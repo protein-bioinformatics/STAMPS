@@ -748,5 +748,47 @@ function mouse_up_listener(event){
 }
 
 
+function download_essay(){
+    var proteins = "";
+    for (var i = 0; i < data.length; ++i){
+        for (var j = 0; j < data[i].proteins.length; ++j){
+            if (data[i].proteins[j].marked){
+                if (proteins.length) proteins += ":";
+                proteins += data[i].proteins[j].id.toString();
+            }
+        }
+    }
+    if (!proteins.length){
+        alert("No proteins are selected.");
+        return;
+    }
+    
+    
+    document.getElementById("downloadbackground").style.display = "inline";
+    document.getElementById("download").style.display = "inline";
+    document.getElementById("renderarea").style.filter = "blur(5px)";
+    
+    var xmlhttp = new XMLHttpRequest();
+    var download_link = "";
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            download_link = xmlhttp.responseText;
+            html = "<table width=100% height=100%><tr><td align=\"center\">";
+            html += "<a href=\"" + download_link + "\">download essay</a>";
+            html += "</td></tr></table>";
+            document.getElementById("download").innerHTML = html;
+        }
+    }
+    xmlhttp.open("GET", "prepare-download.py?proteins=" + proteins, true);
+    xmlhttp.send();
+}
+
+
+
+function hide_download (event){
+    document.getElementById("downloadbackground").style.display = "none";
+    document.getElementById("download").style.display = "none";
+    document.getElementById("renderarea").style.filter = "none";
+}
 
 document.addEventListener('DOMContentLoaded', init, false);

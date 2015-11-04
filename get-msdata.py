@@ -16,7 +16,7 @@ def make_dict(cur):
     return {key[0]: value for key, value in zip(cur.description, cur.fetchall()[0])}
 
 spectrum_id = int(form.getvalue('spectrum_id'))
-    
+   
 db = sqlite3.connect('/home/dominik.kopczynski/Data/blib/TestLibraryPS.blib')
 cur = db.cursor()
 cur.execute('SELECT * FROM RefSpectra r INNER JOIN RefSpectraPeaks p ON r.id = p.RefSpectraID WHERE r.id = %i;' % int(spectrum_id))
