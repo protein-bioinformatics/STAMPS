@@ -768,6 +768,10 @@ function download_essay(){
     document.getElementById("download").style.display = "inline";
     document.getElementById("renderarea").style.filter = "blur(5px)";
     
+    html = "<table width=100% height=100%><tr><td align=\"center\">";
+    html += "<img src=\"ajax-loader.gif\"></td></tr></table>"
+    document.getElementById("download").innerHTML = html;
+    
     var xmlhttp = new XMLHttpRequest();
     var download_link = "";
     xmlhttp.onreadystatechange = function() {
@@ -775,7 +779,8 @@ function download_essay(){
             download_link = xmlhttp.responseText;
             html = "<table width=100% height=100%><tr><td align=\"center\">";
             html += "<a href=\"" + download_link + "\">download essay</a>";
-            html += "</td></tr></table>";
+            html += "<p>&nbsp;<p>";
+            html += "<button onclick=\"hide_download();\">Close Window</button></td></tr></table>"
             document.getElementById("download").innerHTML = html;
         }
     }
@@ -785,7 +790,7 @@ function download_essay(){
 
 
 
-function hide_download (event){
+function hide_download (){
     document.getElementById("downloadbackground").style.display = "none";
     document.getElementById("download").style.display = "none";
     document.getElementById("renderarea").style.filter = "none";

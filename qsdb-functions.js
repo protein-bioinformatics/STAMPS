@@ -4,7 +4,7 @@ function protein(data){
     this.definition = data['definition'];
     this.kegg_link = data['kegg_link'];
     this.accession = data['accession'];
-    this.marked = false;
+    this.marked = true;
     this.check_len = 15;
     this.line_height = 20;
     
@@ -130,7 +130,6 @@ function node(data, c){
         }
         this.width *= 12;
     }
-    if (this.name == "Slc2a7") console.log(this.width + " " + this.name);
     
     this.draw = function(font_size, factor, radius) {
         switch (this.type){

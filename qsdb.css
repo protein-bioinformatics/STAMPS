@@ -35,7 +35,7 @@ div.download {
     display: none;
     left: 25%;
     width: 50%;
-    height: 25%;
+    height: 50%;
     position: fixed;
     z-index: 40;
     background-color: white;
