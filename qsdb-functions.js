@@ -4,19 +4,26 @@ function protein(data){
     this.definition = data['definition'];
     this.kegg_link = data['kegg_link'];
     this.accession = data['accession'];
-    this.marked = true;
+    this.marked = false;
+    this.num_peptides = data['n_peptides'];
     this.check_len = 15;
     this.line_height = 20;
     
     this.draw = function(ctx, x, y, line_number, num, factor) {
         var check_side = this.check_len * factor;
         y -= Math.floor((line_number - 1) * this.line_height * factor * 0.5) - num * this.line_height * factor;
+        ctx.lineWidth = 1;
         
+        if (!this.num_peptides){
+            ctx.fillStyle="#BBBBBB";
+            ctx.fillRect(x + check_side / 2, y - check_side / 2, check_side, check_side); 
+        }
+        else {
+            ctx.fillStyle="black";
+        }
         // write text
         ctx.fillText(this.name, x + check_side * 2, y);
-        
         // draw checkbox
-        ctx.lineWidth = 1;
         ctx.strokeRect(x + check_side / 2, y - check_side / 2, check_side, check_side);
         
         // draw hooklet
@@ -38,11 +45,15 @@ function protein(data){
     };
     
     this.toggle_marked = function(){
-        this.marked = !this.marked;
+        if (this.num_peptides){
+            this.marked = !this.marked;
+        }
     }
     
     this.mark = function(m){
-        this.marked = m;
+        if (this.num_peptides){
+            this.marked = m;
+        }
     }
     
     this.is_over = function(x, y, x_m, y_m, line_number, num, factor){
@@ -196,10 +207,12 @@ function node(data, c){
     
     this.dblcheck_protein_marked = function(res, factor){
         var cnt = 0;
+        var cnt_avbl = 0;
         for (var i = 0; i < this.proteins.length; ++i){
             cnt += this.proteins[i].marked;
+            cnt_avbl += this.proteins[i].num_peptides > 0;
         }
-        var marking = (cnt != this.proteins.length);
+        var marking = (cnt != cnt_avbl);
         for (var i = 0; i < this.proteins.length; ++i){
             this.proteins[i].mark(marking);
         }

@@ -8,7 +8,11 @@ import json
 form = cgi.FieldStorage()
 pathway = form.getvalue('pathway')
 species = form.getvalue('species')
-species = species.replace(":", "', '")
+
+try:
+    species = species.replace(":", "', '")
+except:
+    species = ""
 
 print("Content-Type: text/html")
 print()
@@ -23,6 +27,7 @@ sql_query += "union (select id, '', pathway_id, type, pathway_ref, x, y from nod
 my_cur.execute(sql_query)
 
 my_cur_prot = conn.cursor(pymysql.cursors.DictCursor)
+my_cur_pep = conn.cursor(pymysql.cursors.DictCursor)
 for row in my_cur:
     response.append(dict(row))
     
@@ -32,5 +37,8 @@ for row in my_cur:
         my_cur_prot.execute(sql_protein)
         for row_protein in my_cur_prot:
             response[-1]["proteins"].append(dict(row_protein))
-            
+            sql_peptide = "SELECT count(pep.id) cnt FROM proteins pr INNER JOIN peptides pep ON pr.id = pep.protein_id WHERE pr.id = %i" % row_protein["id"]
+            my_cur_pep.execute(sql_peptide)
+            for row_pep in my_cur_pep:
+                response[-1]["proteins"][-1]["n_peptides"] = row_pep["cnt"]
 print(json.dumps(response))
