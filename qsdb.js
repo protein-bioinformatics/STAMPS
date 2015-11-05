@@ -228,7 +228,7 @@ function load_data(reload){
             tmp_data = JSON.parse(xmlhttp.responseText);
         }
     }
-    xmlhttp.open("GET", "getdata.php?pathway=" + current_pathway + "&species=" + species_string, false);
+    xmlhttp.open("GET", "get-qsdbdata.py?pathway=" + current_pathway + "&species=" + species_string, false);
     xmlhttp.send();
     
     var x_mean = 0, y_mean = 0;
