@@ -748,7 +748,7 @@ function mouse_up_listener(event){
 }
 
 
-function download_essay(){
+function download_assay(){
     var proteins = "";
     for (var i = 0; i < data.length; ++i){
         for (var j = 0; j < data[i].proteins.length; ++j){
@@ -778,7 +778,7 @@ function download_essay(){
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             download_link = xmlhttp.responseText;
             html = "<table width=100% height=100%><tr><td align=\"center\">";
-            html += "<a href=\"" + download_link + "\">download essay</a>";
+            html += "<a href=\"" + download_link + "\">download assay</a>";
             html += "<p>&nbsp;<p>";
             html += "<button onclick=\"hide_download();\">Close Window</button></td></tr></table>"
             document.getElementById("download").innerHTML = html;
