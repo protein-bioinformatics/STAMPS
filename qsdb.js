@@ -25,13 +25,30 @@ text_size = 15;
 anchors = ['left', 'top', 'right', 'bottom'];
 administration = false;
 
+line_width = 4;
+protein_stroke_color = "#ff9000";
+protein_fill_color = "#ffef99";
+metabolite_stroke_color = "#ff9000";
+metabolite_fill_color = "white";
+pathway_stroke_color = "#ff9000";
+pathway_fill_color = "white";
+edge_color = "#ff9000";
+disabled_text_color = "#bbbbbb";
+disabled_fill_color = "#cccccc";
+text_color = "black";
+
+
+
 function debug(text){
     document.getElementById("hint").innerHTML = text;
 }
 
 
-CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height) {
+CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, fill, stroke, factor) {
     var radius = Math.floor(round_rect_radius * Math.pow(scaling, zoom - 5));
+    this.fillStyle = fill;
+    this.strokeStyle = stroke;
+    this.lineWidth = line_width * factor;
     this.beginPath();
     this.moveTo(x + radius, y);
     this.lineTo(x + width - radius, y);
@@ -49,13 +66,16 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height) {
 
 
 
-CanvasRenderingContext2D.prototype.arrow = function (p1_x, p1_y, p2_x, p2_y, head) {
+CanvasRenderingContext2D.prototype.arrow = function (p1_x, p1_y, p2_x, p2_y, factor, head) {
     if (typeof head == 'undefined') {
         head = true;
     }
-    
+    this.strokeStyle = edge_color;
+    this.lineWidth = line_width * factor;
+    this.beginPath();
     this.moveTo(p1_x, p1_y);
     this.lineTo(p2_x, p2_y);
+    this.closePath();
     this.stroke();
     
     if (head){
@@ -76,7 +96,9 @@ CanvasRenderingContext2D.prototype.arrow = function (p1_x, p1_y, p2_x, p2_y, hea
         var y_r = y - l / 2 * (p1_x - p2_x);
         
         var r = Math.sqrt(Math.pow(y_arc - y_r, 2) + Math.pow(x_arc - x_r, 2));
-        
+        this.strokeStyle = edge_color;
+        this.fillStyle = edge_color;
+        this.lineWidth = (20 * line_width) * factor;
         this.beginPath();
         this.moveTo(p2_x, p2_y);
         this.bezierCurveTo(x_arc, y_arc, (x_arc + x_l) / 2, (y_arc + y_l) / 2, x_l, y_l);
@@ -132,15 +154,13 @@ function draw(){
     
     //draw nodes
     for (var i = 0; i < data.length; ++i){
-        ctx.fillStyle='white';
-        ctx.lineWidth = data[i].highlight ? 3 : 1;
         data[i].draw(font_size, factor, radius);
     }
     
     // draw edges
     ctx.lineWidth = 1;
     for (var i = 0; i < all_edges.length; ++i){
-        ctx.arrow(all_edges[i][0], all_edges[i][1], all_edges[i][2], all_edges[i][3], all_edges[i][4]);
+        ctx.arrow(all_edges[i][0], all_edges[i][1], all_edges[i][2], all_edges[i][3], factor, all_edges[i][4]);
     }
 }
 
@@ -228,7 +248,7 @@ function load_data(reload){
             tmp_data = JSON.parse(xmlhttp.responseText);
         }
     }
-    xmlhttp.open("GET", "get-qsdbdata.py?pathway=" + current_pathway + "&species=" + species_string, false);
+    xmlhttp.open("GET", "get-qsdbdata.py?request=qsdbdata&pathway=" + current_pathway + "&species=" + species_string, false);
     xmlhttp.send();
     
     var x_mean = 0, y_mean = 0;

@@ -14,16 +14,22 @@ function protein(data){
         y -= Math.floor((line_number - 1) * this.line_height * factor * 0.5) - num * this.line_height * factor;
         ctx.lineWidth = 1;
         
+        
         if (!this.num_peptides){
-            ctx.fillStyle="#BBBBBB";
-            ctx.fillRect(x + check_side / 2, y - check_side / 2, check_side, check_side); 
+            ctx.fillStyle = disabled_fill_color;
+            ctx.fillRect(x + check_side / 2, y - check_side / 2, check_side, check_side);
+            ctx.fillStyle = disabled_text_color;
+            ctx.fillText(this.name, x + check_side * 2, y);
         }
         else {
-            ctx.fillStyle="black";
+            ctx.fillStyle = "white";
+            ctx.fillRect(x + check_side / 2, y - check_side / 2, check_side, check_side);
+            ctx.fillStyle = text_color;
+            ctx.fillText(this.name, x + check_side * 2, y);
         }
         // write text
-        ctx.fillText(this.name, x + check_side * 2, y);
         // draw checkbox
+        ctx.strokeStyle = "black";
         ctx.strokeRect(x + check_side / 2, y - check_side / 2, check_side, check_side);
         
         // draw hooklet
@@ -145,11 +151,11 @@ function node(data, c){
     this.draw = function(font_size, factor, radius) {
         switch (this.type){
             case "protein":
+                this.ctx.fillStyle = protein_fill_color;
                 this.ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+                this.ctx.lineWidth = line_width * factor;
+                this.ctx.strokeStyle = protein_stroke_color;
                 this.ctx.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
-                this.ctx.lineWidth = 1;
-               
-                
        
                 this.ctx.textAlign = "left";
                 this.ctx.textBaseline = 'middle';
@@ -159,15 +165,20 @@ function node(data, c){
                     this.proteins[i].draw(this.ctx, this.x - this.width / 2, this.y, this.proteins.length, i, factor);
                 }
                 break;
+                
             case "pathway":
-                this.ctx.roundRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+                this.ctx.roundRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height, pathway_fill_color, pathway_stroke_color, factor);
                 this.ctx.textAlign = "center";
                 this.ctx.textBaseline = 'middle';
                 this.ctx.font = font_size.toString() + "px Arial";
                 this.ctx.fillStyle = "black";
                 this.ctx.wrapText(this.name, this.x, this.y, this.width, 20 * factor);
                 break;
+                
             case "metabolite":
+                this.ctx.fillStyle = metabolite_fill_color;
+                this.ctx.strokeStyle = metabolite_stroke_color;
+                this.ctx.lineWidth = line_width * factor;
                 this.ctx.beginPath();
                 this.ctx.arc(this.x, this.y, radius, 0, 2 * Math.PI);
                 this.ctx.closePath();
