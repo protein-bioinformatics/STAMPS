@@ -374,6 +374,7 @@ function routing(x_s, y_s, a_s, x_e, y_e, a_e){
     ctx.arc((cell_x_e - cell_x_s) * grid_length + xd_s, (cell_y_e - cell_y_s) * grid_length + yd_s, 3, 0, 2*Math.PI);
     ctx.fill();
     */
+    
 }
 
 document.addEventListener('DOMContentLoaded', function() {
