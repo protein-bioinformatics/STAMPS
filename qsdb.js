@@ -19,6 +19,7 @@ eedges = new Array();
 
 scaling = 1.4;
 zoom = 5;
+base_grid = 25;
 metabolite_radius = 10;
 arrow_length = 10;
 round_rect_radius = 10;
@@ -171,7 +172,9 @@ function draw(){
         ctx.arrow(all_edges[i][0], all_edges[i][1], all_edges[i][2], all_edges[i][3], factor, all_edges[i][4]);
     }
     
-    eedges[0].draw(ctx);
+    for (var i = 0; i < eedges.length; ++i){
+        eedges[i].draw(ctx);
+    }
 }
 
 
@@ -319,6 +322,7 @@ function load_data(reload){
 
 function compute_edges(){
     all_edges = new Array();
+    eedges = new Array();
     var factor = Math.pow(scaling, zoom - 5);
     var radius = Math.floor(metabolite_radius * factor);
     var edges = new Array();
@@ -454,9 +458,9 @@ function compute_edges(){
         }
         
         all_edges.push([start_x, start_y, end_x, end_y, edges[i][4]]);
-        if (node_id == data_ref[141] && metabolite_id == data_ref[155]){
-            eedges.push(new edge(start_x, start_y, node_anchor, end_x, end_y, metabolite_anchor, edges[i][4]));
-        }
+        //if (node_id == data_ref[126] && metabolite_id == data_ref[191]){
+            eedges.push(new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], edges[i][4]));
+        //}
     }
     
 }
@@ -603,6 +607,12 @@ function mouse_wheel_listener(e){
         all_edges[i][2] = res.x + scale * (all_edges[i][2] - res.x);
         all_edges[i][3] = res.y + scale * (all_edges[i][3] - res.y);
     }
+    for (var i = 0; i < eedges.length; ++i){
+        for (var j = 0; j < eedges[i].point_list.length; ++j){
+            eedges[i].point_list[j].x = res.x + scale * (eedges[i].point_list[j].x - res.x);
+            eedges[i].point_list[j].y = res.y + scale * (eedges[i].point_list[j].y - res.y);
+        }
+    }
     null_x = res.x + scale * (null_x - res.x);
     null_y = res.y + scale * (null_y - res.y);
     draw();
@@ -673,7 +683,7 @@ function mouse_move_listener(e){
         }
         
         var factor = Math.pow(scaling, zoom - 5);
-        var grid = Math.floor(50 * factor * 1000);
+        var grid = Math.floor(base_grid * factor * 1000);
         
         if (!event_key_down || highlight == -1){
             for (var i = 0; i < data.length; ++i){
@@ -685,6 +695,12 @@ function mouse_move_listener(e){
                 all_edges[i][1] += res.y - offsetY;
                 all_edges[i][2] += res.x - offsetX;
                 all_edges[i][3] += res.y - offsetY;
+            }
+            for (var i = 0; i < eedges.length; ++i){
+                for (var j = 0; j < eedges[i].point_list.length; ++j){
+                    eedges[i].point_list[j].x += res.x - offsetX;
+                    eedges[i].point_list[j].y += res.y - offsetY;
+                }
             }
             null_x += res.x - offsetX;
             null_y += res.y - offsetY;

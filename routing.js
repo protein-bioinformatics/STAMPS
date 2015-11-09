@@ -213,18 +213,22 @@ function draw(ctx, point_list){
     }
 
 
-function routing(x_s, y_s, a_s, x_e, y_e, a_e){
-    var grid_length = 25;
+function routing(x_s, y_s, a_s, w_s, h_s, x_e, y_e, a_e, w_e, h_e){
+    var grid = 25;
     
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
-    var offset_x = {"l": -grid_length, "r": grid_length, "t": 0, "b": 0};
-    var offset_y = {"l": 0, "r": 0, "t": -grid_length, "b": grid_length};
+    var offset_x = {"l": -grid, "r": grid, "t": 0, "b": 0};
+    var offset_y = {"l": 0, "r": 0, "t": -grid, "b": grid};
+    w_s /= 2;
+    h_s /= 2;
+    w_e /= 2;
+    h_e /= 2;
     
-    var xa_s = x_s + (a_s == "r" ? 30 : (a_s == "l" ? -30 : 0));
-    var ya_s = y_s + (a_s == "b" ? 35 : (a_s == "t" ? -35 : 0));
-    var xa_e = x_e + (a_e == "r" ? 35 : (a_e == "l" ? -35 : 0));
-    var ya_e = y_e + (a_e == "b" ? 45 : (a_e == "t" ? -45 : 0));
+    var xa_s = x_s + (a_s == "r" ? w_s : (a_s == "l" ? -w_s : 0));
+    var ya_s = y_s + (a_s == "b" ? h_s : (a_s == "t" ? -h_s : 0));
+    var xa_e = x_e + (a_e == "r" ? w_e : (a_e == "l" ? -w_e : 0));
+    var ya_e = y_e + (a_e == "b" ? h_e : (a_e == "t" ? -h_e : 0));
     
     var xd_s = xa_s + offset_x[a_s];
     var yd_s = ya_s + offset_y[a_s];
@@ -232,8 +236,8 @@ function routing(x_s, y_s, a_s, x_e, y_e, a_e){
     var yd_e = ya_e + offset_y[a_e];
     
     // initialize grid
-    var W = 8 + Math.ceil(Math.abs(xd_s +  - xd_e) / grid_length);
-    var H = 8 + Math.ceil(Math.abs(yd_s - yd_e) / grid_length);
+    var W = 8 + Math.ceil(Math.abs(xd_s +  - xd_e) / grid);
+    var H = 8 + Math.ceil(Math.abs(yd_s - yd_e) / grid);
     var open_list = new priority_queue();
     var matrix = new Array();
     for (var h = 0; h < H; ++h){
@@ -251,25 +255,25 @@ function routing(x_s, y_s, a_s, x_e, y_e, a_e){
     var cell_x_e = 0;
     var cell_y_e = 0;
     for (var h = 0; h < H; ++h){    
-        var y = (h - cell_y_s) * grid_length + yd_s;
+        var y = (h - cell_y_s) * grid + yd_s;
         for (var w = 0; w < W; ++w){
-            var x = (w - cell_x_s) * grid_length + xd_s;
+            var x = (w - cell_x_s) * grid + xd_s;
             var active = true;
-            if (x_s - 30 <= x && x <= x_s + 30 && y_s - 35 <= y && y <= y_s + 35){
+            if (x_s - w_s <= x && x <= x_s + w_s && y_s - h_s <= y && y <= y_s + h_s){
                 active = false;
             }
-            if (active && x_e - 35 <= x && x <= x_e + 35 && y_e - 45 <= y && y <= y_e + 45){
+            if (active && x_e - w_e <= x && x <= x_e + w_e && y_e - h_e <= y && y <= y_e + h_e){
                 active = false;
             }
             matrix[h][w].active = active;
         }
-        if (Math.abs(y - yd_e) < Math.abs((cell_y_e - cell_y_s) * grid_length + yd_s - yd_e)){
+        if (Math.abs(y - yd_e) < Math.abs((cell_y_e - cell_y_s) * grid + yd_s - yd_e)){
             cell_y_e = h;
         }
     }
     for (var w = 1; w < W; ++w){
-        var x = (w - cell_x_s) * grid_length + xd_s;
-        if (Math.abs(x - xd_e) < Math.abs((cell_x_e - cell_x_s) * grid_length + xd_s - xd_e)){
+        var x = (w - cell_x_s) * grid + xd_s;
+        if (Math.abs(x - xd_e) < Math.abs((cell_x_e - cell_x_s) * grid + xd_s - xd_e)){
             cell_x_e = w;
         }
     }
@@ -317,7 +321,7 @@ function routing(x_s, y_s, a_s, x_e, y_e, a_e){
     var post_x = -1;
     var post_y = -1;
     while (((curr_x != -1) || (curr_y != -1))){
-        console.log("t: " + curr_x + " " + curr_y);
+        //console.log("t: " + curr_x + " " + curr_y);
         matrix[curr_y][curr_x].in_path = true;
         if (post_x != -1) matrix[curr_y][curr_x].post = [post_x, post_y];
         if ((post_x - curr_x) == 1) matrix[curr_y][curr_x].direction = "r";
@@ -334,8 +338,8 @@ function routing(x_s, y_s, a_s, x_e, y_e, a_e){
     // determining the points / corners of the path
     var curr_x = start_x;
     var curr_y = start_y;
-    var x = (curr_x - cell_x_s) * grid_length + xd_s;
-    var y = (curr_y - cell_y_s) * grid_length + yd_s;
+    var x = (curr_x - cell_x_s) * grid + xd_s;
+    var y = (curr_y - cell_y_s) * grid + yd_s;
     var point_list = [new point(x, y, opposite[a_s] + a_s)];
     var in_corner = false;
     var d = a_s;
@@ -345,22 +349,22 @@ function routing(x_s, y_s, a_s, x_e, y_e, a_e){
         post_y = matrix[curr_y][curr_x].post[1];
         
         if ((curr_x == end_x) && (curr_y == end_y) && !in_corner){
-            var x = (curr_x - cell_x_s) * grid_length + xd_s;
-            var y = (curr_y - cell_y_s) * grid_length + yd_s;
+            var x = (curr_x - cell_x_s) * grid + xd_s;
+            var y = (curr_y - cell_y_s) * grid + yd_s;
             point_list.push(new point(x, y, opposite[d] + d));
             break;
         }
         if (in_corner){
-            var x = (curr_x - cell_x_s) * grid_length + xd_s;
-            var y = (curr_y - cell_y_s) * grid_length + yd_s;
+            var x = (curr_x - cell_x_s) * grid + xd_s;
+            var y = (curr_y - cell_y_s) * grid + yd_s;
             point_list.push(new point(x, y, opposite[matrix[curr_y][curr_x].direction] + matrix[curr_y][curr_x].direction));
             in_corner = false;
             ++corners;
         }
         if (d != matrix[curr_y][curr_x].direction){
             //console.log("dc: " + curr_x + " " + curr_y);
-            var x = (matrix[curr_y][curr_x].pre[0] - cell_x_s) * grid_length + xd_s;
-            var y = (matrix[curr_y][curr_x].pre[1] - cell_y_s) * grid_length + yd_s;
+            var x = (matrix[curr_y][curr_x].pre[0] - cell_x_s) * grid + xd_s;
+            var y = (matrix[curr_y][curr_x].pre[1] - cell_y_s) * grid + yd_s;
             point_list.push(new point(x, y, opposite[d] + matrix[curr_y][curr_x].direction));
             d = matrix[curr_y][curr_x].direction;
             in_corner = true;
@@ -372,7 +376,7 @@ function routing(x_s, y_s, a_s, x_e, y_e, a_e){
     
     
     // correcting the targeting points
-    if (corners > 1){
+    if (corners > 0){
         var shift_x = xa_e - point_list[point_list.length - 1].x;
         var shift_y = ya_e - point_list[point_list.length - 1].y;
         
@@ -403,8 +407,9 @@ function routing(x_s, y_s, a_s, x_e, y_e, a_e){
             point_list[point_list.length - 1].y = ya_e;
         }
         
-        if (corners > 2){
+        if (corners > 1){
             var dd = point_list[point_list.length - s - 4].b.charAt(0);
+            //console.log(dd);
             if (dd == "b" || dd == "t"){
                 point_list[point_list.length - s - 3].y += shift_y;
                 point_list[point_list.length - s - 4].y += shift_y;
@@ -426,7 +431,7 @@ function routing(x_s, y_s, a_s, x_e, y_e, a_e){
             if (matrix[h][w].in_path){
                 ctx.fillStyle = "yellow";
             }
-            ctx.arc((w - cell_x_s) * grid_length + xd_s, (h - cell_y_s) * grid_length + yd_s, 3, 0, 2 * Math.PI);
+            ctx.arc((w - cell_x_s) * grid + xd_s, (h - cell_y_s) * grid + yd_s, 3, 0, 2 * Math.PI);
             ctx.fill();
             ctx.stroke();
         }
@@ -466,7 +471,7 @@ function routing(x_s, y_s, a_s, x_e, y_e, a_e){
     /*
     ctx.beginPath();
     ctx.fillStyle = "#00ff00";
-    ctx.arc((cell_x_e - cell_x_s) * grid_length + xd_s, (cell_y_e - cell_y_s) * grid_length + yd_s, 3, 0, 2*Math.PI);
+    ctx.arc((cell_x_e - cell_x_s) * grid + xd_s, (cell_y_e - cell_y_s) * grid + yd_s, 3, 0, 2*Math.PI);
     ctx.fill();
     */
     
@@ -476,7 +481,7 @@ document.addEventListener('DOMContentLoaded', function() {
    //routing(200, 220, "b", 750, 250, "r");
    //routing(750, 100, "l", 200, 350, "t");
    //routing(200, 150, "t", 750, 250, "b");
-   routing(750, 350, "r", 200, 100, "t");
+   routing(750, 300, "l", 200, 100, "b");
 }, false);
 
 
