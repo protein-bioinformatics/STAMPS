@@ -148,12 +148,15 @@ function node(data, c){
         this.width *= 12;
     }
     
+    //this.width = Math.ceil(this.width / 25) * 25;
+    //this.height = Math.ceil(this.height / 25) * 25;
+    
     this.draw = function(font_size, factor, radius) {
         switch (this.type){
             case "protein":
                 this.ctx.fillStyle = protein_fill_color;
                 this.ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
-                this.ctx.lineWidth = line_width * factor;
+                this.ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
                 this.ctx.strokeStyle = protein_stroke_color;
                 this.ctx.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
        
@@ -167,7 +170,10 @@ function node(data, c){
                 break;
                 
             case "pathway":
-                this.ctx.roundRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height, pathway_fill_color, pathway_stroke_color, factor);
+                this.ctx.fillStyle = pathway_fill_color;
+                this.ctx.strokeStyle = pathway_stroke_color;
+                this.ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
+                this.ctx.roundRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
                 this.ctx.textAlign = "center";
                 this.ctx.textBaseline = 'middle';
                 this.ctx.font = font_size.toString() + "px Arial";
@@ -178,7 +184,7 @@ function node(data, c){
             case "metabolite":
                 this.ctx.fillStyle = metabolite_fill_color;
                 this.ctx.strokeStyle = metabolite_stroke_color;
-                this.ctx.lineWidth = line_width * factor;
+                this.ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
                 this.ctx.beginPath();
                 this.ctx.arc(this.x, this.y, radius, 0, 2 * Math.PI);
                 this.ctx.closePath();
@@ -227,5 +233,75 @@ function node(data, c){
         for (var i = 0; i < this.proteins.length; ++i){
             this.proteins[i].mark(marking);
         }
+    }
+};
+
+
+function point(x, y, b){
+    this.x = x;
+    this.y = y;
+    this.b = b;
+};
+
+function edge(x_s, y_s, a_s, x_e, y_e, a_e, head){
+    
+    this.head = head;
+    this.point_list = new Array(new point(x_s, y_s, ""), new point(x_e, y_e, ""));
+    var current = new point(x_s, y_s, "");
+    var direction = a_s.substring(0, 1);
+    var insert = 1;
+    
+    
+    
+    var diff_x = x_e - current.x;
+    var diff_y = y_e - current.y;
+    console.log(direction, diff_x, diff_y);
+    
+    if (direction == "l"){
+        if (diff_x < -25){
+            this.point_list.splice(insert, 0, new point(x_e - 25, current.y, ""));
+            new_x = x_e;
+        }
+    }
+    else {
+        
+    }
+    
+    
+    this.draw = function(ctx, factor){
+        ctx.strokeStyle = "black";//edge_color;
+        //this.ctx.fillStyle = edge_color;
+        ctx.lineWidth = line_width * factor;
+        ctx.beginPath();
+        ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
+        var odd = false;
+        for (var i = 0; i < this.point_list.length - 1; ++i){
+            if (odd){
+                var control = new point(0, 0, 0);
+                switch (this.point_list[i].b){
+                    case "rt":
+                    case "lt":
+                    case "rb":
+                    case "lb":
+                        control.x = this.point_list[i + 1].x;
+                        control.y = this.point_list[i].y;
+                        break;
+                        
+                    case "tr":
+                    case "tl":
+                    case "br":
+                    case "bl":
+                        control.x = this.point_list[i].x;
+                        control.y = this.point_list[i + 1].y;
+                        break;
+                }
+                ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
+            }
+            else {
+                ctx.lineTo(this.point_list[i + 1].x, this.point_list[i + 1].y);
+            }
+            odd = !odd;
+        }
+        ctx.stroke();
     }
 };

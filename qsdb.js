@@ -15,6 +15,7 @@ event_moving_node = false;
 event_key_down = false;
 node_move_x = 0;
 node_move_y = 0;
+eedges = new Array();
 
 scaling = 1.4;
 zoom = 5;
@@ -27,7 +28,7 @@ administration = false;
 
 line_width = 4;
 protein_stroke_color = "#ff9000";
-protein_fill_color = "#ffef99";
+protein_fill_color = "#fff6d5";
 metabolite_stroke_color = "#ff9000";
 metabolite_fill_color = "white";
 pathway_stroke_color = "#ff9000";
@@ -44,11 +45,8 @@ function debug(text){
 }
 
 
-CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, fill, stroke, factor) {
+CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height) {
     var radius = Math.floor(round_rect_radius * Math.pow(scaling, zoom - 5));
-    this.fillStyle = fill;
-    this.strokeStyle = stroke;
-    this.lineWidth = line_width * factor;
     this.beginPath();
     this.moveTo(x + radius, y);
     this.lineTo(x + width - radius, y);
@@ -70,18 +68,11 @@ CanvasRenderingContext2D.prototype.arrow = function (p1_x, p1_y, p2_x, p2_y, fac
     if (typeof head == 'undefined') {
         head = true;
     }
-    this.strokeStyle = edge_color;
-    this.lineWidth = line_width * factor;
-    this.beginPath();
-    this.moveTo(p1_x, p1_y);
-    this.lineTo(p2_x, p2_y);
-    this.closePath();
-    this.stroke();
     
     if (head){
-        var l = Math.sqrt(Math.pow(arrow_length * Math.pow(scaling, zoom - 5), 2) / (Math.pow(p2_x - p1_x, 2) + Math.pow(p2_y - p1_y, 2)));
+        var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (Math.pow(p2_x - p1_x, 2) + Math.pow(p2_y - p1_y, 2)));
         
-        var l2 = Math.sqrt(Math.pow(arrow_length / 2 * Math.pow(scaling, zoom - 5), 2) / (Math.pow(p2_x - p1_x, 2) + Math.pow(p2_y - p1_y, 2)));
+        var l2 = Math.sqrt(Math.pow(arrow_length / 2 * factor, 2) / (Math.pow(p2_x - p1_x, 2) + Math.pow(p2_y - p1_y, 2)));
         
         var x = p2_x + l * (p1_x - p2_x);
         var y = p2_y + l * (p1_y - p2_y);
@@ -95,17 +86,34 @@ CanvasRenderingContext2D.prototype.arrow = function (p1_x, p1_y, p2_x, p2_y, fac
         var x_r = x + l / 2 * (p1_y - p2_y);
         var y_r = y - l / 2 * (p1_x - p2_x);
         
-        var r = Math.sqrt(Math.pow(y_arc - y_r, 2) + Math.pow(x_arc - x_r, 2));
+        
         this.strokeStyle = edge_color;
         this.fillStyle = edge_color;
-        this.lineWidth = (20 * line_width) * factor;
+        this.lineWidth = line_width * factor;
+        this.beginPath();
+        this.moveTo(p1_x, p1_y);
+        this.lineTo(x, y);
+        this.closePath();
+        this.stroke();
+        
+        var r = Math.sqrt(Math.pow(y_arc - y_r, 2) + Math.pow(x_arc - x_r, 2));
+        this.lineWidth = 1;
         this.beginPath();
         this.moveTo(p2_x, p2_y);
-        this.bezierCurveTo(x_arc, y_arc, (x_arc + x_l) / 2, (y_arc + y_l) / 2, x_l, y_l);
         this.lineTo(x_r, y_r);
-        this.bezierCurveTo((x_arc + x_r) / 2, (y_arc + y_r) / 2, x_arc, y_arc, p2_x, p2_y);
+        this.lineTo(x_l, y_l);
         this.closePath();
         this.fill();
+    }
+    else {
+        this.strokeStyle = edge_color;
+        this.fillStyle = edge_color;
+        this.lineWidth = line_width * factor;
+        this.beginPath();
+        this.moveTo(p1_x, p1_y);
+        this.lineTo(p2_x, p2_y);
+        this.closePath();
+        this.stroke();
     }
 }
 
@@ -162,6 +170,8 @@ function draw(){
     for (var i = 0; i < all_edges.length; ++i){
         ctx.arrow(all_edges[i][0], all_edges[i][1], all_edges[i][2], all_edges[i][3], factor, all_edges[i][4]);
     }
+    
+    eedges[0].draw(ctx);
 }
 
 
@@ -268,9 +278,7 @@ function load_data(reload){
         for (var i = 0; i < data.length; ++i){
             data[i].x += null_x;
             data[i].y += null_y;
-            //if (i == 49) console.log(data[i].width);
             data[i].width *= factor;
-            //if (i == 49) console.log(data[i].width);
             data[i].height *= factor;
             data[i].x = null_x + factor * (data[i].x - null_x);
             data[i].y = null_y + factor * (data[i].y - null_y);
@@ -446,6 +454,9 @@ function compute_edges(){
         }
         
         all_edges.push([start_x, start_y, end_x, end_y, edges[i][4]]);
+        if (node_id == data_ref[141] && metabolite_id == data_ref[155]){
+            eedges.push(new edge(start_x, start_y, node_anchor, end_x, end_y, metabolite_anchor, edges[i][4]));
+        }
     }
     
 }
@@ -662,7 +673,7 @@ function mouse_move_listener(e){
         }
         
         var factor = Math.pow(scaling, zoom - 5);
-        var grid = Math.floor(25 * factor * 1000);
+        var grid = Math.floor(50 * factor * 1000);
         
         if (!event_key_down || highlight == -1){
             for (var i = 0; i < data.length; ++i){
