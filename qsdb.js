@@ -161,19 +161,20 @@ function draw(){
     var font_size = Math.floor(text_size * factor);
     var radius = Math.floor(metabolite_radius * factor);
     
-    //draw nodes
-    for (var i = 0; i < data.length; ++i){
-        data[i].draw(font_size, factor, radius);
-    }
-    
     // draw edges
     ctx.lineWidth = 1;
     for (var i = 0; i < all_edges.length; ++i){
-        ctx.arrow(all_edges[i][0], all_edges[i][1], all_edges[i][2], all_edges[i][3], factor, all_edges[i][4]);
+        //ctx.arrow(all_edges[i][0], all_edges[i][1], all_edges[i][2], all_edges[i][3], factor, all_edges[i][4]);
     }
     
+    
     for (var i = 0; i < eedges.length; ++i){
-        eedges[i].draw(ctx);
+        eedges[i].draw(ctx, factor);
+    }
+    
+    //draw nodes
+    for (var i = 0; i < data.length; ++i){
+        data[i].draw(font_size, factor, radius);
     }
 }
 

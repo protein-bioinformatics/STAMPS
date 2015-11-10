@@ -240,6 +240,8 @@ function node(data, c){
     }
 };
 
+
+
 function queue_node(_cell){
     this.cost = 100000;
     this.cll = _cell;
@@ -489,6 +491,33 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
         }
         
         
+        // add actual source
+        var opposite = {"t": "b", "b": "t", "l": "r", "r": "l"};
+        var start_x = cell_x_s + (a_s == "r" ? -1 : (a_s == "l" ? 1 : 0));
+        var start_y = cell_y_s + (a_s == "b" ? -1 : (a_s == "t" ? 1 : 0));
+        matrix[start_y][start_x].post = [cell_x_s, cell_y_s];
+        matrix[cell_y_s][cell_x_s].pre = [start_x, start_y];
+        matrix[start_y][start_x].in_path = true;
+        matrix[start_y][start_x].active = false;
+        matrix[start_y][start_x].direction = a_s;
+        
+        // add actual target
+        var end_x = cell_x_e + (a_e == "r" ? -1 : (a_e == "l" ? 1 : 0));
+        var end_y = cell_y_e + (a_e == "b" ? -1 : (a_e == "t" ? 1 : 0));
+        matrix[cell_y_e][cell_x_e].post = [end_x, end_y];
+        matrix[end_y][end_x].pre = [cell_x_e, cell_y_e];
+        matrix[end_y][end_x].active = false;
+        matrix[end_y][end_x].direction = opposite[a_e];
+        
+        
+        
+        if (!matrix[cell_y_s][cell_x_s].active || !matrix[cell_y_e][cell_x_e].active){
+            this.point_list = [new point(x_s, y_s, opposite[a_s] + a_s)];
+            this.point_list.push(new point(x_e, y_e, opposite[a_e] + a_e));
+            return;
+        }
+        
+        
         
         
         // start routing
@@ -508,29 +537,13 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
         
         
         
-        
-        // add actual source
-        var opposite = {"t": "b", "b": "t", "l": "r", "r": "l"};
-        var start_x = cell_x_s + (a_s == "r" ? -1 : (a_s == "l" ? 1 : 0));
-        var start_y = cell_y_s + (a_s == "b" ? -1 : (a_s == "t" ? 1 : 0));
-        matrix[start_y][start_x].post = [cell_x_s, cell_y_s];
-        matrix[cell_y_s][cell_x_s].pre = [start_x, start_y];
-        matrix[start_y][start_x].in_path = true;
-        matrix[start_y][start_x].direction = a_s;
-        
-        // add actual target
-        var end_x = cell_x_e + (a_e == "r" ? -1 : (a_e == "l" ? 1 : 0));
-        var end_y = cell_y_e + (a_e == "b" ? -1 : (a_e == "t" ? 1 : 0));
-        matrix[cell_y_e][cell_x_e].post = [end_x, end_y];
-        matrix[end_y][end_x].pre = [cell_x_e, cell_y_e];
-        matrix[end_y][end_x].direction = opposite[a_e];
-        
         // correct the path from end to front
         var curr_x = end_x;
         var curr_y = end_y;
         var post_x = -1;
         var post_y = -1;
-        while (((curr_x != -1) || (curr_y != -1))){
+        var cnt = 0;
+        while (((curr_x != -1) || (curr_y != -1)) /* && cnt < 1000*/){
             //console.log("t: " + curr_x + " " + curr_y);
             matrix[curr_y][curr_x].in_path = true;
             if (post_x != -1) matrix[curr_y][curr_x].post = [post_x, post_y];
@@ -543,6 +556,14 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
             post_y = curr_y;
             curr_x = matrix[post_y][post_x].pre[0];
             curr_y = matrix[post_y][post_x].pre[1];
+            cnt += 1;
+        }
+        
+        if (cnt > 990){
+            console.log("s: " + start_x + " " + start_y);
+            console.log("e: " + end_x + " " + end_y);
+            console.log("poss error: " + protein_node.id + " " + metabolite_node.id);
+            return;
         }
         
         // determining the points / corners of the path
@@ -600,7 +621,11 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
             curr_y = post_y;
         }
         
-        
+        /*
+        for (var i = 0; i < this.point_list.length; ++i){
+            console.log(this.point_list[i]);
+        }*/
+                
         
         
         // correcting the targeting points
@@ -608,38 +633,38 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
             var shift_x = xa_e - this.point_list[this.point_list.length - 1].x;
             var shift_y = ya_e - this.point_list[this.point_list.length - 1].y;
             
-            var s = 0;
-            switch (this.point_list[this.point_list.length - 1].b){
-                case "lr":
-                case "rl":
-                case "tb":
-                case "bt":
-                    break;
-                default:
-                    ++s;
-                    break;
-            }
-            
-            if (s){
-                this.point_list[this.point_list.length - 3].x += shift_x;
-                this.point_list[this.point_list.length - 3].y += shift_y;
-                this.point_list[this.point_list.length - 2].x += shift_x;
-                this.point_list[this.point_list.length - 2].y += shift_y;
+            if (corners == 1){
+                var dd = this.point_list[1].b.charAt(0);
+                if (dd == "b" || dd == "t"){
+                    this.point_list[this.point_list.length - 2].y += shift_y;
+                }
+                else {
+                    this.point_list[this.point_list.length - 2].x += shift_x;
+                }
             }
             else {
+                var s = 0;
+                switch (this.point_list[this.point_list.length - 2].b){
+                    case "lr": case "rl": case "tb": case "bt": ++s; break;
+                    default: break;
+                }
+                
+                if (s){
+                    this.point_list[this.point_list.length - 3].x += shift_x;
+                    this.point_list[this.point_list.length - 3].y += shift_y;
+                }
+                
                 this.point_list[this.point_list.length - 2].x += shift_x;
                 this.point_list[this.point_list.length - 2].y += shift_y;
-            }
-            
-            if (corners > 1){
+                
                 var dd = this.point_list[this.point_list.length - s - 4].b.charAt(0);
                 if (dd == "b" || dd == "t"){
                     this.point_list[this.point_list.length - s - 3].y += shift_y;
-                    this.point_list[this.point_list.length - s - 4].y += shift_y;
+                    if (this.point_list.length - s - 4 > 0) this.point_list[this.point_list.length - s - 4].y += shift_y;
                 }
                 else {
                     this.point_list[this.point_list.length - s - 3].x += shift_x;
-                    this.point_list[this.point_list.length - s - 4].x += shift_x;
+                    if (this.point_list.length - s - 4 > 0) this.point_list[this.point_list.length - s - 4].x += shift_x;
                 }
             }
         }
@@ -651,39 +676,64 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
     this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node); 
     
     this.draw = function(ctx, factor){
-        ctx.strokeStyle = "black";//edge_color;
-        //this.ctx.fillStyle = edge_color;
+        //console.log(protein_node.id + " " + metabolite_node.id);
+        ctx.strokeStyle = edge_color;
+        ctx.fillStyle = edge_color;
         ctx.lineWidth = line_width * factor;
         ctx.beginPath();
         ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
-        var odd = false;
         for (var i = 0; i < this.point_list.length - 1; ++i){
-            if (odd){
-                var control = new point(0, 0, 0);
-                switch (this.point_list[i].b){
-                    case "rt":
-                    case "lt":
-                    case "rb":
-                    case "lb":
-                        control.x = this.point_list[i + 1].x;
-                        control.y = this.point_list[i].y;
-                        break;
-                        
-                    case "tr":
-                    case "tl":
-                    case "br":
-                    case "bl":
-                        control.x = this.point_list[i].x;
-                        control.y = this.point_list[i + 1].y;
-                        break;
-                }
-                ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
+            var control = new point(0, 0, 0);
+            switch (this.point_list[i].b){
+                case "rt": case "lt": case "rb": case "lb":
+                    control.x = this.point_list[i + 1].x;
+                    control.y = this.point_list[i].y;
+                    ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    break;
+                    
+                case "tr": case "tl": case "br": case "bl":
+                    control.x = this.point_list[i].x;
+                    control.y = this.point_list[i + 1].y;
+                    ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    break;
+                default:
+                    ctx.lineTo(this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    break;
+                    
             }
-            else {
-                ctx.lineTo(this.point_list[i + 1].x, this.point_list[i + 1].y);
-            }
-            odd = !odd;
         }
         ctx.stroke();
+        if (head && false){
+            var b = this.point_list[this.point_list.length - 1].b;
+            var p2_x = this.point_list[this.point_list.length - 1].x;
+            var p2_y = this.point_list[this.point_list.length - 1].y;
+            var p1_x = p2_x + (b == "lr" ? -base_grid : (b == "rl" ? base_grid : 0));
+            var p1_y = p2_y + (b == "tb" ? -base_grid : (b == "bt" ? base_grid : 0));
+            
+            var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (Math.pow(p2_x - p1_x, 2) + Math.pow(p2_y - p1_y, 2)));
+            var l2 = Math.sqrt(Math.pow(arrow_length / 2 * factor, 2) / (Math.pow(p2_x - p1_x, 2) + Math.pow(p2_y - p1_y, 2)));
+            
+            var x = p2_x + l * (p1_x - p2_x);
+            var y = p2_y + l * (p1_y - p2_y);
+            
+            var x_arc = p2_x + l2 * (p1_x - p2_x);
+            var y_arc = p2_y + l2 * (p1_y - p2_y);
+            
+            var x_l = x - l / 2 * (p1_y - p2_y);
+            var y_l = y + l / 2 * (p1_x - p2_x);
+            
+            var x_r = x + l / 2 * (p1_y - p2_y);
+            var y_r = y - l / 2 * (p1_x - p2_x);
+            
+            
+            var r = Math.sqrt(Math.pow(y_arc - y_r, 2) + Math.pow(x_arc - x_r, 2));
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(p2_x, p2_y);
+            ctx.lineTo(x_r, y_r);
+            ctx.lineTo(x_l, y_l);
+            ctx.closePath();
+            ctx.fill();
+        }
     }
 };
