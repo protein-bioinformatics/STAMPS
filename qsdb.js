@@ -459,7 +459,7 @@ function compute_edges(){
         }
         
         all_edges.push([start_x, start_y, end_x, end_y, edges[i][4]]);
-        //if (node_id == data_ref[126] && metabolite_id == data_ref[191]){
+        //if (node_id == data_ref[105] && metabolite_id == data_ref[157]){
             eedges.push(new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], edges[i][4]));
         //}
     }

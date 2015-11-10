@@ -290,7 +290,7 @@ function priority_queue(){
     
     this.left = function(i){return 2 * i + 1;};
     this.right = function(i){return 2 * i + 2;};
-    this.parent = function(i){return Math.floor((i - 1) / 2);};
+    this.parent = function(i){return Math.floor((i - 1) >> 1);};
     
     this.heapify = function(i){
         var min = i;
@@ -364,16 +364,16 @@ function sq(x){
 function penelty(dir, d_x, d_y){
     switch (dir){
         case "l":
-            if (d_x < 0) return 1;
+            return (d_x < 0) * 2;
             break;
         case "r":
-            if (d_x > 0) return 1;
+            return (d_x > 0) * 2;
             break;
         case "t":
-            if (d_y < 0) return 1;
+            return (d_y < 0) * 2;
             break;
         case "b":
-            if (d_y > 0) return 1;
+            return (d_y > 0) * 2;
             break;
     }
     return 0;
@@ -413,7 +413,7 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
             matrix[c_y][c_x].pre = [current_node.cll.pos[0], current_node.cll.pos[1]];
             matrix[c_y][c_x].cost = new_cost;
             matrix[c_y][c_x].direction = dir_name[i];
-            var f = new_cost + 2 * penelty(current_node.cll.direction, c_x - t_x, c_y - t_y);
+            var f = new_cost + penelty(current_node.cll.direction, c_x - t_x, c_y - t_y);
             
             matrix[c_y][c_x].q_node.cost = f;
             if (!matrix[c_y][c_x].q_node.in_queue){
@@ -429,13 +429,13 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
     this.routing = function(xa_s, ya_s, a_s, protein_node, xa_e, ya_e, a_e, metabolite_node){
         a_s = a_s.charAt(0);
         a_e = a_e.charAt(0);
-        var grid = 25;
+        var grid = base_grid;
         var offset_x = {"l": -grid, "r": grid, "t": 0, "b": 0};
         var offset_y = {"l": 0, "r": 0, "t": -grid, "b": grid};
-        var w_s = protein_node.width / 2;
-        var h_s = protein_node.height / 2;
-        var w_e = metabolite_node / 2;
-        var h_e = metabolite_node / 2;
+        var w_s = protein_node.width * 0.5;
+        var h_s = protein_node.height * 0.5;
+        var w_e = metabolite_node * 0.5;
+        var h_e = metabolite_node * 0.5;
         
         var x_s = protein_node.x;
         var y_s = protein_node.y;
@@ -593,15 +593,17 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
                 in_corner = false;
                 ++corners;
                 if (corner_path.length > 2 && corner_path[corner_path.length - 2]){
-                    if (matrix[curr_y][curr_x].direction == "l" || matrix[curr_y][curr_x].direction == "r"){
-                        y = (this.point_list[this.point_list.length - 1].y + this.point_list[this.point_list.length - 4].y) / 2;
-                        this.point_list[this.point_list.length - 2].y = y;
-                        this.point_list[this.point_list.length - 3].y = y;
-                    }
-                    else {
-                        x = (this.point_list[this.point_list.length - 1].x + this.point_list[this.point_list.length - 4].x) / 2;
-                        this.point_list[this.point_list.length - 2].x = x;
-                        this.point_list[this.point_list.length - 3].x = x;
+                    switch (matrix[curr_y][curr_x].direction){
+                        case "l": case "r":
+                            y = (this.point_list[this.point_list.length - 1].y + this.point_list[this.point_list.length - 4].y) / 2;
+                            this.point_list[this.point_list.length - 2].y = y;
+                            this.point_list[this.point_list.length - 3].y = y;
+                            break;
+                        case "t": case "b":
+                            x = (this.point_list[this.point_list.length - 1].x + this.point_list[this.point_list.length - 4].x) / 2;
+                            this.point_list[this.point_list.length - 2].x = x;
+                            this.point_list[this.point_list.length - 3].x = x;
+                            break;
                     }
                 }
             }
@@ -629,47 +631,48 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
         
         
         // correcting the targeting points
+        var p_len = this.point_list.length;
         if (corners > 0){
-            var shift_x = xa_e - this.point_list[this.point_list.length - 1].x;
-            var shift_y = ya_e - this.point_list[this.point_list.length - 1].y;
+            var shift_x = xa_e - this.point_list[p_len - 1].x;
+            var shift_y = ya_e - this.point_list[p_len - 1].y;
             
             if (corners == 1){
                 var dd = this.point_list[1].b.charAt(0);
                 if (dd == "b" || dd == "t"){
-                    this.point_list[this.point_list.length - 2].y += shift_y;
+                    this.point_list[p_len - 2].y += shift_y;
                 }
                 else {
-                    this.point_list[this.point_list.length - 2].x += shift_x;
+                    this.point_list[p_len - 2].x += shift_x;
                 }
             }
             else {
                 var s = 0;
-                switch (this.point_list[this.point_list.length - 2].b){
+                switch (this.point_list[p_len - 2].b){
                     case "lr": case "rl": case "tb": case "bt": ++s; break;
                     default: break;
                 }
                 
                 if (s){
-                    this.point_list[this.point_list.length - 3].x += shift_x;
-                    this.point_list[this.point_list.length - 3].y += shift_y;
+                    this.point_list[p_len - 3].x += shift_x;
+                    this.point_list[p_len - 3].y += shift_y;
                 }
                 
-                this.point_list[this.point_list.length - 2].x += shift_x;
-                this.point_list[this.point_list.length - 2].y += shift_y;
+                this.point_list[p_len - 2].x += shift_x;
+                this.point_list[p_len - 2].y += shift_y;
                 
-                var dd = this.point_list[this.point_list.length - s - 4].b.charAt(0);
+                var dd = this.point_list[p_len - s - 4].b.charAt(0);
                 if (dd == "b" || dd == "t"){
-                    this.point_list[this.point_list.length - s - 3].y += shift_y;
-                    if (this.point_list.length - s - 4 > 0) this.point_list[this.point_list.length - s - 4].y += shift_y;
+                    this.point_list[p_len - s - 3].y += shift_y;
+                    if (p_len - s - 4 > 0) this.point_list[p_len - s - 4].y += shift_y;
                 }
                 else {
-                    this.point_list[this.point_list.length - s - 3].x += shift_x;
-                    if (this.point_list.length - s - 4 > 0) this.point_list[this.point_list.length - s - 4].x += shift_x;
+                    this.point_list[p_len - s - 3].x += shift_x;
+                    if (p_len - s - 4 > 0) this.point_list[p_len - s - 4].x += shift_x;
                 }
             }
         }
-        this.point_list[this.point_list.length - 1].x = xa_e;
-        this.point_list[this.point_list.length - 1].y = ya_e;
+        this.point_list[p_len - 1].x = xa_e;
+        this.point_list[p_len - 1].y = ya_e;
     }
     
     
@@ -682,7 +685,8 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
         ctx.lineWidth = line_width * factor;
         ctx.beginPath();
         ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
-        for (var i = 0; i < this.point_list.length - 1; ++i){
+        var p_len = this.point_list.length;
+        for (var i = 0; i < p_len - 1 - head; ++i){
             var control = new point(0, 0, 0);
             switch (this.point_list[i].b){
                 case "rt": case "lt": case "rb": case "lb":
@@ -703,30 +707,111 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
             }
         }
         ctx.stroke();
-        if (head && false){
-            var b = this.point_list[this.point_list.length - 1].b;
-            var p2_x = this.point_list[this.point_list.length - 1].x;
-            var p2_y = this.point_list[this.point_list.length - 1].y;
-            var p1_x = p2_x + (b == "lr" ? -base_grid : (b == "rl" ? base_grid : 0));
-            var p1_y = p2_y + (b == "tb" ? -base_grid : (b == "bt" ? base_grid : 0));
+        if (head){
+            var x_head = -1;
+            var y_head = -1;
+            var p2_x = this.point_list[p_len - 1].x;
+            var p2_y = this.point_list[p_len - 1].y;
+            var p1_x = this.point_list[p_len - 2].x;
+            var p1_y = this.point_list[p_len - 2].y;
+            var ct_x = -1;
+            var ct_y = -1;
+            switch (this.point_list[p_len - 2].b){
+                case "rt": case "lt": case "rb": case "lb":
+                    ct_x = this.point_list[p_len - 1].x;
+                    ct_y = this.point_list[p_len - 2].y;
+                    break;
+                case "tr": case "tl": case "br": case "bl":
+                    ct_x = this.point_list[p_len - 2].x;
+                    ct_y = this.point_list[p_len - 1].y;
+                    break;
+            }
             
-            var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (Math.pow(p2_x - p1_x, 2) + Math.pow(p2_y - p1_y, 2)));
-            var l2 = Math.sqrt(Math.pow(arrow_length / 2 * factor, 2) / (Math.pow(p2_x - p1_x, 2) + Math.pow(p2_y - p1_y, 2)));
+            switch (this.point_list[p_len - 2].b){
+                case "rl": case "lr": case "bt": case "tb":
+                    var b = this.point_list[p_len - 1].b;
+                    
+                    
+                    var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - p1_x) + sq(p2_y - p1_y)));
+                    x_head = p2_x + l * (p1_x - p2_x);
+                    y_head = p2_y + l * (p1_y - p2_y);
+                    
+                    
+                    ctx.lineWidth = line_width * factor;
+                    ctx.beginPath();
+                    ctx.moveTo(p1_x, p1_y);
+                    ctx.lineTo(x_head, y_head);
+                    ctx.stroke();
+                    
+                    break;
+                
+                default:                    
+                    var mm = 0;
+                    var upper = 1;
+                    var lower = 0;
+                    var l1 = -1;
+                    var l = -1;
+                    {
+                        var a_x = p1_x - 2 * ct_x + p2_x;
+                        var a_y = p1_y - 2 * ct_y + p2_y;
+                        var b_x = 2 * ct_x - 2 * p1_x;
+                        var b_y = 2 * ct_y - 2 * p1_y;
+                        var A = 4 * (a_x * a_x + a_y * a_y);
+                        var B = 4 * (a_x * b_x + a_y * b_y);
+                        var C = b_x * b_x + b_y * b_y;
+
+                        var Sabc = 2 * Math.sqrt(A + B + C);
+                        var A_2 = Math.sqrt(A);
+                        var A_32 = 2 * A * A_2;
+                        var C_2 = 2 * Math.sqrt(C);
+                        var BA = B / A_2;
+
+                        l1 = (A_32 * Sabc + A_2 * B * (Sabc - C_2) + (4 * C * A - B * B) * Math.log((2 * A_2 + BA + Sabc) / (BA + C_2))) / (4 * A_32);
+                    }
+                    while (true && mm < 10){
+                        t = (upper + lower) * 0.5;
+                        x_head = (1 - t) * (1 - t) * p1_x + 2 * (1 - t) * t * ct_x + t * t * p2_x;
+                        y_head = (1 - t) * (1 - t) * p1_y + 2 * (1 - t) * t * ct_y + t * t * p2_y;
+                        var a_x = p1_x - 2 * ct_x + x_head;
+                        var a_y = p1_y - 2 * ct_y + y_head;
+                        var b_x = 2 * ct_x - 2 * p1_x;
+                        var b_y = 2 * ct_y - 2 * p1_y;
+                        var A = 4 * (a_x * a_x + a_y * a_y);
+                        var B = 4 * (a_x * b_x + a_y * b_y);
+                        var C = b_x * b_x + b_y * b_y;
+
+                        var Sabc = 2 * Math.sqrt(A + B + C);
+                        var A_2 = Math.sqrt(A);
+                        var A_32 = 2 * A * A_2;
+                        var C_2 = 2 * Math.sqrt(C);
+                        var BA = B / A_2;
+
+                        l = (A_32 * Sabc + A_2 * B * (Sabc - C_2) + (4 * C * A - B * B) * Math.log((2 * A_2 + BA + Sabc) / (BA + C_2))) / (4 * A_32);
+                        if (Math.abs(l1 - l - arrow_length * factor) < 5e-2) break;
+                        if (l1 - l < arrow_length * factor) upper = t;
+                        else lower = t;
+                        ++mm;
+                    }
+                    
+                    
+                    t *= 1.05;
+                    xc_head = (1 - t) * (1 - t) * p1_x + 2 * (1 - t) * t * ct_x + t * t * p2_x;
+                    yc_head = (1 - t) * (1 - t) * p1_y + 2 * (1 - t) * t * ct_y + t * t * p2_y;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(p1_x, p1_y);
+                    ctx.bezierCurveTo(ct_x, ct_y, xc_head, yc_head, xc_head, yc_head);
+                    ctx.stroke();
+                    break;
+            }
             
-            var x = p2_x + l * (p1_x - p2_x);
-            var y = p2_y + l * (p1_y - p2_y);
+            var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - x_head) + sq(p2_y - y_head)));
+            var x_l = x_head - l * 0.5 * (y_head - p2_y);
+            var y_l = y_head + l * 0.5 * (x_head - p2_x);
+                    
+            var x_r = x_head + l * 0.5 * (y_head - p2_y);
+            var y_r = y_head - l * 0.5 * (x_head - p2_x);
             
-            var x_arc = p2_x + l2 * (p1_x - p2_x);
-            var y_arc = p2_y + l2 * (p1_y - p2_y);
-            
-            var x_l = x - l / 2 * (p1_y - p2_y);
-            var y_l = y + l / 2 * (p1_x - p2_x);
-            
-            var x_r = x + l / 2 * (p1_y - p2_y);
-            var y_r = y - l / 2 * (p1_x - p2_x);
-            
-            
-            var r = Math.sqrt(Math.pow(y_arc - y_r, 2) + Math.pow(x_arc - x_r, 2));
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(p2_x, p2_y);
@@ -734,6 +819,8 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
             ctx.lineTo(x_l, y_l);
             ctx.closePath();
             ctx.fill();
+            
+            
         }
     }
 };
