@@ -542,8 +542,7 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
         var curr_y = end_y;
         var post_x = -1;
         var post_y = -1;
-        var cnt = 0;
-        while (((curr_x != -1) || (curr_y != -1)) /* && cnt < 1000*/){
+        while (((curr_x != -1) || (curr_y != -1))){
             //console.log("t: " + curr_x + " " + curr_y);
             matrix[curr_y][curr_x].in_path = true;
             if (post_x != -1) matrix[curr_y][curr_x].post = [post_x, post_y];
@@ -556,15 +555,8 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
             post_y = curr_y;
             curr_x = matrix[post_y][post_x].pre[0];
             curr_y = matrix[post_y][post_x].pre[1];
-            cnt += 1;
         }
         
-        if (cnt > 990){
-            console.log("s: " + start_x + " " + start_y);
-            console.log("e: " + end_x + " " + end_y);
-            console.log("poss error: " + protein_node.id + " " + metabolite_node.id);
-            return;
-        }
         
         // determining the points / corners of the path
         var curr_x = start_x;
@@ -589,9 +581,7 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
             if (in_corner){
                 var x = (curr_x - cell_x_s) * grid + xd_s;
                 var y = (curr_y - cell_y_s) * grid + yd_s;
-                this.point_list.push(new point(x, y, opposite[matrix[curr_y][curr_x].direction] + matrix[curr_y][curr_x].direction));
-                in_corner = false;
-                ++corners;
+                this.point_list.push(new point(x, y, opposite[d] + d));
                 if (corner_path.length > 2 && corner_path[corner_path.length - 2]){
                     switch (matrix[curr_y][curr_x].direction){
                         case "l": case "r":
@@ -606,6 +596,8 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
                             break;
                     }
                 }
+                in_corner = false;
+                ++corners;
             }
             if (d != matrix[curr_y][curr_x].direction){
                 var x = (matrix[curr_y][curr_x].pre[0] - cell_x_s) * grid + xd_s;
@@ -623,12 +615,28 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
             curr_y = post_y;
         }
         
-        /*
-        for (var i = 0; i < this.point_list.length; ++i){
+        /*for (var i = 0; i < this.point_list.length; ++i){
             console.log(this.point_list[i]);
         }*/
-                
         
+        
+        // merge equal points
+        for (var i = 0; i < this.point_list.length - 1; ++i){
+            var p2_x = this.point_list[i].x;
+            var p2_y = this.point_list[i].y;
+            var p1_x = this.point_list[i + 1].x;
+            var p1_y = this.point_list[i + 1].y;
+            if (Math.abs(p2_x - p1_x) < 1 && Math.abs(p2_y - p1_y) < 1){
+                this.point_list.splice(i, 1);
+            }
+        }
+        
+        
+        /*for (var i = 0; i < this.point_list.length; ++i){
+            console.log(this.point_list[i]);
+        }*/
+        
+                
         
         // correcting the targeting points
         var p_len = this.point_list.length;
@@ -636,50 +644,35 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
             var shift_x = xa_e - this.point_list[p_len - 1].x;
             var shift_y = ya_e - this.point_list[p_len - 1].y;
             
-            if (corners == 1){
-                var dd = this.point_list[1].b.charAt(0);
-                if (dd == "b" || dd == "t"){
-                    this.point_list[p_len - 2].y += shift_y;
-                }
-                else {
-                    this.point_list[p_len - 2].x += shift_x;
-                }
+            var s = false;
+            switch (this.point_list[p_len - 2].b){
+                case "lr": case "rl": case "tb": case "bt": s = true; break;
+                default: break;
             }
-            else {
-                var s = 0;
-                switch (this.point_list[p_len - 2].b){
-                    case "lr": case "rl": case "tb": case "bt": ++s; break;
-                    default: break;
-                }
-                
-                if (s){
-                    this.point_list[p_len - 3].x += shift_x;
-                    this.point_list[p_len - 3].y += shift_y;
-                }
-                
-                this.point_list[p_len - 2].x += shift_x;
-                this.point_list[p_len - 2].y += shift_y;
-                
-                var dd = this.point_list[p_len - s - 4].b.charAt(0);
+            if (s){
+                var dd = this.point_list[p_len - 1].b.charAt(0);
                 if (dd == "b" || dd == "t"){
-                    this.point_list[p_len - s - 3].y += shift_y;
-                    if (p_len - s - 4 > 0) this.point_list[p_len - s - 4].y += shift_y;
+                    this.point_list[p_len - 2].x += shift_x;
+                    this.point_list[p_len - 3].x += shift_x;
                 }
                 else {
-                    this.point_list[p_len - s - 3].x += shift_x;
-                    if (p_len - s - 4 > 0) this.point_list[p_len - s - 4].x += shift_x;
+                    this.point_list[p_len - 2].y += shift_y;
+                    this.point_list[p_len - 3].y += shift_y;
                 }
             }
         }
         this.point_list[p_len - 1].x = xa_e;
         this.point_list[p_len - 1].y = ya_e;
+        
+        /*for (var i = 0; i < this.point_list.length; ++i){
+            console.log(this.point_list[i]);
+        }*/
     }
     
     
     this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node); 
     
     this.draw = function(ctx, factor){
-        //console.log(protein_node.id + " " + metabolite_node.id);
         ctx.strokeStyle = edge_color;
         ctx.fillStyle = edge_color;
         ctx.lineWidth = line_width * factor;
