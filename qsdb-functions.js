@@ -119,14 +119,19 @@ function node(data, c){
     this.highlight = false;
     this.pathway_ref = data['pathway_ref'];
     this.proteins = new Array();
+    this.lines = -1;
     this.width = -1;
     this.height = -1;
     this.c = c;
     this.ctx = c.getContext("2d");
+    this.slide = false;
+    this.slide_percent = 0;
     
     if (this.type == "protein"){
         var name = "";
-        this.height = 20 + 20 * data['proteins'].length;
+        this.height = 20 + 20 * Math.min(data['proteins'].length, max_protein_line_number);
+        this.lines = data['proteins'].length;
+        this.slide = (data['proteins'].length > max_protein_line_number);
         for (var j = 0; j < data['proteins'].length; ++j){
             this.proteins.push(new protein(data['proteins'][j]));
             if (name.length) name += ", ";
@@ -135,7 +140,7 @@ function node(data, c){
             }
             name += data['proteins'][j]['name'];
         }
-        this.width += 50;
+        this.width += 50 + this.slide * 30;
         this.name = name;
     }
     else if (this.type == "pathway"){
@@ -158,12 +163,16 @@ function node(data, c){
     this.draw = function(font_size, factor, radius) {
         switch (this.type){
             case "protein":
+                // draw fill
                 this.ctx.fillStyle = protein_fill_color;
                 this.ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
-                this.ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
-                this.ctx.strokeStyle = protein_stroke_color;
-                this.ctx.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
        
+                // draw content
+                if (this.lines > max_protein_line_number){
+                    this.ctx.save();
+                    this.ctx.rect(this.x - this.width * 0.45, this.y - this.height * 0.45, this.width * 0.9, this.height * 0.9);
+                    this.ctx.clip();
+                }
                 this.ctx.textAlign = "left";
                 this.ctx.textBaseline = 'middle';
                 this.ctx.font = font_size.toString() + "px Arial";
@@ -171,6 +180,14 @@ function node(data, c){
                 for (var i = 0; i < this.proteins.length; ++i){
                     this.proteins[i].draw(this.ctx, this.x - this.width / 2, this.y, this.proteins.length, i, factor);
                 }
+                if (this.lines > max_protein_line_number){
+                    this.ctx.restore();
+                }
+                
+                // draw stroke
+                this.ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
+                this.ctx.strokeStyle = protein_stroke_color;
+                this.ctx.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
                 break;
                 
             case "pathway":
@@ -514,8 +531,8 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
         
         
         if (!matrix[cell_y_s][cell_x_s].active || !matrix[cell_y_e][cell_x_e].active){
-            this.point_list = [new point(x_s, y_s, opposite[a_s] + a_s)];
-            this.point_list.push(new point(x_e, y_e, opposite[a_e] + a_e));
+            this.point_list = [new point(xa_s, ya_s, opposite[a_s] + a_s)];
+            this.point_list.push(new point(xa_e, ya_e, opposite[a_e] + a_e));
             return;
         }
         
@@ -669,19 +686,25 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
         /*for (var i = 0; i < this.point_list.length; ++i){
             console.log(this.point_list[i]);
         }*/
+        
     }
     
     
     this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node); 
     
     this.draw = function(factor){
+        
+        /*for (var i = 0; i < this.point_list.length; ++i){
+            console.log(this.point_list[i]);
+        }*/
+        
         this.ctx.strokeStyle = edge_color;
         this.ctx.fillStyle = edge_color;
         this.ctx.lineWidth = line_width * factor;
         this.ctx.beginPath();
         this.ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
         var p_len = this.point_list.length;
-        for (var i = 0; i < p_len - 1 - head; ++i){
+        for (var i = 0; i < p_len - 1 - this.head; ++i){
             var control = new point(0, 0, 0);
             switch (this.point_list[i].b){
                 case "rt": case "lt": case "rb": case "lb":
@@ -702,7 +725,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             }
         }
         this.ctx.stroke();
-        if (head){
+        if (this.head){
             var x_head = -1;
             var y_head = -1;
             var p2_x = this.point_list[p_len - 1].x;
@@ -730,7 +753,6 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
                     var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - p1_x) + sq(p2_y - p1_y)));
                     x_head = p2_x + l * (p1_x - p2_x);
                     y_head = p2_y + l * (p1_y - p2_y);
-                    
                     
                     this.ctx.lineWidth = line_width * factor;
                     this.ctx.beginPath();

@@ -15,16 +15,19 @@ event_key_down = false;
 node_move_x = 0;
 node_move_y = 0;
 edges = new Array();
+stage = 0;
 
 scaling = 1.4;
 zoom = 5;
 base_grid = 25;
+max_protein_line_number = 3;
 metabolite_radius = 10;
 arrow_length = 10;
 round_rect_radius = 10;
 text_size = 15;
 anchors = ['left', 'top', 'right', 'bottom'];
 administration = false;
+
 
 line_width = 4;
 protein_stroke_color = "#f69301";
@@ -154,22 +157,24 @@ function compute_angle(x_1, y_1, x_2, y_2, anchor){
 
 function draw(){
     var c = document.getElementById("renderarea");
+    
     var ctx = c.getContext("2d");
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     var factor = Math.pow(scaling, zoom - 5);
     var font_size = Math.floor(text_size * factor);
     var radius = Math.floor(metabolite_radius * factor);
     
+    //draw nodes
+    for (var i = 0; i < data.length; ++i){
+        data[i].draw(font_size, factor, radius);
+    }
     // draw edges
     for (var i = 0; i < edges.length; ++i){
         edges[i].draw(factor);
     }
     
-    //draw nodes
-    for (var i = 0; i < data.length; ++i){
-        data[i].draw(font_size, factor, radius);
-    }
 }
+
 
 
 function init(){
@@ -184,10 +189,22 @@ function init(){
     }
     if (HTTP_GET_VARS['admin']) administration = HTTP_GET_VARS['admin'] == 1;
     
+    
+    
     document.documentElement.style.overflow = 'hidden';
     document.body.scroll = "no";
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
+    
+    
+    c.onclick = function (event)
+    {
+        if (event.region) {
+            alert('You clicked ' + event.region);
+        }
+    }
+    
+    
     ctx.canvas.width  = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
     c.onmousedown = mouse_down_listener;
@@ -449,8 +466,9 @@ function compute_edges(){
                 start_x += node_width / 2;
             }
         }
-        
+        //if (node_id == data_ref[145] && metabolite_id == data_ref[162]){
         edges.push(new edge(c, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], connections[i][4]));
+        //}
     }
     
 }
