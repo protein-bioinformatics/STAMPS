@@ -501,7 +501,7 @@ function show_management(){
             proteins = JSON.parse(xmlhttp.responseText);
         }
     }
-    xmlhttp.open("GET", "getproteins.php", false);
+    xmlhttp.open("GET", "get-proteins.py", false);
     xmlhttp.send();
     
     inner_html = "<table width='100%'>";
@@ -781,7 +781,7 @@ function update_node(event) {
     var x = Math.floor((data[highlight].x - null_x) / factor);
     var y = Math.floor((data[highlight].y - null_y) / factor);
     var xmlhttp = new XMLHttpRequest();
-    var request = "update_node.php?id=";
+    var request = "update_node.py?id=";
     request += data[highlight].id;
     request += "&x=";
     request += x;
