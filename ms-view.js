@@ -1,30 +1,30 @@
-var zoom = 0;
-var max_zoom = 30;
-var scaling = 1.2;
-var origin_x = 0;
-var last_x = 0;
-var left_border = 0;
-var right_border = 0;
-var top_border = 0;
-var bottom_border = 0;
-var x_tics = [200, 100, 50, 25, 10, 5, 2, 1];
-var y_tics = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5];
-var peaks = new Array();
-var acids = new Array();
-var tolerance = 10;
-var H =       1.007276;
-var C12 =    12.000000;
-var O =      15.994914;
-var H3O =    19.016742;
-var O2 =     31.989829;
-var acetyl = 43.016742;
-var peptide = "";
-var charge = 0;
-var precursor_mass = 0;
-var grid_color = "#DDDDDD"
-var label_color = "black"
-var peak_color = "#888888"
-var peak_highlight_color = "#D40000"
+ms_zoom = 0;
+max_ms_zoom = 30;
+ms_scaling = 1.2;
+origin_x = 0;
+last_x = 0;
+left_border = 0;
+right_border = 0;
+top_border = 0;
+bottom_border = 0;
+x_tics = [200, 100, 50, 25, 10, 5, 2, 1];
+y_tics = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5];
+peaks = new Array();
+acids = new Array();
+tolerance = 10;
+H =       1.007276;
+C12 =    12.000000;
+O =      15.994914;
+H3O =    19.016742;
+O2 =     31.989829;
+acetyl = 43.016742;
+peptide = "";
+charge = 0;
+precursor_mass = 0;
+grid_color = "#DDDDDD";
+label_color = "black";
+peak_color = "#888888";
+peak_highlight_color = "#D40000";
 
 
 
@@ -110,14 +110,12 @@ function annotation(){
     for (var i = 0; i < rev_peptide.length; ++i){
         mass += acids[rev_peptide[i]];
         var diff_mass = binary_search(mass);
-        //console.log(diff_mass + " " + rev_peptide[i] + " " + mass + " " + peaks[diff_mass[1]].mass + " " + peaks[diff_mass[1]].intensity);
         if (diff_mass[0] < tolerance){
             peaks[diff_mass[1]].highlight = true;
             peaks[diff_mass[1]].annotation = "y" + subscripting(i + 1);
         }
         else {
             var diff_mass = binary_search(mass / 2);
-            //console.log(diff_mass + " " + rev_peptide[i] + " " + mass / 2, peaks[diff_mass[1]].mass);
             if (diff_mass[0] < tolerance){
                 peaks[diff_mass[1]].highlight = true;
                 peaks[diff_mass[1]].annotation = "y" + subscripting(i + 1);
@@ -131,14 +129,12 @@ function annotation(){
     for (var i = 0; i < peptide.length; ++i){
         mass += acids[peptide[i]];
         var diff_mass = binary_search(mass);
-        //console.log(diff_mass + " " + rev_peptide[i] + " " + mass, peaks[diff_mass[1]].mass);
         if (diff_mass[0] < tolerance){
             peaks[diff_mass[1]].highlight = true;
             peaks[diff_mass[1]].annotation = "b" + subscripting(i + 1);
         }
         else {
             var diff_mass = binary_search(mass / 2);
-            //console.log(diff_mass + " " + rev_peptide[i] + " " + mass / 2, peaks[diff_mass[1]].mass);
             if (diff_mass[0] < tolerance){
                 peaks[diff_mass[1]].highlight = true;
                 peaks[diff_mass[1]].annotation = "b" + subscripting(i + 1);
@@ -148,27 +144,20 @@ function annotation(){
 }
 
 
+function resize_ms_view(redraw){
+    document.getElementById("msarea").width = document.getElementById('check_spectra').offsetWidth * 0.695;
+    document.getElementById("msarea").height = document.getElementById('check_spectra').offsetHeight * 0.9;
+    var rect = document.getElementById('check_spectra').getBoundingClientRect();
+    document.getElementById("msarea").style.top = (rect.top + (rect.bottom - rect.top) * 0.05).toString() + "px";
+    document.getElementById("msarea").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
+    if (redraw) draw_spectrum();
+}
 
-function init_view(){
-    var strGET = document.location.search.substr(1, document.location.search.length);
-    var HTTP_GET_VARS = new Array();
-    if(strGET != ''){
-        var gArr = strGET.split('&');
-        for(var i = 0; i < gArr.length; ++i){
-            var v = '';
-            var vArr = gArr[i].split('=');
-            if(vArr.length > 1){
-                v = vArr[1];
-            }
-            HTTP_GET_VARS[unescape(vArr[0])] = unescape(v);
-        }
-    }
-    var spectrum_id = (strGET != '' && HTTP_GET_VARS['spectrum_id']) ? HTTP_GET_VARS['spectrum_id'] : "1";
-    
+
+
+function load_spectrum(spectrum_id){    
     var c = document.getElementById("msarea");
     var ctx = c.getContext("2d");
-    ctx.canvas.width  = window.innerWidth * 0.8;
-    ctx.canvas.height = window.innerHeight * 0.8;
     
     var spectrum_data = 0;
     var xmlhttp = new XMLHttpRequest();
@@ -202,21 +191,18 @@ function init_view(){
     }
     
     var ii = 1;
-    console.log(spectrum_data["peakIntensity"].length);
     for (var items in spectrum_data["peakIntensity"]){
         peaks[ii].intensity = spectrum_data["peakIntensity"][items];
         ii += 1;
     }
     
     
-    c.addEventListener("mousewheel", mouse_wheel_listener, false);
-    c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
     annotation();
-    draw();
+    draw_spectrum();
 }
 
 
-function draw(){
+function draw_spectrum(){
     var c = document.getElementById("msarea");
     var ctx = c.getContext("2d");
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -226,7 +212,7 @@ function draw(){
     // Add x-axis tics, values and grid
     var max_tic = peaks[peaks.length - 1].mass;
     var tics_start = Math.min(peaks[0].x, left_border);
-    var tic = x_tics[Math.floor(zoom / 4)];
+    var tic = x_tics[Math.floor(ms_zoom / 4)];
     var width = Math.max(peaks[peaks.length - 1].x, right_border) - Math.min(peaks[0].x, left_border);
     ctx.textAlign = "center";
     ctx.textBaseline = 'middle';
@@ -374,11 +360,11 @@ function get_mouse_pos(canvas, evt){
 
 function mouse_wheel_listener(event){
     var direction = (1 - 2 *(event.detail >= 0));
-    if (zoom + direction < 0 || max_zoom <= zoom + direction)
+    if (ms_zoom + direction < 0 || max_ms_zoom <= ms_zoom + direction)
         return;
     
-    zoom += direction;
-    var scale = scaling;
+    ms_zoom += direction;
+    var scale = ms_scaling;
     if (event.detail >= 0) scale = 1. / scale;
     var c = document.getElementById("msarea");
     var ctx = c.getContext("2d");
@@ -407,8 +393,5 @@ function mouse_wheel_listener(event){
         }
     }
     
-    draw();
+    draw_spectrum();
 }
-
-
-document.addEventListener('DOMContentLoaded', init_view, false);

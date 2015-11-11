@@ -1,30 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="utf-8"/>
 <link rel="stylesheet" type="text/css" href="qsdb.css">
 <script src="qsdb.js"></script>
 <script src="qsdb-functions.js"></script>
+<script src="ms-view.js"></script>
 </head>
+
 <body>
 <canvas id="renderarea" class="renderarea">Your browser does not support the HTML5 canvas tag.</canvas>
 <canvas id="refarea" class="refarea" style="display: none;">Your browser does not support the HTML5 canvas tag.</canvas>
+
 <div id="hint" style="position: fixed; top: 10px; left: 10px;">--</div>
+<div id="tooltip" class="tooltip"></div>
+
 <div id="menubackground" class="menubackground"></div>
 <div id="custommenu" class="custommenu"></div>
-<div id="tooltip" class="tooltip"></div>
+
 <div id="managementbackground" class="managementbackground"></div>
 <div id="management" class="management"></div>
+
 <div id="navigation" class="navigation">
 Select species:<br>
 <form action="" onchange="load_data(true);">
     <input type="checkbox" id="species_mouse" name="species" value="mouse" checked>Mouse<br>
     <input type="checkbox" id="species_human" name="species" value="human">Human
 </form><p>
-<button>Check Spectra</button><p>
+<button onclick="check_spectra();">Check Spectra</button><p>
 <button onclick="download_assay();">Download Assay</button>
 </div>
+
 <div id="download" class="download"></div>
 <div id="downloadbackground" class="downloadbackground"></div>
+
+<div id="check_spectra" class="check_spectra">
+  <div id="spectra_panel" class="spectra_panel"></div>
+  <canvas id="msarea" class="msarea"></canvas>
+</div>
+<div id="check_spectra_background" class="check_spectra_background"></div>
+
 </body>
 </html> 

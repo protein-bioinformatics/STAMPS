@@ -20,7 +20,7 @@ stage = 0;
 scaling = 1.4;
 zoom = 5;
 base_grid = 25;
-max_protein_line_number = 3;
+max_protein_line_number = 300;
 metabolite_radius = 10;
 arrow_length = 10;
 round_rect_radius = 10;
@@ -177,6 +177,7 @@ function draw(){
 
 
 
+
 function init(){
     strGET = document.location.search.substr(1,document.location.search.length);
     if(strGET!=''){
@@ -219,6 +220,12 @@ function init(){
     document.addEventListener('keyup', key_up, false);
     document.getElementById("menubackground").addEventListener("click", hide_custom_menu, false);
     document.getElementById("managementbackground").addEventListener("click", hide_management, false);
+    
+    
+    document.getElementById("check_spectra_background").addEventListener("click", hide_check_spectra, false);
+    window.addEventListener('resize', function() {resize_ms_view(true);}, false);
+    document.getElementById("msarea").addEventListener("mousewheel", mouse_wheel_listener, false);
+    document.getElementById("msarea").addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
     
     c.oncontextmenu = function (event){
         show_custom_menu(event);
@@ -836,6 +843,22 @@ function download_assay(){
 function hide_download (){
     document.getElementById("downloadbackground").style.display = "none";
     document.getElementById("download").style.display = "none";
+    document.getElementById("renderarea").style.filter = "none";
+}
+
+
+function check_spectra (){
+    document.getElementById("check_spectra_background").style.display = "inline";
+    document.getElementById("check_spectra").style.display = "inline";
+    document.getElementById("renderarea").style.filter = "blur(5px)";
+    resize_ms_view(false);
+}
+
+
+
+function hide_check_spectra (){
+    document.getElementById("check_spectra_background").style.display = "none";
+    document.getElementById("check_spectra").style.display = "none";
     document.getElementById("renderarea").style.filter = "none";
 }
 
