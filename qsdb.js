@@ -330,7 +330,7 @@ function load_data(reload){
             nodes = JSON.parse(xmlhttp2.responseText);
         }
     }
-    xmlhttp2.open("GET", "getnodes.php?pathway=" + current_pathway, false);
+    xmlhttp2.open("GET", "get-edgedata.py?pathway=" + current_pathway, false);
     xmlhttp2.send();
     compute_edges();
     draw();
