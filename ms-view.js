@@ -358,7 +358,7 @@ function get_mouse_pos(canvas, evt){
 }
 
 
-function mouse_wheel_listener(event){
+function view_mouse_wheel_listener(event){
     var direction = (1 - 2 *(event.detail >= 0));
     if (ms_zoom + direction < 0 || max_ms_zoom <= ms_zoom + direction)
         return;
