@@ -386,8 +386,10 @@ function point(x, y, b){
     this.b = b;
 };
 
-function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head){
+function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head){
     
+    this.c = c;
+    this.ctx = this.c.getContext("2d");
     this.head = head;
     this.point_list = [];
     this.start_id = protein_node.id;
@@ -672,12 +674,12 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
     
     this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node); 
     
-    this.draw = function(ctx, factor){
-        ctx.strokeStyle = edge_color;
-        ctx.fillStyle = edge_color;
-        ctx.lineWidth = line_width * factor;
-        ctx.beginPath();
-        ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
+    this.draw = function(factor){
+        this.ctx.strokeStyle = edge_color;
+        this.ctx.fillStyle = edge_color;
+        this.ctx.lineWidth = line_width * factor;
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
         var p_len = this.point_list.length;
         for (var i = 0; i < p_len - 1 - head; ++i){
             var control = new point(0, 0, 0);
@@ -685,21 +687,21 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
                 case "rt": case "lt": case "rb": case "lb":
                     control.x = this.point_list[i + 1].x;
                     control.y = this.point_list[i].y;
-                    ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    this.ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
                     break;
                     
                 case "tr": case "tl": case "br": case "bl":
                     control.x = this.point_list[i].x;
                     control.y = this.point_list[i + 1].y;
-                    ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    this.ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
                     break;
                 default:
-                    ctx.lineTo(this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    this.ctx.lineTo(this.point_list[i + 1].x, this.point_list[i + 1].y);
                     break;
                     
             }
         }
-        ctx.stroke();
+        this.ctx.stroke();
         if (head){
             var x_head = -1;
             var y_head = -1;
@@ -730,11 +732,11 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
                     y_head = p2_y + l * (p1_y - p2_y);
                     
                     
-                    ctx.lineWidth = line_width * factor;
-                    ctx.beginPath();
-                    ctx.moveTo(p1_x, p1_y);
-                    ctx.lineTo(x_head, y_head);
-                    ctx.stroke();
+                    this.ctx.lineWidth = line_width * factor;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p1_x, p1_y);
+                    this.ctx.lineTo(x_head, y_head);
+                    this.ctx.stroke();
                     
                     break;
                 
@@ -791,10 +793,10 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
                     xc_head = (1 - t) * (1 - t) * p1_x + 2 * (1 - t) * t * ct_x + t * t * p2_x;
                     yc_head = (1 - t) * (1 - t) * p1_y + 2 * (1 - t) * t * ct_y + t * t * p2_y;
                     
-                    ctx.beginPath();
-                    ctx.moveTo(p1_x, p1_y);
-                    ctx.bezierCurveTo(ct_x, ct_y, xc_head, yc_head, xc_head, yc_head);
-                    ctx.stroke();
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p1_x, p1_y);
+                    this.ctx.bezierCurveTo(ct_x, ct_y, xc_head, yc_head, xc_head, yc_head);
+                    this.ctx.stroke();
                     break;
             }
             
@@ -805,13 +807,13 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head)
             var x_r = x_head + l * 0.5 * (y_head - p2_y);
             var y_r = y_head - l * 0.5 * (x_head - p2_x);
             
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(p2_x, p2_y);
-            ctx.lineTo(x_r, y_r);
-            ctx.lineTo(x_l, y_l);
-            ctx.closePath();
-            ctx.fill();
+            this.ctx.lineWidth = 1;
+            this.ctx.beginPath();
+            this.ctx.moveTo(p2_x, p2_y);
+            this.ctx.lineTo(x_r, y_r);
+            this.ctx.lineTo(x_l, y_l);
+            this.ctx.closePath();
+            this.ctx.fill();
             
             
         }

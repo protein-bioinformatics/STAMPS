@@ -9,13 +9,12 @@ null_x = 0;
 null_y = 0;
 data = new Array();
 data_ref = new Array();
-all_edges = new Array();
 nodes = null;
 event_moving_node = false;
 event_key_down = false;
 node_move_x = 0;
 node_move_y = 0;
-eedges = new Array();
+edges = new Array();
 
 scaling = 1.4;
 zoom = 5;
@@ -28,13 +27,13 @@ anchors = ['left', 'top', 'right', 'bottom'];
 administration = false;
 
 line_width = 4;
-protein_stroke_color = "#ff9000";
+protein_stroke_color = "#f69301";
 protein_fill_color = "#fff6d5";
-metabolite_stroke_color = "#ff9000";
+metabolite_stroke_color = "f#69301";
 metabolite_fill_color = "white";
-pathway_stroke_color = "#ff9000";
+pathway_stroke_color = "#f69301";
 pathway_fill_color = "white";
-edge_color = "#ff9000";
+edge_color = "#f69301";
 disabled_text_color = "#bbbbbb";
 disabled_fill_color = "#cccccc";
 text_color = "black";
@@ -162,14 +161,8 @@ function draw(){
     var radius = Math.floor(metabolite_radius * factor);
     
     // draw edges
-    ctx.lineWidth = 1;
-    for (var i = 0; i < all_edges.length; ++i){
-        //ctx.arrow(all_edges[i][0], all_edges[i][1], all_edges[i][2], all_edges[i][3], factor, all_edges[i][4]);
-    }
-    
-    
-    for (var i = 0; i < eedges.length; ++i){
-        eedges[i].draw(ctx, factor);
+    for (var i = 0; i < edges.length; ++i){
+        edges[i].draw(factor);
     }
     
     //draw nodes
@@ -253,7 +246,6 @@ function load_data(reload){
     
     // get data information
     data = new Array();
-    all_edges = new Array();
     data_ref = new Array();
     var tmp_data = 0;
     var xmlhttp = new XMLHttpRequest();
@@ -322,11 +314,11 @@ function load_data(reload){
 
 
 function compute_edges(){
-    all_edges = new Array();
-    eedges = new Array();
+    edges = new Array();
+    var c = document.getElementById("renderarea");
     var factor = Math.pow(scaling, zoom - 5);
     var radius = Math.floor(metabolite_radius * factor);
-    var edges = new Array();
+    var connections = new Array();
     var nodes_anchors = new Array();
     for (var i = 0; i < data.length; ++i){
         nodes_anchors.push({left: [], right: [], top: [], bottom: []});
@@ -341,16 +333,16 @@ function compute_edges(){
             
             if (nodes[i]['reagents'][j]['type'] == 'educt'){
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, nodes[i]['anchor_in']);
-                edges.push([node_id, nodes[i]['anchor_in'], metabolite_id, nodes[i]['reagents'][j]['anchor'], reversible]);
-                nodes_anchors[node_id][nodes[i]['anchor_in']].push([metabolite_id, edges.length - 1, angle_node]);
+                connections.push([node_id, nodes[i]['anchor_in'], metabolite_id, nodes[i]['reagents'][j]['anchor'], reversible]);
+                nodes_anchors[node_id][nodes[i]['anchor_in']].push([metabolite_id, connections.length - 1, angle_node]);
             }
             else{
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, nodes[i]['anchor_out']);
-                edges.push([node_id, nodes[i]['anchor_out'], metabolite_id, nodes[i]['reagents'][j]['anchor'], true]);
-                nodes_anchors[node_id][nodes[i]['anchor_out']].push([metabolite_id, edges.length - 1, angle_node]);
+                connections.push([node_id, nodes[i]['anchor_out'], metabolite_id, nodes[i]['reagents'][j]['anchor'], true]);
+                nodes_anchors[node_id][nodes[i]['anchor_out']].push([metabolite_id, connections.length - 1, angle_node]);
                 
             }
-            nodes_anchors[metabolite_id][nodes[i]['reagents'][j]['anchor']].push([node_id, edges.length - 1, angle_metabolite]);
+            nodes_anchors[metabolite_id][nodes[i]['reagents'][j]['anchor']].push([node_id, connections.length - 1, angle_metabolite]);
         }
     }
     
@@ -376,14 +368,14 @@ function compute_edges(){
     }
     
     
-    for (var i = 0; i < edges.length; ++i){
-        var node_id = edges[i][0];
-        var node_anchor = edges[i][1];
+    for (var i = 0; i < connections.length; ++i){
+        var node_id = connections[i][0];
+        var node_anchor = connections[i][1];
         var node_len = nodes_anchors[node_id][node_anchor].length;
-        var metabolite_id = edges[i][2];
-        var metabolite_anchor = edges[i][3];
+        var metabolite_id = connections[i][2];
+        var metabolite_anchor = connections[i][3];
         var metabolite_len = nodes_anchors[metabolite_id][metabolite_anchor].length;
-        var has_head = edges[i][4];
+        var has_head = connections[i][4];
         var start_x = 0, start_y = 0;
         var end_x = 0, end_y = 0;
         var node_pos = 0, metabolite_pos = 0;
@@ -458,10 +450,7 @@ function compute_edges(){
             }
         }
         
-        //all_edges.push([start_x, start_y, end_x, end_y, edges[i][4]]);
-        //if (node_id == data_ref[185] && metabolite_id == data_ref[191]){
-            eedges.push(new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], edges[i][4]));
-        //}
+        edges.push(new edge(c, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], connections[i][4]));
     }
     
 }
@@ -602,16 +591,10 @@ function mouse_wheel_listener(e){
         data[i].x = res.x + scale * (data[i].x - res.x);
         data[i].y = res.y + scale * (data[i].y - res.y);
     }
-    for (var i = 0; i < all_edges.length; ++i){
-        all_edges[i][0] = res.x + scale * (all_edges[i][0] - res.x);
-        all_edges[i][1] = res.y + scale * (all_edges[i][1] - res.y);
-        all_edges[i][2] = res.x + scale * (all_edges[i][2] - res.x);
-        all_edges[i][3] = res.y + scale * (all_edges[i][3] - res.y);
-    }
-    for (var i = 0; i < eedges.length; ++i){
-        for (var j = 0; j < eedges[i].point_list.length; ++j){
-            eedges[i].point_list[j].x = res.x + scale * (eedges[i].point_list[j].x - res.x);
-            eedges[i].point_list[j].y = res.y + scale * (eedges[i].point_list[j].y - res.y);
+    for (var i = 0; i < edges.length; ++i){
+        for (var j = 0; j < edges[i].point_list.length; ++j){
+            edges[i].point_list[j].x = res.x + scale * (edges[i].point_list[j].x - res.x);
+            edges[i].point_list[j].y = res.y + scale * (edges[i].point_list[j].y - res.y);
         }
     }
     null_x = res.x + scale * (null_x - res.x);
@@ -691,16 +674,10 @@ function mouse_move_listener(e){
                 data[i].x += res.x - offsetX;
                 data[i].y += res.y - offsetY;
             }
-            for (var i = 0; i < all_edges.length; ++i){
-                all_edges[i][0] += res.x - offsetX;
-                all_edges[i][1] += res.y - offsetY;
-                all_edges[i][2] += res.x - offsetX;
-                all_edges[i][3] += res.y - offsetY;
-            }
-            for (var i = 0; i < eedges.length; ++i){
-                for (var j = 0; j < eedges[i].point_list.length; ++j){
-                    eedges[i].point_list[j].x += res.x - offsetX;
-                    eedges[i].point_list[j].y += res.y - offsetY;
+            for (var i = 0; i < edges.length; ++i){
+                for (var j = 0; j < edges[i].point_list.length; ++j){
+                    edges[i].point_list[j].x += res.x - offsetX;
+                    edges[i].point_list[j].y += res.y - offsetY;
                 }
             }
             null_x += res.x - offsetX;

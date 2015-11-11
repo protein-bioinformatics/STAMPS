@@ -6,7 +6,8 @@ html {
 body {
     margin: 0px;
     top: 0px;
-    background-color: #fafafa;
+    background-color: #f3f8ff; 
+    /* #fafafa; */
 }
 
 div.custommenu {
