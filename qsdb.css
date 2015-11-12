@@ -146,6 +146,15 @@ canvas.renderarea {
     margin: 0px;
 }
 
+div.spectra_panel {
+    background-color: white;
+    border: 1px solid #d3d3d3;
+    margin: 0px;
+    position: fixed;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
 canvas.msarea {
     background-color: white;
     border:1px solid #d3d3d3;

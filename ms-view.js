@@ -7,6 +7,7 @@ left_border = 0;
 right_border = 0;
 top_border = 0;
 bottom_border = 0;
+spectrum_loaded = false;
 x_tics = [200, 100, 50, 25, 10, 5, 2, 1];
 y_tics = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5];
 peaks = new Array();
@@ -147,9 +148,15 @@ function annotation(){
 function resize_ms_view(redraw){
     document.getElementById("msarea").width = document.getElementById('check_spectra').offsetWidth * 0.695;
     document.getElementById("msarea").height = document.getElementById('check_spectra').offsetHeight * 0.9;
+    document.getElementById("spectra_panel").style.width = (document.getElementById('check_spectra').offsetWidth * 0.29).toString() + "px";
+    document.getElementById("spectra_panel").style.height = (document.getElementById('check_spectra').offsetHeight * 0.9).toString() + "px";
+    
+    
     var rect = document.getElementById('check_spectra').getBoundingClientRect();
     document.getElementById("msarea").style.top = (rect.top + (rect.bottom - rect.top) * 0.05).toString() + "px";
     document.getElementById("msarea").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
+    document.getElementById("spectra_panel").style.top = (rect.top + (rect.bottom - rect.top) * 0.05).toString() + "px";
+    document.getElementById("spectra_panel").style.left = (rect.left + (rect.right - rect.left) * 0.005).toString() + "px";
     if (redraw) draw_spectrum();
 }
 
@@ -196,6 +203,7 @@ function load_spectrum(spectrum_id){
         ii += 1;
     }
     
+    spectrum_loaded = true;
     
     annotation();
     draw_spectrum();
@@ -208,6 +216,7 @@ function draw_spectrum(){
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.font="10px Arial";
     
+    if (!spectrum_loaded) return;
     
     // Add x-axis tics, values and grid
     var max_tic = peaks[peaks.length - 1].mass;

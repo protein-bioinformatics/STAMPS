@@ -32,14 +32,26 @@ exit()
 from pymysql import connect, cursors
 from cgi import FieldStorage
 from json import dumps
-import sys
-import os
+import sqlite3
+#import sys
+#import os
 
+
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+'''
+pathway = "1"
+species = "mouse"
+'''
 
 form = FieldStorage()
-request = "qsdbdata" #form.getvalue('request')
 pathway = form.getvalue('pathway')
 species = form.getvalue('species')
+
 
 try:
     species = species.replace(":", "', '")
@@ -49,35 +61,45 @@ except:
 print("Content-Type: text/html")
 print()
 
-if request == "qsdbdata":
 
-    response = []
-    conn = connect(host='localhost', port=3306, user='qsdb_user', passwd='qsdb_password', db='qsdb')
-    my_cur = conn.cursor(cursors.DictCursor)
-    sql_query = "(select n.id, p.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = %i)" % int(pathway)
-    sql_query += "union "
-    sql_query += "(select n.id, m.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = %i)" % int(pathway)
-    sql_query += "union "
-    sql_query += "(select id, '', pathway_id, type, pathway_ref, x, y from nodes n where type = 'protein' and pathway_id = %i);" % int(pathway)
-    my_cur.execute(sql_query)
+response = []
+conn = connect(host='localhost', port=3306, user='qsdb_user', passwd='qsdb_password', db='qsdb')
+my_cur = conn.cursor(cursors.DictCursor)
+sql_query = "(select n.id, p.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = %s)"
+sql_query += "union "
+sql_query += "(select n.id, m.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = %s)"
+sql_query += "union "
+sql_query += "(select id, '', pathway_id, type, pathway_ref, x, y from nodes n where type = 'protein' and pathway_id = %s);"
+my_cur.execute(sql_query, (pathway, pathway, pathway))
 
-
-
-    my_cur_prot = conn.cursor(cursors.DictCursor)
-    my_cur_pep = conn.cursor(cursors.DictCursor)                
-    for row in my_cur:
-        response.append(row)
-        if (response[-1]["type"] == "protein"):
-            response[-1]["proteins"] = []
-            sql_protein = "SELECT p.id, p.name, p.definition, p.species, p.kegg_link, p.accession FROM proteins p INNER JOIN nodeproteincorrelations np ON p.id = np.protein_id WHERE np.node_id = %i and species in ('%s')" % (int(response[-1]["id"]), species)
-            my_cur_prot.execute(sql_protein)
-            for row_protein in my_cur_prot:
-                response[-1]["proteins"].append(row_protein)
-                response[-1]["proteins"][-1]["n_peptides"] = 1
-                sql_peptide = "SELECT count(pep.id) cnt FROM proteins pr INNER JOIN peptides pep ON pr.id = pep.protein_id WHERE pr.id = %i" % row_protein["id"]
-                my_cur_pep.execute(sql_peptide)
-                for row_pep in my_cur_pep:
-                    response[-1]["proteins"][-1]["n_peptides"] = row_pep["cnt"]
+lite_db = sqlite3.connect('/home/dominik.kopczynski/Data/blib/TestLibraryPS.blib')
+lite_db.row_factory = dict_factory
+lite_cur = lite_db.cursor()
 
 
-    print(dumps(response))
+my_cur_prot = conn.cursor(cursors.DictCursor)
+my_cur_pep = conn.cursor(cursors.DictCursor)                
+for row in my_cur:
+    response.append(row)
+    r_last = response[-1]
+    if (r_last["type"] == "protein"):
+        r_last["proteins"] = []
+        r_last_prot = r_last["proteins"]
+        sql_protein = "SELECT p.id, p.name, p.definition, p.species, p.kegg_link, p.accession FROM proteins p INNER JOIN nodeproteincorrelations np ON p.id = np.protein_id WHERE np.node_id = %s and species in (%s)"
+        my_cur_prot.execute(sql_protein, (response[-1]["id"], species))
+        for row_protein in my_cur_prot:
+            r_last_prot.append(row_protein)
+            r_last_prot[-1]["peptides"] = []
+            r_last_pep = r_last_prot[-1]["peptides"]
+            sql_peptide = "SELECT peptide_seq FROM proteins pr INNER JOIN peptides pep ON pr.id = pep.protein_id WHERE pr.id = %s"
+            my_cur_pep.execute(sql_peptide, row_protein["id"])
+            for row_pep in my_cur_pep:
+                r_last_pep.append({})
+                r_last_pep[-1]['peptide_seq'] = row_pep['peptide_seq']
+                r_last_pep[-1]['mass_id'] = []
+                sql_mass_id = "SELECT id, precursorMZ FROM RefSpectra WHERE peptideSeq = :peptide_seq"
+                lite_cur.execute(sql_mass_id, {"peptide_seq": row_pep['peptide_seq']})
+                for row_mass_id in lite_cur:
+                    r_last_pep[-1]['mass_id'].append(row_mass_id)
+
+print(dumps(response))

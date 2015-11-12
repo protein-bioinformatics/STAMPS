@@ -1,13 +1,22 @@
-function protein(data){
+function Peptide(data){
+    this.peptide_seq = data['peptide_seq'];
+    this.spectra_data = data['mass_id'];
+}
+
+function Protein(data){
     this.id = data['id'];
     this.name = data['name'];
     this.definition = data['definition'];
     this.kegg_link = data['kegg_link'];
     this.accession = data['accession'];
+    this.peptides = new Array();
     this.marked = false;
-    this.num_peptides = data['n_peptides'];
     this.check_len = 15;
     this.line_height = 20;
+    
+    for (var i = 0; i < data['peptides'].length; ++i){
+        this.peptides.push(new Peptide(data['peptides'][i]));
+    }
     
     this.draw = function(ctx, x, y, line_number, num, factor) {
         var check_side = this.check_len * factor;
@@ -16,7 +25,7 @@ function protein(data){
         ctx.lineWidth = 1;
         
         
-        if (!this.num_peptides){
+        if (!this.peptides.length){
             ctx.fillStyle = disabled_fill_color;
             ctx.fillRect(x + check_side_h, y - check_side_h, check_side, check_side);
             ctx.fillStyle = disabled_text_color;
@@ -52,13 +61,13 @@ function protein(data){
     };
     
     this.toggle_marked = function(){
-        if (this.num_peptides){
+        if (this.peptides.length){
             this.marked = !this.marked;
         }
     }
     
     this.mark = function(m){
-        if (this.num_peptides){
+        if (this.peptides.length){
             this.marked = m;
         }
     }
@@ -135,7 +144,7 @@ function node(data, c){
         this.lines = data['proteins'].length;
         this.slide = (data['proteins'].length > max_protein_line_number);
         for (var j = 0; j < data['proteins'].length; ++j){
-            this.proteins.push(new protein(data['proteins'][j]));
+            this.proteins.push(new Protein(data['proteins'][j]));
             if (name.length) name += ", ";
             if (this.width < document.getElementById("refarea").getContext("2d").measureText(this.proteins[j].name).width){
                 this.width = document.getElementById("refarea").getContext("2d").measureText(this.proteins[j].name).width;
@@ -250,7 +259,7 @@ function node(data, c){
         var cnt_avbl = 0;
         for (var i = 0; i < this.proteins.length; ++i){
             cnt += this.proteins[i].marked;
-            cnt_avbl += this.proteins[i].num_peptides > 0;
+            cnt_avbl += this.proteins[i].peptides.length > 0;
         }
         var marking = (cnt != cnt_avbl);
         for (var i = 0; i < this.proteins.length; ++i){

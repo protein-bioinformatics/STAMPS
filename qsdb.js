@@ -853,6 +853,44 @@ function check_spectra (){
     document.getElementById("check_spectra").style.display = "inline";
     document.getElementById("renderarea").style.filter = "blur(5px)";
     resize_ms_view(false);
+    
+    // triangle right: 9656
+    // triangle down: 9662
+    
+    var inner_html = "<table width=\"100px\" spacing=\"2\">";
+    var spectra_content = [];
+    for (var i = 0; i < data.length; ++i){
+        for (var j = 0; j < data[i].proteins.length; ++j){
+            if (data[i].proteins[j].marked){
+                spectra_content.push([data[i].proteins[j].name, i, j]);
+            }
+        }
+    }
+    spectra_content.sort();
+    var peps = 0;
+    var specs = 0;
+    for (var i = 0; i < spectra_content.length; ++i){
+        var p = spectra_content[i][1];
+        var pp = spectra_content[i][2];
+        inner_html += "<tr><td onclick=\"document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: default;\">&nbsp;" + String.fromCharCode(9656) + "&nbsp;" + spectra_content[i][0] + "</td></tr>";
+        
+        inner_html += "<tr><td><table id='peptide_" + peps + "' style=\"display: none;\">";
+        for (var j = 0; j < data[p].proteins[pp].peptides.length; ++j){
+            inner_html += "<tr><td onclick=\"document.getElementById('spectrum_" + specs + "').style.display = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: default;\">&nbsp;&nbsp;&nbsp;&nbsp;" + String.fromCharCode(9656) + "&nbsp;" + data[p].proteins[pp].peptides[j].peptide_seq + "</td></tr>";
+            
+            inner_html += "<tr><td><table id='spectrum_" + specs + "' style=\"display: none;\">";
+            for (var k = 0; k < data[p].proteins[pp].peptides[j].spectra_data.length; ++k){
+                inner_html += "<tr><td style=\"cursor: default;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + data[p].proteins[pp].peptides[j].spectra_data[k]['precursorMZ'] + "</td></tr>";
+            }
+            inner_html += "</table></td></tr>";
+            ++specs;
+        }
+        inner_html += "</table></td></tr>";
+        ++peps;
+    }
+    inner_html += "</table>";
+    
+    document.getElementById("spectra_panel").innerHTML = inner_html;
 }
 
 
