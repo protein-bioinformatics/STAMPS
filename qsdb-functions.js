@@ -11,39 +11,40 @@ function protein(data){
     
     this.draw = function(ctx, x, y, line_number, num, factor) {
         var check_side = this.check_len * factor;
+        var check_side_h = check_side * 0.5;
         y -= Math.floor((line_number - 1) * this.line_height * factor * 0.5) - num * this.line_height * factor;
         ctx.lineWidth = 1;
         
         
         if (!this.num_peptides){
             ctx.fillStyle = disabled_fill_color;
-            ctx.fillRect(x + check_side / 2, y - check_side / 2, check_side, check_side);
+            ctx.fillRect(x + check_side_h, y - check_side_h, check_side, check_side);
             ctx.fillStyle = disabled_text_color;
             ctx.fillText(this.name, x + check_side * 2, y);
         }
         else {
             ctx.fillStyle = "white";
-            ctx.fillRect(x + check_side / 2, y - check_side / 2, check_side, check_side);
+            ctx.fillRect(x + check_side_h, y - check_side_h, check_side, check_side);
             ctx.fillStyle = text_color;
             ctx.fillText(this.name, x + check_side * 2, y);
         }
         // write text
         // draw checkbox
         ctx.strokeStyle = "black";
-        ctx.strokeRect(x + check_side / 2, y - check_side / 2, check_side, check_side);
+        ctx.strokeRect(x + check_side_h, y - check_side_h, check_side, check_side);
         
         // draw hooklet
-        var x_check = x + check_side / 2;
-        var y_check = y - check_side / 2;
+        var x_check = x + check_side_h;
+        var y_check = y - check_side_h;
         if (this.marked){
-            x_check += check_side / 2;
-            y_check += check_side / 2;
-            var x1 = x_check - check_side * 3 / 8;
+            x_check += check_side_h;
+            y_check += check_side_h;
+            var x1 = x_check - check_side * 0.375;
             var y1 = y_check;
-            var x2 = x_check - check_side / 8;
-            var y2 = y_check + check_side * 3 / 8;
-            var x3 = x_check + check_side * 3 / 8;
-            var y3 = y_check - check_side * 3 / 8;
+            var x2 = x_check - check_side * 0.125;
+            var y2 = y_check + check_side * 0.375;
+            var x3 = x_check + check_side * 0.375;
+            var y3 = y_check - check_side * 0.375;
             ctx.lineWidth = factor * 3;
             ctx.draw_line(x1, y1, x2, y2);
             ctx.draw_line(x2, y2, x3, y3);
@@ -65,10 +66,11 @@ function protein(data){
     this.is_over = function(x, y, x_m, y_m, line_number, num, factor){
         y -= Math.floor((line_number - 1) * this.line_height * factor * 0.5) - num * this.line_height * factor;
         var check_side = this.check_len * factor;
-        var l = x + check_side / 2;
+        var check_side_h = check_side * 0.5;
+        var l = x + check_side_h;
         var r = x + check_side * 1.5;
-        var t = y - check_side / 2;
-        var b = y + check_side / 2;
+        var t = y - check_side_h;
+        var b = y + check_side_h;
         if (l <= x_m && x_m <= r && t <= y_m && y_m <= b) return true;
         return false;
     }
@@ -379,18 +381,19 @@ function sq(x){
 
 
 function penelty(dir, d_x, d_y){
+    var weight = 2;
     switch (dir){
         case "l":
-            return (d_x < 0) * 2;
+            return (d_x < 0) * weight;
             break;
         case "r":
-            return (d_x > 0) * 2;
+            return (d_x > 0) * weight;
             break;
         case "t":
-            return (d_y < 0) * 2;
+            return (d_y < 0) * weight;
             break;
         case "b":
-            return (d_y > 0) * 2;
+            return (d_y > 0) * weight;
             break;
     }
     return 0;
@@ -604,12 +607,12 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
                 if (corner_path.length > 2 && corner_path[corner_path.length - 2]){
                     switch (matrix[curr_y][curr_x].direction){
                         case "l": case "r":
-                            y = (this.point_list[this.point_list.length - 1].y + this.point_list[this.point_list.length - 4].y) / 2;
+                            y = (this.point_list[this.point_list.length - 1].y + this.point_list[this.point_list.length - 4].y) * 0.5;
                             this.point_list[this.point_list.length - 2].y = y;
                             this.point_list[this.point_list.length - 3].y = y;
                             break;
                         case "t": case "b":
-                            x = (this.point_list[this.point_list.length - 1].x + this.point_list[this.point_list.length - 4].x) / 2;
+                            x = (this.point_list[this.point_list.length - 1].x + this.point_list[this.point_list.length - 4].x) * 0.5;
                             this.point_list[this.point_list.length - 2].x = x;
                             this.point_list[this.point_list.length - 3].x = x;
                             break;

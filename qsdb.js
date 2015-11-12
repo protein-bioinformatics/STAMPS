@@ -15,7 +15,6 @@ event_key_down = false;
 node_move_x = 0;
 node_move_y = 0;
 edges = new Array();
-stage = 0;
 
 scaling = 1.4;
 zoom = 5;
@@ -265,7 +264,7 @@ function load_data(reload){
     
     var species = new Array();
     if(document.getElementById("species_mouse").checked) species.push("mouse");
-    if(document.getElementById("species_human").checked) species.push("human");
+    //if(document.getElementById("species_human").checked) species.push("human");
     var species_string = species.join(":");
     
     // get data information
@@ -645,11 +644,13 @@ function mouse_dblclick_listener(e){
 function mouse_click_listener(e){
     if (!moved){
         if (highlight != -1){
+            /*
             if (data[highlight].type == 'pathway'){
                 current_pathway = data[highlight].pathway_ref;
                 reset_view();
                 load_data(false);
             }
+            */
         }
         if (highlight >= 0 && data[highlight].type == 'protein'){
             var c = document.getElementById("renderarea");
