@@ -1,6 +1,15 @@
+function Spectrum(data){
+    this.id = data['id'];
+    this.mass = data['mass']
+    this.charge = data['charge'];
+}
+
 function Peptide(data){
     this.peptide_seq = data['peptide_seq'];
-    this.spectra_data = data['mass_id'];
+    this.spectra = new Array();
+    for (var i = 0; i < data['spectra'].length; ++i){
+        this.spectra.push(new Spectrum(data['spectra'][i]));
+    }
 }
 
 function Protein(data){

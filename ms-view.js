@@ -165,6 +165,8 @@ function resize_ms_view(redraw){
 function load_spectrum(spectrum_id){    
     var c = document.getElementById("msarea");
     var ctx = c.getContext("2d");
+    ms_zoom = 0;
+    peaks = new Array();
     
     var spectrum_data = 0;
     var xmlhttp = new XMLHttpRequest();
@@ -184,6 +186,7 @@ function load_spectrum(spectrum_id){
     right_border = ctx.canvas.width * 0.95;
     top_border = ctx.canvas.height * 0.05;
     bottom_border = ctx.canvas.height * 0.95;
+    
     
     peaks.push(new peak(0, 0, 0));
     origin_x = left_border;

@@ -47,7 +47,6 @@ def dict_factory(cursor, row):
 pathway = "1"
 species = "mouse"
 '''
-
 form = FieldStorage()
 pathway = form.getvalue('pathway')
 species = form.getvalue('species')
@@ -78,7 +77,8 @@ lite_cur = lite_db.cursor()
 
 
 my_cur_prot = conn.cursor(cursors.DictCursor)
-my_cur_pep = conn.cursor(cursors.DictCursor)                
+my_cur_pep = conn.cursor(cursors.DictCursor)
+my_cur_charge = conn.cursor(cursors.DictCursor)                
 for row in my_cur:
     response.append(row)
     r_last = response[-1]
@@ -91,15 +91,21 @@ for row in my_cur:
             r_last_prot.append(row_protein)
             r_last_prot[-1]["peptides"] = []
             r_last_pep = r_last_prot[-1]["peptides"]
-            sql_peptide = "SELECT peptide_seq FROM proteins pr INNER JOIN peptides pep ON pr.id = pep.protein_id WHERE pr.id = %s"
+            sql_peptide = "SELECT pep.id, pep.peptide_seq FROM proteins pr INNER JOIN peptides pep ON pr.id = pep.protein_id WHERE pr.id = %s"
             my_cur_pep.execute(sql_peptide, row_protein["id"])
             for row_pep in my_cur_pep:
                 r_last_pep.append({})
                 r_last_pep[-1]['peptide_seq'] = row_pep['peptide_seq']
-                r_last_pep[-1]['mass_id'] = []
-                sql_mass_id = "SELECT id, precursorMZ FROM RefSpectra WHERE peptideSeq = :peptide_seq"
-                lite_cur.execute(sql_mass_id, {"peptide_seq": row_pep['peptide_seq']})
-                for row_mass_id in lite_cur:
-                    r_last_pep[-1]['mass_id'].append(row_mass_id)
-
+                r_last_pep[-1]['spectra'] = []
+                
+                sql_charge = "SELECT charge FROM peptide_spectra ps INNER JOIN peptides p ON ps.peptide_id = p.id WHERE p.id = %s"
+                my_cur_charge.execute(sql_charge, row_pep['id'])
+                for row_spec in my_cur_charge:
+                    sql_mass_id = "SELECT id, precursorMZ FROM RefSpectra WHERE peptideSeq = :peptide_seq and peptideModSeq = :peptide_seq and precursorCharge = :charge"
+                    lite_cur.execute(sql_mass_id, {"peptide_seq": row_pep['peptide_seq'], "charge": row_spec['charge']})
+                    for row_mass_id in lite_cur:
+                        r_last_pep[-1]['spectra'].append({})
+                        r_last_pep[-1]['spectra'][-1]['id'] = row_mass_id['id']
+                        r_last_pep[-1]['spectra'][-1]['charge'] = row_spec['charge']
+                        r_last_pep[-1]['spectra'][-1]['mass'] = row_mass_id['precursorMZ']
 print(dumps(response))
