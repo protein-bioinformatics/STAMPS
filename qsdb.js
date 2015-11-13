@@ -907,39 +907,82 @@ function check_spectra(){
 
 function search(){
     var search_text = document.getElementById("search_field").value;
-    
-    if (search_text.length > 2){
+    var len_p = search_text.length;
+    if (len_p > 2){
         var masks = new Array(128).fill(0);
         
         var lower = search_text.toLowerCase();
         var upper = search_text.toUpperCase();
         
         
-        
         var bit = 1;
-        for (var i = 0; i < search_text.length; ++i){
+        for (var i = 0; i < len_p; ++i){
             masks[lower.charCodeAt(i)] |= bit;
             masks[upper.charCodeAt(i)] |= bit;
+            if (lower.charAt(i) == '-') masks[' '.charCodeAt(0)] |= bit;
+            if (lower.charAt(i) == ' ') masks['-'.charCodeAt(0)] |= bit;
+            if (lower.charAt(i) == '.') masks[','.charCodeAt(0)] |= bit;
+            if (lower.charAt(i) == ',') masks['.'.charCodeAt(0)] |= bit;
             bit <<= 1;
         }
         
-                   
-        
-        var accept = 1 << (search_text.length - 1);
+        var accept = 1 << (len_p - 1);
         var results = [];
         for (var i = 0; i < data.length; ++i){
-            var r = data[i].search(search_text.length, accept, masks);
+            var r = data[i].search(len_p, accept, masks);
             if (r.length){
                 results = results.concat(r);
             }
         }
         
-        
-        for (var i = 0; i < results.length; ++i){
-            console.log(results[i]);
+        if (results.length){
+            document.getElementById("search_results").style.display = "inline";
+            var rect = document.getElementById('search_field').getBoundingClientRect();
+            document.getElementById("search_results").style.top = (rect.top + document.getElementById('search_field').offsetHeight).toString() + "px";
+            document.getElementById("search_results").style.left = (rect.left).toString() + "px";
+            var inner_html = "<table>";
+            for (var i = 0; i < results.length; ++i){
+                var t1 = "<font color=\"" + disabled_text_color + "\">" + results[i][0].substring(0, results[i][1]) + "</font>";
+                var t2 = results[i][0].substring(results[i][1], results[i][1] + len_p);
+                var t3 = "<font color=\"" + disabled_text_color + "\">" + results[i][0].substring(results[i][1] + len_p, results[i][0].length) + "</font>";
+                inner_html += "<tr><td class=\"single_search_result\" onclick=\"highlight_protein(" + results[i][2] + ", " + results[i][3] + ");\">" + t1 + t2 + t3 + "</td></tr>";
+            }
+            inner_html += "<table>";
+            document.getElementById("search_results").innerHTML = inner_html;
+        }
+        else {
+            document.getElementById("search_results").style.display = "none";
         }
     }
+    else {
+        document.getElementById("search_results").style.display = "none";
+    }
 }
+
+
+
+function highlight_protein(node_id, prot_id){
+    document.getElementById("search_results").style.display = "none";
+    var x = data[data_ref[node_id]].x;
+    var y = data[data_ref[node_id]].y;
+    
+    var width  = window.innerWidth * 0.5;
+    var height = window.innerHeight * 0.5;
+    
+    
+    for (var i = 0; i < data.length; ++i){
+        data[i].x += width - x;
+        data[i].y += height - y;
+    }
+    for (var i = 0; i < edges.length; ++i){
+        for (var j = 0; j < edges[i].point_list.length; ++j){
+            edges[i].point_list[j].x += width - x;
+            edges[i].point_list[j].y += height - y;
+        }
+    }
+    draw();
+}
+
 
 
 

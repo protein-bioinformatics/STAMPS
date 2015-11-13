@@ -11,11 +11,11 @@ function Peptide(data){
         this.spectra.push(new Spectrum(data['spectra'][i]));
     }
     
-    this.search = function(len_p, accept, masks, prot_id){
+    this.search = function(len_p, accept, masks, node_id, prot_id){
         var results = [];
         for (var i = 0, states = 0; i < this.peptide_seq.length; ++i){ // search peptide_seq
             states = ((states << 1) | 1) & masks[this.peptide_seq.charCodeAt(i)];
-            if (accept & states) results.push([this.peptide_seq, i - len_p + 1, prot_id]);
+            if (accept & states) results.push([this.peptide_seq, i - len_p + 1, node_id, prot_id]);
         }
         return results;
     }
@@ -40,22 +40,22 @@ function Protein(data){
     
     //this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
     
-    this.search = function(len_p, accept, masks, prot_id){
+    this.search = function(len_p, accept, masks, node_id){
         var results = [];
         for (var i = 0, states = 0; i < this.name.length; ++i){ // search name
             states = ((states << 1) | 1) & masks[this.name.charCodeAt(i)];
-            if (accept & states) results.push([this.name, i - len_p + 1, prot_id]);
+            if (accept & states) results.push([this.name, i - len_p + 1, node_id, this.id]);
         }
         for (var i = 0, states = 0; i < this.accession.length; ++i){ // search accession
             states = ((states << 1) | 1) & masks[this.accession.charCodeAt(i)];
-            if (accept & states) results.push([this.accession, i - len_p + 1, prot_id]);
+            if (accept & states) results.push([this.accession, i - len_p + 1, node_id, this.id]);
         }
         for (var i = 0, states = 0; i < this.definition.length; ++i){ // search definition
             states = ((states << 1) | 1) & masks[this.definition.charCodeAt(i)];
-            if (accept & states) results.push([this.definition, i - len_p + 1, prot_id]);
+            if (accept & states) results.push([this.definition, i - len_p + 1, node_id, this.id]);
         }
         for (var i = 0; i < this.peptides.length; ++i){
-            var r = this.peptides[i].search(len_p, accept, masks, prot_id);
+            var r = this.peptides[i].search(len_p, accept, masks, node_id, this.id);
             if (r.length) results = results.concat(r);
         }
         return results;
@@ -229,7 +229,7 @@ function node(data, c){
         else {
             for (var i = 0, states = 0; i < this.name.length; ++i){ // search name
                 states = ((states << 1) | 1) & masks[this.name.charCodeAt(i)];
-                if (accept & states) results.push([this.name, i - len_p + 1, this.id]);
+                if (accept & states) results.push([this.name, i - len_p + 1, this.id, -1]);
             }
         }
         return results;

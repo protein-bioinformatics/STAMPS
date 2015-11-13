@@ -85,6 +85,24 @@ div.check_spectra_background {
     opacity: 0.4;
 }
 
+div.search_results {
+    display: none;
+    background: white;
+    position: fixed;
+    border:1px solid #d3d3d3;
+}
+
+td.single_search_result {
+    border-bottom: 1px dashed #d3d3d3;
+    background: white;
+    padding: 5px;
+}
+td.single_search_result:hover {
+    border-bottom: 1px dashed #d3d3d3;
+    background: #eeeeee;
+    cursor: pointer;
+}
+
 
 div.navigation {
     top: 30px;
