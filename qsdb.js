@@ -222,7 +222,7 @@ function init(){
     
     
     document.getElementById("check_spectra_background").addEventListener("click", hide_check_spectra, false);
-    window.addEventListener('resize', function() {resize_ms_view(true);}, false);
+    window.addEventListener('resize', resize_ms_view, false);
     document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
     document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
     
@@ -855,11 +855,13 @@ function charge_plus(x){
 }
 
 
-function check_spectra (){
+function check_spectra(){
     document.getElementById("check_spectra_background").style.display = "inline";
     document.getElementById("check_spectra").style.display = "inline";
     document.getElementById("renderarea").style.filter = "blur(5px)";
-    resize_ms_view(false);
+    resize_ms_view();
+    
+    document.getElementById("error_value").value = (document.getElementById("radio_ppm").checked ? tolerance_relative : tolerance_absolute);
     
     // triangle right: 9656
     // triangle down: 9662

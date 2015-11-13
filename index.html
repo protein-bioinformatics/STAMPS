@@ -36,8 +36,13 @@ Select species:<br>
 <div id="downloadbackground" class="downloadbackground"></div>
 
 <div id="check_spectra" class="check_spectra">
-  <div id="spectra_panel" class="spectra_panel"></div>
   <canvas id="msarea" class="msarea"></canvas>
+  <fieldset id="spectra_options" class="spectra_options" style="position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;">
+    <input type="radio" onchange="change_match_error();" id="radio_ppm" name="select_error" value="ppm" style="border: 0px; margin: 0px; top: 0px; padding: 0px;" checked><label for="radio_ppm">Relative</label>
+    <input type="radio" onchange="change_match_error();" id="radio_da" name="select_error" value="Da" style="border: 0px; margin: 0px; top: 0px; padding: 0px;"><label for="radio_da">Absolute</label>
+    <input type="text" onchange="change_match_error_value();" id="error_value" value="-" size=1 style="text-align: right;"><label id="unit">ppm</label>
+  </fieldset>
+  <div id="spectra_panel" class="spectra_panel"></div>
 </div>
 <div id="check_spectra_background" class="check_spectra_background"></div>
 

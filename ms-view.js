@@ -12,7 +12,8 @@ x_tics = [200, 100, 50, 25, 10, 5, 2, 1];
 y_tics = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5];
 peaks = new Array();
 acids = new Array();
-tolerance = 10;
+tolerance_relative = 10;
+tolerance_absolute = 0.055;
 H =       1.007276;
 C12 =    12.000000;
 O =      15.994914;
@@ -24,8 +25,9 @@ charge = 0;
 precursor_mass = 0;
 grid_color = "#DDDDDD";
 label_color = "black";
-peak_color = "#888888";
-peak_highlight_color = "#D40000";
+var ion_type = {no_type: 0, a_type: 1, b_type: 2, c_type: 3, x_type: 4, y_type: 5, z_type: 6};
+var ion_type_colors = ["#888888", "#888888", "#0056af", "#888888", "#888888", "#D40000", "#888888"];
+
 
 
 
@@ -76,7 +78,7 @@ function binary_search(key){
         mn = Math.abs(peaks[mid + 1].mass - key);
         mn_index = mid + 1;
     }
-    return new Array(mn / key * 1000000, mn_index);
+    return new Array(document.getElementById("radio_ppm").checked ? mn / key * 1000000 : mn, mn_index);
 }
 
 
@@ -85,6 +87,7 @@ function peak(ms, xx, int){
     this.mass = ms;
     this.x = xx;
     this.intensity = int;
+    this.type = ion_type.no_type;
     this.annotation = "";
     this.highlight = false;
 }
@@ -106,19 +109,29 @@ function subscripting(x){
 
 function annotation(){
     // annotate y-ions
+    var tolerance = (document.getElementById("radio_ppm").checked ? tolerance_relative : tolerance_absolute);
     var rev_peptide = peptide.split("").reverse().join("");
     var mass = H3O;
+    
+    for (var i = 0; i < peaks.length; ++i){
+        peaks[i].type = ion_type.no_type;
+        peaks[i].annotation = "";
+        peaks[i].highlight = false;
+    }
+    
     for (var i = 0; i < rev_peptide.length; ++i){
         mass += acids[rev_peptide[i]];
         var diff_mass = binary_search(mass);
         if (diff_mass[0] < tolerance){
             peaks[diff_mass[1]].highlight = true;
+            peaks[diff_mass[1]].ion_type = ion_type.y_type;
             peaks[diff_mass[1]].annotation = "y" + subscripting(i + 1);
         }
         else {
             var diff_mass = binary_search(mass / 2);
             if (diff_mass[0] < tolerance){
                 peaks[diff_mass[1]].highlight = true;
+                peaks[diff_mass[1]].ion_type = ion_type.y_type;
                 peaks[diff_mass[1]].annotation = "y" + subscripting(i + 1);
             }
         }
@@ -132,12 +145,14 @@ function annotation(){
         var diff_mass = binary_search(mass);
         if (diff_mass[0] < tolerance){
             peaks[diff_mass[1]].highlight = true;
+            peaks[diff_mass[1]].ion_type = ion_type.b_type;
             peaks[diff_mass[1]].annotation = "b" + subscripting(i + 1);
         }
         else {
             var diff_mass = binary_search(mass / 2);
             if (diff_mass[0] < tolerance){
                 peaks[diff_mass[1]].highlight = true;
+                peaks[diff_mass[1]].ion_type = ion_type.b_type;
                 peaks[diff_mass[1]].annotation = "b" + subscripting(i + 1);
             }
         }
@@ -145,7 +160,7 @@ function annotation(){
 }
 
 
-function resize_ms_view(redraw){
+function resize_ms_view(){
     document.getElementById("msarea").width = document.getElementById('check_spectra').offsetWidth * 0.695;
     document.getElementById("msarea").height = document.getElementById('check_spectra').offsetHeight * 0.9;
     document.getElementById("spectra_panel").style.width = (document.getElementById('check_spectra').offsetWidth * 0.29).toString() + "px";
@@ -157,7 +172,59 @@ function resize_ms_view(redraw){
     document.getElementById("msarea").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
     document.getElementById("spectra_panel").style.top = (rect.top + (rect.bottom - rect.top) * 0.05).toString() + "px";
     document.getElementById("spectra_panel").style.left = (rect.left + (rect.right - rect.left) * 0.005).toString() + "px";
-    if (redraw) draw_spectrum();
+    document.getElementById("spectra_options").style.top = (rect.top + (rect.bottom - rect.top) * 0.05).toString() + "px";
+    document.getElementById("spectra_options").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
+    
+    var scl = (document.getElementById("msarea").width * 0.95 - document.getElementById("msarea").width * 0.05) / (right_border - left_border);
+    origin_x *= scl;
+    last_x *= scl;
+    for (var i = 0; i < peaks.length; ++i) {
+        peaks[i].x *= scl;
+    }
+    left_border = document.getElementById("msarea").width * 0.05;
+    right_border = document.getElementById("msarea").width * 0.95;
+    top_border = document.getElementById("msarea").height * 0.05;
+    bottom_border = document.getElementById("msarea").height * 0.95;
+    
+    if (spectrum_loaded) draw_spectrum();
+}
+
+
+
+function change_match_error_value(){
+    // check if new value is a number
+    var n = document.getElementById("error_value").value;
+    if (!isNaN(parseFloat(n)) && isFinite(n)){
+        if (document.getElementById("radio_ppm").checked){
+            tolerance_relative = parseFloat(n);
+        }
+        else {
+            tolerance_absolute = parseFloat(n);
+        }
+        if (spectrum_loaded){
+            annotation();
+            draw_spectrum();
+        }
+    }
+    else {
+        document.getElementById("error_value").value = (document.getElementById("radio_ppm").checked ? tolerance_relative : tolerance_absolute);
+    }
+}
+
+
+function change_match_error(){
+    if (document.getElementById("radio_ppm").checked){
+        document.getElementById("unit").innerHTML = document.getElementById("radio_ppm").value;
+        document.getElementById("error_value").value = tolerance_relative;
+    }
+    else {
+        document.getElementById("unit").innerHTML = document.getElementById("radio_da").value;
+        document.getElementById("error_value").value = tolerance_absolute;
+    }
+    if (spectrum_loaded){
+        annotation();
+        draw_spectrum();
+    }
 }
 
 
@@ -300,7 +367,7 @@ function draw_spectrum(){
     var zero_y = bottom_border;
     ctx.lineWidth = 1;
     ctx.setLineDash([0]);
-    ctx.strokeStyle = peak_color;
+    ctx.strokeStyle = ion_type_colors[ion_type.no_type];
     var y_factor = ctx.canvas.height * 0.85 / max_intensity;
     var y_offset = ctx.canvas.height * 0.02;
     var annotated = new Array();
@@ -320,9 +387,9 @@ function draw_spectrum(){
     }
     
     ctx.lineWidth = 2;
-    ctx.strokeStyle = peak_highlight_color;
     ctx.font="16px Arial";
     for (var i = 0; i < annotated.length; ++i) {
+        ctx.strokeStyle = ion_type_colors[peaks[annotated[i]].ion_type];
         ctx.beginPath();
         ctx.moveTo(peaks[annotated[i]].x, zero_y);
         ctx.lineTo(peaks[annotated[i]].x, zero_y - peaks[annotated[i]].intensity * y_factor);    
@@ -356,7 +423,7 @@ function draw_spectrum(){
     ctx.translate(0, 0);
     ctx.rotate(-Math.PI/2);
     ctx.textAlign = "center";
-    ctx.fillText("intensity", left_border, top_border);
+    //ctx.fillText("intensity", left_border - 100, top_border);
     ctx.restore();
 }
 
