@@ -22,10 +22,15 @@ function Protein(data){
     this.marked = false;
     this.check_len = 15;
     this.line_height = 20;
+    this.containing_spectra = 0;
     
     for (var i = 0; i < data['peptides'].length; ++i){
         this.peptides.push(new Peptide(data['peptides'][i]));
+        this.containing_spectra += this.peptides[i].spectra.length;
     }
+    
+    this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
+    
     
     this.draw = function(ctx, x, y, line_number, num, factor) {
         var check_side = this.check_len * factor;
@@ -34,7 +39,7 @@ function Protein(data){
         ctx.lineWidth = 1;
         
         
-        if (!this.peptides.length){
+        if (!this.peptides.length || !this.containing_spectra){
             ctx.fillStyle = disabled_fill_color;
             ctx.fillRect(x + check_side_h, y - check_side_h, check_side, check_side);
             ctx.fillStyle = disabled_text_color;
@@ -70,13 +75,13 @@ function Protein(data){
     };
     
     this.toggle_marked = function(){
-        if (this.peptides.length){
+        if (this.peptides.length && this.containing_spectra){
             this.marked = !this.marked;
         }
     }
     
     this.mark = function(m){
-        if (this.peptides.length){
+        if (this.peptides.length && this.containing_spectra){
             this.marked = m;
         }
     }
@@ -268,7 +273,7 @@ function node(data, c){
         var cnt_avbl = 0;
         for (var i = 0; i < this.proteins.length; ++i){
             cnt += this.proteins[i].marked;
-            cnt_avbl += this.proteins[i].peptides.length > 0;
+            cnt_avbl += (this.proteins[i].peptides.length > 0) && (this.proteins[i].containing_spectra > 0);
         }
         var marking = (cnt != cnt_avbl);
         for (var i = 0; i < this.proteins.length; ++i){

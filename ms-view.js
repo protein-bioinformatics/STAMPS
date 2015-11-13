@@ -13,7 +13,7 @@ y_tics = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5];
 peaks = new Array();
 acids = new Array();
 tolerance_relative = 10;
-tolerance_absolute = 0.055;
+tolerance_absolute = 0.02;
 H =       1.007276;
 C12 =    12.000000;
 O =      15.994914;
@@ -25,8 +25,8 @@ charge = 0;
 precursor_mass = 0;
 grid_color = "#DDDDDD";
 label_color = "black";
-var ion_type = {no_type: 0, a_type: 1, b_type: 2, c_type: 3, x_type: 4, y_type: 5, z_type: 6};
-var ion_type_colors = ["#888888", "#888888", "#0056af", "#888888", "#888888", "#D40000", "#888888"];
+var ion_type = {no_type: 0, a_type: 1, b_type: 2, c_type: 3, x_type: 4, y_type: 5, z_type: 6, precursor: 7};
+var ion_type_colors = ["#888888", "#888888", "#0056af", "#888888", "#888888", "#D40000", "#888888", "#c89200"];
 
 
 
@@ -124,14 +124,14 @@ function annotation(){
         var diff_mass = binary_search(mass);
         if (diff_mass[0] < tolerance){
             peaks[diff_mass[1]].highlight = true;
-            peaks[diff_mass[1]].ion_type = ion_type.y_type;
+            peaks[diff_mass[1]].type = ion_type.y_type;
             peaks[diff_mass[1]].annotation = "y" + subscripting(i + 1);
         }
         else {
             var diff_mass = binary_search(mass / 2);
             if (diff_mass[0] < tolerance){
                 peaks[diff_mass[1]].highlight = true;
-                peaks[diff_mass[1]].ion_type = ion_type.y_type;
+                peaks[diff_mass[1]].type = ion_type.y_type;
                 peaks[diff_mass[1]].annotation = "y" + subscripting(i + 1);
             }
         }
@@ -145,17 +145,25 @@ function annotation(){
         var diff_mass = binary_search(mass);
         if (diff_mass[0] < tolerance){
             peaks[diff_mass[1]].highlight = true;
-            peaks[diff_mass[1]].ion_type = ion_type.b_type;
+            peaks[diff_mass[1]].type = ion_type.b_type;
             peaks[diff_mass[1]].annotation = "b" + subscripting(i + 1);
         }
         else {
             var diff_mass = binary_search(mass / 2);
             if (diff_mass[0] < tolerance){
                 peaks[diff_mass[1]].highlight = true;
-                peaks[diff_mass[1]].ion_type = ion_type.b_type;
+                peaks[diff_mass[1]].type = ion_type.b_type;
                 peaks[diff_mass[1]].annotation = "b" + subscripting(i + 1);
             }
         }
+    }
+    
+    // annotate precursor
+    var diff_mass = binary_search(precursor_mass);
+    if (diff_mass[0] < tolerance){
+        peaks[diff_mass[1]].highlight = true;
+        peaks[diff_mass[1]].type = ion_type.precursor;
+        peaks[diff_mass[1]].annotation = "pre" + charge_plus(charge);
     }
 }
 
@@ -373,7 +381,7 @@ function draw_spectrum(){
     var annotated = new Array();
     for (var i = 0; i < peaks.length; ++i) {
         if (left_border <= peaks[i].x && peaks[i].x <= right_border){
-            if (!peaks[i].highlight){
+            if (peaks[i].type == ion_type.no_type){
                 ctx.beginPath();
                 ctx.moveTo(peaks[i].x, zero_y);
                 ctx.lineTo(peaks[i].x, zero_y - peaks[i].intensity * y_factor);    
@@ -386,16 +394,20 @@ function draw_spectrum(){
         }
     }
     
+    // draw annotated peaks
     ctx.lineWidth = 2;
     ctx.font="16px Arial";
     for (var i = 0; i < annotated.length; ++i) {
-        ctx.strokeStyle = ion_type_colors[peaks[annotated[i]].ion_type];
+        ctx.strokeStyle = ion_type_colors[peaks[annotated[i]].type];
         ctx.beginPath();
         ctx.moveTo(peaks[annotated[i]].x, zero_y);
         ctx.lineTo(peaks[annotated[i]].x, zero_y - peaks[annotated[i]].intensity * y_factor);    
         ctx.closePath();
         ctx.stroke();
-        
+    }
+    
+    // draw annotations
+    for (var i = 0; i < annotated.length; ++i) {
         ctx.textAlign = "center";
         ctx.textBaseline = 'bottom';
         ctx.fillText(peaks[annotated[i]].annotation, peaks[annotated[i]].x, zero_y - peaks[annotated[i]].intensity * y_factor - y_offset);
