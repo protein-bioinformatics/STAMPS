@@ -6,9 +6,18 @@ function Spectrum(data){
 
 function Peptide(data){
     this.peptide_seq = data['peptide_seq'];
-    this.spectra = new Array();
+    this.spectra = [];
     for (var i = 0; i < data['spectra'].length; ++i){
         this.spectra.push(new Spectrum(data['spectra'][i]));
+    }
+    
+    this.search = function(len_p, accept, masks, prot_id){
+        var results = [];
+        for (var i = 0, states = 0; i < this.peptide_seq.length; ++i){ // search peptide_seq
+            states = ((states << 1) | 1) & masks[this.peptide_seq.charCodeAt(i)];
+            if (accept & states) results.push([this.peptide_seq, i - len_p + 1, prot_id]);
+        }
+        return results;
     }
 }
 
@@ -18,7 +27,7 @@ function Protein(data){
     this.definition = data['definition'];
     this.kegg_link = data['kegg_link'];
     this.accession = data['accession'];
-    this.peptides = new Array();
+    this.peptides = [];
     this.marked = false;
     this.check_len = 15;
     this.line_height = 20;
@@ -29,7 +38,28 @@ function Protein(data){
         this.containing_spectra += this.peptides[i].spectra.length;
     }
     
-    this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
+    //this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
+    
+    this.search = function(len_p, accept, masks, prot_id){
+        var results = [];
+        for (var i = 0, states = 0; i < this.name.length; ++i){ // search name
+            states = ((states << 1) | 1) & masks[this.name.charCodeAt(i)];
+            if (accept & states) results.push([this.name, i - len_p + 1, prot_id]);
+        }
+        for (var i = 0, states = 0; i < this.accession.length; ++i){ // search accession
+            states = ((states << 1) | 1) & masks[this.accession.charCodeAt(i)];
+            if (accept & states) results.push([this.accession, i - len_p + 1, prot_id]);
+        }
+        for (var i = 0, states = 0; i < this.definition.length; ++i){ // search definition
+            states = ((states << 1) | 1) & masks[this.definition.charCodeAt(i)];
+            if (accept & states) results.push([this.definition, i - len_p + 1, prot_id]);
+        }
+        for (var i = 0; i < this.peptides.length; ++i){
+            var r = this.peptides[i].search(len_p, accept, masks, prot_id);
+            if (r.length) results = results.concat(r);
+        }
+        return results;
+    }
     
     
     this.draw = function(ctx, x, y, line_number, num, factor) {
@@ -143,7 +173,7 @@ function node(data, c){
     this.name = data['name'];
     this.highlight = false;
     this.pathway_ref = data['pathway_ref'];
-    this.proteins = new Array();
+    this.proteins = [];
     this.lines = -1;
     this.width = -1;
     this.height = -1;
@@ -184,6 +214,27 @@ function node(data, c){
     
     //this.width = Math.ceil(this.width / 25) * 25;
     //this.height = Math.ceil(this.height / 25) * 25;
+    
+    
+    this.search = function(len_p, accept, masks){
+        var results = [];
+        if (this.type == "protein"){
+            for (var i = 0; i < this.proteins.length; ++i){
+                var r = this.proteins[i].search(len_p, accept, masks, this.id);
+                if (r.length){
+                    results = results.concat(r);
+                }
+            }
+        }
+        else {
+            for (var i = 0, states = 0; i < this.name.length; ++i){ // search name
+                states = ((states << 1) | 1) & masks[this.name.charCodeAt(i)];
+                if (accept & states) results.push([this.name, i - len_p + 1, this.id]);
+            }
+        }
+        return results;
+    }
+    
     
     this.draw = function(font_size, factor, radius) {
         switch (this.type){
@@ -294,7 +345,7 @@ function queue_node(_cell){
 
 
 function priority_queue(){
-    this.field = new Array();
+    this.field = [];
     
     this.is_empty = function(){
         return this.field.length == 0;
@@ -496,9 +547,9 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
         var W = 8 + Math.ceil(Math.abs(xd_s +  - xd_e) / grid);
         var H = 8 + Math.ceil(Math.abs(yd_s - yd_e) / grid);
         var open_list = new priority_queue();
-        var matrix = new Array();
+        var matrix = [];
         for (var h = 0; h < H; ++h){
-            matrix.push(new Array());
+            matrix.push([]);
             for (var w = 0; w < W; ++w){
                 matrix[h].push(new cell(w, h));
             }

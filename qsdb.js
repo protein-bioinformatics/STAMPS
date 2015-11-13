@@ -1,5 +1,5 @@
 moved = false;
-HTTP_GET_VARS = new Array();
+HTTP_GET_VARS = [];
 current_pathway = 1;
 mouse_down = false;
 highlight = -1;
@@ -7,14 +7,14 @@ offsetX = 0;
 offsetY = 0;
 null_x = 0;
 null_y = 0;
-data = new Array();
-data_ref = new Array();
+data = [];
+data_ref = [];
 nodes = null;
 event_moving_node = false;
 event_key_down = false;
 node_move_x = 0;
 node_move_y = 0;
-edges = new Array();
+edges = [];
 
 scaling = 1.4;
 zoom = 5;
@@ -901,6 +901,44 @@ function check_spectra(){
     inner_html += "</table>";
     
     document.getElementById("spectra_panel").innerHTML = inner_html;
+}
+
+
+
+function search(){
+    var search_text = document.getElementById("search_field").value;
+    
+    if (search_text.length > 2){
+        var masks = new Array(128).fill(0);
+        
+        var lower = search_text.toLowerCase();
+        var upper = search_text.toUpperCase();
+        
+        
+        
+        var bit = 1;
+        for (var i = 0; i < search_text.length; ++i){
+            masks[lower.charCodeAt(i)] |= bit;
+            masks[upper.charCodeAt(i)] |= bit;
+            bit <<= 1;
+        }
+        
+                   
+        
+        var accept = 1 << (search_text.length - 1);
+        var results = [];
+        for (var i = 0; i < data.length; ++i){
+            var r = data[i].search(search_text.length, accept, masks);
+            if (r.length){
+                results = results.concat(r);
+            }
+        }
+        
+        
+        for (var i = 0; i < results.length; ++i){
+            console.log(results[i]);
+        }
+    }
 }
 
 

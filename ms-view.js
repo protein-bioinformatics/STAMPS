@@ -10,8 +10,8 @@ bottom_border = 0;
 spectrum_loaded = false;
 x_tics = [200, 100, 50, 25, 10, 5, 2, 1];
 y_tics = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5];
-peaks = new Array();
-acids = new Array();
+peaks = [];
+acids = [];
 tolerance_relative = 10;
 tolerance_absolute = 0.02;
 H =       1.007276;
@@ -78,7 +78,7 @@ function binary_search(key){
         mn = Math.abs(peaks[mid + 1].mass - key);
         mn_index = mid + 1;
     }
-    return new Array(document.getElementById("radio_ppm").checked ? mn / key * 1000000 : mn, mn_index);
+    return [document.getElementById("radio_ppm").checked ? mn / key * 1000000 : mn, mn_index];
 }
 
 
@@ -241,7 +241,7 @@ function load_spectrum(spectrum_id){
     var c = document.getElementById("msarea");
     var ctx = c.getContext("2d");
     ms_zoom = 0;
-    peaks = new Array();
+    peaks = [];
     
     var spectrum_data = 0;
     var xmlhttp = new XMLHttpRequest();
@@ -378,7 +378,7 @@ function draw_spectrum(){
     ctx.strokeStyle = ion_type_colors[ion_type.no_type];
     var y_factor = ctx.canvas.height * 0.85 / max_intensity;
     var y_offset = ctx.canvas.height * 0.02;
-    var annotated = new Array();
+    var annotated = [];
     for (var i = 0; i < peaks.length; ++i) {
         if (left_border <= peaks[i].x && peaks[i].x <= right_border){
             if (peaks[i].type == ion_type.no_type){
