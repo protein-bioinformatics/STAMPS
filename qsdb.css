@@ -116,6 +116,11 @@ td.single_search_result:hover {
 }
 
 
+input.search_field {
+    height: 25px;
+}
+
+
 div.navigation {
     top: 0px;
     left: 0px;

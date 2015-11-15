@@ -1,3 +1,15 @@
+function search_pattern(text, len_p, accept, masks, id1, id2){
+    var results = [];
+    text = text.replace(String.fromCharCode(13) + String.fromCharCode(10), " ");
+    text = text.replace(String.fromCharCode(10), " ");
+    text = text.replace(String.fromCharCode(13), " ");
+    for (var i = 0, states = 0; i < text.length; ++i){ // search name
+        states = ((states << 1) | 1) & masks[text.charCodeAt(i)];
+        if (accept & states) results.push([text, i - len_p + 1, id1, id2]);
+    }
+    return results;
+}
+
 function Spectrum(data){
     this.id = data['id'];
     this.mass = data['mass']
@@ -12,11 +24,8 @@ function Peptide(data){
     }
     
     this.search = function(len_p, accept, masks, node_id, prot_id){
-        var results = [];
-        for (var i = 0, states = 0; i < this.peptide_seq.length; ++i){ // search peptide_seq
-            states = ((states << 1) | 1) & masks[this.peptide_seq.charCodeAt(i)];
-            if (accept & states) results.push([this.peptide_seq, i - len_p + 1, node_id, prot_id]);
-        }
+        var results = search_pattern(this.peptide_seq, len_p, accept, masks, node_id, prot_id);
+        
         return results;
     }
 }
@@ -42,18 +51,13 @@ function Protein(data){
     
     this.search = function(len_p, accept, masks, node_id){
         var results = [];
-        for (var i = 0, states = 0; i < this.name.length; ++i){ // search name
-            states = ((states << 1) | 1) & masks[this.name.charCodeAt(i)];
-            if (accept & states) results.push([this.name, i - len_p + 1, node_id, this.id]);
-        }
-        for (var i = 0, states = 0; i < this.accession.length; ++i){ // search accession
-            states = ((states << 1) | 1) & masks[this.accession.charCodeAt(i)];
-            if (accept & states) results.push([this.accession, i - len_p + 1, node_id, this.id]);
-        }
-        for (var i = 0, states = 0; i < this.definition.length; ++i){ // search definition
-            states = ((states << 1) | 1) & masks[this.definition.charCodeAt(i)];
-            if (accept & states) results.push([this.definition, i - len_p + 1, node_id, this.id]);
-        }
+        var r = search_pattern(this.name, len_p, accept, masks, node_id, this.id);
+        if (r.length) results = results.concat(r);
+        r = search_pattern(this.accession, len_p, accept, masks, node_id, this.id);
+        if (r.length) results = results.concat(r);
+        r = search_pattern(this.definition, len_p, accept, masks, node_id, this.id);
+        if (r.length) results = results.concat(r);
+        
         for (var i = 0; i < this.peptides.length; ++i){
             var r = this.peptides[i].search(len_p, accept, masks, node_id, this.id);
             if (r.length) results = results.concat(r);
@@ -221,16 +225,11 @@ function node(data, c){
         if (this.type == "protein"){
             for (var i = 0; i < this.proteins.length; ++i){
                 var r = this.proteins[i].search(len_p, accept, masks, this.id);
-                if (r.length){
-                    results = results.concat(r);
-                }
+                if (r.length) results = results.concat(r);
             }
         }
         else {
-            for (var i = 0, states = 0; i < this.name.length; ++i){ // search name
-                states = ((states << 1) | 1) & masks[this.name.charCodeAt(i)];
-                if (accept & states) results.push([this.name, i - len_p + 1, this.id, -1]);
-            }
+            results = search_pattern(this.name, len_p, accept, masks, this.id, -1);
         }
         return results;
     }

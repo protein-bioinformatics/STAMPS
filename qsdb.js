@@ -929,6 +929,8 @@ function start_search(){
             masks[upper.charCodeAt(i)] |= bit;
             if (lower.charAt(i) == '-') masks[' '.charCodeAt(0)] |= bit;
             if (lower.charAt(i) == ' ') masks['-'.charCodeAt(0)] |= bit;
+            //if (lower.charAt(i) == '\n') masks[' '.charCodeAt(0)] |= bit;
+            //if (lower.charAt(i) == ' ') masks['\n'.charCodeAt(0)] |= bit;
             if (lower.charAt(i) == '.') masks[','.charCodeAt(0)] |= bit;
             if (lower.charAt(i) == ',') masks['.'.charCodeAt(0)] |= bit;
             bit <<= 1;
