@@ -23,17 +23,32 @@
 <div id="management" class="management"></div>
 
 <div id="navigation" class="navigation">
+  <table>
+  <tr><td class="navigation_cell">
+    <input type="checkbox" id="species_mouse" name="species" value="mouse" checked disabled>Mouse
+  </td><td id="search_field_nav" class="navigation_cell">
+    Search: <input type="text" onkeyup="start_search();" onfocus="start_search();" id="search_field" size=16>
+  </td><td class="navigation_cell_click" onclick="check_spectra();">
+    Check Spectra
+  </td><td class="navigation_cell_click" onclick="download_assay();">
+    Download Assay
+  </td></tr>
+  </table>
+  <!--
   Select species:<br>
   <form action="" onchange="load_data(true);">
     <input type="checkbox" id="species_mouse" name="species" value="mouse" checked disabled>Mouse<br>
-    <!-- <input type="checkbox" id="species_human" name="species" value="human">Human -->
+    <input type="checkbox" id="species_human" name="species" value="human">Human
   </form><p>
   <button onclick="check_spectra();">Check Spectra</button><p>
   <button onclick="download_assay();">Download Assay</button><p>
   Search:<br>
-  <input type="text" onkeyup="search()" id="search_field" size=16>
+  <input type="text" onkeyup="start_search();" onfocus="start_search();" id="search_field" size=16> -->
 </div>
+
+
 <div id="search_results" class="search_results">aaa</div>
+<div id="search_background" class="search_background"></div>
 <div id="download" class="download"></div>
 <div id="downloadbackground" class="downloadbackground"></div>
 

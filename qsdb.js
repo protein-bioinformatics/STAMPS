@@ -219,6 +219,7 @@ function init(){
     document.addEventListener('keyup', key_up, false);
     document.getElementById("menubackground").addEventListener("click", hide_custom_menu, false);
     document.getElementById("managementbackground").addEventListener("click", hide_management, false);
+    document.getElementById("search_background").addEventListener("click", kill_search, false);
     
     
     document.getElementById("check_spectra_background").addEventListener("click", hide_check_spectra, false);
@@ -903,9 +904,16 @@ function check_spectra(){
     document.getElementById("spectra_panel").innerHTML = inner_html;
 }
 
+function show_search(){
+    var search_text = document.getElementById("search_field").value;
+    var len_p = search_text.length;
+    if (len_p > 2 && document.getElementById("search_results").innerHTML.length){
+        document.getElementById("search_results").style.display = "inline";
+        document.getElementById("search_background").style.display = "inline";
+    }
+}
 
-
-function search(){
+function start_search(){
     var search_text = document.getElementById("search_field").value;
     var len_p = search_text.length;
     if (len_p > 2){
@@ -937,8 +945,9 @@ function search(){
         
         if (results.length){
             document.getElementById("search_results").style.display = "inline";
-            var rect = document.getElementById('search_field').getBoundingClientRect();
-            document.getElementById("search_results").style.top = (rect.top + document.getElementById('search_field').offsetHeight).toString() + "px";
+            document.getElementById("search_background").style.display = "inline";
+            var rect = document.getElementById('search_field_nav').getBoundingClientRect();
+            document.getElementById("search_results").style.top = (rect.top + document.getElementById('search_field_nav').offsetHeight).toString() + "px";
             document.getElementById("search_results").style.left = (rect.left).toString() + "px";
             var inner_html = "<table>";
             for (var i = 0; i < results.length; ++i){
@@ -947,25 +956,24 @@ function search(){
                 var t3 = "<font color=\"" + disabled_text_color + "\">" + results[i][0].substring(results[i][1] + len_p, results[i][0].length) + "</font>";
                 inner_html += "<tr><td class=\"single_search_result\" onclick=\"highlight_protein(" + results[i][2] + ", " + results[i][3] + ");\">" + t1 + t2 + t3 + "</td></tr>";
             }
-            inner_html += "<table>";
+            inner_html += "</table>";
             document.getElementById("search_results").innerHTML = inner_html;
         }
         else {
-            document.getElementById("search_results").style.display = "none";
+            kill_search();
         }
     }
     else {
-        document.getElementById("search_results").style.display = "none";
+        kill_search();
     }
 }
 
 
 
 function highlight_protein(node_id, prot_id){
-    document.getElementById("search_results").style.display = "none";
+    kill_search();
     var x = data[data_ref[node_id]].x;
     var y = data[data_ref[node_id]].y;
-    
     var width  = window.innerWidth * 0.5;
     var height = window.innerHeight * 0.5;
     
@@ -983,6 +991,11 @@ function highlight_protein(node_id, prot_id){
     draw();
 }
 
+
+function kill_search(){
+    document.getElementById("search_results").style.display = "none";
+    document.getElementById("search_background").style.display = "none";
+}
 
 
 
