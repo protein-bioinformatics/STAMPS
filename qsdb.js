@@ -18,6 +18,7 @@ edges = [];
 
 scaling = 1.4;
 zoom = 5;
+max_zoom = 10;
 base_grid = 25;
 max_protein_line_number = 300;
 metabolite_radius = 10;
@@ -28,7 +29,7 @@ anchors = ['left', 'top', 'right', 'bottom'];
 administration = false;
 
 
-line_width = 4;
+line_width = 5;
 protein_stroke_color = "#f69301";
 protein_fill_color = "#fff6d5";
 metabolite_stroke_color = "f#69301";
@@ -601,7 +602,7 @@ function hide_custom_menu(event){
 
 function mouse_wheel_listener(e){
     var direction = (1 - 2 *(e.detail >= 0));
-    if (zoom + direction < 1 || 9 < zoom + direction)
+    if (zoom + direction < 1 || max_zoom < zoom + direction)
         return;
     zoom += direction;
     var scale = scaling;
@@ -832,6 +833,8 @@ function download_assay(){
             html = "<table width=100% height=100%><tr><td align=\"center\">";
             html += "<a href=\"" + download_link + "\">download assay</a>";
             html += "<p>&nbsp;<p>";
+	    html += "Extracted .fasta and .blib file can be easily imported in <a href=\"https://skyline.gs.washington.edu/labkey/project/home/software/Skyline/begin.view\" target=\"_blank\">Skyline</a>.";
+	    html += "<p>&nbsp;<p>";
             html += "<button onclick=\"hide_download();\">Close Window</button></td></tr></table>"
             document.getElementById("download").innerHTML = html;
         }
@@ -990,6 +993,7 @@ function highlight_protein(node_id, prot_id){
             edges[i].point_list[j].y += height - y;
         }
     }
+    //zoom = max_zoom;
     draw();
 }
 
