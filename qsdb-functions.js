@@ -47,7 +47,7 @@ function Protein(data){
         this.containing_spectra += this.peptides[i].spectra.length;
     }
     
-    this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
+    //this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
     
     this.search = function(len_p, accept, masks, node_id){
         var results = [];
@@ -181,6 +181,7 @@ function node(data, c){
     this.lines = -1;
     this.width = -1;
     this.height = -1;
+    this.orig_height = -1;
     this.c = c;
     this.ctx = c.getContext("2d");
     this.slide = false;
@@ -189,6 +190,7 @@ function node(data, c){
     if (this.type == "protein"){
         var name = "";
         this.height = 20 + 20 * Math.min(data['proteins'].length, max_protein_line_number);
+        this.orig_height = 20 + 20 * data['proteins'].length;
         this.lines = data['proteins'].length;
         this.slide = (data['proteins'].length > max_protein_line_number);
         for (var j = 0; j < data['proteins'].length; ++j){
@@ -235,6 +237,26 @@ function node(data, c){
     }
     
     
+    this.is_on_slide = function(mouse, factor){
+        if (!this.slide) return false;
+        var sl_x = this.x + this.width * 0.5 * 0.75;
+        var sl_y_s = this.y - this.height * 0.5 * 0.75;
+        var sl_y_e = this.y + this.height * 0.5 * 0.75;
+        var ctl_y = sl_y_s + this.slide_percent * (sl_y_e - sl_y_s);
+        
+        return Math.sqrt(sq(sl_x - mouse.x) + sq(ctl_y - mouse.y)) < slide_bullet * factor;
+    }
+    
+    
+    this.change_slider = function(y, factor){
+        var sl_y_s = this.y - this.height * 0.5 * 0.75;
+        var sl_y_e = this.y + this.height * 0.5 * 0.75;
+        this.slide_percent = (y - sl_y_s) / (sl_y_e - sl_y_s);
+        this.slide_percent = Math.max(this.slide_percent, 0);
+        this.slide_percent = Math.min(this.slide_percent, 1);
+    }
+    
+    
     this.draw = function(font_size, factor, radius) {
         switch (this.type){
             case "protein":
@@ -252,11 +274,36 @@ function node(data, c){
                 this.ctx.textBaseline = 'middle';
                 this.ctx.font = font_size.toString() + "px Arial";
                 this.ctx.fillStyle = "black";
+                var offset_y = 0;
+                if (this.lines > max_protein_line_number){
+                    offset_y = (this.orig_height * 0.5 - this.height * 0.5) - this.slide_percent * (this.orig_height - this.height);
+                }
                 for (var i = 0; i < this.proteins.length; ++i){
-                    this.proteins[i].draw(this.ctx, this.x - this.width / 2, this.y, this.proteins.length, i, factor);
+                    this.proteins[i].draw(this.ctx, this.x - this.width / 2, this.y + offset_y, this.proteins.length, i, factor);
                 }
                 if (this.lines > max_protein_line_number){
                     this.ctx.restore();
+                    
+                    var sl_x = this.x + this.width * 0.5 * 0.75;
+                    var sl_y_s = this.y - this.height * 0.5 * 0.75;
+                    var sl_y_e = this.y + this.height * 0.5 * 0.75;
+                    
+                    var ctl_y = sl_y_s + this.slide_percent * (sl_y_e - sl_y_s);
+                    
+                    this.ctx.fillStyle = slide_color;
+                    this.ctx.strokeStyle = slide_color;
+                    this.ctx.lineWidth = slide_width * factor;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(sl_x, sl_y_s);
+                    this.ctx.lineTo(sl_x, sl_y_e);
+                    this.ctx.stroke();
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(sl_x, ctl_y, slide_bullet * factor, 0, 2 * Math.PI);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                    this.ctx.stroke();
+                    
                 }
                 
                 // draw stroke
@@ -310,8 +357,12 @@ function node(data, c){
     };
     
     this.check_protein_marked = function(res, factor){
+        var offset_y = 0;
+        if (this.lines > max_protein_line_number){
+            offset_y = (this.orig_height * 0.5 - this.height * 0.5) - this.slide_percent * (this.orig_height - this.height);
+        }
         for (var i = 0; i < this.proteins.length; ++i){
-            if (this.proteins[i].is_over(this.x - this.width / 2, this.y, res.x, res.y, this.proteins.length, i, factor)){
+            if (this.proteins[i].is_over(this.x - this.width / 2, this.y + offset_y, res.x, res.y, this.proteins.length, i, factor)){
                 this.proteins[i].toggle_marked();
                 break;
             }

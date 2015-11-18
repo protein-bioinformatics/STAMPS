@@ -24,8 +24,10 @@
 
 <div id="navigation" class="navigation">
   <table>
-  <tr><td id="select_species_nav" class="navigation_cell_click" onclick="select_species();">
-    Select Species    
+  <tr><td id="select_pathway_nav" class="navigation_cell_click" onclick="select_pathway();">
+    Select Pathway
+  </td><td id="select_species_nav" class="navigation_cell_click" onclick="select_species();">
+    Select Species
   </td><td id="search_field_nav" class="navigation_cell">
     Search: <input type="text" onkeyup="start_search();" onfocus="start_search();" class="search_field" id="search_field" size=24>
   </td><td class="navigation_cell_click" onclick="check_spectra();">
@@ -47,6 +49,16 @@
   </table>
 </div>
 <div id="select_species_background" class="select_species_background"></div>
+
+<div id="select_pathway" class="select_pathway">
+  <table>
+    <tr><td class="select_pathway_cell" onclick="change_pathway(1);">
+      Glycolysis
+    </td></tr>
+  </table>
+</div>
+<div id="select_pathway_background" class="select_pathway_background"></div>
+<div id="animation_background" class="animation_background"></div>
 
 
 <div id="search_results" class="search_results"></div>

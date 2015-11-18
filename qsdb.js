@@ -20,16 +20,17 @@ scaling = 1.4;
 zoom = 5;
 max_zoom = 10;
 base_grid = 25;
-max_protein_line_number = 300;
+max_protein_line_number = 3;
 metabolite_radius = 10;
 arrow_length = 10;
 round_rect_radius = 10;
 text_size = 15;
 anchors = ['left', 'top', 'right', 'bottom'];
 administration = false;
+on_slide = false;
 
 
-line_width = 5;
+line_width = 4;
 protein_stroke_color = "#f69301";
 protein_fill_color = "#fff6d5";
 metabolite_stroke_color = "f#69301";
@@ -40,6 +41,9 @@ edge_color = "#f69301";
 disabled_text_color = "#bbbbbb";
 disabled_fill_color = "#cccccc";
 text_color = "black";
+slide_color = "#5792da";
+slide_width = 2;
+slide_bullet = 4;
 
 
 
@@ -222,6 +226,7 @@ function init(){
     document.getElementById("managementbackground").addEventListener("click", hide_management, false);
     document.getElementById("search_background").addEventListener("click", hide_search, false);
     document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
+    document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
     
     
     document.getElementById("check_spectra_background").addEventListener("click", hide_check_spectra, false);
@@ -615,6 +620,7 @@ function mouse_wheel_listener(e){
         data[i].width *= scale;
         //if (i == 49) console.log(data[i].width);
         data[i].height *= scale;
+        data[i].orig_height *= scale;
         data[i].x = res.x + scale * (data[i].x - res.x);
         data[i].y = res.y + scale * (data[i].y - res.y);
     }
@@ -649,9 +655,7 @@ function mouse_click_listener(e){
         if (highlight != -1){
             /*
             if (data[highlight].type == 'pathway'){
-                current_pathway = data[highlight].pathway_ref;
-                reset_view();
-                load_data(false);
+                change_pathway(data[highlight].pathway_ref);
             }
             */
         }
@@ -666,6 +670,14 @@ function mouse_click_listener(e){
 }
 
 
+function change_pathway(p){
+    hide_select_pathway();
+    current_pathway = p;
+    reset_view();
+    load_data();
+}
+
+
 function mouse_down_listener(e){
     if (e.which != 1){
         return;
@@ -674,6 +686,14 @@ function mouse_down_listener(e){
     if (highlight >= 0){
         node_move_x = data[highlight].x;
         node_move_y = data[highlight].y;
+    }
+    on_slide = -1;
+    var factor = Math.pow(scaling, zoom - 5);
+    for (var i = 0; i < data.length; ++i){
+        if (data[i].is_on_slide(res, factor)){
+            on_slide = i;
+            break;
+        }
     }
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, e);
@@ -686,46 +706,54 @@ function mouse_move_listener(e){
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     res = get_mouse_pos(c, e);
+    var factor = Math.pow(scaling, zoom - 5);
+    var grid = Math.floor(base_grid * factor * 1000);
+    
     
     // shift all nodes
     if (mouse_down){
-        var shift_x = res.x - offsetX;
-        var shift_y = res.y - offsetY;
-        if (shift_x != 0 || shift_y != 0){
-            moved = true;
+        if (on_slide > -1){
+            data[on_slide].change_slider(res.y, factor);
         }
+        else {
         
-        var factor = Math.pow(scaling, zoom - 5);
-        var grid = Math.floor(base_grid * factor * 1000);
-        
-        if (!event_key_down || highlight == -1){
-            for (var i = 0; i < data.length; ++i){
-                data[i].x += res.x - offsetX;
-                data[i].y += res.y - offsetY;
+            var shift_x = res.x - offsetX;
+            var shift_y = res.y - offsetY;
+            if (shift_x != 0 || shift_y != 0){
+                moved = true;
             }
-            for (var i = 0; i < edges.length; ++i){
-                for (var j = 0; j < edges[i].point_list.length; ++j){
-                    edges[i].point_list[j].x += res.x - offsetX;
-                    edges[i].point_list[j].y += res.y - offsetY;
+            
+            
+            if (!event_key_down || highlight == -1){
+                for (var i = 0; i < data.length; ++i){
+                    data[i].x += res.x - offsetX;
+                    data[i].y += res.y - offsetY;
                 }
+                for (var i = 0; i < edges.length; ++i){
+                    for (var j = 0; j < edges[i].point_list.length; ++j){
+                        edges[i].point_list[j].x += res.x - offsetX;
+                        edges[i].point_list[j].y += res.y - offsetY;
+                    }
+                }
+                null_x += res.x - offsetX;
+                null_y += res.y - offsetY;
             }
-            null_x += res.x - offsetX;
-            null_y += res.y - offsetY;
+            else if (administration) {
+                event_moving_node = true;
+                node_move_x += res.x - offsetX;
+                node_move_y += res.y - offsetY;
+                data[highlight].x = Math.floor(node_move_x - (1000 * (node_move_x - null_x) % grid) / 1000.);
+                data[highlight].y = Math.floor(node_move_y - (1000 * (node_move_y - null_y) % grid) / 1000.);
+                compute_edges();
+            }
         }
-        else if (administration) {
-            event_moving_node = true;
-            node_move_x += res.x - offsetX;
-            node_move_y += res.y - offsetY;
-            data[highlight].x = Math.floor(node_move_x - (1000 * (node_move_x - null_x) % grid) / 1000.);
-            data[highlight].y = Math.floor(node_move_y - (1000 * (node_move_y - null_y) % grid) / 1000.);
-            compute_edges();
-        }
-        
         
         draw();
         offsetX = res.x;
         offsetY = res.y;
     }
+    
+    
     
     // find active node
     var brk = false;
@@ -911,6 +939,16 @@ function check_spectra(){
     document.getElementById("spectra_panel").innerHTML = inner_html;
 }
 
+
+
+function hide_check_spectra (){
+    document.getElementById("check_spectra_background").style.display = "none";
+    document.getElementById("check_spectra").style.display = "none";
+    document.getElementById("renderarea").style.filter = "none";
+    document.getElementById("navigation").style.filter = "none";
+}
+
+
 function show_search(){
     var search_text = document.getElementById("search_field").value;
     var len_p = search_text.length;
@@ -936,8 +974,6 @@ function start_search(){
             masks[upper.charCodeAt(i)] |= bit;
             if (lower.charAt(i) == '-') masks[' '.charCodeAt(0)] |= bit;
             if (lower.charAt(i) == ' ') masks['-'.charCodeAt(0)] |= bit;
-            //if (lower.charAt(i) == '\n') masks[' '.charCodeAt(0)] |= bit;
-            //if (lower.charAt(i) == ' ') masks['\n'.charCodeAt(0)] |= bit;
             if (lower.charAt(i) == '.') masks[','.charCodeAt(0)] |= bit;
             if (lower.charAt(i) == ',') masks['.'.charCodeAt(0)] |= bit;
             bit <<= 1;
@@ -980,25 +1016,41 @@ function start_search(){
 
 
 function highlight_protein(node_id, prot_id){
+    
     hide_search();
+    var progress = 0;
+    var steps = 32;
+    var time = 3; // seconds
+    document.getElementById("animation_background").style.display = "inline";
     var x = data[data_ref[node_id]].x;
     var y = data[data_ref[node_id]].y;
     var width  = window.innerWidth * 0.5;
     var height = window.innerHeight * 0.5;
+    var res = 0;
     
-    
-    for (var i = 0; i < data.length; ++i){
-        data[i].x += width - x;
-        data[i].y += height - y;
-    }
-    for (var i = 0; i < edges.length; ++i){
-        for (var j = 0; j < edges[i].point_list.length; ++j){
-            edges[i].point_list[j].x += width - x;
-            edges[i].point_list[j].y += height - y;
+    var moving = setInterval (function () {
+        if (progress > time) { 
+            clearInterval (moving);
+            document.getElementById("animation_background").style.display = "none";
         }
-    }
-    //zoom = max_zoom;
-    draw();
+    
+        var split = Math.exp(-0.5 * sq((progress - 1.5) / 0.5)) / (Math.sqrt(2 * Math.PI) * 0.5) / steps;
+        res += split;
+        
+        for (var i = 0; i < data.length; ++i){
+            data[i].x += split * (width - x);
+            data[i].y += split * (height - y);
+        }
+        for (var i = 0; i < edges.length; ++i){
+            for (var j = 0; j < edges[i].point_list.length; ++j){
+                edges[i].point_list[j].x += split * (width - x);
+                edges[i].point_list[j].y += split * (height - y);
+            }
+        }
+        draw();
+        progress += 1 / steps;
+    }, steps);
+    
 }
 
 
@@ -1009,7 +1061,6 @@ function hide_search(){
 
 
 function select_species(){
-    console.log(document.getElementById("select_species").style.display);
     if (document.getElementById("select_species").style.display == "inline"){
         hide_select_species();
     }
@@ -1029,13 +1080,27 @@ function hide_select_species(){
 }
 
 
-
-function hide_check_spectra (){
-    document.getElementById("check_spectra_background").style.display = "none";
-    document.getElementById("check_spectra").style.display = "none";
-    document.getElementById("renderarea").style.filter = "none";
-    document.getElementById("navigation").style.filter = "none";
+function select_pathway(){
+    if (document.getElementById("select_pathway").style.display == "inline"){
+        hide_select_pathway();
+    }
+    else {
+        var rect = document.getElementById('select_pathway_nav').getBoundingClientRect();
+        document.getElementById("select_pathway").style.top = (rect.top + document.getElementById('select_pathway_nav').offsetHeight).toString() + "px";
+        document.getElementById("select_pathway").style.left = (rect.left).toString() + "px";
+        document.getElementById("select_pathway").style.display = "inline";
+        document.getElementById("select_pathway_background").style.display = "inline";
+    }
 }
+
+
+function hide_select_pathway(){
+    document.getElementById("select_pathway").style.display = "none";
+    document.getElementById("select_pathway_background").style.display = "none";
+}
+
+
+
 
 
 document.addEventListener('DOMContentLoaded', init, false);

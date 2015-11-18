@@ -10,6 +10,16 @@ body {
     z-index: 0;
 }
 
+div.animation_background {
+    margin: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    position: fixed;
+    display: none;
+}
+
 div.custommenu {
     top: 0px;
     display: none;
@@ -132,6 +142,7 @@ div.navigation {
 }
 
 td.navigation_cell {
+    color: #fff6d5;
     padding: 8px;
     margin: 5px;
     border-right: white;
@@ -140,6 +151,7 @@ td.navigation_cell {
 }
 
 td.navigation_cell_click {
+    color: #fff6d5;
     padding: 8px;
     margin: 5px;
     border-right: white;
@@ -292,5 +304,38 @@ div.select_species_background {
 td.select_species_cell {
     border-bottom: 1px dashed #d3d3d3;
     background: white;
+    padding: 10px;
+}
+
+
+div.select_pathway {
+    display: none;
+    background: white;
+    position: fixed;
+    border:1px solid #d3d3d3;
+    z-index: 80;
+}
+
+div.select_pathway_background {
+    top: 0px;
+    display: none;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: 70;
+}
+
+
+td.select_pathway_cell {
+    border-bottom: 1px dashed #d3d3d3;
+    background: white;
+    padding: 10px;
+}
+
+
+td.select_pathway_cell:hover {
+    border-bottom: 1px dashed #d3d3d3;
+    background: #eeeeee;
     padding: 10px;
 }
