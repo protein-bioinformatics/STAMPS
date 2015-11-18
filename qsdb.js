@@ -1025,17 +1025,36 @@ function highlight_protein(node_id, prot_id){
     var x = data[data_ref[node_id]].x;
     var y = data[data_ref[node_id]].y;
     var width  = window.innerWidth * 0.5;
-    var height = window.innerHeight * 0.5;
-    var res = 0;
+    var height = window.innerHeight * 0.5;    
     
-    var moving = setInterval (function () {
+    var moving = setInterval(function(){
         if (progress > time) { 
-            clearInterval (moving);
             document.getElementById("animation_background").style.display = "none";
+            
+            
+            var l = 0;
+            var ii = 0;
+            var highlighting = setInterval(function(){
+                if (ii >= 3){
+                    clearInterval (highlighting);
+                }
+                //console.log(l + " " + ii);
+            
+                data[data_ref[node_id]].highlight = (l < 25 && ii < 3);
+                draw();
+                l += 1;
+                if (l >= 35){
+                    l = 0;
+                    ii += 1;
+                }
+            }, 20);
+            
+            
+            clearInterval (moving);
+            
         }
     
         var split = Math.exp(-0.5 * sq((progress - 1.5) / 0.5)) / (Math.sqrt(2 * Math.PI) * 0.5) / steps;
-        res += split;
         
         for (var i = 0; i < data.length; ++i){
             data[i].x += split * (width - x);
@@ -1047,9 +1066,12 @@ function highlight_protein(node_id, prot_id){
                 edges[i].point_list[j].y += split * (height - y);
             }
         }
+        
         draw();
         progress += 1 / steps;
     }, steps);
+    
+    
     
 }
 
