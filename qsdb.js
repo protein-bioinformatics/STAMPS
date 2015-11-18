@@ -220,7 +220,8 @@ function init(){
     document.addEventListener('keyup', key_up, false);
     document.getElementById("menubackground").addEventListener("click", hide_custom_menu, false);
     document.getElementById("managementbackground").addEventListener("click", hide_management, false);
-    document.getElementById("search_background").addEventListener("click", kill_search, false);
+    document.getElementById("search_background").addEventListener("click", hide_search, false);
+    document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
     
     
     document.getElementById("check_spectra_background").addEventListener("click", hide_check_spectra, false);
@@ -820,6 +821,7 @@ function download_assay(){
     document.getElementById("downloadbackground").style.display = "inline";
     document.getElementById("download").style.display = "inline";
     document.getElementById("renderarea").style.filter = "blur(5px)";
+    document.getElementById("navigation").style.filter = "blur(5px)";
     
     html = "<table width=100% height=100%><tr><td align=\"center\">";
     html += "<img src=\"ajax-loader.gif\"></td></tr></table>"
@@ -849,6 +851,7 @@ function hide_download (){
     document.getElementById("downloadbackground").style.display = "none";
     document.getElementById("download").style.display = "none";
     document.getElementById("renderarea").style.filter = "none";
+    document.getElementById("navigation").style.filter = "none";
 }
 
 
@@ -863,6 +866,7 @@ function check_spectra(){
     document.getElementById("check_spectra_background").style.display = "inline";
     document.getElementById("check_spectra").style.display = "inline";
     document.getElementById("renderarea").style.filter = "blur(5px)";
+    document.getElementById("navigation").style.filter = "blur(5px)";
     resize_ms_view();
     
     document.getElementById("error_value").value = (document.getElementById("radio_ppm").checked ? tolerance_relative : tolerance_absolute);
@@ -965,18 +969,18 @@ function start_search(){
             document.getElementById("search_results").innerHTML = inner_html;
         }
         else {
-            kill_search();
+            hide_search();
         }
     }
     else {
-        kill_search();
+        hide_search();
     }
 }
 
 
 
 function highlight_protein(node_id, prot_id){
-    kill_search();
+    hide_search();
     var x = data[data_ref[node_id]].x;
     var y = data[data_ref[node_id]].y;
     var width  = window.innerWidth * 0.5;
@@ -998,9 +1002,30 @@ function highlight_protein(node_id, prot_id){
 }
 
 
-function kill_search(){
+function hide_search(){
     document.getElementById("search_results").style.display = "none";
     document.getElementById("search_background").style.display = "none";
+}
+
+
+function select_species(){
+    console.log(document.getElementById("select_species").style.display);
+    if (document.getElementById("select_species").style.display == "inline"){
+        hide_select_species();
+    }
+    else {
+        var rect = document.getElementById('select_species_nav').getBoundingClientRect();
+        document.getElementById("select_species").style.top = (rect.top + document.getElementById('select_species_nav').offsetHeight).toString() + "px";
+        document.getElementById("select_species").style.left = (rect.left).toString() + "px";
+        document.getElementById("select_species").style.display = "inline";
+        document.getElementById("select_species_background").style.display = "inline";
+    }
+}
+
+
+function hide_select_species(){
+    document.getElementById("select_species").style.display = "none";
+    document.getElementById("select_species_background").style.display = "none";
 }
 
 
@@ -1009,6 +1034,8 @@ function hide_check_spectra (){
     document.getElementById("check_spectra_background").style.display = "none";
     document.getElementById("check_spectra").style.display = "none";
     document.getElementById("renderarea").style.filter = "none";
+    document.getElementById("navigation").style.filter = "none";
 }
+
 
 document.addEventListener('DOMContentLoaded', init, false);

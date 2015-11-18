@@ -24,8 +24,8 @@
 
 <div id="navigation" class="navigation">
   <table>
-  <tr><td class="navigation_cell">
-    <input type="checkbox" id="species_mouse" name="species" value="mouse" checked disabled>Mouse
+  <tr><td id="select_species_nav" class="navigation_cell_click" onclick="select_species();">
+    Select Species    
   </td><td id="search_field_nav" class="navigation_cell">
     Search: <input type="text" onkeyup="start_search();" onfocus="start_search();" class="search_field" id="search_field" size=24>
   </td><td class="navigation_cell_click" onclick="check_spectra();">
@@ -34,20 +34,22 @@
     Download Assay
   </td></tr>
   </table>
-  <!--
-  Select species:<br>
-  <form action="" onchange="load_data(true);">
-    <input type="checkbox" id="species_mouse" name="species" value="mouse" checked disabled>Mouse<br>
-    <input type="checkbox" id="species_human" name="species" value="human">Human
-  </form><p>
-  <button onclick="check_spectra();">Check Spectra</button><p>
-  <button onclick="download_assay();">Download Assay</button><p>
-  Search:<br>
-  <input type="text" onkeyup="start_search();" onfocus="start_search();" id="search_field" size=16> -->
 </div>
 
+<div id="select_species" class="select_species">
+  <table>
+    <tr><td class="select_species_cell">
+      <input type="checkbox" id="species_mouse" name="species" value="mouse" checked disabled>Mouse
+    </td></tr>
+    <!-- <tr><td class="select_species_cell">
+      <input type="checkbox" id="species_human" name="species" value="human">Human
+    </td></tr> -->
+  </table>
+</div>
+<div id="select_species_background" class="select_species_background"></div>
 
-<div id="search_results" class="search_results">aaa</div>
+
+<div id="search_results" class="search_results"></div>
 <div id="search_background" class="search_background"></div>
 <div id="download" class="download"></div>
 <div id="downloadbackground" class="downloadbackground"></div>
