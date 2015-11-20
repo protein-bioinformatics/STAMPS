@@ -18,6 +18,7 @@ edges = [];
 
 scaling = 1.4;
 zoom = 5;
+start_zoom = 5;
 max_zoom = 10;
 base_grid = 25;
 max_protein_line_number = 3;
@@ -53,7 +54,7 @@ function debug(text){
 
 
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height) {
-    var radius = Math.floor(round_rect_radius * Math.pow(scaling, zoom - 5));
+    var radius = Math.floor(round_rect_radius * Math.pow(scaling, zoom - start_zoom));
     this.beginPath();
     this.moveTo(x + radius, y);
     this.lineTo(x + width - radius, y);
@@ -164,9 +165,11 @@ function draw(){
     
     var ctx = c.getContext("2d");
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    var factor = Math.pow(scaling, zoom - 5);
-    var font_size = Math.floor(text_size * factor);
-    var radius = Math.floor(metabolite_radius * factor);
+    var factor = Math.pow(scaling, zoom - start_zoom);
+    //console.log(scaling + " " + (zoom - start_zoom));
+    
+    var font_size = text_size * factor;
+    var radius = metabolite_radius * factor;
     
     //draw nodes
     for (var i = 0; i < data.length; ++i){
@@ -252,7 +255,7 @@ function init(){
 
 
 function reset_view(){
-    zoom = 5;
+    zoom = start_zoom;
     null_x = 0;
     null_y = 0;    
 }
@@ -261,12 +264,12 @@ function reset_view(){
 
 function load_data(reload){
     if (!reload){
-        zoom = 5;
+        zoom = start_zoom;
         null_x = 0;
         null_y = 0;
     }
     
-    var factor = Math.pow(scaling, zoom - 5);
+    var factor = Math.pow(scaling, zoom - start_zoom);
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     
@@ -321,12 +324,21 @@ function load_data(reload){
         null_x += ctx.canvas.width / 2 - x_mean;
         null_y += ctx.canvas.height / 2 - y_mean;
     
+        /*
         if ((x_max - x_min + 200) / ctx.canvas.width > (y_max - y_min + 200) / ctx.canvas.height){
             scaling = Math.pow((x_max - x_min + 200) / ctx.canvas.width, 0.25);
         }
         else {
             scaling = Math.pow((y_max - y_min + 200) / ctx.canvas.height, 0.25);
         }
+        */
+        if ((x_max - x_min + 200) / ctx.canvas.width > (y_max - y_min + 200) / ctx.canvas.height){
+            start_zoom = Math.ceil(Math.log((x_max - x_min + 200) / ctx.canvas.width) / Math.log(scaling)) + 1;
+        }
+        else {
+            start_zoom = Math.ceil(Math.log((y_max - y_min + 200) / ctx.canvas.height) / Math.log(scaling)) + 1;
+        }
+        zoom = start_zoom;        
     }
     
     
@@ -347,7 +359,7 @@ function load_data(reload){
 function compute_edges(){
     edges = new Array();
     var c = document.getElementById("renderarea");
-    var factor = Math.pow(scaling, zoom - 5);
+    var factor = Math.pow(scaling, zoom - start_zoom);
     var radius = Math.floor(metabolite_radius * factor);
     var connections = new Array();
     var nodes_anchors = new Array();
@@ -607,7 +619,7 @@ function hide_custom_menu(event){
 
 
 function mouse_wheel_listener(e){
-    var direction = (1 - 2 *(e.detail >= 0));
+    var direction = (1 - 2 * (e.detail >= 0));
     if (zoom + direction < 1 || max_zoom < zoom + direction)
         return;
     zoom += direction;
@@ -632,6 +644,7 @@ function mouse_wheel_listener(e){
     }
     null_x = res.x + scale * (null_x - res.x);
     null_y = res.y + scale * (null_y - res.y);
+    //console.log(zoom + " " + data[data_ref[105]].width);
     draw();
 }
 
@@ -641,7 +654,7 @@ function mouse_dblclick_listener(e){
         if (highlight >= 0 && data[highlight].type == 'protein'){
             var c = document.getElementById("renderarea");
             var res = get_mouse_pos(c, e);
-            data[highlight].dblcheck_protein_marked(res, Math.pow(scaling, zoom - 5));
+            data[highlight].dblcheck_protein_marked(res, Math.pow(scaling, zoom - start_zoom));
             draw();
         }
     }
@@ -662,7 +675,7 @@ function mouse_click_listener(e){
         if (highlight >= 0 && data[highlight].type == 'protein'){
             var c = document.getElementById("renderarea");
             var res = get_mouse_pos(c, e);
-            data[highlight].check_protein_marked(res, Math.pow(scaling, zoom - 5));
+            data[highlight].check_protein_marked(res, Math.pow(scaling, zoom - start_zoom));
             draw();
         }
     }
@@ -688,7 +701,7 @@ function mouse_down_listener(e){
         node_move_y = data[highlight].y;
     }
     on_slide = -1;
-    var factor = Math.pow(scaling, zoom - 5);
+    var factor = Math.pow(scaling, zoom - start_zoom);
     for (var i = 0; i < data.length; ++i){
         if (data[i].is_on_slide(res, factor)){
             on_slide = i;
@@ -706,7 +719,7 @@ function mouse_move_listener(e){
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     res = get_mouse_pos(c, e);
-    var factor = Math.pow(scaling, zoom - 5);
+    var factor = Math.pow(scaling, zoom - start_zoom);
     var grid = Math.floor(base_grid * factor * 1000);
     
     
@@ -758,7 +771,7 @@ function mouse_move_listener(e){
     // find active node
     var brk = false;
     var newhighlight = -1;
-    var radius = Math.floor(metabolite_radius * Math.pow(scaling, zoom - 5));
+    var radius = Math.floor(metabolite_radius * Math.pow(scaling, zoom - start_zoom));
     for (var i = 0; i < data.length && !brk; ++i){
         if (data[i].is_mouse_over(res.x, res.y, radius)){
             newhighlight = i;
@@ -809,7 +822,7 @@ function key_up(event){
 function update_node(event) {
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, event);
-    var factor = Math.pow(scaling, zoom - 5);
+    var factor = Math.pow(scaling, zoom - start_zoom);
     var x = Math.floor((data[highlight].x - null_x) / factor);
     var y = Math.floor((data[highlight].y - null_y) / factor);
     var xmlhttp = new XMLHttpRequest();
@@ -1015,63 +1028,71 @@ function start_search(){
 
 
 
+
+
 function highlight_protein(node_id, prot_id){
     
     hide_search();
     var progress = 0;
-    var steps = 32;
+    var steps = 24;
     var time = 3; // seconds
     document.getElementById("animation_background").style.display = "inline";
     var x = data[data_ref[node_id]].x;
     var y = data[data_ref[node_id]].y;
     var width  = window.innerWidth * 0.5;
-    var height = window.innerHeight * 0.5;    
+    var height = window.innerHeight * 0.5;
+    var scale = Math.pow(Math.pow(scaling, 7 - zoom), 1 / (time * steps));
+    var zoom_scale = Math.pow(7 / zoom, 1 / (time * steps));
     
     var moving = setInterval(function(){
-        if (progress > time) { 
-            document.getElementById("animation_background").style.display = "none";
-            
-            
-            var l = 0;
-            var ii = 0;
+        if (progress >= time) {
+            zoom = 7;
+            var l = 0, ii = 0;
             var highlighting = setInterval(function(){
                 if (ii >= 3){
                     clearInterval (highlighting);
                 }
-                //console.log(l + " " + ii);
-            
-                data[data_ref[node_id]].highlight = (l < 25 && ii < 3);
-                draw();
-                l += 1;
-                if (l >= 35){
-                    l = 0;
-                    ii += 1;
+                else {
+                    data[data_ref[node_id]].highlight = (l < 25);
+                    draw();
+                    l += 1;
+                    if (l >= 50){
+                        l = 0; ii += 1;
+                    }
                 }
             }, 20);
-            
-            
+            document.getElementById("animation_background").style.display = "none";
             clearInterval (moving);
+            zoom = 7;
+            draw();
             
         }
-    
-        var split = Math.exp(-0.5 * sq((progress - 1.5) / 0.5)) / (Math.sqrt(2 * Math.PI) * 0.5) / steps;
-        
-        for (var i = 0; i < data.length; ++i){
-            data[i].x += split * (width - x);
-            data[i].y += split * (height - y);
-        }
-        for (var i = 0; i < edges.length; ++i){
-            for (var j = 0; j < edges[i].point_list.length; ++j){
-                edges[i].point_list[j].x += split * (width - x);
-                edges[i].point_list[j].y += split * (height - y);
+        else {
+            var split = Math.exp(-0.5 * sq((progress - time * 0.5) / 0.5)) / (Math.sqrt(2 * Math.PI) * 0.5) / steps;
+            for (var i = 0; i < data.length; ++i){
+                data[i].width *= scale;
+                data[i].height *= scale;
+                data[i].orig_height *= scale;
+                data[i].x = width + scale * (data[i].x + split * (width - x) - width);
+                data[i].y = height + scale * (data[i].y + split * (height - y) - height);
             }
+            for (var i = 0; i < edges.length; ++i){
+                for (var j = 0; j < edges[i].point_list.length; ++j){
+                    edges[i].point_list[j].x = width + scale * (edges[i].point_list[j].x + split * (width - x) - width);
+                    edges[i].point_list[j].y = height + scale * (edges[i].point_list[j].y + split * (height - y) - height);
+                }
+            }
+            x = width + scale * (x - width);
+            y = height + scale * (y - height);
+            null_x = width + scale * (null_x - width);
+            null_y = height + scale * (null_y - height);
+            zoom *= zoom_scale;
+            
+            
+            draw();
+            progress += 1 / steps;
         }
-        
-        draw();
-        progress += 1 / steps;
     }, steps);
-    
-    
     
 }
 

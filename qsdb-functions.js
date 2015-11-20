@@ -47,7 +47,7 @@ function Protein(data){
         this.containing_spectra += this.peptides[i].spectra.length;
     }
     
-    //this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
+    this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
     
     this.search = function(len_p, accept, masks, node_id){
         var results = [];
@@ -72,18 +72,19 @@ function Protein(data){
         y -= Math.floor((line_number - 1) * this.line_height * factor * 0.5) - num * this.line_height * factor;
         ctx.lineWidth = 1;
         
-        
+        var def = this.definition;
+        if (def.length > 13) def = def.substring(0, 10) + "...";
         if (!this.peptides.length || !this.containing_spectra){
             ctx.fillStyle = disabled_fill_color;
             ctx.fillRect(x + check_side_h, y - check_side_h, check_side, check_side);
             ctx.fillStyle = disabled_text_color;
-            ctx.fillText(this.name, x + check_side * 2, y);
+            ctx.fillText(def, x + check_side * 2, y);
         }
         else {
             ctx.fillStyle = "white";
             ctx.fillRect(x + check_side_h, y - check_side_h, check_side, check_side);
             ctx.fillStyle = text_color;
-            ctx.fillText(this.name, x + check_side * 2, y);
+            ctx.fillText(def, x + check_side * 2, y);
         }
         // write text
         // draw checkbox
@@ -196,8 +197,10 @@ function node(data, c){
         for (var j = 0; j < data['proteins'].length; ++j){
             this.proteins.push(new Protein(data['proteins'][j]));
             if (name.length) name += ", ";
-            if (this.width < document.getElementById("refarea").getContext("2d").measureText(this.proteins[j].name).width){
-                this.width = document.getElementById("refarea").getContext("2d").measureText(this.proteins[j].name).width;
+            var def = this.proteins[j].definition;
+            if (def.length > 13) def = def.substring(0, 10) + "...";
+            if (this.width < document.getElementById("refarea").getContext("2d").measureText(def).width){
+                this.width = document.getElementById("refarea").getContext("2d").measureText(def).width;
             }
             name += data['proteins'][j]['name'];
         }
@@ -260,6 +263,7 @@ function node(data, c){
     this.draw = function(font_size, factor, radius) {
         switch (this.type){
             case "protein":
+                
                 // draw fill
                 this.ctx.fillStyle = protein_fill_color;
                 this.ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
