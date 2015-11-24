@@ -15,6 +15,8 @@ event_key_down = false;
 node_move_x = 0;
 node_move_y = 0;
 edges = [];
+show_infobox = false;
+infobox = 0;
 
 scaling = 1.4;
 zoom = 5;
@@ -26,9 +28,12 @@ metabolite_radius = 10;
 arrow_length = 10;
 round_rect_radius = 10;
 text_size = 15;
+check_len = 15;
+line_height = 20;
 anchors = ['left', 'top', 'right', 'bottom'];
 administration = false;
 on_slide = false;
+factor = Math.pow(scaling, zoom - start_zoom);
 
 
 line_width = 4;
@@ -72,7 +77,7 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height) {
 
 
 
-CanvasRenderingContext2D.prototype.arrow = function (p1_x, p1_y, p2_x, p2_y, factor, head) {
+CanvasRenderingContext2D.prototype.arrow = function (p1_x, p1_y, p2_x, p2_y, head) {
     if (typeof head == 'undefined') {
         head = true;
     }
@@ -173,13 +178,16 @@ function draw(){
     
     //draw nodes
     for (var i = 0; i < data.length; ++i){
-        data[i].draw(font_size, factor, radius);
+        data[i].draw(font_size, radius);
     }
     // draw edges
     for (var i = 0; i < edges.length; ++i){
-        edges[i].draw(factor);
+        edges[i].draw();
     }
     
+    if (show_infobox){
+        infobox.draw();
+    }
 }
 
 
@@ -203,6 +211,7 @@ function init(){
     document.body.scroll = "no";
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
+    infobox = new Infobox();
     
     
     c.onclick = function (event)
@@ -269,7 +278,6 @@ function load_data(reload){
         null_y = 0;
     }
     
-    var factor = Math.pow(scaling, zoom - start_zoom);
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     
@@ -338,7 +346,8 @@ function load_data(reload){
         else {
             start_zoom = Math.ceil(Math.log((y_max - y_min + 200) / ctx.canvas.height) / Math.log(scaling)) + 1;
         }
-        zoom = start_zoom;        
+        zoom = start_zoom;     
+        factor = Math.pow(scaling, zoom - start_zoom);
     }
     
     
@@ -359,7 +368,6 @@ function load_data(reload){
 function compute_edges(){
     edges = new Array();
     var c = document.getElementById("renderarea");
-    var factor = Math.pow(scaling, zoom - start_zoom);
     var radius = Math.floor(metabolite_radius * factor);
     var connections = new Array();
     var nodes_anchors = new Array();
@@ -623,6 +631,7 @@ function mouse_wheel_listener(e){
     if (zoom + direction < 1 || max_zoom < zoom + direction)
         return;
     zoom += direction;
+    factor = Math.pow(scaling, zoom - start_zoom);
     var scale = scaling;
     if (e.detail >= 0) scale = 1. / scale;
     
@@ -654,7 +663,7 @@ function mouse_dblclick_listener(e){
         if (highlight >= 0 && data[highlight].type == 'protein'){
             var c = document.getElementById("renderarea");
             var res = get_mouse_pos(c, e);
-            data[highlight].dblcheck_protein_marked(res, Math.pow(scaling, zoom - start_zoom));
+            data[highlight].dblclick_mark_proteins(res, Math.pow(scaling, zoom - start_zoom));
             draw();
         }
     }
@@ -675,8 +684,13 @@ function mouse_click_listener(e){
         if (highlight >= 0 && data[highlight].type == 'protein'){
             var c = document.getElementById("renderarea");
             var res = get_mouse_pos(c, e);
-            data[highlight].check_protein_marked(res, Math.pow(scaling, zoom - start_zoom));
+            data[highlight].mark_protein_checkbox(res);
             draw();
+            
+            var prot = data[highlight].check_mouse_over_protein_name(res);
+            if (prot > -1){
+                prepare_infobox(prot);
+            }            
         }
     }
     moved = false;
@@ -695,19 +709,20 @@ function mouse_down_listener(e){
     if (e.which != 1){
         return;
     }
+    on_slide = -1;
+    for (var i = 0; i < data.length; ++i){
+        if (data[i].is_on_slide(res)){
+            on_slide = i;
+            break;
+        }
+    }
+    
     mouse_down = true;
     if (highlight >= 0){
         node_move_x = data[highlight].x;
         node_move_y = data[highlight].y;
     }
-    on_slide = -1;
-    var factor = Math.pow(scaling, zoom - start_zoom);
-    for (var i = 0; i < data.length; ++i){
-        if (data[i].is_on_slide(res, factor)){
-            on_slide = i;
-            break;
-        }
-    }
+    
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, e);
     offsetX = res.x;
@@ -719,14 +734,13 @@ function mouse_move_listener(e){
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     res = get_mouse_pos(c, e);
-    var factor = Math.pow(scaling, zoom - start_zoom);
     var grid = Math.floor(base_grid * factor * 1000);
     
     
     // shift all nodes
     if (mouse_down){
         if (on_slide > -1){
-            data[on_slide].change_slider(res.y, factor);
+            data[on_slide].change_slider(res.y);
         }
         else {
         
@@ -822,7 +836,6 @@ function key_up(event){
 function update_node(event) {
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, event);
-    var factor = Math.pow(scaling, zoom - start_zoom);
     var x = Math.floor((data[highlight].x - null_x) / factor);
     var y = Math.floor((data[highlight].y - null_y) / factor);
     var xmlhttp = new XMLHttpRequest();
@@ -1064,6 +1077,7 @@ function highlight_protein(node_id, prot_id){
             document.getElementById("animation_background").style.display = "none";
             clearInterval (moving);
             zoom = 7;
+            factor = Math.pow(scaling, zoom - start_zoom);
             draw();
             
         }
@@ -1087,6 +1101,7 @@ function highlight_protein(node_id, prot_id){
             null_x = width + scale * (null_x - width);
             null_y = height + scale * (null_y - height);
             zoom *= zoom_scale;
+            factor = Math.pow(scaling, zoom - start_zoom);
             
             
             draw();
@@ -1142,7 +1157,68 @@ function hide_select_pathway(){
     document.getElementById("select_pathway_background").style.display = "none";
 }
 
+function close_navigation(nav){
+    switch (nav){
+        case 1:
+            hide_select_species();
+            break;
+        case 2:
+            hide_select_pathway();
+            break;
+        default:
+            hide_select_species();
+            hide_select_pathway();
+            break;
+    }
+}
 
+
+function prepare_infobox(prot){
+    var steps = 24;
+    var time = 1; // seconds
+    
+    var xy = data[highlight].get_protein_position(prot);
+    var x = xy[0];
+    var y = xy[1];
+    infobox.node_id = highlight;
+    infobox.protein_id = prot;
+    infobox.x = x;
+    infobox.y = y;
+    
+    var progress = 0;
+    var width  = window.innerWidth * 0.5;
+    var height = window.innerHeight * 0.5;
+    var std_dev = time / 6.;
+    var inv_steps = 1. / steps;
+    document.getElementById("animation_background").style.display = "inline";
+    
+    var moving = setInterval(function(){
+        if (progress >= time) {
+            clearInterval (moving);
+            document.getElementById("animation_background").style.display = "none";
+            show_infobox = true;
+            draw();
+        }
+        else {
+            var split = Math.exp(-0.5 * sq((progress - time * 0.5) / std_dev)) / (Math.sqrt(2 * Math.PI) * std_dev) * inv_steps;
+            for (var i = 0; i < data.length; ++i){
+                data[i].x += split * (width - x);
+                data[i].y += split * (height - y);
+            }
+            for (var i = 0; i < edges.length; ++i){
+                for (var j = 0; j < edges[i].point_list.length; ++j){
+                    edges[i].point_list[j].x += split * (width - x);
+                    edges[i].point_list[j].y += split * (height - y);
+                }
+            }
+            null_x += split * (width - x);
+            null_y += split * (height - y);
+            
+            draw();
+            progress += inv_steps;
+        }
+    }, steps);
+}
 
 
 

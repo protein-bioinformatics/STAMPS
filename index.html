@@ -24,15 +24,15 @@
 
 <div id="navigation" class="navigation">
   <table>
-  <tr><td id="select_pathway_nav" class="navigation_cell_click" onclick="select_pathway();">
+  <tr><td id="select_pathway_nav" class="navigation_cell_click" onclick="close_navigation(1); select_pathway();">
     Select Pathway
-  </td><td id="select_species_nav" class="navigation_cell_click" onclick="select_species();">
+  </td><td id="select_species_nav" class="navigation_cell_click" onclick="close_navigation(2); select_species();">
     Select Species
-  </td><td id="search_field_nav" class="navigation_cell">
-    Search: <input type="text" onkeyup="start_search();" onfocus="start_search();" class="search_field" id="search_field" size=24>
-  </td><td class="navigation_cell_click" onclick="check_spectra();">
+  </td><td id="search_field_nav" class="navigation_cell" title="Search for name, definition, UniProt accession number, EC number or peptide amino sequence.">
+    Search: <input type="text" onkeyup="start_search();" onfocus="close_navigation(0); start_search();" class="search_field" id="search_field" size=24>
+  </td><td class="navigation_cell_click" onclick="close_navigation(0); check_spectra();">
     Check Spectra
-  </td><td class="navigation_cell_click" onclick="download_assay();">
+  </td><td class="navigation_cell_click" onclick="close_navigation(0); download_assay();">
     Download Assay
   </td></tr>
   </table>

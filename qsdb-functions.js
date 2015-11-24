@@ -36,10 +36,9 @@ function Protein(data){
     this.definition = data['definition'];
     this.kegg_link = data['kegg_link'];
     this.accession = data['accession'];
+    this.ec_number = data['ec_number'];
     this.peptides = [];
     this.marked = false;
-    this.check_len = 15;
-    this.line_height = 20;
     this.containing_spectra = 0;
     
     for (var i = 0; i < data['peptides'].length; ++i){
@@ -57,6 +56,8 @@ function Protein(data){
         if (r.length) results = results.concat(r);
         r = search_pattern(this.definition, len_p, accept, masks, node_id, this.id);
         if (r.length) results = results.concat(r);
+        r = search_pattern(this.ec_number, len_p, accept, masks, node_id, this.id);
+        if (r.length) results = results.concat(r);
         
         for (var i = 0; i < this.peptides.length; ++i){
             var r = this.peptides[i].search(len_p, accept, masks, node_id, this.id);
@@ -66,14 +67,27 @@ function Protein(data){
     }
     
     
-    this.draw = function(ctx, x, y, line_number, num, factor) {
-        var check_side = this.check_len * factor;
+    this.check_mouse_over_protein_name = function(ctx, x, y, line_number, num, mouse){
+        var check_side = check_len * factor;
         var check_side_h = check_side * 0.5;
-        y -= Math.floor((line_number - 1) * this.line_height * factor * 0.5) - num * this.line_height * factor;
+        y -= Math.floor((line_number - 1) * line_height * factor * 0.5) - num * line_height * factor;
+        var x_l = x + check_side * 2;
+        var x_r = x_l + ctx.measureText(this.name).width;
+        var y_l = y - line_height * factor * 0.5;
+        var y_r = y + line_height * factor * 0.5;
+        if (x_l <= mouse.x && mouse.x <= x_r && y_l <= mouse.y && mouse.y <= y_r) return true;
+        return false;
+    }
+    
+    
+    this.draw = function(ctx, x, y, line_number, num) {
+        var check_side = check_len * factor;
+        var check_side_h = check_side * 0.5;
+        y -= Math.floor((line_number - 1) * line_height * factor * 0.5) - num * line_height * factor;
         ctx.lineWidth = 1;
         
-        var def = this.definition;
-        if (def.length > 13) def = def.substring(0, 10) + "...";
+        var def = this.name;
+        //if (def.length > 13) def = def.substring(0, 10) + "...";
         if (!this.peptides.length || !this.containing_spectra){
             ctx.fillStyle = disabled_fill_color;
             ctx.fillRect(x + check_side_h, y - check_side_h, check_side, check_side);
@@ -121,9 +135,13 @@ function Protein(data){
         }
     }
     
-    this.is_over = function(x, y, x_m, y_m, line_number, num, factor){
-        y -= Math.floor((line_number - 1) * this.line_height * factor * 0.5) - num * this.line_height * factor;
-        var check_side = this.check_len * factor;
+    this.mouse_over_name = function(x, y, x_m, y_m, line_number, num){
+        
+    }
+    
+    this.mouse_over_checkbox = function(x, y, x_m, y_m, line_number, num){
+        y -= Math.floor((line_number - 1) * line_height * factor * 0.5) - num * line_height * factor;
+        var check_side = check_len * factor;
         var check_side_h = check_side * 0.5;
         var l = x + check_side_h;
         var r = x + check_side * 1.5;
@@ -133,6 +151,10 @@ function Protein(data){
         return false;
     }
 }
+
+
+
+
 
 
 CanvasRenderingContext2D.prototype.wrapText = function (text, x, y, maxWidth, lineHeight) {
@@ -170,6 +192,22 @@ CanvasRenderingContext2D.prototype.draw_line = function (x1, y1, x2, y2) {
 }
 
 
+
+function Infobox(){
+    this.x = 0;
+    this.y = 0;
+    this.width = 100;
+    this.height = 250;
+    this.node_id = -1;
+    this.protein_id = -1;
+    
+    this.draw = function(){
+        
+    }
+}
+
+
+
 function node(data, c){
     this.x = parseInt(data['x']);
     this.y = parseInt(data['y']);
@@ -197,8 +235,7 @@ function node(data, c){
         for (var j = 0; j < data['proteins'].length; ++j){
             this.proteins.push(new Protein(data['proteins'][j]));
             if (name.length) name += ", ";
-            var def = this.proteins[j].definition;
-            if (def.length > 13) def = def.substring(0, 10) + "...";
+            var def = this.proteins[j].name;
             if (this.width < document.getElementById("refarea").getContext("2d").measureText(def).width){
                 this.width = document.getElementById("refarea").getContext("2d").measureText(def).width;
             }
@@ -240,7 +277,7 @@ function node(data, c){
     }
     
     
-    this.is_on_slide = function(mouse, factor){
+    this.is_on_slide = function(mouse){
         if (!this.slide) return false;
         var sl_x = this.x + this.width * 0.5 * 0.75;
         var sl_y_s = this.y - this.height * 0.5 * 0.75;
@@ -251,7 +288,7 @@ function node(data, c){
     }
     
     
-    this.change_slider = function(y, factor){
+    this.change_slider = function(y){
         var sl_y_s = this.y - this.height * 0.5 * 0.75;
         var sl_y_e = this.y + this.height * 0.5 * 0.75;
         this.slide_percent = (y - sl_y_s) / (sl_y_e - sl_y_s);
@@ -260,7 +297,7 @@ function node(data, c){
     }
     
     
-    this.draw = function(font_size, factor, radius) {
+    this.draw = function(font_size, radius) {
         switch (this.type){
             case "protein":
                 
@@ -283,7 +320,7 @@ function node(data, c){
                     offset_y = (this.orig_height * 0.5 - this.height * 0.5) - this.slide_percent * (this.orig_height - this.height);
                 }
                 for (var i = 0; i < this.proteins.length; ++i){
-                    this.proteins[i].draw(this.ctx, this.x - this.width / 2, this.y + offset_y, this.proteins.length, i, factor);
+                    this.proteins[i].draw(this.ctx, this.x - this.width / 2, this.y + offset_y, this.proteins.length, i);
                 }
                 if (this.lines > max_protein_line_number){
                     this.ctx.restore();
@@ -360,20 +397,51 @@ function node(data, c){
         return false;
     };
     
-    this.check_protein_marked = function(res, factor){
+    this.mark_protein_checkbox = function(res){
         var offset_y = 0;
         if (this.lines > max_protein_line_number){
             offset_y = (this.orig_height * 0.5 - this.height * 0.5) - this.slide_percent * (this.orig_height - this.height);
         }
         for (var i = 0; i < this.proteins.length; ++i){
-            if (this.proteins[i].is_over(this.x - this.width / 2, this.y + offset_y, res.x, res.y, this.proteins.length, i, factor)){
+            if (this.proteins[i].mouse_over_checkbox(this.x - this.width / 2, this.y + offset_y, res.x, res.y, this.proteins.length, i)){
                 this.proteins[i].toggle_marked();
                 break;
             }
         }
     }
     
-    this.dblcheck_protein_marked = function(res, factor){
+    this.get_protein_position = function(i){
+        if (i < 0 || this.proteins.length <= i){
+            return [-1, -1];
+        }
+        var offset_y = 0;
+        if (this.lines > max_protein_line_number){
+            offset_y = (this.orig_height * 0.5 - this.height * 0.5) - this.slide_percent * (this.orig_height - this.height);
+        }
+        var check_side_h = check_len * factor * 0.5;
+        var x = this.x - this.width * 0.5 + check_side_h;
+        var y = this.y + offset_y - Math.floor((i - 1) * line_height * factor * 0.5) - this.proteins.length * line_height * factor;
+        
+        return [x, y];
+    }
+    
+    
+    this.check_mouse_over_protein_name = function(mouse){
+        if (this.type != "protein") return -1;
+        
+        var offset_y = 0;
+        if (this.lines > max_protein_line_number){
+            offset_y = (this.orig_height * 0.5 - this.height * 0.5) - this.slide_percent * (this.orig_height - this.height);
+        }
+        for (var i = 0; i < this.proteins.length; ++i){
+            if(this.proteins[i].check_mouse_over_protein_name(this.ctx, this.x - this.width / 2, this.y + offset_y, this.proteins.length, i, mouse)){
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    this.dblclick_mark_proteins = function(res){
         var cnt = 0;
         var cnt_avbl = 0;
         for (var i = 0; i < this.proteins.length; ++i){
@@ -823,7 +891,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     
     this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node); 
     
-    this.draw = function(factor){
+    this.draw = function(){
         
         /*for (var i = 0; i < this.point_list.length; ++i){
             console.log(this.point_list[i]);
