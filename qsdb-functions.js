@@ -46,7 +46,7 @@ function Protein(data){
         this.containing_spectra += this.peptides[i].spectra.length;
     }
     
-    this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
+    //this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
     
     this.search = function(len_p, accept, masks, node_id){
         var results = [];
@@ -69,7 +69,6 @@ function Protein(data){
     
     this.check_mouse_over_protein_name = function(ctx, x, y, line_number, num, mouse){
         var check_side = check_len * factor;
-        var check_side_h = check_side * 0.5;
         y -= Math.floor((line_number - 1) * line_height * factor * 0.5) - num * line_height * factor;
         var x_l = x + check_side * 2;
         var x_r = x_l + ctx.measureText(this.name).width;
@@ -77,6 +76,14 @@ function Protein(data){
         var y_r = y + line_height * factor * 0.5;
         if (x_l <= mouse.x && mouse.x <= x_r && y_l <= mouse.y && mouse.y <= y_r) return true;
         return false;
+    }
+    
+    
+    this.get_position = function(x, y, line_number, num){
+        var check_side = check_len * factor;
+        y -= Math.floor((line_number - 1) * line_height * factor * 0.5) - num * line_height * factor;
+        x += check_side * 2;
+        return [x, y];
     }
     
     
@@ -193,16 +200,43 @@ CanvasRenderingContext2D.prototype.draw_line = function (x1, y1, x2, y2) {
 
 
 
-function Infobox(){
+function Infobox(ctx){
     this.x = 0;
     this.y = 0;
     this.width = 100;
     this.height = 250;
     this.node_id = -1;
     this.protein_id = -1;
+    this.ctx = ctx;
     
     this.draw = function(){
+        var radius = Math.floor(round_rect_radius);
         
+        this.ctx.fillStyle = infobox_fill_color;
+        this.ctx.strokeStyle = infobox_stroke_color;
+        this.ctx.lineWidth = infobox_stroke_width;
+        
+        var offset_x = this.width + infobox_offset_x;
+        var offset_y = this.height / 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.x - offset_x + radius, this.y - offset_y);
+        this.ctx.lineTo(this.x - offset_x + this.width - radius, this.y - offset_y);
+        this.ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y, this.x - offset_x + this.width, this.y - offset_y + radius);
+        
+        
+        this.ctx.lineTo(this.x - offset_x + this.width, this.y - infobox_offset_x);
+        this.ctx.lineTo(this.x - offset_x + this.width + infobox_offset_x, this.y);
+        this.ctx.lineTo(this.x - offset_x + this.width, this.y + infobox_offset_x);
+        
+        this.ctx.lineTo(this.x - offset_x + this.width, this.y - offset_y + this.height - radius);
+        this.ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y + this.height, this.x - offset_x + this.width - radius, this.y - offset_y + this.height);
+        this.ctx.lineTo(this.x - offset_x + radius, this.y - offset_y + this.height);
+        this.ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y + this.height, this.x - offset_x, this.y - offset_y + this.height - radius);
+        this.ctx.lineTo(this.x - offset_x, this.y - offset_y + radius);
+        this.ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y, this.x - offset_x + radius, this.y - offset_y);
+        this.ctx.closePath();
+        this.ctx.fill();
+        this.ctx.stroke();
     }
 }
 
@@ -410,19 +444,21 @@ function node(data, c){
         }
     }
     
-    this.get_protein_position = function(i){
-        if (i < 0 || this.proteins.length <= i){
+    this.get_position = function(i){
+        if ((this.type == "protein" && (i < 0 || this.proteins.length <= i)) || this.type == "pathway"){
             return [-1, -1];
         }
+        
+        if (this.type == "metabolite"){
+            return [this.x - Math.floor(metabolite_radius * factor), this.y];
+        }
+        
         var offset_y = 0;
         if (this.lines > max_protein_line_number){
             offset_y = (this.orig_height * 0.5 - this.height * 0.5) - this.slide_percent * (this.orig_height - this.height);
         }
-        var check_side_h = check_len * factor * 0.5;
-        var x = this.x - this.width * 0.5 + check_side_h;
-        var y = this.y + offset_y - Math.floor((i - 1) * line_height * factor * 0.5) - this.proteins.length * line_height * factor;
         
-        return [x, y];
+        return this.proteins[i].get_position(this.x - this.width / 2, this.y + offset_y, this.proteins.length, i);
     }
     
     

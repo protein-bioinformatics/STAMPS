@@ -50,6 +50,10 @@ text_color = "black";
 slide_color = "#5792da";
 slide_width = 2;
 slide_bullet = 4;
+infobox_fill_color = "white";
+infobox_stroke_color = "#777777";
+infobox_stroke_width = 1;
+infobox_offset_x = 20;
 
 
 
@@ -59,7 +63,7 @@ function debug(text){
 
 
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height) {
-    var radius = Math.floor(round_rect_radius * Math.pow(scaling, zoom - start_zoom));
+    var radius = Math.floor(round_rect_radius * factor);
     this.beginPath();
     this.moveTo(x + radius, y);
     this.lineTo(x + width - radius, y);
@@ -205,13 +209,21 @@ function init(){
     }
     if (HTTP_GET_VARS['admin']) administration = HTTP_GET_VARS['admin'] == 1;
     
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            var receive = xmlhttp.responseText;
+        }
+    }
+    xmlhttp.open("GET", "set-counter.py?counter=request", true);
+    xmlhttp.send();
     
     
     document.documentElement.style.overflow = 'hidden';
     document.body.scroll = "no";
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
-    infobox = new Infobox();
+    infobox = new Infobox(ctx);
     
     
     c.onclick = function (event)
@@ -651,14 +663,21 @@ function mouse_wheel_listener(e){
             edges[i].point_list[j].y = res.y + scale * (edges[i].point_list[j].y - res.y);
         }
     }
+    infobox.x = res.x + scale * (infobox.x - res.x);
+    infobox.y = res.y + scale * (infobox.y - res.y);
     null_x = res.x + scale * (null_x - res.x);
     null_y = res.y + scale * (null_y - res.y);
-    //console.log(zoom + " " + data[data_ref[105]].width);
     draw();
 }
 
 
 function mouse_dblclick_listener(e){
+    
+    if (show_infobox){
+        show_infobox = false;
+        draw();
+    }
+    
     if (!moved){
         if (highlight >= 0 && data[highlight].type == 'protein'){
             var c = document.getElementById("renderarea");
@@ -681,13 +700,20 @@ function mouse_click_listener(e){
             }
             */
         }
-        if (highlight >= 0 && data[highlight].type == 'protein'){
+        if (highlight >= 0){
             var c = document.getElementById("renderarea");
             var res = get_mouse_pos(c, e);
-            data[highlight].mark_protein_checkbox(res);
-            draw();
+            var prot = -1;
+            if (data[highlight].type == 'protein'){
+                data[highlight].mark_protein_checkbox(res);
+                draw();
+                prot = data[highlight].check_mouse_over_protein_name(res);
+            }
+            else if (data[highlight].type == 'metabolite'){
+                prot = data[highlight].is_mouse_over(res.x, res.y, metabolite_radius * factor) - 1;
+                console.log(prot);
+            }
             
-            var prot = data[highlight].check_mouse_over_protein_name(res);
             if (prot > -1){
                 prepare_infobox(prot);
             }            
@@ -709,6 +735,7 @@ function mouse_down_listener(e){
     if (e.which != 1){
         return;
     }
+    
     on_slide = -1;
     for (var i = 0; i < data.length; ++i){
         if (data[i].is_on_slide(res)){
@@ -762,6 +789,8 @@ function mouse_move_listener(e){
                         edges[i].point_list[j].y += res.y - offsetY;
                     }
                 }
+                infobox.x += res.x - offsetX;
+                infobox.y += res.y - offsetY;
                 null_x += res.x - offsetX;
                 null_y += res.y - offsetY;
             }
@@ -785,11 +814,11 @@ function mouse_move_listener(e){
     // find active node
     var brk = false;
     var newhighlight = -1;
-    var radius = Math.floor(metabolite_radius * Math.pow(scaling, zoom - start_zoom));
+    var radius = Math.floor(metabolite_radius * factor);
     for (var i = 0; i < data.length && !brk; ++i){
         if (data[i].is_mouse_over(res.x, res.y, radius)){
             newhighlight = i;
-            brk = true;  
+            brk = true; 
         }
     }
     if (highlight != newhighlight && !event_moving_node){
@@ -871,6 +900,15 @@ function download_assay(){
         return;
     }
     
+    
+    var xmlhttp_c = new XMLHttpRequest();
+    xmlhttp_c.onreadystatechange = function() {
+        if (xmlhttp_c.readyState == 4 && xmlhttp_c.status == 200) {
+            var receive = xmlhttp_c.responseText;
+        }
+    }
+    xmlhttp_c.open("GET", "set-counter.py?counter=download", true);
+    xmlhttp_c.send();
     
     document.getElementById("downloadbackground").style.display = "inline";
     document.getElementById("download").style.display = "inline";
@@ -1096,10 +1134,13 @@ function highlight_protein(node_id, prot_id){
                     edges[i].point_list[j].y = height + scale * (edges[i].point_list[j].y + split * (height - y) - height);
                 }
             }
+            infobox.x = width + scale * (infobox.x + split * (width - x) - width);
+            infobox.y = height + scale * (infobox.y + split * (height - y) - height);
             x = width + scale * (x - width);
             y = height + scale * (y - height);
             null_x = width + scale * (null_x - width);
             null_y = height + scale * (null_y - height);
+            
             zoom *= zoom_scale;
             factor = Math.pow(scaling, zoom - start_zoom);
             
@@ -1174,16 +1215,17 @@ function close_navigation(nav){
 
 
 function prepare_infobox(prot){
+    show_infobox = false;
     var steps = 24;
     var time = 1; // seconds
     
-    var xy = data[highlight].get_protein_position(prot);
+    mouse_down = false;
+    unTip();
+    var xy = data[highlight].get_position(prot);
     var x = xy[0];
     var y = xy[1];
     infobox.node_id = highlight;
     infobox.protein_id = prot;
-    infobox.x = x;
-    infobox.y = y;
     
     var progress = 0;
     var width  = window.innerWidth * 0.5;
@@ -1197,6 +1239,9 @@ function prepare_infobox(prot){
             clearInterval (moving);
             document.getElementById("animation_background").style.display = "none";
             show_infobox = true;
+            var xy = data[highlight].get_position(prot);
+            infobox.x = xy[0];
+            infobox.y = xy[1];
             draw();
         }
         else {
