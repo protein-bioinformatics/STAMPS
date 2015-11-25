@@ -64,11 +64,11 @@ print()
 response = []
 conn = connect(host='localhost', port=3306, user='qsdb_user', passwd='qsdb_password', db='qsdb')
 my_cur = conn.cursor(cursors.DictCursor)
-sql_query = "(select n.id, p.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = %s)"
+sql_query = "(select n.id, p.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, '' c_number, '' formula, '' exact_mass from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = %s)"
 sql_query += "union "
-sql_query += "(select n.id, m.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = %s)"
+sql_query += "(select n.id, m.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, m.c_number, m.formula, m.exact_mass from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = %s)"
 sql_query += "union "
-sql_query += "(select id, '', pathway_id, type, pathway_ref, x, y from nodes n where type = 'protein' and pathway_id = %s);"
+sql_query += "(select id, '', pathway_id, type, pathway_ref, x, y, '' c_number, '' formula, '' exact_mass from nodes n where type = 'protein' and pathway_id = %s);"
 my_cur.execute(sql_query, (pathway, pathway, pathway))
 
 lite_db = sqlite3.connect('/home/dominik.kopczynski/Data/blib/TestLibraryPS.blib')

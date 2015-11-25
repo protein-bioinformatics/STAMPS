@@ -18,7 +18,7 @@ edges = [];
 show_infobox = false;
 infobox = 0;
 
-scaling = 1.4;
+scaling = 1.1;
 zoom = 5;
 start_zoom = 5;
 max_zoom = 10;
@@ -39,11 +39,20 @@ factor = Math.pow(scaling, zoom - start_zoom);
 line_width = 4;
 protein_stroke_color = "#f69301";
 protein_fill_color = "#fff6d5";
-metabolite_stroke_color = "f#69301";
-metabolite_fill_color = "white";
+metabolite_stroke_color = "#f69301";
+metabolite_fill_color = "white";;
 pathway_stroke_color = "#f69301";
 pathway_fill_color = "white";
 edge_color = "#f69301";
+/*
+protein_stroke_color = "#3644a2";
+protein_fill_color = "#f3f8ff";
+metabolite_stroke_color = "#3644a2";
+metabolite_fill_color = "white";
+pathway_stroke_color = "#3644a2";
+pathway_fill_color = "white";
+edge_color = "#3644a2";*/
+
 disabled_text_color = "#bbbbbb";
 disabled_fill_color = "#cccccc";
 text_color = "black";
@@ -175,7 +184,6 @@ function draw(){
     var ctx = c.getContext("2d");
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     var factor = Math.pow(scaling, zoom - start_zoom);
-    //console.log(scaling + " " + (zoom - start_zoom));
     
     var font_size = text_size * factor;
     var radius = metabolite_radius * factor;
@@ -651,7 +659,6 @@ function mouse_wheel_listener(e){
     res = get_mouse_pos(c, e);
     for (var i = 0; i < data.length; ++i){
         data[i].width *= scale;
-        //if (i == 49) console.log(data[i].width);
         data[i].height *= scale;
         data[i].orig_height *= scale;
         data[i].x = res.x + scale * (data[i].x - res.x);
@@ -711,7 +718,6 @@ function mouse_click_listener(e){
             }
             else if (data[highlight].type == 'metabolite'){
                 prot = data[highlight].is_mouse_over(res.x, res.y, metabolite_radius * factor) - 1;
-                console.log(prot);
             }
             
             if (prot > -1){
@@ -828,7 +834,7 @@ function mouse_move_listener(e){
         highlight = newhighlight;
         draw();
     }
-    if(highlight >= 0 && (true || data[highlight].type == "metabolite")) Tip(e, data[highlight].id + " " + data[highlight].name);
+    if(highlight >= 0 && data[highlight].type != "pathway" && data[highlight].name.length) Tip(e, /* data[highlight].id + " " + */ data[highlight].name);
     else unTip();
 }
 
@@ -1224,8 +1230,6 @@ function prepare_infobox(prot){
     var xy = data[highlight].get_position(prot);
     var x = xy[0];
     var y = xy[1];
-    infobox.node_id = highlight;
-    infobox.protein_id = prot;
     
     var progress = 0;
     var width  = window.innerWidth * 0.5;
@@ -1240,8 +1244,8 @@ function prepare_infobox(prot){
             document.getElementById("animation_background").style.display = "none";
             show_infobox = true;
             var xy = data[highlight].get_position(prot);
-            infobox.x = xy[0];
-            infobox.y = xy[1];
+            infobox.create(xy[0], xy[1], highlight, prot);
+            data[highlight].highlight = false;
             draw();
         }
         else {

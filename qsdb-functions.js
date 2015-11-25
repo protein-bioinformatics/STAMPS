@@ -199,7 +199,6 @@ CanvasRenderingContext2D.prototype.draw_line = function (x1, y1, x2, y2) {
 }
 
 
-
 function Infobox(ctx){
     this.x = 0;
     this.y = 0;
@@ -208,6 +207,29 @@ function Infobox(ctx){
     this.node_id = -1;
     this.protein_id = -1;
     this.ctx = ctx;
+    
+    
+    this.create = function(x, y, node_id, prot_id){
+        this.x = x;
+        this.y = y;
+        this.node_id = node_id;
+        this.protein_id = prot_id;
+        if (data[node_id].type == "metabolite"){
+            this.width = data[this.node_id].img.width + 40;
+            this.height = data[this.node_id].img.height + 40;
+            
+            this.ctx.font = "bold " + line_height.toString() + "px Arial";
+            this.width = Math.max(this.width, this.ctx.measureText(data[this.node_id].name).width + 40);
+            this.height += 3 * line_height + 20;
+            
+            this.ctx.font = "bold " + (line_height - 4).toString() + "px Arial";
+            this.width = Math.max(this.width, this.ctx.measureText("Formula: " + data[this.node_id].formula).width + 40);
+            
+        }
+        else {
+            this.img_url = 0;
+        }
+    }
     
     this.draw = function(){
         var radius = Math.floor(round_rect_radius);
@@ -237,6 +259,30 @@ function Infobox(ctx){
         this.ctx.closePath();
         this.ctx.fill();
         this.ctx.stroke();
+        
+        
+        this.ctx.textAlign = "left";
+        this.ctx.textBaseline = 'top';
+        this.ctx.font = "bold " + line_height.toString() + "px Arial";
+        this.ctx.fillStyle = "black";
+        this.ctx.fillText(data[this.node_id].name, this.x - offset_x + 20, this.y - offset_y + 20);
+        
+        
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = disabled_fill_color;
+        this.ctx.moveTo(this.x - offset_x + 20, this.y - offset_y + line_height + 30);
+        this.ctx.lineTo(this.x - offset_x + this.width - 20, this.y - offset_y + line_height + 30);
+        this.ctx.stroke();
+        
+        this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
+        this.ctx.fillText("Formula:", this.x - offset_x + 20, this.y - offset_y + line_height + 40);
+        this.ctx.fillText("Exact mass:", this.x - offset_x + 20, this.y - offset_y + 2 * line_height + 40);
+        
+        this.ctx.font = (line_height - 5).toString() + "px Arial";
+        this.ctx.fillText(data[this.node_id].formula, this.x - offset_x + 20 + this.ctx.measureText("Formula:  ").width, this.y - offset_y + line_height + 40);
+        this.ctx.fillText(data[this.node_id].exact_mass, this.x - offset_x + 20 + this.ctx.measureText("Exact mass: ").width, this.y - offset_y + 2 * line_height + 40);
+        
+        this.ctx.drawImage(data[this.node_id].img, this.x - offset_x + 20, this.y - offset_y + 40 + 3 * line_height);
     }
 }
 
@@ -248,6 +294,10 @@ function node(data, c){
     this.type = data['type'];
     this.id = data['id'];
     this.name = data['name'];
+    this.c_number = data['c_number'];
+    this.formula = data['formula'];
+    this.exact_mass = data['exact_mass'];
+    this.img = 0;
     this.highlight = false;
     this.pathway_ref = data['pathway_ref'];
     this.proteins = [];
@@ -290,6 +340,8 @@ function node(data, c){
     else {
         this.width = metabolite_radius * 2;
         this.height = metabolite_radius * 2;
+        this.img = new Image();
+        this.img.src = "http://www.genome.jp/Fig/compound/" + this.c_number + ".gif";
     }
     
     //this.width = Math.ceil(this.width / 25) * 25;
@@ -797,7 +849,6 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
         var post_x = -1;
         var post_y = -1;
         while (((curr_x != -1) || (curr_y != -1))){
-            //console.log("t: " + curr_x + " " + curr_y);
             matrix[curr_y][curr_x].in_path = true;
             if (post_x != -1) matrix[curr_y][curr_x].post = [post_x, post_y];
             if ((post_x - curr_x) == 1) matrix[curr_y][curr_x].direction = "r";
@@ -869,10 +920,6 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             curr_y = post_y;
         }
         
-        /*for (var i = 0; i < this.point_list.length; ++i){
-            console.log(this.point_list[i]);
-        }*/
-        
         
         // merge equal points
         for (var i = 0; i < this.point_list.length - 1; ++i){
@@ -886,11 +933,6 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
         }
         
         
-        /*for (var i = 0; i < this.point_list.length; ++i){
-            console.log(this.point_list[i]);
-        }*/
-        
-                
         
         // correcting the targeting points
         var p_len = this.point_list.length;
@@ -917,21 +959,13 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
         }
         this.point_list[p_len - 1].x = xa_e;
         this.point_list[p_len - 1].y = ya_e;
-        
-        /*for (var i = 0; i < this.point_list.length; ++i){
-            console.log(this.point_list[i]);
-        }*/
-        
+                
     }
     
     
     this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node); 
     
     this.draw = function(){
-        
-        /*for (var i = 0; i < this.point_list.length; ++i){
-            console.log(this.point_list[i]);
-        }*/
         
         this.ctx.strokeStyle = edge_color;
         this.ctx.fillStyle = edge_color;
