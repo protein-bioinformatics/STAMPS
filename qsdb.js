@@ -18,7 +18,7 @@ edges = [];
 show_infobox = false;
 infobox = 0;
 
-scaling = 1.1;
+scaling = 1.4;
 zoom = 5;
 start_zoom = 5;
 max_zoom = 10;
