@@ -306,6 +306,7 @@ td.select_species_cell {
     border-bottom: 1px dashed #d3d3d3;
     background: white;
     padding: 10px;
+    cursor: pointer;
 }
 
 
@@ -332,6 +333,7 @@ td.select_pathway_cell {
     border-bottom: 1px dashed #d3d3d3;
     background: white;
     padding: 10px;
+    cursor: pointer;
 }
 
 

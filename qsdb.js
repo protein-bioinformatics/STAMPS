@@ -1,7 +1,6 @@
 moved = false;
 HTTP_GET_VARS = [];
 current_pathway = 1;
-mouse_down = false;
 highlight = -1;
 offsetX = 0;
 offsetY = 0;
@@ -426,13 +425,16 @@ function compute_edges(){
                 
                 // bubble sort
                 for (var j = 0; j < len; ++j){
+                    var swps = 0;
                     for (var k = 0; k < len - 1; ++k){
                         if (node_p[k][2] > node_p[k + 1][2]){
                             var tmp = node_p[k];
                             node_p[k] = node_p[k + 1];
                             node_p[k + 1] = tmp;
+                            swps += 1;
                         }
                     }
+                    if (!swps) break;
                 }
             }
         }
@@ -742,6 +744,11 @@ function mouse_down_listener(e){
         return;
     }
     
+
+    if (show_infobox && infobox.is_mouse_over(res)){
+        show_infobox = false;
+    }
+    
     on_slide = -1;
     for (var i = 0; i < data.length; ++i){
         if (data[i].is_on_slide(res)){
@@ -750,7 +757,6 @@ function mouse_down_listener(e){
         }
     }
     
-    mouse_down = true;
     if (highlight >= 0){
         node_move_x = data[highlight].x;
         node_move_y = data[highlight].y;
@@ -770,9 +776,11 @@ function mouse_move_listener(e){
     var grid = Math.floor(base_grid * factor * 1000);
     
     
+    
     // shift all nodes
-    if (mouse_down){
+    if (e.buttons & 1){
         if (on_slide > -1){
+            show_infobox = false;
             data[on_slide].change_slider(res.y);
         }
         else {
@@ -814,28 +822,34 @@ function mouse_move_listener(e){
         offsetX = res.x;
         offsetY = res.y;
     }
-    
-    
-    
-    // find active node
-    var brk = false;
-    var newhighlight = -1;
-    var radius = Math.floor(metabolite_radius * factor);
-    for (var i = 0; i < data.length && !brk; ++i){
-        if (data[i].is_mouse_over(res.x, res.y, radius)){
-            newhighlight = i;
-            brk = true; 
+    else {
+        // mouse over infobox
+        if (show_infobox && infobox.is_mouse_over(res)){
+            
         }
-    }
-    if (highlight != newhighlight && !event_moving_node){
-        for (var i = 0; i < data.length; ++i){
-            data[i].highlight = (i == newhighlight);
+        else {
+    
+            // find active node
+            var brk = false;
+            var newhighlight = -1;
+            for (var i = 0; i < data.length && !brk; ++i){
+                if (data[i].is_mouse_over(res.x, res.y)){
+                    newhighlight = i;
+                    brk = true; 
+                }
+            }
+            if (highlight != newhighlight && !event_moving_node){
+                for (var i = 0; i < data.length; ++i){
+                    data[i].highlight = (i == newhighlight);
+                }
+                highlight = newhighlight;
+                draw();
+            }
         }
-        highlight = newhighlight;
-        draw();
+        
     }
-    if(highlight >= 0 && data[highlight].type != "pathway" && data[highlight].name.length) Tip(e, /* data[highlight].id + " " + */ data[highlight].name);
-    else unTip();
+        if(highlight >= 0 && data[highlight].type != "pathway" && data[highlight].name.length) Tip(e, /* data[highlight].id + " " + */ data[highlight].name);
+        else unTip();
 }
 
 function Tip(e, name) {      
@@ -887,7 +901,6 @@ function update_node(event) {
 
 function mouse_up_listener(event){
     if (event_moving_node) update_node(event);
-    mouse_down = false;
 }
 
 
@@ -1225,7 +1238,6 @@ function prepare_infobox(prot){
     var steps = 24;
     var time = 1; // seconds
     
-    mouse_down = false;
     unTip();
     var xy = data[highlight].get_position(prot);
     var x = xy[0];

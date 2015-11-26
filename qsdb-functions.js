@@ -238,6 +238,14 @@ function Infobox(ctx){
         }
     }
     
+    this.is_mouse_over = function(mouse){
+        var x_l = this.x - (this.width + infobox_offset_x);
+        var x_r = this.x - infobox_offset_x;
+        var y_l = this.y - this.height * 0.5;
+        var y_r = this.y + this.height * 0.5;
+        return (x_l <= mouse.x && mouse.x <= x_r && y_l <= mouse.y && mouse.y <= y_r);
+    }
+    
     this.draw = function(){
         var radius = Math.floor(round_rect_radius);
         
@@ -288,7 +296,8 @@ function Infobox(ctx){
             this.ctx.fillText(data[this.node_id].formula, this.x - offset_x + 20 + this.ctx.measureText("Formula:  ").width, this.y - offset_y + line_height + 40);
             this.ctx.fillText(data[this.node_id].exact_mass, this.x - offset_x + 20 + this.ctx.measureText("Exact mass: ").width, this.y - offset_y + 2 * line_height + 40);
             
-            this.ctx.drawImage(data[this.node_id].img, this.x - offset_x + 20, this.y - offset_y + 40 + 3 * line_height);
+            if (data[this.node_id].img.width)
+                this.ctx.drawImage(data[this.node_id].img, this.x - offset_x + 20, this.y - offset_y + 40 + 3 * line_height);
         }
         else if (data[this.node_id].type == "protein"){
             this.ctx.textAlign = "left";
@@ -500,7 +509,8 @@ function node(data, c){
         
     };
     
-    this.is_mouse_over = function (mouse_x, mouse_y, radius){
+    this.is_mouse_over = function (mouse_x, mouse_y){
+        var radius = metabolite_radius * factor;
         switch (this.type){
             case "metabolite":
                 if (Math.sqrt(Math.pow(this.x - mouse_x, 2) + Math.pow(this.y - mouse_y, 2)) < radius){
