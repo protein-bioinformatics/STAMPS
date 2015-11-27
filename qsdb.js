@@ -647,17 +647,16 @@ function mouse_wheel_listener(e){
         return;
     zoom += direction;
     factor = Math.pow(scaling, zoom - start_zoom);
-    zoom_in_out(e, e.detail >= 0);
+    
+    var c = document.getElementById("renderarea");
+    zoom_in_out(e.detail >= 0, get_mouse_pos(c, e));
 }
     
-function zoom_in_out(e, dir){
+function zoom_in_out(dir, res){
     var scale = scaling;
     if (dir) scale = 1. / scale;
     
-    var c = document.getElementById("renderarea");
-    var res = 0;
-    if (e.buttons & 1) res = get_mouse_pos(c, e);
-    else {
+    if (res == "undefined") {
         res = [];
         res.x = window.innerWidth * 0.5;
         res.y = window.innerHeight * 0.5;
@@ -694,8 +693,7 @@ function mouse_dblclick_listener(e){
         if (highlight_element && highlight_element.type == 'protein'){
             var c = document.getElementById("renderarea");
             var res = get_mouse_pos(c, e);
-            highlight_element.dblclick_mark_proteins(res, Math.pow(scaling, zoom - start_zoom));
-            draw();
+            highlight_element.mouse_dbl_click(res);
         }
     }
     moved = false;
@@ -705,29 +703,10 @@ function mouse_dblclick_listener(e){
 
 function mouse_click_listener(e){
     if (!moved){
-        if (!highlight_element){
-            /*
-            if (data[highlight].type == 'pathway'){
-                change_pathway(data[highlight].pathway_ref);
-            }
-            */
-        }
         if (highlight_element){
             var c = document.getElementById("renderarea");
             var res = get_mouse_pos(c, e);
-            var prot = -1;
-            if (highlight_element.type == 'protein'){
-                highlight_element.mark_protein_checkbox(res);
-                draw();
-                prot = highlight_element.check_mouse_over_protein_name(res);
-            }
-            else if (highlight_element.type == 'metabolite'){
-                prot = highlight_element.is_mouse_over(res.x, res.y, metabolite_radius * factor) - 1;
-            }
-            
-            if (prot > -1){
-                prepare_infobox(prot);
-            }            
+            highlight_element.mouse_click(res);
         }
     }
     moved = false;
@@ -747,30 +726,19 @@ function mouse_down_listener(e){
         return;
     }
     
-
-    if (infobox.visible && infobox.is_mouse_over(res)){
-        infobox.visible = false;
-        draw();
-    }
-    
-    on_slide = -1;
-    for (var i = 0; i < data.length; ++i){
-        if (data[i].is_on_slide(res)){
-            on_slide = i;
-            break;
-        }
-    }
-    
-    if (!highlight_element){
-        node_move_x = highlight_element.x;
-        node_move_y = highlight_element.y;
-    }
     
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, e);
+    
+    if (highlight_element){
+        highlight_element.mouse_down(res);
+        node_move_x = highlight_element.x;
+        node_move_y = highlight_element.y;        
+    }
     offsetX = res.x;
     offsetY = res.y;
 }
+
 
 
 function mouse_move_listener(e){
@@ -783,12 +751,7 @@ function mouse_move_listener(e){
     
     // shift all nodes
     if (e.buttons & 1){
-        if (on_slide > -1){
-            infobox.visible = false;
-            data[on_slide].change_slider(res.y);
-        }
-        else {
-        
+        if (!highlight_element || !highlight_element.mouse_down_move(res)){
             var shift_x = res.x - offsetX;
             var shift_y = res.y - offsetY;
             if (shift_x != 0 || shift_y != 0){
@@ -827,33 +790,25 @@ function mouse_move_listener(e){
         offsetY = res.y;
     }
     else {
-        // mouse over infobox
-        if (infobox.visible && infobox.is_mouse_over(res)){
-            
+        // find active node
+        var newhighlight = 0;
+        for (var i = elements.length - 1; i >= 0; --i){
+            if (elements[i].is_mouse_over(res)){
+                newhighlight = elements[i];
+                break; 
+            }
         }
-        else {
-    
-            // find active node
-            var brk = false;
-            var newhighlight = 0;
-            for (var i = 0; i < data.length && !brk; ++i){
-                if (data[i].is_mouse_over(res.x, res.y)){
-                    newhighlight = data[i];
-                    brk = true; 
-                }
+        if (highlight_element != newhighlight && !event_moving_node){
+            for (var i = 0; i < elements.length; ++i){
+                elements[i].highlight = (highlight_element == newhighlight);
             }
-            if (highlight_element != newhighlight && !event_moving_node){
-                for (var i = 0; i < data.length; ++i){
-                    highlight_element.highlight = (highlight_element == newhighlight);
-                }
-                highlight_element = newhighlight;
-                draw();
-            }
+            highlight_element = newhighlight;
+            draw();
         }
         
     }
-        if(highlight_element && highlight_element.type != "pathway" && highlight_element.name.length) Tip(e, /* data[highlight].id + " " + */ highlight_element.name);
-        else unTip();
+    if(highlight_element && highlight_element.tipp) Tip(e, /* data[highlight].id + " " + */ highlight_element.name);
+    else unTip();
 }
 
 function Tip(e, name) {      
@@ -907,6 +862,9 @@ function update_node(event) {
 
 
 function mouse_up_listener(event){
+    var c = document.getElementById("renderarea");
+    res = get_mouse_pos(c, event);
+    if (highlight_element) highlight_element.mouse_up(res);
     if (event_moving_node) update_node(event);
 }
 
