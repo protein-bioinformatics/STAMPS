@@ -1,7 +1,7 @@
 moved = false;
 HTTP_GET_VARS = [];
 current_pathway = 1;
-highlight = -1;
+highlight_element = 0;
 offsetX = 0;
 offsetY = 0;
 null_x = 0;
@@ -14,8 +14,8 @@ event_key_down = false;
 node_move_x = 0;
 node_move_y = 0;
 edges = [];
-show_infobox = false;
 infobox = 0;
+elements = [];
 
 scaling = 1.4;
 zoom = 5;
@@ -43,6 +43,7 @@ metabolite_fill_color = "white";;
 pathway_stroke_color = "#f69301";
 pathway_fill_color = "white";
 edge_color = "#f69301";
+
 /*
 protein_stroke_color = "#3644a2";
 protein_fill_color = "#f3f8ff";
@@ -182,22 +183,11 @@ function draw(){
     
     var ctx = c.getContext("2d");
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    var factor = Math.pow(scaling, zoom - start_zoom);
     
-    var font_size = text_size * factor;
-    var radius = metabolite_radius * factor;
     
-    //draw nodes
-    for (var i = 0; i < data.length; ++i){
-        data[i].draw(font_size, radius);
-    }
-    // draw edges
-    for (var i = 0; i < edges.length; ++i){
-        edges[i].draw();
-    }
-    
-    if (show_infobox){
-        infobox.draw();
+    //draw elements visual elements
+    for (var i = 0; i < elements.length; ++i){
+        elements[i].draw();
     }
 }
 
@@ -297,17 +287,19 @@ function load_data(reload){
         null_y = 0;
     }
     
+    elements = [];
+    
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     
-    var species = new Array();
+    var species = [];
     if(document.getElementById("species_mouse").checked) species.push("mouse");
     //if(document.getElementById("species_human").checked) species.push("human");
     var species_string = species.join(":");
     
     // get data information
-    data = new Array();
-    data_ref = new Array();
+    data = [];
+    data_ref = [];
     var tmp_data = 0;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -323,6 +315,7 @@ function load_data(reload){
     var y_min = 1e100, y_max = -1e100;
     for (var i = 0; i < tmp_data.length; ++i){
         data.push(new node(tmp_data[i], c));
+        elements.push(data[i]);
         x_mean += data[i].x;
         y_mean += data[i].y;
         x_min = Math.min(x_min, data[i].x);
@@ -380,6 +373,7 @@ function load_data(reload){
     xmlhttp2.open("GET", "get-edgedata.py?pathway=" + current_pathway, false);
     xmlhttp2.send();
     compute_edges();
+    elements.push(infobox);
     draw();
 }
 
@@ -522,9 +516,8 @@ function compute_edges(){
                 start_x += node_width / 2;
             }
         }
-        //if (node_id == data_ref[145] && metabolite_id == data_ref[162]){
         edges.push(new edge(c, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], connections[i][4]));
-        //}
+        elements.push(edges[i]);
     }
     
 }
@@ -590,23 +583,23 @@ function show_custom_menu(event){
     if (!administration) return;
     var menu_points = new Array();
     unTip();
-    if (highlight == -1){
+    if (!highlight_element){
         menu_points.push(["Insert protein", "debug", 0, 1]);
         menu_points.push(["Insert metabolite", "debug", 0, 1]);
         menu_points.push(["Insert pathway", "debug", 0, 1]);
         menu_points.push(["Manage reagents", "show_management", 0, 1]);
     }
-    else if (data[highlight].type == "metabolite"){
+    else if (highlight_element.type == "metabolite"){
         menu_points.push(["Connect metabolite", "debug", 1, 1]);
         menu_points.push(["Edit metabolite", "debug", 1, 1]);
         menu_points.push(["Delete metabolite", "debug", 1, 1]);
     }
-    else if (data[highlight].type == "protein"){
+    else if (highlight_element.type == "protein"){
         menu_points.push(["Edit protein(s)", "debug", 1, 1]);
         var enable_del_reaction = false;
         for (var i = 0; i < nodes.length; ++i){
             var node_id = data_ref[nodes[i]['node_id']];
-            if (data_ref[nodes[i]['node_id']] == highlight){
+            if (data_ref[nodes[i]['node_id']] == highlight_element){
                 enable_del_reaction = true;
                 break;
             }
@@ -614,7 +607,7 @@ function show_custom_menu(event){
         menu_points.push(["Delete reaction", "debug", 1, enable_del_reaction]);
         menu_points.push(["Delete protein", "debug", 1, 1]);
     }
-    else if (data[highlight].type == "pathway"){
+    else if (highlight_element.type == "pathway"){
         menu_points.push(["Edit pathway", "debug", 1, 1]);
         menu_points.push(["Delete pathway", "debug", 1, 1]);
     }
@@ -623,7 +616,7 @@ function show_custom_menu(event){
     for (var i = 0; i < menu_points.length; ++i){
         if (menu_points[i][3]){
             var menu_command = menu_points[i][1] + "(";
-            if (menu_points[i][2]) menu_command += data[highlight].id;
+            if (menu_points[i][2]) menu_command += highlight_element.id;
             menu_command += ")";
             inner_html += "<tr><td onclick='hide_custom_menu(event); " + menu_command + "'; class='menuitem'>" + menu_points[i][0] + "</td></tr>";
         }
@@ -654,11 +647,21 @@ function mouse_wheel_listener(e){
         return;
     zoom += direction;
     factor = Math.pow(scaling, zoom - start_zoom);
+    zoom_in_out(e, e.detail >= 0);
+}
+    
+function zoom_in_out(e, dir){
     var scale = scaling;
-    if (e.detail >= 0) scale = 1. / scale;
+    if (dir) scale = 1. / scale;
     
     var c = document.getElementById("renderarea");
-    res = get_mouse_pos(c, e);
+    var res = 0;
+    if (e.buttons & 1) res = get_mouse_pos(c, e);
+    else {
+        res = [];
+        res.x = window.innerWidth * 0.5;
+        res.y = window.innerHeight * 0.5;
+    }
     for (var i = 0; i < data.length; ++i){
         data[i].width *= scale;
         data[i].height *= scale;
@@ -682,16 +685,16 @@ function mouse_wheel_listener(e){
 
 function mouse_dblclick_listener(e){
     
-    if (show_infobox){
-        show_infobox = false;
+    if (infobox.visible){
+        infobox.visible = false;
         draw();
     }
     
     if (!moved){
-        if (highlight >= 0 && data[highlight].type == 'protein'){
+        if (highlight_element && highlight_element.type == 'protein'){
             var c = document.getElementById("renderarea");
             var res = get_mouse_pos(c, e);
-            data[highlight].dblclick_mark_proteins(res, Math.pow(scaling, zoom - start_zoom));
+            highlight_element.dblclick_mark_proteins(res, Math.pow(scaling, zoom - start_zoom));
             draw();
         }
     }
@@ -702,24 +705,24 @@ function mouse_dblclick_listener(e){
 
 function mouse_click_listener(e){
     if (!moved){
-        if (highlight != -1){
+        if (!highlight_element){
             /*
             if (data[highlight].type == 'pathway'){
                 change_pathway(data[highlight].pathway_ref);
             }
             */
         }
-        if (highlight >= 0){
+        if (highlight_element){
             var c = document.getElementById("renderarea");
             var res = get_mouse_pos(c, e);
             var prot = -1;
-            if (data[highlight].type == 'protein'){
-                data[highlight].mark_protein_checkbox(res);
+            if (highlight_element.type == 'protein'){
+                highlight_element.mark_protein_checkbox(res);
                 draw();
-                prot = data[highlight].check_mouse_over_protein_name(res);
+                prot = highlight_element.check_mouse_over_protein_name(res);
             }
-            else if (data[highlight].type == 'metabolite'){
-                prot = data[highlight].is_mouse_over(res.x, res.y, metabolite_radius * factor) - 1;
+            else if (highlight_element.type == 'metabolite'){
+                prot = highlight_element.is_mouse_over(res.x, res.y, metabolite_radius * factor) - 1;
             }
             
             if (prot > -1){
@@ -745,8 +748,9 @@ function mouse_down_listener(e){
     }
     
 
-    if (show_infobox && infobox.is_mouse_over(res)){
-        show_infobox = false;
+    if (infobox.visible && infobox.is_mouse_over(res)){
+        infobox.visible = false;
+        draw();
     }
     
     on_slide = -1;
@@ -757,9 +761,9 @@ function mouse_down_listener(e){
         }
     }
     
-    if (highlight >= 0){
-        node_move_x = data[highlight].x;
-        node_move_y = data[highlight].y;
+    if (!highlight_element){
+        node_move_x = highlight_element.x;
+        node_move_y = highlight_element.y;
     }
     
     var c = document.getElementById("renderarea");
@@ -780,7 +784,7 @@ function mouse_move_listener(e){
     // shift all nodes
     if (e.buttons & 1){
         if (on_slide > -1){
-            show_infobox = false;
+            infobox.visible = false;
             data[on_slide].change_slider(res.y);
         }
         else {
@@ -792,7 +796,7 @@ function mouse_move_listener(e){
             }
             
             
-            if (!event_key_down || highlight == -1){
+            if (!event_key_down || !highlight_element){
                 for (var i = 0; i < data.length; ++i){
                     data[i].x += res.x - offsetX;
                     data[i].y += res.y - offsetY;
@@ -812,8 +816,8 @@ function mouse_move_listener(e){
                 event_moving_node = true;
                 node_move_x += res.x - offsetX;
                 node_move_y += res.y - offsetY;
-                data[highlight].x = Math.floor(node_move_x - (1000 * (node_move_x - null_x) % grid) / 1000.);
-                data[highlight].y = Math.floor(node_move_y - (1000 * (node_move_y - null_y) % grid) / 1000.);
+                highlight_element.x = Math.floor(node_move_x - (1000 * (node_move_x - null_x) % grid) / 1000.);
+                highlight_element.y = Math.floor(node_move_y - (1000 * (node_move_y - null_y) % grid) / 1000.);
                 compute_edges();
             }
         }
@@ -824,31 +828,31 @@ function mouse_move_listener(e){
     }
     else {
         // mouse over infobox
-        if (show_infobox && infobox.is_mouse_over(res)){
+        if (infobox.visible && infobox.is_mouse_over(res)){
             
         }
         else {
     
             // find active node
             var brk = false;
-            var newhighlight = -1;
+            var newhighlight = 0;
             for (var i = 0; i < data.length && !brk; ++i){
                 if (data[i].is_mouse_over(res.x, res.y)){
-                    newhighlight = i;
+                    newhighlight = data[i];
                     brk = true; 
                 }
             }
-            if (highlight != newhighlight && !event_moving_node){
+            if (highlight_element != newhighlight && !event_moving_node){
                 for (var i = 0; i < data.length; ++i){
-                    data[i].highlight = (i == newhighlight);
+                    highlight_element.highlight = (highlight_element == newhighlight);
                 }
-                highlight = newhighlight;
+                highlight_element = newhighlight;
                 draw();
             }
         }
         
     }
-        if(highlight >= 0 && data[highlight].type != "pathway" && data[highlight].name.length) Tip(e, /* data[highlight].id + " " + */ data[highlight].name);
+        if(highlight_element && highlight_element.type != "pathway" && highlight_element.name.length) Tip(e, /* data[highlight].id + " " + */ highlight_element.name);
         else unTip();
 }
 
@@ -871,6 +875,7 @@ function key_down(event){
     if (administration){
         event_key_down = (event.which == 17);
     }
+    
 }
 
 
@@ -882,14 +887,15 @@ function key_up(event){
     }
 }
 
+
 function update_node(event) {
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, event);
-    var x = Math.floor((data[highlight].x - null_x) / factor);
-    var y = Math.floor((data[highlight].y - null_y) / factor);
+    var x = Math.floor((highlight_element.x - null_x) / factor);
+    var y = Math.floor((highlight_element.y - null_y) / factor);
     var xmlhttp = new XMLHttpRequest();
     var request = "update_node.py?id=";
-    request += data[highlight].id;
+    request += highlight_element.id;
     request += "&x=";
     request += x;
     request += "&y=";
@@ -898,6 +904,7 @@ function update_node(event) {
     xmlhttp.send();
     event_moving_node = false;
 }
+
 
 function mouse_up_listener(event){
     if (event_moving_node) update_node(event);
@@ -1234,12 +1241,12 @@ function close_navigation(nav){
 
 
 function prepare_infobox(prot){
-    show_infobox = false;
+    infobox.visible = false;
     var steps = 24;
     var time = 1; // seconds
     
     unTip();
-    var xy = data[highlight].get_position(prot);
+    var xy = highlight_element.get_position(prot);
     var x = xy[0];
     var y = xy[1];
     
@@ -1254,10 +1261,10 @@ function prepare_infobox(prot){
         if (progress >= time) {
             clearInterval (moving);
             document.getElementById("animation_background").style.display = "none";
-            show_infobox = true;
-            var xy = data[highlight].get_position(prot);
-            infobox.create(xy[0], xy[1], highlight, prot);
-            data[highlight].highlight = false;
+            infobox.visible = true;
+            var xy = highlight_element.get_position(prot);
+            infobox.create(xy[0], xy[1], data_ref[highlight_element.id], prot);
+            highlight_element.highlight = false;
             draw();
         }
         else {

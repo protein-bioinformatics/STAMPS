@@ -1,3 +1,15 @@
+function visual_element() {
+    this.x = 0;
+    this.y = 0;
+    this.width = 0;
+    this.height = 0;
+    this.mouse_click = function(mouse){};
+    this.mouse_down = function(mouse){};
+    this.is_mouse_over = function(mouse){return false};
+    this.draw = function(){};
+}
+
+
 function search_pattern(text, len_p, accept, masks, id1, id2){
     var results = [];
     text = text.replace(String.fromCharCode(13) + String.fromCharCode(10), " ");
@@ -199,134 +211,135 @@ CanvasRenderingContext2D.prototype.draw_line = function (x1, y1, x2, y2) {
 }
 
 
+Infobox.prototype = new visual_element();
+
+Infobox.prototype.constructor = Infobox;
+
 function Infobox(ctx){
-    this.x = 0;
-    this.y = 0;
-    this.width = 40;
-    this.height = 40;
     this.node_id = -1;
     this.protein_id = -1;
     this.ctx = ctx;
+    this.visible = false;
+}
     
-    
-    this.create = function(x, y, node_id, protein_id){
-        this.x = x;
-        this.y = y;
-        this.node_id = node_id;
-        this.protein_id = protein_id;
-        if (data[node_id].type == "metabolite"){
-            this.width = data[this.node_id].img.width + 40;
-            this.height = data[this.node_id].img.height + 40;
-            
-            this.ctx.font = "bold " + line_height.toString() + "px Arial";
-            this.width = Math.max(this.width, this.ctx.measureText(data[this.node_id].name).width + 40);
-            this.height += 3 * line_height + 20;
-            
-            this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
-            this.width = Math.max(this.width, this.ctx.measureText("Formula:  " + data[this.node_id].formula).width + 40);
-            this.width = Math.max(this.width, this.ctx.measureText("Exact Mass: " + data[this.node_id].exact_mass).width + 40);
-            
-        }
-        else {
-            this.width = 40;
-            this.height = 40;
-            this.height += 4 * line_height + 20;
-            this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
-            this.width = Math.max(this.width, this.ctx.measureText("Definition: " + data[this.node_id].proteins[this.protein_id].definition).width + 40);
-            this.width = Math.max(this.width, this.ctx.measureText("Uniprot accession: " + data[this.node_id].proteins[this.protein_id].accession).width + 40);
-            this.width = Math.max(this.width, this.ctx.measureText("EC number: " + data[this.node_id].proteins[this.protein_id].ec_number).width + 40);
-        }
-    }
-    
-    this.is_mouse_over = function(mouse){
-        var x_l = this.x - (this.width + infobox_offset_x);
-        var x_r = this.x - infobox_offset_x;
-        var y_l = this.y - this.height * 0.5;
-        var y_r = this.y + this.height * 0.5;
-        return (x_l <= mouse.x && mouse.x <= x_r && y_l <= mouse.y && mouse.y <= y_r);
-    }
-    
-    this.draw = function(){
-        var radius = Math.floor(round_rect_radius);
+Infobox.prototype.create = function(x, y, node_id, protein_id){
+    this.x = x;
+    this.y = y;
+    this.node_id = node_id;
+    this.protein_id = protein_id;
+    if (data[node_id].type == "metabolite"){
+        this.width = data[this.node_id].img.width + 40;
+        this.height = data[this.node_id].img.height + 40;
         
-        this.ctx.fillStyle = infobox_fill_color;
-        this.ctx.strokeStyle = infobox_stroke_color;
-        this.ctx.lineWidth = infobox_stroke_width;
+        this.ctx.font = "bold " + line_height.toString() + "px Arial";
+        this.width = Math.max(this.width, this.ctx.measureText(data[this.node_id].name).width + 40);
+        this.height += 3 * line_height + 20;
         
-        var offset_x = this.width + infobox_offset_x;
-        var offset_y = this.height / 2;
+        this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
+        this.width = Math.max(this.width, this.ctx.measureText("Formula:  " + data[this.node_id].formula).width + 40);
+        this.width = Math.max(this.width, this.ctx.measureText("Exact Mass: " + data[this.node_id].exact_mass).width + 40);
+        
+    }
+    else {
+        this.width = 40;
+        this.height = 40;
+        this.height += 4 * line_height + 20;
+        this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
+        this.width = Math.max(this.width, this.ctx.measureText("Definition: " + data[this.node_id].proteins[this.protein_id].definition).width + 40);
+        this.width = Math.max(this.width, this.ctx.measureText("Uniprot accession: " + data[this.node_id].proteins[this.protein_id].accession).width + 40);
+        this.width = Math.max(this.width, this.ctx.measureText("EC number: " + data[this.node_id].proteins[this.protein_id].ec_number).width + 40);
+    }
+}
+
+Infobox.prototype.is_mouse_over = function(mouse){
+    var x_l = this.x - (this.width + infobox_offset_x);
+    var x_r = this.x - infobox_offset_x;
+    var y_l = this.y - this.height * 0.5;
+    var y_r = this.y + this.height * 0.5;
+    return (x_l <= mouse.x && mouse.x <= x_r && y_l <= mouse.y && mouse.y <= y_r);
+}
+
+Infobox.prototype.draw = function(){
+    if (!this.visible) return;
+    var radius = Math.floor(round_rect_radius);
+    
+    this.ctx.fillStyle = infobox_fill_color;
+    this.ctx.strokeStyle = infobox_stroke_color;
+    this.ctx.lineWidth = infobox_stroke_width;
+    
+    var offset_x = this.width + infobox_offset_x;
+    var offset_y = this.height / 2;
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.x - offset_x + radius, this.y - offset_y);
+    this.ctx.lineTo(this.x - offset_x + this.width - radius, this.y - offset_y);
+    this.ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y, this.x - offset_x + this.width, this.y - offset_y + radius);
+    
+    
+    this.ctx.lineTo(this.x - offset_x + this.width, this.y - infobox_offset_x);
+    this.ctx.lineTo(this.x - offset_x + this.width + infobox_offset_x, this.y);
+    this.ctx.lineTo(this.x - offset_x + this.width, this.y + infobox_offset_x);
+    
+    this.ctx.lineTo(this.x - offset_x + this.width, this.y - offset_y + this.height - radius);
+    this.ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y + this.height, this.x - offset_x + this.width - radius, this.y - offset_y + this.height);
+    this.ctx.lineTo(this.x - offset_x + radius, this.y - offset_y + this.height);
+    this.ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y + this.height, this.x - offset_x, this.y - offset_y + this.height - radius);
+    this.ctx.lineTo(this.x - offset_x, this.y - offset_y + radius);
+    this.ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y, this.x - offset_x + radius, this.y - offset_y);
+    this.ctx.closePath();
+    this.ctx.fill();
+    this.ctx.stroke();
+    
+    if (data[this.node_id].type == "metabolite"){
+        this.ctx.textAlign = "left";
+        this.ctx.textBaseline = 'top';
+        this.ctx.font = "bold " + line_height.toString() + "px Arial";
+        this.ctx.fillStyle = "black";
+        this.ctx.fillText(data[this.node_id].name, this.x - offset_x + 20, this.y - offset_y + 20);
+        
         this.ctx.beginPath();
-        this.ctx.moveTo(this.x - offset_x + radius, this.y - offset_y);
-        this.ctx.lineTo(this.x - offset_x + this.width - radius, this.y - offset_y);
-        this.ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y, this.x - offset_x + this.width, this.y - offset_y + radius);
-        
-        
-        this.ctx.lineTo(this.x - offset_x + this.width, this.y - infobox_offset_x);
-        this.ctx.lineTo(this.x - offset_x + this.width + infobox_offset_x, this.y);
-        this.ctx.lineTo(this.x - offset_x + this.width, this.y + infobox_offset_x);
-        
-        this.ctx.lineTo(this.x - offset_x + this.width, this.y - offset_y + this.height - radius);
-        this.ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y + this.height, this.x - offset_x + this.width - radius, this.y - offset_y + this.height);
-        this.ctx.lineTo(this.x - offset_x + radius, this.y - offset_y + this.height);
-        this.ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y + this.height, this.x - offset_x, this.y - offset_y + this.height - radius);
-        this.ctx.lineTo(this.x - offset_x, this.y - offset_y + radius);
-        this.ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y, this.x - offset_x + radius, this.y - offset_y);
-        this.ctx.closePath();
-        this.ctx.fill();
+        this.ctx.strokeStyle = disabled_fill_color;
+        this.ctx.moveTo(this.x - offset_x + 20, this.y - offset_y + line_height + 30);
+        this.ctx.lineTo(this.x - offset_x + this.width - 20, this.y - offset_y + line_height + 30);
         this.ctx.stroke();
         
-        if (data[this.node_id].type == "metabolite"){
-            this.ctx.textAlign = "left";
-            this.ctx.textBaseline = 'top';
-            this.ctx.font = "bold " + line_height.toString() + "px Arial";
-            this.ctx.fillStyle = "black";
-            this.ctx.fillText(data[this.node_id].name, this.x - offset_x + 20, this.y - offset_y + 20);
-            
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = disabled_fill_color;
-            this.ctx.moveTo(this.x - offset_x + 20, this.y - offset_y + line_height + 30);
-            this.ctx.lineTo(this.x - offset_x + this.width - 20, this.y - offset_y + line_height + 30);
-            this.ctx.stroke();
-            
-            this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
-            this.ctx.fillText("Formula:", this.x - offset_x + 20, this.y - offset_y + line_height + 40);
-            this.ctx.fillText("Exact mass:", this.x - offset_x + 20, this.y - offset_y + 2 * line_height + 40);
-            
-            this.ctx.font = (line_height - 5).toString() + "px Arial";
-            this.ctx.fillText(data[this.node_id].formula, this.x - offset_x + 20 + this.ctx.measureText("Formula:  ").width, this.y - offset_y + line_height + 40);
-            this.ctx.fillText(data[this.node_id].exact_mass, this.x - offset_x + 20 + this.ctx.measureText("Exact mass: ").width, this.y - offset_y + 2 * line_height + 40);
-            
-            if (data[this.node_id].img.width)
-                this.ctx.drawImage(data[this.node_id].img, this.x - offset_x + 20, this.y - offset_y + 40 + 3 * line_height);
-        }
-        else if (data[this.node_id].type == "protein"){
-            this.ctx.textAlign = "left";
-            this.ctx.textBaseline = 'top';
-            this.ctx.font = "bold " + line_height.toString() + "px Arial";
-            this.ctx.fillStyle = "black";
-            this.ctx.fillText(data[this.node_id].proteins[this.protein_id].name, this.x - offset_x + 20, this.y - offset_y + 20);
+        this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
+        this.ctx.fillText("Formula:", this.x - offset_x + 20, this.y - offset_y + line_height + 40);
+        this.ctx.fillText("Exact mass:", this.x - offset_x + 20, this.y - offset_y + 2 * line_height + 40);
         
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = disabled_fill_color;
-            this.ctx.moveTo(this.x - offset_x + 20, this.y - offset_y + line_height + 30);
-            this.ctx.lineTo(this.x - offset_x + this.width - 20, this.y - offset_y + line_height + 30);
-            this.ctx.stroke();
-            
-            this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
-            this.ctx.fillText("Definition: ", this.x - offset_x + 20, this.y - offset_y + line_height + 40);
-            this.ctx.fillText("Uniprot accession: ", this.x - offset_x + 20, this.y - offset_y + 2 * line_height + 40);
-            this.ctx.fillText("EC number: ", this.x - offset_x + 20, this.y - offset_y + 3 * line_height + 40);
-            var l_def = this.ctx.measureText("Definition: ").width;
-            var l_acc = this.ctx.measureText("Uniprot accession: ").width;
-            var l_ec = this.ctx.measureText("EC number: ").width;
-            
-            
-            
-            this.ctx.font = (line_height - 5).toString() + "px Arial";
-            this.ctx.fillText(data[this.node_id].proteins[this.protein_id].definition, this.x - offset_x + 20 + l_def, this.y - offset_y + line_height + 40);
-            this.ctx.fillText(data[this.node_id].proteins[this.protein_id].accession, this.x - offset_x + 20 + l_acc, this.y - offset_y + 2 * line_height + 40);
-            this.ctx.fillText(data[this.node_id].proteins[this.protein_id].ec_number, this.x - offset_x + 20 + l_ec, this.y - offset_y + 3 * line_height + 40);
-        }
+        this.ctx.font = (line_height - 5).toString() + "px Arial";
+        this.ctx.fillText(data[this.node_id].formula, this.x - offset_x + 20 + this.ctx.measureText("Formula:  ").width, this.y - offset_y + line_height + 40);
+        this.ctx.fillText(data[this.node_id].exact_mass, this.x - offset_x + 20 + this.ctx.measureText("Exact mass: ").width, this.y - offset_y + 2 * line_height + 40);
+        
+        if (data[this.node_id].img.width)
+            this.ctx.drawImage(data[this.node_id].img, this.x - offset_x + 20, this.y - offset_y + 40 + 3 * line_height);
+    }
+    else if (data[this.node_id].type == "protein"){
+        this.ctx.textAlign = "left";
+        this.ctx.textBaseline = 'top';
+        this.ctx.font = "bold " + line_height.toString() + "px Arial";
+        this.ctx.fillStyle = "black";
+        this.ctx.fillText(data[this.node_id].proteins[this.protein_id].name, this.x - offset_x + 20, this.y - offset_y + 20);
+    
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = disabled_fill_color;
+        this.ctx.moveTo(this.x - offset_x + 20, this.y - offset_y + line_height + 30);
+        this.ctx.lineTo(this.x - offset_x + this.width - 20, this.y - offset_y + line_height + 30);
+        this.ctx.stroke();
+        
+        this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
+        this.ctx.fillText("Definition: ", this.x - offset_x + 20, this.y - offset_y + line_height + 40);
+        this.ctx.fillText("Uniprot accession: ", this.x - offset_x + 20, this.y - offset_y + 2 * line_height + 40);
+        this.ctx.fillText("EC number: ", this.x - offset_x + 20, this.y - offset_y + 3 * line_height + 40);
+        var l_def = this.ctx.measureText("Definition: ").width;
+        var l_acc = this.ctx.measureText("Uniprot accession: ").width;
+        var l_ec = this.ctx.measureText("EC number: ").width;
+        
+        
+        
+        this.ctx.font = (line_height - 5).toString() + "px Arial";
+        this.ctx.fillText(data[this.node_id].proteins[this.protein_id].definition, this.x - offset_x + 20 + l_def, this.y - offset_y + line_height + 40);
+        this.ctx.fillText(data[this.node_id].proteins[this.protein_id].accession, this.x - offset_x + 20 + l_acc, this.y - offset_y + 2 * line_height + 40);
+        this.ctx.fillText(data[this.node_id].proteins[this.protein_id].ec_number, this.x - offset_x + 20 + l_ec, this.y - offset_y + 3 * line_height + 40);
     }
 }
 
@@ -427,7 +440,10 @@ function node(data, c){
     }
     
     
-    this.draw = function(font_size, radius) {
+    this.draw = function() {
+        var font_size = text_size * factor;
+        var radius = metabolite_radius * factor;
+    
         switch (this.type){
             case "protein":
                 
