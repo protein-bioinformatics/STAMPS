@@ -642,21 +642,20 @@ function hide_custom_menu(event){
 
 
 function mouse_wheel_listener(e){
-    var direction = (1 - 2 * (e.detail >= 0));
-    if (zoom + direction < 1 || max_zoom < zoom + direction)
-        return;
-    zoom += direction;
-    factor = Math.pow(scaling, zoom - start_zoom);
-    
     var c = document.getElementById("renderarea");
     zoom_in_out(e.detail >= 0, get_mouse_pos(c, e));
 }
     
 function zoom_in_out(dir, res){
+    var direction = (1 - 2 * dir);
+    if (zoom + direction < 1 || max_zoom < zoom + direction)
+        return;
+    zoom += direction;
+    factor = Math.pow(scaling, zoom - start_zoom);
     var scale = scaling;
     if (dir) scale = 1. / scale;
     
-    if (res == "undefined") {
+    if (!res) {
         res = [];
         res.x = window.innerWidth * 0.5;
         res.y = window.innerHeight * 0.5;
@@ -800,7 +799,7 @@ function mouse_move_listener(e){
         }
         if (highlight_element != newhighlight && !event_moving_node){
             for (var i = 0; i < elements.length; ++i){
-                elements[i].highlight = (highlight_element == newhighlight);
+                elements[i].highlight = (elements[i] == newhighlight);
             }
             highlight_element = newhighlight;
             draw();
@@ -827,6 +826,8 @@ function unTip() {
 
 
 function key_down(event){
+    if(event.which == 45) zoom_in_out(1, 0);
+    else if (event.which == 43) zoom_in_out(0, 0);
     if (administration){
         event_key_down = (event.which == 17);
     }

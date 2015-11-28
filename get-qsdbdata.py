@@ -85,7 +85,7 @@ for row in my_cur:
     if (r_last["type"] == "protein"):
         r_last["proteins"] = []
         r_last_prot = r_last["proteins"]
-        sql_protein = "SELECT p.id, p.name, p.definition, p.species, p.kegg_link, p.accession, p.ec_number FROM proteins p INNER JOIN nodeproteincorrelations np ON p.id = np.protein_id WHERE np.node_id = %s and species in (%s)"
+        sql_protein = "SELECT p.* FROM proteins p INNER JOIN nodeproteincorrelations np ON p.id = np.protein_id WHERE np.node_id = %s and species in (%s)"
         my_cur_prot.execute(sql_protein, (response[-1]["id"], species))
         for row_protein in my_cur_prot:
             r_last_prot.append(row_protein)

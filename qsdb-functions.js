@@ -55,6 +55,7 @@ function Protein(data){
     this.kegg_link = data['kegg_link'];
     this.accession = data['accession'];
     this.ec_number = data['ec_number'];
+    this.mass = data['mass'];
     this.peptides = [];
     this.marked = false;
     this.containing_spectra = 0;
@@ -243,17 +244,18 @@ function Infobox(ctx){
             
             this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
             this.width = Math.max(this.width, this.ctx.measureText("Formula:  " + data[this.node_id].formula).width + 40);
-            this.width = Math.max(this.width, this.ctx.measureText("Exact Mass: " + data[this.node_id].exact_mass).width + 40);
+            this.width = Math.max(this.width, this.ctx.measureText("Exact Mass / Da: " + data[this.node_id].exact_mass).width + 40);
             
         }
         else {
             this.width = 40;
             this.height = 40;
-            this.height += 4 * line_height + 20;
+            this.height += 5 * line_height + 20;
             this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
             this.width = Math.max(this.width, this.ctx.measureText("Definition: " + data[this.node_id].proteins[this.protein_id].definition).width + 40);
             this.width = Math.max(this.width, this.ctx.measureText("Uniprot accession: " + data[this.node_id].proteins[this.protein_id].accession).width + 40);
             this.width = Math.max(this.width, this.ctx.measureText("EC number: " + data[this.node_id].proteins[this.protein_id].ec_number).width + 40);
+            this.width = Math.max(this.width, this.ctx.measureText("Mass / Da: " + data[this.node_id].proteins[this.protein_id].mass).width + 40);
         }
     }
 
@@ -316,11 +318,15 @@ function Infobox(ctx){
             
             this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
             this.ctx.fillText("Formula:", this.x - offset_x + 20, this.y - offset_y + line_height + 40);
-            this.ctx.fillText("Exact mass:", this.x - offset_x + 20, this.y - offset_y + 2 * line_height + 40);
+            this.ctx.fillText("Exact mass / Da:", this.x - offset_x + 20, this.y - offset_y + 2 * line_height + 40);
+            var l_for = this.ctx.measureText("Formula: ").width;
+            var l_ems = this.ctx.measureText("Exact mass / Da: ").width;
+            
+            
             
             this.ctx.font = (line_height - 5).toString() + "px Arial";
-            this.ctx.fillText(data[this.node_id].formula, this.x - offset_x + 20 + this.ctx.measureText("Formula:  ").width, this.y - offset_y + line_height + 40);
-            this.ctx.fillText(data[this.node_id].exact_mass, this.x - offset_x + 20 + this.ctx.measureText("Exact mass: ").width, this.y - offset_y + 2 * line_height + 40);
+            this.ctx.fillText(data[this.node_id].formula, this.x - offset_x + 20 + l_for, this.y - offset_y + line_height + 40);
+            this.ctx.fillText(data[this.node_id].exact_mass, this.x - offset_x + 20 + l_ems, this.y - offset_y + 2 * line_height + 40);
             
             if (data[this.node_id].img.width)
                 this.ctx.drawImage(data[this.node_id].img, this.x - offset_x + 20, this.y - offset_y + 40 + 3 * line_height);
@@ -342,9 +348,11 @@ function Infobox(ctx){
             this.ctx.fillText("Definition: ", this.x - offset_x + 20, this.y - offset_y + line_height + 40);
             this.ctx.fillText("Uniprot accession: ", this.x - offset_x + 20, this.y - offset_y + 2 * line_height + 40);
             this.ctx.fillText("EC number: ", this.x - offset_x + 20, this.y - offset_y + 3 * line_height + 40);
+            this.ctx.fillText("Mass / Da: ", this.x - offset_x + 20, this.y - offset_y + 4 * line_height + 40);
             var l_def = this.ctx.measureText("Definition: ").width;
             var l_acc = this.ctx.measureText("Uniprot accession: ").width;
             var l_ec = this.ctx.measureText("EC number: ").width;
+            var l_ms = this.ctx.measureText("Mass / Da: ").width;
             
             
             
@@ -352,6 +360,7 @@ function Infobox(ctx){
             this.ctx.fillText(data[this.node_id].proteins[this.protein_id].definition, this.x - offset_x + 20 + l_def, this.y - offset_y + line_height + 40);
             this.ctx.fillText(data[this.node_id].proteins[this.protein_id].accession, this.x - offset_x + 20 + l_acc, this.y - offset_y + 2 * line_height + 40);
             this.ctx.fillText(data[this.node_id].proteins[this.protein_id].ec_number, this.x - offset_x + 20 + l_ec, this.y - offset_y + 3 * line_height + 40);
+            this.ctx.fillText(data[this.node_id].proteins[this.protein_id].mass, this.x - offset_x + 20 + l_ms, this.y - offset_y + 4 * line_height + 40);
         }
     }
 }
