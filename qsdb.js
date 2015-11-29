@@ -15,6 +15,8 @@ node_move_x = 0;
 node_move_y = 0;
 edges = [];
 infobox = 0;
+zoom_sign_in = 0;
+zoom_sign_out = 0;
 elements = [];
 
 scaling = 1.4;
@@ -221,6 +223,8 @@ function init(){
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     infobox = new Infobox(ctx);
+    zoom_sign_in = new zoom_sign(ctx, 1);
+    zoom_sign_out = new zoom_sign(ctx, 0);
     
     
     c.onclick = function (event)
@@ -374,6 +378,8 @@ function load_data(reload){
     xmlhttp2.send();
     compute_edges();
     elements.push(infobox);
+    elements.push(zoom_sign_in);
+    elements.push(zoom_sign_out);
     draw();
 }
 

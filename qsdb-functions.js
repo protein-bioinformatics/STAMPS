@@ -218,8 +218,40 @@ CanvasRenderingContext2D.prototype.draw_line = function (x1, y1, x2, y2) {
 }
 
 
-Infobox.prototype = new visual_element();
+zoom_sign.prototype = new visual_element();
+zoom_sign.prototype.constructor = zoom_sign;
 
+function zoom_sign(ctx, dir){
+    this.dir = dir;
+    this.name = dir ? "zoom in" : "zoom out";
+    this.img = new Image();
+    this.img.src = "zoom_" + (dir ? "in" : "out") + ".png";
+    var ratio = 0.02 * window.innerWidth / this.img.width;
+    this.width = this.img.width * ratio;
+    this.height = this.img.height * ratio;
+    this.x = window.innerWidth - this.width * 1.3;
+    this.y = window.innerHeight - this.height * (1.3 + dir);
+    this.ctx = ctx;
+    
+    this.mouse_click = function(mouse){
+        zoom_in_out(1 - this.dir, 0);
+    }
+    
+    this.is_mouse_over = function(mouse){
+        return (this.x <= mouse.x && mouse.x <= this.x + this.width && this.y <= mouse.y && mouse.y <= this.y + this.height);
+    }
+    
+    this.draw = function(){
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.3 + 0.7 * this.highlight;
+        this.ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+        this.ctx.restore();
+        this.ctx.globalAlpha = 1.;
+    }
+}
+
+
+Infobox.prototype = new visual_element();
 Infobox.prototype.constructor = Infobox;
 
 function Infobox(ctx){
