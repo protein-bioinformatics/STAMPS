@@ -761,6 +761,7 @@ function mouse_move_listener(e){
             var shift_y = res.y - offsetY;
             if (shift_x != 0 || shift_y != 0){
                 moved = true;
+                c.style.cursor = "all-scroll";
             }
             
             
@@ -871,6 +872,7 @@ function update_node(event) {
 function mouse_up_listener(event){
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, event);
+    c.style.cursor = "auto";
     if (highlight_element) highlight_element.mouse_up(res);
     if (event_moving_node) update_node(event);
 }
@@ -1230,6 +1232,7 @@ function prepare_infobox(prot){
             var xy = highlight_element.get_position(prot);
             infobox.create(xy[0], xy[1], data_ref[highlight_element.id], prot);
             highlight_element.highlight = false;
+            highlight_element = 0;
             draw();
         }
         else {
