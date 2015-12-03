@@ -1,6 +1,6 @@
 moved = false;
 HTTP_GET_VARS = [];
-current_pathway = 1;
+current_pathway = 6;
 highlight_element = 0;
 offsetX = 0;
 offsetY = 0;
@@ -20,7 +20,7 @@ zoom_sign_out = 0;
 elements = [];
 
 scaling = 1.4;
-zoom = 5;
+zoom = 1;
 start_zoom = 5;
 max_zoom = 10;
 base_grid = 25;
@@ -319,7 +319,7 @@ function load_data(reload){
     var y_min = 1e100, y_max = -1e100;
     for (var i = 0; i < tmp_data.length; ++i){
         data.push(new node(tmp_data[i], c));
-        elements.push(data[i]);
+        //elements.push(data[i]);
         x_mean += data[i].x;
         y_mean += data[i].y;
         x_min = Math.min(x_min, data[i].x);
@@ -348,21 +348,21 @@ function load_data(reload){
         null_x += ctx.canvas.width / 2 - x_mean;
         null_y += ctx.canvas.height / 2 - y_mean;
     
-        /*
+        
         if ((x_max - x_min + 200) / ctx.canvas.width > (y_max - y_min + 200) / ctx.canvas.height){
             scaling = Math.pow((x_max - x_min + 200) / ctx.canvas.width, 0.25);
         }
         else {
             scaling = Math.pow((y_max - y_min + 200) / ctx.canvas.height, 0.25);
         }
-        */
-        if ((x_max - x_min + 200) / ctx.canvas.width > (y_max - y_min + 200) / ctx.canvas.height){
+        
+        /*if ((x_max - x_min + 200) / ctx.canvas.width > (y_max - y_min + 200) / ctx.canvas.height){
             start_zoom = Math.ceil(Math.log((x_max - x_min + 200) / ctx.canvas.width) / Math.log(scaling)) + 1;
         }
         else {
             start_zoom = Math.ceil(Math.log((y_max - y_min + 200) / ctx.canvas.height) / Math.log(scaling)) + 1;
-        }
-        zoom = start_zoom;     
+        }*/
+        //zoom = start_zoom;     
         factor = Math.pow(scaling, zoom - start_zoom);
     }
     
@@ -376,20 +376,18 @@ function load_data(reload){
     }
     xmlhttp2.open("GET", "get-edgedata.py?pathway=" + current_pathway, false);
     xmlhttp2.send();
+    assemble_elements();
     compute_edges();
-    elements.push(infobox);
-    elements.push(zoom_sign_in);
-    elements.push(zoom_sign_out);
     draw();
 }
 
 
 function compute_edges(){
-    edges = new Array();
+    edges = [];
     var c = document.getElementById("renderarea");
     var radius = Math.floor(metabolite_radius * factor);
-    var connections = new Array();
-    var nodes_anchors = new Array();
+    var connections = [];
+    var nodes_anchors = [];
     for (var i = 0; i < data.length; ++i){
         nodes_anchors.push({left: [], right: [], top: [], bottom: []});
     }
@@ -523,9 +521,19 @@ function compute_edges(){
             }
         }
         edges.push(new edge(c, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], connections[i][4]));
-        elements.push(edges[i]);
+        //elements.push(edges[i]);
     }
-    
+    assemble_elements();
+}
+
+
+function assemble_elements(){
+    elements = [];
+    for (var i = 0; i < data.length; ++i) elements.push(data[i]);
+    for (var i = 0; i < edges.length; ++i) elements.push(edges[i]);    
+    elements.push(infobox);
+    elements.push(zoom_sign_in);
+    elements.push(zoom_sign_out);
 }
 
 
@@ -813,7 +821,7 @@ function mouse_move_listener(e){
         }
         
     }
-    if(highlight_element && highlight_element.tipp) Tip(e, /* data[highlight].id + " " + */ highlight_element.name);
+    if(highlight_element && highlight_element.tipp) Tip(e, highlight_element.id + " " + highlight_element.name);
     else unTip();
 }
 

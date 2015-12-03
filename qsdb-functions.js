@@ -224,8 +224,7 @@ zoom_sign.prototype.constructor = zoom_sign;
 function zoom_sign(ctx, dir){
     this.dir = dir;
     this.name = dir ? "zoom in" : "zoom out";
-    this.img = new Image();
-    this.img.src = "zoom_" + (dir ? "in" : "out") + ".png";
+    this.img = document.getElementById("zoom_" + (dir ? "in" : "out"));
     var ratio = 0.02 * window.innerWidth / this.img.width;
     this.width = this.img.width * ratio;
     this.height = this.img.height * ratio;
