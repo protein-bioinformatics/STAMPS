@@ -185,7 +185,7 @@ function Protein(data){
 
 CanvasRenderingContext2D.prototype.wrapText = function (text, x, y, maxWidth, lineHeight) {
     var lines = text.split("\n");
-    y -= Math.floor((lines.length - 1) * lineHeight * 0.5);
+    y -= (lines.length - 1) * lineHeight * 0.5;
     for (var i = 0; i < lines.length; i++) {
         var words = lines[i].split(' ');
         var line = '';
@@ -306,7 +306,7 @@ function Infobox(ctx){
 
     this.draw = function(){
         if (!this.visible) return;
-        var radius = Math.floor(round_rect_radius);
+        var radius = round_rect_radius;
         
         this.ctx.fillStyle = infobox_fill_color;
         this.ctx.strokeStyle = infobox_stroke_color;
@@ -625,7 +625,7 @@ function node(data, c){
         }
         
         if (this.type == "metabolite"){
-            return [this.x - Math.floor(metabolite_radius * factor), this.y];
+            return [this.x - metabolite_radius * factor, this.y];
         }
         
         var offset_y = 0;
@@ -880,7 +880,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     this.routing = function(xa_s, ya_s, a_s, protein_node, xa_e, ya_e, a_e, metabolite_node){
         a_s = a_s.charAt(0);
         a_e = a_e.charAt(0);
-        var grid = base_grid;
+        var grid = base_grid * factor;
         var offset_x = {"l": -grid, "r": grid, "t": 0, "b": 0};
         var offset_y = {"l": 0, "r": 0, "t": -grid, "b": grid};
         var w_s = protein_node.width * 0.5;
@@ -899,7 +899,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
         var yd_e = ya_e + offset_y[a_e];
         
         // initialize grid
-        var W = 8 + Math.ceil(Math.abs(xd_s +  - xd_e) / grid);
+        var W = 8 + Math.ceil(Math.abs(xd_s - xd_e) / grid);
         var H = 8 + Math.ceil(Math.abs(yd_s - yd_e) / grid);
         var open_list = new priority_queue();
         var matrix = [];
@@ -922,12 +922,25 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             for (var w = 0; w < W; ++w){
                 var x = (w - cell_x_s) * grid + xd_s;
                 var active = true;
+                
                 if (x_s - w_s <= x && x <= x_s + w_s && y_s - h_s <= y && y <= y_s + h_s){
                     active = false;
                 }
                 if (active && x_e - w_e <= x && x <= x_e + w_e && y_e - h_e <= y && y <= y_e + h_e){
                     active = false;
                 }
+                /*
+                for (var i = 0; i < data.length && active; ++i){
+                    xx_min = data[i].x - (data[i].width * 0.5 + base_grid * factor);
+                    xx_max = data[i].x + (data[i].width * 0.5 + base_grid * factor);
+                    yy_min = data[i].y - data[i].height * 0.5 + base_grid * factor;
+                    yy_max = data[i].y + (data[i].height * 0.5 + base_grid * factor);
+                    if (xx_min <= x && x <= xx_max && yy_min <= y && y <= yy_max){
+                        active = false;
+                    }
+                }
+                if (!active) console.log("na: " + ((w - cell_x_s) * grid + xd_s) + " " + ((h - cell_y_s) * grid + yd_s));
+                */
                 matrix[h][w].active = active;
             }
             if (Math.abs(y - yd_e) < Math.abs((cell_y_e - cell_y_s) * grid + yd_s - yd_e)){

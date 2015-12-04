@@ -19,10 +19,11 @@ zoom_sign_in = 0;
 zoom_sign_out = 0;
 elements = [];
 
-scaling = 1.4;
-zoom = 5;
-start_zoom = 5;
-max_zoom = 10;
+scaling = 1.25;
+zoom = 0;
+max_zoom = 5;
+min_zoom = -5;
+highlight_zoom = 3;
 base_grid = 25;
 max_protein_line_number = 3;
 metabolite_radius = 10;
@@ -34,7 +35,7 @@ line_height = 20;
 anchors = ['left', 'top', 'right', 'bottom'];
 administration = false;
 on_slide = false;
-factor = Math.pow(scaling, zoom - start_zoom);
+factor = Math.pow(scaling, zoom);
 
 
 line_width = 4;
@@ -74,7 +75,7 @@ function debug(text){
 
 
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height) {
-    var radius = Math.floor(round_rect_radius * factor);
+    var radius = round_rect_radius * factor;
     this.beginPath();
     this.moveTo(x + radius, y);
     this.lineTo(x + width - radius, y);
@@ -277,7 +278,7 @@ function init(){
 
 
 function reset_view(){
-    zoom = start_zoom;
+    zoom = 0;
     null_x = 0;
     null_y = 0;    
 }
@@ -286,9 +287,11 @@ function reset_view(){
 
 function load_data(reload){
     if (!reload){
-        zoom = start_zoom;
+        zoom = 0;
         null_x = 0;
         null_y = 0;
+        document.getElementById("search_field").value = "";
+        hide_search();
     }
     
     elements = [];
@@ -318,7 +321,6 @@ function load_data(reload){
     var x_min = 1e100, x_max = -1e100;
     var y_min = 1e100, y_max = -1e100;
     var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
-    console.log(nav_height);
     for (var i = 0; i < tmp_data.length; ++i){
         data.push(new node(tmp_data[i], c));
         x_mean += data[i].x;
@@ -350,21 +352,22 @@ function load_data(reload){
         null_y += ctx.canvas.height / 2 - y_mean;
     
         
+        /*
         if ((x_max - x_min + 200) / ctx.canvas.width > (y_max - y_min + 200) / ctx.canvas.height){
             scaling = Math.pow((x_max - x_min + 200) / ctx.canvas.width, 0.25);
         }
         else {
             scaling = Math.pow((y_max - y_min + 200) / ctx.canvas.height, 0.25);
-        }
+        }*/
         
-        /*if ((x_max - x_min + 200) / ctx.canvas.width > (y_max - y_min + 200) / ctx.canvas.height){
-            start_zoom = Math.ceil(Math.log((x_max - x_min + 200) / ctx.canvas.width) / Math.log(scaling)) + 1;
+        
+        if ((x_max - x_min) / ctx.canvas.width > (y_max - y_min) / (ctx.canvas.height - nav_height)){
+            min_zoom = -Math.ceil(Math.log((x_max - x_min) / ctx.canvas.width) / Math.log(scaling));
         }
         else {
-            start_zoom = Math.ceil(Math.log((y_max - y_min + 200) / ctx.canvas.height) / Math.log(scaling)) + 1;
-        }*/
-        //zoom = start_zoom; 
-        factor = Math.pow(scaling, zoom - start_zoom);
+            min_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height)) / Math.log(scaling));
+        }
+        factor = Math.pow(scaling, zoom);
     }
     
     // get nodes information
@@ -378,7 +381,7 @@ function load_data(reload){
     xmlhttp2.send();
     assemble_elements();
     compute_edges();
-    for (var i = zoom; i >= 0; --i) zoom_in_out(1, 0);
+    for (var i = zoom; i >= min_zoom; --i) zoom_in_out(1, 0);
     draw();
 }
 
@@ -386,7 +389,7 @@ function load_data(reload){
 function compute_edges(){
     edges = [];
     var c = document.getElementById("renderarea");
-    var radius = Math.floor(metabolite_radius * factor);
+    var radius = metabolite_radius * factor;
     var connections = [];
     var nodes_anchors = [];
     for (var i = 0; i < data.length; ++i){
@@ -522,7 +525,6 @@ function compute_edges(){
             }
         }
         edges.push(new edge(c, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], connections[i][4]));
-        //elements.push(edges[i]);
     }
     assemble_elements();
 }
@@ -663,10 +665,10 @@ function mouse_wheel_listener(e){
     
 function zoom_in_out(dir, res){
     var direction = (1 - 2 * dir);
-    if (zoom + direction < 1 || max_zoom < zoom + direction)
+    if (zoom + direction < min_zoom || max_zoom < zoom + direction)
         return;
     zoom += direction;
-    factor = Math.pow(scaling, zoom - start_zoom);
+    factor = Math.pow(scaling, zoom);
     var scale = scaling;
     if (dir) scale = 1. / scale;
     
@@ -1089,17 +1091,19 @@ function highlight_protein(node_id, prot_id){
     var progress = 0;
     var steps = 24;
     var time = 3; // seconds
+    var std_dev = time / 6.;
     document.getElementById("animation_background").style.display = "inline";
     var x = data[data_ref[node_id]].x;
     var y = data[data_ref[node_id]].y;
     var width  = window.innerWidth * 0.5;
     var height = window.innerHeight * 0.5;
-    var scale = Math.pow(Math.pow(scaling, 7 - zoom), 1 / (time * steps));
-    var zoom_scale = Math.pow(7 / zoom, 1 / (time * steps));
+    var scale = Math.pow(Math.pow(scaling, highlight_zoom - zoom), 1 / (time * steps));
+    //var zoom_scale = Math.pow(highlight_zoom / zoom, 1 / (time * steps));
+    var zoom_scale = (highlight_zoom - zoom) / (time * steps);
     
     var moving = setInterval(function(){
         if (progress >= time) {
-            zoom = 7;
+            zoom = highlight_zoom;
             var l = 0, ii = 0;
             var highlighting = setInterval(function(){
                 if (ii >= 3){
@@ -1116,13 +1120,13 @@ function highlight_protein(node_id, prot_id){
             }, 20);
             document.getElementById("animation_background").style.display = "none";
             clearInterval (moving);
-            zoom = 7;
-            factor = Math.pow(scaling, zoom - start_zoom);
+            zoom = highlight_zoom;
+            factor = Math.pow(scaling, zoom);
             draw();
             
         }
         else {
-            var split = Math.exp(-0.5 * sq((progress - time * 0.5) / 0.5)) / (Math.sqrt(2 * Math.PI) * 0.5) / steps;
+            var split = Math.exp(-0.5 * sq((progress - time * 0.5) / std_dev)) / (Math.sqrt(2 * Math.PI) * std_dev) / steps;
             for (var i = 0; i < data.length; ++i){
                 data[i].width *= scale;
                 data[i].height *= scale;
@@ -1143,8 +1147,8 @@ function highlight_protein(node_id, prot_id){
             null_x = width + scale * (null_x - width);
             null_y = height + scale * (null_y - height);
             
-            zoom *= zoom_scale;
-            factor = Math.pow(scaling, zoom - start_zoom);
+            zoom += zoom_scale;
+            factor = Math.pow(scaling, zoom);
             
             
             draw();

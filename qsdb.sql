@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Erstellungszeit: 04. Dez 2015 um 08:56
+-- Erstellungszeit: 04. Dez 2015 um 10:58
 -- Server Version: 5.5.46-0ubuntu0.14.04.2
 -- PHP-Version: 5.5.9-1ubuntu4.14
 
@@ -391,7 +391,7 @@ INSERT INTO `nodes` (`id`, `pathway_id`, `type`, `foreign_id`, `pathway_ref`, `x
 (317, 6, 'protein', 0, 0, 1224, 549),
 (318, 6, 'protein', 0, 0, 1099, 474),
 (319, 6, 'protein', 0, 0, 399, 374),
-(320, 6, 'protein', 0, 0, -27, 498),
+(320, 6, 'protein', 0, 0, -26, 498),
 (321, 6, 'protein', 0, 0, 924, 374),
 (322, 6, 'protein', 0, 0, 699, 374),
 (323, 6, 'protein', 0, 0, 99, 374),
@@ -401,16 +401,16 @@ INSERT INTO `nodes` (`id`, `pathway_id`, `type`, `foreign_id`, `pathway_ref`, `x
 (327, 6, 'protein', 0, 0, 649, 248),
 (328, 6, 'protein', 0, 0, 524, 148),
 (329, 6, 'protein', 0, 0, 324, 48),
-(330, 6, 'protein', 0, 0, -27, 624),
+(330, 6, 'protein', 0, 0, -26, 648),
 (331, 6, 'metabolite', 125, 0, 1249, 148),
-(332, 6, 'metabolite', 126, 0, -27, 549),
-(333, 6, 'metabolite', 127, 0, 224, 347),
+(332, 6, 'metabolite', 126, 0, -26, 573),
+(333, 6, 'metabolite', 127, 0, 224, 348),
 (334, 6, 'metabolite', 128, 0, 1099, 549),
 (335, 6, 'metabolite', 129, 0, 324, 148),
-(336, 6, 'metabolite', 130, 0, -27, 423),
+(336, 6, 'metabolite', 130, 0, -26, 423),
 (337, 6, 'metabolite', 131, 0, 1099, 374),
 (338, 6, 'metabolite', 132, 0, 824, 374),
-(339, 6, 'metabolite', 133, 0, -27, 724),
+(339, 6, 'metabolite', 133, 0, -26, 723),
 (340, 6, 'metabolite', 134, 0, 523, 374),
 (341, 6, 'metabolite', 135, 0, 724, 823),
 (342, 6, 'metabolite', 136, 0, 824, 623),
@@ -428,15 +428,15 @@ INSERT INTO `nodes` (`id`, `pathway_id`, `type`, `foreign_id`, `pathway_ref`, `x
 (354, 6, 'pathway', 9, 0, -76, 274),
 (355, 6, 'pathway', 1, 0, 1024, -52),
 (356, 6, 'pathway', 11, 0, 599, -52),
-(357, 6, 'pathway', 12, 0, 24, -26),
-(358, 6, 'pathway', 13, 0, 24, 124),
+(357, 6, 'pathway', 12, 0, -151, 22),
+(358, 6, 'pathway', 13, 0, -151, 122),
 (359, 6, 'pathway', 14, 0, 1549, 822),
 (360, 6, 'pathway', 15, 0, 1523, 723),
 (361, 6, 'pathway', 16, 0, -201, 374),
-(362, 6, 'pathway', 17, 0, -226, 798),
+(362, 6, 'pathway', 17, 0, -126, 823),
 (363, 6, 'pathway', 15, 0, -101, 199),
 (364, 6, 'pathway', 19, 0, 1049, 822),
-(365, 6, 'pathway', 17, 0, -101, 49),
+(365, 6, 'pathway', 17, 0, 99, -53),
 (366, 6, 'pathway', 21, 0, -226, 474),
 (367, 6, 'pathway', 21, 0, 1474, 623),
 (368, 6, 'protein', 0, 0, 1449, 23),
@@ -2221,7 +2221,7 @@ CREATE TABLE IF NOT EXISTS `request_counter` (
 
 INSERT INTO `request_counter` (`id`, `month_year`, `number`) VALUES
 (1, '2015-11-01', 163),
-(2, '2015-12-01', 125);
+(2, '2015-12-01', 189);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
