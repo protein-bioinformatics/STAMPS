@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Erstellungszeit: 04. Dez 2015 um 10:58
+-- Erstellungszeit: 04. Dez 2015 um 11:18
 -- Server Version: 5.5.46-0ubuntu0.14.04.2
 -- PHP-Version: 5.5.9-1ubuntu4.14
 
@@ -95,29 +95,17 @@ INSERT INTO `metabolites` (`id`, `name`, `c_number`, `formula`, `exact_mass`) VA
 (122, '2,3-Bisphospho-D-glycerate', 'C01159', 'C3H8O10P2', '265.9593'),
 (123, 'D-Glyceraldehyde 3-phosphate', 'C00118', 'C3H7O6P', '169.998'),
 (124, 'Thiamin diphosphate', 'C00068', 'C12H19N4O7P2S', '425.045'),
-(125, 'Pyruvate', 'C00022', 'C3H4O3', '88.016'),
 (126, 'Fumarate', 'C00122', 'C4H4O4', '116.011'),
-(127, 'Oxaloacetate', 'C00036', 'C4H4O5', '132.0059'),
 (128, 'Oxalosuccinate', 'C05379', 'C6H6O7', '190.0114'),
-(129, 'Acetyl-CoA', 'C00024', 'C23H38N7O17P3S', '809.1258'),
 (130, '(S)-Malate', 'C00149', 'C4H6O5', '134.0215'),
 (131, 'Isocitrate', 'C00311', 'C6H8O7', '192.027'),
 (132, 'cis-Aconitate', 'C00417', 'C6H6O6', '174.0164'),
 (133, 'Succinate', 'C00042', 'C4H6O4', '118.0266'),
 (134, 'Citrate', 'C00158', 'C6H8O7', '192.027'),
-(135, 'Enzyme N6-(lipoyl)lysine', 'C15972', 'C8H14NOS2R', '-'),
-(136, 'Thiamin diphosphate', 'C00068', 'C12H19N4O7P2S', '425.045'),
 (137, '[Dihydrolipoyllysine-residue succinyltransferase] S-succinyldihydrolipoyllysine', 'C16254', 'C12H20NO4S2R', '-'),
-(138, 'Enzyme N6-(dihydrolipoyl)lysine', 'C15973', 'C8H16NOS2R', '-'),
 (139, 'Succinyl-CoA', 'C00091', 'C25H40N7O19P3S', '867.1313'),
 (140, '2-Oxoglutarate', 'C00026', 'C5H6O5', '146.0215'),
-(141, '3-Carboxy-1-hydroxypropyl-ThPP', 'C05381', 'C16H25N4O10P2S', '527.0767'),
-(142, '2-(alpha-Hydroxyethyl)thiamine diphosphate', 'C05125', 'C14H23N4O8P2S', '469.0712'),
-(143, 'Thiamin diphosphate', 'C00068', 'C12H19N4O7P2S', '425.045'),
-(144, 'Enzyme N6-(lipoyl)lysine', 'C15972', 'C8H14NOS2R', '-'),
-(145, '[Dihydrolipoyllysine-residue acetyltransferase] S-acetyldihydrolipoyllysine', 'C16255', 'C10H18NO2S2R', '-'),
-(146, 'Enzyme N6-(dihydrolipoyl)lysine', 'C15973', 'C8H16NOS2R', '-'),
-(147, 'Phosphoenolpyruvate', 'C00074', 'C3H5O6P', '167.9824');
+(141, '3-Carboxy-1-hydroxypropyl-ThPP', 'C05381', 'C16H25N4O10P2S', '527.0767');
 
 -- --------------------------------------------------------
 
@@ -402,29 +390,29 @@ INSERT INTO `nodes` (`id`, `pathway_id`, `type`, `foreign_id`, `pathway_ref`, `x
 (328, 6, 'protein', 0, 0, 524, 148),
 (329, 6, 'protein', 0, 0, 324, 48),
 (330, 6, 'protein', 0, 0, -26, 648),
-(331, 6, 'metabolite', 125, 0, 1249, 148),
+(331, 6, 'metabolite', 110, 0, 1249, 148),
 (332, 6, 'metabolite', 126, 0, -26, 573),
-(333, 6, 'metabolite', 127, 0, 224, 348),
+(333, 6, 'metabolite', 121, 0, 224, 348),
 (334, 6, 'metabolite', 128, 0, 1099, 549),
-(335, 6, 'metabolite', 129, 0, 324, 148),
+(335, 6, 'metabolite', 112, 0, 324, 148),
 (336, 6, 'metabolite', 130, 0, -26, 423),
 (337, 6, 'metabolite', 131, 0, 1099, 374),
 (338, 6, 'metabolite', 132, 0, 824, 374),
 (339, 6, 'metabolite', 133, 0, -26, 723),
 (340, 6, 'metabolite', 134, 0, 523, 374),
-(341, 6, 'metabolite', 135, 0, 724, 823),
-(342, 6, 'metabolite', 136, 0, 824, 623),
+(341, 6, 'metabolite', 108, 0, 724, 823),
+(342, 6, 'metabolite', 124, 0, 824, 623),
 (343, 6, 'metabolite', 137, 0, 523, 724),
-(344, 6, 'metabolite', 138, 0, 399, 822),
+(344, 6, 'metabolite', 115, 0, 399, 822),
 (345, 6, 'metabolite', 139, 0, 249, 724),
 (346, 6, 'metabolite', 140, 0, 1099, 724),
 (347, 6, 'metabolite', 141, 0, 824, 724),
-(348, 6, 'metabolite', 142, 0, 949, 148),
-(349, 6, 'metabolite', 143, 0, 949, 48),
-(350, 6, 'metabolite', 144, 0, 799, 248),
-(351, 6, 'metabolite', 145, 0, 649, 148),
-(352, 6, 'metabolite', 146, 0, 524, 248),
-(353, 6, 'metabolite', 147, 0, 524, 48),
+(348, 6, 'metabolite', 111, 0, 949, 148),
+(349, 6, 'metabolite', 124, 0, 949, 48),
+(350, 6, 'metabolite', 108, 0, 799, 248),
+(351, 6, 'metabolite', 114, 0, 649, 148),
+(352, 6, 'metabolite', 115, 0, 524, 248),
+(353, 6, 'metabolite', 104, 0, 524, 48),
 (354, 6, 'pathway', 9, 0, -76, 274),
 (355, 6, 'pathway', 1, 0, 1024, -52),
 (356, 6, 'pathway', 11, 0, 599, -52),
@@ -2221,7 +2209,7 @@ CREATE TABLE IF NOT EXISTS `request_counter` (
 
 INSERT INTO `request_counter` (`id`, `month_year`, `number`) VALUES
 (1, '2015-11-01', 163),
-(2, '2015-12-01', 189);
+(2, '2015-12-01', 192);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
