@@ -20,7 +20,7 @@ zoom_sign_out = 0;
 elements = [];
 
 scaling = 1.4;
-zoom = 1;
+zoom = 5;
 start_zoom = 5;
 max_zoom = 10;
 base_grid = 25;
@@ -317,15 +317,16 @@ function load_data(reload){
     var x_mean = 0, y_mean = 0;
     var x_min = 1e100, x_max = -1e100;
     var y_min = 1e100, y_max = -1e100;
+    var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
+    console.log(nav_height);
     for (var i = 0; i < tmp_data.length; ++i){
         data.push(new node(tmp_data[i], c));
-        //elements.push(data[i]);
         x_mean += data[i].x;
         y_mean += data[i].y;
-        x_min = Math.min(x_min, data[i].x);
-        x_max = Math.max(x_max, data[i].x);
-        y_min = Math.min(y_min, data[i].y);
-        y_max = Math.max(y_max, data[i].y);
+        x_min = Math.min(x_min, data[i].x - data[i].width * 0.5);
+        x_max = Math.max(x_max, data[i].x + data[i].width * 0.5);
+        y_min = Math.min(y_min, data[i].y - data[i].height * 0.5);
+        y_max = Math.max(y_max, data[i].y + data[i].height * 0.5);
         data_ref[data[i]['id']] = i;
     }
     if (reload){
@@ -343,7 +344,7 @@ function load_data(reload){
         y_mean /= data.length;
         for (var i = 0; i < data.length; ++i){
             data[i].x += ctx.canvas.width / 2 - x_mean;
-            data[i].y += ctx.canvas.height / 2 - y_mean;
+            data[i].y += nav_height + ctx.canvas.height / 2 - y_mean;
         }
         null_x += ctx.canvas.width / 2 - x_mean;
         null_y += ctx.canvas.height / 2 - y_mean;
@@ -362,10 +363,9 @@ function load_data(reload){
         else {
             start_zoom = Math.ceil(Math.log((y_max - y_min + 200) / ctx.canvas.height) / Math.log(scaling)) + 1;
         }*/
-        //zoom = start_zoom;     
+        //zoom = start_zoom; 
         factor = Math.pow(scaling, zoom - start_zoom);
     }
-    
     
     // get nodes information
     var xmlhttp2 = new XMLHttpRequest();
@@ -378,6 +378,7 @@ function load_data(reload){
     xmlhttp2.send();
     assemble_elements();
     compute_edges();
+    for (var i = zoom; i >= 0; --i) zoom_in_out(1, 0);
     draw();
 }
 
@@ -863,7 +864,7 @@ function update_node(event) {
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, event);
     var x = Math.floor((highlight_element.x - null_x) / factor);
-    var y = Math.floor((highlight_element.y - null_y) / factor);
+    var y = Math.floor((highlight_element.y - null_y) / factor) - document.getElementById("navigation").getBoundingClientRect().height;
     var xmlhttp = new XMLHttpRequest();
     var request = "update_node.py?id=";
     request += highlight_element.id;
