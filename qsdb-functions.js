@@ -4,10 +4,10 @@ function visual_element() {
     this.width = 0;
     this.height = 0;
     this.name = "";
-    this.mouse_click = function(mouse){return -1;};
-    this.mouse_dbl_click = function(mouse){return -1;};
-    this.mouse_down = function(mouse){return -1;};
-    this.mouse_down_move = function(mouse){return false;};
+    this.mouse_click = function(mouse, key){return -1;};
+    this.mouse_dbl_click = function(mouse, key){return -1;};
+    this.mouse_down = function(mouse, key){return -1;};
+    this.mouse_down_move = function(mouse, key){return false;};
     this.mouse_up = function(mouse){return false;};
     this.is_mouse_over = function(mouse){return false;};
     this.draw = function(){};
@@ -218,6 +218,16 @@ CanvasRenderingContext2D.prototype.draw_line = function (x1, y1, x2, y2) {
 }
 
 
+
+preview.prototype = new visual_element();
+preview.prototype.constructor = preview;
+
+function preview(ctx){
+    this.preview_image = new Image();
+}
+
+
+
 zoom_sign.prototype = new visual_element();
 zoom_sign.prototype.constructor = zoom_sign;
 
@@ -232,7 +242,7 @@ function zoom_sign(ctx, dir){
     this.y = window.innerHeight - this.height * (1.3 + dir);
     this.ctx = ctx;
     
-    this.mouse_click = function(mouse){
+    this.mouse_click = function(mouse, key){
         zoom_in_out(1 - this.dir, 0);
     }
     
@@ -299,7 +309,7 @@ function Infobox(ctx){
         return (x_l <= mouse.x && mouse.x <= x_r && y_l <= mouse.y && mouse.y <= y_r);
     }
     
-    this.mouse_click = function(mouse){
+    this.mouse_click = function(mouse, key){
         this.visible = false;
         draw();
     }
@@ -440,7 +450,7 @@ function node(data, c){
         }
         this.width += 50 + this.slide * 30;
         this.name = name;
-        this.tipp = (name.length);
+        this.tipp = (name.length || true);
     }
     else if (this.type == "pathway"){
         var tokens = data['name'].split("\n");
@@ -474,7 +484,7 @@ function node(data, c){
         return results;
     }
     
-    this.mouse_down = function(mouse){
+    this.mouse_down = function(mouse, key){
         if (!this.slide) return false;
         var sl_x = this.x + this.width * 0.5 * 0.75;
         var sl_y_s = this.y - this.height * 0.5 * 0.75;
@@ -490,7 +500,7 @@ function node(data, c){
         return true;
     }
     
-    this.mouse_down_move = function(mouse){
+    this.mouse_down_move = function(mouse, key){
         var sl_y_s = this.y - this.height * 0.5 * 0.75;
         var sl_y_e = this.y + this.height * 0.5 * 0.75;
         if (this.on_slide){
@@ -652,7 +662,7 @@ function node(data, c){
         return -1;
     }
     
-    this.mouse_click = function(mouse){
+    this.mouse_click = function(mouse, key){
         if (this.type == 'protein'){
             var mopn = this.check_mouse_over_protein_name(mouse);
             if (mopn >= 0){
@@ -668,7 +678,7 @@ function node(data, c){
         }
     }
     
-    this.mouse_dbl_click = function(res){
+    this.mouse_dbl_click = function(res, key){
         if (this.type != "protein") return false;
         var cnt = 0;
         var cnt_avbl = 0;
@@ -835,14 +845,73 @@ function point(x, y, b){
 edge.prototype = new visual_element();
 edge.prototype.constructor = edge;
 
-function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head){
+function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head, reaction_id, reagent_id, edge_id){
     
     this.c = c;
     this.ctx = this.c.getContext("2d");
     this.head = head;
     this.point_list = [];
+    this.start_point = (x_s, y_s, "");
     this.start_id = protein_node.id;
+    this.start_anchor = a_s;
+    this.end_point = (x_e, y_e, "");
     this.end_id = metabolite_node.id;
+    this.end_anchor = a_e;
+    this.reaction_id = reaction_id;
+    this.reagent_id = reagent_id;
+    this.edge_id = edge_id;
+    
+    
+    
+    this.is_mouse_over = function(mouse){
+        for (var i = 0; i < this.point_list.length - 1; ++i){
+            var p1 = this.point_list[i];
+            var p2 = this.point_list[i + 1];
+            var dir = p1.b;
+            if (dir != "tb" && dir != "bt" && dir != "lr" && dir != "rl") continue;
+            var dv_ab = new point(p2.x - p1.x, p2.y - p1.y, "");
+            var dv_cd = new point(dv_ab.y, -dv_ab.x, "");
+            
+            var divi = ((dv_ab.y) * (dv_cd.x) - (dv_ab.x) * (dv_cd.y));
+            var beta = divi ? ((p1.x - mouse.x) * (dv_cd.y) - (p1.y - mouse.y) * (dv_cd.x)) / divi : 0;
+            if (0 > beta || beta > 1) continue;
+            
+            var pd = new point(p1.x + beta * dv_ab.x, p1.y + beta * dv_ab.y, "");
+            var dist = Math.sqrt(sq(mouse.x - pd.x) + sq(mouse.y - pd.y));
+            if (dist < 0.5 * line_width * factor){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
+    this.mouse_down = function(mouse, key){
+        if ((key != 1 && key != 3) || !administration) return false;
+        var xmlhttp = new XMLHttpRequest();
+        var request = "update_edge.py?id=";
+        request += this.edge_id;
+        request += "&element=";
+        request += (key == 1) ? "protein" : "metabolite";
+        xmlhttp.open("GET", request, false);
+        xmlhttp.send();
+        
+        if (key == 1){
+            if (nodes[this.reaction_id]['reagents'][this.reagent_id]['type'] == "educt"){
+                nodes[this.reaction_id]['anchor_in'] = next_anchor[nodes[this.reaction_id]['anchor_in']];
+            }
+            else {
+                nodes[this.reaction_id]['anchor_out'] = next_anchor[nodes[this.reaction_id]['anchor_out']];
+            }
+        }
+        else {
+            var anchor = nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'];
+            nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'] = next_anchor[anchor];
+        }
+        compute_edges();
+        draw();
+    }
+    
     
     
     this.expand_node = function(matrix, current_node, open_list, W, H, t_x, t_y, t_a){

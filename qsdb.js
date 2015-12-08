@@ -1,6 +1,6 @@
 moved = false;
 HTTP_GET_VARS = [];
-current_pathway = 6;
+current_pathway = 28;
 highlight_element = 0;
 offsetX = 0;
 offsetY = 0;
@@ -33,6 +33,7 @@ text_size = 15;
 check_len = 15;
 line_height = 20;
 anchors = ['left', 'top', 'right', 'bottom'];
+next_anchor = {"left": "top", "top": "right", "right": "bottom", "bottom": "left"};
 administration = false;
 on_slide = false;
 factor = Math.pow(scaling, zoom);
@@ -281,15 +282,14 @@ function reset_view(){
     zoom = 0;
     null_x = 0;
     null_y = 0;    
+    factor = Math.pow(scaling, zoom);
 }
 
 
 
 function load_data(reload){
     if (!reload){
-        zoom = 0;
-        null_x = 0;
-        null_y = 0;
+        reset_view();
         document.getElementById("search_field").value = "";
         hide_search();
     }
@@ -317,14 +317,11 @@ function load_data(reload){
     xmlhttp.open("GET", "get-qsdbdata.py?request=qsdbdata&pathway=" + current_pathway + "&species=" + species_string, false);
     xmlhttp.send();
     
-    var x_mean = 0, y_mean = 0;
     var x_min = 1e100, x_max = -1e100;
     var y_min = 1e100, y_max = -1e100;
     var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
     for (var i = 0; i < tmp_data.length; ++i){
         data.push(new node(tmp_data[i], c));
-        x_mean += data[i].x;
-        y_mean += data[i].y;
         x_min = Math.min(x_min, data[i].x - data[i].width * 0.5);
         x_max = Math.max(x_max, data[i].x + data[i].width * 0.5);
         y_min = Math.min(y_min, data[i].y - data[i].height * 0.5);
@@ -342,32 +339,23 @@ function load_data(reload){
         }
     }
     if (!reload){
-        x_mean /= data.length;
-        y_mean /= data.length;
+        var shift_x = (ctx.canvas.width - x_min - x_max) * 0.5;
+        var shift_y = nav_height + (ctx.canvas.height - nav_height - y_min - y_max) * 0.5;
         for (var i = 0; i < data.length; ++i){
-            data[i].x += ctx.canvas.width / 2 - x_mean;
-            data[i].y += nav_height + ctx.canvas.height / 2 - y_mean;
+            data[i].x += shift_x;
+            data[i].y += shift_y;
         }
-        null_x += ctx.canvas.width / 2 - x_mean;
-        null_y += ctx.canvas.height / 2 - y_mean;
+        null_x += shift_x;
+        null_y += shift_y;
     
-        
-        /*
-        if ((x_max - x_min + 200) / ctx.canvas.width > (y_max - y_min + 200) / ctx.canvas.height){
-            scaling = Math.pow((x_max - x_min + 200) / ctx.canvas.width, 0.25);
-        }
-        else {
-            scaling = Math.pow((y_max - y_min + 200) / ctx.canvas.height, 0.25);
-        }*/
-        
         
         if ((x_max - x_min) / ctx.canvas.width > (y_max - y_min) / (ctx.canvas.height - nav_height)){
             min_zoom = -Math.ceil(Math.log((x_max - x_min) / ctx.canvas.width) / Math.log(scaling));
         }
         else {
             min_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height)) / Math.log(scaling));
+            console.log((y_max - y_min) + " " + (ctx.canvas.height - nav_height) + " " + scaling + " " + min_zoom);
         }
-        factor = Math.pow(scaling, zoom);
     }
     
     // get nodes information
@@ -405,12 +393,12 @@ function compute_edges(){
             
             if (nodes[i]['reagents'][j]['type'] == 'educt'){
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, nodes[i]['anchor_in']);
-                connections.push([node_id, nodes[i]['anchor_in'], metabolite_id, nodes[i]['reagents'][j]['anchor'], reversible]);
+                connections.push([node_id, nodes[i]['anchor_in'], metabolite_id, nodes[i]['reagents'][j]['anchor'], reversible, i, j, nodes[i]['reagents'][j]['id']]);
                 nodes_anchors[node_id][nodes[i]['anchor_in']].push([metabolite_id, connections.length - 1, angle_node]);
             }
             else{
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, nodes[i]['anchor_out']);
-                connections.push([node_id, nodes[i]['anchor_out'], metabolite_id, nodes[i]['reagents'][j]['anchor'], true]);
+                connections.push([node_id, nodes[i]['anchor_out'], metabolite_id, nodes[i]['reagents'][j]['anchor'], true, i, j, nodes[i]['reagents'][j]['id']]);
                 nodes_anchors[node_id][nodes[i]['anchor_out']].push([metabolite_id, connections.length - 1, angle_node]);
                 
             }
@@ -451,6 +439,9 @@ function compute_edges(){
         var metabolite_anchor = connections[i][3];
         var metabolite_len = nodes_anchors[metabolite_id][metabolite_anchor].length;
         var has_head = connections[i][4];
+        var reaction_id = connections[i][5];
+        var reagent_id = connections[i][6];
+        var edge_id = connections[i][7];
         var start_x = 0, start_y = 0;
         var end_x = 0, end_y = 0;
         var node_pos = 0, metabolite_pos = 0;
@@ -524,7 +515,7 @@ function compute_edges(){
                 start_x += node_width / 2;
             }
         }
-        edges.push(new edge(c, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], connections[i][4]));
+        edges.push(new edge(c, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id, edge_id));
     }
     assemble_elements();
 }
@@ -675,7 +666,8 @@ function zoom_in_out(dir, res){
     if (!res) {
         res = [];
         res.x = window.innerWidth * 0.5;
-        res.y = window.innerHeight * 0.5;
+        var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
+        res.y = nav_height + (window.innerHeight - nav_height) * 0.5;
     }
     for (var i = 0; i < data.length; ++i){
         data[i].width *= scale;
@@ -709,7 +701,7 @@ function mouse_dblclick_listener(e){
         if (highlight_element && highlight_element.type == 'protein'){
             var c = document.getElementById("renderarea");
             var res = get_mouse_pos(c, e);
-            highlight_element.mouse_dbl_click(res);
+            highlight_element.mouse_dbl_click(res, e.which);
         }
     }
     moved = false;
@@ -722,7 +714,7 @@ function mouse_click_listener(e){
         if (highlight_element){
             var c = document.getElementById("renderarea");
             var res = get_mouse_pos(c, e);
-            highlight_element.mouse_click(res);
+            highlight_element.mouse_click(res, e.which);
         }
     }
     moved = false;
@@ -737,17 +729,13 @@ function change_pathway(p){
 }
 
 
-function mouse_down_listener(e){
-    if (e.which != 1){
-        return;
-    }
-    
+function mouse_down_listener(e){    
     
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, e);
     
     if (highlight_element){
-        highlight_element.mouse_down(res);
+        highlight_element.mouse_down(res, e.which);
         node_move_x = highlight_element.x;
         node_move_y = highlight_element.y;        
     }
@@ -767,7 +755,7 @@ function mouse_move_listener(e){
     
     // shift all nodes
     if (e.buttons & 1){
-        if (!highlight_element || !highlight_element.mouse_down_move(res)){
+        if (!highlight_element || !highlight_element.mouse_down_move(res, e.which)){
             var shift_x = res.x - offsetX;
             var shift_y = res.y - offsetY;
             if (shift_x != 0 || shift_y != 0){
@@ -866,7 +854,7 @@ function update_node(event) {
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, event);
     var x = Math.floor((highlight_element.x - null_x) / factor);
-    var y = Math.floor((highlight_element.y - null_y) / factor) - document.getElementById("navigation").getBoundingClientRect().height;
+    var y = Math.floor((highlight_element.y - null_y) / factor);
     var xmlhttp = new XMLHttpRequest();
     var request = "update_node.py?id=";
     request += highlight_element.id;
