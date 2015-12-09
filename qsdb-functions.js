@@ -290,7 +290,10 @@ function preview(ctx){
         this.on_active = true;
         offsetX = mouse.x;
         offsetY = mouse.y;
-        this.on_move = (this.active_boundaries[0] <= mouse.x && mouse.x <= this.active_boundaries[0] + this.active_boundaries[2] && this.active_boundaries[1] <= mouse.y && mouse.y <= this.active_boundaries[1] + this.active_boundaries[3]);
+        if (this.active_boundaries[0] <= mouse.x && mouse.x <= this.active_boundaries[0] + this.active_boundaries[2] && this.active_boundaries[1] <= mouse.y && mouse.y <= this.active_boundaries[1] + this.active_boundaries[3]){
+            this.on_move = true;
+            this.ctx.canvas.style.cursor = "all-scroll";
+        }
         return this.on_active;
     }
     
@@ -326,6 +329,7 @@ function preview(ctx){
     this.mouse_up = function(mouse){
         this.on_active = false;
         this.on_move = false;
+        this.ctx.canvas.style.cursor = "default";
         return true;
     }
     
@@ -340,10 +344,10 @@ function preview(ctx){
         this.scale_x = boundaries[2] / this.width;
         this.scale_y = boundaries[3] / this.height;
         
-        this.active_boundaries[2] = this.width * (active_x_max - active_x_min) / boundaries[2];
-        this.active_boundaries[3] = this.height * (active_y_max - active_y_min) / boundaries[3];
         this.active_boundaries[0] = this.x + (active_x_min - boundaries[0]) / boundaries[2] * this.width;
         this.active_boundaries[1] = this.y + (active_y_min - boundaries[1]) / boundaries[3] * this.height;
+        this.active_boundaries[2] = Math.max(0, this.width * (active_x_max - active_x_min) / boundaries[2]);
+        this.active_boundaries[3] = Math.max(0, this.height * (active_y_max - active_y_min) / boundaries[3]);
     }
     
     this.draw = function(){
@@ -575,6 +579,7 @@ function node(data, c){
     this.slide = false;
     this.slide_percent = 0;
     this.on_slide = false;
+    this.ctx.font = (text_size * factor).toString() + "px Arial";
     
     if (this.type == "protein"){
         var name = "";
@@ -586,12 +591,12 @@ function node(data, c){
             this.proteins.push(new Protein(data['proteins'][j]));
             if (name.length) name += ", ";
             var def = this.proteins[j].name;
-            if (this.width < document.getElementById("refarea").getContext("2d").measureText(def).width){
-                this.width = document.getElementById("refarea").getContext("2d").measureText(def).width;
+            if (this.width < this.ctx.measureText(def).width){
+                this.width = this.ctx.measureText(def).width;
             }
             name += data['proteins'][j]['name'];
         }
-        this.width += 50 + this.slide * 30;
+        this.width += 50 + this.slide * 20;
         this.name = name;
         this.tipp = (name.length || true);
     }
