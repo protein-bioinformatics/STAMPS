@@ -223,7 +223,150 @@ preview.prototype = new visual_element();
 preview.prototype.constructor = preview;
 
 function preview(ctx){
-    this.preview_image = new Image();
+    this.preview_image = 0;
+    this.preview_image_original = 0;
+    this.ctx = ctx;
+    this.on_active = false;
+    this.on_move = false;
+    this.active_boundaries = [0, 0, 0, 0];
+    this.scale_x = 1;
+    this.scale_y = 1;
+    
+    this.snapshot = function(){
+        var x_min = 1e100, x_max = -1e100;
+        var y_min = 1e100, y_max = -1e100;
+        for (var i = 0; i < data.length; ++i){
+            x_min = Math.min(x_min, data[i].x - data[i].width * 0.5);
+            x_max = Math.max(x_max, data[i].x + data[i].width * 0.5);
+            y_min = Math.min(y_min, data[i].y - data[i].height * 0.5);
+            y_max = Math.max(y_max, data[i].y + data[i].height * 0.5);
+        }
+        x_min -= 25;
+        x_max += 25;
+        y_min -= 25;
+        y_max += 25;
+        boundaries[0] = x_min;
+        boundaries[1] = y_min;
+        boundaries[2] = x_max - x_min;
+        boundaries[3] = y_max - y_min;
+        
+        var image_data = this.ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
+        if ((x_max - x_min) / window.innerWidth >= (y_max - y_min) / window.innerHeight) {
+            var sf = window.innerWidth / (x_max - x_min) * 0.2;
+        }
+        else {
+            var sf = window.innerHeight / (y_max - y_min) * 0.2;
+        }
+        this.width = Math.ceil((x_max - x_min) * sf);
+        this.height = Math.ceil((y_max - y_min) * sf);
+        this.x = 0;
+        this.y = window.innerHeight - this.height;
+        this.preview_image = this.ctx.createImageData(this.width, this.height);
+        this.preview_image_original = this.ctx.createImageData(this.width, this.height);
+        var wf = image_data.width / this.width;
+        var hf = image_data.height / this.height;
+       
+        var h = 0;
+        var w = 0;
+        for (var i = 0; i < this.preview_image.data.length; i += 4){
+            var ii = (Math.floor(h * hf) * image_data.width + Math.floor(w * wf)) * 4;
+            this.preview_image.data[i] = image_data.data[ii];
+            this.preview_image.data[i + 1] = image_data.data[ii + 1];
+            this.preview_image.data[i + 2] = image_data.data[ii + 2];
+            this.preview_image.data[i + 3] = image_data.data[ii + 3];
+            ++w;
+            if (w >= this.preview_image.width){
+                w = 0;
+                h += 1;
+            }
+        }
+    }
+    
+    this.is_mouse_over = function(mouse){
+        return (this.x <= mouse.x && mouse.x <= this.x + this.width && this.y <= mouse.y && mouse.y <= this.y + this.height);
+    }
+    
+    this.mouse_down = function(mouse, key){
+        this.on_active = true;
+        offsetX = mouse.x;
+        offsetY = mouse.y;
+        this.on_move = (this.active_boundaries[0] <= mouse.x && mouse.x <= this.active_boundaries[0] + this.active_boundaries[2] && this.active_boundaries[1] <= mouse.y && mouse.y <= this.active_boundaries[1] + this.active_boundaries[3]);
+        return this.on_active;
+    }
+    
+    this.mouse_down_move = function(mouse, key){
+        if (this.on_move){
+            
+            var shift_x = (mouse.x - offsetX) * this.scale_x;
+            var shift_y = (mouse.y - offsetY) * this.scale_y;
+            
+            for (var i = 0; i < data.length; ++i){
+                data[i].x -= shift_x;
+                data[i].y -= shift_y;
+            }
+            for (var i = 0; i < edges.length; ++i){
+                for (var j = 0; j < edges[i].point_list.length; ++j){
+                    edges[i].point_list[j].x -= shift_x;
+                    edges[i].point_list[j].y -= shift_y;
+                }
+            }
+            infobox.x -= shift_x;
+            infobox.y -= shift_y;
+            null_x -= shift_x;
+            null_y -= shift_y;
+            boundaries[0] -= shift_x;
+            boundaries[1] -= shift_y;
+            this.compute_boundaries();
+            offsetX = mouse.x;
+            offsetY = mouse.y;
+        }
+        return this.on_active;
+    }
+    
+    this.mouse_up = function(mouse){
+        this.on_active = false;
+        this.on_move = false;
+        return true;
+    }
+    
+    
+    this.compute_boundaries = function(){
+        var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
+        var active_x_min = Math.max(boundaries[0], 0);
+        var active_x_max = Math.min(boundaries[0] + boundaries[2], window.innerWidth);
+        var active_y_min = Math.max(boundaries[1], nav_height);
+        var active_y_max = Math.min(boundaries[1] + boundaries[3], window.innerHeight);
+        
+        this.scale_x = boundaries[2] / this.width;
+        this.scale_y = boundaries[3] / this.height;
+        
+        this.active_boundaries[2] = this.width * (active_x_max - active_x_min) / boundaries[2];
+        this.active_boundaries[3] = this.height * (active_y_max - active_y_min) / boundaries[3];
+        this.active_boundaries[0] = this.x + (active_x_min - boundaries[0]) / boundaries[2] * this.width;
+        this.active_boundaries[1] = this.y + (active_y_min - boundaries[1]) / boundaries[3] * this.height;
+    }
+    
+    this.draw = function(){
+        if (this.preview_image){
+            
+            this.ctx.putImageData(this.preview_image, this.x, this.y);
+            this.ctx.strokeStyle = "#777777";
+            this.ctx.lineWidth = 1;
+            this.ctx.beginPath();
+            this.ctx.rect(this.x, this.y, this.width, this.height);
+            this.ctx.stroke();
+            
+            this.compute_boundaries();
+            
+            this.ctx.save();
+            this.ctx.globalAlpha = .4;
+            this.ctx.fillStyle = "black";
+            this.ctx.fillRect(this.active_boundaries[0], this.active_boundaries[1], this.active_boundaries[2], this.active_boundaries[3]);
+            this.ctx.restore();
+            this.ctx.globalAlpha = 1.;
+            
+        }
+    }
 }
 
 

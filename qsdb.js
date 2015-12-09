@@ -18,6 +18,7 @@ infobox = 0;
 zoom_sign_in = 0;
 zoom_sign_out = 0;
 elements = [];
+boundaries = [0, 0, 0, 0];
 
 scaling = 1.25;
 zoom = 0;
@@ -67,6 +68,7 @@ infobox_fill_color = "white";
 infobox_stroke_color = "#777777";
 infobox_stroke_width = 1;
 infobox_offset_x = 20;
+preview_element = 0;
 
 
 
@@ -298,6 +300,7 @@ function load_data(reload){
     
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
+    preview_element = new preview(ctx);
     
     var species = [];
     if(document.getElementById("species_mouse").checked) species.push("mouse");
@@ -354,7 +357,6 @@ function load_data(reload){
         }
         else {
             min_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height)) / Math.log(scaling));
-            console.log((y_max - y_min) + " " + (ctx.canvas.height - nav_height) + " " + scaling + " " + min_zoom);
         }
     }
     
@@ -370,7 +372,8 @@ function load_data(reload){
     assemble_elements();
     compute_edges();
     for (var i = zoom; i >= min_zoom; --i) zoom_in_out(1, 0);
-    draw();
+    preview_element.snapshot();
+    draw();    
 }
 
 
@@ -528,6 +531,7 @@ function assemble_elements(){
     elements.push(infobox);
     elements.push(zoom_sign_in);
     elements.push(zoom_sign_out);
+    elements.push(preview_element);
 }
 
 
@@ -654,6 +658,7 @@ function mouse_wheel_listener(e){
     zoom_in_out(e.detail >= 0, get_mouse_pos(c, e));
 }
     
+    
 function zoom_in_out(dir, res){
     var direction = (1 - 2 * dir);
     if (zoom + direction < min_zoom || max_zoom < zoom + direction)
@@ -686,6 +691,10 @@ function zoom_in_out(dir, res){
     infobox.y = res.y + scale * (infobox.y - res.y);
     null_x = res.x + scale * (null_x - res.x);
     null_y = res.y + scale * (null_y - res.y);
+    boundaries[0] = res.x + scale * (boundaries[0] - res.x);
+    boundaries[1] = res.y + scale * (boundaries[1] - res.y);
+    boundaries[2] *= scale;
+    boundaries[3] *= scale;
     draw();
 }
 
@@ -779,6 +788,8 @@ function mouse_move_listener(e){
                 infobox.y += res.y - offsetY;
                 null_x += res.x - offsetX;
                 null_y += res.y - offsetY;
+                boundaries[0] += res.x - offsetX;
+                boundaries[1] += res.y - offsetY;
             }
             else if (administration) {
                 event_moving_node = true;
@@ -815,6 +826,7 @@ function mouse_move_listener(e){
     if(highlight_element && highlight_element.tipp) Tip(e, highlight_element.id + " " + highlight_element.name);
     else unTip();
 }
+
 
 function Tip(e, name) {      
     var wmtt = document.getElementById('tooltip');
@@ -1086,7 +1098,6 @@ function highlight_protein(node_id, prot_id){
     var width  = window.innerWidth * 0.5;
     var height = window.innerHeight * 0.5;
     var scale = Math.pow(Math.pow(scaling, highlight_zoom - zoom), 1 / (time * steps));
-    //var zoom_scale = Math.pow(highlight_zoom / zoom, 1 / (time * steps));
     var zoom_scale = (highlight_zoom - zoom) / (time * steps);
     
     var moving = setInterval(function(){
@@ -1134,6 +1145,10 @@ function highlight_protein(node_id, prot_id){
             y = height + scale * (y - height);
             null_x = width + scale * (null_x - width);
             null_y = height + scale * (null_y - height);
+            boundaries[0] = width + scale * (boundaries[0] + split * (width - x) - width);
+            boundaries[1] = height + scale * (boundaries[1] + split * (height - y) - height);
+            boundaries[2] *= scale;
+            boundaries[3] *= scale;
             
             zoom += zoom_scale;
             factor = Math.pow(scaling, zoom);
@@ -1250,6 +1265,8 @@ function prepare_infobox(prot){
             }
             null_x += split * (width - x);
             null_y += split * (height - y);
+            boundaries[0] += split * (width - x);
+            boundaries[1] += split * (height - y);
             
             draw();
             progress += inv_steps;
