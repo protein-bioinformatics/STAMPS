@@ -1,6 +1,6 @@
 moved = false;
 HTTP_GET_VARS = [];
-current_pathway = 3;
+current_pathway = 1;
 highlight_element = 0;
 offsetX = 0;
 offsetY = 0;

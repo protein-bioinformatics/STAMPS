@@ -65,7 +65,7 @@ function Protein(data){
         this.containing_spectra += this.peptides[i].spectra.length;
     }
     
-    //this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
+    this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
     
     this.search = function(len_p, accept, masks, node_id){
         var results = [];
@@ -88,6 +88,7 @@ function Protein(data){
     
     this.check_mouse_over_protein_name = function(ctx, x, y, line_number, num, mouse){
         var check_side = check_len * factor;
+        ctx.font = (text_size * factor).toString() + "px Arial";
         y -= Math.floor((line_number - 1) * line_height * factor * 0.5) - num * line_height * factor;
         var x_l = x + check_side * 2;
         var x_r = x_l + ctx.measureText(this.name).width;
@@ -1146,18 +1147,6 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
                 if (active && x_e - w_e <= x && x <= x_e + w_e && y_e - h_e <= y && y <= y_e + h_e){
                     active = false;
                 }
-                /*
-                for (var i = 0; i < data.length && active; ++i){
-                    xx_min = data[i].x - (data[i].width * 0.5 + base_grid * factor);
-                    xx_max = data[i].x + (data[i].width * 0.5 + base_grid * factor);
-                    yy_min = data[i].y - data[i].height * 0.5 + base_grid * factor;
-                    yy_max = data[i].y + (data[i].height * 0.5 + base_grid * factor);
-                    if (xx_min <= x && x <= xx_max && yy_min <= y && y <= yy_max){
-                        active = false;
-                    }
-                }
-                if (!active) console.log("na: " + ((w - cell_x_s) * grid + xd_s) + " " + ((h - cell_y_s) * grid + yd_s));
-                */
                 matrix[h][w].active = active;
             }
             if (Math.abs(y - yd_e) < Math.abs((cell_y_e - cell_y_s) * grid + yd_s - yd_e)){
