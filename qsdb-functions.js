@@ -101,20 +101,18 @@ function Protein(data){
     
     this.get_position = function(x, y, line_number, num){
         var check_side = check_len * factor;
-        y -= Math.floor((line_number - 1) * line_height * factor * 0.5) - num * line_height * factor;
+        y -= (line_number - 1) * line_height * factor * 0.5 - num * line_height * factor;
         x += check_side * 2;
         return [x, y];
     }
     
     
-    this.draw = function(ctx, x, y, line_number, num) {
+    this.draw = function(ctx, x, y) {
+        ctx.lineWidth = 1;
         var check_side = check_len * factor;
         var check_side_h = check_side * 0.5;
-        y -= Math.floor((line_number - 1) * line_height * factor * 0.5) - num * line_height * factor;
-        ctx.lineWidth = 1;
         
         var def = this.name;
-        //if (def.length > 13) def = def.substring(0, 10) + "...";
         if (!this.peptides.length || !this.containing_spectra){
             ctx.fillStyle = disabled_fill_color;
             ctx.fillRect(x + check_side_h, y - check_side_h, check_side, check_side);
@@ -132,6 +130,7 @@ function Protein(data){
         ctx.strokeStyle = "black";
         ctx.strokeRect(x + check_side_h, y - check_side_h, check_side, check_side);
         
+        
         // draw hooklet
         var x_check = x + check_side_h;
         var y_check = y - check_side_h;
@@ -145,9 +144,13 @@ function Protein(data){
             var x3 = x_check + check_side * 0.375;
             var y3 = y_check - check_side * 0.375;
             ctx.lineWidth = factor * 3;
-            ctx.draw_line(x1, y1, x2, y2);
-            ctx.draw_line(x2, y2, x3, y3);
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.lineTo(x3, y3);
+            ctx.stroke();
         }
+        
     };
     
     this.toggle_marked = function(){
@@ -363,11 +366,9 @@ function preview(ctx){
             
             this.compute_boundaries();
             
-            this.ctx.save();
             this.ctx.globalAlpha = .4;
             this.ctx.fillStyle = "black";
             this.ctx.fillRect(this.active_boundaries[0], this.active_boundaries[1], this.active_boundaries[2], this.active_boundaries[3]);
-            this.ctx.restore();
             this.ctx.globalAlpha = 1.;
             
         }
@@ -399,10 +400,8 @@ function zoom_sign(ctx, dir){
     }
     
     this.draw = function(){
-        this.ctx.save();
         this.ctx.globalAlpha = 0.3 + 0.7 * this.highlight;
         this.ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
-        this.ctx.restore();
         this.ctx.globalAlpha = 1.;
     }
 }
@@ -635,9 +634,9 @@ function node(data, c){
     
     this.mouse_down = function(mouse, key){
         if (!this.slide) return false;
-        var sl_x = this.x + this.width * 0.5 * 0.75;
-        var sl_y_s = this.y - this.height * 0.5 * 0.75;
-        var sl_y_e = this.y + this.height * 0.5 * 0.75;
+        var sl_x = this.x + this.width * 0.375;
+        var sl_y_s = this.y - this.height * 0.375;
+        var sl_y_e = this.y + this.height * 0.375;
         var ctl_y = sl_y_s + this.slide_percent * (sl_y_e - sl_y_s);
         
         this.on_slide = Math.sqrt(sq(sl_x - mouse.x) + sq(ctl_y - mouse.y)) < slide_bullet * factor;
@@ -664,37 +663,29 @@ function node(data, c){
     this.draw = function() {
         var font_size = text_size * factor;
         var radius = metabolite_radius * factor;
+        var hh = this.height * 0.5;
+        var hw = this.width * 0.5;
     
         switch (this.type){
             case "protein":
                 
                 // draw fill
                 this.ctx.fillStyle = protein_fill_color;
-                this.ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+                this.ctx.fillRect(this.x - hw, this.y - hh, this.width, this.height);
        
                 // draw content
-                if (this.lines > max_protein_line_number){
-                    this.ctx.save();
-                    this.ctx.rect(this.x - this.width * 0.45, this.y - this.height * 0.45, this.width * 0.9, this.height * 0.9);
-                    this.ctx.clip();
-                }
                 this.ctx.textAlign = "left";
                 this.ctx.textBaseline = 'middle';
                 this.ctx.font = font_size.toString() + "px Arial";
                 this.ctx.fillStyle = "black";
-                var offset_y = 0;
+                var ty = this.y;
+                var tx = this.x - hw;
                 if (this.lines > max_protein_line_number){
-                    offset_y = (this.orig_height * 0.5 - this.height * 0.5) - this.slide_percent * (this.orig_height - this.height);
-                }
-                for (var i = 0; i < this.proteins.length; ++i){
-                    this.proteins[i].draw(this.ctx, this.x - this.width / 2, this.y + offset_y, this.proteins.length, i);
-                }
-                if (this.lines > max_protein_line_number){
-                    this.ctx.restore();
+                    ty += (this.orig_height * 0.5 - hh) - this.slide_percent * (this.orig_height - this.height);
                     
-                    var sl_x = this.x + this.width * 0.5 * 0.75;
-                    var sl_y_s = this.y - this.height * 0.5 * 0.75;
-                    var sl_y_e = this.y + this.height * 0.5 * 0.75;
+                    var sl_x = this.x + this.width * 0.375;
+                    var sl_y_s = this.y - this.height * 0.375;
+                    var sl_y_e = this.y + this.height * 0.375;
                     
                     var ctl_y = sl_y_s + this.slide_percent * (sl_y_e - sl_y_s);
                     
@@ -711,20 +702,24 @@ function node(data, c){
                     this.ctx.closePath();
                     this.ctx.fill();
                     this.ctx.stroke();
-                    
+                }
+                
+                var lhf = line_height * factor;
+                for (var i = 0, tty = ty - (this.proteins.length - 1) * lhf * 0.5; i < this.proteins.length; i += 1, tty += lhf){
+                    if (Math.abs(tty - this.y) <= hh - lhf * 0.5) this.proteins[i].draw(this.ctx, tx, tty);
                 }
                 
                 // draw stroke
                 this.ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
                 this.ctx.strokeStyle = protein_stroke_color;
-                this.ctx.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+                this.ctx.strokeRect(this.x - hw, this.y - hh, this.width, this.height);
                 break;
                 
             case "pathway":
                 this.ctx.fillStyle = pathway_fill_color;
                 this.ctx.strokeStyle = pathway_stroke_color;
                 this.ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
-                this.ctx.roundRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+                this.ctx.roundRect(this.x - hw, this.y - hh, this.width, this.height);
                 this.ctx.textAlign = "center";
                 this.ctx.textBaseline = 'middle';
                 this.ctx.font = font_size.toString() + "px Arial";

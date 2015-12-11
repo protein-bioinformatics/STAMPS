@@ -1,11 +1,13 @@
 moved = false;
 HTTP_GET_VARS = [];
-current_pathway = 1;
+current_pathway = 28;
 highlight_element = 0;
 offsetX = 0;
 offsetY = 0;
 null_x = 0;
 null_y = 0;
+mouse_x = 0;
+mouse_y = 0;
 data = [];
 data_ref = [];
 nodes = null;
@@ -759,8 +761,8 @@ function mouse_move_listener(e){
     var ctx = c.getContext("2d");
     res = get_mouse_pos(c, e);
     var grid = Math.floor(base_grid * factor * 1000);
-    
-    
+    mouse_x = res.x;
+    mouse_y = res.y;
     
     // shift all nodes
     if (e.buttons & 1){
@@ -774,27 +776,29 @@ function mouse_move_listener(e){
             
             
             if (!event_key_down || !highlight_element){
+                
                 for (var i = 0; i < data.length; ++i){
-                    data[i].x += res.x - offsetX;
-                    data[i].y += res.y - offsetY;
+                    data[i].x += shift_x;
+                    data[i].y += shift_y;
                 }
                 for (var i = 0; i < edges.length; ++i){
+                    var edg = edges[i];
                     for (var j = 0; j < edges[i].point_list.length; ++j){
-                        edges[i].point_list[j].x += res.x - offsetX;
-                        edges[i].point_list[j].y += res.y - offsetY;
+                        edg.point_list[j].x += shift_x;
+                        edg.point_list[j].y += shift_y;
                     }
                 }
-                infobox.x += res.x - offsetX;
-                infobox.y += res.y - offsetY;
-                null_x += res.x - offsetX;
-                null_y += res.y - offsetY;
-                boundaries[0] += res.x - offsetX;
-                boundaries[1] += res.y - offsetY;
+                infobox.x += shift_x;
+                infobox.y += shift_y;
+                null_x += shift_x;
+                null_y += shift_y;
+                boundaries[0] += shift_x;
+                boundaries[1] += shift_y;
             }
             else if (administration) {
                 event_moving_node = true;
-                node_move_x += res.x - offsetX;
-                node_move_y += res.y - offsetY;
+                node_move_x += shift_x;
+                node_move_y += shift_y;
                 highlight_element.x = Math.floor(node_move_x - (1000 * (node_move_x - null_x) % grid) / 1000.);
                 highlight_element.y = Math.floor(node_move_y - (1000 * (node_move_y - null_y) % grid) / 1000.);
                 compute_edges();
@@ -982,15 +986,21 @@ function check_spectra(){
     spectra_content.sort();
     var peps = 0;
     var specs = 0;
+    var line = 0;
+    var sign_right = String.fromCharCode(9656);
+    var sign_down = String.fromCharCode(9662);
     for (var i = 0; i < spectra_content.length; ++i){
         var p = spectra_content[i][1];
         var pp = spectra_content[i][2];
-        inner_html += "<tr><td width=\"100%\" onclick=\"document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: default;\">&nbsp;" + String.fromCharCode(9656) + "&nbsp;" + spectra_content[i][0] + " | " + data[p].proteins[pp].accession + "</td></tr>";
+        
+        var bg_color = (line & 1) ? "#DDDDDD" : "white";
+        ++line;
+        inner_html += "<tr><td width=\"100%\" bgcolor=\"" + bg_color + "\" onclick=\"document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: default;\">&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"protein_sign_" + i + "\">" + sign_right + "</div>&nbsp;" + spectra_content[i][0] + " | " + data[p].proteins[pp].accession + "</td></tr>";
         
         inner_html += "<tr><td><table id='peptide_" + peps + "' style=\"display: none;\">";
         for (var j = 0; j < data[p].proteins[pp].peptides.length; ++j){
             var n_specs = data[p].proteins[pp].peptides[j].spectra.length;
-            inner_html += "<tr><td onclick=\"document.getElementById('spectrum_" + specs + "').style.display = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: default; color: " + (n_specs ? "black" : disabled_text_color) + ";\">&nbsp;&nbsp;&nbsp;&nbsp;" + String.fromCharCode(9656) + "&nbsp;" + data[p].proteins[pp].peptides[j].peptide_seq + "</td></tr>";
+            inner_html += "<tr><td onclick=\"document.getElementById('peptide_sign_" + specs + "').innerHTML = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('spectrum_" + specs + "').style.display = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: default; color: " + (n_specs ? "black" : disabled_text_color) + ";\">&nbsp;&nbsp;&nbsp;&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"peptide_sign_" + specs + "\">" + sign_right + "</div>&nbsp;" + data[p].proteins[pp].peptides[j].peptide_seq + "</td></tr>";
             
             inner_html += "<tr><td><table id='spectrum_" + specs + "' style=\"display: none;\">";
             for (var k = 0; k < n_specs; ++k){
@@ -1092,6 +1102,7 @@ function highlight_protein(node_id, prot_id){
     var steps = 24;
     var time = 3; // seconds
     var std_dev = time / 6.;
+    var c = document.getElementById("renderarea");
     document.getElementById("animation_background").style.display = "inline";
     var x = data[data_ref[node_id]].x;
     var y = data[data_ref[node_id]].y;
@@ -1149,6 +1160,13 @@ function highlight_protein(node_id, prot_id){
             boundaries[1] = height + scale * (boundaries[1] + split * (height - y) - height);
             boundaries[2] *= scale;
             boundaries[3] *= scale;
+            
+            var rect = c.getBoundingClientRect();
+            mouse_move_listener(
+            {
+                clientX: mouse_x + rect.left,
+                clientY: mouse_y + rect.top
+            });
             
             zoom += zoom_scale;
             factor = Math.pow(scaling, zoom);
@@ -1229,7 +1247,8 @@ function prepare_infobox(prot){
     var time = 1; // seconds
     
     unTip();
-    var xy = highlight_element.get_position(prot);
+    var he = highlight_element;
+    var xy = he.get_position(prot);
     var x = xy[0];
     var y = xy[1];
     
@@ -1239,16 +1258,17 @@ function prepare_infobox(prot){
     var std_dev = time / 6.;
     var inv_steps = 1. / steps;
     document.getElementById("animation_background").style.display = "inline";
+    var c = document.getElementById("renderarea");
     
     var moving = setInterval(function(){
         if (progress >= time) {
             clearInterval (moving);
             document.getElementById("animation_background").style.display = "none";
             infobox.visible = true;
-            var xy = highlight_element.get_position(prot);
-            infobox.create(xy[0], xy[1], data_ref[highlight_element.id], prot);
-            highlight_element.highlight = false;
-            highlight_element = 0;
+            var xy = he.get_position(prot);
+            infobox.create(xy[0], xy[1], data_ref[he.id], prot);
+            he.highlight = false;
+            he = 0;
             draw();
         }
         else {
@@ -1267,8 +1287,15 @@ function prepare_infobox(prot){
             null_y += split * (height - y);
             boundaries[0] += split * (width - x);
             boundaries[1] += split * (height - y);
-            
             draw();
+            
+            var rect = c.getBoundingClientRect();
+            mouse_move_listener(
+            {
+                clientX: mouse_x + rect.left,
+                clientY: mouse_y + rect.top
+            });
+            
             progress += inv_steps;
         }
     }, steps);
