@@ -40,6 +40,8 @@ next_anchor = {"left": "top", "top": "right", "right": "bottom", "bottom": "left
 administration = false;
 on_slide = false;
 factor = Math.pow(scaling, zoom);
+font_size = text_size * factor;
+radius = metabolite_radius * factor;
 
 
 line_width = 4;
@@ -80,17 +82,17 @@ function debug(text){
 
 
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height) {
-    var radius = round_rect_radius * factor;
+    var rect_curve = round_rect_radius * factor;
     this.beginPath();
-    this.moveTo(x + radius, y);
-    this.lineTo(x + width - radius, y);
-    this.quadraticCurveTo(x + width, y, x + width, y + radius);
-    this.lineTo(x + width, y + height - radius);
-    this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    this.lineTo(x + radius, y + height);
-    this.quadraticCurveTo(x, y + height, x, y + height - radius);
-    this.lineTo(x, y + radius);
-    this.quadraticCurveTo(x, y, x + radius, y);
+    this.moveTo(x + rect_curve, y);
+    this.lineTo(x + width - rect_curve, y);
+    this.quadraticCurveTo(x + width, y, x + width, y + rect_curve);
+    this.lineTo(x + width, y + height - rect_curve);
+    this.quadraticCurveTo(x + width, y + height, x + width - rect_curve, y + height);
+    this.lineTo(x + rect_curve, y + height);
+    this.quadraticCurveTo(x, y + height, x, y + height - rect_curve);
+    this.lineTo(x, y + rect_curve);
+    this.quadraticCurveTo(x, y, x + rect_curve, y);
     this.closePath();
     this.fill();
     this.stroke();
@@ -287,6 +289,8 @@ function reset_view(){
     null_x = 0;
     null_y = 0;    
     factor = Math.pow(scaling, zoom);
+    font_size = text_size * factor;
+    radius = metabolite_radius * factor;
 }
 
 
@@ -382,7 +386,7 @@ function load_data(reload){
 function compute_edges(){
     edges = [];
     var c = document.getElementById("renderarea");
-    var radius = metabolite_radius * factor;
+    var diameter = 2 * radius;
     var connections = [];
     var nodes_anchors = [];
     for (var i = 0; i < data.length; ++i){
@@ -469,55 +473,57 @@ function compute_edges(){
                 metabolite_pos = j;
             }
         }
+        var len_adjacent = diameter * (-1 / metabolite_len + 1);
+        var correction_shift = metabolite_pos / (metabolite_len - 1);
         switch (metabolite_anchor){
             case "top":
                 end_y -= radius;
-                var w = 2 * radius * (-1 / metabolite_len + 1);
-                end_x -= w / 2;
+                var w = len_adjacent;
+                end_x -= w * 0.5;
                 if (metabolite_len > 1){
-                    end_x += w / (metabolite_len - 1) * metabolite_pos;
+                    end_x += w * correction_shift;
                 }
                 break;
             case "bottom":
                 end_y += radius;
-                var w = 2 * radius * (-1 / metabolite_len + 1);
-                end_x += w / 2;
+                var w = len_adjacent;
+                end_x += w * 0.5;
                 if (metabolite_len > 1){
-                    end_x -= w / (metabolite_len - 1) * metabolite_pos;
+                    end_x -= w * correction_shift;
                 }
                 break;
             case "left":
                 end_x -= radius;
-                var h = 2 * radius * (-1 / metabolite_len + 1);
-                end_y += h / 2;
+                var h = len_adjacent;
+                end_y += h * 0.5;
                 if (metabolite_len > 1){
-                    end_y -= h / (metabolite_len - 1) * metabolite_pos;
+                    end_y -= h * correction_shift;
                 }
                 break;
             case "right":
                 end_x += radius;
-                var h = 2 * radius * (-1 / metabolite_len + 1);
-                end_y -= h / 2;
+                var h = len_adjacent;
+                end_y -= h * 0.5;
                 if (metabolite_len > 1){
-                    end_y += h / (metabolite_len - 1) * metabolite_pos;
+                    end_y += h * correction_shift;
                 }
                 break;
         }
         
         if ((node_anchor == 'top') || (node_anchor == 'bottom')){
             if (node_anchor == 'top'){
-                start_y -= node_height / 2;
+                start_y -= node_height * 0.5;
             }
             else {
-                start_y += node_height / 2;
+                start_y += node_height * 0.5;
             }
         }
         if ((node_anchor == 'left') || (node_anchor == 'right')){
             if (node_anchor == 'left'){
-                start_x -= node_width / 2;
+                start_x -= node_width * 0.5;
             }
             else {
-                start_x += node_width / 2;
+                start_x += node_width * 0.5;
             }
         }
         edges.push(new edge(c, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id, edge_id));
@@ -667,6 +673,8 @@ function zoom_in_out(dir, res){
         return;
     zoom += direction;
     factor = Math.pow(scaling, zoom);
+    font_size = text_size * factor;
+    radius = metabolite_radius * factor;
     var scale = scaling;
     if (dir) scale = 1. / scale;
     
@@ -1132,6 +1140,8 @@ function highlight_protein(node_id, prot_id){
             clearInterval (moving);
             zoom = highlight_zoom;
             factor = Math.pow(scaling, zoom);
+            font_size = text_size * factor;
+            radius = metabolite_radius * factor;
             draw();
             
         }
@@ -1170,7 +1180,8 @@ function highlight_protein(node_id, prot_id){
             
             zoom += zoom_scale;
             factor = Math.pow(scaling, zoom);
-            
+            font_size = text_size * factor;
+            radius = metabolite_radius * factor;
             
             draw();
             progress += 1 / steps;

@@ -65,7 +65,7 @@ function Protein(data){
         this.containing_spectra += this.peptides[i].spectra.length;
     }
     
-    this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
+    //this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
     
     this.search = function(len_p, accept, masks, node_id){
         var results = [];
@@ -463,7 +463,7 @@ function Infobox(ctx){
 
     this.draw = function(){
         if (!this.visible) return;
-        var radius = round_rect_radius;
+        var rect_curve = round_rect_radius;
         
         this.ctx.fillStyle = infobox_fill_color;
         this.ctx.strokeStyle = infobox_stroke_color;
@@ -472,21 +472,21 @@ function Infobox(ctx){
         var offset_x = this.width + infobox_offset_x;
         var offset_y = this.height / 2;
         this.ctx.beginPath();
-        this.ctx.moveTo(this.x - offset_x + radius, this.y - offset_y);
-        this.ctx.lineTo(this.x - offset_x + this.width - radius, this.y - offset_y);
-        this.ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y, this.x - offset_x + this.width, this.y - offset_y + radius);
+        this.ctx.moveTo(this.x - offset_x + rect_curve, this.y - offset_y);
+        this.ctx.lineTo(this.x - offset_x + this.width - rect_curve, this.y - offset_y);
+        this.ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y, this.x - offset_x + this.width, this.y - offset_y + rect_curve);
         
         
         this.ctx.lineTo(this.x - offset_x + this.width, this.y - infobox_offset_x);
         this.ctx.lineTo(this.x - offset_x + this.width + infobox_offset_x, this.y);
         this.ctx.lineTo(this.x - offset_x + this.width, this.y + infobox_offset_x);
         
-        this.ctx.lineTo(this.x - offset_x + this.width, this.y - offset_y + this.height - radius);
-        this.ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y + this.height, this.x - offset_x + this.width - radius, this.y - offset_y + this.height);
-        this.ctx.lineTo(this.x - offset_x + radius, this.y - offset_y + this.height);
-        this.ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y + this.height, this.x - offset_x, this.y - offset_y + this.height - radius);
-        this.ctx.lineTo(this.x - offset_x, this.y - offset_y + radius);
-        this.ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y, this.x - offset_x + radius, this.y - offset_y);
+        this.ctx.lineTo(this.x - offset_x + this.width, this.y - offset_y + this.height - rect_curve);
+        this.ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y + this.height, this.x - offset_x + this.width - rect_curve, this.y - offset_y + this.height);
+        this.ctx.lineTo(this.x - offset_x + rect_curve, this.y - offset_y + this.height);
+        this.ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y + this.height, this.x - offset_x, this.y - offset_y + this.height - rect_curve);
+        this.ctx.lineTo(this.x - offset_x, this.y - offset_y + rect_curve);
+        this.ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y, this.x - offset_x + rect_curve, this.y - offset_y);
         this.ctx.closePath();
         this.ctx.fill();
         this.ctx.stroke();
@@ -661,8 +661,6 @@ function node(data, c){
     
     
     this.draw = function() {
-        var font_size = text_size * factor;
-        var radius = metabolite_radius * factor;
         var hh = this.height * 0.5;
         var hw = this.width * 0.5;
     
@@ -742,7 +740,6 @@ function node(data, c){
     };
     
     this.is_mouse_over = function (mouse){
-        var radius = metabolite_radius * factor;
         switch (this.type){
             case "metabolite":
                 if (Math.sqrt(Math.pow(this.x - mouse.x, 2) + Math.pow(this.y - mouse.y, 2)) < radius){
@@ -779,7 +776,7 @@ function node(data, c){
         }
         
         if (this.type == "metabolite"){
-            return [this.x - metabolite_radius * factor, this.y];
+            return [this.x - radius, this.y];
         }
         
         var offset_y = 0;
@@ -818,7 +815,7 @@ function node(data, c){
             }
         }
         else if (this.type == 'metabolite'){
-            prepare_infobox(this.is_mouse_over(mouse.x, mouse.y, metabolite_radius * factor) - 1);
+            prepare_infobox(this.is_mouse_over(mouse) - 1);
         }
     }
     
@@ -994,6 +991,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     this.c = c;
     this.ctx = this.c.getContext("2d");
     this.head = head;
+    this.head_start = 0;
     this.point_list = [];
     this.start_point = (x_s, y_s, "");
     this.start_id = protein_node.id;
@@ -1318,41 +1316,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
         }
         this.point_list[p_len - 1].x = xa_e;
         this.point_list[p_len - 1].y = ya_e;
-                
-    }
-    
-    
-    this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node); 
-    
-    this.draw = function(){
         
-        this.ctx.strokeStyle = edge_color;
-        this.ctx.fillStyle = edge_color;
-        this.ctx.lineWidth = line_width * factor;
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
-        var p_len = this.point_list.length;
-        for (var i = 0; i < p_len - 1 - this.head; ++i){
-            var control = new point(0, 0, 0);
-            switch (this.point_list[i].b){
-                case "rt": case "lt": case "rb": case "lb":
-                    control.x = this.point_list[i + 1].x;
-                    control.y = this.point_list[i].y;
-                    this.ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
-                    break;
-                    
-                case "tr": case "tl": case "br": case "bl":
-                    control.x = this.point_list[i].x;
-                    control.y = this.point_list[i + 1].y;
-                    this.ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
-                    break;
-                default:
-                    this.ctx.lineTo(this.point_list[i + 1].x, this.point_list[i + 1].y);
-                    break;
-                    
-            }
-        }
-        this.ctx.stroke();
         if (this.head){
             var x_head = -1;
             var y_head = -1;
@@ -1374,20 +1338,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             }
             
             switch (this.point_list[p_len - 2].b){
-                case "rl": case "lr": case "bt": case "tb":
-                    var b = this.point_list[p_len - 1].b;
-                    
-                    
-                    var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - p1_x) + sq(p2_y - p1_y)));
-                    x_head = p2_x + l * (p1_x - p2_x);
-                    y_head = p2_y + l * (p1_y - p2_y);
-                    
-                    this.ctx.lineWidth = line_width * factor;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(p1_x, p1_y);
-                    this.ctx.lineTo(x_head, y_head);
-                    this.ctx.stroke();
-                    
+                case "rl": case "lr": case "bt": case "tb":                    
                     break;
                 
                 default:                    
@@ -1440,14 +1391,94 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
                     
                     
                     t *= 1.05;
-                    xc_head = (1 - t) * (1 - t) * p1_x + 2 * (1 - t) * t * ct_x + t * t * p2_x;
-                    yc_head = (1 - t) * (1 - t) * p1_y + 2 * (1 - t) * t * ct_y + t * t * p2_y;
+                    this.head_start = t;
+                    break;
+            }
+        }
+                
+    }
+    
+    
+    this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node); 
+    
+    this.draw = function(){
+        
+        this.ctx.strokeStyle = edge_color;
+        this.ctx.fillStyle = edge_color;
+        this.ctx.lineWidth = line_width * factor;
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
+        var p_len = this.point_list.length;
+        for (var i = 0; i < p_len - 1 - this.head; ++i){
+            var control = new point(0, 0, 0);
+            switch (this.point_list[i].b){
+                case "rt": case "lt": case "rb": case "lb":
+                    control.x = this.point_list[i + 1].x;
+                    control.y = this.point_list[i].y;
+                    this.ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    break;
+                    
+                case "tr": case "tl": case "br": case "bl":
+                    control.x = this.point_list[i].x;
+                    control.y = this.point_list[i + 1].y;
+                    this.ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    break;
+                default:
+                    this.ctx.lineTo(this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    break;
+                    
+            }
+        }
+        this.ctx.stroke();
+        
+        if (this.head){
+            var x_head = -1;
+            var y_head = -1;
+            var p2_x = this.point_list[p_len - 1].x;
+            var p2_y = this.point_list[p_len - 1].y;
+            var p1_x = this.point_list[p_len - 2].x;
+            var p1_y = this.point_list[p_len - 2].y;
+            var ct_x = -1;
+            var ct_y = -1;
+            switch (this.point_list[p_len - 2].b){
+                case "rt": case "lt": case "rb": case "lb":
+                    ct_x = this.point_list[p_len - 1].x;
+                    ct_y = this.point_list[p_len - 2].y;
+                    break;
+                case "tr": case "tl": case "br": case "bl":
+                    ct_x = this.point_list[p_len - 2].x;
+                    ct_y = this.point_list[p_len - 1].y;
+                    break;
+            }
+            
+            switch (this.point_list[p_len - 2].b){
+                case "rl": case "lr": case "bt": case "tb":
+                    var b = this.point_list[p_len - 1].b;
+                    
+                    
+                    var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - p1_x) + sq(p2_y - p1_y)));
+                    x_head = p2_x + l * (p1_x - p2_x);
+                    y_head = p2_y + l * (p1_y - p2_y);
+                    
+                    this.ctx.lineWidth = line_width * factor;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p1_x, p1_y);
+                    this.ctx.lineTo(x_head, y_head);
+                    this.ctx.stroke();
+                    
+                    break;
+                
+                default:
+                    var t = this.head_start;
+                    x_head = (1 - t) * (1 - t) * p1_x + 2 * (1 - t) * t * ct_x + t * t * p2_x;
+                    y_head = (1 - t) * (1 - t) * p1_y + 2 * (1 - t) * t * ct_y + t * t * p2_y;
                     
                     this.ctx.beginPath();
                     this.ctx.moveTo(p1_x, p1_y);
-                    this.ctx.bezierCurveTo(ct_x, ct_y, xc_head, yc_head, xc_head, yc_head);
+                    this.ctx.bezierCurveTo(ct_x, ct_y, x_head, y_head, x_head, y_head);
                     this.ctx.stroke();
                     break;
+                    
             }
             
             var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - x_head) + sq(p2_y - y_head)));
