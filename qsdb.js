@@ -1,6 +1,6 @@
 moved = false;
 HTTP_GET_VARS = [];
-current_pathway = 28;
+current_pathway = 1;
 highlight_element = 0;
 offsetX = 0;
 offsetY = 0;
@@ -323,11 +323,15 @@ function load_data(reload){
             tmp_data = JSON.parse(xmlhttp.responseText);
         }
     }
+    var start_time = new Date().getTime();
     xmlhttp.open("GET", "get-qsdbdata.py?request=qsdbdata&pathway=" + current_pathway + "&species=" + species_string, false);
     xmlhttp.send();
+    var end_time = new Date().getTime();
+    console.log("time: " + (end_time - start_time));
     
     var x_min = 1e100, x_max = -1e100;
     var y_min = 1e100, y_max = -1e100;
+    var preview_zoom = 0, m_zoom = 0;
     var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
     for (var i = 0; i < tmp_data.length; ++i){
         data.push(new node(tmp_data[i], c));
@@ -359,10 +363,12 @@ function load_data(reload){
     
         
         if ((x_max - x_min) / ctx.canvas.width > (y_max - y_min) / (ctx.canvas.height - nav_height)){
-            min_zoom = -Math.ceil(Math.log((x_max - x_min) / ctx.canvas.width) / Math.log(scaling));
+            m_zoom = -Math.ceil(Math.log((x_max - x_min) / ctx.canvas.width) / Math.log(scaling));
+            preview_zoom = -Math.ceil(Math.log((x_max - x_min) / ctx.canvas.width * 5) / Math.log(scaling));
         }
         else {
-            min_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height)) / Math.log(scaling));
+            m_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height)) / Math.log(scaling));
+            preview_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height) * 5) / Math.log(scaling));
         }
     }
     
@@ -377,11 +383,13 @@ function load_data(reload){
     xmlhttp2.send();
     assemble_elements();
     compute_edges();
-    for (var i = zoom; i >= min_zoom; --i) zoom_in_out(1, 0);
+    min_zoom = preview_zoom;
+    for (var i = zoom; i >= preview_zoom; --i) zoom_in_out(1, 0);
     preview_element.snapshot();
+    for (var i = 0; i < (m_zoom - preview_zoom); ++i) zoom_in_out(0, 0);
+    min_zoom = m_zoom;
     draw();    
 }
-
 
 function compute_edges(){
     edges = [];
@@ -976,6 +984,8 @@ function check_spectra(){
     document.getElementById("renderarea").style.filter = "blur(5px)";
     document.getElementById("navigation").style.filter = "blur(5px)";
     resize_ms_view();
+    spectrum_loaded = false;
+    draw_spectrum();
     
     document.getElementById("error_value").value = (document.getElementById("radio_ppm").checked ? tolerance_relative : tolerance_absolute);
     
@@ -1008,6 +1018,7 @@ function check_spectra(){
         inner_html += "<tr><td><table id='peptide_" + peps + "' style=\"display: none;\">";
         for (var j = 0; j < data[p].proteins[pp].peptides.length; ++j){
             var n_specs = data[p].proteins[pp].peptides[j].spectra.length;
+            if (!n_specs) continue;
             inner_html += "<tr><td onclick=\"document.getElementById('peptide_sign_" + specs + "').innerHTML = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('spectrum_" + specs + "').style.display = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: default; color: " + (n_specs ? "black" : disabled_text_color) + ";\">&nbsp;&nbsp;&nbsp;&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"peptide_sign_" + specs + "\">" + sign_right + "</div>&nbsp;" + data[p].proteins[pp].peptides[j].peptide_seq + "</td></tr>";
             
             inner_html += "<tr><td><table id='spectrum_" + specs + "' style=\"display: none;\">";

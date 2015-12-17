@@ -65,7 +65,7 @@ function Protein(data){
         this.containing_spectra += this.peptides[i].spectra.length;
     }
     
-    //this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
+    this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
     
     this.search = function(len_p, accept, masks, node_id){
         var results = [];
@@ -245,16 +245,17 @@ function preview(ctx){
             y_min = Math.min(y_min, data[i].y - data[i].height * 0.5);
             y_max = Math.max(y_max, data[i].y + data[i].height * 0.5);
         }
-        x_min -= 25;
-        x_max += 25;
-        y_min -= 25;
-        y_max += 25;
+        x_min -= 5;
+        x_max += 5;
+        y_min -= 5;
+        y_max += 5;
         boundaries[0] = x_min;
         boundaries[1] = y_min;
         boundaries[2] = x_max - x_min;
         boundaries[3] = y_max - y_min;
         
         var image_data = this.ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
+        /*
         if ((x_max - x_min) / window.innerWidth >= (y_max - y_min) / window.innerHeight) {
             var sf = window.innerWidth / (x_max - x_min) * 0.2;
         }
@@ -263,10 +264,22 @@ function preview(ctx){
         }
         this.width = Math.ceil((x_max - x_min) * sf);
         this.height = Math.ceil((y_max - y_min) * sf);
+        */
+        this.width = x_max - x_min;
+        this.height = y_max - y_min;
         this.x = 0;
         this.y = window.innerHeight - this.height;
         this.preview_image = this.ctx.createImageData(this.width, this.height);
         this.preview_image_original = this.ctx.createImageData(this.width, this.height);
+        for (var i = 0; i < this.preview_image.data.length; i += 4){
+            this.preview_image.data[i] = image_data.data[i];
+            this.preview_image.data[i + 1] = image_data.data[i + 1];
+            this.preview_image.data[i + 2] = image_data.data[i + 2];
+            this.preview_image.data[i + 3] = image_data.data[i + 3];
+        }
+        
+        
+        /*
         var wf = image_data.width / this.width;
         var hf = image_data.height / this.height;
        
@@ -284,6 +297,7 @@ function preview(ctx){
                 h += 1;
             }
         }
+        */
     }
     
     this.is_mouse_over = function(mouse){
