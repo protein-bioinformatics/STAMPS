@@ -23,6 +23,7 @@ elements = [];
 boundaries = [0, 0, 0, 0];
 pathway_is_loaded = false;
 edge_count = 0;
+draw_code = 0;
 
 scaling = 1.25;
 zoom = 0;
@@ -190,16 +191,32 @@ function compute_angle(x_1, y_1, x_2, y_2, anchor){
 
 
 
-function draw(){
-    var c = document.getElementById("renderarea");
-    
-    var ctx = c.getContext("2d");
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    
-    
-    //draw elements visual elements
-    for (var i = 0; i < elements.length; ++i){
-        elements[i].draw();
+function draw(sync){
+    if (typeof(sync) == "undefined"){
+        var dc = Math.random();
+        draw_code = dc;
+        var dr = setInterval(function(dc){
+            var c = document.getElementById("renderarea");
+            var ctx = c.getContext("2d");
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            
+            //draw elements visual elements
+            for (var i = 0; i < elements.length; ++i){
+                elements[i].draw();
+            }
+            clearInterval(dr);
+        }, 1, dc);
+    }
+    else {
+        console.log("huhu");
+        var c = document.getElementById("renderarea");
+        var ctx = c.getContext("2d");
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        
+        //draw elements visual elements
+        for (var i = 0; i < elements.length; ++i){
+            elements[i].draw();
+        }
     }
 }
 
@@ -252,7 +269,8 @@ function init(){
     c.onmousemove = mouse_move_listener;
     c.addEventListener("click", mouse_click_listener, false);
     c.addEventListener("dblclick", mouse_dblclick_listener, false);
-    c.addEventListener("mousewheel", mouse_wheel_listener, false);
+    //c.addEventListener("wheel", mouse_wheel_listener, false);
+    //c.addEventListener("mousewheel", mouse_wheel_listener, false);
     c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
     
     document.addEventListener('keydown', key_down, false);
@@ -406,7 +424,7 @@ function load_data(reload){
             assemble_elements();
             min_zoom = preview_zoom;
             for (var i = zoom; i >= preview_zoom; --i) zoom_in_out(1, 0);
-            draw();
+            draw(1);
             preview_element.snapshot();
             for (var i = 0; i < (m_zoom - preview_zoom); ++i) zoom_in_out(0, 0);
             min_zoom = m_zoom;
@@ -818,7 +836,6 @@ function mouse_move_listener(e){
     mouse_x = res.x;
     mouse_y = res.y;
     
-    var start_time = new Date().getTime();
     // shift all nodes
     if (e.buttons & 1){
         if (!highlight_element || !highlight_element.mouse_down_move(res, e.which)){
@@ -859,7 +876,10 @@ function mouse_move_listener(e){
                 compute_edges();
             }
         }
-        draw();
+        //var process_draw = setInterval(function(){
+            draw();
+        //    clearInterval(process_draw);
+        //}, 1);
         offsetX = res.x;
         offsetY = res.y;
     }
@@ -883,7 +903,7 @@ function mouse_move_listener(e){
     }
     if(highlight_element && highlight_element.tipp) Tip(e, highlight_element.id + " " + highlight_element.name);
     else unTip();
-            var end_time = new Date().getTime(); console.log("time: " + (end_time - start_time));
+    
 }
 
 
@@ -1169,7 +1189,7 @@ function highlight_protein(node_id, prot_id){
     
     hide_search();
     var progress = 0;
-    var steps = 24;
+    var steps = 30;
     var time = 3; // seconds
     var std_dev = time / 6.;
     var c = document.getElementById("renderarea");
