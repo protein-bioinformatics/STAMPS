@@ -407,6 +407,7 @@ function zoom_sign(ctx, dir){
     
     this.mouse_click = function(mouse, key){
         zoom_in_out(1 - this.dir, 0);
+        draw();
     }
     
     this.is_mouse_over = function(mouse){
@@ -530,8 +531,9 @@ function Infobox(ctx){
             this.ctx.fillText(data[this.node_id].formula, this.x - offset_x + 20 + l_for, this.y - offset_y + line_height + 40);
             this.ctx.fillText(data[this.node_id].exact_mass, this.x - offset_x + 20 + l_ems, this.y - offset_y + 2 * line_height + 40);
             
-            if (data[this.node_id].img.width)
+            if (data[this.node_id].img.width){
                 this.ctx.drawImage(data[this.node_id].img, this.x - offset_x + 20, this.y - offset_y + 40 + 3 * line_height);
+            }
         }
         else if (data[this.node_id].type == "protein"){
             this.ctx.textAlign = "left";
@@ -567,7 +569,6 @@ function Infobox(ctx){
     }
 }
 
-
 node.prototype = new visual_element();
 node.prototype.constructor = node;
 
@@ -595,42 +596,51 @@ function node(data, c){
     this.on_slide = false;
     this.ctx.font = (text_size * factor).toString() + "px Arial";
     
-    if (this.type == "protein"){
-        var name = "";
-        this.height = 20 + 20 * Math.min(data['proteins'].length, max_protein_line_number);
-        this.orig_height = 20 + 20 * data['proteins'].length;
-        this.lines = data['proteins'].length;
-        this.slide = (data['proteins'].length > max_protein_line_number);
-        for (var j = 0; j < data['proteins'].length; ++j){
-            this.proteins.push(new Protein(data['proteins'][j]));
-            if (name.length) name += ", ";
-            var def = this.proteins[j].name;
-            if (this.width < this.ctx.measureText(def).width){
-                this.width = this.ctx.measureText(def).width;
+    
+    switch (this.type){
+        case "protein":
+            var name = "";
+            this.height = 20 + 20 * Math.min(data['proteins'].length, max_protein_line_number);
+            this.orig_height = 20 + 20 * data['proteins'].length;
+            this.lines = data['proteins'].length;
+            this.slide = (data['proteins'].length > max_protein_line_number);
+            for (var j = 0; j < data['proteins'].length; ++j){
+                this.proteins.push(new Protein(data['proteins'][j]));
+                if (name.length) name += ", ";
+                var def = this.proteins[j].name;
+                var text_width = this.ctx.measureText(def).width;
+                if (this.width < text_width){
+                    this.width = text_width;
+                }
+                name += data['proteins'][j]['name'];
             }
-            name += data['proteins'][j]['name'];
-        }
-        this.width += 50 + this.slide * 20;
-        this.name = name;
-        this.tipp = (name.length || true);
+            this.width += 50 + this.slide * 20;
+            this.name = name;
+            this.tipp = (name.length || true);
+            break;
+        case "pathway":
+            var tokens = data['name'].split("\n");
+            this.height = 40 + 20 * tokens.length;
+            
+            for (var j = 0; j < tokens.length; ++j){
+                if (this.width < tokens[j].length) this.width = tokens[j].length;
+            }
+            this.width *= 12;
+            break;
+        case "metabolite":
+            this.width = metabolite_radius * 2;
+            this.height = metabolite_radius * 2;
+            //this.img = new Image();
+            //this.img.src = "http://www.genome.jp/Fig/compound/" + nd.c_number + ".gif";
+            var load_process = setInterval(function(nd){
+                nd.img = new Image();
+                nd.img.src = "http://www.genome.jp/Fig/compound/" + nd.c_number + ".gif";
+                clearInterval(load_process);
+            }, 1, this);
+            this.tipp = true;
+            break;
     }
-    else if (this.type == "pathway"){
-        var tokens = data['name'].split("\n");
-        this.height = 40 + 20 * tokens.length;
-        
-        for (var j = 0; j < tokens.length; ++j){
-            if (this.width < tokens[j].length) this.width = tokens[j].length;
-        }
-        this.width *= 12;
-    }
-    else {
-        this.width = metabolite_radius * 2;
-        this.height = metabolite_radius * 2;
-        this.img = new Image();
-        this.img.src = "http://www.genome.jp/Fig/compound/" + this.c_number + ".gif";
-        this.tipp = true;
-    }
-     
+    
     
     this.search = function(len_p, accept, masks){
         var results = [];
@@ -1191,147 +1201,163 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
         if (!matrix[cell_y_s][cell_x_s].active || !matrix[cell_y_e][cell_x_e].active){
             this.point_list = [new point(xa_s, ya_s, opposite[a_s] + a_s)];
             this.point_list.push(new point(xa_e, ya_e, opposite[a_e] + a_e));
-            return;
+            //return;
         }
         
         
-        
-        
-        // start routing
-        matrix[cell_y_s][cell_x_s].q_node.cost = 0;
-        matrix[cell_y_s][cell_x_s].q_node.in_queue = true;
-        matrix[cell_y_s][cell_x_s].cost = 0;
-        matrix[cell_y_e][cell_x_e].is_target = true;
-        open_list.insert(matrix[cell_y_s][cell_x_s].q_node);
-        matrix[cell_y_s][cell_x_s].direction = a_s;
-        while (!open_list.is_empty()){
-            current_node = open_list.extract_min();
-            if (current_node.cll.is_target) break;
-            current_node.in_queue = false;
-            current_node.cll.visited = true;
-            this.expand_node(matrix, current_node, open_list, W, H, cell_x_e, cell_y_e);
-        }
-        
-        
-        
-        // correct the path from end to front
-        var curr_x = end_x;
-        var curr_y = end_y;
-        var post_x = -1;
-        var post_y = -1;
-        while (((curr_x != -1) || (curr_y != -1))){
-            matrix[curr_y][curr_x].in_path = true;
-            if (post_x != -1) matrix[curr_y][curr_x].post = [post_x, post_y];
-            if ((post_x - curr_x) == 1) matrix[curr_y][curr_x].direction = "r";
-            else if ((post_x - curr_x) == -1) matrix[curr_y][curr_x].direction = "l";
-            else if ((post_y - curr_y) == 1) matrix[curr_y][curr_x].direction = "b";
-            else if ((post_y - curr_y) == -1) matrix[curr_y][curr_x].direction = "t";
+        else {
             
-            post_x = curr_x;
-            post_y = curr_y;
-            curr_x = matrix[post_y][post_x].pre[0];
-            curr_y = matrix[post_y][post_x].pre[1];
-        }
-        
-        
-        // determining the points / corners of the path
-        var curr_x = start_x;
-        var curr_y = start_y;
-        var x = (curr_x - cell_x_s) * grid + xd_s;
-        var y = (curr_y - cell_y_s) * grid + yd_s;
-        this.point_list = [new point(x, y, opposite[a_s] + a_s)];
-        var in_corner = false;
-        var d = a_s;
-        var corners = 0;
-        var corner_path = [];
-        while (((curr_x != -1) || (curr_y != -1))){
-            post_x = matrix[curr_y][curr_x].post[0];
-            post_y = matrix[curr_y][curr_x].post[1];
-            
-            if ((curr_x == end_x) && (curr_y == end_y) && !in_corner){
-                var x = (curr_x - cell_x_s) * grid + xd_s;
-                var y = (curr_y - cell_y_s) * grid + yd_s;
-                this.point_list.push(new point(x, y, opposite[d] + d));
-                break;
+            // start routing
+            matrix[cell_y_s][cell_x_s].q_node.cost = 0;
+            matrix[cell_y_s][cell_x_s].q_node.in_queue = true;
+            matrix[cell_y_s][cell_x_s].cost = 0;
+            matrix[cell_y_e][cell_x_e].is_target = true;
+            open_list.insert(matrix[cell_y_s][cell_x_s].q_node);
+            matrix[cell_y_s][cell_x_s].direction = a_s;
+            while (!open_list.is_empty()){
+                current_node = open_list.extract_min();
+                if (current_node.cll.is_target) break;
+                current_node.in_queue = false;
+                current_node.cll.visited = true;
+                this.expand_node(matrix, current_node, open_list, W, H, cell_x_e, cell_y_e);
             }
-            if (in_corner){
-                var x = (curr_x - cell_x_s) * grid + xd_s;
-                var y = (curr_y - cell_y_s) * grid + yd_s;
-                this.point_list.push(new point(x, y, opposite[d] + d));
-                if (corner_path.length > 2 && corner_path[corner_path.length - 2]){
-                    switch (matrix[curr_y][curr_x].direction){
-                        case "l": case "r":
-                            y = (this.point_list[this.point_list.length - 1].y + this.point_list[this.point_list.length - 4].y) * 0.5;
-                            this.point_list[this.point_list.length - 2].y = y;
-                            this.point_list[this.point_list.length - 3].y = y;
-                            break;
-                        case "t": case "b":
-                            x = (this.point_list[this.point_list.length - 1].x + this.point_list[this.point_list.length - 4].x) * 0.5;
-                            this.point_list[this.point_list.length - 2].x = x;
-                            this.point_list[this.point_list.length - 3].x = x;
-                            break;
-                    }
+            
+            
+            
+            // correct the path from end to front
+            var curr_x = end_x;
+            var curr_y = end_y;
+            var post_x = -1;
+            var post_y = -1;
+            while (((curr_x != -1) || (curr_y != -1))){
+                matrix[curr_y][curr_x].in_path = true;
+                if (post_x != -1) matrix[curr_y][curr_x].post = [post_x, post_y];
+                if ((post_x - curr_x) == 1) matrix[curr_y][curr_x].direction = "r";
+                else if ((post_x - curr_x) == -1) matrix[curr_y][curr_x].direction = "l";
+                else if ((post_y - curr_y) == 1) matrix[curr_y][curr_x].direction = "b";
+                else if ((post_y - curr_y) == -1) matrix[curr_y][curr_x].direction = "t";
+                
+                post_x = curr_x;
+                post_y = curr_y;
+                curr_x = matrix[post_y][post_x].pre[0];
+                curr_y = matrix[post_y][post_x].pre[1];
+            }
+            
+            
+            // determining the points / corners of the path
+            var curr_x = start_x;
+            var curr_y = start_y;
+            var x = (curr_x - cell_x_s) * grid + xd_s;
+            var y = (curr_y - cell_y_s) * grid + yd_s;
+            this.point_list = [new point(x, y, opposite[a_s] + a_s)];
+            var in_corner = false;
+            var d = a_s;
+            var corners = 0;
+            var corner_path = [];
+            while (((curr_x != -1) || (curr_y != -1))){
+                post_x = matrix[curr_y][curr_x].post[0];
+                post_y = matrix[curr_y][curr_x].post[1];
+                
+                if ((curr_x == end_x) && (curr_y == end_y) && !in_corner){
+                    var x = (curr_x - cell_x_s) * grid + xd_s;
+                    var y = (curr_y - cell_y_s) * grid + yd_s;
+                    this.point_list.push(new point(x, y, opposite[d] + d));
+                    break;
                 }
-                in_corner = false;
-                ++corners;
-            }
-            if (d != matrix[curr_y][curr_x].direction){
-                var x = (matrix[curr_y][curr_x].pre[0] - cell_x_s) * grid + xd_s;
-                var y = (matrix[curr_y][curr_x].pre[1] - cell_y_s) * grid + yd_s;
-                this.point_list.push(new point(x, y, opposite[d] + matrix[curr_y][curr_x].direction));
-                d = matrix[curr_y][curr_x].direction;
-                in_corner = true;
-                corner_path.push(1);
-            }
-            else {
-                corner_path.push(0);
-            }
-            
-            curr_x = post_x;
-            curr_y = post_y;
-        }
-        
-        
-        // merge equal points
-        for (var i = 0; i < this.point_list.length - 1; ++i){
-            var p2_x = this.point_list[i].x;
-            var p2_y = this.point_list[i].y;
-            var p1_x = this.point_list[i + 1].x;
-            var p1_y = this.point_list[i + 1].y;
-            if (Math.abs(p2_x - p1_x) < 1 && Math.abs(p2_y - p1_y) < 1){
-                this.point_list.splice(i, 1);
-            }
-        }
-        
-        
-        
-        // correcting the targeting points
-        var p_len = this.point_list.length;
-        if (corners > 0){
-            var shift_x = xa_e - this.point_list[p_len - 1].x;
-            var shift_y = ya_e - this.point_list[p_len - 1].y;
-            
-            var s = false;
-            switch (this.point_list[p_len - 2].b){
-                case "lr": case "rl": case "tb": case "bt": s = true; break;
-                default: break;
-            }
-            if (s){
-                var dd = this.point_list[p_len - 1].b.charAt(0);
-                if (dd == "b" || dd == "t"){
-                    this.point_list[p_len - 2].x += shift_x;
-                    this.point_list[p_len - 3].x += shift_x;
+                if (in_corner){
+                    var x = (curr_x - cell_x_s) * grid + xd_s;
+                    var y = (curr_y - cell_y_s) * grid + yd_s;
+                    this.point_list.push(new point(x, y, opposite[d] + d));
+                    if (corner_path.length > 2 && corner_path[corner_path.length - 2]){
+                        switch (matrix[curr_y][curr_x].direction){
+                            case "l": case "r":
+                                y = (this.point_list[this.point_list.length - 1].y + this.point_list[this.point_list.length - 4].y) * 0.5;
+                                this.point_list[this.point_list.length - 2].y = y;
+                                this.point_list[this.point_list.length - 3].y = y;
+                                break;
+                            case "t": case "b":
+                                x = (this.point_list[this.point_list.length - 1].x + this.point_list[this.point_list.length - 4].x) * 0.5;
+                                this.point_list[this.point_list.length - 2].x = x;
+                                this.point_list[this.point_list.length - 3].x = x;
+                                break;
+                        }
+                    }
+                    in_corner = false;
+                    ++corners;
+                }
+                if (d != matrix[curr_y][curr_x].direction){
+                    var x = (matrix[curr_y][curr_x].pre[0] - cell_x_s) * grid + xd_s;
+                    var y = (matrix[curr_y][curr_x].pre[1] - cell_y_s) * grid + yd_s;
+                    this.point_list.push(new point(x, y, opposite[d] + matrix[curr_y][curr_x].direction));
+                    d = matrix[curr_y][curr_x].direction;
+                    in_corner = true;
+                    corner_path.push(1);
                 }
                 else {
-                    this.point_list[p_len - 2].y += shift_y;
-                    this.point_list[p_len - 3].y += shift_y;
+                    corner_path.push(0);
+                }
+                
+                curr_x = post_x;
+                curr_y = post_y;
+            }
+            
+            
+            // merge equal points
+            for (var i = 0; i < this.point_list.length - 1; ++i){
+                var p2_x = this.point_list[i].x;
+                var p2_y = this.point_list[i].y;
+                var p1_x = this.point_list[i + 1].x;
+                var p1_y = this.point_list[i + 1].y;
+                if (Math.abs(p2_x - p1_x) < 1 && Math.abs(p2_y - p1_y) < 1){
+                    this.point_list.splice(i, 1);
                 }
             }
+            
+            
+            
+            // correcting the targeting points
+            var p_len = this.point_list.length;
+            if (corners > 0){
+                var shift_x = xa_e - this.point_list[p_len - 1].x;
+                var shift_y = ya_e - this.point_list[p_len - 1].y;
+                
+                var s = false;
+                switch (this.point_list[p_len - 2].b){
+                    case "lr": case "rl": case "tb": case "bt": s = true; break;
+                    default: break;
+                }
+                if (s){
+                    var dd = this.point_list[p_len - 1].b.charAt(0);
+                    if (dd == "b" || dd == "t"){
+                        this.point_list[p_len - 2].x += shift_x;
+                        this.point_list[p_len - 3].x += shift_x;
+                    }
+                    else {
+                        this.point_list[p_len - 2].y += shift_y;
+                        this.point_list[p_len - 3].y += shift_y;
+                    }
+                }
+            }
+            this.point_list[p_len - 1].x = xa_e;
+            this.point_list[p_len - 1].y = ya_e;
         }
-        this.point_list[p_len - 1].x = xa_e;
-        this.point_list[p_len - 1].y = ya_e;
+        
+        for (var i = 0; i < this.point_list.length; ++i){
+            switch (this.point_list[i].b){
+                case "rt": case "lt": case "rb": case "lb":
+                    this.point_list[i].b = 0;
+                    break;
+                case "tr": case "tl": case "br": case "bl":
+                    this.point_list[i].b = 1;
+                    break;
+                case "rl": case "lr": case "bt": case "tb":
+                    this.point_list[i].b = 2;
+                    break;
+            }
+        }
         
         if (this.head){
+            var p_len = this.point_list.length;
             var x_head = -1;
             var y_head = -1;
             var p2_x = this.point_list[p_len - 1].x;
@@ -1341,18 +1367,18 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             var ct_x = -1;
             var ct_y = -1;
             switch (this.point_list[p_len - 2].b){
-                case "rt": case "lt": case "rb": case "lb":
+                case 0:
                     ct_x = this.point_list[p_len - 1].x;
                     ct_y = this.point_list[p_len - 2].y;
                     break;
-                case "tr": case "tl": case "br": case "bl":
+                case 1:
                     ct_x = this.point_list[p_len - 2].x;
                     ct_y = this.point_list[p_len - 1].y;
                     break;
             }
             
             switch (this.point_list[p_len - 2].b){
-                case "rl": case "lr": case "bt": case "tb":                    
+                case 2:                    
                     break;
                 
                 default:                    
@@ -1416,7 +1442,6 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node); 
     
     this.draw = function(){
-        
         this.ctx.strokeStyle = edge_color;
         this.ctx.fillStyle = edge_color;
         this.ctx.lineWidth = line_width * factor;
@@ -1425,18 +1450,20 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
         var p_len = this.point_list.length;
         for (var i = 0; i < p_len - 1 - this.head; ++i){
             var control = new point(0, 0, 0);
+            
             switch (this.point_list[i].b){
-                case "rt": case "lt": case "rb": case "lb":
+                case 0:
                     control.x = this.point_list[i + 1].x;
                     control.y = this.point_list[i].y;
                     this.ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
                     break;
                     
-                case "tr": case "tl": case "br": case "bl":
+                case 1:
                     control.x = this.point_list[i].x;
                     control.y = this.point_list[i + 1].y;
                     this.ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
                     break;
+                    
                 default:
                     this.ctx.lineTo(this.point_list[i + 1].x, this.point_list[i + 1].y);
                     break;
@@ -1455,21 +1482,18 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             var ct_x = -1;
             var ct_y = -1;
             switch (this.point_list[p_len - 2].b){
-                case "rt": case "lt": case "rb": case "lb":
+                case 0:
                     ct_x = this.point_list[p_len - 1].x;
                     ct_y = this.point_list[p_len - 2].y;
                     break;
-                case "tr": case "tl": case "br": case "bl":
+                case 1:
                     ct_x = this.point_list[p_len - 2].x;
                     ct_y = this.point_list[p_len - 1].y;
                     break;
             }
             
             switch (this.point_list[p_len - 2].b){
-                case "rl": case "lr": case "bt": case "tb":
-                    var b = this.point_list[p_len - 1].b;
-                    
-                    
+                case 2:
                     var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - p1_x) + sq(p2_y - p1_y)));
                     x_head = p2_x + l * (p1_x - p2_x);
                     y_head = p2_y + l * (p1_y - p2_y);

@@ -32,9 +32,9 @@ exit()
 from pymysql import connect, cursors
 from cgi import FieldStorage
 from json import dumps
+from math import ceil
 import sqlite3
-#import sys
-#import os
+import time
 
 
 def dict_factory(cursor, row):
@@ -64,38 +64,120 @@ print()
 response = []
 conn = connect(host='localhost', port=3306, user='qsdb_user', passwd='qsdb_password', db='qsdb')
 my_cur = conn.cursor(cursors.DictCursor)
-sql_query = "(select n.id, p.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, '' c_number, '' formula, '' exact_mass from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = %s)"
-sql_query += "union "
-sql_query += "(select n.id, m.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, m.c_number, m.formula, m.exact_mass from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = %s)"
-#sql_query += "union "
-#sql_query += "(select id, '', pathway_id, type, pathway_ref, x, y, '' c_number, '' formula, '' exact_mass from nodes n where type = 'protein' and pathway_id = %s);"
-my_cur.execute(sql_query, (pathway, pathway))
 
-#lite_db = sqlite3.connect('/home/dominik.kopczynski/Data/blib/TestLibraryPS.blib')
-lite_db = sqlite3.connect('/media/home/mouse.blib')
+
+lite_db = sqlite3.connect('/home/dominik.kopczynski/Data/blib/TestLibraryPS.blib')
+#lite_db = sqlite3.connect('/media/home/mouse.blib')
 lite_db.row_factory = dict_factory
 lite_cur = lite_db.cursor()
 
 
-my_cur_prot = conn.cursor(cursors.DictCursor)
-my_cur_pep = conn.cursor(cursors.DictCursor)
-my_cur_charge = conn.cursor(cursors.DictCursor)
 
 
 
+
+
+
+sql_query_nodes = "select * from nodes where pathway_id = %s and type = 'protein';"
+my_cur.execute(sql_query_nodes, pathway)
+
+for row in my_cur:
+    response.append({'id': row['id'],
+                    'name': '',
+                    'pathway_id': row['pathway_id'],
+                    'type': row['type'],
+                    'pathway_ref': '0',
+                    'x': row['x'],
+                    'y': row['y'],
+                    'c_number': '',
+                    'formula': '',
+                    'exact_mass': '',
+                    'proteins': []
+                    })
+
+sql_query_proteins = "select n.id nid, p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = %s and n.type = 'protein' and p.species = %s;"
+my_cur.execute(sql_query_proteins, (pathway, species))
+
+i = 0
+proteins = {}
+
+sql_query_peptides = []
+
+for row in my_cur:
+    while response[i]['id'] < row['nid']: i += 1
+    pid = int(row['id'])
+    response[i]['proteins'].append({'id': pid,
+                                    'name': row['name'],
+                                    'definition': row['definition'],
+                                    'mass': row['mass'],
+                                    'accession': row['accession'],
+                                    'ec_number': row['ec_number'],
+                                    #'fasta': row['fasta'],
+                                    'peptides': []
+                                    })
+    if pid not in proteins: proteins[pid] = []
+    proteins[pid].append(response[i]['proteins'][-1])
+    sql_query_peptides.append("select " + str(pid) + " pid")
+    
+sql_query_peptides = "select p.pid, pep.* from (" + " union ".join(sql_query_peptides) + ") p inner join peptides pep on p.pid = pep.protein_id;"
+my_cur.execute(sql_query_peptides)
+
+
+peptides = {}
+
+for row in my_cur:
+    for pr in proteins[int(row['pid'])]:
+        pep_id = int(row['id'])
+        pr['peptides'].append({'id': pep_id,
+                               'peptide_seq': row['peptide_seq'],
+                               'spectra': []
+                              })
+        if pep_id not in peptides: peptides[pep_id] = []
+        peptides[pep_id].append(pr['peptides'][-1])
+        
+        
+sql_query_spectra = []
+for pep_id in peptides:
+    sql_query_spectra.append("select " + str(pep_id) + " pep_id")
+
+
+sql_query_spectra = "select pep.pep_id, ps.* from (" + " union ".join(sql_query_spectra) + ") pep inner join peptide_spectra ps on pep.pep_id = ps.peptide_id;"
+my_cur.execute(sql_query_spectra)
+
+sql_query_lite = []
+for row in my_cur:
+    sql_query_lite.append("select %s pep_id, '%s' seq, %s chrg" % (row['pep_id'], peptides[int(row['pep_id'])][0]['peptide_seq'], row['charge']))
+
+t, l = 500, len(sql_query_lite)
+for i in range(ceil(l / t)):
+    sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, rs.id sid, rs.precursorMZ FROM RefSpectra rs inner join (" + " union ".join(sql_query_lite[i * t : min((i + 1) * t, l)]) + ") ps on rs.peptideSeq = ps.seq and rs.peptideModSeq = ps.seq and rs.precursorCharge = ps.chrg;"
+    lite_cur.execute(sql_query_lite2)
+    
+    for row in lite_cur:
+        for pep in peptides[int(row['pep_id'])]:
+            pep["spectra"].append({})
+            pep["spectra"][-1]['id'] = row['sid']
+            pep["spectra"][-1]['charge'] = row['charge']
+            pep["spectra"][-1]['mass'] = row['precursorMZ']
+
+sql_query = "(select n.id, p.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, '' c_number, '' formula, '' exact_mass from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = %s)"
+sql_query += "union "
+sql_query += "(select n.id, m.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, m.c_number, m.formula, m.exact_mass from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = %s)"
+my_cur.execute(sql_query, (pathway, pathway))
 
 
 for row in my_cur:
     response.append(row)
-    
-    
 
-sql_query = "select n.*, p.*, pep.*, ps.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id left join peptides pep on p.id = pep.protein_id left join peptide_spectra ps on pep.id = ps.peptide_id where p.species = %s and n.pathway_id = %s and n.type = 'protein';"
-my_cur.execute(sql_query, (species, pathway))
-#sql_query = "select id, '' name, pathway_id, type, pathway_ref, x, y, '' c_number, '' formula, '' exact_mass from nodes n where type = 'protein' and pathway_id = %s;"
-#my_cur.execute(sql_query, pathway)
+
+
 
 """
+
+
+
+
+
 for row in my_cur:
     response.append(row)
     r_last = response[-1]
@@ -124,77 +206,6 @@ for row in my_cur:
                     r_last_pep[-1]['spectra'][-1]['id'] = row_mass_id['id']
                     r_last_pep[-1]['spectra'][-1]['charge'] = row_spec['charge']
                     r_last_pep[-1]['spectra'][-1]['mass'] = row_mass_id['precursorMZ']
+
 """
-
-#pep.id p.id accession fasta name foreign_id y mass ec_number protein_id x pathway_id definition species ps.id pathway_ref peptide_id type peptide_seq charge id kegg_link 
-node_id = -1
-protein_id = -1
-peptide_id = -1
-for i, row in enumerate(my_cur):
-    if row['id'] != node_id:
-        response.append({'id': row['id'],
-                         'name': '',
-                         'pathway_id': row['pathway_id'],
-                         'type': row['type'],
-                         'pathway_ref': '0',
-                         'x': row['x'],
-                         'y': row['y'],
-                         'c_number': '',
-                         'formula': '',
-                         'exact_mass': '',
-                         'proteins': []
-                         })
-        node_id = row['id']
-        protein_id = -1
-        peptide_id = -1
-        
-    if row['p.id'] != protein_id:
-        response[-1]['proteins'].append({'id': row['p.id'],
-                                         'name': row['name'],
-                                         'definition': row['definition'],
-                                         'mass': row['mass'],
-                                         'accession': row['accession'],
-                                         'ec_number': row['ec_number'],
-                                         'fasta': row['fasta'],
-                                         'peptides': []
-                                         })
-        protein_id = row['p.id']
-        peptide_id = -1
-        if row['pep.id'] == "": continue
-        
-    if row['pep.id'] != peptide_id:
-        response[-1]['proteins'][-1]["peptides"].append({'id': row['pep.id'],
-                                                         'peptide_seq': row['peptide_seq'],
-                                                         'spectra': []
-                                                         })
-        peptide_id = row['pep.id']
-        if row['charge'] == "": continue
-    
-    sql_mass_id = "SELECT id, precursorMZ FROM RefSpectra WHERE peptideSeq = :peptide_seq and peptideModSeq = :peptide_seq and precursorCharge = :charge"
-    lite_cur.execute(sql_mass_id, {"peptide_seq": row['peptide_seq'], "charge": row['charge']})
-    for row_mass_id in lite_cur:
-        response[-1]['proteins'][-1]["peptides"][-1]["spectra"].append({})
-        response[-1]['proteins'][-1]["peptides"][-1]["spectra"][-1]['id'] = row_mass_id['id']
-        response[-1]['proteins'][-1]["peptides"][-1]["spectra"][-1]['charge'] = row['charge']
-        response[-1]['proteins'][-1]["peptides"][-1]["spectra"][-1]['mass'] = row_mass_id['precursorMZ']
-
-
-sql_query = "select n.* from nodes n left join nodeproteincorrelations np on n.id = np.node_id left join proteins p on np.protein_id = p.id where n.pathway_id = %s and isnull(p.id) and n.type = 'protein';"
-my_cur.execute(sql_query, pathway)
-
-for row in my_cur:
-    response.append({'id': row['id'],
-                     'name': '',
-                     'pathway_id': row['pathway_id'],
-                     'type': row['type'],
-                     'pathway_ref': '0',
-                     'x': row['x'],
-                     'y': row['y'],
-                     'c_number': '',
-                     'formula': '',
-                     'exact_mass': '',
-                     'proteins': []
-                     })
-
-
 print(dumps(response))

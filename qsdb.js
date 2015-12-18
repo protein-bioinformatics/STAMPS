@@ -1,6 +1,6 @@
 moved = false;
 HTTP_GET_VARS = [];
-current_pathway = 1;
+current_pathway = 28;
 highlight_element = 0;
 offsetX = 0;
 offsetY = 0;
@@ -10,7 +10,7 @@ mouse_x = 0;
 mouse_y = 0;
 data = [];
 data_ref = [];
-nodes = null;
+nodes = 0;
 event_moving_node = false;
 event_key_down = false;
 node_move_x = 0;
@@ -21,6 +21,8 @@ zoom_sign_in = 0;
 zoom_sign_out = 0;
 elements = [];
 boundaries = [0, 0, 0, 0];
+pathway_is_loaded = false;
+edge_count = 0;
 
 scaling = 1.25;
 zoom = 0;
@@ -294,8 +296,9 @@ function reset_view(){
 }
 
 
-
 function load_data(reload){
+    
+    pathway_is_loaded = false;
     if (!reload){
         reset_view();
         document.getElementById("search_field").value = "";
@@ -303,6 +306,7 @@ function load_data(reload){
     }
     
     elements = [];
+    edges = [];
     
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
@@ -317,58 +321,11 @@ function load_data(reload){
     data = [];
     data_ref = [];
     var tmp_data = 0;
+    nodes = 0;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             tmp_data = JSON.parse(xmlhttp.responseText);
-        }
-    }
-    var start_time = new Date().getTime();
-    xmlhttp.open("GET", "get-qsdbdata.py?request=qsdbdata&pathway=" + current_pathway + "&species=" + species_string, false);
-    xmlhttp.send();
-    var end_time = new Date().getTime();
-    console.log("time: " + (end_time - start_time));
-    
-    var x_min = 1e100, x_max = -1e100;
-    var y_min = 1e100, y_max = -1e100;
-    var preview_zoom = 0, m_zoom = 0;
-    var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
-    for (var i = 0; i < tmp_data.length; ++i){
-        data.push(new node(tmp_data[i], c));
-        x_min = Math.min(x_min, data[i].x - data[i].width * 0.5);
-        x_max = Math.max(x_max, data[i].x + data[i].width * 0.5);
-        y_min = Math.min(y_min, data[i].y - data[i].height * 0.5);
-        y_max = Math.max(y_max, data[i].y + data[i].height * 0.5);
-        data_ref[data[i]['id']] = i;
-    }
-    if (reload){
-        for (var i = 0; i < data.length; ++i){
-            data[i].x += null_x;
-            data[i].y += null_y;
-            data[i].width *= factor;
-            data[i].height *= factor;
-            data[i].x = null_x + factor * (data[i].x - null_x);
-            data[i].y = null_y + factor * (data[i].y - null_y);
-        }
-    }
-    if (!reload){
-        var shift_x = (ctx.canvas.width - x_min - x_max) * 0.5;
-        var shift_y = nav_height + (ctx.canvas.height - nav_height - y_min - y_max) * 0.5;
-        for (var i = 0; i < data.length; ++i){
-            data[i].x += shift_x;
-            data[i].y += shift_y;
-        }
-        null_x += shift_x;
-        null_y += shift_y;
-    
-        
-        if ((x_max - x_min) / ctx.canvas.width > (y_max - y_min) / (ctx.canvas.height - nav_height)){
-            m_zoom = -Math.ceil(Math.log((x_max - x_min) / ctx.canvas.width) / Math.log(scaling));
-            preview_zoom = -Math.ceil(Math.log((x_max - x_min) / ctx.canvas.width * 5) / Math.log(scaling));
-        }
-        else {
-            m_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height)) / Math.log(scaling));
-            preview_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height) * 5) / Math.log(scaling));
         }
     }
     
@@ -379,17 +336,87 @@ function load_data(reload){
             nodes = JSON.parse(xmlhttp2.responseText);
         }
     }
-    xmlhttp2.open("GET", "get-edgedata.py?pathway=" + current_pathway, false);
+    
+    
+    xmlhttp.open("GET", "get-qsdbdata.py?request=qsdbdata&pathway=" + current_pathway + "&species=" + species_string, true);
+    xmlhttp.send();
+    
+    
+    xmlhttp2.open("GET", "get-edgedata.py?pathway=" + current_pathway, true);
     xmlhttp2.send();
-    assemble_elements();
-    compute_edges();
-    min_zoom = preview_zoom;
-    for (var i = zoom; i >= preview_zoom; --i) zoom_in_out(1, 0);
-    preview_element.snapshot();
-    for (var i = 0; i < (m_zoom - preview_zoom); ++i) zoom_in_out(0, 0);
-    min_zoom = m_zoom;
-    draw();    
+    
+    
+    
+    var x_min = 1e100, x_max = -1e100;
+    var y_min = 1e100, y_max = -1e100;
+    var preview_zoom = 0, m_zoom = 0;
+    var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
+    
+    
+    
+    var process_nodes = setInterval(function(){
+        if (tmp_data){
+            for (var i = 0; i < tmp_data.length; ++i){
+                data.push(new node(tmp_data[i], c));
+                x_min = Math.min(x_min, data[i].x - data[i].width * 0.5);
+                x_max = Math.max(x_max, data[i].x + data[i].width * 0.5);
+                y_min = Math.min(y_min, data[i].y - data[i].height * 0.5);
+                y_max = Math.max(y_max, data[i].y + data[i].height * 0.5);
+                data_ref[data[i].id] = i;
+            }
+            if (reload){
+                for (var i = 0; i < data.length; ++i){
+                    data[i].x += null_x;
+                    data[i].y += null_y;
+                    data[i].width *= factor;
+                    data[i].height *= factor;
+                    data[i].x = null_x + factor * (data[i].x - null_x);
+                    data[i].y = null_y + factor * (data[i].y - null_y);
+                }
+            }
+            if (!reload){
+                var shift_x = (ctx.canvas.width - x_min - x_max) * 0.5;
+                var shift_y = nav_height + (ctx.canvas.height - nav_height - y_min - y_max) * 0.5;
+                for (var i = 0; i < data.length; ++i){
+                    data[i].x += shift_x;
+                    data[i].y += shift_y;
+                }
+                null_x += shift_x;
+                null_y += shift_y;
+            
+                
+                if ((x_max - x_min) / ctx.canvas.width > (y_max - y_min) / (ctx.canvas.height - nav_height)){
+                    m_zoom = -Math.ceil(Math.log((x_max - x_min) / ctx.canvas.width) / Math.log(scaling));
+                    preview_zoom = -Math.ceil(Math.log((x_max - x_min) / ctx.canvas.width * 5) / Math.log(scaling));
+                }
+                else {
+                    m_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height)) / Math.log(scaling));
+                    preview_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height) * 5) / Math.log(scaling));
+                }
+            }
+            clearInterval(process_nodes);
+            
+        }
+    }, 1);
+        
+    var start_time = new Date().getTime();
+    var process_edges = setInterval(function(){
+        if (tmp_data && nodes){
+            compute_edges();
+            assemble_elements();
+            min_zoom = preview_zoom;
+            for (var i = zoom; i >= preview_zoom; --i) zoom_in_out(1, 0);
+            draw();
+            preview_element.snapshot();
+            for (var i = 0; i < (m_zoom - preview_zoom); ++i) zoom_in_out(0, 0);
+            min_zoom = m_zoom;
+            draw();
+            pathway_is_loaded = true;
+            clearInterval(process_edges);
+        }
+    }, 1);
 }
+
 
 function compute_edges(){
     edges = [];
@@ -447,6 +474,9 @@ function compute_edges(){
         }
     }
     
+    for (var i = 0; i < connections.length; ++i){
+        edges.push(0);
+    }
     
     for (var i = 0; i < connections.length; ++i){
         var node_id = connections[i][0];
@@ -534,9 +564,9 @@ function compute_edges(){
                 start_x += node_width * 0.5;
             }
         }
-        edges.push(new edge(c, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id, edge_id));
+        edges[i] = new edge(c, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id, edge_id);
     }
-    assemble_elements();
+    
 }
 
 
@@ -611,6 +641,7 @@ function show_custom_menu(event){
     if (!administration) return;
     var menu_points = new Array();
     unTip();
+    /*
     if (!highlight_element){
         menu_points.push(["Insert protein", "debug", 0, 1]);
         menu_points.push(["Insert metabolite", "debug", 0, 1]);
@@ -660,6 +691,7 @@ function show_custom_menu(event){
     
     cm.style.left = (event.clientX - (event.clientX + cm.offsetWidth > window.innerWidth ? cm.offsetWidth : 0)) + "px";
     cm.style.top = (event.clientY - (event.clientY + cm.offsetHeight > window.innerHeight ? cm.offsetHeight : 0)) + "px";
+    */
 }
 
 
@@ -670,8 +702,10 @@ function hide_custom_menu(event){
 
 
 function mouse_wheel_listener(e){
+    if (!pathway_is_loaded) return;
     var c = document.getElementById("renderarea");
     zoom_in_out(e.detail >= 0, get_mouse_pos(c, e));
+    draw();
 }
     
     
@@ -713,11 +747,11 @@ function zoom_in_out(dir, res){
     boundaries[1] = res.y + scale * (boundaries[1] - res.y);
     boundaries[2] *= scale;
     boundaries[3] *= scale;
-    draw();
 }
 
 
 function mouse_dblclick_listener(e){
+    if (!pathway_is_loaded) return;
     
     if (infobox.visible){
         infobox.visible = false;
@@ -737,6 +771,7 @@ function mouse_dblclick_listener(e){
 
 
 function mouse_click_listener(e){
+    if (!pathway_is_loaded) return;
     if (!moved){
         if (highlight_element){
             var c = document.getElementById("renderarea");
@@ -756,7 +791,8 @@ function change_pathway(p){
 }
 
 
-function mouse_down_listener(e){    
+function mouse_down_listener(e){
+    if (!pathway_is_loaded) return;
     
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, e);
@@ -773,6 +809,8 @@ function mouse_down_listener(e){
 
 
 function mouse_move_listener(e){
+    if (!pathway_is_loaded) return;
+    
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     res = get_mouse_pos(c, e);
@@ -780,6 +818,7 @@ function mouse_move_listener(e){
     mouse_x = res.x;
     mouse_y = res.y;
     
+    var start_time = new Date().getTime();
     // shift all nodes
     if (e.buttons & 1){
         if (!highlight_element || !highlight_element.mouse_down_move(res, e.which)){
@@ -820,7 +859,6 @@ function mouse_move_listener(e){
                 compute_edges();
             }
         }
-        
         draw();
         offsetX = res.x;
         offsetY = res.y;
@@ -845,6 +883,7 @@ function mouse_move_listener(e){
     }
     if(highlight_element && highlight_element.tipp) Tip(e, highlight_element.id + " " + highlight_element.name);
     else unTip();
+            var end_time = new Date().getTime(); console.log("time: " + (end_time - start_time));
 }
 
 
@@ -864,8 +903,16 @@ function unTip() {
 
 
 function key_down(event){
-    if(event.which == 45) zoom_in_out(1, 0);
-    else if (event.which == 43) zoom_in_out(0, 0);
+    if (!pathway_is_loaded) return;
+    
+    if(event.which == 45){
+        zoom_in_out(1, 0);
+        draw();
+    }
+    else if (event.which == 43){
+        zoom_in_out(0, 0);
+        draw();
+    }
     if (administration){
         event_key_down = (event.which == 17);
     }
@@ -874,6 +921,8 @@ function key_down(event){
 
 
 function key_up(event){
+    if (!pathway_is_loaded) return;
+    
     if (event_moving_node) update_node(event);
     event_key_down = false;
     if (event.buttons == 2 && !moved){
@@ -901,6 +950,8 @@ function update_node(event) {
 
 
 function mouse_up_listener(event){
+    if (!pathway_is_loaded) return;
+    
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, event);
     c.style.cursor = "auto";
