@@ -112,7 +112,7 @@ for row in my_cur:
                                     'mass': row['mass'],
                                     'accession': row['accession'],
                                     'ec_number': row['ec_number'],
-                                    #'fasta': row['fasta'],
+                                    'fasta': row['fasta'],
                                     'peptides': []
                                     })
     if pid not in proteins: proteins[pid] = []
