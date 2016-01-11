@@ -151,6 +151,12 @@ td.navigation_cell {
     border-right-width: 1px;
 }
 
+td.navigation_cell_name {
+    color: #fff6d5;
+    padding: 8px;
+    margin: 5px;
+}
+
 td.navigation_cell_click {
     color: #fff6d5;
     padding: 8px;

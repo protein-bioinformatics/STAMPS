@@ -23,6 +23,7 @@ elements = [];
 boundaries = [0, 0, 0, 0];
 pathway_is_loaded = false;
 edge_count = 0;
+draw_code = 0;
 
 scaling = 1.25;
 zoom = 0;
@@ -44,6 +45,7 @@ on_slide = false;
 factor = Math.pow(scaling, zoom);
 font_size = text_size * factor;
 radius = metabolite_radius * factor;
+last_keys = [];
 
 
 line_width = 4;
@@ -76,6 +78,13 @@ infobox_stroke_width = 1;
 infobox_offset_x = 20;
 preview_element = 0;
 
+pathways = [[6, 'Citrate Cycle'],
+            [11, 'Fatty Acid Biosynthesis'],
+            [29, 'Glycerolipid metabolism'],
+            [28, 'Glycerophospholipid metabolism'],
+            [1, 'Glycolysis'],
+            [3, 'Pentose phosphate'],
+            [41, 'Sphingolipid metabolism']];
 
 
 function debug(text){
@@ -190,16 +199,32 @@ function compute_angle(x_1, y_1, x_2, y_2, anchor){
 
 
 
-function draw(){
-    var c = document.getElementById("renderarea");
-    
-    var ctx = c.getContext("2d");
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    
-    
-    //draw elements visual elements
-    for (var i = 0; i < elements.length; ++i){
-        elements[i].draw();
+function draw(sync){
+    if (typeof(sync) == "undefined"){
+        var dc = Math.random();
+        draw_code = dc;
+        var dr = setInterval(function(dc){
+            var c = document.getElementById("renderarea");
+            var ctx = c.getContext("2d");
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            
+            //draw elements visual elements
+            for (var i = 0; i < elements.length; ++i){
+                elements[i].draw();
+            }
+            clearInterval(dr);
+        }, 1, dc);
+    }
+    else {
+        console.log("huhu");
+        var c = document.getElementById("renderarea");
+        var ctx = c.getContext("2d");
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        
+        //draw elements visual elements
+        for (var i = 0; i < elements.length; ++i){
+            elements[i].draw();
+        }
     }
 }
 
@@ -228,6 +253,19 @@ function init(){
     xmlhttp.send();
     
     
+    var pathway_menu = "<table>";
+    for (var i = 0; i < pathways.length; ++i){
+        pathway_menu += "<tr><td class=\"select_pathway_cell\" onclick=\"change_pathway(";
+        pathway_menu += i;
+        pathway_menu += ");\">";
+        pathway_menu += pathways[i][1]; 
+        pathway_menu += "</td></tr>";
+    }
+    pathway_menu += "</table>";
+    document.getElementById("select_pathway").innerHTML = pathway_menu;
+    console.log(pathway_menu);
+    
+    
     document.documentElement.style.overflow = 'hidden';
     document.body.scroll = "no";
     var c = document.getElementById("renderarea");
@@ -252,7 +290,8 @@ function init(){
     c.onmousemove = mouse_move_listener;
     c.addEventListener("click", mouse_click_listener, false);
     c.addEventListener("dblclick", mouse_dblclick_listener, false);
-    c.addEventListener("mousewheel", mouse_wheel_listener, false);
+    //c.addEventListener("wheel", mouse_wheel_listener, false);
+    //c.addEventListener("mousewheel", mouse_wheel_listener, false);
     c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
     
     document.addEventListener('keydown', key_down, false);
@@ -281,7 +320,8 @@ function init(){
         return false;        
     };
     
-    load_data(false);
+    change_pathway(0);
+    //load_data(false);
 }
 
 
@@ -406,7 +446,7 @@ function load_data(reload){
             assemble_elements();
             min_zoom = preview_zoom;
             for (var i = zoom; i >= preview_zoom; --i) zoom_in_out(1, 0);
-            draw();
+            draw(1);
             preview_element.snapshot();
             for (var i = 0; i < (m_zoom - preview_zoom); ++i) zoom_in_out(0, 0);
             min_zoom = m_zoom;
@@ -783,10 +823,12 @@ function mouse_click_listener(e){
 }
 
 
+
 function change_pathway(p){
     hide_select_pathway();
-    current_pathway = p;
+    current_pathway = pathways[p][0];
     reset_view();
+    document.getElementById("pathway_name").innerHTML = "Current pathway: " + pathways[p][1];
     load_data();
 }
 
@@ -818,7 +860,6 @@ function mouse_move_listener(e){
     mouse_x = res.x;
     mouse_y = res.y;
     
-    var start_time = new Date().getTime();
     // shift all nodes
     if (e.buttons & 1){
         if (!highlight_element || !highlight_element.mouse_down_move(res, e.which)){
@@ -859,7 +900,10 @@ function mouse_move_listener(e){
                 compute_edges();
             }
         }
-        draw();
+        //var process_draw = setInterval(function(){
+            draw();
+        //    clearInterval(process_draw);
+        //}, 1);
         offsetX = res.x;
         offsetY = res.y;
     }
@@ -883,7 +927,7 @@ function mouse_move_listener(e){
     }
     if(highlight_element && highlight_element.tipp) Tip(e, highlight_element.id + " " + highlight_element.name);
     else unTip();
-            var end_time = new Date().getTime(); console.log("time: " + (end_time - start_time));
+    
 }
 
 
@@ -903,6 +947,22 @@ function unTip() {
 
 
 function key_down(event){
+    // easter egg
+    var k_code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+    last_keys.push(event.which);
+    while (last_keys.length > 10) last_keys.shift();
+    if (last_keys.length == 10){
+        var k_is_valid = true;
+        for (var i = 0; i < 10; ++i){
+            if (k_code[i] != last_keys[i]){
+                k_is_valid = false;
+                break;
+            }
+        }
+        if (k_is_valid){
+            alert("You breaked the master code - you sneaky hacker. We'll flood your mailbox with yellow bananas. Your database will be dropped, your client destroyed. All your base are belong to us!!!");
+        }
+    }    
     if (!pathway_is_loaded) return;
     
     if(event.which == 45){
@@ -920,7 +980,7 @@ function key_down(event){
 }
 
 
-function key_up(event){
+function key_up(event){    
     if (!pathway_is_loaded) return;
     
     if (event_moving_node) update_node(event);
@@ -1169,7 +1229,7 @@ function highlight_protein(node_id, prot_id){
     
     hide_search();
     var progress = 0;
-    var steps = 24;
+    var steps = 30;
     var time = 3; // seconds
     var std_dev = time / 6.;
     var c = document.getElementById("renderarea");
