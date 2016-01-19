@@ -45,6 +45,7 @@ on_slide = false;
 factor = Math.pow(scaling, zoom);
 font_size = text_size * factor;
 radius = metabolite_radius * factor;
+last_keys = [];
 
 
 line_width = 4;
@@ -77,6 +78,13 @@ infobox_stroke_width = 1;
 infobox_offset_x = 20;
 preview_element = 0;
 
+pathways = [[6, 'Citrate Cycle'],
+            [11, 'Fatty Acid Biosynthesis'],
+            [29, 'Glycerolipid metabolism'],
+            [28, 'Glycerophospholipid metabolism'],
+            [1, 'Glycolysis'],
+            [3, 'Pentose phosphate'],
+            [41, 'Sphingolipid metabolism']];
 
 
 function debug(text){
@@ -208,7 +216,10 @@ function draw(sync){
         }, 1, dc);
     }
     else {
+<<<<<<< HEAD
         console.log("huhu");
+=======
+>>>>>>> ff49246e215ba728a90e7802c4a8130f3821009d
         var c = document.getElementById("renderarea");
         var ctx = c.getContext("2d");
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -243,6 +254,18 @@ function init(){
     }
     xmlhttp.open("GET", "set-counter.py?counter=request", true);
     xmlhttp.send();
+    
+    
+    var pathway_menu = "<table>";
+    for (var i = 0; i < pathways.length; ++i){
+        pathway_menu += "<tr><td class=\"select_pathway_cell\" onclick=\"change_pathway(";
+        pathway_menu += i;
+        pathway_menu += ");\">";
+        pathway_menu += pathways[i][1]; 
+        pathway_menu += "</td></tr>";
+    }
+    pathway_menu += "</table>";
+    document.getElementById("select_pathway").innerHTML = pathway_menu;
     
     
     document.documentElement.style.overflow = 'hidden';
@@ -299,7 +322,8 @@ function init(){
         return false;        
     };
     
-    load_data(false);
+    change_pathway(0);
+    //load_data(false);
 }
 
 
@@ -801,10 +825,12 @@ function mouse_click_listener(e){
 }
 
 
+
 function change_pathway(p){
     hide_select_pathway();
-    current_pathway = p;
+    current_pathway = pathways[p][0];
     reset_view();
+    document.getElementById("pathway_name").innerHTML = "Current pathway: " + pathways[p][1];
     load_data();
 }
 
@@ -923,6 +949,22 @@ function unTip() {
 
 
 function key_down(event){
+    // easter egg
+    var k_code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+    last_keys.push(event.which);
+    while (last_keys.length > 10) last_keys.shift();
+    if (last_keys.length == 10){
+        var k_is_valid = true;
+        for (var i = 0; i < 10; ++i){
+            if (k_code[i] != last_keys[i]){
+                k_is_valid = false;
+                break;
+            }
+        }
+        if (k_is_valid){
+            alert("You breaked the master code - you sneaky hacker. We'll flood your mailbox with yellow bananas. Your database will be dropped, your client destroyed. All your base are belong to us!!!");
+        }
+    }    
     if (!pathway_is_loaded) return;
     
     if(event.which == 45){
@@ -940,7 +982,7 @@ function key_down(event){
 }
 
 
-function key_up(event){
+function key_up(event){    
     if (!pathway_is_loaded) return;
     
     if (event_moving_node) update_node(event);
