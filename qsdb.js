@@ -216,7 +216,6 @@ function draw(sync){
         }, 1, dc);
     }
     else {
-        console.log("huhu");
         var c = document.getElementById("renderarea");
         var ctx = c.getContext("2d");
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -263,7 +262,6 @@ function init(){
     }
     pathway_menu += "</table>";
     document.getElementById("select_pathway").innerHTML = pathway_menu;
-    console.log(pathway_menu);
     
     
     document.documentElement.style.overflow = 'hidden';
