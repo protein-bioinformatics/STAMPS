@@ -2,6 +2,7 @@
 
 from pymysql import connect, cursors
 from cgi import FieldStorage
+from defines import *
 
 form = FieldStorage()
 idx = form.getvalue('id')
@@ -21,7 +22,7 @@ except:
     print(-1)
     exit()
     
-conn = connect(host='localhost', port=3306, user='qsdb_user', passwd='qsdb_password', db='qsdb')
+conn = connect(host = mysql_host, port = mysql_port, user = mysql_user, passwd = mysql_passwd, db = mysql_db)
 my_cur = conn.cursor(cursors.DictCursor)
 sql_query = "UPDATE nodes SET x = %s, y = %s WHERE id = %s"
 my_cur.execute(sql_query, (x, y, idx))

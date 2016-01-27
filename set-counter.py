@@ -2,6 +2,7 @@
 
 from pymysql import connect, cursors
 from cgi import FieldStorage
+from defines import *
 
 
 form = FieldStorage()
@@ -26,7 +27,7 @@ if counter != "request" and counter != "download":
 
 
 
-conn = connect(host='localhost', port=3306, user='qsdb_user', passwd='qsdb_password', db='qsdb')
+conn = connect(host = mysql_host, port = mysql_port, user = mysql_user, passwd = mysql_passwd, db = mysql_db)
 my_cur = conn.cursor(cursors.DictCursor)
 sql_query = "SELECT count(id) cnt FROM %s_counter WHERE MONTH(month_year) = MONTH(NOW()) AND YEAR(month_year) = YEAR(NOW());" % counter
 my_cur.execute(sql_query)

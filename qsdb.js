@@ -216,10 +216,6 @@ function draw(sync){
         }, 1, dc);
     }
     else {
-<<<<<<< HEAD
-        console.log("huhu");
-=======
->>>>>>> ff49246e215ba728a90e7802c4a8130f3821009d
         var c = document.getElementById("renderarea");
         var ctx = c.getContext("2d");
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);

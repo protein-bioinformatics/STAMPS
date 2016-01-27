@@ -3,6 +3,7 @@
 from pymysql import connect, cursors
 from cgi import FieldStorage
 from json import dumps
+from defines import *
 
 form = FieldStorage()
 pathway = form.getvalue('pathway')
@@ -21,7 +22,7 @@ except:
     exit()
 
 response = []
-conn = connect(host='localhost', port=3306, user='qsdb_user', passwd='qsdb_password', db='qsdb')
+conn = connect(host = mysql_host, port = mysql_port, user = mysql_user, passwd = mysql_passwd, db = mysql_db)
 my_cur = conn.cursor(cursors.DictCursor)
 sql_query = "SELECT r.* FROM reactions r INNER JOIN nodes n ON r.node_id = n.id WHERE n.pathway_id = %s"
 my_cur.execute(sql_query, pathway)

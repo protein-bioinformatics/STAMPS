@@ -237,7 +237,7 @@ function change_match_error(){
 
 
 
-function load_spectrum(spectrum_id){    
+function load_spectrum(spectrum_id){
     var c = document.getElementById("msarea");
     var ctx = c.getContext("2d");
     ms_zoom = 0;

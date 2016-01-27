@@ -5,6 +5,7 @@ import zlib
 import struct
 import json
 import cgi, cgitb
+from defines import *
 
 print("Content-Type: text/html")
 print()
@@ -17,9 +18,9 @@ def make_dict(cur):
 
 spectrum_id = int(form.getvalue('spectrum_id'))
    
-db = sqlite3.connect('/home/dominik.kopczynski/Data/blib/TestLibraryPS.blib')
+db = sqlite3.connect(sqlite_file)
 cur = db.cursor()
-cur.execute('SELECT * FROM RefSpectra r INNER JOIN RefSpectraPeaks p ON r.id = p.RefSpectraID WHERE r.id = %i;' % int(spectrum_id))
+cur.execute('SELECT * FROM RefSpectra r INNER JOIN RefSpectraPeaks p ON r.id = p.RefSpectraID WHERE r.id = %i;' % spectrum_id)
 result = make_dict(cur)
 
 try: result["peakMZ"] = zlib.decompress(result["peakMZ"])

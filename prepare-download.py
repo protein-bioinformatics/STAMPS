@@ -5,6 +5,7 @@ import cgi, cgitb
 import sqlite3
 from random import random
 import os
+from defines import *
 
 
 form = cgi.FieldStorage()
@@ -22,7 +23,7 @@ os.system("mkdir tmp/%s" % rnd)
 
 # create fasta file
 fasta_file = "tmp/%s/proteins.fasta" % rnd
-conn = pymysql.connect(host='localhost', port=3306, user='qsdb_user', passwd='qsdb_password', db='qsdb')
+conn = connect(host = mysql_host, port = mysql_port, user = mysql_user, passwd = mysql_passwd, db = mysql_db)
 my_cur = conn.cursor()
 sql_query = "SELECT fasta FROM proteins WHERE id IN (%s);" % proteins
 my_cur.execute(sql_query)
@@ -34,7 +35,7 @@ with open(fasta_file, mode="wt") as fl:
 
 # create blib file
 blib_file = "tmp/%s/spectra.blib" % rnd
-db = sqlite3.connect('/home/dominik.kopczynski/Data/blib/TestLibraryPS.blib')
+db = sqlite3.connect(sqlite_file)
 lite_cur = db.cursor()
 lite_cur.execute("ATTACH DATABASE '%s' As blib;" % blib_file)
 

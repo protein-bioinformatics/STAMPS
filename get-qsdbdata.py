@@ -35,6 +35,7 @@ from json import dumps
 from math import ceil
 import sqlite3
 import time
+from defines import *
 
 
 def dict_factory(cursor, row):
@@ -62,21 +63,12 @@ print()
 
 
 response = []
-conn = connect(host='localhost', port=3306, user='qsdb_user', passwd='qsdb_password', db='qsdb')
+conn = connect(host = mysql_host, port = mysql_port, user = mysql_user, passwd = mysql_passwd, db = mysql_db)
 my_cur = conn.cursor(cursors.DictCursor)
 
-
-lite_db = sqlite3.connect('/home/dominik.kopczynski/Data/blib/TestLibraryPS.blib')
-#lite_db = sqlite3.connect('/media/home/mouse.blib')
+lite_db = sqlite3.connect(sqlite_file)
 lite_db.row_factory = dict_factory
 lite_cur = lite_db.cursor()
-
-
-
-
-
-
-
 
 sql_query_nodes = "select * from nodes where pathway_id = %s and type = 'protein';"
 my_cur.execute(sql_query_nodes, pathway)
