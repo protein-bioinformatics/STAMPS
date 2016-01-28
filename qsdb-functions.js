@@ -65,7 +65,7 @@ function Protein(data){
         this.containing_spectra += this.peptides[i].spectra.length;
     }
     
-    // this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
+    this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
     
     this.search = function(len_p, accept, masks, node_id){
         var results = [];
