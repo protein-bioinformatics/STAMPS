@@ -897,6 +897,7 @@ function mouse_move_listener(e){
                 highlight_element.x = Math.floor(node_move_x - (1000 * (node_move_x - null_x) % grid) / 1000.);
                 highlight_element.y = Math.floor(node_move_y - (1000 * (node_move_y - null_y) % grid) / 1000.);
                 compute_edges();
+                assemble_elements();
             }
         }
         //var process_draw = setInterval(function(){

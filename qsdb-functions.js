@@ -1054,7 +1054,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     
     this.mouse_down = function(mouse, key){
         if ((key != 1 && key != 3) || !administration) return false;
-        
+        console.log(this.edge_id);
         
         var xmlhttp = new XMLHttpRequest();
         var request = "update_edge.py?id=";

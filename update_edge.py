@@ -32,7 +32,7 @@ if element == "metabolite":
     conn.commit()
     
 elif element == "protein":
-    sql_query = "select rc.*, rg.type from reagents rg inner join reactions rc on rg.reaction_id = rg.id where rg.id = %s;"
+    sql_query = "select rc.*, rg.type from reagents rg inner join reactions rc on rg.reaction_id = rc.id where rg.id = %s;"
     my_cur.execute(sql_query, idx)
     row = my_cur.fetchone()
     e_type = row["type"]
