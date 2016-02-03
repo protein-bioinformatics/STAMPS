@@ -133,12 +133,14 @@ for pep_id in peptides:
     sql_query_spectra.append("select " + str(pep_id) + " pep_id")
 
 
-sql_query_spectra = "select pep.pep_id, ps.* from (" + " union ".join(sql_query_spectra) + ") pep inner join peptide_spectra ps on pep.pep_id = ps.peptide_id;"
-my_cur.execute(sql_query_spectra)
 
 sql_query_lite = []
-for row in my_cur:
-    sql_query_lite.append("select %s pep_id, '%s' seq, %s chrg" % (row['pep_id'], peptides[int(row['pep_id'])][0]['peptide_seq'], row['charge']))
+if len(sql_query_spectra):
+    sql_query_spectra = "select pep.pep_id, ps.* from (" + " union ".join(sql_query_spectra) + ") pep inner join peptide_spectra ps on pep.pep_id = ps.peptide_id;"
+    my_cur.execute(sql_query_spectra)
+
+    for row in my_cur:
+        sql_query_lite.append("select %s pep_id, '%s' seq, %s chrg" % (row['pep_id'], peptides[int(row['pep_id'])][0]['peptide_seq'], row['charge']))
 
 t, l = 500, len(sql_query_lite)
 for i in range(ceil(l / t)):

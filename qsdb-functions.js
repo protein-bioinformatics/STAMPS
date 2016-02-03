@@ -1034,7 +1034,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             var p1 = this.point_list[i];
             var p2 = this.point_list[i + 1];
             var dir = p1.b;
-            if (dir != "tb" && dir != "bt" && dir != "lr" && dir != "rl") continue;
+            if (dir != 2) continue;
             var dv_ab = new point(p2.x - p1.x, p2.y - p1.y, "");
             var dv_cd = new point(dv_ab.y, -dv_ab.x, "");
             
@@ -1054,6 +1054,8 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     
     this.mouse_down = function(mouse, key){
         if ((key != 1 && key != 3) || !administration) return false;
+        
+        
         var xmlhttp = new XMLHttpRequest();
         var request = "update_edge.py?id=";
         request += this.edge_id;
@@ -1075,6 +1077,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'] = next_anchor[anchor];
         }
         compute_edges();
+        assemble_elements();
         draw();
     }
     

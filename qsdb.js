@@ -1,6 +1,6 @@
 moved = false;
 HTTP_GET_VARS = [];
-current_pathway = 28;
+current_pathway = 0;
 highlight_element = 0;
 offsetX = 0;
 offsetY = 0;
@@ -78,7 +78,8 @@ infobox_stroke_width = 1;
 infobox_offset_x = 20;
 preview_element = 0;
 
-pathways = [[6, 'Citrate Cycle'],
+pathways = [[48, 'Pentose and glucuronate interconversions'],
+            [6, 'Citrate Cycle'],
             [11, 'Fatty Acid Biosynthesis'],
             [29, 'Glycerolipid metabolism'],
             [28, 'Glycerophospholipid metabolism'],
