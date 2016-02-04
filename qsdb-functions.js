@@ -744,7 +744,7 @@ function node(data, c){
                 this.ctx.roundRect(this.x - hw, this.y - hh, this.width, this.height);
                 this.ctx.textAlign = "center";
                 this.ctx.textBaseline = 'middle';
-                this.ctx.font = font_size.toString() + "px Arial";
+                this.ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
                 this.ctx.fillStyle = "black";
                 this.ctx.wrapText(this.name, this.x, this.y, this.width, 20 * factor);
                 break;

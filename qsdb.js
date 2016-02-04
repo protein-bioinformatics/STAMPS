@@ -78,14 +78,15 @@ infobox_stroke_width = 1;
 infobox_offset_x = 20;
 preview_element = 0;
 
-pathways = [[48, 'Pentose and glucuronate interconversions'],
-            [6, 'Citrate Cycle'],
-            [11, 'Fatty Acid Biosynthesis'],
-            [29, 'Glycerolipid metabolism'],
-            [28, 'Glycerophospholipid metabolism'],
-            [1, 'Glycolysis'],
-            [3, 'Pentose phosphate'],
-            [41, 'Sphingolipid metabolism']];
+pathways = [[66, "Fructose and mannose metabolism"], 
+            [6, "Citrate Cycle"],
+            [11, "Fatty Acid Biosynthesis"],
+            [29, "Glycerolipid metabolism"],
+            [28, "Glycerophospholipid metabolism"],
+            [1, "Glycolysis"],
+            [48, "Pentose and glucuronate interconversions"],
+            [3, "Pentose phosphate"],
+            [41, "Sphingolipid metabolism"]];
 
 
 function debug(text){

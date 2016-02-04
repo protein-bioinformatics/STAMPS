@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Erstellungszeit: 14. Dez 2015 um 10:21
--- Server Version: 5.5.46-0ubuntu0.14.04.2
--- PHP-Version: 5.5.9-1ubuntu4.14
+-- Generation Time: Feb 04, 2016 at 08:20 AM
+-- Server version: 5.5.47-0ubuntu0.14.04.1
+-- PHP Version: 5.5.9-1ubuntu4.14
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -17,7 +17,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Datenbank: `qsdb`
+-- Database: `qsdb`
 --
 CREATE DATABASE IF NOT EXISTS `qsdb` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `qsdb`;
@@ -25,7 +25,7 @@ USE `qsdb`;
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `download_counter`
+-- Table structure for table `download_counter`
 --
 
 DROP TABLE IF EXISTS `download_counter`;
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `download_counter` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 --
--- Daten für Tabelle `download_counter`
+-- Dumping data for table `download_counter`
 --
 
 INSERT INTO `download_counter` (`id`, `month_year`, `number`) VALUES
@@ -46,7 +46,7 @@ INSERT INTO `download_counter` (`id`, `month_year`, `number`) VALUES
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `metabolites`
+-- Table structure for table `metabolites`
 --
 
 DROP TABLE IF EXISTS `metabolites`;
@@ -57,10 +57,10 @@ CREATE TABLE IF NOT EXISTS `metabolites` (
   `formula` varchar(100) NOT NULL,
   `exact_mass` varchar(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=355 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=465 ;
 
 --
--- Daten für Tabelle `metabolites`
+-- Dumping data for table `metabolites`
 --
 
 INSERT INTO `metabolites` (`id`, `name`, `c_number`, `formula`, `exact_mass`) VALUES
@@ -277,12 +277,122 @@ INSERT INTO `metabolites` (`id`, `name`, `c_number`, `formula`, `exact_mass`) VA
 (348, 'D-Xylulose 5-phosphate', 'C00231', 'C5H11O8P', '230.0192'),
 (350, 'D-Ribulose 5-phosphate', 'C00199', 'C5H11O8P', '230.0192'),
 (351, 'D-arabino-Hex-3-ulose 6-phosphate', 'C06019', 'C6H13O9P', '260.0297'),
-(352, '6-Phospho-D-glucosaminate', 'C20589', 'C6H14NO9P', '275.0406');
+(352, '6-Phospho-D-glucosaminate', 'C20589', 'C6H14NO9P', '275.0406'),
+(355, 'D-Altronate', 'C00817', 'C6H12O7', '196.0583'),
+(356, 'D-Glucose 1-phosphate', 'C00103', 'C6H13O9P', '260.0297'),
+(357, 'D-Fructuronate', 'C00905', 'C6H10O7', '194.0427'),
+(358, 'D-Mannonate', 'C00514', 'C6H12O7', '196.0583'),
+(359, 'D-Tagaturonate', 'C00558', 'C6H10O7', '194.0427'),
+(360, 'L-Gulonate', 'C00800', 'C6H12O7', '196.0583'),
+(361, 'D-Glucuronate 1-phosphate', 'C05385', 'C6H11O10P', '274.009'),
+(362, 'UDP-glucuronate', 'C00167', 'C15H22N2O18P2', '580.0343'),
+(363, 'UDP-glucose', 'C00029', 'C15H24N2O17P2', '566.055'),
+(364, 'L-Xylulose', 'C00312', 'C5H10O5', '150.0528'),
+(365, 'D-Xylonolactone', 'C02266', 'C5H8O5', '148.0372'),
+(366, 'Xylitol', 'C00379', 'C5H12O5', '152.0685'),
+(367, 'D-Xylose', 'C00181', 'C5H10O5', '150.0528'),
+(368, 'D-Ribitol 5-phosphate', 'C01068', 'C5H13O8P', '232.0348'),
+(369, 'CDP-ribitol', 'C00789', 'C14H25N3O15P2', '537.0761'),
+(370, 'Pyruvate', 'C00022', 'C3H4O3', '88.016'),
+(371, '2-Dehydro-3-deoxy-D-xylonate', 'C03826', 'C5H8O5', '148.0372'),
+(372, 'D-Xylonate', 'C00502', 'C5H10O6', '166.0477'),
+(373, 'D-Ribulose', 'C00309', 'C5H10O5', '150.0528'),
+(374, 'Ribitol', 'C00474', 'C5H12O5', '152.0685'),
+(375, 'D-Xylulose 5-phosphate', 'C00231', 'C5H11O8P', '230.0192'),
+(376, 'D-Xylulose', 'C00310', 'C5H10O5', '150.0528'),
+(377, 'D-Ribulose 5-phosphate', 'C00199', 'C5H11O8P', '230.0192'),
+(378, 'D-Lyxose', 'C00476', 'C5H10O5', '150.0528'),
+(379, 'L-Ribulose', 'C00508', 'C5H10O5', '150.0528'),
+(380, 'L-Arabitol', 'C00532', 'C5H12O5', '152.0685'),
+(381, 'L-Xylulose 5-phosphate', 'C03291', 'C5H11O8P', '230.0192'),
+(382, 'L-Lyxose', 'C01508', 'C5H10O5', '150.0528'),
+(383, 'L-Ribulose 5-phosphate', 'C01101', 'C5H11O8P', '230.0192'),
+(384, 'L-Arabinose', 'C00259', 'C5H10O5', '150.0528'),
+(385, 'D-Arabitol', 'C01904', 'C5H12O5', '152.0685'),
+(386, '3-Dehydro-L-gulonate', 'C00618', 'C6H10O7', '194.0427'),
+(387, 'Pectin', 'C00714', '(C26H36O24)n', '-'),
+(388, 'Pectate', 'C00470', 'C12H18O13(C6H8O6)n-2', '-'),
+(389, 'Digalacturonate', 'C02273', 'C12H18O13', '370.0747'),
+(390, '4-(4-Deoxy-alpha-D-gluc-4-enuronosyl)-D-galacturonate', 'C06118', 'C12H16O12', '352.0642'),
+(391, '5-Dehydro-4-deoxy-D-glucuronate', 'C04053', 'C6H8O6', '176.0321'),
+(392, '(4S)-4,6-Dihydroxy-2,5-dioxohexanoate', 'C04349', 'C6H8O6', '176.0321'),
+(393, 'L-Xylonate', 'C05411', 'C5H10O6', '166.0477'),
+(394, '(4R,5S)-4,5,6-Trihydroxy-2,3-dioxohexanoate', 'C04575', 'C6H8O7', '192.027'),
+(395, 'L-Lyxonate', 'C05412', 'C5H10O6', '166.0477'),
+(396, 'L-Xylulose 1-phosphate', 'C06441', 'C5H11O8P', '230.0192'),
+(397, 'Glycolaldehyde', 'C00266', 'C2H4O2', '60.0211'),
+(398, 'Glycerone phosphate', 'C00111', 'C3H7O6P', '169.998'),
+(399, '2-Dehydro-3-deoxy-D-gluconate', 'C00204', 'C6H10O6', '178.0477'),
+(400, 'Glycerol', 'C00116', 'C3H8O3', '92.0473'),
+(401, '3-Dehydro-L-gulonate 6-phosphate', 'C14899', 'C6H11O10P', '274.009'),
+(402, 'L-Galactonate', 'C15930', 'C6H12O7', '196.0583'),
+(403, '2-Dehydro-3-deoxy-L-galactonate', 'C20680', 'C6H10O6', '178.0477'),
+(404, 'beta-D-Glucuronoside', 'C03033', 'C6H9O7R', '-'),
+(405, 'D-Glucuronate', 'C00191', 'C6H10O7', '194.0427'),
+(406, 'L-Glyceraldehyde', 'C02426', 'C3H6O3', '90.0317'),
+(407, '2,5-Dioxopentanoate', 'C00433', 'C5H6O4', '130.0266'),
+(408, '2-Oxoglutarate', 'C00026', 'C5H6O5', '146.0215'),
+(409, 'D-Galacturonate', 'C00333', 'C6H10O7', '194.0427'),
+(410, 'Mannan', 'C00464', 'C00464                      Compound', '-'),
+(411, '1,4-beta-D-Mannan', 'C02492', '(C6H10O5)n', '-'),
+(412, 'Sorbitol 6-phosphate', 'C01096', 'C6H15O9P', '262.0454'),
+(413, 'GDP-L-fucose', 'C00325', 'C16H25N5O15P2', '589.0822'),
+(414, '(Alginate)n', 'C01768', '(C6H8O6)n', '-'),
+(415, 'D-Glyceraldehyde', 'C00577', 'C3H6O3', '90.0317'),
+(416, 'L-Rhamnose', 'C00507', 'C6H12O5', '164.0685'),
+(417, 'L-Rhamnulose', 'C00861', 'C6H12O5', '164.0685'),
+(418, 'L-Rhamnulose 1-phosphate', 'C01131', 'C6H13O8P', '244.0348'),
+(419, 'L-Rhamnofuranose', 'C02431', 'C6H12O5', '164.0685'),
+(420, 'L-Rhamnonate', 'C01934', 'C6H12O6', '180.0634'),
+(421, '2-Dehydro-3-deoxy-L-rhamnonate', 'C03979', 'C6H10O5', '162.0528'),
+(422, 'D-Glyceraldehyde 3-phosphate', 'C00118', 'C3H7O6P', '169.998'),
+(423, 'GDP-mannose', 'C00096', 'C16H25N5O16P2', '605.0772'),
+(424, 'beta-D-Fructose 6-phosphate', 'C05345', 'C6H13O9P', '260.0297'),
+(425, 'GDP-D-mannuronate', 'C00976', 'C16H23N5O17P2', '619.0564'),
+(426, 'GDP-4-dehydro-6-deoxy-D-mannose', 'C01222', 'C16H23N5O15P2', '587.0666'),
+(427, 'L-Fucose 1-phosphate', 'C02985', 'C6H13O8P', '244.0348'),
+(428, 'Oligouronide with 4-deoxy-alpha-L-erythro-hex-4-enopyranuronosyl group', 'C05392', 'C6H8O6(C6H8O6)n', '-'),
+(429, 'GDP-6-deoxy-D-talose', 'C02977', 'C16H25N5O15P2', '589.0822'),
+(430, 'GDP-6-deoxy-D-mannose', 'C03117', 'C16H25N5O15P2', '589.0822'),
+(431, 'D-Fructose', 'C00095', 'C6H12O6', '180.0634'),
+(432, 'D-Sorbitol', 'C00794', 'C6H14O6', '182.079'),
+(433, 'D-Mannose 1-phosphate', 'C00636', 'C6H13O9P', '260.0297'),
+(434, 'beta-D-Fructose 1,6-bisphosphate', 'C05378', 'C6H14O12P2', '339.996'),
+(435, 'L-Rhamnono-1,4-lactone', 'C02991', 'C6H10O5', '162.0528'),
+(436, 'Fructan', 'C01355', 'C01355                      Compound', '-'),
+(437, '6-Deoxy-L-galactose', 'C01019', 'C6H12O5', '164.0685'),
+(438, 'Glycerone phosphate', 'C00111', 'C3H7O6P', '169.998'),
+(439, 'L-Fuculose 1-phosphate', 'C01099', 'C6H13O8P', '244.0348'),
+(440, 'L-Fuculose', 'C01721', 'C6H12O5', '164.0685'),
+(441, 'ADP-mannose', 'C06192', 'C16H25N5O15P2', '589.0822'),
+(442, 'Sorbose 1-phosphate', 'C02888', 'C6H13O9P', '260.0297'),
+(443, 'L-Sorbose', 'C00247', 'C6H12O6', '180.0634'),
+(444, 'D-Allulose 6-phosphate', 'C18096', 'C6H13O9P', '260.0297'),
+(445, 'D-Allose 6-phosphate', 'C02962', 'C6H13O9P', '260.0297'),
+(446, 'D-Allose', 'C01487', 'C6H12O6', '180.0634'),
+(447, 'L-Fucono-1,5-lactone', 'C18028', 'C6H10O5', '162.0528'),
+(448, 'L-Fuconate', 'C01720', 'C6H12O6', '180.0634'),
+(449, '2-Dehydro-3-deoxy-L-fuconate', 'C03827', 'C6H10O5', '162.0528'),
+(450, '2,4-Diketo-3-deoxy-L-fuconate', 'C20781', 'C6H8O5', '160.0372'),
+(451, '(S)-Lactaldehyde', 'C00424', 'C3H6O2', '74.0368'),
+(452, '(S)-Lactate', 'C00186', 'C3H6O3', '90.0317'),
+(453, '2(alpha-D-Mannosyl)-D-glycerate', 'C11544', 'C9H16O9', '268.0794'),
+(454, '2-(alpha-D-Mannosyl)-3-phosphoglycerate', 'C11516', 'C9H17O12P', '348.0458'),
+(455, 'L-Sorbose', 'C00247', 'C6H12O6', '180.0634'),
+(456, 'alpha-D-Glucose', 'C00267', 'C6H12O6', '180.0634'),
+(457, 'D-Fructose 1-phosphate', 'C01094', 'C6H13O9P', '260.0297'),
+(458, 'D-Mannose', 'C00159', 'C6H12O6', '180.0634'),
+(459, 'D-Mannose 6-phosphate', 'C00275', 'C6H13O9P', '260.0297'),
+(460, 'Mannitol', 'C00392', 'C6H14O6', '182.079'),
+(461, 'D-Mannitol 1-phosphate', 'C00644', 'C6H15O9P', '262.0454'),
+(462, 'beta-D-Fructose 2-phosphate', 'C03267', 'C6H13O9P', '260.0297'),
+(463, 'beta-D-Fructose 2,6-bisphosphate', 'C00665', 'C6H14O12P2', '339.996'),
+(464, 'D-Sorbitol', 'C00794', 'C6H14O6', '182.079');
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `nodeproteincorrelations`
+-- Table structure for table `nodeproteincorrelations`
 --
 
 DROP TABLE IF EXISTS `nodeproteincorrelations`;
@@ -293,7 +403,7 @@ CREATE TABLE IF NOT EXISTS `nodeproteincorrelations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Daten für Tabelle `nodeproteincorrelations`
+-- Dumping data for table `nodeproteincorrelations`
 --
 
 INSERT INTO `nodeproteincorrelations` (`node_id`, `protein_id`) VALUES
@@ -924,12 +1034,94 @@ INSERT INTO `nodeproteincorrelations` (`node_id`, `protein_id`) VALUES
 (967, 855),
 (968, 856),
 (969, 857),
-(970, 858);
+(970, 858),
+(972, 865),
+(972, 866),
+(974, 879),
+(979, 878),
+(980, 863),
+(982, 880),
+(982, 881),
+(982, 882),
+(982, 883),
+(982, 884),
+(982, 885),
+(982, 886),
+(982, 887),
+(982, 888),
+(982, 889),
+(982, 890),
+(982, 891),
+(982, 892),
+(982, 893),
+(982, 894),
+(982, 895),
+(982, 896),
+(982, 897),
+(983, 898),
+(989, 873),
+(990, 874),
+(990, 875),
+(990, 876),
+(990, 877),
+(991, 862),
+(992, 864),
+(1003, 868),
+(1005, 867),
+(1009, 869),
+(1009, 870),
+(1009, 871),
+(1009, 872),
+(1034, 859),
+(1034, 860),
+(1034, 861),
+(1104, 930),
+(1104, 931),
+(1104, 932),
+(1104, 933),
+(1105, 905),
+(1105, 906),
+(1105, 907),
+(1105, 908),
+(1107, 918),
+(1108, 919),
+(1108, 920),
+(1116, 913),
+(1116, 914),
+(1116, 915),
+(1116, 916),
+(1116, 917),
+(1131, 929),
+(1135, 923),
+(1140, 926),
+(1140, 927),
+(1140, 928),
+(1143, 922),
+(1145, 921),
+(1147, 904),
+(1148, 909),
+(1148, 910),
+(1148, 911),
+(1148, 912),
+(1149, 899),
+(1149, 900),
+(1149, 901),
+(1149, 902),
+(1150, 903),
+(1151, 924),
+(1151, 925),
+(1152, 934),
+(1152, 935),
+(1152, 936),
+(1152, 937),
+(1153, 938),
+(1153, 939),
+(1156, 940);
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `nodes`
+-- Table structure for table `nodes`
 --
 
 DROP TABLE IF EXISTS `nodes`;
@@ -942,10 +1134,10 @@ CREATE TABLE IF NOT EXISTS `nodes` (
   `x` int(11) NOT NULL,
   `y` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=971 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1233 ;
 
 --
--- Daten für Tabelle `nodes`
+-- Dumping data for table `nodes`
 --
 
 INSERT INTO `nodes` (`id`, `pathway_id`, `type`, `foreign_id`, `pathway_ref`, `x`, `y`) VALUES
@@ -1690,12 +1882,274 @@ INSERT INTO `nodes` (`id`, `pathway_id`, `type`, `foreign_id`, `pathway_ref`, `x
 (967, 41, 'protein', 0, 0, -175, -75),
 (968, 41, 'protein', 0, 0, -175, -125),
 (969, 41, 'protein', 0, 0, -175, -175),
-(970, 41, 'protein', 0, 0, -175, -225);
+(970, 41, 'protein', 0, 0, -175, -225),
+(971, 48, 'protein', 0, 0, 1475, 1150),
+(972, 48, 'protein', 0, 0, 975, 850),
+(973, 48, 'protein', 0, 0, 350, 625),
+(974, 48, 'protein', 0, 0, 600, 1075),
+(975, 48, 'protein', 0, 0, 725, 700),
+(976, 48, 'protein', 0, 0, 475, 700),
+(977, 48, 'protein', 0, 0, 475, 575),
+(978, 48, 'protein', 0, 0, 1200, 650),
+(979, 48, 'protein', 0, 0, 1325, 850),
+(980, 48, 'protein', 0, 0, 1200, 775),
+(981, 48, 'protein', 0, 0, 725, 775),
+(982, 48, 'protein', 0, 0, 725, 850),
+(983, 48, 'protein', 0, 0, 600, 925),
+(984, 48, 'protein', 0, 0, 1300, 1375),
+(985, 48, 'protein', 0, 0, 1225, 1375),
+(986, 48, 'protein', 0, 0, 1225, 1150),
+(987, 48, 'protein', 0, 0, 425, 1375),
+(988, 48, 'protein', 0, 0, 1125, 1225),
+(989, 48, 'protein', 0, 0, 1050, 1300),
+(990, 48, 'protein', 0, 0, 775, 1300),
+(991, 48, 'protein', 0, 0, 900, 1350),
+(992, 48, 'protein', 0, 0, 525, 1300),
+(993, 48, 'protein', 0, 0, 775, 1225),
+(994, 48, 'protein', 0, 0, 650, 1350),
+(995, 48, 'protein', 0, 0, 1425, 1700),
+(996, 48, 'protein', 0, 0, 1150, 1700),
+(997, 48, 'protein', 0, 0, 425, 1625),
+(998, 48, 'protein', 0, 0, 325, 1550),
+(999, 48, 'protein', 0, 0, 425, 1500),
+(1000, 48, 'protein', 0, 0, 975, 1700),
+(1001, 48, 'protein', 0, 0, 775, 1775),
+(1002, 48, 'protein', 0, 0, 775, 1700),
+(1003, 48, 'protein', 0, 0, 1050, 1425),
+(1004, 48, 'protein', 0, 0, 650, 1500),
+(1005, 48, 'protein', 0, 0, 1050, 1550),
+(1006, 48, 'protein', 0, 0, 1425, 1600),
+(1007, 48, 'protein', 0, 0, 1400, 1300),
+(1008, 48, 'protein', 0, 0, 1550, 1450),
+(1009, 48, 'protein', 0, 0, 1675, 1300),
+(1010, 48, 'protein', 0, 0, 1150, 1550),
+(1011, 48, 'protein', 0, 0, 1300, 1525),
+(1012, 48, 'protein', 0, 0, 1675, 1600),
+(1013, 48, 'protein', 0, 0, 900, 1625),
+(1014, 48, 'protein', 0, 0, 900, 1500),
+(1015, 48, 'protein', 0, 0, 1400, 975),
+(1016, 48, 'protein', 0, 0, 1325, 1050),
+(1017, 48, 'protein', 0, 0, 1400, 900),
+(1018, 48, 'protein', 0, 0, 900, 275),
+(1019, 48, 'protein', 0, 0, 900, 375),
+(1020, 48, 'protein', 0, 0, 750, 325),
+(1021, 48, 'protein', 0, 0, 1000, 425),
+(1022, 48, 'protein', 0, 0, 900, 475),
+(1023, 48, 'protein', 0, 0, 600, 400),
+(1024, 48, 'protein', 0, 0, 475, 475),
+(1025, 48, 'protein', 0, 0, 1025, 1150),
+(1026, 48, 'protein', 0, 0, 225, 625),
+(1027, 48, 'protein', 0, 0, 750, 575),
+(1028, 48, 'protein', 0, 0, 1025, 575),
+(1029, 48, 'protein', 0, 0, 1200, 575),
+(1030, 48, 'protein', 0, 0, 1425, 575),
+(1031, 48, 'protein', 0, 0, 1625, 575),
+(1032, 48, 'protein', 0, 0, 975, 700),
+(1033, 48, 'protein', 0, 0, 975, 775),
+(1034, 48, 'protein', 0, 0, 225, 1625),
+(1035, 48, 'metabolite', 355, 0, 350, 575),
+(1036, 48, 'metabolite', 356, 0, 600, 1150),
+(1037, 48, 'metabolite', 357, 0, 850, 700),
+(1038, 48, 'metabolite', 358, 0, 600, 700),
+(1039, 48, 'metabolite', 359, 0, 600, 575),
+(1040, 48, 'metabolite', 360, 0, 1325, 775),
+(1041, 48, 'metabolite', 361, 0, 850, 775),
+(1042, 48, 'metabolite', 362, 0, 600, 850),
+(1043, 48, 'metabolite', 363, 0, 600, 1000),
+(1044, 48, 'metabolite', 364, 0, 1300, 1300),
+(1045, 48, 'metabolite', 365, 0, 425, 1300),
+(1046, 48, 'metabolite', 366, 0, 900, 1225),
+(1047, 48, 'metabolite', 367, 0, 650, 1300),
+(1048, 48, 'metabolite', 368, 0, 1300, 1700),
+(1049, 48, 'metabolite', 369, 0, 1550, 1700),
+(1050, 48, 'metabolite', 370, 0, 425, 1700),
+(1051, 48, 'metabolite', 371, 0, 425, 1550),
+(1052, 48, 'metabolite', 372, 0, 425, 1425),
+(1053, 48, 'metabolite', 373, 0, 900, 1700),
+(1054, 48, 'metabolite', 374, 0, 650, 1700),
+(1055, 48, 'metabolite', 375, 0, 1150, 1475),
+(1056, 48, 'metabolite', 376, 0, 900, 1425),
+(1057, 48, 'metabolite', 377, 0, 1050, 1700),
+(1058, 48, 'metabolite', 378, 0, 650, 1550),
+(1059, 48, 'metabolite', 379, 0, 1550, 1600),
+(1060, 48, 'metabolite', 380, 0, 1550, 1300),
+(1061, 48, 'metabolite', 381, 0, 1300, 1425),
+(1062, 48, 'metabolite', 382, 0, 1225, 1425),
+(1063, 48, 'metabolite', 383, 0, 1300, 1600),
+(1064, 48, 'metabolite', 384, 0, 1800, 1450),
+(1065, 48, 'metabolite', 385, 0, 900, 1550),
+(1066, 48, 'metabolite', 386, 0, 1325, 925),
+(1067, 48, 'metabolite', 387, 0, 900, 225),
+(1068, 48, 'metabolite', 388, 0, 900, 325),
+(1069, 48, 'metabolite', 389, 0, 900, 425),
+(1070, 48, 'metabolite', 390, 0, 600, 325),
+(1071, 48, 'metabolite', 391, 0, 600, 475),
+(1072, 48, 'metabolite', 392, 0, 225, 475),
+(1073, 48, 'metabolite', 393, 0, 1550, 975),
+(1074, 48, 'metabolite', 394, 0, 1475, 900),
+(1075, 48, 'metabolite', 395, 0, 1550, 850),
+(1076, 48, 'metabolite', 396, 0, 1125, 1150),
+(1077, 48, 'metabolite', 397, 0, 958, 1084),
+(1078, 48, 'metabolite', 398, 0, 875, 1150),
+(1079, 48, 'metabolite', 399, 0, 350, 700),
+(1080, 48, 'metabolite', 400, 0, 1725, 575),
+(1081, 48, 'metabolite', 401, 0, 1475, 1075),
+(1082, 48, 'metabolite', 402, 0, 1100, 575),
+(1083, 48, 'metabolite', 403, 0, 1325, 575),
+(1084, 48, 'metabolite', 404, 0, 850, 850),
+(1085, 48, 'metabolite', 405, 0, 1100, 775),
+(1086, 48, 'metabolite', 406, 0, 1550, 575),
+(1087, 48, 'metabolite', 407, 0, 225, 1550),
+(1088, 48, 'metabolite', 408, 0, 225, 1700),
+(1089, 48, 'metabolite', 409, 0, 900, 525),
+(1090, 48, 'pathway', 55, 0, 1250, 1750),
+(1091, 48, 'pathway', 56, 0, 414, 956),
+(1092, 48, 'pathway', 57, 0, 1650, 775),
+(1093, 48, 'pathway', 58, 0, 375, 1200),
+(1094, 48, 'pathway', 59, 0, 675, 1625),
+(1095, 48, 'pathway', 60, 0, 1600, 475),
+(1096, 48, 'pathway', 61, 0, 338, 830),
+(1097, 48, 'pathway', 62, 0, 350, 1075),
+(1098, 48, 'pathway', 63, 0, 975, 1000),
+(1099, 48, 'pathway', 64, 0, 1600, 675),
+(1100, 48, 'pathway', 65, 0, 325, 1750),
+(1101, 66, 'protein', 0, 0, 575, 225),
+(1102, 66, 'protein', 0, 0, 300, 350),
+(1103, 66, 'protein', 0, 0, 1800, 2000),
+(1104, 66, 'protein', 0, 0, 1175, 1925),
+(1105, 66, 'protein', 0, 0, 600, 600),
+(1106, 66, 'protein', 0, 0, 425, 525),
+(1107, 66, 'protein', 0, 0, 1075, 600),
+(1108, 66, 'protein', 0, 0, 775, 675),
+(1109, 66, 'protein', 0, 0, 1500, 325),
+(1110, 66, 'protein', 0, 0, 675, 325),
+(1111, 66, 'protein', 0, 0, 850, 375),
+(1112, 66, 'protein', 0, 0, 1325, 375),
+(1113, 66, 'protein', 0, 0, 1775, 500),
+(1114, 66, 'protein', 0, 0, 575, 400),
+(1115, 66, 'protein', 0, 0, 1175, 400),
+(1116, 66, 'protein', 0, 0, 1500, 450),
+(1117, 66, 'protein', 0, 0, 1800, 875),
+(1118, 66, 'protein', 0, 0, 425, 750),
+(1119, 66, 'protein', 0, 0, 298, 748),
+(1120, 66, 'protein', 0, 0, 1800, 675),
+(1121, 66, 'protein', 0, 0, 1875, 800),
+(1122, 66, 'protein', 0, 0, 1325, 775),
+(1123, 66, 'protein', 0, 0, 1750, 1450),
+(1124, 66, 'protein', 0, 0, 450, 1800),
+(1125, 66, 'protein', 0, 0, 525, 1750),
+(1126, 66, 'protein', 0, 0, 600, 1850),
+(1127, 66, 'protein', 0, 0, 1050, 1850),
+(1128, 66, 'protein', 0, 0, 525, 1675),
+(1129, 66, 'protein', 0, 0, 925, 1675),
+(1130, 66, 'protein', 0, 0, 1200, 1675),
+(1131, 66, 'protein', 0, 0, 1650, 1350),
+(1132, 66, 'protein', 0, 0, 600, 850),
+(1133, 66, 'protein', 0, 0, 600, 900),
+(1134, 66, 'protein', 0, 0, 950, 825),
+(1135, 66, 'protein', 0, 0, 775, 1000),
+(1136, 66, 'protein', 0, 0, 875, 800),
+(1137, 66, 'protein', 0, 0, 1125, 950),
+(1138, 66, 'protein', 0, 0, 1050, 900),
+(1139, 66, 'protein', 0, 0, 1700, 500),
+(1140, 66, 'protein', 0, 0, 1728, 802),
+(1141, 66, 'protein', 0, 0, 1650, 850),
+(1142, 66, 'protein', 0, 0, 1100, 775),
+(1143, 66, 'protein', 0, 0, 775, 1150),
+(1144, 66, 'protein', 0, 0, 1025, 1050),
+(1145, 66, 'protein', 0, 0, 775, 1275),
+(1146, 66, 'protein', 0, 0, 1075, 1100),
+(1147, 66, 'protein', 0, 0, 175, 1425),
+(1148, 66, 'protein', 0, 0, 950, 500),
+(1149, 66, 'protein', 0, 0, 300, 225),
+(1150, 66, 'protein', 0, 0, 450, 300),
+(1151, 66, 'protein', 0, 0, 775, 800),
+(1152, 66, 'protein', 0, 0, 1650, 1150),
+(1153, 66, 'protein', 0, 0, 1525, 825),
+(1154, 66, 'protein', 0, 0, 700, 1675),
+(1155, 66, 'protein', 0, 0, 675, 425),
+(1156, 66, 'protein', 0, 0, 625, 1350),
+(1157, 66, 'protein', 0, 0, 450, 1400),
+(1158, 66, 'protein', 0, 0, 450, 1525),
+(1159, 66, 'protein', 0, 0, 1000, 1450),
+(1160, 66, 'protein', 0, 0, 620, 1450),
+(1161, 66, 'protein', 0, 0, 625, 750),
+(1162, 66, 'protein', 0, 0, 1875, 950),
+(1163, 66, 'protein', 0, 0, 1850, 550),
+(1164, 66, 'protein', 0, 0, 1850, 425),
+(1165, 66, 'protein', 0, 0, 1850, 275),
+(1166, 66, 'protein', 0, 0, 625, 1525),
+(1167, 66, 'protein', 0, 0, 875, 1525),
+(1168, 66, 'protein', 0, 0, 1050, 1525),
+(1169, 66, 'protein', 0, 0, 1225, 1525),
+(1170, 66, 'protein', 0, 0, 1325, 900),
+(1171, 66, 'metabolite', 410, 0, 425, 850),
+(1172, 66, 'metabolite', 411, 0, 300, 900),
+(1173, 66, 'metabolite', 412, 0, 1800, 725),
+(1174, 66, 'metabolite', 413, 0, 775, 1200),
+(1175, 66, 'metabolite', 414, 0, 1200, 775),
+(1176, 66, 'metabolite', 415, 0, 1750, 1675),
+(1177, 66, 'metabolite', 416, 0, 450, 1750),
+(1178, 66, 'metabolite', 417, 0, 450, 1850),
+(1179, 66, 'metabolite', 418, 0, 800, 1850),
+(1180, 66, 'metabolite', 419, 0, 450, 1675),
+(1181, 66, 'metabolite', 420, 0, 800, 1675),
+(1182, 66, 'metabolite', 421, 0, 1025, 1675),
+(1183, 66, 'metabolite', 422, 0, 1650, 1250),
+(1184, 66, 'metabolite', 423, 0, 775, 900),
+(1185, 66, 'metabolite', 424, 0, 1650, 600),
+(1186, 66, 'metabolite', 425, 0, 1000, 775),
+(1187, 66, 'metabolite', 426, 0, 775, 1075),
+(1188, 66, 'metabolite', 427, 0, 775, 1350),
+(1189, 66, 'metabolite', 428, 0, 1425, 775),
+(1190, 66, 'metabolite', 429, 0, 1225, 1050),
+(1191, 66, 'metabolite', 430, 0, 1225, 1100),
+(1192, 66, 'metabolite', 431, 0, 450, 375),
+(1193, 66, 'metabolite', 432, 0, 450, 225),
+(1194, 66, 'metabolite', 433, 0, 775, 750),
+(1195, 66, 'metabolite', 434, 0, 1650, 1025),
+(1196, 66, 'metabolite', 435, 0, 625, 1675),
+(1197, 66, 'metabolite', 436, 0, 850, 425),
+(1198, 66, 'metabolite', 437, 0, 450, 1350),
+(1199, 66, 'metabolite', 438, 0, 1650, 1450),
+(1200, 66, 'metabolite', 439, 0, 775, 1450),
+(1201, 66, 'metabolite', 440, 0, 450, 1450),
+(1202, 66, 'metabolite', 441, 0, 550, 750),
+(1203, 66, 'metabolite', 442, 0, 1875, 875),
+(1204, 66, 'metabolite', 443, 0, 1875, 1000),
+(1205, 66, 'metabolite', 444, 0, 1850, 500),
+(1206, 66, 'metabolite', 445, 0, 1850, 350),
+(1207, 66, 'metabolite', 446, 0, 1850, 200),
+(1208, 66, 'metabolite', 447, 0, 525, 1525),
+(1209, 66, 'metabolite', 448, 0, 775, 1525),
+(1210, 66, 'metabolite', 449, 0, 950, 1525),
+(1211, 66, 'metabolite', 450, 0, 1150, 1525),
+(1212, 66, 'metabolite', 451, 0, 1350, 1675),
+(1213, 66, 'metabolite', 452, 0, 1325, 1525),
+(1214, 66, 'metabolite', 453, 0, 1425, 900),
+(1215, 66, 'metabolite', 454, 0, 1225, 900),
+(1216, 66, 'metabolite', 455, 0, 675, 225),
+(1217, 66, 'metabolite', 456, 0, 175, 225),
+(1218, 66, 'metabolite', 457, 0, 800, 1925),
+(1219, 66, 'metabolite', 458, 0, 425, 600),
+(1220, 66, 'metabolite', 459, 0, 775, 600),
+(1221, 66, 'metabolite', 460, 0, 1000, 325),
+(1222, 66, 'metabolite', 461, 0, 1775, 375),
+(1223, 66, 'metabolite', 462, 0, 1000, 400),
+(1224, 66, 'metabolite', 463, 0, 1375, 400),
+(1225, 66, 'metabolite', 464, 0, 1800, 950),
+(1226, 66, 'pathway', 66, 0, 2025, 650),
+(1227, 66, 'pathway', 67, 0, 600, 1075),
+(1228, 66, 'pathway', 68, 0, 850, 225),
+(1229, 66, 'pathway', 69, 0, 450, 975),
+(1230, 66, 'pathway', 70, 0, 1200, 1600),
+(1231, 66, 'pathway', 71, 0, 1175, 700),
+(1232, 66, 'pathway', 72, 0, 1350, 1250);
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `pathways`
+-- Table structure for table `pathways`
 --
 
 DROP TABLE IF EXISTS `pathways`;
@@ -1703,10 +2157,10 @@ CREATE TABLE IF NOT EXISTS `pathways` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=55 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=73 ;
 
 --
--- Daten für Tabelle `pathways`
+-- Dumping data for table `pathways`
 --
 
 INSERT INTO `pathways` (`id`, `name`) VALUES
@@ -1745,12 +2199,30 @@ INSERT INTO `pathways` (`id`, `name`) VALUES
 (49, 'Purine metabolism'),
 (50, 'Pyrimidine metabolism'),
 (51, 'Histidine metabolism'),
-(53, 'Galactose metabolism');
+(53, 'Galactose metabolism'),
+(55, 'Pentose phosphate pathway'),
+(56, 'Galactose metabolism'),
+(57, 'Amino sugar and nucleotide sugar metabolism'),
+(58, 'Starch and sucrose metabolism'),
+(59, 'Riboflavin metabolism'),
+(60, 'Glycerolipid metabolism'),
+(61, 'Pentose phosphate pathway'),
+(62, 'Glycolysis / Gluconeogenesis'),
+(63, 'Inositol phosphate metabolism'),
+(64, 'Ascorbate and aldarate metabolism'),
+(65, 'Citrate cycle (TCA cycle)'),
+(66, 'Glycolysis / Gluconeogenesis'),
+(67, 'N-Glycan biosynthesis'),
+(68, 'Galactose metabolism'),
+(69, 'Amino sugar and nucleotide sugar metabolism'),
+(70, 'Pyruvate metabolism'),
+(71, 'Amino sugar and nucleotide sugar metabolism'),
+(72, 'Glycolysis / Gluconeogenesis');
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `peptide_spectra`
+-- Table structure for table `peptide_spectra`
 --
 
 DROP TABLE IF EXISTS `peptide_spectra`;
@@ -1762,7 +2234,7 @@ CREATE TABLE IF NOT EXISTS `peptide_spectra` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2246 ;
 
 --
--- Daten für Tabelle `peptide_spectra`
+-- Dumping data for table `peptide_spectra`
 --
 
 INSERT INTO `peptide_spectra` (`id`, `peptide_id`, `charge`) VALUES
@@ -3881,7 +4353,7 @@ INSERT INTO `peptide_spectra` (`id`, `peptide_id`, `charge`) VALUES
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `peptides`
+-- Table structure for table `peptides`
 --
 
 DROP TABLE IF EXISTS `peptides`;
@@ -3893,7 +4365,7 @@ CREATE TABLE IF NOT EXISTS `peptides` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3263 ;
 
 --
--- Daten für Tabelle `peptides`
+-- Dumping data for table `peptides`
 --
 
 INSERT INTO `peptides` (`id`, `protein_id`, `peptide_seq`) VALUES
@@ -6088,7 +6560,7 @@ INSERT INTO `peptides` (`id`, `protein_id`, `peptide_seq`) VALUES
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `proteins`
+-- Table structure for table `proteins`
 --
 
 DROP TABLE IF EXISTS `proteins`;
@@ -6103,10 +6575,10 @@ CREATE TABLE IF NOT EXISTS `proteins` (
   `ec_number` varchar(30) NOT NULL,
   `fasta` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=859 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=941 ;
 
 --
--- Daten für Tabelle `proteins`
+-- Dumping data for table `proteins`
 --
 
 INSERT INTO `proteins` (`id`, `name`, `definition`, `species`, `kegg_link`, `mass`, `accession`, `ec_number`, `fasta`) VALUES
@@ -6524,12 +6996,95 @@ INSERT INTO `proteins` (`id`, `name`, `definition`, `species`, `kegg_link`, `mas
 (855, 'Tradd', 'Tumor necrosis factor receptor type 1-associated DEATH domain protein', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:105242493', '34,577', 'Q3U0V2', 'doctype', '>sp|Q3U0V2|TRADD_MOUSE Tumor necrosis factor receptor type 1-associated DEATH domain protein OS=Mus musculus GN=Tradd PE=1 SV=1\nMAAGQNGHEEWVGSAYLFLESAVDKVILSEAYTDPKKKVAIYKALQTALSESGDSSDVLQ\nILKIHCSDPQLIVQLRFCGRVLCGRFLQAYREGALRTALQRCMAPALAQEALRLQLELRA\nGAEQLDSWLTDEERCLNYILAQKPDRLRDEELAELEDELCKLTCDCTGQGGAIQVASAGS\nKFPVSSPTEEKPLPAACQTFLFHGQLVVNRPLTLQDQQTFARSVGLKWRRVGRSLQRNCR\nALRDPALDSLAYEYERDGLYEQAFQLLRRFMQAEGRRATLQRLVEALEENELTSLAEDLL\nGQAEPDGGLA'),
 (856, 'Ppp2ca', 'Serine/threonine-protein phosphatase 2A catalytic subunit alpha isoform', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:19052', '35,608', 'P63330', 'PP2AA_MOUSE', '>sp|P63330|PP2AA_MOUSE Serine/threonine-protein phosphatase 2A catalytic subunit alpha isoform OS=Mus musculus GN=Ppp2ca PE=1 SV=1\nMDEKLFTKELDQWIEQLNECKQLSESQVKSLCEKAKEILTKESNVQEVRCPVTVCGDVHG\nQFHDLMELFRIGGKSPDTNYLFMGDYVDRGYYSVETVTLLVALKVRYRERITILRGNHES\nRQITQVYGFYDECLRKYGNANVWKYFTDLFDYLPLTALVDGQIFCLHGGLSPSIDTLDHI\nRALDRLQEVPHEGPMCDLLWSDPDDRGGWGISPRGAGYTFGQDISETFNHANGLTLVSRA\nHQLVMEGYNWCHDRNVVTIFSAPNYCYRCGNQAAIMELDDTLKYSFLQFDPAPRRGEPHV\nTRRTPDYFL'),
 (857, 'Bcl2', 'Apoptosis regulator Bcl-2', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:12043', '26,407', 'P10417', 'doctype', '>sp|P10417|BCL2_MOUSE Apoptosis regulator Bcl-2 OS=Mus musculus GN=Bcl2 PE=1 SV=3\nMAQAGRTGYDNREIVMKYIHYKLSQRGYEWDAGDADAAPLGAAPTPGIFSFQPESNPMPA\nVHRDMAARTSPLRPLVATAGPALSPVPPVVHLTLRRAGDDFSRRYRRDFAEMSSQLHLTP\nFTARGRFATVVEELFRDGVNWGRIVAFFEFGGVMCVESVNREMSPLVDNIALWMTEYLNR\nHLHTWIQDNGGWDAFVELYGPSMRPLFDFSWLSLKTLLSLALVGACITLGAYLGHK'),
-(858, 'Map2k1', 'Dual-specificity mitogen-activated protein kinase kinase 1', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:26395', '43,474', 'Q3TMJ8', 'Q3TMJ8_MOUSE', '>tr|Q3TMJ8|Q3TMJ8_MOUSE Dual-specificity mitogen-activated protein kinase kinase 1 OS=Mus musculus GN=Map2k1 PE=1 SV=1\nMPKKKPTPIQLNPAPDGSAVNGTSSAETNLEALQKKLEELELDEQQRKRLEAFLTQKQKV\nGELKDDDFEKISELGAGNGGVVFKVSHKPSGLVMARKLIHLEIKPAIRNQIIRELQVLHE\nCNSPYIVGFYGAFYSDGEISICMEHMDGGSLDQVLKKAGRIPEQILGKVSIAVIKGLTYL\nREKHKIMHRDVKPSNILVNSRGEIKLCDFGVSGQLIDSMANSFVGTRSYMSPERLQGTHY\nSVQSDIWSMGLSLVEMAVGRYPIPPPDAKELELLFGCHVEGDAAETPPRPRTPGRPLSSY\nGMDSRPPMAIFELLDYIVNEPPPKLPSGVFSLEFQDFVNKCLIKNPAERADLKQLMVHAF\nIKRSDAEEVDFAGWLCSTIGLNQPSTPTHAASI');
+(858, 'Map2k1', 'Dual-specificity mitogen-activated protein kinase kinase 1', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:26395', '43,474', 'Q3TMJ8', 'Q3TMJ8_MOUSE', '>tr|Q3TMJ8|Q3TMJ8_MOUSE Dual-specificity mitogen-activated protein kinase kinase 1 OS=Mus musculus GN=Map2k1 PE=1 SV=1\nMPKKKPTPIQLNPAPDGSAVNGTSSAETNLEALQKKLEELELDEQQRKRLEAFLTQKQKV\nGELKDDDFEKISELGAGNGGVVFKVSHKPSGLVMARKLIHLEIKPAIRNQIIRELQVLHE\nCNSPYIVGFYGAFYSDGEISICMEHMDGGSLDQVLKKAGRIPEQILGKVSIAVIKGLTYL\nREKHKIMHRDVKPSNILVNSRGEIKLCDFGVSGQLIDSMANSFVGTRSYMSPERLQGTHY\nSVQSDIWSMGLSLVEMAVGRYPIPPPDAKELELLFGCHVEGDAAETPPRPRTPGRPLSSY\nGMDSRPPMAIFELLDYIVNEPPPKLPSGVFSLEFQDFVNKCLIKNPAERADLKQLMVHAF\nIKRSDAEEVDFAGWLCSTIGLNQPSTPTHAASI'),
+(859, 'Aldh2', 'Aldehyde dehydrogenase 2, mitochondrial, isoform CRA_b', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11669', '56,538', 'Q544B1', '1.2.1.3', '>tr|Q544B1|Q544B1_MOUSE Aldehyde dehydrogenase 2, mitochondrial, isoform CRA_b OS=Mus musculus GN=Aldh2 PE=1 SV=1\nMLRAALTTVRRGPRLSRLLSAAATSAVPAPNHQPEVFCNQIFINNEWHDAVSRKTFPTVN\nPSTGEVICQVAEGNKEDVDKAVKAARAAFQLGSPWRRMDASDRGRLLYRLADLIERDRTY\nLAALETLDNGKPYVISYLVDLDMVLKCLRYYAGWADKYHGKTIPIDGDFFSYTRHEPVGV\nCGQIIPWNFPLLMQAWKLGPALATGNVVVMKVAEQTPLTALYVANLIKEAGFPPGVVNIV\nPGFGPTAGAAIASHEGVDKVAFTGSTEVGHLIQVAAGSSNLKRVTLELGGKSPNIIMSDA\nDMDWAVEQAHFALFFNQGQCCCAGSRTFVQENVYDEFVERSVARAKSRVVGNPFDSRTEQ\nGPQVDETQFKKILGYIKSGQQEGAKLLCGGGAAADRGYFIQPTVFGDVKDGMTIAKEEIF\nGPVMQILKFKTIEEVVGRANDSKYGLAAAVFTKDLDKANYLSQALQAGTVWINCYDVFGA\nQSPFGGYKMSGSGRELGEYGLQAYTEVKTVTVKVPQKNS'),
+(860, 'Aldh3a2', 'Fatty aldehyde dehydrogenase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11671', '53,971', 'P47740', '1.2.1.3', '>sp|P47740|AL3A2_MOUSE Fatty aldehyde dehydrogenase OS=Mus musculus GN=Aldh3a2 PE=1 SV=2\nMERQVLRLRQAFRSGRSRPLRFRLQQLEALRRMVQEREKEILAAIAADLSKSELNAYSHE\nVITILGEIDFMLGNLPELASARPAKKNLLTMMDEAYVQPEPLGVVLIIGAWNYPFVLTMQ\nPLVGAIAAGNAAIVKPSELSENTAKILAELLPQYLDQDLYAIVNGGIPETTELLKQRFDH\nILYTGNTAVGKIVMEAAAKHLTPVTLELGGKSPCYIDRDCDLDVACRRIAWGKYMNCGQT\nCIAPDYILCEASLQNQIVQKIKETVKDFYGENIKASPDYERIINLRHFKRLQSLLKGQKI\nAFGGEMDEATRYLAPTILTDVDPNSKVMQEEIFGPILPIVSVKNVDEAINFINDREKPLA\nLYVFSRNNKLIKRVIDETSSGGVTGNDVIMHFTVNSLPFGGVGASGMGAYHGKYSFDTFS\nHQRPCLLKGLKGESVNKLRYPPNSESKVSWAKFFLLKQFNKGRLGMLLFVCLVAVAAVIV\nKDQL'),
+(861, 'Aldh1b1', 'Aldehyde dehydrogenase X, mitochondrial', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:72535', '57,553', 'Q9CZS1', '1.2.1.3', '>sp|Q9CZS1|AL1B1_MOUSE Aldehyde dehydrogenase X, mitochondrial OS=Mus musculus GN=Aldh1b1 PE=1 SV=1\nMLTARLLLPRLLCLQGRTTSYSTAAALPNPIPNPEICYNKLFINNEWHDAVSKKTFPTVN\nPTTGEVIGHVAEGDRADVDLAVKAAREAFRLGSPWRRMDASERGRLLNRLADLVERDRVY\nLASLETLDNGKPFQESYVLDLDEVIKVYRYFAGWADKWHGKTIPMDGEHFCFTRHEPVGV\nCGQIIPWNFPLVMQGWKLAPALATGNTVVMKVAEQTPLSALYLASLIKEAGFPPGVVNII\nTGYGPTAGAAIAQHMDVDKVAFTGSTEVGHLIQKAAGESNLKRVTLELGGKSPSIVLADA\nDMEHAVDQCHEALFFNMGQCCCAGSRTFVEESIYREFLERTVEKAKQRKVGNPFELDTQQ\nGPQVDKEQFERILGYIRLGQKEGAKLLCGGERLGERGFFIKPTVFGDVQDGMRIAKEEIF\nGPVQPLFKFKKIEEVIQRANNTRYGLAAAVFTRDLDKAIYFTQALQAGTVWVNTYNIVTC\nHTPFGGFKESGNGRELGEDGLRAYTEVKTVTIKVPEKNS'),
+(862, 'Sord', 'Sorbitol dehydrogenase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:20322', '38,249', 'Q64442', '1.1.1.14', '>sp|Q64442|DHSO_MOUSE Sorbitol dehydrogenase OS=Mus musculus GN=Sord PE=1 SV=3\nMAAPAKGENLSLVVHGPGDIRLENYPIPELGPNDVLLKMHSVGICGSDVHYWEHGRIGDF\nVVKKPMVLGHEAAGTVTKVGELVKHLKPGDRVAIEPGVPREVDEYCKIGRYNLTPTIFFC\nATPPDDGNLCRFYKHNADFCYKLPDSVTFEEGALIEPLSVGIYACRRGSVSLGNKVLVCG\nAGPVGMVTLLVAKAMGAAQVVVTDLSASRLTKAKEVGADFTIQVGKETPQEIASKVESLL\nGSKPEVTIECTGAESSVQTGIYATHSGGTLVIVGMGAEMVNLPLVHAAIREVDIKGVFRY\nCNTWPMAISMLASKTLNVKPLVTHRFPLEKAVEAFETAKKGVGLKVMIKCDPNDQNP'),
+(863, 'Akr1a1', 'Alcohol dehydrogenase [NADP(+)]', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:58810', '36,587', 'Q9JII6', '1.1.1.2', '>sp|Q9JII6|AK1A1_MOUSE Alcohol dehydrogenase [NADP(+)] OS=Mus musculus GN=Akr1a1 PE=1 SV=3\nMTASSVLLHTGQKMPLIGLGTWKSEPGQVKAAIKHALSAGYRHIDCASVYGNETEIGEAL\nKESVGSGKAVPREELFVTSKLWNTKHHPEDVEPALRKTLADLQLEYLDLYLMHWPYAFER\nGDNPFPKNADGTVRYDSTHYKETWKALEVLVAKGLVKALGLSNFNSRQIDDVLSVASVRP\nAVLQVECHPYLAQNELIAHCHARGLEVTAYSPLGSSDRAWRHPDEPVLLEEPVVLALAEK\nHGRSPAQILLRWQVQRKVICIPKSINPSRILQNIQVFDFTFSPEEMKQLDALNKNWRYIV\nPMITVDGKRVPRDAGHPLYPFNDPY'),
+(864, 'Dhdh', 'Trans-1,2-dihydrobenzene-1,2-diol dehydrogenase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:71755', '36,301', 'Q9DBB8', '1.3.1.20', '>sp|Q9DBB8|DHDH_MOUSE Trans-1,2-dihydrobenzene-1,2-diol dehydrogenase OS=Mus musculus GN=Dhdh PE=1 SV=1\nMALRWGIVSAGLIANDFTTVLSSLPSSEHQVVAVAARDLNRAEEFAQKFNIPKAYGSYEE\nLAKDPNVEVAYIATQHPQHKPAVLLCLAAGKAVLCEKPMGVNAAEVREMVAKARSQGVFL\nMEAIWSRFFPAMEALREVLVQGTIGDLRVARAEFGFDLSHIPRATDWNQAGGGLLDLGIY\nCVQFLSMIFGAQKPEKISAVGRIHETGVDDTVSVLLQYPGGVHGSFTCSISSNLPNTAYV\nSGTKGMAQIQKLWAPTELVVNGERKEFPPPVLGKDYNFVNGSCMLYEANHVRECLRKGLK\nESPVVPLAESELLAEILEEARKAIGVTFPQDKR'),
+(865, 'Gusb', 'Beta-glucuronidase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:110006', '74,195', 'P12265', '3.2.1.31', '>sp|P12265|BGLR_MOUSE Beta-glucuronidase OS=Mus musculus GN=Gusb PE=1 SV=2\nMSLKWSACWVALGQLLCSCALALKGGMLFPKESPSRELKALDGLWHFRADLSNNRLQGFE\nQQWYRQPLRESGPVLDMPVPSSFNDITQEAALRDFIGWVWYEREAILPRRWTQDTDMRVV\nLRINSAHYYAVVWVNGIHVVEHEGGHLPFEADISKLVQSGPLTTCRITIAINNTLTPHTL\nPPGTIVYKTDTSMYPKGYFVQDTSFDFFNYAGLHRSVVLYTTPTTYIDDITVITNVEQDI\nGLVTYWISVQGSEHFQLEVQLLDEGGKVVAHGTGNQGQLQVPSANLWWPYLMHEHPAYMY\nSLEVKVTTTESVTDYYTLPIGIRTVAVTKSKFLINGKPFYFQGVNKHEDSDIRGKGFDWP\nLLVKDFNLLRWLGANSFRTSHYPYSEEVLQLCDRYGIVVIDECPGVGIVLPQSFGNESLR\nHHLEVMEELVRRDKNHPAVVMWSVANEPSSALKPAAYYFKTLITHTKALDLTRPVTFVSN\nAKYDADLGAPYVDVICVNSYFSWYHDYGHLEVIQPQLNSQFENWYKTHQKPIIQSEYGAD\nAIPGIHEDPPRMFSEEYQKAVLENYHSVLDQKRKEYVVGELIWNFADFMTNQSPLRVIGN\nKKGIFTRQRQPKTSAFILRERYWRIANETGGHGSGPRTQCFGSRPFTF'),
+(866, 'Kl', 'Klotho', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:16591', '116,398', 'O35082', '3.2.1.31', '>sp|O35082|KLOT_MOUSE Klotho OS=Mus musculus GN=Kl PE=1 SV=2\nMLARAPPRRPPRLVLLRLLLLHLLLLALRARCLSAEPGQGAQTWARFARAPAPEAAGLLH\nDTFPDGFLWAVGSAAYQTEGGWRQHGKGASIWDTFTHHSGAAPSDSPIVVAPSGAPSPPL\nSSTGDVASDSYNNVYRDTEGLRELGVTHYRFSISWARVLPNGTAGTPNREGLRYYRRLLE\nRLRELGVQPVVTLYHWDLPQRLQDTYGGWANRALADHFRDYAELCFRHFGGQVKYWITID\nNPYVVAWHGYATGRLAPGVRGSSRLGYLVAHNLLLAHAKVWHLYNTSFRPTQGGRVSIAL\nSSHWINPRRMTDYNIRECQKSLDFVLGWFAKPIFIDGDYPESMKNNLSSLLPDFTESEKR\nLIRGTADFFALSFGPTLSFQLLDPNMKFRQLESPNLRQLLSWIDLEYNHPPIFIVENGWF\nVSGTTKRDDAKYMYYLKKFIMETLKAIRLDGVDVIGYTAWSLMDGFEWHRGYSIRRGLFY\nVDFLSQDKELLPKSSALFYQKLIEDNGFPPLPENQPLEGTFPCDFAWGVVDNYVQVDTTL\nSQFTDPNVYLWDVHHSKRLIKVDGVVAKKRKPYCVDFSAIRPQITLLREMRVTHFRFSLD\nWALILPLGNQTQVNHTVLHFYRCMISELVHANITPVVALWQPAAPHQGLPHALAKHGAWE\nNPHTALAFADYANLCFKELGHWVNLWITMNEPNTRNMTYRAGHHLLRAHALAWHLYDDKF\nRAAQKGKISIALQADWIEPACPFSQNDKEVAERVLEFDIGWLAEPIFGSGDYPRVMRDWL\nNQKNNFLLPYFTEDEKKLVRGSFDFLAVSHYTTILVDWEKEDPMKYNDYLEVQEMTDITW\nLNSPSQVAVVPWGLRKVLNWLRFKYGDLPMYVTANGIDDDPHAEQDSLRIYYIKNYVNEA\nLKAYVLDDINLCGYFAYSLSDRSAPKSGFYRYAANQFEPKPSMKHYRKIIDSNGFLGSGT\nLGRFCPEEYTVCTECGFFQTRKSLLVFISFLVFTFIISLALIFHYSKKGQRSYK'),
+(867, 'Rpe', 'Ribulose-phosphate 3-epimerase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:66646', '24,945', 'Q8VEE0', '5.1.3.1', '>sp|Q8VEE0|RPE_MOUSE Ribulose-phosphate 3-epimerase OS=Mus musculus GN=Rpe PE=1 SV=1\nMASGCKIGPSILNSDLANLGAECLRMLDSGADYLHLDVMDGHFVPNITFGHPVVESLRKQ\nLGQDPFFDMHMMVSRPEQWVKPMAVAGANQYTFHLEATENPGALIKDIRENGMKVGLAIK\nPGTTVEYLAPWANQIDMALVMTVEPGFGGQKFMEDMMPKVHWLRTQFPTLDIEVDGGVGP\nDTVQKCAEAGANMIVSGSAIMRSDDPRAVINLLRNVCSEAAQKRSLDR'),
+(868, 'Xylb', 'Xylulose kinase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:102448', '59,544', 'Q3TNA1', '2.7.1.17', '>sp|Q3TNA1|XYLB_MOUSE Xylulose kinase OS=Mus musculus GN=Xylb PE=1 SV=1\nMDARTHRRAAGTPRALAERAGRRCCLGWDFSTQQVKVVAVDAELNVFYEDSVHFDRDLPE\nFGTQGGVHVHKDRLTVTSPVLMWVQALDLILGKMKSSGFDFSQVLALSGAGQQHGSVYWK\nTGASLALSSLSPALPLHQQLQSCFSISDCPIWMDSSTTAQCHQLEAAVGGAQALSCLTGS\nRAYERFTGNQIAKLFQKNPEAYSHSERISLVSSFAASLFLGGYSPIDYSDGSGMNLLQIQ\nEKVWSQACLDVCAPHLEEKLGSPVPSCSVVGTISSYYVQRYGFPPGCKVVAFSGDNPASL\nAGMRLEEGDIAVSLGTSDTLFLWLQKPMPALEGHIFCNPVDPQHYMALLCFKNGSLMREK\nIRDESASCSWNKFSKALKSTAMGNNGNLGFYFDVMEITPEIIGRHRFNAENMEVSAFPGD\nVEIRALIEGQFMAKRIHAEGLGYRVMPKTKILATGGASHNKDILQVLADVFGAPVYVIDT\nTSSACVGSAYRAFHGLAGGTGVAFSEVVKSAPQPSLAATPNPGASQVYAALLPRYSALEQ\nRILSTAQRPLE'),
+(869, 'Akr1b1', 'Aldose reductase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11677', '35,732', 'P45376', '1.1.1.21', '>sp|P45376|ALDR_MOUSE Aldose reductase OS=Mus musculus GN=Akr1b1 PE=1 SV=3\nMASHLELNNGTKMPTLGLGTWKSPPGQVTEAVKVAIDLGYRHIDCAQVYQNEKEVGVALQ\nEKLKEQVVKRQDLFIVSKLWCTFHDKSMVKGAFQKTLSDLQLDYLDLYLIHWPTGFKPGP\nDYFPLDASGNVIPSDTDFVDTWTAMEQLVDEGLVKTIGVSNFNPLQIERILNKPGLKYKP\nAVNQIECHPYLTQEKLIEYCHSKGIVVTAYSPLGSPDRPWAKPEDPSLLEDPRIKAIAAK\nYNKTTAQVLIRFPIQRNLVVIPKSVTPVRIAENLKVFDFEVSSEDMATLLSYNRNWRVCA\nLMSCAKHKDYPFHAEV'),
+(870, 'Akr1b7', 'Aldose reductase-related protein 1', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11997', '35,988', 'P21300', '1.1.1.21', '>sp|P21300|ALD1_MOUSE Aldose reductase-related protein 1 OS=Mus musculus GN=Akr1b7 PE=1 SV=4\nMATFVELSTKAKMPLVGLGTWKSSPGQVKEAVKAAIDAGYRHIDCAYVYHNENEVGEAIQ\nEKIKENAVKREDLFIVSKLWATFFEKSLVKKAFQNTLSDLKLDYLDLYLVHWPQGFQAGN\nALLPKDNKGKVLLSKSTFLDAWEAMEELVDQGLVKALGISNFNHFQIERLLNKPGLKHKP\nVTNQIESHPYLTQEKLIQYCQSKGIAVTAYSPLGSPDRPYAKPEDPVVMEIPKIKEIAAK\nHKKTVAQVLIRFHVQRNVVVIPKSVTPSRIQENLQVFDFQLSEEDMAAILSFNRNWRACD\nLLDARTEEDYPFHEEY'),
+(871, 'Akr1b8', 'Aldose reductase-related protein 2', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:14187', '36,121', 'P45377', '1.1.1.21', '>sp|P45377|ALD2_MOUSE Aldose reductase-related protein 2 OS=Mus musculus GN=Akr1b8 PE=1 SV=2\nMATFVELSTKAKMPIVGLGTWKSPPNQVKEAVKAAIDAGYRHIDCAYAYCNENEVGEAIQ\nEKIKEKAVQREDLFIVSKLWPTCFEKKLLKEAFQKTLTDLKLDYLDLYLIHWPQGLQPGK\nELFPKDDQGRILTSKTTFLEAWEGMEELVDQGLVKALGVSNFNHFQIERLLNKPGLKHKP\nVTNQVECHPYLTQEKLIQYCHSKGISVTAYSPLGSPDRPSAKPEDPSLLEDPKIKEIAAK\nHEKTSAQVLIRFHIQRNVVVIPKSVTPSRIQENIQVFDFQLSDEEMATILSFNRNWRACL\nLPETVNMEEYPYDAEY'),
+(872, 'Akr1b10', 'MCG142264, isoform CRA_b', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:67861', '35,848', 'G5E895', '1.1.1.2', '>tr|G5E895|G5E895_MOUSE MCG142264, isoform CRA_b OS=Mus musculus GN=Akr1b10 PE=1 SV=1\nMAAFVTLLTGAKMPIVGLGTWKSPPAKVREAVKVAIDAGYRHIDCAYVYQNESEVGEAIQ\nEKIQEKAVKREDLFIVSKLWSTFFEKSLVKKAFQNTLSDLKLDYLDLYLIHWPQGFQSGN\nVFLPTDDKGSILSSKYTFLDAWEAMEELVDQGLVKALGVSNFNHFQIERLLNKPGLKHKP\nVTNQVECHPYLTQEKLIQYCHSKGITITAYSPLGSPDRPSAKPEDPLLLEIPKIKEIAAK\nHKRTAAQVLIRFHIERNVVVIPKSVTPSRIQENIQVFDFQLSEEDMAAILSFNRNWRACG\nLFAASHNEDFPFHAEY'),
+(873, 'Dcxr', 'L-xylulose reductase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:67880', '25,746', 'Q91X52', '1.1.1.10', '>sp|Q91X52|DCXR_MOUSE L-xylulose reductase OS=Mus musculus GN=Dcxr PE=1 SV=2\nMDLGLAGRRALVTGAGKGIGRSTVLALKAAGAQVVAVSRTREDLDDLVRECPGVEPVCVD\nLADWEATEQALSNVGPVDLLVNNAAVALLQPFLEVTKEACDTSFNVNLRAVIQVSQIVAK\nGMIARGVPGAIVNVSSQASQRALTNHTVYCSTKGALDMLTKMMALELGPHKIRVNAVNPT\nVVMTPMGRTNWSDPHKAKAMLDRIPLGKFAEVENVVDTILFLLSNRSGMTTGSTLPVDGG\nFLAT'),
+(874, 'Akr1b1', 'Aldose reductase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11677', '35,732', 'P45376', '1.1.1.21', '>sp|P45376|ALDR_MOUSE Aldose reductase OS=Mus musculus GN=Akr1b1 PE=1 SV=3\nMASHLELNNGTKMPTLGLGTWKSPPGQVTEAVKVAIDLGYRHIDCAQVYQNEKEVGVALQ\nEKLKEQVVKRQDLFIVSKLWCTFHDKSMVKGAFQKTLSDLQLDYLDLYLIHWPTGFKPGP\nDYFPLDASGNVIPSDTDFVDTWTAMEQLVDEGLVKTIGVSNFNPLQIERILNKPGLKYKP\nAVNQIECHPYLTQEKLIEYCHSKGIVVTAYSPLGSPDRPWAKPEDPSLLEDPRIKAIAAK\nYNKTTAQVLIRFPIQRNLVVIPKSVTPVRIAENLKVFDFEVSSEDMATLLSYNRNWRVCA\nLMSCAKHKDYPFHAEV'),
+(875, 'Akr1b7', 'Aldose reductase-related protein 1', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11997', '35,988', 'P21300', '1.1.1.21', '>sp|P21300|ALD1_MOUSE Aldose reductase-related protein 1 OS=Mus musculus GN=Akr1b7 PE=1 SV=4\nMATFVELSTKAKMPLVGLGTWKSSPGQVKEAVKAAIDAGYRHIDCAYVYHNENEVGEAIQ\nEKIKENAVKREDLFIVSKLWATFFEKSLVKKAFQNTLSDLKLDYLDLYLVHWPQGFQAGN\nALLPKDNKGKVLLSKSTFLDAWEAMEELVDQGLVKALGISNFNHFQIERLLNKPGLKHKP\nVTNQIESHPYLTQEKLIQYCQSKGIAVTAYSPLGSPDRPYAKPEDPVVMEIPKIKEIAAK\nHKKTVAQVLIRFHVQRNVVVIPKSVTPSRIQENLQVFDFQLSEEDMAAILSFNRNWRACD\nLLDARTEEDYPFHEEY'),
+(876, 'Akr1b8', 'Aldose reductase-related protein 2', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:14187', '36,121', 'P45377', '1.1.1.21', '>sp|P45377|ALD2_MOUSE Aldose reductase-related protein 2 OS=Mus musculus GN=Akr1b8 PE=1 SV=2\nMATFVELSTKAKMPIVGLGTWKSPPNQVKEAVKAAIDAGYRHIDCAYAYCNENEVGEAIQ\nEKIKEKAVQREDLFIVSKLWPTCFEKKLLKEAFQKTLTDLKLDYLDLYLIHWPQGLQPGK\nELFPKDDQGRILTSKTTFLEAWEGMEELVDQGLVKALGVSNFNHFQIERLLNKPGLKHKP\nVTNQVECHPYLTQEKLIQYCHSKGISVTAYSPLGSPDRPSAKPEDPSLLEDPKIKEIAAK\nHEKTSAQVLIRFHIQRNVVVIPKSVTPSRIQENIQVFDFQLSDEEMATILSFNRNWRACL\nLPETVNMEEYPYDAEY'),
+(877, 'Akr1b10', 'MCG142264, isoform CRA_b', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:67861', '35,848', 'G5E895', '1.1.1.2', '>tr|G5E895|G5E895_MOUSE MCG142264, isoform CRA_b OS=Mus musculus GN=Akr1b10 PE=1 SV=1\nMAAFVTLLTGAKMPIVGLGTWKSPPAKVREAVKVAIDAGYRHIDCAYVYQNESEVGEAIQ\nEKIQEKAVKREDLFIVSKLWSTFFEKSLVKKAFQNTLSDLKLDYLDLYLIHWPQGFQSGN\nVFLPTDDKGSILSSKYTFLDAWEAMEELVDQGLVKALGVSNFNHFQIERLLNKPGLKHKP\nVTNQVECHPYLTQEKLIQYCHSKGITITAYSPLGSPDRPSAKPEDPLLLEIPKIKEIAAK\nHKRTAAQVLIRFHIERNVVVIPKSVTPSRIQENIQVFDFQLSEEDMAAILSFNRNWRACG\nLFAASHNEDFPFHAEY'),
+(878, 'Cryl1', 'Lambda-crystallin homolog', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:68631', '35,209', 'Q99KP3', '1.1.1.45', '>sp|Q99KP3|CRYL1_MOUSE Lambda-crystallin homolog OS=Mus musculus GN=Cryl1 PE=1 SV=3\nMASPAAGGVVIVGSGLIGRSWAMLFASGGFKVKLYDIEQQQITDALENIRKEMKSLEQSG\nSLKGSLSAERQLSLISGCGNLAEAVEGAVHIQECVPENLELKKKIFAQLDRIVDDRVILS\nSSSSCLLPSKLFSGLAHVKQCIVAHPVNPPYYVPLVELVPHPETAPATMDRTYALMKKIG\nQSPVRVLKEIDGFVLNRLQYAVISEAWRLVEEEIVSPSDLDLVMSDGLGMRYAFIGPLET\nMHLNAEGVISYCERYSEGMKHVLSTFGPVPEFSGATVERVSEDMCMKVPDDPEHLAARRQ\nWRDDCLMKLSILKYQMQPK'),
+(879, 'Ugp2', 'UTP--glucose-1-phosphate uridylyltransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:216558', '56,979', 'Q91ZJ5', '2.7.7.9', '>sp|Q91ZJ5|UGPA_MOUSE UTP--glucose-1-phosphate uridylyltransferase OS=Mus musculus GN=Ugp2 PE=1 SV=3\nMSRFVQDLSKAMSQDGASQFQEVILQELELSVKKELEKILTTAASHEFEHTKKDLDGFRK\nLFHRFLQEKGPSVDWGKIQRPPEDSIQPYEKIKARGLPDNISSVLNKLVVVKLNGGLGTS\nMGCKGPKSLIGVRNENTFLDLTVQQIEHLNKTYNTDVPLVLMNSFNTDEDTKKILQKYNH\nCRVKIYTFNQSRYPRINKESLLPIAKDVSYSGENTEAWYPPGHGDIYASFYNSGLLDTFI\nEEGKEYIFVSNIDNLGATVDLYILNHLMNPPNGKRCEFVMEVTNKTRADVKGGTLTQYEG\nKLRLVEIAQVPKAHVDEFKSVSKFKIFNTNNLWISLGAVKRLQEQNAIDMEIIVNPKTLD\nGGLNVIQLETAVGAAIKSFENSLGINVPRSRFLPVKTTSDLLLVMSNLYSLNAGSLTMSE\nKREFPTVPLVKLGSSFTKVQDYLRRFESIPDMLELDHLTVSGDVTFGKNVSLKGTVIIIA\nNHGDRIDIPPGAVLENKIVSGNLRILDH'),
+(880, 'Ugt2b38', 'MCG131371', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:100559', '60,929', 'Q91WH2', '2.4.1.17', '>tr|Q91WH2|Q91WH2_MOUSE MCG131371 OS=Mus musculus GN=Ugt2b38 PE=2 SV=1\nMPGKWISALLLLQISCCFRSVKCGKVLVWPMEFSHWMNIKIILDELVQRGHEVTVLRPSA\nYYVLDPKKSPGLKFETFPTSVSKDNLENFFIKFVDVWTYEMPRDTCLSYSPLLQNMIDEF\nSDYFLSLCKDVVSNKELMTKLQESKFDVLLSDPVASCGELIAELLQIPFLYSIRFSPGYQ\nIEKSSGRFLLPPSYVPVILSGLGGQMTFIERVKNMICRLYFDFWFQMFNDKKWDSFYSEY\nLGRPTTLAETMGKAEMWLIRSNWDLEFPHPTLPNVDYVGGLHCKPAKPLPKDMEEFVQSS\nGDHGVVVFSLGSMVSNMTEEKANTIAWALAQIPQKVLWKFDGKTPATLGHNTRVYKWLPQ\nNDLLGHPKTKAFVTHGGANGVYEVIYHGIPMIGIPLFGEQHDNIAHMVAKGAAVTLNIRT\nMSRSDVLNALEEVIDNPFYKKNAIWLSTIHHDQPTKPLDRAVFWVEFVMRHKRAKHLRSL\nGHNLTWHQYHFLDVIGFLLSCVAVTIVLTVKCLLFIYRFFVKKEKKIKNE'),
+(881, 'Ugt2b34', 'UDP-glucuronosyltransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:100727', '60,877', 'Q8K154', '2.4.1.17', '>tr|Q8K154|Q8K154_MOUSE UDP-glucuronosyltransferase OS=Mus musculus GN=Ugt2b34 PE=1 SV=1\nMPVKMTAALLLLLLQLSGFFGSGTGGKVLVWPMEFSHWLNLKTILDELLKKGHEVMVLRP\nSASLSYEVDNTSAIEFETYPTSYSLSELEEIFWESLKKYIYELPKQSFWGYFLMLQEMVW\nVDSKYFESLCKDVVFNKELMTKLQKSRFDVILADPFIPCGDLLAEVLKIPLVYSLRFFPG\nSTYEKYSGGLPLPPSYVPVVMSELSDRMTFMERVRNVIYMLCFDFWFQTFNEKNWNQLYT\nEVLGRPTTLSETMAKADIWLIRTYWDLEFPHPVLPNFDFIGGLHCRPAKPLPKEIEDFVQ\nSSGEHGVVVFSLGSMVGSITEERANVIAAGLAQIPQKVLWRFEGKKPETLGSNTRLYKWI\nPQNDLLGHSKTRAFITHGGTNGIYEAIYHGIPVVGIPLFGDQYDNIVHLKAKGAAVRLDF\nLTMSSTDLHTALKTVTNDPSYKENAMRLSRIHHDQPVKPLDRAVFWIEFVMRHKGAKHLR\nVAAHDLSWVQYHSLDVLGFLLACVLTVMFILKKCCLFCCQKLTKAGRKKKGE'),
+(882, 'Ugt2b37', 'UDP-glucuronosyltransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:112417', '60,816', 'Q8VCN3', '2.4.1.17', '>tr|Q8VCN3|Q8VCN3_MOUSE UDP-glucuronosyltransferase OS=Mus musculus GN=Ugt2b37 PE=1 SV=1\nMPGKWISALLLLQISCCFRSVKCGKVLVWPMEFSHWMNIKIILDELVQRGHEVTVLRPSA\nYYVLDPKKSPGLKFETFPTSVTKDDLENFFIQLLNVWTYELSRDTCLSYSPLMQNMFDEL\nSGYYLSLCKDVVSNRQLMTKLQESKFDVLLSDPVAFGGELIAELLHIPFLYSLRFTAGYR\nIEKSSGRFLLPPSYVPVILSGLGGQMTFIERVKNMICMLYFDFWFQMPNDKKWDSFYTEY\nLGRPTTLAETMGQAEMWLIRSNWDLEFPHPTLPNVDYVGGLHCKPAKPLPKDMEEYVQSS\nGDHGVVVFSLGSMVSNITEEKVNAIAWALAQIPQKVLWKFDGKTPATLGHNTRVYKWLPQ\nNDLLGHPKTKAFITHGGANSVYEAIYHGIPMIGIPLFGEQHDNIAHMVAKGAAVTLNIRT\nMSRSDVLNALEEVIENPFYKKNAMWLSTIHHDQPMKPLDRAVFWVEFVMRHKNAKHLRPL\nGHNLTWYQYHSLDVIGFLLACVAATVVLTVKCLLFIYRFFVTKKKKMKNE'),
+(883, 'Ugt1a2', 'UDP-glucuronosyltransferase 1-2', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:22236', '60,285', 'P70691', '2.4.1.17', '>sp|P70691|UD12_MOUSE UDP-glucuronosyltransferase 1-2 OS=Mus musculus GN=Ugt1a2 PE=1 SV=1\nMDTGLCVPLRGISGLLLLLCALPWAEGAKVLVLPMEGSQWLSMRDVVRELHARGHQTVVL\nASEVTVHIKGEDFFTLKTYAFPYTKEEYQQEILSDIEKTFKTQHFVKAFFETTASIRNFF\nDLYSNSCIALLHNKMLIQQLNSSFFDVILTDPIFPCGAVLAKYLQIPAVFILRSLSCGIE\nYEATQCPNPSSYIPNLLTRLSDHMDFLQRVQNMLYYLVLKYICRLSITPYESLASELLQR\nEVSLVEVLSHASVWLFRGDFVLDYPRPIMPNMVFIGGINCVTKKPLSQEFEAYVNASGEH\nGIVVFSLGSMVSEIPEKKAMEIAEALGRIPQTVLWRYTGTRPSNLAKNTILVKWLPQNDL\nLGHPKTRAFITHSGSHGIYEGICNGVPMVMMPLFGDQMDNAKRMETRGAGVTLNVLEMTA\nDDLENALKTVINNKSYKENIMRLSSLHKDRPIEPLDLAVFWVEYVMRHKGAPHLRPAAHD\nLTWYQYHSLDVIGFLLAIVLTVVFIVFKCCAYGCRKCFGGKGRVKKSHKSKTH'),
+(884, 'Ugt2b5', 'UDP-glucuronosyltransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:22238', '60,874', 'Q8K169', '2.4.1.17', '>tr|Q8K169|Q8K169_MOUSE UDP-glucuronosyltransferase OS=Mus musculus GN=Ugt2b5 PE=1 SV=1\nMPGKWISALLLLQISCCFRSVKCGKVLVWPMEFSHWMNIKIILDELVQRGHEVTVLRPSA\nYYVLDPKKSPGLKFETFPTSVSKDNLENFFIKFVDVWTYEMPRDTCLSYSPLLQNMIDEF\nSDYFLSLCKDVVSNKELMTKLQESKFDVLLSDPVASCGELIAELLQIPFLYSIRFSPGYQ\nIEKSSGRFLLPPSYVPVILSGLGGQMTFIERIKNMICMLYFDFWFQMFNDKKWDSFYSEY\nLGRPTTLVETMGQAEMWLIRSNWDLEFPHPTLPNVDYVGGLHCKPAKPLPKDMEEFVQSS\nGDHGVVVFSLGSMVSNMTEEKANAIAWALAQIPQKVLWKFDGKTPATLGHNTRVYKWLPQ\nNDLLGHPKTKAFVTHGGANGVYEAIYHGIPMIGIPLFGEQHDNIAHMVAKGAAVALNIRT\nMSKSDVLNALEEVIENPFYKKNAMWLSTIHHDQPMKPLDRAVFWIEFVMRHKRAKHLRPL\nGHNLTWYQYHSLDVIGFLLSCVATTIVLSVKCLLFIYRFFVKKENKMKNE'),
+(885, 'Ugt2b36', 'UDP-glucuronosyltransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:231396', '61,041', 'Q3UEP4', '2.4.1.17', '>tr|Q3UEP4|Q3UEP4_MOUSE UDP-glucuronosyltransferase OS=Mus musculus GN=Ugt2b36 PE=1 SV=1\nMLWKWISALLLLQISCCFRSAKCGKVLVWPVDYSHWMNIKIILDELKQKGHEVTVLRPST\nSIFLDPKKSPGLKFETFPTSFSNDVMEIIFAKAVERWTYEVPRDTCLSYSPLLQNIFDEY\nSDYCLTLCKDTVSNKQLMAKLQESKFDVILSDAIGPCGELIAELLQIPFLYSLRFSPGYY\nLEKYSGGLPLPPSYVPVILSGLSGQMTFKERVKNMICMLYFDFWFQTFREKKWDQFYSET\nLGRPTTLIETMGKAEMWLIRSYWDLEFPHPTLPNVYYVGGVHCKPAKPLPKEMEDFVQSS\nGEHGVVVFSLGSMVSNMTEEKANAIAWALAQIPQKVLWRFDGKTPATLGPNTRIYKWLPQ\nNDLLGHPKTKAFITHGGANGLYEAIHHGIPMIGIPLFGEQHDNIAHMVAKGAAVTLNIRT\nMSRSDLLNALEEVIDNPFYKENAMWLSTIHHDQPMKPLDRAVFWIEFVMRHKGAKHLRPL\nAYNLTWYQYHSLDVIGFLLAFVTFIVALIVKCFLFVYRFFVKKEKKMKNE'),
+(886, 'Ugt2b35', 'UDP-glucuronosyltransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:243085', '60,454', 'Q8BJL9', '2.4.1.17', '>tr|Q8BJL9|Q8BJL9_MOUSE UDP-glucuronosyltransferase OS=Mus musculus GN=Ugt2b35 PE=1 SV=1\nMPVKWISALLLLQMSCCFRSTSCGKVLVWPLEFSHWMNLKIILDELVQRGHEVTVLRPSA\nSIFVDPKYSPGLKFETFPTAFSKDYLETFLTKLVDEWTFEVPRDTCLSYSLLQTLFGKLS\nDYSLSLCKEAVSNKQLMTKFQESKFDVLILDAMASCGELIAQLLQIPFLYSLRFSPGYQV\nEKNSGGFVLPPSYVPVILSGLGGQMTFTERVKNMICMLYFDFWFQTFTEKEWDQFYSETL\nGRPTTLIETMGKAEMWFIRSYWDLEFPHPTLPNVEYVGGLHCKPAKPLPKEMEDFVQSSG\nVHGVVVFSLGSMVSNMTEERANAISWALAQIPQKVLWRFDGKTPASLGPNTRIYKWLPQN\nDLLGHPKTKAFVTHGGANGLYEAIHHGIPMIGIPLFSEQHDNIAHMVAKGTAVALNIRTM\nSRSDLLNALEEVINNPSYKENVMWLSTIHHDQPMKPLNRTIFWIEFVMRHKGAKHLRPLA\nHNLTWYQYHSLDVIGFLLVCVVATAVLPVKCCLFVYQFFVKKAKKRKNE'),
+(887, 'Ugt1a10', 'UDP-glucuronosyltransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:394430', '60,295', 'E9PXN7', '2.4.1.17', '>tr|E9PXN7|E9PXN7_MOUSE UDP-glucuronosyltransferase OS=Mus musculus GN=Ugt1a10 PE=1 SV=1\nMVPAAFPTSLPLCVCLLLASGLVQAGRLLVVPMDGSHWFDMQMVVEKLIQRGHEVVVVIP\nEVSWRLGKSLNCTVKTYSVSHTLEDLDREFKYFTYTQWKTPEQSIRSFMTGSARGFFELM\nFSHSRGLFNDKKLVEYLKQRSFDAVFLDPFDVCGLIVAKYLSLPSVIFARLSFCYYLEEG\nAQCPSLLSYVPRLFSKYTDTMTFKERVWNHYMYIEDYVFCPYFFKTAVEIASEVLQTPVT\nMTDLFSPVSIWLLRTDFVLEFPRPVMPNMVFVGGMNCLQGKPLSKEFEAYVNASGEHGIV\nVFSLGSMVSEIPEKKAMEIAEALGRIPQTVLWRYTGTRPSNLAKNTILVKWLPQNDLLGH\nPKTRAFITHSGSHGIYEGICNGVPMVMMPLFGDQMDNAKRMETRGAGVTLNVLEMTADDL\nENALKTVINNKSYKENIMRLSSLHKDRPIEPLDLAVFWVEYVMRHKGAPHLRPAAHDLTW\nYQYHSLDVIGFLLAIVLTVVFIVFKCCAYGCRKCFGGKGRVKKSHKSKTH'),
+(888, 'Ugt1a7c', 'UDP-glucuronosyltransferase 1-7C', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:394432', '59,758', 'Q6ZQM8', '2.4.1.17', '>sp|Q6ZQM8|UD17C_MOUSE UDP-glucuronosyltransferase 1-7C OS=Mus musculus GN=Ugt1a7c PE=1 SV=1\nMAPADFPASLPLCVCLLLASGLAQAGRLLVVPMDGSHWFTMQTVVEKLLHKGHEVVVVVP\nEVSWQLTKPLNFVVKTYAVSHTQEDLNREFKIFIDAQWKSQQEGGILPLLDSPAKGFFEL\nLFSHCRSLFNDKKLVEYLKQTSFDAVFLDPFDVCGLTVAKYFSLPSVVFSRGIFCHYLED\nAAQCPSPPSYIPRMLLKFTDTMTFKERTRNLLAYMGERAFCHKFFKSAADIASEVLQTPV\nTMTDLFSPVSIWLLRTDFVLEFPRPVMPNVIYIGGINCHQGKPLSKEFEAYVNASGEHGI\nVVFSLGSMVSEIPEKKAMEIAEALGRIPQTVLWRYTGTRPSNLAKNTILVKWLPQNDLLG\nHPKTRAFITHSGSHGIYEGICNGVPMVMMPLFGDQMDNAKRMETRGAGVTLNVLEMTADD\nLENALKTVINNKSYKENIMRLSSLHKDRPIEPLDLAVFWVEYVMRHKGAPHLRPAAHDLT\nWYQYHSLDVIGFLLAIVLTVVFIVFKCCAYGCRKCFGGKGRVKKSHKSKTH'),
+(889, 'Ugt1a5', 'UDP-glucuronosyltransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:394433', '60,073', 'B2RT14', '2.4.1.17', '>tr|B2RT14|B2RT14_MOUSE UDP-glucuronosyltransferase OS=Mus musculus GN=Ugt1a5 PE=1 SV=1\nMGLRMPLQGLVGLLLLCALPWTEGEKVLVFPVGGSHWLSMRDVVRELHAQGHQTVVLAPE\nVNMRIKEEDFFTFKVYAVPYTRQELEEMMENLKVFFDTGNYMKKIFKTSEALRNMSTVLL\nKTCTNILHNESLLHHLNSSSFDVVFTDPVFPCGALLAKYLGIPAVFFLRYIPCGIEYEAT\nQCPSPSSYIPNLFTRLSDHMDFLQRVQNMLYHLVLKYICHLLITPYESLASELFQREVSS\nVELFSYASVWLFRGDFVLDYPRPIMPNMVFIGGINCVTKKPLSQEFEAYVNASGEHGIVV\nFSLGSMVSEIPEKKAMEIAEALGRIPQTVLWRYTGTRPSNLAKNTILVKWLPQNDLLGHP\nKTRAFITHSGSHGIYEGICNGVPMVMMPLFGDQMDNAKRMETRGAGVTLNVLEMTADDLE\nNALKTVINNKSYKENIMRLSSLHKDRPIEPLDLAVFWVEYVMRHKGAPHLRPAAHDLTWY\nQYHSLDVIGFLLAIVLTVVFIVFKCCAYGCRKCFGGKGRVKKSHKSKTH'),
+(890, 'Ugt1a9', 'UDP-glucuronosyltransferase 1-9', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:394434', '60,008', 'Q62452', '2.4.1.17', '>sp|Q62452|UD19_MOUSE UDP-glucuronosyltransferase 1-9 OS=Mus musculus GN=Ugt1a9 PE=1 SV=3\nMAPVAFPTSFFLCLLLASGLAQAGRLLVVPMDGSHWFTMQMVVEKLIHRGHEVVVVIPEV\nSWQLGKSLNCTVKTYSISHTLEDLDREFKYLSYTQWKTPEHSIRSFLTGSARGFFELTFS\nHCRSLFNDKKLVEYLKQRFFDAVFLDPFDVCGLIVAKYFSLPSVIFARGVFCDYLEEGAQ\nCPSLPSYVPRLFSKYTDTMTFKERVWNHLIYIEEHAFCSYFLRTAVEVASEILQTPVTMT\nDLFSPVSIWLLRTDFVLEFPRPVMPNMVFIGGINCLQKKSLSKEFEAYVNASGEHGIVVF\nSLGSMVSEIPEKKAMEIAEALGRIPQTVLWRYTGTRPSNLAKNTILVKWLPQNDLLGHPK\nTRAFITHSGSHGIYEGICNGVPMVMMPLFGDQMDNAKRMETRGAGVTLNVLEMTADDLEN\nALKTVINNKSYKENIMRLSSLHKDRPIEPLDLAVFWVEYVMRHKGAPHLRPAAHDLTWYQ\nYHSLDVIGFLLAIVLTVVFIVFKCCAYGCRKCFGGKGRVKKSHKSKTH'),
+(891, 'Ugt1a6b', 'UDP-glucuronosyltransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:394435', '60,491', 'K9J7B2', '2.4.1.17', '>tr|K9J7B2|K9J7B2_MOUSE UDP-glucuronosyltransferase OS=Mus musculus GN=Ugt1a6b PE=1 SV=1\nMACLLPAAQTLPAGFLFLVLWASVLGDKLLVVPQDGSHWLSMKEIVEHLSERGHDIVVLV\nPEVNLLLGESKYYRRKIFSVPYSLEELQTRFRTFGRNQFVPGAPLMGPLREYRNSMLTLE\nMFFSNCQSLLKDSATLSFLRENKFDALFTDPAMPCGVILAEYLNLPSVYLFRGFPCSLEH\nMLGQSPSPVSYVPRFYTKFSDHMTFPQRLANFIVNILENYLYYCLYSKYEIIVTDLLKRD\nVSLPSLHQNSLWLLRYDFVFEYPRPIMPNMIFIGGINCKKKGKLTQEFEAYVNASGEHGI\nVVFSLGSMVSEIPEKKAMEIAEALGRIPQTVLWRYTGTRPSNLAKNTILVKWLPQNDLLG\nHPKTRAFITHSGSHGIYEGICNGVPMVMMPLFGDQMDNAKRMETRGAGVTLNVLEMTADD\nLENALKTVINNKSYKENIMRLSSLHKDRPIEPLDLAVFWVEYVMRHKGAPHLRPAAHDLT\nWYQYHSLDVIGFLLAIVLTVVFIVFKCCAYGCRKCFGGKGRVKKSHKSKTH'),
+(892, 'Ugt1a1', 'UDP-glucuronosyltransferase 1-1', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:394436', '60,047', 'Q63886', '2.4.1.17', '>sp|Q63886|UD11_MOUSE UDP-glucuronosyltransferase 1-1 OS=Mus musculus GN=Ugt1a1 PE=1 SV=2\nMTVVCWSSRLLLLLPYLLLCVFGPSASHAGRLLVFPMDGSHWLSMLGVIQQLQQKGHEVV\nVIAPEASIHIKEGSFYTLRKFPVPFQKENVTATLVELGRTAFNQDSFLLRVVKIYMKVKR\nDSSMLLAGCSHLLHNAEFMASLEESHFDALLTDPFLPCGSIVAQYLTVPTVYFLNKLPCS\nLDSEATQCPVPLSYVPKSLSFNSDRMNFLQRVKNVLLAVSENFMCRVVYSPYGSLATEIL\nQKEVTVQDLLSPASIWLMRSDFVKDYPRPIMPNMVFIGGINCLQKKPLSQEFEAYVNASG\nEHGIVVFSLGSMVSEIPEKKAMEIAEALGRIPQTVLWRYTGTRPSNLAKNTILVKWLPQN\nDLLGHPKTRAFITHSGSHGIYEGICNGVPMVMMPLFGDQMDNAKRMETRGAGVTLNVLEM\nTADDLENALKTVINNKSYKENIMRLSSLHKDRPIEPLDLAVFWVEYVMRHKGAPHLRPAA\nHDLTWYQYHSLDVIGFLLAIVLTVVFIVFKCCAYGCRKCFGGKGRVKKSHKSKTH'),
+(893, 'Ugt2a2', 'UDP-glucuronosyltransferase 2A2', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:552899', '59,967', 'Q6PDD0', '2.4.1.17', '>sp|Q6PDD0|UD2A2_MOUSE UDP-glucuronosyltransferase 2A2 OS=Mus musculus GN=Ugt2a2 PE=2 SV=1\nMIKKVLQLLIFHLTLAEIVLSGNVVVWPTDGSHWLNIKILLEELVQRNHSVTVLAPSETL\nFINSRLDAFINFEEIPVSYTKSKIDEIIEHMIALWLDHRPTPLTMWTFYKELGNLLATFY\nTTNKQMCDGVLNNPTVMERLQKGGFDVLLADPVTMCGELVALKLGIPFVYTLRFSPAFTV\nERHCGKIPAPISYVPAALSELTDQMSFGERVKNIISYSLQDYIFKTYWGEWNSYYSKVLG\nRPTTLCETMGKAEIWLMRTYWDFEFPRPYLPNFEFVGGLHCKPAKPLPKEMEEFVQTSGE\nHGIVVFSLGSMVKNLTDEKANLIASALAQIPQKVLWRYKGKIPDTLGSNTRLFDWIPQND\nLLGHPKTRAFITHGGTNGIYEAIYHGIPMVGVPMFADQPDNIAHMKAKGAAVEVNMNTMT\nSSDLLNALRTVINEPSYKENAMRLSRIHHDQPVKPLDRAVFWIEFVMRHKGAKHLRVAAH\nDLSWFQYHSLDVIGFLLACVASAILLVAKCCLFIFQKVGKTGKKKKRD'),
+(894, 'Ugt2b1', 'UDP-glucuronosyltransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:71773', '60,157', 'Q8R084', '2.4.1.17', '>tr|Q8R084|Q8R084_MOUSE UDP-glucuronosyltransferase OS=Mus musculus GN=Ugt2b1 PE=1 SV=1\nMSMKQASVFLLIQFICYIRPGACGKVLVWPTEYSHWINMKIILDELVQRGHDVTVLISSA\nSILIGPSNESSINFEIYSAPLSKDDLEYAFEKWVGNWTYELKKLPFWTSYSKLQKISSEY\nSDMIESFCKAVVWNKSLMKKLQGSKFDVVLADALVPCGELLSELLKTPLVYSLRFCPGYK\nCEKYSGGLPLPPSYVPVVLSELSDHMTFAERVKNMLQVLLFDFWFQTFNEKSWNQFYSDV\nLGRPTTLTEMMGKADIWLVRTFWDLKFPHPFLPNFDFVGGLHCKPAKPLPKEMEEFVQSS\nGEHGVVVFSLGSMVKNIKEEKANVVASALAQIPQKVLWRFDGKKPDTLGSNTRLYKWIPQ\nNDLLGHPKTKAFIAHGGTNGIYEAIYHGIPIVGIPLFGDQPDNINHIVAKGAAVRVDFDT\nMSTTDLLTALKTVINDPSYKENAMRLSRIHHDQPMKPLDRAVFWIEYVMRNKGAKHLRPA\nLHDLTWFQYHSLDVIGFLLVCVVAVVFIIAKCCLFCCHKTANMGKKKKE'),
+(895, 'Ugt2a3', 'UDP-glucuronosyltransferase 2A3', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:72094', '61,119', 'Q8BWQ1', '2.4.1.17', '>sp|Q8BWQ1|UD2A3_MOUSE UDP-glucuronosyltransferase 2A3 OS=Mus musculus GN=Ugt2a3 PE=1 SV=1\nMVSEKCVAAFFLLQLCWAGCGFCSKVLVWPCDMSHWLNLKTILEELGARGHEVTVLKYPS\nIIIDQSKRIPLHFENIPLLYEIETAENRLNEIANLAVNVIPNLSLWEAAKTLQDFFLQVT\nGDFESICRSVLYNQKFMDKLRDAQYDVVVIDPVVPCGELVAEVLQIPFVYTLRFSMGYYM\nEKHCGQLPIPLSYVPVVMSELTDNMTFTERVKNMMFSLLFEYWLQQYDFAFWDQFYSETL\nGRPTTFCKTVGKADIWLIRTYWDVEFPRPYLPNFEFVGGLHCKPAKPLPKEMEEFVQSSG\nEHGVVVFSLGSMVKNLTEEKANLIASVLAQIPQKVLWRYSGKKPATLGSNTRLFNWIPQN\nDLLGHPKTKAFITHGGTNGIYEAIYHGVPMVGVPMLGDQPHNIAHMEAKGAALKVSISTM\nTSTDLLSAVRAVINEPSYKENAMRLSRIHHDQPVKPLDRAVFWIEFVMRHKGAKHLRVAA\nHDLSWFQYHSLDVIGFLLLCVVTLTFIITKFCLFVCQKLYMKESKKMGNRKKKN'),
+(896, 'Ugt2a1', 'UDP-glucuronosyltransferase 2A1', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:94215', '59,965', 'Q80X89', '2.4.1.17', '>sp|Q80X89|UD2A1_MOUSE UDP-glucuronosyltransferase 2A1 OS=Mus musculus GN=Ugt2a1 PE=2 SV=1\nMLKNILLCSLQISLLGMSLGGNVLIWPMEGSHWLNVKIIIDELLRKEHNVTVLVASGALF\nITPSSISPSLTFEIYPVPFGKEKIESVIKDFVLTWLENRPSPSTIWTFYKEMAKVIEEFH\nLVSRGICDGVLKNEKLMSKLQKEKFEVLLSDPVFPCGDIVALKLGIPFIYSLRFSPASTV\nEKHCGKVPFPPSYVPAILSELTDQMSFTDRVRNFISYRMQDYMFETLWKQWDSYYTKALG\nRPTTLCETMGKAEIWLMRTYWDFEFPRPYLPNFEFVGGLHCKPAKPLPKEMEEFVQTSGE\nHGIVVFSLGSMVKNLTDEKANLIASALAQIPQKVLWRYKGKIPDTLGSNTRLFDWIPQND\nLLGHPKTRAFITHGGTNGIYEAIYHGIPMVGVPMFADQPDNIAHMKAKGAAVEVNMNTMT\nSSDLLNALRTVINEPSYKENAMRLSRIHHDQPVKPLDRAVFWIEFVMRHKGAKHLRVAAH\nDLSWFQYHSLDVIGFLLACVASAILLVAKCCLFIFQKVGKTGKKKKRD'),
+(897, 'Ugt1a6', 'UDP-glucuronosyltransferase 1-6', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:94284', '60,439', 'Q64435', '2.4.1.17', '>sp|Q64435|UD16_MOUSE UDP-glucuronosyltransferase 1-6 OS=Mus musculus GN=Ugt1a6 PE=1 SV=1\nMACLLPAAQTLPAGFLFLVLWASVLGDKLLVVPQDGSHWLSMKEIVEHLSERGHDIMVLV\nPEVNLLLGESKYYRRKIFSVTYSLEELQTRFRTFGNNHFLPGASLMGPLREYRNNMIVVD\nMFFSNCQSLLKDSATLSFLRENKFDALFTDPAMPCGVILAEYLNLPSVYLFRGFPCSLEH\nMLGQSPSPVSYVPRFYTKFSDHMTFPQRLANFIVNILENYLYYCLYSKYEIIASDLLKRD\nVSLPSLHQNSLWLLRYDFVFEYPRPVMPNMIFLGGINCKKKGKLTQEFEAYVNASGEHGI\nVVFSLGSMVSEIPEKKAMEIAEALGRIPQTVLWRYTGTRPSNLAKNTILVKWLPQNDLLG\nHPKTRAFITHSGSHGIYEGICNGVPMVMMPLFGDQMDNAKRMETRGAGVTLNVLEMTADD\nLENALKTVINNKSYKENIMRLSSLHKDRPIEPLDLAVFWVEYVMRHKGAPHLRPAAHDLT\nWYQYHSLDVIGFLLAIVLTVVFIVFKCCAYGCRKCFGGKGRVKKSHKSKTH'),
+(898, 'Ugdh', 'UDP-glucose 6-dehydrogenase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:22235', '54,832', 'O70475', '1.1.1.22', '>sp|O70475|UGDH_MOUSE UDP-glucose 6-dehydrogenase OS=Mus musculus GN=Ugdh PE=1 SV=1\nMVEIKKICCIGAGYVGGPTCSVIAHMCPEIRVTVVDVNEARINAWNSPTLPIYEPGLKEV\nVESCRGKNLFFSTNIDDAIREADLVFISVNTPTKTYGMGKGRAADLKYIEACARRIVQNS\nNGYKIVTEKSTVPVRAAESIRRIFDANTKPNLNLQVLSNPEFLAEGTAIKDLKNPDRVLI\nGGDETPEGQKAVRALCAVYEHWVPKEKILTTNTWSSELSKLAANAFLAQRISSINSISAL\nCEATGADVEEVATAIGMDQRIGNKFLKASVGFGGSCFQKDVLNLVYLCEALNLPEVARYW\nQQVIDMNDYQRRRFASRIIDSLFNTVTDKKIAILGFAFKKDTGDTRESSSIYISKYLMDE\nGAHLHIYDPKVPREQIVVDLSHPGVSADDQVSRLVTISKDPYEACDGAHALVICTEWDMF\nKELDYERIHKKMLKPAFIFDGRRVLDGLHSELQTIGFQIETIGKKVSSKRIPYTPGEIPK\nFSLQDPPNKKPKV'),
+(899, 'Akr1b1', 'Aldose reductase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11677', '35,732', 'P45376', '1.1.1.21', '>sp|P45376|ALDR_MOUSE Aldose reductase OS=Mus musculus GN=Akr1b1 PE=1 SV=3\nMASHLELNNGTKMPTLGLGTWKSPPGQVTEAVKVAIDLGYRHIDCAQVYQNEKEVGVALQ\nEKLKEQVVKRQDLFIVSKLWCTFHDKSMVKGAFQKTLSDLQLDYLDLYLIHWPTGFKPGP\nDYFPLDASGNVIPSDTDFVDTWTAMEQLVDEGLVKTIGVSNFNPLQIERILNKPGLKYKP\nAVNQIECHPYLTQEKLIEYCHSKGIVVTAYSPLGSPDRPWAKPEDPSLLEDPRIKAIAAK\nYNKTTAQVLIRFPIQRNLVVIPKSVTPVRIAENLKVFDFEVSSEDMATLLSYNRNWRVCA\nLMSCAKHKDYPFHAEV'),
+(900, 'Akr1b7', 'Aldose reductase-related protein 1', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11997', '35,988', 'P21300', '1.1.1.21', '>sp|P21300|ALD1_MOUSE Aldose reductase-related protein 1 OS=Mus musculus GN=Akr1b7 PE=1 SV=4\nMATFVELSTKAKMPLVGLGTWKSSPGQVKEAVKAAIDAGYRHIDCAYVYHNENEVGEAIQ\nEKIKENAVKREDLFIVSKLWATFFEKSLVKKAFQNTLSDLKLDYLDLYLVHWPQGFQAGN\nALLPKDNKGKVLLSKSTFLDAWEAMEELVDQGLVKALGISNFNHFQIERLLNKPGLKHKP\nVTNQIESHPYLTQEKLIQYCQSKGIAVTAYSPLGSPDRPYAKPEDPVVMEIPKIKEIAAK\nHKKTVAQVLIRFHVQRNVVVIPKSVTPSRIQENLQVFDFQLSEEDMAAILSFNRNWRACD\nLLDARTEEDYPFHEEY'),
+(901, 'Akr1b8', 'Aldose reductase-related protein 2', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:14187', '36,121', 'P45377', '1.1.1.21', '>sp|P45377|ALD2_MOUSE Aldose reductase-related protein 2 OS=Mus musculus GN=Akr1b8 PE=1 SV=2\nMATFVELSTKAKMPIVGLGTWKSPPNQVKEAVKAAIDAGYRHIDCAYAYCNENEVGEAIQ\nEKIKEKAVQREDLFIVSKLWPTCFEKKLLKEAFQKTLTDLKLDYLDLYLIHWPQGLQPGK\nELFPKDDQGRILTSKTTFLEAWEGMEELVDQGLVKALGVSNFNHFQIERLLNKPGLKHKP\nVTNQVECHPYLTQEKLIQYCHSKGISVTAYSPLGSPDRPSAKPEDPSLLEDPKIKEIAAK\nHEKTSAQVLIRFHIQRNVVVIPKSVTPSRIQENIQVFDFQLSDEEMATILSFNRNWRACL\nLPETVNMEEYPYDAEY'),
+(902, 'Akr1b10', 'MCG142264, isoform CRA_b', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:67861', '35,848', 'G5E895', '1.1.1.2', '>tr|G5E895|G5E895_MOUSE MCG142264, isoform CRA_b OS=Mus musculus GN=Akr1b10 PE=1 SV=1\nMAAFVTLLTGAKMPIVGLGTWKSPPAKVREAVKVAIDAGYRHIDCAYVYQNESEVGEAIQ\nEKIQEKAVKREDLFIVSKLWSTFFEKSLVKKAFQNTLSDLKLDYLDLYLIHWPQGFQSGN\nVFLPTDDKGSILSSKYTFLDAWEAMEELVDQGLVKALGVSNFNHFQIERLLNKPGLKHKP\nVTNQVECHPYLTQEKLIQYCHSKGITITAYSPLGSPDRPSAKPEDPLLLEIPKIKEIAAK\nHKRTAAQVLIRFHIERNVVVIPKSVTPSRIQENIQVFDFQLSEEDMAAILSFNRNWRACG\nLFAASHNEDFPFHAEY'),
+(903, 'Sord', 'Sorbitol dehydrogenase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:20322', '38,249', 'Q64442', '1.1.1.14', '>sp|Q64442|DHSO_MOUSE Sorbitol dehydrogenase OS=Mus musculus GN=Sord PE=1 SV=3\nMAAPAKGENLSLVVHGPGDIRLENYPIPELGPNDVLLKMHSVGICGSDVHYWEHGRIGDF\nVVKKPMVLGHEAAGTVTKVGELVKHLKPGDRVAIEPGVPREVDEYCKIGRYNLTPTIFFC\nATPPDDGNLCRFYKHNADFCYKLPDSVTFEEGALIEPLSVGIYACRRGSVSLGNKVLVCG\nAGPVGMVTLLVAKAMGAAQVVVTDLSASRLTKAKEVGADFTIQVGKETPQEIASKVESLL\nGSKPEVTIECTGAESSVQTGIYATHSGGTLVIVGMGAEMVNLPLVHAAIREVDIKGVFRY\nCNTWPMAISMLASKTLNVKPLVTHRFPLEKAVEAFETAKKGVGLKVMIKCDPNDQNP'),
+(904, 'Khk', 'Ketohexokinase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:16548', '32,750', 'P97328', '2.7.1.3', '>sp|P97328|KHK_MOUSE Ketohexokinase OS=Mus musculus GN=Khk PE=1 SV=1\nMEEKQILCVGLVVLDIINVVDKYPEEDTDRRCLSQRWQRGGNASNSCTVLSLLGARCAFM\nGSLAPGHVADFLVADFRQRGVDVSQVTWQSQGDTPCSCCIVNNSNGSRTIILYDTNLPDV\nSAKDFEKVDLTRFKWIHIEGRNASEQVKMLQRIEEHNAKQPLPQKVRVSVEIEKPREELF\nQLFSYGEVVFVSKDVAKHLGFQPAVEALRGLYSRVKKGATLVCAWAEEGADALGPDGQLL\nHSDAFPPPRVVDTLGAGDTFNASVIFSLSKGNSMQEALRFGCQVAGKKCGLQGFDGIV');
+INSERT INTO `proteins` (`id`, `name`, `definition`, `species`, `kegg_link`, `mass`, `accession`, `ec_number`, `fasta`) VALUES
+(905, 'Hk1', 'Hexokinase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:15275', '102,302', 'Q6GQU1', '2.7.1.1', '>tr|Q6GQU1|Q6GQU1_MOUSE Hexokinase OS=Mus musculus GN=Hk1 PE=2 SV=1\nMIAAQLLAYYFTELKDDQVKKIDKYLYAMRLSDEILIDILTRFKKEMKNGLSRDYNPTAS\nVKMLPTFVRSIPDGSEKGDFIALDLGGSSFRILRVQVNHEKSQNVSMESEVYDTPENIVH\nGSGSQLFDHVAECLGDFMEKRKIKDKKLPVGFTFSFPCRQSKIDEAVLITWTKRFKASGV\nEGADVVKLLNKAIKKRGDYDANIVAVVNDTVGTMMTCGYDDQQCEVGLIIGTGTNACYME\nELRHIDLVEGDEGRMCINTEWGAFGDDGSLEDIRTEFDRELDRGSLNPGKQLFEKMVSGM\nYMGELVRLILVKMAKESLLFEGRITPELLTRGKFTTSDVAAIETDKEGVQNAKEILTRLG\nVEPSHDDCVSVQHVCTIVSFRSANLVAATLGAILNRLRDNKGTPRLRTTVGVDGSLYKMH\nPQYSRRFHKTLRRLVPDSDVRFLLSESGSGKGAAMVTAVAYRLAEQHRQIEETLSHFRLS\nKQALMEVKKKLRSEMEMGLRKETNSRATVKMLPSYVRSIPDGTEHGDFLALDLGGTNFRV\nLLVKIRSGKKRTVEMHNKIYSIPLEIMQGTGDELFDHIVSCISDFLDYMGIKGPRMPLGF\nTFSFPCKQTSLDCGILITWTKGFKATDCVGHDVATLLRDAVKRREEFDLDVVAVVNDTVG\nTMMTCAYEEPSCEIGLIVGTGSNACYMEEMKNVEMVEGNQGQMCINMEWGAFGDNGCLDD\nIRTDFDKVVDEYSLNSGKQRFEKMISGMYLGEIVRNILIDFTKKGFLFRGQISEPLKTRG\nIFETKFLSQIESDRLALLQVRAILQQLGLNSTCDDSILVKTVCGVVSKRAAQLCGAGMAA\nVVEKIRENRGLDHLNVTVGVDGTLYKLHPHFSRIMHQTVKELSPKCTVSFLLSEDGSGKG\nAALITAVGVRLRGDPTNA'),
+(906, 'Hk2', 'Hexokinase-2', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:15277', '102,535', 'O08528', '2.7.1.1', '>sp|O08528|HXK2_MOUSE Hexokinase-2 OS=Mus musculus GN=Hk2 PE=1 SV=1\nMIASHMIACLFTELNQNQVQKVDQYLYHMRLSDETLLEISRRFRKEMEKGLGATTHPTAA\nVKMLPTFVRSTPDGTEHGEFLALDLGGTNFRVLRVRVTDNGLQRVEMENQIYAIPEDIMR\nGSGTQLFDHIAECLANFMDKLQIKEKKLPLGFTFSFPCHQTKLDESFLVSWTKGFKSSGV\nEGRDVVDLIRKAIQRRGDFDIDIVAVVNDTVGTMMTCGYDDQNCEIGLIVGTGSNACYME\nEMRHIDMVEGDEGRMCINMEWGAFGDDGTLNDIRTEFDREIDMGSLNPGKQLFEKMISGM\nYMGELVRLILVKMAKAELLFQGKLSPELLTTGSFETKDVSDIEDDKDGIQKAYQILVRLG\nLSPLQEDCVATHRICQIVSTRSASLCAATLAAVLWRIKENKGEERLRSTIGVDGSVYKKH\nPHFAKRLHKAVRRLVPDCDVRFLRSEDGSGKGAAMVTAVAYRLADQHRARQKTLESLKLS\nHEQLLEVKRRMKVEMEQGLSKETHEAAPVKMLPTYVCATPDGTEKGDFLALDLGGTNFRV\nLLVRVRNGKRRGVEMHNKIYSIPQEVMHGTGEELFDHIVQCIADFLEYMGMKGVSLPLGF\nTFSFPCQQNSLDQSILLKWTKGFKASGCEGEDVVTLLKEAIRRREEFDLDVVAVVNDTVG\nTMMTCGYEDPHCEVGLIVGTGSNACYMEEMRNVELVDGEEGRMCVNMEWGAFGDNGCLDD\nLRTVFDVAVDELSLNPGKQRFEKMISGMYLGEIVRNILIDFTKRGLLFRGRISERLKTRG\nIFETKFLSQIESDCLALLQVRAILRHLGLESTCDDSIIVKEVCTVVARRAAQLCGAGMAA\nVVDKIRENRGLDNLKVTVGVDGTLYKLHPHFAKVMHETVRDLAPKCDVSFLESEDGSGKG\nAALITAVACRIREAGQR'),
+(907, 'Hk3', 'Hexokinase-3', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:212032', '100,101', 'Q3TRM8', '2.7.1.1', '>sp|Q3TRM8|HXK3_MOUSE Hexokinase-3 OS=Mus musculus GN=Hk3 PE=1 SV=2\nMATIGPSGLHPGERASVCPHEGVPRPSGSLELECLQQFKVTRTQLQQIQASLLCSMEQAL\nKGQDSPAPSVRMLPTYVRSTPHGTEQGDFLVLELGATGASLRVLWVTLTGTKECRVEPRS\nREFVIPQEVILGAGQQLFDFAARCLSEFLDAYPVENQGLKLGFNFSFPCHQTGLDRSTLI\nSWTKGFRCSGVEGQDVVQLLRDAIQRQGTYRIDVVAMVNDTVGTMMGCELGTRPCEVGLI\nVDTGTNACYMEEARHVAALDEDRGRTCVSIEWGSFYDEDALGPVLTTFDSALDRESLTPG\nAQRFEKMIGGLYLGELVRLVLVHLTQHGVLFDGCASPALLSQGCILLDHVAEMEDTATGT\nARVHTILQDLGLSPRASDAELVQYVCVAVCTRAAQLCAAALAAVLSRLQHSREQQTLQVA\nVATGGRVFERHPRFLRILKETVTLLAPNCDVSFIPSVDGGGRGVAMVTAVAARLAAHRRI\nLEETLAPFQLTLEQMTVVQAQMREAMIRGLQGEASSLRMLPTYVRATPDGSERGDFLALD\nLGGTNFRVLLVRVAEGSVQIINQVYSIPECRAQGSGQKLFDHIVDCIVDFQKRQGLSGQS\nLPLGFTFSFPCKQLGLDQGILLNWTKGFNASGCEGQDVVYLLREAIRRRQAVELNVVAIV\nNDTVGTMMSCGYDDPRCEMGLIVGTGTNACYMEELRNVASVPGDSGLMCINMEWGAFGDD\nGSLGTLSTRFDTSVDQASINPGKQRFEKMISGMYLGEIVRHILLHLTNLGVLFRGQKTQC\nLQARDIFKTKFLSEIESDSLALRQVRAILEDLGLTLTSDDALMVLEVCQAVSRRAAQLCG\nAGVAAVVEKIRENRGLQELTVSVGVDGTLYKLHPHFSKLVSATVRKLAPQCTVTFLQSED\nGSGKGAALVTAVACRLTQMAHV'),
+(908, 'Hkdc1', 'Putative hexokinase HKDC1', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:216019', '102,259', 'Q91W97', '2.7.1.1', '>sp|Q91W97|HKDC1_MOUSE Putative hexokinase HKDC1 OS=Mus musculus GN=Hkdc1 PE=2 SV=1\nMFAVHLVAFYFTKLKEDQIKKVDRFLYHMRLSDETLVDIMARFQAEMEKGLGKDTNPTAS\nVKMLPTFVRAIPDGSENGEFLSLDLGGSKFRVLKVQVSQEGQQNVQMESQFYPMPNEITR\nGNGTELFDYVADCLADFMKTKNLTHKKLPLGFTFSFPCRQNKLEEGVLLSWTKKFKARGV\nQDTDVVNRLATAMKKHKDLDVDILALVNDTVGTMMTCAYDDPNCEVGVIIGTGTNACYME\nDMSNIDLVEGDEGRMCINTEWGAFGDDGALEDIRTEFDRELDLGSLNPGKQLFEKMISGL\nYMGELVRLILLKMAKVGLLFGGAKSSALHTKGKIETQHVAAMEMSKEGLANTREILVDLG\nLEPSESDCIAVQHVCTIVSFRSANLCAAALATILTRLRENKKLARLRTTVGMDGTLYKTH\nPQYPKRLHKVVRRLVPNCDVRFLLSESGSTKGAAMVTAVASRVQAQRKQIDKVLALFQLT\nREQLLGVRDKMRAELEYGLKKKTHSLATVKMLPTYVYGMPDGTEKGKFLALDLGGTNFRV\nLLVKIRRRSVRMYNKIFAIPLEIMQGTGEELFDHIVQCIADFLDYMGLKGAQLPLGFTFS\nFPCRQTCIDKGTLVGWTKGFKATDCEGEDVVDMLREAIKRRNEFDLDIVAIVNDTVGTMM\nTCGYEDPRCEIGLIAGTGSNVCYMEEMRNIELVDGDEGRMCVNTEWGGFGDNGCIDDIRT\nQYDKEVDEGSLNAGKQRYEKMTSGMYLGEIVRRILIDLTRQGLLFRGQISERLRTRGIFE\nTKFLSQIESDRLALLQVRRILQQLGLDSTCEDSIVVKEVCGAVSRRAAQMCGAGMAAIVE\nKRREDQGLQHFKVTVGVDGTLYKLHPHFSRILQETVKELAPQCDVTFMLSEDGSGKGAAL\nITAVAKRLQQPRKDI'),
+(909, 'Hk1', 'Hexokinase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:15275', '102,302', 'Q6GQU1', '2.7.1.1', '>tr|Q6GQU1|Q6GQU1_MOUSE Hexokinase OS=Mus musculus GN=Hk1 PE=2 SV=1\nMIAAQLLAYYFTELKDDQVKKIDKYLYAMRLSDEILIDILTRFKKEMKNGLSRDYNPTAS\nVKMLPTFVRSIPDGSEKGDFIALDLGGSSFRILRVQVNHEKSQNVSMESEVYDTPENIVH\nGSGSQLFDHVAECLGDFMEKRKIKDKKLPVGFTFSFPCRQSKIDEAVLITWTKRFKASGV\nEGADVVKLLNKAIKKRGDYDANIVAVVNDTVGTMMTCGYDDQQCEVGLIIGTGTNACYME\nELRHIDLVEGDEGRMCINTEWGAFGDDGSLEDIRTEFDRELDRGSLNPGKQLFEKMVSGM\nYMGELVRLILVKMAKESLLFEGRITPELLTRGKFTTSDVAAIETDKEGVQNAKEILTRLG\nVEPSHDDCVSVQHVCTIVSFRSANLVAATLGAILNRLRDNKGTPRLRTTVGVDGSLYKMH\nPQYSRRFHKTLRRLVPDSDVRFLLSESGSGKGAAMVTAVAYRLAEQHRQIEETLSHFRLS\nKQALMEVKKKLRSEMEMGLRKETNSRATVKMLPSYVRSIPDGTEHGDFLALDLGGTNFRV\nLLVKIRSGKKRTVEMHNKIYSIPLEIMQGTGDELFDHIVSCISDFLDYMGIKGPRMPLGF\nTFSFPCKQTSLDCGILITWTKGFKATDCVGHDVATLLRDAVKRREEFDLDVVAVVNDTVG\nTMMTCAYEEPSCEIGLIVGTGSNACYMEEMKNVEMVEGNQGQMCINMEWGAFGDNGCLDD\nIRTDFDKVVDEYSLNSGKQRFEKMISGMYLGEIVRNILIDFTKKGFLFRGQISEPLKTRG\nIFETKFLSQIESDRLALLQVRAILQQLGLNSTCDDSILVKTVCGVVSKRAAQLCGAGMAA\nVVEKIRENRGLDHLNVTVGVDGTLYKLHPHFSRIMHQTVKELSPKCTVSFLLSEDGSGKG\nAALITAVGVRLRGDPTNA'),
+(910, 'Hk2', 'Hexokinase-2', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:15277', '102,535', 'O08528', '2.7.1.1', '>sp|O08528|HXK2_MOUSE Hexokinase-2 OS=Mus musculus GN=Hk2 PE=1 SV=1\nMIASHMIACLFTELNQNQVQKVDQYLYHMRLSDETLLEISRRFRKEMEKGLGATTHPTAA\nVKMLPTFVRSTPDGTEHGEFLALDLGGTNFRVLRVRVTDNGLQRVEMENQIYAIPEDIMR\nGSGTQLFDHIAECLANFMDKLQIKEKKLPLGFTFSFPCHQTKLDESFLVSWTKGFKSSGV\nEGRDVVDLIRKAIQRRGDFDIDIVAVVNDTVGTMMTCGYDDQNCEIGLIVGTGSNACYME\nEMRHIDMVEGDEGRMCINMEWGAFGDDGTLNDIRTEFDREIDMGSLNPGKQLFEKMISGM\nYMGELVRLILVKMAKAELLFQGKLSPELLTTGSFETKDVSDIEDDKDGIQKAYQILVRLG\nLSPLQEDCVATHRICQIVSTRSASLCAATLAAVLWRIKENKGEERLRSTIGVDGSVYKKH\nPHFAKRLHKAVRRLVPDCDVRFLRSEDGSGKGAAMVTAVAYRLADQHRARQKTLESLKLS\nHEQLLEVKRRMKVEMEQGLSKETHEAAPVKMLPTYVCATPDGTEKGDFLALDLGGTNFRV\nLLVRVRNGKRRGVEMHNKIYSIPQEVMHGTGEELFDHIVQCIADFLEYMGMKGVSLPLGF\nTFSFPCQQNSLDQSILLKWTKGFKASGCEGEDVVTLLKEAIRRREEFDLDVVAVVNDTVG\nTMMTCGYEDPHCEVGLIVGTGSNACYMEEMRNVELVDGEEGRMCVNMEWGAFGDNGCLDD\nLRTVFDVAVDELSLNPGKQRFEKMISGMYLGEIVRNILIDFTKRGLLFRGRISERLKTRG\nIFETKFLSQIESDCLALLQVRAILRHLGLESTCDDSIIVKEVCTVVARRAAQLCGAGMAA\nVVDKIRENRGLDNLKVTVGVDGTLYKLHPHFAKVMHETVRDLAPKCDVSFLESEDGSGKG\nAALITAVACRIREAGQR'),
+(911, 'Hk3', 'Hexokinase-3', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:212032', '100,101', 'Q3TRM8', '2.7.1.1', '>sp|Q3TRM8|HXK3_MOUSE Hexokinase-3 OS=Mus musculus GN=Hk3 PE=1 SV=2\nMATIGPSGLHPGERASVCPHEGVPRPSGSLELECLQQFKVTRTQLQQIQASLLCSMEQAL\nKGQDSPAPSVRMLPTYVRSTPHGTEQGDFLVLELGATGASLRVLWVTLTGTKECRVEPRS\nREFVIPQEVILGAGQQLFDFAARCLSEFLDAYPVENQGLKLGFNFSFPCHQTGLDRSTLI\nSWTKGFRCSGVEGQDVVQLLRDAIQRQGTYRIDVVAMVNDTVGTMMGCELGTRPCEVGLI\nVDTGTNACYMEEARHVAALDEDRGRTCVSIEWGSFYDEDALGPVLTTFDSALDRESLTPG\nAQRFEKMIGGLYLGELVRLVLVHLTQHGVLFDGCASPALLSQGCILLDHVAEMEDTATGT\nARVHTILQDLGLSPRASDAELVQYVCVAVCTRAAQLCAAALAAVLSRLQHSREQQTLQVA\nVATGGRVFERHPRFLRILKETVTLLAPNCDVSFIPSVDGGGRGVAMVTAVAARLAAHRRI\nLEETLAPFQLTLEQMTVVQAQMREAMIRGLQGEASSLRMLPTYVRATPDGSERGDFLALD\nLGGTNFRVLLVRVAEGSVQIINQVYSIPECRAQGSGQKLFDHIVDCIVDFQKRQGLSGQS\nLPLGFTFSFPCKQLGLDQGILLNWTKGFNASGCEGQDVVYLLREAIRRRQAVELNVVAIV\nNDTVGTMMSCGYDDPRCEMGLIVGTGTNACYMEELRNVASVPGDSGLMCINMEWGAFGDD\nGSLGTLSTRFDTSVDQASINPGKQRFEKMISGMYLGEIVRHILLHLTNLGVLFRGQKTQC\nLQARDIFKTKFLSEIESDSLALRQVRAILEDLGLTLTSDDALMVLEVCQAVSRRAAQLCG\nAGVAAVVEKIRENRGLQELTVSVGVDGTLYKLHPHFSKLVSATVRKLAPQCTVTFLQSED\nGSGKGAALVTAVACRLTQMAHV'),
+(912, 'Hkdc1', 'Putative hexokinase HKDC1', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:216019', '102,259', 'Q91W97', '2.7.1.1', '>sp|Q91W97|HKDC1_MOUSE Putative hexokinase HKDC1 OS=Mus musculus GN=Hkdc1 PE=2 SV=1\nMFAVHLVAFYFTKLKEDQIKKVDRFLYHMRLSDETLVDIMARFQAEMEKGLGKDTNPTAS\nVKMLPTFVRAIPDGSENGEFLSLDLGGSKFRVLKVQVSQEGQQNVQMESQFYPMPNEITR\nGNGTELFDYVADCLADFMKTKNLTHKKLPLGFTFSFPCRQNKLEEGVLLSWTKKFKARGV\nQDTDVVNRLATAMKKHKDLDVDILALVNDTVGTMMTCAYDDPNCEVGVIIGTGTNACYME\nDMSNIDLVEGDEGRMCINTEWGAFGDDGALEDIRTEFDRELDLGSLNPGKQLFEKMISGL\nYMGELVRLILLKMAKVGLLFGGAKSSALHTKGKIETQHVAAMEMSKEGLANTREILVDLG\nLEPSESDCIAVQHVCTIVSFRSANLCAAALATILTRLRENKKLARLRTTVGMDGTLYKTH\nPQYPKRLHKVVRRLVPNCDVRFLLSESGSTKGAAMVTAVASRVQAQRKQIDKVLALFQLT\nREQLLGVRDKMRAELEYGLKKKTHSLATVKMLPTYVYGMPDGTEKGKFLALDLGGTNFRV\nLLVKIRRRSVRMYNKIFAIPLEIMQGTGEELFDHIVQCIADFLDYMGLKGAQLPLGFTFS\nFPCRQTCIDKGTLVGWTKGFKATDCEGEDVVDMLREAIKRRNEFDLDIVAIVNDTVGTMM\nTCGYEDPRCEIGLIAGTGSNVCYMEEMRNIELVDGDEGRMCVNTEWGGFGDNGCIDDIRT\nQYDKEVDEGSLNAGKQRYEKMTSGMYLGEIVRRILIDLTRQGLLFRGQISERLRTRGIFE\nTKFLSQIESDRLALLQVRRILQQLGLDSTCEDSIVVKEVCGAVSRRAAQMCGAGMAAIVE\nKRREDQGLQHFKVTVGVDGTLYKLHPHFSRILQETVKELAPQCDVTFMLSEDGSGKGAAL\nITAVAKRLQQPRKDI'),
+(913, 'Pfkfb3', 'Pfkfb3 protein', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:170768', '60,418', 'Q7TS91', '2.7.1.105', '>tr|Q7TS91|Q7TS91_MOUSE Pfkfb3 protein OS=Mus musculus GN=Pfkfb3 PE=1 SV=1\nMPLELTQSRVQKIWVPVDHRPSLPRSCGPKLTNSPTVIVMVGLPARGKTYISKKLTRYLN\nWIGVPTKVFNVGEYRREAVKQYSSYNFFRPDNEEAMRVRKQCALAALRDVKSYLTKEGGQ\nIAVFDATNTTRERRHMILNFAKENDFKAFFIESVCDDPTVVASNIMEVKISSPDYKDCNS\nAEAMDDFMKRINCYEASYQPLDPDKCDRDLSLIKVIDVGRRFLVNRVQDHIQSRIVYYLM\nNIHVQPRTIYLCRHGENEYNLQGKIGGDSGLSSRGKKFANALSKFVEEQNLKDLRVWTSQ\nLKSTIQTAEALRLPYEQWKALNEIDAGVCEELTYEEIRDTYPEEYALREQDKYYYRYPTG\nESYQDLVQRLEPVIMELERQENVLVICHQAVLRCLLAYFLDKSAEEMPYLKCPLHTVLKL\nTPVAYGCRVESIYLNVESVSTHRERSEDAKKGPNPLMRRNSVTPLASPEPTKKPRINSFE\nERVASTSAALPSCLPPEVPTQLPGQPLLGKACLRSVCHIFSKFSPY'),
+(914, 'Pfkfb1', '6-phosphofructo-2-kinase/fructose-2,6-bisphosphatase 1', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:18639', '54,849', 'P70266', '2.7.1.105', '>sp|P70266|F261_MOUSE 6-phosphofructo-2-kinase/fructose-2,6-bisphosphatase 1 OS=Mus musculus GN=Pfkfb1 PE=1 SV=2\nMSREMGELTQTRLQKIWIPHSSSSSLLQRRRGSSIPQFTNSPTMVIMVGLPARGKTYIST\nKLTRYLNWIGTPTKVFNLGQYRREAVSYRNYEFFRPDNMEAQLIRKQCALAALKDVHKYL\nSREEGHVAVFDATNTTRERRSLILQFAKEHGYKVFFIESICNDPDIIAENIKQVKLGSPD\nYIDCDQEKVLEDFLKRIECYEINYQPLDEELDSHLSYIKIFDVGTRYMVNRVQDHVQSRT\nAYYLMNIHVTPRSIYLCRHGESELNLRGRIGGDSGLSARGKQYAYALANFIRSQSISSLK\nVWTSHMKRTIQTAEALGVPYEQWKALNEIDAGVCEEMTYEEIQEHYPEEFALRDQDKYRY\nRYPKGESYEDLVQRLEPVIMELERQENVLVICHQAVMRCLLAYFLDKSSDELPYLKCPLH\nTVLKLTPVAYGCRVESIYLNVEAVNTHRDKPENVDITREPEEALDTVPAHY'),
+(915, 'Pfkfb2', '6-phosphofructo-2-kinase/fructose-2, 6-biphosphatase 2', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:18640', '59,816', 'Q6GTL7', '2.7.1.105', '>tr|Q6GTL7|Q6GTL7_MOUSE 6-phosphofructo-2-kinase/fructose-2, 6-biphosphatase 2 OS=Mus musculus GN=Pfkfb2 PE=1 SV=1\nMSENSTFSPEDCNSSYKPHASNLRRAGKTCSWASYMTNSPTLIVMIGLPARGKTYVSKKL\nTRYLNWIGVPTKVFNLGVYRREAVKSYQSYDFFRHDNEEAMKIRKQCALVALEDVKAYFT\nEESGQIAVFDATNTTRERRDMILNFAKQNAFKVFFVESVCDDPDVIAANILEVKVSSPDY\nPERNRENVMEDFLKRIECYKVTYQPLDPDNYDKDLSFIKVINVGQRFLVNRVQDYIQSKI\nVYYLMNIHVHPRTIYLCRHGESEFNLLGKIGGDSGLSVRGKQFAHALKKFLEEQEIQDLK\nVWTSQLKRTIQTAESLGVTYEQWKILNEIDAGVCEEMTYSEIEQRYPEEFALRDQEKYLY\nRYPGGESYQDLVQRLEPVIMELERQGNILVISHQAVMRCLLAYFLDKGADELPYLRCPLH\nIIFKLTPVAYGCKVETITLNVDAVDTHRDKPTHNFPKSQTPVRMRRNSFTPLSSSNTIRR\nPRNYSVGSRPLKPLSPLRALDMQEGADQPKTQVSIPVV'),
+(916, 'Pfkfb4', '6-phosphofructo-2-kinase/fructose-2,6-bisphosphatase 4', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:270198', '54,067', 'Q6DTY7', '2.7.1.105', '>sp|Q6DTY7|F264_MOUSE 6-phosphofructo-2-kinase/fructose-2,6-bisphosphatase 4 OS=Mus musculus GN=Pfkfb4 PE=2 SV=4\nMASPRELTQNPLKKIWMPYSNGRPALHASQRGVCMTNCPTLIVMVGLPARGKTYISKKLT\nRYLNWIGVPTREFNVGQYRRDIVKTYKSFEFFLPDNEEGLKIRKQCALAALSDVRKFLSE\nEGGHVAVFDATNTTRERRAMIFNFGEQNGYKTFFVESICVDPEVVAANIVQVKLGSPDYV\nNRDSDEATEDFMRRIECYENSYESLDEDLDRDLSYIKIMDVGQSYVVNRVADHIQSRIVY\nYLMNIHVTPRSIYLCRHGESELNLKGRIGGDPGLSPRGREFSKHLAQFISDQNIKDLKVW\nTSQMKRTIQTAEALSVPYEQWKVLNEIDAGVCEEMTYEEIQDHYPLEFALRDQDKYRYRY\nPKGESYEDLVQRLEPVIMELERQENVLVICHQAVMRCLLAYFLDKAAEELPYLKCPLHTV\nLKLTPVAYGCKVESIFLNVAAVNTHRDRPQNVDISRPSEEALVTVPAHQ'),
+(917, 'Tigar', 'Fructose-2,6-bisphosphatase TIGAR', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:319801', '29,191', 'Q8BZA9', '3.1.3.46', '>sp|Q8BZA9|TIGAR_MOUSE Fructose-2,6-bisphosphatase TIGAR OS=Mus musculus GN=Tigar PE=1 SV=1\nMPRFALTVIRHGETRLNKEKIIQGQGVDAPLSETGFRQAAAAGQFLSNVQFTHAFSSDLT\nRTKQTIHGILEKSRFCKDMAVKYDSRLRERMYGVAEGKPLSELRAMAKAAGEECPMFTPP\nGGETVEQVKMRGKDFFDFICQLILGKAGQRESVLPGAPGSGLESSLAEVFPVGKHGSLGA\nNPKGGTLGLAASILVVSHGAYMRSLFGYFLSDLRCSLPGARDKLELSSITPNTGISVFII\nDCEEARQPSIQCVCMNLQEHLNGVTEKQH'),
+(918, 'Mpi', 'Mannose-6-phosphate isomerase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:110119', '46,575', 'Q924M7', '5.3.1.8', '>sp|Q924M7|MPI_MOUSE Mannose-6-phosphate isomerase OS=Mus musculus GN=Mpi PE=1 SV=1\nMASPRVFPLSCVVQQYAWGKVGSKSEVACLLASSDPLAQISEDKPYAELWMGTHPRGDAK\nILDNRISQKTLGQWIAENPDCLGSKVKNTFNGKLPFLFKVLSVDTALSIQAHPNKELAEK\nLHLQAPEHYPDANHKPEMAIALTSFQGLCGFRPVEEIVTFMKKVPEFQLLIGDDATAQLK\nESVGGDTEAMASALRNCFSHLMKSEKKVVVEQLNLLVKRISQQVFDGNNMEDIYGKLLLQ\nLHQQHPGDIGCFAIYFLNLLTLKPGEAMFLDANVPHAYLKGDCVECMACSDNTVRAGLTP\nKFIDVPTLCEMLNYTPSPSNNRLFAPAQSQDDPYLSIYDPPVPDFTVMKMEVPSSVTEYK\nVSTLDSASILLMVQGTVTAIIPSAHAEIPLYRGGVLFIAANESVLLKITVPKDLLIFRAC\nCLL'),
+(919, 'Pmm1', 'Phosphomannomutase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:29858', '23,103', 'Q91W01', '5.4.2.8', '>tr|Q91W01|Q91W01_MOUSE Phosphomannomutase OS=Mus musculus GN=Pmm1 PE=1 SV=1\nMAVAVEGARRKERILCLFDVDGTLTPARQKIDPETIQNHLGEELLQDLINFCLSYMALLR\nLPKKRGTFIEFRNGMLNVSPIGRSCTLEERIEFSELDKKEKIREKFVEALKTEFAGKGLR\nFSRGGMISFDVFPEGWDKRYCLDSLDEDSFDIIHFFGNETSPGGNDFEIYADPRTVGHSV\nVSPQDTVQRCRELFFPETAHEA'),
+(920, 'Pmm2', 'Phosphomannomutase 2', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:54128', '27,657', 'Q9Z2M7', '5.4.2.8', '>sp|Q9Z2M7|PMM2_MOUSE Phosphomannomutase 2 OS=Mus musculus GN=Pmm2 PE=1 SV=1\nMATLCLFDMDGTLTAPRQKITEEMDGFLQKLRQKTKIGVVGGSDFEKLQEQLGNDVVEKY\nDYVFPENGLVAYKDGKLLCKQNIQGHLGEDVIQDLINYCLSYIANIKLPKKRGTFIEFRN\nGMLNVSPIGRSCSQEERIEFYELDKKEHIRQKFVADLRKEFAGKGLTFSIGGQISIDVFP\nEGWDKRYCLRHLEHAGYKTIYFFGDKTMPGGNDHEIFTDPRTVGYTVTAPEDTRRICEGL\nFP'),
+(921, 'Fpgt', 'MCG140999', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:75540', '65,362', 'G5E8F4', '2.7.7.30', '>tr|G5E8F4|G5E8F4_MOUSE MCG140999 OS=Mus musculus GN=Fpgt PE=1 SV=1\nMASLREATLRKLRRFSELRGKPVAAGEFWDVVAITAADEKQELAYKQQLSEKLKKRELPL\nGVQYHVFPDPAGTKIGNGGSTLCSLECLESLCGDKWNSLKVLLIHSGGYSQRLPNASALG\nKIFTALPLGEPIYQMLELKLAMYVDFPSNMRPGVLVTCADDIELYSVGDSEYIAFDQPGF\nTALAHPSSLAVGTTHGVFVLHSDSSLQHGDLEYRQCYQFLHKPTIENMHRFNAVHRQRSF\nGQQNLSGGDTDCLPLHTEYVYTDSLFYMDHKSAKKLLDFYKSEGPLNCEIDAYGDFLQAL\nGPGATAEYTRNTSHVTKEESQLLDMRQKIFHLLKGTPLNVVVLNNSRFYHIGTLQEYLLH\nFTSDSALKTELGLQSIAFSVSPSVPERSSGTACVIHSIVDSGCCVAPGSVVEYSRLGPEV\nSIGENCIISSSVIAKTVVPAYSFLCSLSVKINGHLKYSTMVFGMQDNLKNSVKTLEDIKA\nLQFFGVCFLSCLDIWNLKATEKLFSGNKMNLSLWTACIFPVCSSLSESATASLGMLSAVR\nNHSPFNLSDFNLLSIQEMLVYKDVQDMLAYREHIFLEISSNKNQSDLEKS'),
+(922, 'Tsta3', 'GDP-L-fucose synthase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:22122', '35,878', 'P23591', '1.1.1.271', '>sp|P23591|FCL_MOUSE GDP-L-fucose synthase OS=Mus musculus GN=Tsta3 PE=1 SV=3\nMGEPHGSMRILVTGGSGLVGRAIQKVVADGAGLPGEEWVFVSSKDADLTDAAQTQALFQK\nVQPTHVIHLAAMVGGLFRNIKYNLDFWRKNVHINDNVLHSAFEVGARKVVSCLSTCIFPD\nKTTYPIDETMIHNGPPHSSNFGYSYAKRMIDVQNRAYFQQHGCTFTAVIPTNVFGPYDNF\nNIEDGHVLPGLIHKVHLAKSSDSALTVWGTGKPRRQFIYSLDLARLFIWVLREYSEVEPI\nILSVGEEDEVSIKEAAEAVVEAMDFNGEVTFDSTKSDGQYKKTASNGKLRSYLPDFRFTP\nFKQAVKETCTWFTDNYEQARK'),
+(923, 'Gmds', 'GDP-mannose 4,6 dehydratase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:218138', '41,985', 'Q8K0C9', '4.2.1.47', '>sp|Q8K0C9|GMDS_MOUSE GDP-mannose 4,6 dehydratase OS=Mus musculus GN=Gmds PE=1 SV=1\nMAQAPAKCPSYPGSGDGEMGKLRKVALITGITGQDGSYLAEFLLEKGYEVHGIVRRSSSF\nNTGRIEHLYKNPQAHIEGNMKLHYGDLTDSTCLVKIINEVKPTEIYNLGAQSHVKISFDL\nAEYTADVDGVGTLRLLDAIKTCGLINSVKFYQASTSELYGKVQEIPQKETTPFYPRSPYG\nAAKLYAYWIVVNFREAYNLFAVNGILFNHESPRRGANFVTRKISRSVAKIYLGQLECFSL\nGNLDAKRDWGHAKDYVEAMWLMLQNDEPEDFVIATGEVHSVREFVEKSFMHIGKTIVWEG\nKNENEVGRCKETGKVHVTVDLKYYRPTEVDFLQGDCSKAQQKLNWKPRVAFDELVREMVQ\nADVELMRTNPNA'),
+(924, 'Gmppb', 'Mannose-1-phosphate guanyltransferase beta', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:331026', '39,917', 'Q8BTZ7', '2.7.7.13', '>sp|Q8BTZ7|GMPPB_MOUSE Mannose-1-phosphate guanyltransferase beta OS=Mus musculus GN=Gmppb PE=1 SV=1\nMKALILVGGYGTRLRPLTLSTPKPLVDFCNKPILLHQVEALAAAGVDHVILAVSYMSQML\nEKEMKAQEQRLGIRISMSHEEEPLGTAGPLALARDLLSETADPFFVLNSDVICDFPFQAM\nVQFHRHHGQEGSILVTKVEEPSKYGVVVCEADTGRIHRFVEKPQVFVSNKINAGMYILSP\nAVLQRIQLKPTSIEKEIFPVMAKEGQLYAMELQGFWMDIGQPKDFLTGMCLFLQSLRQKH\nPERLYSGPGIVGNVLVDPSARIGQNCSIGPNVSLGPGVVVEDGVCIRRCTVLRDAHIRSH\nSWLESCIVGWRCRVGQWVRMENVTVLGEDVIVNDELYLNGASVLPHKSIGESVPEPRIIM'),
+(925, 'Gmppa', 'Mannose-1-phosphate guanyltransferase alpha', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:69080', '46,244', 'Q922H4', '2.7.7.13', '>sp|Q922H4|GMPPA_MOUSE Mannose-1-phosphate guanyltransferase alpha OS=Mus musculus GN=Gmppa PE=1 SV=1\nMLKAVILIGGPQKGTRFRPLSFEVPKPLFPVAGVPMIQHHIEACAQVPGMQEILLIGFYQ\nPDEALTQFLEAAQQEFNLPVRYLQEFAPLGTGGGLYHFRDQILAGAPEAFFVLNADVCSD\nFPLSAMLEAHRRQRHPFLLLGTTANRTQSLNYGCIVENPQTHEVLHYVEKPSTFISDIIN\nCGIYLFSPEALKPLRDVFQRNQQDGQLEESPGSWPGAGTIRLEQDVFSALAGQGQIYVHL\nTDGIWSQIKSAGSALYASRLYLGRYQITHPERLARHTPGGPRIRGNVYIHPTAKVAPSAV\nLGPNVSIGKGVTIGEGVRLRESIVLHGATLQEHTCVLHSIVGWGSTVGRWARVEGTPNDP\nNPNDPRARMDSESLFKDGKLLPAITILGCRVRIPAEVLILNSIVLPHKELSRSFTNQIIL'),
+(926, 'Pfkl', 'ATP-dependent 6-phosphofructokinase, liver type', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:18641', '85,360', 'P12382', '2.7.1.11', '>sp|P12382|PFKAL_MOUSE ATP-dependent 6-phosphofructokinase, liver type OS=Mus musculus GN=Pfkl PE=1 SV=4\nMATVDLEKLRMSGAGKAIGVLTSGGDAQGMNAAVRAVTRMGIYVGAKVFLIYEGYEGLVE\nGGENIKPANWLSVSNIIQLGGTIIGSARCKAFTTREGRLAAAYNLLQHGITNLCVIGGDG\nSLTGANIFRNEWGSLLEELVKEGKISESTAQNYAHLTIAGLVGSIDNDFCGTDMTIGTDS\nALHRIMEVIDAITTTAQSHQRTFVLEVMGRHCGYLALVSALASGADWLFIPEAPPEDGWE\nNFMCERLGETRSRGSRLNIIIIAEGAIDRHGKPISSSYVKDLVVQRLGFDTRVTVLGHVQ\nRGGTPSAFDRILSSKMGMEAVMALLEATPDTPACVVSLSGNQSVRLPLMECVQVTKDVQK\nAMDEERFDEAIQLRGRSFENNWKIYKLLAHQKVSKEKSNFSLAILNVGAPAAGMNAAVRS\nAVRTGISEGHTVYIVHDGFEGLAKGQVQEVGWHDVAGWLGRGGSMLGTKRTLPKPHLEAI\nVENLRTYNIHALLVIGGFEAYEGVLQLVEARGRYEELCIVMCVIPATISNNVPGTDFSLG\nSDTAVNAAMESCDRIKQSASGTKRRVFIVETMGGYCGYLATVTGIAVGADAAYVFEDPFN\nIHDLKANVEHMTEKMKTDIQRGLVLRNEKCHEHYTTEFLYNLYSSEGRGVFDCRTNVLGH\nLQQGGAPTPFDRNYGTKLGVKAMLWVSEKLRDVYRKGRVFANAPDSACVIGLRKKVVAFS\nPVTELKKETDFEHRMPREQWWLNLRLMLKMLAHYRISMADYVSGELEHVTRRTLSIDKGF'),
+(927, 'Pfkm', 'ATP-dependent 6-phosphofructokinase, muscle type', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:18642', '85,269', 'P47857', '2.7.1.11', '>sp|P47857|PFKAM_MOUSE ATP-dependent 6-phosphofructokinase, muscle type OS=Mus musculus GN=Pfkm PE=1 SV=3\nMTHEEHHAAKTLGIGKAIAVLTSGGDAQGMNAAVRAVVRVGIFTGARVFFVHEGYQGLVD\nGGEHIREATWESVSMMLQLGGTVIGSARCKDFREREGRLRAAHNLVKRGITNLCVIGGDG\nSLTGADTFRSEWSDLLNDLQKDGKITAEEATKSSYLNIVGLVGSIDNDFCGTDMTIGTDS\nALHRIVEIVDAITTTAQSHQRTFVLEVMGRHCGYLALVTSLSCGADWVFIPECPPDDDWE\nEHLCRRLSETRTRGSRLNIIIVAEGAIDKNGKPITSEDIKNLVVKRLGYDTRVTVLGHVQ\nRGGTPSAFDRILGSRMGVEAVMALLEGTPDTPACVVSLSGNQAVRLPLMECVQVTKDVTK\nAMDEKRFDEAIKLRGRSFMNNWEVYKLLAHVRPPVSKGGLHTVAVMNVGAPAAGMNAAVR\nSTVRIGLIQGNRVLVVHDGFEGLAKGQIEEAGWSYVGGWTGQGGSKLGTKRTLPKKNLEQ\nISANITKFNIQGLVIIGGFEAYTGGLELMEGRKQFDELCIPFVVIPATVSNNVPGSDFSI\nGADTALNTICTTCDRIKQSAAGTKRRVFIIETMGGYCGYLATMAGLAAGADAAYIFEEPF\nTIRDLQVNVEHLVQKMKTTVKRGLVLRNEKCNENYTTDFIFNLYSEEGKGIFDSRKNVLG\nHMQQGGSPTPFDRNFATKMGAKAMNWMSGKIKESYRNGRIFANTPDSGCVLGMRKRALVF\nQPVTELKDQTDFEHRIPKEQWWLKLRPILKILAKYEIDLDTSDHAHLEHISRKRSGEAAV'),
+(928, 'Pfkp', 'ATP-dependent 6-phosphofructokinase, platelet type', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:56421', '85,455', 'Q9WUA3', '2.7.1.11', '>sp|Q9WUA3|PFKAP_MOUSE ATP-dependent 6-phosphofructokinase, platelet type OS=Mus musculus GN=Pfkp PE=1 SV=1\nMSDLDSSSSSAYPKYLEHLSGDGKAIGVLTSGGDAQGMNAAVRAVVRMGIYTGAKVYFIY\nEGYQGLVDGGSNIVEAKWDCVSSILQVGGTIIGSARCKAFRSREGRLKAACNLARLGITN\nLCVIGGDGSLTGANLFRKEWSGLLEELARNGDIDNDTVQKYSYLNVVGMVGSIDNDFCGT\nDMTIGTDSALHRIIEVVDAIMTTAQSHQRTFVLEVMGRHCGYLALVSALTCGADWVFLPE\nSPPEEDWEENMCLKLSENRARKKRLNIIIVSEGAIDMQNKPITSEKIKELVVKNLGFDTR\nVTILGHVQRGGTPSAFDRILASRMGVEAVIALLEATPETPACVVSLRGNQAVRLPLMECV\nQMTQDVQKAMDERRFKEAVKLRGRRFEGNLNTYKRLAIKLPDEKIVKSNCNVAVINVGAP\nAAGMNAAVRSAVRVGIADGHKMFAIYDGFEGFANGQIKEIGWADVGGWTGQGGSILGTKR\nTLPGKYLEKIAEQMHSHSINALLIIGGFEAYLGLLELAAAREKHEAFCVPMVMVPATVSN\nNVPGSDFSIGADTALNTITDTCDRIKQSASGTKRRVFIIETMGGYCGYLANMGALAAGAD\nAAYIFEEPFDIGDLQSNVVHLTEKMKTSIQRGLVLRNESCSVNYTTDFIYQLYSEEGKGV\nFDCRKNVLGHMQQGGAPSPFDRNFGTKISAKAMEWISAKLKGSQGTGKKFVSDDSICVLG\nICKRDLLFQPVAELKKVTDFEHRIPKEQWWLKLRPIMKILAKYEASYDMSDSGKLESLQH\nHEEL'),
+(929, 'Tpi1', 'Triosephosphate isomerase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:21991', '32,192', 'P17751', '5.3.1.1', '>sp|P17751|TPIS_MOUSE Triosephosphate isomerase OS=Mus musculus GN=Tpi1 PE=1 SV=4\nMEGKAEQQGAGLTMAEGGEKEEFCFTAIYISGQWREPCVCTDLQRLEPGTMAPTRKFFVG\nGNWKMNGRKKCLGELICTLNAANVPAGTEVVCAPPTAYIDFARQKLDPKIAVAAQNCYKV\nTNGAFTGEISPGMIKDLGATWVVLGHSERRHVFGESDELIGQKVSHALAEGLGVIACIGE\nKLDEREAGITEKVVFEQTKVIADNVKDWSKVVLAYEPVWAIGTGKTATPQQAQEVHEKLR\nGWLKSNVNDGVAQSTRIIYGGSVTGATCKELASQPDVDGFLVGGASLKPEFVDIINAKQ'),
+(930, 'Aldoa', 'Fructose-bisphosphate aldolase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11674', '39,356', 'Q5FWB7', '4.1.2.13', '>tr|Q5FWB7|Q5FWB7_MOUSE Fructose-bisphosphate aldolase OS=Mus musculus GN=Aldoa PE=1 SV=1\nMPHPYPALTPEQKKELSDIAHRIVAPGKGILAADESTGSIAKRLQSIGTENTEENRRFYR\nQLLLTADDRVNPCIGGVILFHETLYQKADDGRPFPQVIKSKGGVVGIKVDKGVVPLAGTN\nGETTTQGLDGLSERCAQYKKDGADFAKWRCVLKIGEHTPSALAIMENANVLARYASICQQ\nNGIVPIVEPEILPDGDHDLKRCQYVTEKVLAAVYKALSDHHVYLEGTLLKPNMVTPGHAC\nTQKFSNEEIAMATVTALRRTVPPAVTGVTFLSGGQSEEEASINLNAINKCPLLKPWALTF\nSYGRALQASALKAWGGKKENLKAAQEEYIKRALANSLACQGKYTPSGQSGAAASESLFIS\nNHAY'),
+(931, 'Aldoc', 'Fructose-bisphosphate aldolase C', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11676', '39,395', 'P05063', '4.1.2.13', '>sp|P05063|ALDOC_MOUSE Fructose-bisphosphate aldolase C OS=Mus musculus GN=Aldoc PE=1 SV=4\nMPHSYPALSAEQKKELSDIALRIVTPGKGILAADESVGSMAKRLSQIGVENTEENRRLYR\nQVLFSADDRVKKCIGGVIFFHETLYQKDDNGVPFVRTIQDKGILVGIKVDKGVVPLAGTD\nGETTTQGLDGLLERCAQYKKDGADFAKWRCVLKISDRTPSALAILENANVLARYASICQQ\nNGIVPIVEPEILPDGDHDLKRCQYVTEKVLAAVYKALSDHHVYLEGTLLKPNMVTPGHAC\nPIKYSPEEIAMATVTALRRTVPPAVPGVTFLSGGQSEEEASLNLNAINRCPLPRPWALTF\nSYGRALQASALNAWRGQRDNAGAATEEFIKRAEMNGLAAQGRYEGSGDGGAAAQSLYIAN\nHAY'),
+(932, 'Aldob', 'Fructose-bisphosphate aldolase B', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:230163', '39,507', 'Q91Y97', '4.1.2.13', '>sp|Q91Y97|ALDOB_MOUSE Fructose-bisphosphate aldolase B OS=Mus musculus GN=Aldob PE=1 SV=3\nMAHRFPALTPEQKKELSEIAQRIVANGKGILAADESVGTMGNRLQRIKVENTEENRRQFR\nELLFSVDNSISQSIGGVILFHETLYQKDSQGNLFRNVLKEKGIVVGIKLDQGGAPLAGTN\nKETTIQGLDGLSERCAQYKKDGVDFGKWRAVLRIADQCPSSLAIQENANALARYASICQQ\nNGLVPIVEPEVLPDGDHDLEHCQYVSEKVLAAVYKALNDHHVYLEGTLLKPNMVTAGHAC\nTKKYTPEQVAMATVTALHRTVPAAVPGICFLSGGMSEEDATLNLNAINRCPLPRPWKLSF\nSYGRALQASALAAWGGKAANKKATQEAFMKRAMANCQAAQGQYVHTGSSGAAATQSLFTA\nSYTY'),
+(933, 'Aldoart1', 'Fructose-bisphosphate aldolase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:353204', '45,344', 'A6ZI46', '4.1.2.13', '>tr|A6ZI46|A6ZI46_MOUSE Fructose-bisphosphate aldolase OS=Mus musculus GN=Aldoart1 PE=1 SV=1\nMATHRQDVSIFNMTRLSLAMAFSFPPDANEQPHSGLDNTHQQTKELGKESTTTGTMPCPY\nPALTTEQKKELSDIAHRIVAPGKGILAADESIGSMGNRLQSIGTENTEENRRFFRQLLLT\nADDRVNPCIGGVILFHETLYEKADDGRPFPQVIKSKGGVVGIKVDKGVVPLAGTNGETTT\nQGLDGLSERCAQYKKDGADFAKWRCVLKIGKHTPSPLAIMENANVLARYASICQQNGIVP\nIVEPEILPDGDHDLSCCQYVTEKVLAAVYKALSDHHVYLEGTLLKPNMVTPGHACTQKFS\nNEEIAMATVTALRRTVPPAVPGVTFLSGGQSEEEASINLNAINKCPLLKPWALTFSYGRA\nLQASALKAWGGKEENLKAAQEEYIKRALANSLACQGKYTPSGKTGATASESLFISNHAY'),
+(934, 'Aldoa', 'Fructose-bisphosphate aldolase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11674', '39,356', 'Q5FWB7', '4.1.2.13', '>tr|Q5FWB7|Q5FWB7_MOUSE Fructose-bisphosphate aldolase OS=Mus musculus GN=Aldoa PE=1 SV=1\nMPHPYPALTPEQKKELSDIAHRIVAPGKGILAADESTGSIAKRLQSIGTENTEENRRFYR\nQLLLTADDRVNPCIGGVILFHETLYQKADDGRPFPQVIKSKGGVVGIKVDKGVVPLAGTN\nGETTTQGLDGLSERCAQYKKDGADFAKWRCVLKIGEHTPSALAIMENANVLARYASICQQ\nNGIVPIVEPEILPDGDHDLKRCQYVTEKVLAAVYKALSDHHVYLEGTLLKPNMVTPGHAC\nTQKFSNEEIAMATVTALRRTVPPAVTGVTFLSGGQSEEEASINLNAINKCPLLKPWALTF\nSYGRALQASALKAWGGKKENLKAAQEEYIKRALANSLACQGKYTPSGQSGAAASESLFIS\nNHAY'),
+(935, 'Aldoc', 'Fructose-bisphosphate aldolase C', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11676', '39,395', 'P05063', '4.1.2.13', '>sp|P05063|ALDOC_MOUSE Fructose-bisphosphate aldolase C OS=Mus musculus GN=Aldoc PE=1 SV=4\nMPHSYPALSAEQKKELSDIALRIVTPGKGILAADESVGSMAKRLSQIGVENTEENRRLYR\nQVLFSADDRVKKCIGGVIFFHETLYQKDDNGVPFVRTIQDKGILVGIKVDKGVVPLAGTD\nGETTTQGLDGLLERCAQYKKDGADFAKWRCVLKISDRTPSALAILENANVLARYASICQQ\nNGIVPIVEPEILPDGDHDLKRCQYVTEKVLAAVYKALSDHHVYLEGTLLKPNMVTPGHAC\nPIKYSPEEIAMATVTALRRTVPPAVPGVTFLSGGQSEEEASLNLNAINRCPLPRPWALTF\nSYGRALQASALNAWRGQRDNAGAATEEFIKRAEMNGLAAQGRYEGSGDGGAAAQSLYIAN\nHAY'),
+(936, 'Aldob', 'Fructose-bisphosphate aldolase B', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:230163', '39,507', 'Q91Y97', '4.1.2.13', '>sp|Q91Y97|ALDOB_MOUSE Fructose-bisphosphate aldolase B OS=Mus musculus GN=Aldob PE=1 SV=3\nMAHRFPALTPEQKKELSEIAQRIVANGKGILAADESVGTMGNRLQRIKVENTEENRRQFR\nELLFSVDNSISQSIGGVILFHETLYQKDSQGNLFRNVLKEKGIVVGIKLDQGGAPLAGTN\nKETTIQGLDGLSERCAQYKKDGVDFGKWRAVLRIADQCPSSLAIQENANALARYASICQQ\nNGLVPIVEPEVLPDGDHDLEHCQYVSEKVLAAVYKALNDHHVYLEGTLLKPNMVTAGHAC\nTKKYTPEQVAMATVTALHRTVPAAVPGICFLSGGMSEEDATLNLNAINRCPLPRPWKLSF\nSYGRALQASALAAWGGKAANKKATQEAFMKRAMANCQAAQGQYVHTGSSGAAATQSLFTA\nSYTY'),
+(937, 'Aldoart1', 'Fructose-bisphosphate aldolase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:353204', '45,344', 'A6ZI46', '4.1.2.13', '>tr|A6ZI46|A6ZI46_MOUSE Fructose-bisphosphate aldolase OS=Mus musculus GN=Aldoart1 PE=1 SV=1\nMATHRQDVSIFNMTRLSLAMAFSFPPDANEQPHSGLDNTHQQTKELGKESTTTGTMPCPY\nPALTTEQKKELSDIAHRIVAPGKGILAADESIGSMGNRLQSIGTENTEENRRFFRQLLLT\nADDRVNPCIGGVILFHETLYEKADDGRPFPQVIKSKGGVVGIKVDKGVVPLAGTNGETTT\nQGLDGLSERCAQYKKDGADFAKWRCVLKIGKHTPSPLAIMENANVLARYASICQQNGIVP\nIVEPEILPDGDHDLSCCQYVTEKVLAAVYKALSDHHVYLEGTLLKPNMVTPGHACTQKFS\nNEEIAMATVTALRRTVPPAVPGVTFLSGGQSEEEASINLNAINKCPLLKPWALTFSYGRA\nLQASALKAWGGKEENLKAAQEEYIKRALANSLACQGKYTPSGKTGATASESLFISNHAY'),
+(938, 'Fbp2', 'Fructose-1,6-bisphosphatase isozyme 2', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:14120', '36,947', 'P70695', '3.1.3.11', '>sp|P70695|F16P2_MOUSE Fructose-1,6-bisphosphatase isozyme 2 OS=Mus musculus GN=Fbp2 PE=1 SV=2\nMTDRSPFETDMLTLTRYVMEKGRQAKGTGELTQLLNSMLTAIKAISSAVRKAGLANLYGI\nSGSVNVTGDEVKKLDVLSNSLVINMLQSSYSTCVLVSEENKEAVITAQERRGKYVVCFDP\nLDGSSNIDCLASIGTIFAIYRKTTEDEPSEKDALQPGRNIVAAGYALYGSATLVALSTGQ\nGVDLFMLDPALGEFVLVEKDVRIKKKGKIFSLNEGYAKYFDAATAEYVQKKKFPEDGSEP\nYGARYVGSMVADVHRTLVYGGIFMYPANQKSPNGKLRLLYECNPVAYIIEQAGGMATTGT\nQPVLDVKPESIHQRVPLILGSPEDVQEYLSCVQRNQAGR'),
+(939, 'Fbp1', 'Fructose-1,6-bisphosphatase 1', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:14121', '36,912', 'Q9QXD6', '3.1.3.11', '>sp|Q9QXD6|F16P1_MOUSE Fructose-1,6-bisphosphatase 1 OS=Mus musculus GN=Fbp1 PE=1 SV=3\nMANHAPFETDISTLTRFVMEQGRKAQGTGELTQLLNSLCTAIKAISSAVRQAGIAQLYGI\nAGSTNVTGDQVKKLDILSNDLVINMLKSSYATCVLVSEENTNAIIIEPEKRGKYVVCFDP\nLDGSSNIDCLVSIGTIFGIYRKKSTDEPSEKDALQPGRDLVAAGYALYGSATMLVLAMDC\nGVNCFMLDPSIGEFIMVDRDVKMKKKGNIYSLNEGYAKDFDPAINEYLQRKKFPPDGSAP\nYGARYVGSMVADIHRTLVYGGIFLYPANKKSPSGKLRLLYECNPIAYVMEKAGGLATTGD\nKDILDIVPTEIHQKAPVVMGSSEDVQEFLEIYRKHKAK'),
+(940, 'Fuk', 'L-fucose kinase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:234730', '119,267', 'Q7TMC8', '2.7.1.52', '>tr|Q7TMC8|Q7TMC8_MOUSE L-fucose kinase OS=Mus musculus GN=Fuk PE=1 SV=1\nMEQSEGVNWTVIILTCQYKDSVQVFQRELEVRQRREQIPAGTMLLAVEDPQTRVGSGGAT\nLNALLVAAEHLSARAGFTVVTSDVLHSAWILILHMGRDFPFDDCGRAFTCLPVENPQAPV\nEALVCNLDCLLDIMTHRLGPGSPPGVWVCSTDMLLSVPPNPGISWDGFRGARVIAFPGSL\nAYALNHGVYLTDSQGLVLDIYYQGTKAEIQRCVGPDGLVPLVSGVVFFSVETAEHLLATH\nVSPPLDACTYMGLDSGAQPVQLSLFFDILLCMARNMSRENFLAGRPPELGQGDMDVASYL\nKGARAQLWRELRDQPLTMVYVPDGGYSYMTTDATEFLHRLTMPGVAVAQIVHSQVEEPQL\nLEATCSVVSCLLEGPVHLGPRSVLQHCHLRGPIRIGAGCFVSGLDTAHSEALHGLELHDV\nILQGHHVRLHGSLSRVFTLAGRLDSWERQGAGMYLNMSWNEFFKKTGIRDWDLWDPDTPP\nSDRCLLTARLFPVLHPTRALGPQDVLWMLHPRKHRGEALRAWRASWRLSWEQLQPCVDRA\nATLDFRRDLFFCQALQKARHVLEARQDLCLRPLIRAAVGEGCSGPLLATLDKVAAGAEDP\nGVAARALACVADVLGCMAEGRGGLRSGPAANPEWIQPFSYLECGDLMRGVEALAQEREKW\nLTRPALLVRAARHYEGAEQILIRQAVMTARHFVSTQPVELPAPGQWVVTECPARVDFSGG\nWSDTPPIAYELGGAVLGLAVRVDGRRPIGAKARRIPEPELWLAVGPRQDEMTMRIVCRSL\nDDLRDYCQPHAPGALLKAAFICAGIVHLHSELPLLEQLLHSFNGGFELHTWSELPHGSGL\nGTSSILAGAALAALQRAAGRAVGTEALIHAVLHLEQVLTTGGGWQDQVSGLMPGIKVGRS\nRAQLPLKVEVEEITVPEGFVQKINDHLLLVYTGKTRLARNLLQDVLRNWYARLPVVVQNA\nRRLVRQTEKCAEAFRQGNLPLLGQYLTSYWEQKKLMAPGCEPLAVQRMMDVLAPYAYGQS\nLAGAGGGGFLYLLTKEPRQKETLEAVLAKAEGLGNYSVHLVEVDPQGLSLQLLGHDTRLC\nGAGPSEVGTT');
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `reactions`
+-- Table structure for table `reactions`
 --
 
 DROP TABLE IF EXISTS `reactions`;
@@ -6540,10 +7095,10 @@ CREATE TABLE IF NOT EXISTS `reactions` (
   `anchor_out` enum('left','top','right','bottom') NOT NULL,
   `reversible` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=312 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=446 ;
 
 --
--- Daten für Tabelle `reactions`
+-- Dumping data for table `reactions`
 --
 
 INSERT INTO `reactions` (`id`, `node_id`, `anchor_in`, `anchor_out`, `reversible`) VALUES
@@ -6849,12 +7404,146 @@ INSERT INTO `reactions` (`id`, `node_id`, `anchor_in`, `anchor_out`, `reversible
 (308, 851, 'left', 'right', 1),
 (309, 861, 'left', 'right', 0),
 (310, 860, 'left', 'right', 0),
-(311, 856, 'left', 'right', 0);
+(311, 856, 'left', 'right', 0),
+(312, 971, 'top', 'bottom', 0),
+(313, 972, 'left', 'right', 0),
+(314, 973, 'top', 'bottom', 0),
+(315, 974, 'bottom', 'top', 0),
+(316, 975, 'left', 'right', 1),
+(317, 976, 'right', 'left', 1),
+(318, 977, 'right', 'left', 0),
+(319, 978, 'right', 'left', 1),
+(320, 979, 'top', 'bottom', 1),
+(321, 980, 'right', 'left', 1),
+(322, 981, 'right', 'left', 1),
+(323, 982, 'left', 'right', 1),
+(324, 983, 'bottom', 'top', 1),
+(325, 984, 'top', 'bottom', 1),
+(326, 985, 'top', 'bottom', 1),
+(327, 986, 'right', 'left', 1),
+(328, 987, 'top', 'bottom', 1),
+(329, 988, 'left', 'bottom', 0),
+(330, 989, 'left', 'right', 1),
+(331, 990, 'right', 'left', 1),
+(332, 991, 'top', 'bottom', 1),
+(333, 992, 'right', 'left', 0),
+(334, 993, 'left', 'right', 0),
+(335, 994, 'top', 'bottom', 1),
+(336, 995, 'left', 'right', 1),
+(337, 996, 'right', 'left', 1),
+(338, 997, 'top', 'bottom', 1),
+(339, 998, 'right', 'left', 0),
+(340, 999, 'top', 'bottom', 1),
+(341, 1000, 'left', 'right', 1),
+(342, 1001, 'left', 'right', 0),
+(343, 1002, 'left', 'right', 1),
+(344, 1003, 'left', 'right', 1),
+(345, 1004, 'top', 'bottom', 1),
+(346, 1005, 'bottom', 'top', 1),
+(347, 1006, 'right', 'left', 1),
+(348, 1007, 'right', 'left', 1),
+(349, 1008, 'top', 'bottom', 0),
+(350, 1009, 'left', 'right', 1),
+(351, 1010, 'bottom', 'top', 1),
+(352, 1011, 'bottom', 'top', 1),
+(353, 1012, 'right', 'left', 1),
+(354, 1013, 'top', 'bottom', 1),
+(355, 1014, 'bottom', 'top', 1),
+(356, 1015, 'left', 'right', 0),
+(357, 1016, 'top', 'bottom', 1),
+(358, 1017, 'left', 'right', 1),
+(359, 1018, 'top', 'bottom', 0),
+(360, 1019, 'top', 'bottom', 0),
+(361, 1020, 'right', 'left', 0),
+(362, 1021, 'top', 'bottom', 0),
+(363, 1022, 'top', 'bottom', 0),
+(364, 1023, 'top', 'bottom', 0),
+(365, 1024, 'right', 'left', 1),
+(366, 1025, 'right', 'left', 1),
+(367, 1026, 'bottom', 'top', 1),
+(368, 1027, 'right', 'left', 0),
+(369, 1028, 'left', 'right', 0),
+(370, 1029, 'left', 'right', 0),
+(371, 1030, 'left', 'right', 0),
+(372, 1031, 'left', 'right', 0),
+(373, 1032, 'right', 'left', 1),
+(374, 1033, 'right', 'left', 1),
+(375, 1034, 'top', 'bottom', 0),
+(376, 1101, 'right', 'left', 0),
+(377, 1102, 'left', 'right', 1),
+(378, 1103, 'left', 'right', 0),
+(379, 1104, 'left', 'right', 1),
+(380, 1105, 'left', 'right', 0),
+(381, 1106, 'bottom', 'top', 1),
+(382, 1107, 'left', 'right', 1),
+(383, 1108, 'top', 'bottom', 1),
+(384, 1109, 'left', 'right', 0),
+(385, 1110, 'right', 'left', 0),
+(386, 1111, 'right', 'left', 1),
+(387, 1112, 'right', 'left', 1),
+(388, 1113, 'top', 'bottom', 1),
+(389, 1114, 'right', 'left', 0),
+(390, 1115, 'right', 'left', 0),
+(391, 1116, 'left', 'right', 0),
+(392, 1117, 'bottom', 'top', 0),
+(393, 1118, 'bottom', 'top', 0),
+(394, 1119, 'bottom', 'top', 0),
+(395, 1120, 'bottom', 'top', 1),
+(396, 1121, 'top', 'bottom', 1),
+(397, 1122, 'left', 'right', 0),
+(398, 1123, 'bottom', 'top', 0),
+(399, 1124, 'top', 'bottom', 1),
+(400, 1125, 'left', 'right', 0),
+(401, 1126, 'left', 'right', 0),
+(402, 1127, 'left', 'right', 0),
+(403, 1128, 'left', 'right', 0),
+(404, 1129, 'left', 'right', 0),
+(405, 1130, 'left', 'right', 0),
+(406, 1131, 'top', 'bottom', 1),
+(407, 1132, 'right', 'left', 0),
+(408, 1133, 'right', 'left', 0),
+(409, 1134, 'bottom', 'top', 0),
+(410, 1135, 'top', 'bottom', 0),
+(411, 1136, 'bottom', 'top', 0),
+(412, 1137, 'left', 'right', 0),
+(413, 1138, 'left', 'right', 0),
+(414, 1139, 'bottom', 'top', 0),
+(415, 1140, 'top', 'bottom', 0),
+(416, 1141, 'top', 'bottom', 1),
+(417, 1142, 'left', 'right', 0),
+(418, 1143, 'top', 'bottom', 0),
+(419, 1144, 'left', 'right', 0),
+(420, 1145, 'bottom', 'top', 1),
+(421, 1146, 'right', 'left', 1),
+(422, 1147, 'top', 'bottom', 0),
+(423, 1148, 'left', 'right', 0),
+(424, 1149, 'right', 'left', 1),
+(425, 1150, 'top', 'bottom', 1),
+(426, 1151, 'top', 'bottom', 0),
+(427, 1152, 'top', 'bottom', 1),
+(428, 1153, 'bottom', 'top', 0),
+(429, 1154, 'left', 'right', 0),
+(430, 1155, 'right', 'left', 0),
+(431, 1156, 'left', 'right', 0),
+(432, 1157, 'top', 'bottom', 1),
+(433, 1158, 'left', 'right', 0),
+(434, 1159, 'left', 'right', 0),
+(435, 1160, 'left', 'right', 0),
+(436, 1161, 'left', 'right', 0),
+(437, 1162, 'bottom', 'top', 0),
+(438, 1163, 'top', 'bottom', 0),
+(439, 1164, 'top', 'bottom', 0),
+(440, 1165, 'top', 'bottom', 0),
+(441, 1166, 'left', 'right', 0),
+(442, 1167, 'left', 'right', 0),
+(443, 1168, 'left', 'right', 0),
+(444, 1169, 'left', 'right', 0),
+(445, 1170, 'left', 'right', 0);
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `reagents`
+-- Table structure for table `reagents`
 --
 
 DROP TABLE IF EXISTS `reagents`;
@@ -6865,10 +7554,10 @@ CREATE TABLE IF NOT EXISTS `reagents` (
   `type` enum('educt','product') NOT NULL,
   `anchor` enum('left','top','right','bottom') NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=672 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=944 ;
 
 --
--- Daten für Tabelle `reagents`
+-- Dumping data for table `reagents`
 --
 
 INSERT INTO `reagents` (`id`, `reaction_id`, `node_id`, `type`, `anchor`) VALUES
@@ -7529,12 +8218,284 @@ INSERT INTO `reagents` (`id`, `reaction_id`, `node_id`, `type`, `anchor`) VALUES
 (668, 311, 797, 'educt', 'right'),
 (669, 311, 832, 'product', 'left'),
 (670, 307, 798, 'product', 'top'),
-(671, 308, 798, 'product', 'bottom');
+(671, 308, 798, 'product', 'bottom'),
+(672, 312, 1081, 'educt', 'bottom'),
+(673, 312, 1061, 'product', 'right'),
+(674, 313, 1084, 'educt', 'right'),
+(675, 313, 1085, 'product', 'bottom'),
+(676, 314, 1035, 'educt', 'bottom'),
+(677, 314, 1079, 'product', 'top'),
+(678, 315, 1036, 'educt', 'top'),
+(679, 315, 1043, 'product', 'bottom'),
+(680, 316, 1038, 'educt', 'right'),
+(681, 316, 1037, 'product', 'left'),
+(682, 317, 1038, 'educt', 'left'),
+(683, 317, 1079, 'product', 'right'),
+(684, 318, 1039, 'educt', 'left'),
+(685, 318, 1035, 'product', 'right'),
+(686, 319, 1040, 'educt', 'top'),
+(687, 319, 1037, 'product', 'top'),
+(688, 320, 1040, 'educt', 'bottom'),
+(689, 320, 1066, 'product', 'top'),
+(690, 321, 1040, 'educt', 'left'),
+(691, 321, 1085, 'product', 'right'),
+(692, 322, 1041, 'educt', 'left'),
+(693, 322, 1042, 'product', 'top'),
+(694, 323, 1042, 'educt', 'right'),
+(695, 323, 1084, 'product', 'left'),
+(696, 324, 1043, 'educt', 'top'),
+(697, 324, 1042, 'product', 'bottom'),
+(698, 325, 1044, 'educt', 'bottom'),
+(699, 325, 1061, 'product', 'top'),
+(700, 326, 1044, 'educt', 'left'),
+(701, 326, 1062, 'product', 'top'),
+(702, 327, 1044, 'educt', 'top'),
+(703, 327, 1076, 'product', 'right'),
+(704, 328, 1045, 'educt', 'bottom'),
+(705, 328, 1052, 'product', 'top'),
+(706, 329, 1046, 'educt', 'right'),
+(707, 329, 1044, 'product', 'left'),
+(708, 330, 1046, 'educt', 'bottom'),
+(709, 330, 1044, 'product', 'left'),
+(710, 331, 1046, 'educt', 'bottom'),
+(711, 331, 1047, 'product', 'right'),
+(712, 332, 1046, 'educt', 'bottom'),
+(713, 332, 1056, 'product', 'top'),
+(714, 333, 1047, 'educt', 'left'),
+(715, 333, 1045, 'product', 'right'),
+(716, 334, 1047, 'educt', 'top'),
+(717, 334, 1046, 'product', 'left'),
+(718, 335, 1047, 'educt', 'bottom'),
+(719, 335, 1056, 'product', 'left'),
+(720, 336, 1048, 'educt', 'right'),
+(721, 336, 1049, 'product', 'left'),
+(722, 337, 1048, 'educt', 'left'),
+(723, 337, 1057, 'product', 'right'),
+(724, 338, 1051, 'educt', 'bottom'),
+(725, 338, 1050, 'product', 'top'),
+(726, 339, 1051, 'educt', 'left'),
+(727, 339, 1087, 'product', 'right'),
+(728, 340, 1052, 'educt', 'bottom'),
+(729, 340, 1051, 'product', 'top'),
+(730, 341, 1053, 'educt', 'right'),
+(731, 341, 1057, 'product', 'left'),
+(732, 342, 1054, 'educt', 'bottom'),
+(733, 342, 1053, 'product', 'bottom'),
+(734, 343, 1054, 'educt', 'right'),
+(735, 343, 1053, 'product', 'left'),
+(736, 344, 1056, 'educt', 'right'),
+(737, 344, 1055, 'product', 'top'),
+(738, 345, 1056, 'educt', 'left'),
+(739, 345, 1058, 'product', 'top'),
+(740, 346, 1057, 'educt', 'top'),
+(741, 346, 1055, 'product', 'left'),
+(742, 347, 1059, 'educt', 'left'),
+(743, 347, 1063, 'product', 'right'),
+(744, 348, 1060, 'educt', 'left'),
+(745, 348, 1044, 'product', 'right'),
+(746, 349, 1060, 'educt', 'bottom'),
+(747, 349, 1059, 'product', 'top'),
+(748, 350, 1060, 'educt', 'right'),
+(749, 350, 1064, 'product', 'top'),
+(750, 351, 1063, 'educt', 'left'),
+(751, 351, 1055, 'product', 'bottom'),
+(752, 352, 1063, 'educt', 'top'),
+(753, 352, 1061, 'product', 'bottom'),
+(754, 353, 1064, 'educt', 'bottom'),
+(755, 353, 1059, 'product', 'right'),
+(756, 354, 1065, 'educt', 'bottom'),
+(757, 354, 1053, 'product', 'top'),
+(758, 355, 1065, 'educt', 'top'),
+(759, 355, 1056, 'product', 'bottom'),
+(760, 356, 1066, 'educt', 'right'),
+(761, 356, 1081, 'product', 'top'),
+(762, 357, 1066, 'educt', 'bottom'),
+(763, 357, 1044, 'product', 'top'),
+(764, 358, 1066, 'educt', 'right'),
+(765, 358, 1074, 'product', 'left'),
+(766, 359, 1067, 'educt', 'bottom'),
+(767, 359, 1068, 'product', 'top'),
+(768, 360, 1068, 'educt', 'bottom'),
+(769, 360, 1069, 'product', 'top'),
+(770, 361, 1068, 'educt', 'left'),
+(771, 361, 1070, 'product', 'right'),
+(772, 362, 1068, 'educt', 'right'),
+(773, 362, 1089, 'product', 'right'),
+(774, 363, 1069, 'educt', 'bottom'),
+(775, 363, 1089, 'product', 'top'),
+(776, 364, 1070, 'educt', 'bottom'),
+(777, 364, 1071, 'product', 'top'),
+(778, 365, 1071, 'educt', 'left'),
+(779, 365, 1072, 'product', 'right'),
+(780, 366, 1076, 'educt', 'left'),
+(781, 366, 1077, 'product', 'bottom'),
+(782, 366, 1078, 'product', 'right'),
+(783, 367, 1079, 'educt', 'left'),
+(784, 367, 1072, 'product', 'bottom'),
+(785, 368, 1089, 'educt', 'bottom'),
+(786, 368, 1039, 'product', 'right'),
+(787, 369, 1089, 'educt', 'bottom'),
+(788, 369, 1082, 'product', 'left'),
+(789, 370, 1082, 'educt', 'right'),
+(790, 370, 1083, 'product', 'left'),
+(791, 371, 1083, 'educt', 'right'),
+(792, 371, 1086, 'product', 'left'),
+(793, 372, 1086, 'educt', 'right'),
+(794, 372, 1080, 'product', 'left'),
+(795, 373, 1085, 'educt', 'top'),
+(796, 373, 1037, 'product', 'right'),
+(797, 374, 1085, 'educt', 'left'),
+(798, 374, 1041, 'product', 'right'),
+(799, 375, 1087, 'educt', 'bottom'),
+(800, 375, 1088, 'product', 'top'),
+(801, 376, 1216, 'educt', 'left'),
+(802, 376, 1193, 'product', 'right'),
+(803, 377, 1217, 'educt', 'bottom'),
+(804, 377, 1192, 'product', 'left'),
+(805, 378, 1218, 'educt', 'bottom'),
+(806, 378, 1195, 'product', 'right'),
+(807, 379, 1218, 'educt', 'right'),
+(808, 379, 1199, 'product', 'bottom'),
+(809, 379, 1176, 'product', 'bottom'),
+(810, 380, 1219, 'educt', 'right'),
+(811, 380, 1220, 'product', 'left'),
+(812, 381, 1219, 'educt', 'top'),
+(813, 381, 1192, 'product', 'left'),
+(814, 382, 1220, 'educt', 'right'),
+(815, 382, 1185, 'product', 'left'),
+(816, 383, 1220, 'educt', 'bottom'),
+(817, 383, 1194, 'product', 'top'),
+(818, 384, 1221, 'educt', 'right'),
+(819, 384, 1222, 'product', 'top'),
+(820, 385, 1221, 'educt', 'left'),
+(821, 385, 1192, 'product', 'right'),
+(822, 386, 1221, 'educt', 'bottom'),
+(823, 386, 1192, 'product', 'right'),
+(824, 387, 1222, 'educt', 'left'),
+(825, 387, 1221, 'product', 'bottom'),
+(826, 388, 1222, 'educt', 'bottom'),
+(827, 388, 1185, 'product', 'right'),
+(828, 389, 1223, 'educt', 'left'),
+(829, 389, 1192, 'product', 'right'),
+(830, 390, 1224, 'educt', 'left'),
+(831, 390, 1223, 'product', 'right'),
+(832, 391, 1224, 'educt', 'bottom'),
+(833, 391, 1185, 'product', 'top'),
+(834, 392, 1225, 'educt', 'top'),
+(835, 392, 1173, 'product', 'bottom'),
+(836, 393, 1171, 'educt', 'top'),
+(837, 393, 1219, 'product', 'bottom'),
+(838, 394, 1172, 'educt', 'top'),
+(839, 394, 1219, 'product', 'left'),
+(840, 395, 1173, 'educt', 'top'),
+(841, 395, 1185, 'product', 'right'),
+(842, 396, 1173, 'educt', 'right'),
+(843, 396, 1203, 'product', 'top'),
+(844, 397, 1175, 'educt', 'right'),
+(845, 397, 1189, 'product', 'left'),
+(846, 398, 1176, 'educt', 'top'),
+(847, 398, 1183, 'product', 'right'),
+(848, 399, 1177, 'educt', 'bottom'),
+(849, 399, 1178, 'product', 'top'),
+(850, 400, 1177, 'educt', 'right'),
+(851, 400, 1196, 'product', 'bottom'),
+(852, 401, 1178, 'educt', 'right'),
+(853, 401, 1179, 'product', 'left'),
+(854, 402, 1179, 'educt', 'right'),
+(855, 402, 1199, 'product', 'bottom'),
+(856, 402, 1212, 'product', 'bottom'),
+(857, 403, 1180, 'educt', 'right'),
+(858, 403, 1196, 'product', 'left'),
+(859, 404, 1181, 'educt', 'right'),
+(860, 404, 1182, 'product', 'left'),
+(861, 405, 1182, 'educt', 'right'),
+(862, 405, 1212, 'product', 'left'),
+(863, 406, 1183, 'educt', 'bottom'),
+(864, 406, 1199, 'product', 'top'),
+(865, 407, 1184, 'educt', 'top'),
+(866, 407, 1171, 'product', 'right'),
+(867, 408, 1184, 'educt', 'left'),
+(868, 408, 1172, 'product', 'right'),
+(869, 409, 1184, 'educt', 'right'),
+(870, 409, 1186, 'product', 'left'),
+(871, 410, 1184, 'educt', 'bottom'),
+(872, 410, 1187, 'product', 'top'),
+(873, 411, 1184, 'educt', 'top'),
+(874, 411, 1194, 'product', 'right'),
+(875, 412, 1184, 'educt', 'right'),
+(876, 412, 1214, 'product', 'bottom'),
+(877, 413, 1184, 'educt', 'right'),
+(878, 413, 1215, 'product', 'left'),
+(879, 414, 1185, 'educt', 'top'),
+(880, 414, 1224, 'product', 'right'),
+(881, 415, 1185, 'educt', 'bottom'),
+(882, 415, 1195, 'product', 'right'),
+(883, 416, 1185, 'educt', 'bottom'),
+(884, 416, 1195, 'product', 'top'),
+(885, 417, 1186, 'educt', 'right'),
+(886, 417, 1175, 'product', 'left'),
+(887, 418, 1187, 'educt', 'bottom'),
+(888, 418, 1174, 'product', 'top'),
+(889, 419, 1187, 'educt', 'right'),
+(890, 419, 1190, 'product', 'left'),
+(891, 420, 1188, 'educt', 'top'),
+(892, 420, 1174, 'product', 'bottom'),
+(893, 421, 1191, 'educt', 'left'),
+(894, 421, 1187, 'product', 'right'),
+(895, 422, 1192, 'educt', 'left'),
+(896, 422, 1218, 'product', 'left'),
+(897, 423, 1192, 'educt', 'bottom'),
+(898, 423, 1185, 'product', 'top'),
+(899, 424, 1193, 'educt', 'left'),
+(900, 424, 1217, 'product', 'right'),
+(901, 425, 1193, 'educt', 'bottom'),
+(902, 425, 1192, 'product', 'top'),
+(903, 426, 1194, 'educt', 'bottom'),
+(904, 426, 1184, 'product', 'top'),
+(905, 427, 1195, 'educt', 'bottom'),
+(906, 427, 1183, 'product', 'top'),
+(907, 428, 1195, 'educt', 'left'),
+(908, 428, 1185, 'product', 'bottom'),
+(909, 429, 1196, 'educt', 'right'),
+(910, 429, 1181, 'product', 'left'),
+(911, 430, 1197, 'educt', 'left'),
+(912, 430, 1192, 'product', 'bottom'),
+(913, 431, 1198, 'educt', 'right'),
+(914, 431, 1188, 'product', 'left'),
+(915, 432, 1198, 'educt', 'bottom'),
+(916, 432, 1201, 'product', 'top'),
+(917, 433, 1198, 'educt', 'left'),
+(918, 433, 1208, 'product', 'left'),
+(919, 434, 1200, 'educt', 'right'),
+(920, 434, 1199, 'product', 'left'),
+(921, 434, 1212, 'product', 'top'),
+(922, 435, 1201, 'educt', 'right'),
+(923, 435, 1200, 'product', 'left'),
+(924, 436, 1202, 'educt', 'right'),
+(925, 436, 1194, 'product', 'left'),
+(926, 437, 1204, 'educt', 'top'),
+(927, 437, 1203, 'product', 'bottom'),
+(928, 438, 1205, 'educt', 'bottom'),
+(929, 438, 1185, 'product', 'right'),
+(930, 439, 1206, 'educt', 'bottom'),
+(931, 439, 1205, 'product', 'top'),
+(932, 440, 1207, 'educt', 'bottom'),
+(933, 440, 1206, 'product', 'top'),
+(934, 441, 1208, 'educt', 'right'),
+(935, 441, 1209, 'product', 'left'),
+(936, 442, 1209, 'educt', 'right'),
+(937, 442, 1210, 'product', 'left'),
+(938, 443, 1210, 'educt', 'right'),
+(939, 443, 1211, 'product', 'left'),
+(940, 444, 1211, 'educt', 'right'),
+(941, 444, 1213, 'product', 'left'),
+(942, 445, 1215, 'educt', 'right'),
+(943, 445, 1214, 'product', 'left');
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `request_counter`
+-- Table structure for table `request_counter`
 --
 
 DROP TABLE IF EXISTS `request_counter`;
@@ -7543,15 +8504,16 @@ CREATE TABLE IF NOT EXISTS `request_counter` (
   `month_year` date NOT NULL,
   `number` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
 
 --
--- Daten für Tabelle `request_counter`
+-- Dumping data for table `request_counter`
 --
 
 INSERT INTO `request_counter` (`id`, `month_year`, `number`) VALUES
 (1, '2015-11-01', 163),
-(2, '2015-12-01', 880);
+(2, '2015-12-01', 880),
+(3, '2016-02-01', 49);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
