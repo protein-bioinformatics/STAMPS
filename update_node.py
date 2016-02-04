@@ -22,6 +22,8 @@ except:
     print(-1)
     exit()
     
+x = round(int(x) / 25) * 25
+y = round(int(y) / 25) * 25
 conn = connect(host = mysql_host, port = mysql_port, user = mysql_user, passwd = mysql_passwd, db = mysql_db)
 my_cur = conn.cursor(cursors.DictCursor)
 sql_query = "UPDATE nodes SET x = %s, y = %s WHERE id = %s"

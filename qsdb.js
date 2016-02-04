@@ -78,9 +78,11 @@ infobox_stroke_width = 1;
 infobox_offset_x = 20;
 preview_element = 0;
 
-pathways = [[66, "Fructose and mannose metabolism"], 
+pathways = [[78, "Ascorbate and aldarate metabolism"],
             [6, "Citrate Cycle"],
             [11, "Fatty Acid Biosynthesis"],
+            [66, "Fructose and mannose metabolism"],
+            [53, "Galactose metabolism"],
             [29, "Glycerolipid metabolism"],
             [28, "Glycerophospholipid metabolism"],
             [1, "Glycolysis"],
@@ -997,6 +999,8 @@ function update_node(event) {
     res = get_mouse_pos(c, event);
     var x = Math.round(Math.floor((highlight_element.x - null_x) / factor) / base_grid) * base_grid;
     var y = Math.round(Math.floor((highlight_element.y - null_y) / factor) / base_grid) * base_grid;
+    
+    
     var xmlhttp = new XMLHttpRequest();
     var request = "update_node.py?id=";
     request += highlight_element.id;
