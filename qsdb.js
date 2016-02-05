@@ -79,7 +79,7 @@ infobox_offset_x = 20;
 preview_element = 0;
 
 
-pathways = [[109, "Synthesis and degradation of ketone bodies"],
+pathways = [[151, "Steroid biosynthesis"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
             [78, "Ascorbate and aldarate metabolism"],
             [6, "Citrate Cycle"],
@@ -96,7 +96,8 @@ pathways = [[109, "Synthesis and degradation of ketone bodies"],
             [48, "Pentose and glucuronate interconversions"],
             [3, "Pentose phosphate"],
             [5, "Pyruvate metabolism"],
-            [41, "Sphingolipid metabolism"]];
+            [41, "Sphingolipid metabolism"],
+            [109, "Synthesis and degradation of ketone bodies"]];
 
 
 function debug(text){
