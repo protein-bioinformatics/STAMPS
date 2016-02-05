@@ -48,7 +48,7 @@ radius = metabolite_radius * factor;
 last_keys = [];
 
 
-line_width = 4;
+line_width = 6;
 protein_stroke_color = "#f69301";
 protein_fill_color = "#fff6d5";
 metabolite_stroke_color = "#f69301";
@@ -78,7 +78,9 @@ infobox_stroke_width = 1;
 infobox_offset_x = 20;
 preview_element = 0;
 
-pathways = [[78, "Ascorbate and aldarate metabolism"],
+pathways = [[5, "Pyruvate metabolism"],
+            [57, "Amino sugar and nucleotide sugar metabolism"],
+            [78, "Ascorbate and aldarate metabolism"],
             [6, "Citrate Cycle"],
             [11, "Fatty Acid Biosynthesis"],
             [66, "Fructose and mannose metabolism"],
