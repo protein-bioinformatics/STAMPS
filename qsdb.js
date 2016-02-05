@@ -78,7 +78,8 @@ infobox_stroke_width = 1;
 infobox_offset_x = 20;
 preview_element = 0;
 
-pathways = [[40, "Inositol phosphate metabolism"],
+
+pathways = [[137, "Fatty acid elongation"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
             [78, "Ascorbate and aldarate metabolism"],
             [6, "Citrate Cycle"],
@@ -89,6 +90,7 @@ pathways = [[40, "Inositol phosphate metabolism"],
             [28, "Glycerophospholipid metabolism"],
             [1, "Glycolysis"],
             [9, "Glyoxylate and dicarboxylate metabolism"],
+            [40, "Inositol phosphate metabolism"],
             [48, "Pentose and glucuronate interconversions"],
             [3, "Pentose phosphate"],
             [5, "Pyruvate metabolism"],
@@ -932,7 +934,7 @@ function mouse_move_listener(e){
         }
         
     }
-    if(highlight_element && highlight_element.tipp) Tip(e, highlight_element.id + " " + highlight_element.name);
+    if(highlight_element && highlight_element.tipp && !administration) Tip(e, highlight_element.id + " " + highlight_element.name);
     else unTip();
     
 }
