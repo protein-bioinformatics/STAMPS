@@ -79,11 +79,12 @@ infobox_offset_x = 20;
 preview_element = 0;
 
 
-pathways = [[137, "Fatty acid elongation"],
+pathways = [[13, "Fatty acid degradation"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
             [78, "Ascorbate and aldarate metabolism"],
             [6, "Citrate Cycle"],
             [11, "Fatty Acid Biosynthesis"],
+            [137, "Fatty acid elongation"],
             [66, "Fructose and mannose metabolism"],
             [53, "Galactose metabolism"],
             [29, "Glycerolipid metabolism"],
