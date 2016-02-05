@@ -78,7 +78,7 @@ infobox_stroke_width = 1;
 infobox_offset_x = 20;
 preview_element = 0;
 
-pathways = [[5, "Pyruvate metabolism"],
+pathways = [[9, "Glyoxylate and dicarboxylate metabolism"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
             [78, "Ascorbate and aldarate metabolism"],
             [6, "Citrate Cycle"],
@@ -90,6 +90,7 @@ pathways = [[5, "Pyruvate metabolism"],
             [1, "Glycolysis"],
             [48, "Pentose and glucuronate interconversions"],
             [3, "Pentose phosphate"],
+            [5, "Pyruvate metabolism"],
             [41, "Sphingolipid metabolism"]];
 
 
