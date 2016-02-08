@@ -79,7 +79,7 @@ infobox_offset_x = 20;
 preview_element = 0;
 
 
-pathways = [[155, "Primary bile acid biosynthesis"],
+pathways = [[154, "Steroid hormone biosynthesis"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
             [78, "Ascorbate and aldarate metabolism"],
             [6, "Citrate Cycle"],
@@ -95,6 +95,7 @@ pathways = [[155, "Primary bile acid biosynthesis"],
             [40, "Inositol phosphate metabolism"],
             [48, "Pentose and glucuronate interconversions"],
             [3, "Pentose phosphate"],
+            [155, "Primary bile acid biosynthesis"],
             [5, "Pyruvate metabolism"],
             [41, "Sphingolipid metabolism"],
             [151, "Steroid biosynthesis"],
