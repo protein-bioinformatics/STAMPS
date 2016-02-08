@@ -79,7 +79,7 @@ infobox_offset_x = 20;
 preview_element = 0;
 
 
-pathways = [[154, "Steroid hormone biosynthesis"],
+pathways = [[34, "Ether lipid metabolism"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
             [78, "Ascorbate and aldarate metabolism"],
             [6, "Citrate Cycle"],
@@ -99,6 +99,7 @@ pathways = [[154, "Steroid hormone biosynthesis"],
             [5, "Pyruvate metabolism"],
             [41, "Sphingolipid metabolism"],
             [151, "Steroid biosynthesis"],
+            [154, "Steroid hormone biosynthesis"],
             [109, "Synthesis and degradation of ketone bodies"]];
 
 
