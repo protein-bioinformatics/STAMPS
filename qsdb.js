@@ -79,10 +79,11 @@ infobox_offset_x = 20;
 preview_element = 0;
 
 
-pathways = [[34, "Ether lipid metabolism"],
+pathways = [[160, "Arachidonic acid metabolism"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
             [78, "Ascorbate and aldarate metabolism"],
             [6, "Citrate Cycle"],
+            [34, "Ether lipid metabolism"],
             [11, "Fatty Acid Biosynthesis"],
             [13, "Fatty acid degradation"],
             [137, "Fatty acid elongation"],
