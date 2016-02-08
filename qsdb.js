@@ -79,7 +79,7 @@ infobox_offset_x = 20;
 preview_element = 0;
 
 
-pathways = [[161, "Linoleic acid metabolism"],
+pathways = [[163, "alpha-Linolenic acid metabolism"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
             [160, "Arachidonic acid metabolism"],
             [78, "Ascorbate and aldarate metabolism"],
@@ -95,6 +95,7 @@ pathways = [[161, "Linoleic acid metabolism"],
             [1, "Glycolysis"],
             [9, "Glyoxylate and dicarboxylate metabolism"],
             [40, "Inositol phosphate metabolism"],
+            [161, "Linoleic acid metabolism"],
             [48, "Pentose and glucuronate interconversions"],
             [3, "Pentose phosphate"],
             [155, "Primary bile acid biosynthesis"],
