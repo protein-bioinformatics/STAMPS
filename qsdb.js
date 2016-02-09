@@ -79,10 +79,12 @@ infobox_offset_x = 20;
 preview_element = 0;
 
 
-pathways = [[163, "alpha-Linolenic acid metabolism"],
+pathways = [[49, "Purine metabolism"],
+            [163, "alpha-Linolenic acid metabolism"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
             [160, "Arachidonic acid metabolism"],
             [78, "Ascorbate and aldarate metabolism"],
+            [164, "Biosynthesis of unsaturated fatty acids"],
             [6, "Citrate Cycle"],
             [34, "Ether lipid metabolism"],
             [11, "Fatty Acid Biosynthesis"],
@@ -99,6 +101,7 @@ pathways = [[163, "alpha-Linolenic acid metabolism"],
             [48, "Pentose and glucuronate interconversions"],
             [3, "Pentose phosphate"],
             [155, "Primary bile acid biosynthesis"],
+            [49, "Purine metabolism"],
             [5, "Pyruvate metabolism"],
             [41, "Sphingolipid metabolism"],
             [151, "Steroid biosynthesis"],
