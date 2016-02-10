@@ -79,11 +79,12 @@ infobox_offset_x = 20;
 preview_element = 0;
 
 
-pathways = [[200, "Arginine and proline metabolism"],
+pathways = [[51, "Histidine metabolism"],
             [15, "Alanine, aspartate and glutamate metabolism"],
             [163, "alpha-Linolenic acid metabolism"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
             [160, "Arachidonic acid metabolism"],
+            [200, "Arginine and proline metabolism"],
             [21, "Arginine biosynthesis"],
             [78, "Ascorbate and aldarate metabolism"],
             [164, "Biosynthesis of unsaturated fatty acids"],
