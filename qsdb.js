@@ -82,7 +82,7 @@ preview_element = 0;
 
 
 
-pathways = [[292, "Phenylalanine, tyrosine and tryptophan biosynthesis"],
+pathways = [[298, "Phenylalanine metabolism"],
             [15, "Alanine, aspartate and glutamate metabolism"],
             [163, "alpha-Linolenic acid metabolism"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
@@ -111,6 +111,7 @@ pathways = [[292, "Phenylalanine, tyrosine and tryptophan biosynthesis"],
             [258, "Lysine degradation"],
             [48, "Pentose and glucuronate interconversions"],
             [3, "Pentose phosphate"],
+            [292, "Phenylalanine, tyrosine and tryptophan biosynthesis"],
             [155, "Primary bile acid biosynthesis"],
             [50, "Pyrimidine metabolism"],
             [49, "Purine metabolism"],
