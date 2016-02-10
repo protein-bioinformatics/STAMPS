@@ -82,7 +82,7 @@ preview_element = 0;
 
 
 
-pathways = [[300, "Tryptophan metabolism"],
+pathways = [[292, "Phenylalanine, tyrosine and tryptophan biosynthesis"],
             [15, "Alanine, aspartate and glutamate metabolism"],
             [163, "alpha-Linolenic acid metabolism"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
@@ -119,6 +119,7 @@ pathways = [[300, "Tryptophan metabolism"],
             [151, "Steroid biosynthesis"],
             [154, "Steroid hormone biosynthesis"],
             [109, "Synthesis and degradation of ketone bodies"],
+            [300, "Tryptophan metabolism"],
             [16, "Tyrosine metabolism"],
             [111, "Valine, leucine and isoleucine biosynthesis"],
             [17, "Valine, leucine and isoleucine degradation"]
