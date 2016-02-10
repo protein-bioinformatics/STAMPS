@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Feb 10, 2016 at 10:05 AM
+-- Generation Time: Feb 10, 2016 at 10:13 AM
 -- Server version: 5.5.47-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.14
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `metabolites` (
   `formula` varchar(100) NOT NULL,
   `exact_mass` varchar(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1740 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1763 ;
 
 --
 -- Dumping data for table `metabolites`
@@ -1364,7 +1364,30 @@ INSERT INTO `metabolites` (`id`, `name`, `c_number`, `formula`, `exact_mass`) VA
 (1736, '4-Methyl-2-oxopentanoate', 'C00233', 'C6H10O3', '130.063'),
 (1737, '[Dihydrolipoyllysine-residue (2-methylpropanoyl)transferase] S-(3-methylbutanoyl)dihydrolipoyllysine', 'C15975', 'C13H24NO2S2R', '-'),
 (1738, '3-Methylbutanoyl-CoA', 'C02939', 'C26H44N7O17P3S', '851.1727'),
-(1739, '3-Methylcrotonyl-CoA', 'C03069', 'C26H42N7O17P3S', '849.1571');
+(1739, '3-Methylcrotonyl-CoA', 'C03069', 'C26H42N7O17P3S', '849.1571'),
+(1740, '3-Hydroxy-3-methyl-2-oxobutanoic acid', 'C04181', 'C5H8O4', '132.0423'),
+(1741, '(S)-2-Acetolactate', 'C06010', 'C5H8O4', '132.0423'),
+(1742, 'alpha-Isopropylmalate', 'C02504', 'C7H12O5', '176.0685'),
+(1743, '2-Isopropylmaleate', 'C02631', 'C7H10O4', '158.0579'),
+(1744, '(2R,3S)-3-Isopropylmalate', 'C04411', 'C7H12O5', '176.0685'),
+(1745, '(2S)-2-Isopropyl-3-oxosuccinate', 'C04236', 'C7H10O5', '174.0528'),
+(1746, '4-Methyl-2-oxopentanoate', 'C00233', 'C6H10O3', '130.063'),
+(1747, 'L-Leucine', 'C00123', 'C6H13NO2', '131.0946'),
+(1748, 'L-Threonine', 'C00188', 'C4H9NO3', '119.0582'),
+(1749, 'D-erythro-3-Methylmalate', 'C06032', 'C5H8O5', '148.0372'),
+(1750, '2-Methylmaleate', 'C02226', 'C5H6O4', '130.0266'),
+(1751, '(R)-2-Methylmalate', 'C02612', 'C5H8O5', '148.0372'),
+(1752, 'Acetyl-CoA', 'C00024', 'C23H38N7O17P3S', '809.1258'),
+(1753, 'Pyruvate', 'C00022', 'C3H4O3', '88.016'),
+(1754, '2-Oxobutanoate', 'C00109', 'C4H6O3', '102.0317'),
+(1755, '(S)-2-Aceto-2-hydroxybutanoate', 'C06006', 'C6H10O4', '146.0579'),
+(1756, '(R)-3-Hydroxy-3-methyl-2-oxopentanoate', 'C14463', 'C6H10O4', '146.0579'),
+(1757, '(R)-2,3-Dihydroxy-3-methylpentanoate', 'C06007', 'C6H12O4', '148.0736'),
+(1758, '(S)-3-Methyl-2-oxopentanoic acid', 'C00671', 'C6H10O3', '130.063'),
+(1759, 'L-Isoleucine', 'C00407', 'C6H13NO2', '131.0946'),
+(1760, 'L-Valine', 'C00183', 'C5H11NO2', '117.079'),
+(1761, '3-Methyl-2-oxobutanoic acid', 'C00141', 'C5H8O3', '116.0473'),
+(1762, '(R)-2,3-Dihydroxy-3-methylbutanoate', 'C04272', 'C5H10O4', '134.0579');
 
 -- --------------------------------------------------------
 
@@ -4439,7 +4462,15 @@ INSERT INTO `nodeproteincorrelations` (`node_id`, `protein_id`) VALUES
 (3971, 3348),
 (3971, 3349),
 (3971, 3352),
-(3972, 3283);
+(3972, 3283),
+(4027, 3368),
+(4027, 3369),
+(4037, 3370),
+(4037, 3371),
+(4038, 3374),
+(4038, 3375),
+(4048, 3372),
+(4048, 3373);
 
 -- --------------------------------------------------------
 
@@ -4457,7 +4488,7 @@ CREATE TABLE IF NOT EXISTS `nodes` (
   `x` int(11) NOT NULL,
   `y` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4027 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4075 ;
 
 --
 -- Dumping data for table `nodes`
@@ -8264,7 +8295,55 @@ INSERT INTO `nodes` (`id`, `pathway_id`, `type`, `foreign_id`, `pathway_ref`, `x
 (4023, 17, 'pathway', 246, 0, 1325, 2625),
 (4024, 17, 'pathway', 247, 0, 1325, 2725),
 (4025, 17, 'pathway', 248, 0, 150, 1725),
-(4026, 17, 'pathway', 249, 0, 150, 2525);
+(4026, 17, 'pathway', 249, 0, 150, 2525),
+(4027, 111, 'protein', 0, 0, 325, 600),
+(4028, 111, 'protein', 0, 0, 450, 525),
+(4029, 111, 'protein', 0, 0, 675, 450),
+(4030, 111, 'protein', 0, 0, 925, 450),
+(4031, 111, 'protein', 0, 0, 1025, 525),
+(4032, 111, 'protein', 0, 0, 800, 725),
+(4033, 111, 'protein', 0, 0, 450, 725),
+(4034, 111, 'protein', 0, 0, 450, 875),
+(4035, 111, 'protein', 0, 0, 450, 1025),
+(4036, 111, 'protein', 0, 0, 450, 1175),
+(4037, 111, 'protein', 0, 0, 450, 1350),
+(4038, 111, 'protein', 0, 0, 675, 1350),
+(4039, 111, 'protein', 0, 0, 800, 1350),
+(4040, 111, 'protein', 0, 0, 925, 1250),
+(4041, 111, 'protein', 0, 0, 800, 1175),
+(4042, 111, 'protein', 0, 0, 800, 1025),
+(4043, 111, 'protein', 0, 0, 800, 875),
+(4044, 111, 'protein', 0, 0, 1125, 1250),
+(4045, 111, 'protein', 0, 0, 1325, 1250),
+(4046, 111, 'protein', 0, 0, 1425, 1325),
+(4047, 111, 'protein', 0, 0, 1425, 1475),
+(4048, 111, 'protein', 0, 0, 1425, 1650),
+(4049, 111, 'metabolite', 1740, 0, 800, 950),
+(4050, 111, 'metabolite', 1741, 0, 800, 800),
+(4051, 111, 'metabolite', 1742, 0, 1025, 1250),
+(4052, 111, 'metabolite', 1743, 0, 1225, 1250),
+(4053, 111, 'metabolite', 1744, 0, 1425, 1250),
+(4054, 111, 'metabolite', 1745, 0, 1425, 1400),
+(4055, 111, 'metabolite', 1746, 0, 1425, 1550),
+(4056, 111, 'metabolite', 1747, 0, 1425, 1750),
+(4057, 111, 'metabolite', 1748, 0, 225, 600),
+(4058, 111, 'metabolite', 1749, 0, 525, 450),
+(4059, 111, 'metabolite', 1750, 0, 800, 450),
+(4060, 111, 'metabolite', 1751, 0, 1025, 450),
+(4061, 111, 'metabolite', 1752, 0, 1125, 575),
+(4062, 111, 'metabolite', 1753, 0, 1025, 650),
+(4063, 111, 'metabolite', 1754, 0, 450, 600),
+(4064, 111, 'metabolite', 1755, 0, 450, 800),
+(4065, 111, 'metabolite', 1756, 0, 450, 950),
+(4066, 111, 'metabolite', 1757, 0, 450, 1100),
+(4067, 111, 'metabolite', 1758, 0, 450, 1250),
+(4068, 111, 'metabolite', 1759, 0, 450, 1450),
+(4069, 111, 'metabolite', 1760, 0, 800, 1450),
+(4070, 111, 'metabolite', 1761, 0, 800, 1250),
+(4071, 111, 'metabolite', 1762, 0, 800, 1100),
+(4072, 111, 'pathway', 250, 0, 800, 1650),
+(4073, 111, 'pathway', 251, 0, 1200, 975),
+(4074, 111, 'pathway', 252, 0, 225, 350);
 
 -- --------------------------------------------------------
 
@@ -8277,7 +8356,7 @@ CREATE TABLE IF NOT EXISTS `pathways` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=250 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=253 ;
 
 --
 -- Dumping data for table `pathways`
@@ -8406,7 +8485,10 @@ INSERT INTO `pathways` (`id`, `name`) VALUES
 (246, 'Biosynthesis of 12-, 14- and 16-membered macrolides'),
 (247, 'Biosynthesis of type II polyketide backbone'),
 (248, 'Terpenoid backbone biosynthesis'),
-(249, 'Citrate cycle (TCA cycle)');
+(249, 'Citrate cycle (TCA cycle)'),
+(250, 'Valine, leucine and isoleucine degradation'),
+(251, 'Pyruvate metabolism'),
+(252, 'Glycine, serine and threonine metabolism');
 
 -- --------------------------------------------------------
 
@@ -12764,7 +12846,7 @@ CREATE TABLE IF NOT EXISTS `proteins` (
   `ec_number` varchar(30) NOT NULL,
   `fasta` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3368 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3376 ;
 
 --
 -- Dumping data for table `proteins`
@@ -13991,7 +14073,15 @@ INSERT INTO `proteins` (`id`, `name`, `definition`, `species`, `kegg_link`, `mas
 (3364, 'Acadm', 'Medium-chain specific acyl-CoA dehydrogenase, mitochondrial', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11364', '46,481', 'P45952', '1.3.8.7', '>sp|P45952|ACADM_MOUSE Medium-chain specific acyl-CoA dehydrogenase, mitochondrial OS=Mus musculus GN=Acadm PE=1 SV=1\nMAAAFRRGCRVLRSVSHFECRTQHSKAAHKQEPGLGFSFELTEQQKEFQATARKFAREEI\nIPVAPEYDKSGEYPFPLIKRAWELGLINAHIPESCGGLGLGTFDACLITEELAYGCTGVQ\nTAIEANSLGQMPVILAGNDQQKKKYLGRMTEQPMMCAYCVTEPSAGSDVAAIKTKAEKKG\nDEYVINGQKMWITNGGKANWYFLLARSNPDPKVPASKAFTGFIVEADTPGIHIGKKELNM\nGQRCSDTRGIAFEDVRVPKENVLIGEGAGFKIAMGAFDRTRPTVAAGAVGLAQRALDEAT\nKYALDRKTFGKLLVEHQGVSFLLAEMAMKVELARLSYQRAAWEVDSGRRNTYYASIAKAF\nAGDIANQLATDAVQIFGGYGFNTEYPVEKLMRDAKIYQIYEGTAQIQRLIIAREHIEKYK\nN'),
 (3365, 'Acadm', 'Medium-chain specific acyl-CoA dehydrogenase, mitochondrial', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11364', '46,481', 'P45952', '1.3.8.7', '>sp|P45952|ACADM_MOUSE Medium-chain specific acyl-CoA dehydrogenase, mitochondrial OS=Mus musculus GN=Acadm PE=1 SV=1\nMAAAFRRGCRVLRSVSHFECRTQHSKAAHKQEPGLGFSFELTEQQKEFQATARKFAREEI\nIPVAPEYDKSGEYPFPLIKRAWELGLINAHIPESCGGLGLGTFDACLITEELAYGCTGVQ\nTAIEANSLGQMPVILAGNDQQKKKYLGRMTEQPMMCAYCVTEPSAGSDVAAIKTKAEKKG\nDEYVINGQKMWITNGGKANWYFLLARSNPDPKVPASKAFTGFIVEADTPGIHIGKKELNM\nGQRCSDTRGIAFEDVRVPKENVLIGEGAGFKIAMGAFDRTRPTVAAGAVGLAQRALDEAT\nKYALDRKTFGKLLVEHQGVSFLLAEMAMKVELARLSYQRAAWEVDSGRRNTYYASIAKAF\nAGDIANQLATDAVQIFGGYGFNTEYPVEKLMRDAKIYQIYEGTAQIQRLIIAREHIEKYK\nN'),
 (3366, 'Acads', 'Short-chain specific acyl-CoA dehydrogenase, mitochondrial', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11409', '44,890', 'Q07417', '1.3.8.1', '>sp|Q07417|ACADS_MOUSE Short-chain specific acyl-CoA dehydrogenase, mitochondrial OS=Mus musculus GN=Acads PE=1 SV=2\nMAAALLARARGPLRRALGVRDWRRLHTVYQSVELPETHQMLRQTCRDFAEKELVPIAAQL\nDREHLFPTAQVKKMGELGLLAMDVPEELSGAGLDYLAYSIALEEISRACASTGVIMSVNN\nSLYLGPILKFGSAQQKQQWITPFTNGDKIGCFALSEPGNGSDAGAASTTAREEGDSWVLN\nGTKAWITNSWEASATVVFASTDRSRQNKGISAFLVPMPTPGLTLGKKEDKLGIRASSTAN\nLIFEDCRIPKENLLGEPGMGFKIAMQTLDMGRIGIASQALGIAQASLDCAVKYAENRNAF\nGAPLTKLQNIQFKLADMALALESARLLTWRAAMLKDNKKPFTKESAMAKLAASEAATAIS\nHQAIQILGGMGYVTEMPAERYYRDARITEIYEGTSEIQRLVIAGHLLRSYRS'),
-(3367, 'Acads', 'Short-chain specific acyl-CoA dehydrogenase, mitochondrial', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11409', '44,890', 'Q07417', '1.3.8.1', '>sp|Q07417|ACADS_MOUSE Short-chain specific acyl-CoA dehydrogenase, mitochondrial OS=Mus musculus GN=Acads PE=1 SV=2\nMAAALLARARGPLRRALGVRDWRRLHTVYQSVELPETHQMLRQTCRDFAEKELVPIAAQL\nDREHLFPTAQVKKMGELGLLAMDVPEELSGAGLDYLAYSIALEEISRACASTGVIMSVNN\nSLYLGPILKFGSAQQKQQWITPFTNGDKIGCFALSEPGNGSDAGAASTTAREEGDSWVLN\nGTKAWITNSWEASATVVFASTDRSRQNKGISAFLVPMPTPGLTLGKKEDKLGIRASSTAN\nLIFEDCRIPKENLLGEPGMGFKIAMQTLDMGRIGIASQALGIAQASLDCAVKYAENRNAF\nGAPLTKLQNIQFKLADMALALESARLLTWRAAMLKDNKKPFTKESAMAKLAASEAATAIS\nHQAIQILGGMGYVTEMPAERYYRDARITEIYEGTSEIQRLVIAGHLLRSYRS');
+(3367, 'Acads', 'Short-chain specific acyl-CoA dehydrogenase, mitochondrial', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:11409', '44,890', 'Q07417', '1.3.8.1', '>sp|Q07417|ACADS_MOUSE Short-chain specific acyl-CoA dehydrogenase, mitochondrial OS=Mus musculus GN=Acads PE=1 SV=2\nMAAALLARARGPLRRALGVRDWRRLHTVYQSVELPETHQMLRQTCRDFAEKELVPIAAQL\nDREHLFPTAQVKKMGELGLLAMDVPEELSGAGLDYLAYSIALEEISRACASTGVIMSVNN\nSLYLGPILKFGSAQQKQQWITPFTNGDKIGCFALSEPGNGSDAGAASTTAREEGDSWVLN\nGTKAWITNSWEASATVVFASTDRSRQNKGISAFLVPMPTPGLTLGKKEDKLGIRASSTAN\nLIFEDCRIPKENLLGEPGMGFKIAMQTLDMGRIGIASQALGIAQASLDCAVKYAENRNAF\nGAPLTKLQNIQFKLADMALALESARLLTWRAAMLKDNKKPFTKESAMAKLAASEAATAIS\nHQAIQILGGMGYVTEMPAERYYRDARITEIYEGTSEIQRLVIAGHLLRSYRS'),
+(3368, 'Sds', 'L-serine dehydratase/L-threonine deaminase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:231691', '34,593', 'Q8VBT2', '4.3.1.17', '>sp|Q8VBT2|SDHL_MOUSE L-serine dehydratase/L-threonine deaminase OS=Mus musculus GN=Sds PE=1 SV=3\nMAAQESLHVKTPLRDSMALSKLAGTSVFLKMDSSQPSGSFKIRGIGHLCKMKAKQGCRHF\nVCSSAGNAGMATAYAARRLGIPATIVVPNTTPALTIERLKNEGATVEVVGEMLDEAIQVA\nKALEKNNPGWVYISPFDDPLIWEGHTSLVKELKETLSAKPGAIVLSVGGGGLLCGVVQGL\nREVGWEDVPIIAMETFGAHSFHAAIKEGKLVTLPKITSVAKALGVNTVGAQTLKLFYEHP\nIFSEVISDQEAVSALEKFVDDEKILVEPACGAALAAVYSRVVCRLQDEGRLQTPLASLVV\nIVCGGSNISLAQLQALKVQLGLNGLPE'),
+(3369, 'Sdsl', 'Serine dehydratase-like', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:257635', '34,732', 'Q8R238', '4.3.1.17', '>sp|Q8R238|SDSL_MOUSE Serine dehydratase-like OS=Mus musculus GN=Sdsl PE=1 SV=1\nMEGALAERVGAEPFHRVTPLLESWALSQVAGMPVFLKYENVQIAGSFKIRGIGHFCQQMA\nKRGCRHLVCSSGGNAGIAAAYSARKLGIPVTIVLPEGTSVQVVRRLEGEGAEVQLTGKVW\nDEANVKAQELATRDGWVNVSPFDHPLIWEGHASLVRELKESLGTPPGAVVLAVGGGGLLA\nGVTAGLLEVGWQHVPIVAMETRGAHSFNSALQAGRPVTLPDITSVAKSLGAKTVAARTLE\nCAKECEVLSEVVEDREAVSAVQRFLDDERMLVEPACGAALAAIYSGILWRLQAEGRLSSA\nLASVVVIVCGGNNISSQQLQELKIQLGCS'),
+(3370, 'Bcat1', 'Branched-chain-amino-acid aminotransferase, cytosolic', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:12035', '49,901', 'Q8CBC8', '2.6.1.42', '>tr|Q8CBC8|Q8CBC8_MOUSE Branched-chain-amino-acid aminotransferase, cytosolic OS=Mus musculus GN=Bcat1 PE=1 SV=1\nMLHRLRSPLRRVLAGGSPIVPLSPATPNCSPGLSGSAVRHESPLCHVFPRSRSFVMACLP\nRATATLARQDCSNGCSAPFAGERGSEEVAETFRAKDLIITPATVLKEKPDPDSLVFGATF\nTDHMLTVEWSSASGWEKPHIKPFGNLPIHPAASVLHYAVELFEGLKAFRGVDNKIRLFRP\nDLNMDRMCRSAVRTTLPMFDKEELLKCILQLLQIDQEWVPYSTSASLYIRPTFIGTEPSL\nGVKKPSKALLFVILSPVGPYFSSGSFTPVSLWANPKYIRAWKGGTGDCKMGGNYGASLLA\nQCEAVENGCQQVLWLYGKDNQITEVGTMNLFLYWINEDGEEELATPPLDGIILPGVTRQS\nILELAQQWGEFKVCERHLTMDDLATALEGNRVKEMFGSGTACVVCPVSDILYKGQMLHIP\nTMENGPKLASRILGKLTDIQYGRVESDWTIELP'),
+(3371, 'Bcat2', 'Branched-chain-amino-acid aminotransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:12036', '39,774', 'O88374', '2.6.1.42', '>tr|O88374|O88374_MOUSE Branched-chain-amino-acid aminotransferase OS=Mus musculus GN=Bcat2 PE=1 SV=1\nMTKEPQKKPAPSQALLFGKTFTDHMLMVEWNNKAGWGPPRIQPFQNLTLHPACSGLHYSL\nQLFEGLKAYKGGDQQVRLFRPWLNMDRMLRSARRLCLPDFDKQELLECIRQLIEVDKDWV\nPDGNGTSLYVRPVLIGNEPSLGVGMVTQALLYVILCPVGSYFPGDSMTPVSLLADPSFVR\nAWIGGVGDCKLGGNYGPTVAVQREAQKRGCEQVLWLYGPDHQLTEVGTMNIFVYWTHEDG\nVLELVTPPLNGVILPGVVRQSLLDLARTWGEFRVAERKVTMKELKRALEEGRVREVFGSG\nTACQVCPVHQILYEGKQLHIPTMENGPELILRFQKELKAIQYGASAHDWMFRV'),
+(3372, 'Bcat1', 'Branched-chain-amino-acid aminotransferase, cytosolic', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:12035', '49,901', 'Q8CBC8', '2.6.1.42', '>tr|Q8CBC8|Q8CBC8_MOUSE Branched-chain-amino-acid aminotransferase, cytosolic OS=Mus musculus GN=Bcat1 PE=1 SV=1\nMLHRLRSPLRRVLAGGSPIVPLSPATPNCSPGLSGSAVRHESPLCHVFPRSRSFVMACLP\nRATATLARQDCSNGCSAPFAGERGSEEVAETFRAKDLIITPATVLKEKPDPDSLVFGATF\nTDHMLTVEWSSASGWEKPHIKPFGNLPIHPAASVLHYAVELFEGLKAFRGVDNKIRLFRP\nDLNMDRMCRSAVRTTLPMFDKEELLKCILQLLQIDQEWVPYSTSASLYIRPTFIGTEPSL\nGVKKPSKALLFVILSPVGPYFSSGSFTPVSLWANPKYIRAWKGGTGDCKMGGNYGASLLA\nQCEAVENGCQQVLWLYGKDNQITEVGTMNLFLYWINEDGEEELATPPLDGIILPGVTRQS\nILELAQQWGEFKVCERHLTMDDLATALEGNRVKEMFGSGTACVVCPVSDILYKGQMLHIP\nTMENGPKLASRILGKLTDIQYGRVESDWTIELP'),
+(3373, 'Bcat2', 'Branched-chain-amino-acid aminotransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:12036', '39,774', 'O88374', '2.6.1.42', '>tr|O88374|O88374_MOUSE Branched-chain-amino-acid aminotransferase OS=Mus musculus GN=Bcat2 PE=1 SV=1\nMTKEPQKKPAPSQALLFGKTFTDHMLMVEWNNKAGWGPPRIQPFQNLTLHPACSGLHYSL\nQLFEGLKAYKGGDQQVRLFRPWLNMDRMLRSARRLCLPDFDKQELLECIRQLIEVDKDWV\nPDGNGTSLYVRPVLIGNEPSLGVGMVTQALLYVILCPVGSYFPGDSMTPVSLLADPSFVR\nAWIGGVGDCKLGGNYGPTVAVQREAQKRGCEQVLWLYGPDHQLTEVGTMNIFVYWTHEDG\nVLELVTPPLNGVILPGVVRQSLLDLARTWGEFRVAERKVTMKELKRALEEGRVREVFGSG\nTACQVCPVHQILYEGKQLHIPTMENGPELILRFQKELKAIQYGASAHDWMFRV'),
+(3374, 'Bcat1', 'Branched-chain-amino-acid aminotransferase, cytosolic', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:12035', '49,901', 'Q8CBC8', '2.6.1.42', '>tr|Q8CBC8|Q8CBC8_MOUSE Branched-chain-amino-acid aminotransferase, cytosolic OS=Mus musculus GN=Bcat1 PE=1 SV=1\nMLHRLRSPLRRVLAGGSPIVPLSPATPNCSPGLSGSAVRHESPLCHVFPRSRSFVMACLP\nRATATLARQDCSNGCSAPFAGERGSEEVAETFRAKDLIITPATVLKEKPDPDSLVFGATF\nTDHMLTVEWSSASGWEKPHIKPFGNLPIHPAASVLHYAVELFEGLKAFRGVDNKIRLFRP\nDLNMDRMCRSAVRTTLPMFDKEELLKCILQLLQIDQEWVPYSTSASLYIRPTFIGTEPSL\nGVKKPSKALLFVILSPVGPYFSSGSFTPVSLWANPKYIRAWKGGTGDCKMGGNYGASLLA\nQCEAVENGCQQVLWLYGKDNQITEVGTMNLFLYWINEDGEEELATPPLDGIILPGVTRQS\nILELAQQWGEFKVCERHLTMDDLATALEGNRVKEMFGSGTACVVCPVSDILYKGQMLHIP\nTMENGPKLASRILGKLTDIQYGRVESDWTIELP'),
+(3375, 'Bcat2', 'Branched-chain-amino-acid aminotransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:12036', '39,774', 'O88374', '2.6.1.42', '>tr|O88374|O88374_MOUSE Branched-chain-amino-acid aminotransferase OS=Mus musculus GN=Bcat2 PE=1 SV=1\nMTKEPQKKPAPSQALLFGKTFTDHMLMVEWNNKAGWGPPRIQPFQNLTLHPACSGLHYSL\nQLFEGLKAYKGGDQQVRLFRPWLNMDRMLRSARRLCLPDFDKQELLECIRQLIEVDKDWV\nPDGNGTSLYVRPVLIGNEPSLGVGMVTQALLYVILCPVGSYFPGDSMTPVSLLADPSFVR\nAWIGGVGDCKLGGNYGPTVAVQREAQKRGCEQVLWLYGPDHQLTEVGTMNIFVYWTHEDG\nVLELVTPPLNGVILPGVVRQSLLDLARTWGEFRVAERKVTMKELKRALEEGRVREVFGSG\nTACQVCPVHQILYEGKQLHIPTMENGPELILRFQKELKAIQYGASAHDWMFRV');
 
 -- --------------------------------------------------------
 
@@ -14007,7 +14097,7 @@ CREATE TABLE IF NOT EXISTS `reactions` (
   `anchor_out` enum('left','top','right','bottom') NOT NULL,
   `reversible` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1792 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1814 ;
 
 --
 -- Dumping data for table `reactions`
@@ -15797,7 +15887,29 @@ INSERT INTO `reactions` (`id`, `node_id`, `anchor_in`, `anchor_out`, `reversible
 (1788, 3969, 'top', 'bottom', 1),
 (1789, 3970, 'right', 'left', 0),
 (1790, 3971, 'top', 'bottom', 1),
-(1791, 3972, 'left', 'right', 1);
+(1791, 3972, 'left', 'right', 1),
+(1792, 4027, 'left', 'right', 0),
+(1793, 4028, 'top', 'bottom', 0),
+(1794, 4029, 'right', 'left', 0),
+(1795, 4030, 'right', 'left', 0),
+(1796, 4031, 'bottom', 'top', 0),
+(1797, 4032, 'top', 'bottom', 0),
+(1798, 4033, 'top', 'bottom', 0),
+(1799, 4034, 'top', 'bottom', 1),
+(1800, 4035, 'bottom', 'top', 1),
+(1801, 4036, 'top', 'bottom', 0),
+(1802, 4037, 'top', 'bottom', 0),
+(1803, 4038, 'top', 'bottom', 0),
+(1804, 4039, 'top', 'bottom', 1),
+(1805, 4040, 'left', 'right', 0),
+(1806, 4041, 'top', 'bottom', 0),
+(1807, 4042, 'bottom', 'top', 1),
+(1808, 4043, 'top', 'bottom', 1),
+(1809, 4044, 'left', 'right', 1),
+(1810, 4045, 'right', 'left', 1),
+(1811, 4046, 'top', 'bottom', 1),
+(1812, 4047, 'top', 'bottom', 0),
+(1813, 4048, 'bottom', 'top', 1);
 
 -- --------------------------------------------------------
 
@@ -15813,7 +15925,7 @@ CREATE TABLE IF NOT EXISTS `reagents` (
   `type` enum('educt','product') NOT NULL,
   `anchor` enum('left','top','right','bottom') NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3782 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3828 ;
 
 --
 -- Dumping data for table `reagents`
@@ -19588,7 +19700,53 @@ INSERT INTO `reagents` (`id`, `reaction_id`, `node_id`, `type`, `anchor`) VALUES
 (3778, 1790, 4000, 'educt', 'bottom'),
 (3779, 1790, 3986, 'product', 'top'),
 (3780, 1791, 4002, 'educt', 'right'),
-(3781, 1791, 3981, 'product', 'left');
+(3781, 1791, 3981, 'product', 'left'),
+(3782, 1792, 4057, 'educt', 'right'),
+(3783, 1792, 4063, 'product', 'left'),
+(3784, 1793, 4058, 'educt', 'left'),
+(3785, 1793, 4063, 'product', 'top'),
+(3786, 1794, 4059, 'educt', 'left'),
+(3787, 1794, 4058, 'product', 'right'),
+(3788, 1795, 4060, 'educt', 'left'),
+(3789, 1795, 4059, 'product', 'right'),
+(3790, 1796, 4061, 'educt', 'left'),
+(3791, 1796, 4062, 'educt', 'top'),
+(3792, 1796, 4060, 'product', 'bottom'),
+(3793, 1797, 4062, 'educt', 'bottom'),
+(3794, 1797, 4050, 'product', 'top'),
+(3795, 1798, 4063, 'educt', 'bottom'),
+(3796, 1798, 4062, 'educt', 'left'),
+(3797, 1798, 4064, 'product', 'top'),
+(3798, 1799, 4064, 'educt', 'bottom'),
+(3799, 1799, 4065, 'product', 'top'),
+(3800, 1800, 4066, 'educt', 'top'),
+(3801, 1800, 4065, 'product', 'bottom'),
+(3802, 1801, 4066, 'educt', 'bottom'),
+(3803, 1801, 4067, 'product', 'top'),
+(3804, 1802, 4067, 'educt', 'bottom'),
+(3805, 1802, 4068, 'product', 'top'),
+(3806, 1803, 4070, 'educt', 'left'),
+(3807, 1803, 4069, 'product', 'left'),
+(3808, 1804, 4070, 'educt', 'bottom'),
+(3809, 1804, 4069, 'product', 'top'),
+(3810, 1805, 4070, 'educt', 'right'),
+(3811, 1805, 4051, 'product', 'left'),
+(3812, 1806, 4071, 'educt', 'bottom'),
+(3813, 1806, 4070, 'product', 'top'),
+(3814, 1807, 4071, 'educt', 'top'),
+(3815, 1807, 4049, 'product', 'bottom'),
+(3816, 1808, 4050, 'educt', 'bottom'),
+(3817, 1808, 4049, 'product', 'top'),
+(3818, 1809, 4051, 'educt', 'right'),
+(3819, 1809, 4052, 'product', 'left'),
+(3820, 1810, 4053, 'educt', 'left'),
+(3821, 1810, 4052, 'product', 'right'),
+(3822, 1811, 4053, 'educt', 'bottom'),
+(3823, 1811, 4054, 'product', 'top'),
+(3824, 1812, 4054, 'educt', 'bottom'),
+(3825, 1812, 4055, 'product', 'top'),
+(3826, 1813, 4056, 'educt', 'top'),
+(3827, 1813, 4055, 'product', 'bottom');
 
 -- --------------------------------------------------------
 
@@ -19611,7 +19769,7 @@ CREATE TABLE IF NOT EXISTS `request_counter` (
 INSERT INTO `request_counter` (`id`, `month_year`, `number`) VALUES
 (1, '2015-11-01', 163),
 (2, '2015-12-01', 880),
-(3, '2016-02-01', 191);
+(3, '2016-02-01', 194);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
