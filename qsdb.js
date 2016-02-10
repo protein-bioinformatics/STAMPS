@@ -79,7 +79,7 @@ infobox_offset_x = 20;
 preview_element = 0;
 
 
-pathways = [[118, "Lysine biosynthesis"],
+pathways = [[258, "Lysine degradation"],
             [15, "Alanine, aspartate and glutamate metabolism"],
             [163, "alpha-Linolenic acid metabolism"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
@@ -101,6 +101,7 @@ pathways = [[118, "Lysine biosynthesis"],
             [9, "Glyoxylate and dicarboxylate metabolism"],
             [40, "Inositol phosphate metabolism"],
             [161, "Linoleic acid metabolism"],
+            [118, "Lysine biosynthesis"],
             [48, "Pentose and glucuronate interconversions"],
             [3, "Pentose phosphate"],
             [155, "Primary bile acid biosynthesis"],
