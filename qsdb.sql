@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Feb 10, 2016 at 10:13 AM
+-- Generation Time: Feb 10, 2016 at 10:21 AM
 -- Server version: 5.5.47-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.14
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `metabolites` (
   `formula` varchar(100) NOT NULL,
   `exact_mass` varchar(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1763 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1798 ;
 
 --
 -- Dumping data for table `metabolites`
@@ -1387,7 +1387,42 @@ INSERT INTO `metabolites` (`id`, `name`, `c_number`, `formula`, `exact_mass`) VA
 (1759, 'L-Isoleucine', 'C00407', 'C6H13NO2', '131.0946'),
 (1760, 'L-Valine', 'C00183', 'C5H11NO2', '117.079'),
 (1761, '3-Methyl-2-oxobutanoic acid', 'C00141', 'C5H8O3', '116.0473'),
-(1762, '(R)-2,3-Dihydroxy-3-methylbutanoate', 'C04272', 'C5H10O4', '134.0579');
+(1762, '(R)-2,3-Dihydroxy-3-methylbutanoate', 'C04272', 'C5H10O4', '134.0579'),
+(1763, '(R)-2-Hydroxybutane-1,2,4-tricarboxylate', 'C01251', 'C7H10O7', '206.0427'),
+(1764, 'Acetyl-CoA', 'C00024', 'C23H38N7O17P3S', '809.1258'),
+(1765, 'L-Aspartate', 'C00049', 'C4H7NO4', '133.0375'),
+(1766, '4-Phospho-L-aspartate', 'C03082', 'C4H8NO7P', '213.0038'),
+(1767, 'L-Homoserine', 'C00263', 'C4H9NO3', '119.0582'),
+(1768, 'L-Aspartate 4-semialdehyde', 'C00441', 'C4H7NO3', '117.0426'),
+(1769, '2,3,4,5-Tetrahydrodipicolinate', 'C03972', 'C7H9NO4', '171.0532'),
+(1770, 'N-Acetyl-L-2-amino-6-oxopimelate', 'C05539', 'C9H13NO6', '231.0743'),
+(1771, 'N6-Acetyl-LL-2,6-diaminoheptanedioate', 'C04390', 'C9H16N2O5', '232.1059'),
+(1772, 'N-Succinyl-2-L-amino-6-oxoheptanedioate', 'C04462', 'C11H15NO8', '289.0798'),
+(1773, 'N-Succinyl-LL-2,6-diaminoheptanedioate', 'C04421', 'C11H18N2O7', '290.1114'),
+(1774, 'LL-2,6-Diaminoheptanedioate', 'C00666', 'C7H14N2O4', '190.0954'),
+(1775, 'meso-2,6-Diaminoheptanedioate', 'C00680', 'C7H14N2O4', '190.0954'),
+(1776, 'L-2-Amino-6-oxoheptanedioate', 'C03871', 'C7H11NO5', '189.0637'),
+(1777, 'UDP-N-acetylmuramoyl-L-alanyl-gamma-D-glutamyl-meso-2,6-diaminopimelate', 'C04877', 'C35H55N7O26P2', '1051.2672'),
+(1778, 'L-Lysine', 'C00047', 'C6H14N2O2', '146.1055'),
+(1779, 'N6-(L-1,3-Dicarboxypropyl)-L-lysine', 'C00449', 'C11H20N2O6', '276.1321'),
+(1780, 'L-2-Aminoadipate 6-semialdehyde', 'C04076', 'C6H11NO3', '145.0739'),
+(1781, 'alpha-Aminoadipoyl-S-acyl enzyme', 'C05535', 'C6H10NO3SR', '-'),
+(1782, 'L-2-Aminoadipate adenylate', 'C05560', 'C16H23N6O10P', '490.1213'),
+(1783, 'L-2-Aminoadipate', 'C00956', 'C6H11NO4', '161.0688'),
+(1784, '2-Oxoadipate', 'C00322', 'C6H8O5', '160.0372'),
+(1785, 'Homoisocitrate', 'C05662', 'C7H10O7', '206.0427'),
+(1786, '(Z)-But-1-ene-1,2,4-tricarboxylate', 'C04002', 'C7H8O6', '188.0321'),
+(1787, 'LysW-gamma-L-lysine', 'C19889', 'C11H20N3O5R', '-'),
+(1788, 'LysW-gamma-L-alpha-aminoadipate 6-semialdehyde', 'C19888', 'C11H17N2O6R', '-'),
+(1789, 'LysW-gamma-L-alpha-aminoadipyl 6-phosphate', 'C19887', 'C11H18N2O10PR', '-'),
+(1790, 'LysW-gamma-L-alpha-aminoadipate', 'C19886', 'C11H17N2O7R', '-'),
+(1791, 'UDP-N-acetylmuramoyl-L-alanyl-D-glutamyl-6-carboxy-L-lysyl-D-alanyl-D-alanine', 'C04882', 'C41H65N9O28P2', '1193.3414'),
+(1792, '(2R,3R)-3-Methylornithinyl-N6-lysine', 'C20278', 'C12H26N4O3', '274.2005'),
+(1793, '(2R,3R)-3-Methylornithine', 'C20277', 'C6H14N2O2', '146.1055'),
+(1794, '(2R,3R)-3-Methylglutamyl-5-semialdehyde-N6-lysine', 'C20279', 'C12H23N3O4', '273.1689'),
+(1795, 'L-Pyrrolysine', 'C16138', 'C12H21N3O3', '255.1583'),
+(1796, '(2S,4S)-4-Hydroxy-2,3,4,5-tetrahydrodipicolinate', 'C20258', 'C7H9NO5', '187.0481'),
+(1797, '2-Oxoglutarate', 'C00026', 'C5H6O5', '146.0215');
 
 -- --------------------------------------------------------
 
@@ -4470,7 +4505,11 @@ INSERT INTO `nodeproteincorrelations` (`node_id`, `protein_id`) VALUES
 (4038, 3374),
 (4038, 3375),
 (4048, 3372),
-(4048, 3373);
+(4048, 3373),
+(4100, 3376),
+(4101, 3379),
+(4103, 3377),
+(4104, 3378);
 
 -- --------------------------------------------------------
 
@@ -4488,7 +4527,7 @@ CREATE TABLE IF NOT EXISTS `nodes` (
   `x` int(11) NOT NULL,
   `y` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4075 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4155 ;
 
 --
 -- Dumping data for table `nodes`
@@ -8343,7 +8382,87 @@ INSERT INTO `nodes` (`id`, `pathway_id`, `type`, `foreign_id`, `pathway_ref`, `x
 (4071, 111, 'metabolite', 1762, 0, 800, 1100),
 (4072, 111, 'pathway', 250, 0, 800, 1650),
 (4073, 111, 'pathway', 251, 0, 1200, 975),
-(4074, 111, 'pathway', 252, 0, 225, 350);
+(4074, 111, 'pathway', 252, 0, 225, 350),
+(4075, 118, 'protein', 0, 0, 1900, 1175),
+(4076, 118, 'protein', 0, 0, 1800, 1250),
+(4077, 118, 'protein', 0, 0, 1600, 1250),
+(4078, 118, 'protein', 0, 0, 1350, 1250),
+(4079, 118, 'protein', 0, 0, 525, 475),
+(4080, 118, 'protein', 0, 0, 775, 475),
+(4081, 118, 'protein', 0, 0, 900, 375),
+(4082, 118, 'protein', 0, 0, 1050, 475),
+(4083, 118, 'protein', 0, 0, 1575, 300),
+(4084, 118, 'protein', 0, 0, 1550, 450),
+(4085, 118, 'protein', 0, 0, 1950, 300),
+(4086, 118, 'protein', 0, 0, 2125, 475),
+(4087, 118, 'protein', 0, 0, 1800, 450),
+(4088, 118, 'protein', 0, 0, 1950, 550),
+(4089, 118, 'protein', 0, 0, 1675, 625),
+(4090, 118, 'protein', 0, 0, 1950, 725),
+(4091, 118, 'protein', 0, 0, 2125, 800),
+(4092, 118, 'protein', 0, 0, 1950, 950),
+(4093, 118, 'protein', 0, 0, 1425, 650),
+(4094, 118, 'protein', 0, 0, 1675, 800),
+(4095, 118, 'protein', 0, 0, 2475, 800),
+(4096, 118, 'protein', 0, 0, 2025, 1075),
+(4097, 118, 'protein', 0, 0, 2175, 1275),
+(4098, 118, 'protein', 0, 0, 1825, 1075),
+(4099, 118, 'protein', 0, 0, 1600, 1075),
+(4100, 118, 'protein', 0, 0, 1350, 1075),
+(4101, 118, 'protein', 0, 0, 1125, 1075),
+(4102, 118, 'protein', 0, 0, 1125, 1250),
+(4103, 118, 'protein', 0, 0, 1025, 1175),
+(4104, 118, 'protein', 0, 0, 900, 1250),
+(4105, 118, 'protein', 0, 0, 775, 1175),
+(4106, 118, 'protein', 0, 0, 775, 975),
+(4107, 118, 'protein', 0, 0, 650, 900),
+(4108, 118, 'protein', 0, 0, 425, 900),
+(4109, 118, 'protein', 0, 0, 2375, 1275),
+(4110, 118, 'protein', 0, 0, 2575, 1275),
+(4111, 118, 'protein', 0, 0, 1300, 475),
+(4112, 118, 'metabolite', 1763, 0, 550, 900),
+(4113, 118, 'metabolite', 1764, 0, 350, 975),
+(4114, 118, 'metabolite', 1765, 0, 400, 475),
+(4115, 118, 'metabolite', 1766, 0, 650, 475),
+(4116, 118, 'metabolite', 1767, 0, 900, 275),
+(4117, 118, 'metabolite', 1768, 0, 900, 475),
+(4118, 118, 'metabolite', 1769, 0, 1425, 475),
+(4119, 118, 'metabolite', 1770, 0, 1800, 300),
+(4120, 118, 'metabolite', 1771, 0, 2125, 300),
+(4121, 118, 'metabolite', 1772, 0, 1675, 450),
+(4122, 118, 'metabolite', 1773, 0, 1950, 450),
+(4123, 118, 'metabolite', 1774, 0, 1950, 625),
+(4124, 118, 'metabolite', 1775, 0, 1950, 800),
+(4125, 118, 'metabolite', 1776, 0, 1425, 800),
+(4126, 118, 'metabolite', 1777, 0, 2300, 800),
+(4127, 118, 'metabolite', 1778, 0, 1950, 1075),
+(4128, 118, 'metabolite', 1779, 0, 1700, 1075),
+(4129, 118, 'metabolite', 1780, 0, 1475, 1075),
+(4130, 118, 'metabolite', 1781, 0, 1250, 1075),
+(4131, 118, 'metabolite', 1782, 0, 1025, 1075),
+(4132, 118, 'metabolite', 1783, 0, 1025, 1250),
+(4133, 118, 'metabolite', 1784, 0, 775, 1250),
+(4134, 118, 'metabolite', 1785, 0, 775, 1075),
+(4135, 118, 'metabolite', 1786, 0, 775, 900),
+(4136, 118, 'metabolite', 1787, 0, 1900, 1250),
+(4137, 118, 'metabolite', 1788, 0, 1700, 1250),
+(4138, 118, 'metabolite', 1789, 0, 1475, 1250),
+(4139, 118, 'metabolite', 1790, 0, 1250, 1250),
+(4140, 118, 'metabolite', 1791, 0, 2650, 800),
+(4141, 118, 'metabolite', 1792, 0, 2275, 1275),
+(4142, 118, 'metabolite', 1793, 0, 2100, 1175),
+(4143, 118, 'metabolite', 1794, 0, 2475, 1275),
+(4144, 118, 'metabolite', 1795, 0, 2675, 1275),
+(4145, 118, 'metabolite', 1796, 0, 1175, 475),
+(4146, 118, 'metabolite', 1797, 0, 300, 900),
+(4147, 118, 'pathway', 253, 0, 300, 800),
+(4148, 118, 'pathway', 254, 0, 425, 600),
+(4149, 118, 'pathway', 255, 0, 2450, 1000),
+(4150, 118, 'pathway', 256, 0, 600, 1125),
+(4151, 118, 'pathway', 257, 0, 300, 1075),
+(4152, 118, 'pathway', 258, 0, 2400, 900),
+(4153, 118, 'pathway', 259, 0, 2875, 800),
+(4154, 118, 'pathway', 260, 0, 1175, 225);
 
 -- --------------------------------------------------------
 
@@ -8356,7 +8475,7 @@ CREATE TABLE IF NOT EXISTS `pathways` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=253 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=261 ;
 
 --
 -- Dumping data for table `pathways`
@@ -8488,7 +8607,15 @@ INSERT INTO `pathways` (`id`, `name`) VALUES
 (249, 'Citrate cycle (TCA cycle)'),
 (250, 'Valine, leucine and isoleucine degradation'),
 (251, 'Pyruvate metabolism'),
-(252, 'Glycine, serine and threonine metabolism');
+(252, 'Glycine, serine and threonine metabolism'),
+(253, 'Citrate cycle (TCA cycle)'),
+(254, 'Alanine, aspartate and glutamate metabolism'),
+(255, 'Tropane, piperidine and pyridine alkaloid biosynthesis'),
+(256, 'Pyruvate metabolism'),
+(257, 'Glycolysis / Gluconeogenesis'),
+(258, 'Lysine degradation'),
+(259, 'Peptidoglycan biosynthesis'),
+(260, 'Glycine, serine and threonine metabolism');
 
 -- --------------------------------------------------------
 
@@ -12846,7 +12973,7 @@ CREATE TABLE IF NOT EXISTS `proteins` (
   `ec_number` varchar(30) NOT NULL,
   `fasta` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3376 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3380 ;
 
 --
 -- Dumping data for table `proteins`
@@ -14081,7 +14208,12 @@ INSERT INTO `proteins` (`id`, `name`, `definition`, `species`, `kegg_link`, `mas
 (3372, 'Bcat1', 'Branched-chain-amino-acid aminotransferase, cytosolic', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:12035', '49,901', 'Q8CBC8', '2.6.1.42', '>tr|Q8CBC8|Q8CBC8_MOUSE Branched-chain-amino-acid aminotransferase, cytosolic OS=Mus musculus GN=Bcat1 PE=1 SV=1\nMLHRLRSPLRRVLAGGSPIVPLSPATPNCSPGLSGSAVRHESPLCHVFPRSRSFVMACLP\nRATATLARQDCSNGCSAPFAGERGSEEVAETFRAKDLIITPATVLKEKPDPDSLVFGATF\nTDHMLTVEWSSASGWEKPHIKPFGNLPIHPAASVLHYAVELFEGLKAFRGVDNKIRLFRP\nDLNMDRMCRSAVRTTLPMFDKEELLKCILQLLQIDQEWVPYSTSASLYIRPTFIGTEPSL\nGVKKPSKALLFVILSPVGPYFSSGSFTPVSLWANPKYIRAWKGGTGDCKMGGNYGASLLA\nQCEAVENGCQQVLWLYGKDNQITEVGTMNLFLYWINEDGEEELATPPLDGIILPGVTRQS\nILELAQQWGEFKVCERHLTMDDLATALEGNRVKEMFGSGTACVVCPVSDILYKGQMLHIP\nTMENGPKLASRILGKLTDIQYGRVESDWTIELP'),
 (3373, 'Bcat2', 'Branched-chain-amino-acid aminotransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:12036', '39,774', 'O88374', '2.6.1.42', '>tr|O88374|O88374_MOUSE Branched-chain-amino-acid aminotransferase OS=Mus musculus GN=Bcat2 PE=1 SV=1\nMTKEPQKKPAPSQALLFGKTFTDHMLMVEWNNKAGWGPPRIQPFQNLTLHPACSGLHYSL\nQLFEGLKAYKGGDQQVRLFRPWLNMDRMLRSARRLCLPDFDKQELLECIRQLIEVDKDWV\nPDGNGTSLYVRPVLIGNEPSLGVGMVTQALLYVILCPVGSYFPGDSMTPVSLLADPSFVR\nAWIGGVGDCKLGGNYGPTVAVQREAQKRGCEQVLWLYGPDHQLTEVGTMNIFVYWTHEDG\nVLELVTPPLNGVILPGVVRQSLLDLARTWGEFRVAERKVTMKELKRALEEGRVREVFGSG\nTACQVCPVHQILYEGKQLHIPTMENGPELILRFQKELKAIQYGASAHDWMFRV'),
 (3374, 'Bcat1', 'Branched-chain-amino-acid aminotransferase, cytosolic', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:12035', '49,901', 'Q8CBC8', '2.6.1.42', '>tr|Q8CBC8|Q8CBC8_MOUSE Branched-chain-amino-acid aminotransferase, cytosolic OS=Mus musculus GN=Bcat1 PE=1 SV=1\nMLHRLRSPLRRVLAGGSPIVPLSPATPNCSPGLSGSAVRHESPLCHVFPRSRSFVMACLP\nRATATLARQDCSNGCSAPFAGERGSEEVAETFRAKDLIITPATVLKEKPDPDSLVFGATF\nTDHMLTVEWSSASGWEKPHIKPFGNLPIHPAASVLHYAVELFEGLKAFRGVDNKIRLFRP\nDLNMDRMCRSAVRTTLPMFDKEELLKCILQLLQIDQEWVPYSTSASLYIRPTFIGTEPSL\nGVKKPSKALLFVILSPVGPYFSSGSFTPVSLWANPKYIRAWKGGTGDCKMGGNYGASLLA\nQCEAVENGCQQVLWLYGKDNQITEVGTMNLFLYWINEDGEEELATPPLDGIILPGVTRQS\nILELAQQWGEFKVCERHLTMDDLATALEGNRVKEMFGSGTACVVCPVSDILYKGQMLHIP\nTMENGPKLASRILGKLTDIQYGRVESDWTIELP'),
-(3375, 'Bcat2', 'Branched-chain-amino-acid aminotransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:12036', '39,774', 'O88374', '2.6.1.42', '>tr|O88374|O88374_MOUSE Branched-chain-amino-acid aminotransferase OS=Mus musculus GN=Bcat2 PE=1 SV=1\nMTKEPQKKPAPSQALLFGKTFTDHMLMVEWNNKAGWGPPRIQPFQNLTLHPACSGLHYSL\nQLFEGLKAYKGGDQQVRLFRPWLNMDRMLRSARRLCLPDFDKQELLECIRQLIEVDKDWV\nPDGNGTSLYVRPVLIGNEPSLGVGMVTQALLYVILCPVGSYFPGDSMTPVSLLADPSFVR\nAWIGGVGDCKLGGNYGPTVAVQREAQKRGCEQVLWLYGPDHQLTEVGTMNIFVYWTHEDG\nVLELVTPPLNGVILPGVVRQSLLDLARTWGEFRVAERKVTMKELKRALEEGRVREVFGSG\nTACQVCPVHQILYEGKQLHIPTMENGPELILRFQKELKAIQYGASAHDWMFRV');
+(3375, 'Bcat2', 'Branched-chain-amino-acid aminotransferase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:12036', '39,774', 'O88374', '2.6.1.42', '>tr|O88374|O88374_MOUSE Branched-chain-amino-acid aminotransferase OS=Mus musculus GN=Bcat2 PE=1 SV=1\nMTKEPQKKPAPSQALLFGKTFTDHMLMVEWNNKAGWGPPRIQPFQNLTLHPACSGLHYSL\nQLFEGLKAYKGGDQQVRLFRPWLNMDRMLRSARRLCLPDFDKQELLECIRQLIEVDKDWV\nPDGNGTSLYVRPVLIGNEPSLGVGMVTQALLYVILCPVGSYFPGDSMTPVSLLADPSFVR\nAWIGGVGDCKLGGNYGPTVAVQREAQKRGCEQVLWLYGPDHQLTEVGTMNIFVYWTHEDG\nVLELVTPPLNGVILPGVVRQSLLDLARTWGEFRVAERKVTMKELKRALEEGRVREVFGSG\nTACQVCPVHQILYEGKQLHIPTMENGPELILRFQKELKAIQYGASAHDWMFRV'),
+(3376, 'Aldh7a1', 'Alpha-aminoadipic semialdehyde dehydrogenase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:110695', '58,861', 'Q9DBF1', '1.2.1.3', '>sp|Q9DBF1|AL7A1_MOUSE Alpha-aminoadipic semialdehyde dehydrogenase OS=Mus musculus GN=Aldh7a1 PE=1 SV=4\nMWRVPRRLCVQSVKTSKLSGPWSRPAAHMSTLLIHHPQYAWLQDLGLREDNEGVYNGSWG\nGRGEVITTYCPANNEPIARVRQASLKDYEETIGKAKKAWNIWADIPAPKRGEIVRKIGDA\nFREKIQLLGRLVSLEMGKILVEGIGEVQEYVDVCDYAAGLSRMIGGPTLPSERPGHALIE\nMWNPLGLVGIITAFNFPVAVFGWNNAIALITGNVCLWKGAPTTSLVSVAVTKIIAQVLED\nNLLPGAICSLVCGGADIGTTMARDERVNLLSFTGSTQVGKEVALMVQERFGKSLLELGGN\nNAIIAFEDADLSLVVPSVLFAAVGTAGQRCTTVRRLFLHESIHNEVVDRLRSAYSQIRVG\nNPWDPNILYGPLHTKQAVSMFVRAVEEAKKQGGTVVYGGKVMDHPGNYVEPTIVTGLAHD\nAPIVHQETFAPILYVFKFQDEEEVFEWNNEVKQGLSSSIFTKDLGRIFRWLGPKGSDCGI\nVNVNIPTSGAEIGGAFGGEKHTGGGRESGSDAWKQYMRRSTCTINYSTSLPLAQGIKFQ'),
+(3377, 'Aldh7a1', 'Alpha-aminoadipic semialdehyde dehydrogenase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:110695', '58,861', 'Q9DBF1', '1.2.1.3', '>sp|Q9DBF1|AL7A1_MOUSE Alpha-aminoadipic semialdehyde dehydrogenase OS=Mus musculus GN=Aldh7a1 PE=1 SV=4\nMWRVPRRLCVQSVKTSKLSGPWSRPAAHMSTLLIHHPQYAWLQDLGLREDNEGVYNGSWG\nGRGEVITTYCPANNEPIARVRQASLKDYEETIGKAKKAWNIWADIPAPKRGEIVRKIGDA\nFREKIQLLGRLVSLEMGKILVEGIGEVQEYVDVCDYAAGLSRMIGGPTLPSERPGHALIE\nMWNPLGLVGIITAFNFPVAVFGWNNAIALITGNVCLWKGAPTTSLVSVAVTKIIAQVLED\nNLLPGAICSLVCGGADIGTTMARDERVNLLSFTGSTQVGKEVALMVQERFGKSLLELGGN\nNAIIAFEDADLSLVVPSVLFAAVGTAGQRCTTVRRLFLHESIHNEVVDRLRSAYSQIRVG\nNPWDPNILYGPLHTKQAVSMFVRAVEEAKKQGGTVVYGGKVMDHPGNYVEPTIVTGLAHD\nAPIVHQETFAPILYVFKFQDEEEVFEWNNEVKQGLSSSIFTKDLGRIFRWLGPKGSDCGI\nVNVNIPTSGAEIGGAFGGEKHTGGGRESGSDAWKQYMRRSTCTINYSTSLPLAQGIKFQ');
+INSERT INTO `proteins` (`id`, `name`, `definition`, `species`, `kegg_link`, `mass`, `accession`, `ec_number`, `fasta`) VALUES
+(3378, 'Aadat', 'Kynurenine/alpha-aminoadipate aminotransferase, mitochondrial', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:23923', '47,598', 'Q9WVM8', '2.6.1.7', '>sp|Q9WVM8|AADAT_MOUSE Kynurenine/alpha-aminoadipate aminotransferase, mitochondrial OS=Mus musculus GN=Aadat PE=1 SV=1\nMNYSRFLTATSLARKPSPIRTTADILSKAPKTLISLAPGSPNPSMFPFKSAAFTVENGST\nIRFEDDLIKRALQYSPSYGIPELLSWLKQFQVKLHNPPTVNYPPNQGQMDLCITSGCQDG\nLCKAFEMLINPGDTILVNEPLFPGTLYAMKPLGCNIINVPSDEHGIIPEGLKKILSQWKP\nEDSKDPTKKTPKFLYTVPNGNNPTGNSLTGDRKKEIYELARKYDFLIIEDDPYYFLQFSK\nPWEPTFLSMDVDGRVIRADTFSKTVSSGLRVGFMTGPKTLIQNIVLHTQVSSVHACTLSQ\nLMILQLLHQWGEEGFLAHIDRTIDFYKNQRDSILAAADKWLRGLAEWHVPKAGMFLWIKV\nKGISDTKQLIEEKAIEREVLLVPGNGFFIDGSAPTSFFRASFSLATPAQMDTAFQRLAQL\nIKESL'),
+(3379, 'Aldh7a1', 'Alpha-aminoadipic semialdehyde dehydrogenase', 'mouse', 'http://www.genome.jp/dbget-bin/www_bget?mmu:110695', '58,861', 'Q9DBF1', '1.2.1.3', '>sp|Q9DBF1|AL7A1_MOUSE Alpha-aminoadipic semialdehyde dehydrogenase OS=Mus musculus GN=Aldh7a1 PE=1 SV=4\nMWRVPRRLCVQSVKTSKLSGPWSRPAAHMSTLLIHHPQYAWLQDLGLREDNEGVYNGSWG\nGRGEVITTYCPANNEPIARVRQASLKDYEETIGKAKKAWNIWADIPAPKRGEIVRKIGDA\nFREKIQLLGRLVSLEMGKILVEGIGEVQEYVDVCDYAAGLSRMIGGPTLPSERPGHALIE\nMWNPLGLVGIITAFNFPVAVFGWNNAIALITGNVCLWKGAPTTSLVSVAVTKIIAQVLED\nNLLPGAICSLVCGGADIGTTMARDERVNLLSFTGSTQVGKEVALMVQERFGKSLLELGGN\nNAIIAFEDADLSLVVPSVLFAAVGTAGQRCTTVRRLFLHESIHNEVVDRLRSAYSQIRVG\nNPWDPNILYGPLHTKQAVSMFVRAVEEAKKQGGTVVYGGKVMDHPGNYVEPTIVTGLAHD\nAPIVHQETFAPILYVFKFQDEEEVFEWNNEVKQGLSSSIFTKDLGRIFRWLGPKGSDCGI\nVNVNIPTSGAEIGGAFGGEKHTGGGRESGSDAWKQYMRRSTCTINYSTSLPLAQGIKFQ');
 
 -- --------------------------------------------------------
 
@@ -14097,7 +14229,7 @@ CREATE TABLE IF NOT EXISTS `reactions` (
   `anchor_out` enum('left','top','right','bottom') NOT NULL,
   `reversible` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1814 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1851 ;
 
 --
 -- Dumping data for table `reactions`
@@ -15909,7 +16041,44 @@ INSERT INTO `reactions` (`id`, `node_id`, `anchor_in`, `anchor_out`, `reversible
 (1810, 4045, 'right', 'left', 1),
 (1811, 4046, 'top', 'bottom', 1),
 (1812, 4047, 'top', 'bottom', 0),
-(1813, 4048, 'bottom', 'top', 1);
+(1813, 4048, 'bottom', 'top', 1),
+(1814, 4075, 'bottom', 'top', 0),
+(1815, 4076, 'left', 'right', 0),
+(1816, 4077, 'left', 'right', 0),
+(1817, 4078, 'left', 'right', 0),
+(1818, 4079, 'left', 'right', 0),
+(1819, 4080, 'left', 'right', 0),
+(1820, 4081, 'top', 'bottom', 1),
+(1821, 4082, 'left', 'right', 0),
+(1822, 4083, 'left', 'right', 0),
+(1823, 4084, 'left', 'right', 0),
+(1824, 4085, 'left', 'right', 0),
+(1825, 4086, 'top', 'bottom', 1),
+(1826, 4087, 'right', 'left', 1),
+(1827, 4088, 'top', 'bottom', 0),
+(1828, 4089, 'right', 'left', 1),
+(1829, 4090, 'top', 'bottom', 1),
+(1830, 4091, 'left', 'right', 0),
+(1831, 4092, 'top', 'bottom', 0),
+(1832, 4093, 'bottom', 'top', 1),
+(1833, 4094, 'left', 'right', 1),
+(1834, 4095, 'left', 'right', 0),
+(1835, 4096, 'left', 'right', 0),
+(1836, 4097, 'left', 'right', 0),
+(1837, 4098, 'left', 'right', 1),
+(1838, 4099, 'right', 'left', 1),
+(1839, 4100, 'left', 'right', 0),
+(1840, 4101, 'left', 'right', 0),
+(1841, 4102, 'left', 'right', 0),
+(1842, 4103, 'bottom', 'top', 0),
+(1843, 4104, 'right', 'left', 1),
+(1844, 4105, 'top', 'bottom', 1),
+(1845, 4106, 'bottom', 'top', 1),
+(1846, 4107, 'left', 'right', 1),
+(1847, 4108, 'left', 'right', 0),
+(1848, 4109, 'left', 'right', 0),
+(1849, 4110, 'left', 'right', 0),
+(1850, 4111, 'left', 'right', 0);
 
 -- --------------------------------------------------------
 
@@ -15925,7 +16094,7 @@ CREATE TABLE IF NOT EXISTS `reagents` (
   `type` enum('educt','product') NOT NULL,
   `anchor` enum('left','top','right','bottom') NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3828 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3904 ;
 
 --
 -- Dumping data for table `reagents`
@@ -19746,7 +19915,83 @@ INSERT INTO `reagents` (`id`, `reaction_id`, `node_id`, `type`, `anchor`) VALUES
 (3824, 1812, 4054, 'educt', 'bottom'),
 (3825, 1812, 4055, 'product', 'top'),
 (3826, 1813, 4056, 'educt', 'top'),
-(3827, 1813, 4055, 'product', 'bottom');
+(3827, 1813, 4055, 'product', 'bottom'),
+(3828, 1814, 4136, 'educt', 'top'),
+(3829, 1814, 4127, 'product', 'bottom'),
+(3830, 1815, 4137, 'educt', 'right'),
+(3831, 1815, 4136, 'product', 'left'),
+(3832, 1816, 4138, 'educt', 'right'),
+(3833, 1816, 4137, 'product', 'left'),
+(3834, 1817, 4139, 'educt', 'right'),
+(3835, 1817, 4138, 'product', 'left'),
+(3836, 1818, 4114, 'educt', 'right'),
+(3837, 1818, 4115, 'product', 'left'),
+(3838, 1819, 4115, 'educt', 'right'),
+(3839, 1819, 4117, 'product', 'left'),
+(3840, 1820, 4116, 'educt', 'bottom'),
+(3841, 1820, 4117, 'product', 'top'),
+(3842, 1821, 4117, 'educt', 'right'),
+(3843, 1821, 4145, 'product', 'left'),
+(3844, 1822, 4118, 'educt', 'top'),
+(3845, 1822, 4119, 'product', 'left'),
+(3846, 1823, 4118, 'educt', 'top'),
+(3847, 1823, 4121, 'product', 'left'),
+(3848, 1824, 4119, 'educt', 'right'),
+(3849, 1824, 4120, 'product', 'left'),
+(3850, 1825, 4120, 'educt', 'bottom'),
+(3851, 1825, 4123, 'product', 'right'),
+(3852, 1826, 4122, 'educt', 'left'),
+(3853, 1826, 4121, 'product', 'right'),
+(3854, 1827, 4122, 'educt', 'bottom'),
+(3855, 1827, 4123, 'product', 'top'),
+(3856, 1828, 4123, 'educt', 'left'),
+(3857, 1828, 4118, 'product', 'right'),
+(3858, 1829, 4123, 'educt', 'bottom'),
+(3859, 1829, 4124, 'product', 'top'),
+(3860, 1830, 4124, 'educt', 'right'),
+(3861, 1830, 4126, 'product', 'left'),
+(3862, 1831, 4124, 'educt', 'bottom'),
+(3863, 1831, 4127, 'product', 'top'),
+(3864, 1832, 4125, 'educt', 'top'),
+(3865, 1832, 4118, 'product', 'bottom'),
+(3866, 1833, 4125, 'educt', 'right'),
+(3867, 1833, 4124, 'product', 'left'),
+(3868, 1834, 4126, 'educt', 'right'),
+(3869, 1834, 4140, 'product', 'left'),
+(3870, 1835, 4127, 'educt', 'right'),
+(3871, 1835, 4142, 'product', 'top'),
+(3872, 1836, 4127, 'educt', 'bottom'),
+(3873, 1836, 4142, 'educt', 'bottom'),
+(3874, 1836, 4141, 'product', 'left'),
+(3875, 1837, 4128, 'educt', 'right'),
+(3876, 1837, 4127, 'product', 'left'),
+(3877, 1838, 4128, 'educt', 'left'),
+(3878, 1838, 4129, 'product', 'right'),
+(3879, 1839, 4130, 'educt', 'right'),
+(3880, 1839, 4129, 'product', 'left'),
+(3881, 1840, 4131, 'educt', 'right'),
+(3882, 1840, 4130, 'product', 'left'),
+(3883, 1841, 4132, 'educt', 'right'),
+(3884, 1841, 4139, 'product', 'left'),
+(3885, 1842, 4132, 'educt', 'top'),
+(3886, 1842, 4131, 'product', 'bottom'),
+(3887, 1843, 4132, 'educt', 'left'),
+(3888, 1843, 4133, 'product', 'right'),
+(3889, 1844, 4134, 'educt', 'bottom'),
+(3890, 1844, 4133, 'product', 'top'),
+(3891, 1845, 4134, 'educt', 'top'),
+(3892, 1845, 4135, 'product', 'bottom'),
+(3893, 1846, 4112, 'educt', 'right'),
+(3894, 1846, 4135, 'product', 'left'),
+(3895, 1847, 4113, 'educt', 'top'),
+(3896, 1847, 4146, 'educt', 'right'),
+(3897, 1847, 4112, 'product', 'left'),
+(3898, 1848, 4141, 'educt', 'right'),
+(3899, 1848, 4143, 'product', 'left'),
+(3900, 1849, 4143, 'educt', 'right'),
+(3901, 1849, 4144, 'product', 'left'),
+(3902, 1850, 4145, 'educt', 'right'),
+(3903, 1850, 4118, 'product', 'left');
 
 -- --------------------------------------------------------
 
@@ -19769,7 +20014,7 @@ CREATE TABLE IF NOT EXISTS `request_counter` (
 INSERT INTO `request_counter` (`id`, `month_year`, `number`) VALUES
 (1, '2015-11-01', 163),
 (2, '2015-12-01', 880),
-(3, '2016-02-01', 194);
+(3, '2016-02-01', 198);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
