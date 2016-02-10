@@ -79,7 +79,7 @@ infobox_offset_x = 20;
 preview_element = 0;
 
 
-pathways = [[206, "Glycine, serine and threonine metabolism"],
+pathways = [[228, "Cysteine and methionine metabolism"],
             [15, "Alanine, aspartate and glutamate metabolism"],
             [163, "alpha-Linolenic acid metabolism"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
@@ -95,6 +95,7 @@ pathways = [[206, "Glycine, serine and threonine metabolism"],
             [53, "Galactose metabolism"],
             [29, "Glycerolipid metabolism"],
             [28, "Glycerophospholipid metabolism"],
+            [206, "Glycine, serine and threonine metabolism"],
             [1, "Glycolysis"],
             [9, "Glyoxylate and dicarboxylate metabolism"],
             [40, "Inositol phosphate metabolism"],
