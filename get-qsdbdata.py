@@ -111,26 +111,28 @@ for row in my_cur:
     proteins[pid].append(response[i]['proteins'][-1])
     sql_query_peptides.append("select " + str(pid) + " pid")
     
-sql_query_peptides = "select p.pid, pep.* from (" + " union ".join(sql_query_peptides) + ") p inner join peptides pep on p.pid = pep.protein_id;"
-my_cur.execute(sql_query_peptides)
-
-
+    
+sql_query_spectra = []
 peptides = {}
 
-for row in my_cur:
-    for pr in proteins[int(row['pid'])]:
-        pep_id = int(row['id'])
-        pr['peptides'].append({'id': pep_id,
-                               'peptide_seq': row['peptide_seq'],
-                               'spectra': []
-                              })
-        if pep_id not in peptides: peptides[pep_id] = []
-        peptides[pep_id].append(pr['peptides'][-1])
-        
-        
-sql_query_spectra = []
-for pep_id in peptides:
-    sql_query_spectra.append("select " + str(pep_id) + " pep_id")
+if  len(sql_query_peptides):
+    sql_query_peptides = "select p.pid, pep.* from (" + " union ".join(sql_query_peptides) + ") p inner join peptides pep on p.pid = pep.protein_id;"
+    my_cur.execute(sql_query_peptides)
+
+
+    for row in my_cur:
+        for pr in proteins[int(row['pid'])]:
+            pep_id = int(row['id'])
+            pr['peptides'].append({'id': pep_id,
+                                'peptide_seq': row['peptide_seq'],
+                                'spectra': []
+                                })
+            if pep_id not in peptides: peptides[pep_id] = []
+            peptides[pep_id].append(pr['peptides'][-1])
+            
+            
+    for pep_id in peptides:
+        sql_query_spectra.append("select " + str(pep_id) + " pep_id")
 
 
 
