@@ -79,7 +79,7 @@ infobox_offset_x = 20;
 preview_element = 0;
 
 
-pathways = [[228, "Cysteine and methionine metabolism"],
+pathways = [[17, "Valine, leucine and isoleucine degradation"],
             [15, "Alanine, aspartate and glutamate metabolism"],
             [163, "alpha-Linolenic acid metabolism"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
@@ -87,6 +87,7 @@ pathways = [[228, "Cysteine and methionine metabolism"],
             [78, "Ascorbate and aldarate metabolism"],
             [164, "Biosynthesis of unsaturated fatty acids"],
             [6, "Citrate Cycle"],
+            [228, "Cysteine and methionine metabolism"],
             [34, "Ether lipid metabolism"],
             [11, "Fatty Acid Biosynthesis"],
             [13, "Fatty acid degradation"],

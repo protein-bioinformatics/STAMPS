@@ -1232,7 +1232,9 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             var curr_y = end_y;
             var post_x = -1;
             var post_y = -1;
-            while (((curr_x != -1) || (curr_y != -1))){
+            var iii = 0;
+            //while (((curr_x != -1) || (curr_y != -1)) || (((curr_x != end_x) || (curr_y != end_y)) && (iii > 0)) && iii < 500){
+            while ((curr_x != -1) || (curr_y != -1)){
                 matrix[curr_y][curr_x].in_path = true;
                 if (post_x != -1) matrix[curr_y][curr_x].post = [post_x, post_y];
                 if ((post_x - curr_x) == 1) matrix[curr_y][curr_x].direction = "r";
@@ -1245,7 +1247,14 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
                 curr_x = matrix[post_y][post_x].pre[0];
                 curr_y = matrix[post_y][post_x].pre[1];
             }
-            
+            /*
+            if (iii == 500 || ((curr_x == end_x) || (curr_y == end_y))){
+                console.log(end_x, end_y, this.edge_id);
+                console.log(cell_x_s, cell_y_s);
+                console.log(cell_x_e, cell_y_e);
+                return;
+            }
+            */
             
             // determining the points / corners of the path
             var curr_x = start_x;
