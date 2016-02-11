@@ -1353,6 +1353,18 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             this.point_list[p_len - 1].y = ya_e;
         }
         
+        
+        if (this.point_list.length == 2){
+            switch (this.point_list[0].b){
+                case "rl": case "lr":
+                    this.point_list[0].y = this.point_list[1].y;
+                    break;
+                case "bt": case "tb":
+                    this.point_list[0].x = this.point_list[1].x;
+                    break;                
+            }
+        }
+        
         for (var i = 0; i < this.point_list.length; ++i){
             switch (this.point_list[i].b){
                 case "rt": case "lt": case "rb": case "lb":
@@ -1415,7 +1427,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
 
                         l1 = (A_32 * Sabc + A_2 * B * (Sabc - C_2) + (4 * C * A - B * B) * Math.log((2 * A_2 + BA + Sabc) / (BA + C_2))) / (4 * A_32);
                     }
-                    while (true && mm < 10){
+                    while (mm < 10){
                         t = (upper + lower) * 0.5;
                         x_head = (1 - t) * (1 - t) * p1_x + 2 * (1 - t) * t * ct_x + t * t * p2_x;
                         y_head = (1 - t) * (1 - t) * p1_y + 2 * (1 - t) * t * ct_y + t * t * p2_y;
@@ -1446,7 +1458,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
                     break;
             }
         }
-                
+                 
     }
     
     
