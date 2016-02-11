@@ -322,6 +322,8 @@ div.select_pathway {
     position: fixed;
     border:1px solid #d3d3d3;
     z-index: 80;
+    height: 80%;
+    overflow-y: scroll;
 }
 
 div.select_pathway_background {

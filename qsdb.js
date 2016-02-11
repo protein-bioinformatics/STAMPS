@@ -32,7 +32,7 @@ min_zoom = -5;
 highlight_zoom = 3;
 base_grid = 25;
 max_protein_line_number = 3;
-metabolite_radius = 10;
+metabolite_radius = 12;
 arrow_length = 10;
 round_rect_radius = 10;
 text_size = 15;
@@ -48,28 +48,36 @@ radius = metabolite_radius * factor;
 last_keys = [];
 
 
-line_width = 6;
+line_width = 5;
+disabled_text_color = "#bbbbbb";
+disabled_fill_color = "#cccccc";
+text_color = "black";
+
 protein_stroke_color = "#f69301";
 protein_fill_color = "#fff6d5";
+protein_disabled_stroke_color = "#cccccc";
+protein_disabled_fill_color = "#eeeeee";
 metabolite_stroke_color = "#f69301";
 metabolite_fill_color = "white";;
 pathway_stroke_color = "#f69301";
 pathway_fill_color = "white";
 edge_color = "#f69301";
+edge_disabled_color = "#cccccc";
+slide_color = "#5792da";
+
 
 /*
-protein_stroke_color = "#3644a2";
-protein_fill_color = "#f3f8ff";
-metabolite_stroke_color = "#3644a2";
+// corporate design
+protein_stroke_color = "black";
+protein_fill_color = "white";
+metabolite_stroke_color = "black";
 metabolite_fill_color = "white";
-pathway_stroke_color = "#3644a2";
+pathway_stroke_color = "black";
 pathway_fill_color = "white";
-edge_color = "#3644a2";*/
+edge_color = "black";
+slide_color = "black";
+*/
 
-disabled_text_color = "#bbbbbb";
-disabled_fill_color = "#cccccc";
-text_color = "black";
-slide_color = "#5792da";
 slide_width = 2;
 slide_bullet = 4;
 infobox_fill_color = "white";
@@ -80,7 +88,8 @@ preview_element = 0;
 
 
 
-pathways = [[15, "Alanine, aspartate and glutamate metabolism"],
+pathways = [[34, "Ether lipid metabolism"],
+[15, "Alanine, aspartate and glutamate metabolism"],
             [163, "alpha-Linolenic acid metabolism"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
             [160, "Arachidonic acid metabolism"],
@@ -250,6 +259,7 @@ function draw(sync){
             for (var i = 0; i < elements.length; ++i){
                 elements[i].draw();
             }
+            
             clearInterval(dr);
         }, 1, dc);
     }
@@ -648,8 +658,8 @@ function compute_edges(){
 
 function assemble_elements(){
     elements = [];
-    for (var i = 0; i < data.length; ++i) elements.push(data[i]);
     for (var i = 0; i < edges.length; ++i) elements.push(edges[i]);    
+    for (var i = 0; i < data.length; ++i) elements.push(data[i]);
     elements.push(infobox);
     elements.push(zoom_sign_in);
     elements.push(zoom_sign_out);
@@ -1152,6 +1162,12 @@ function check_spectra(){
         }
     }
     spectra_content.sort();
+    for (var i = spectra_content.length - 1; i > 0; --i){
+        if (spectra_content[i][0] == spectra_content[i - 1][0]){
+            spectra_content.splice(i, 1);
+        }
+    }
+    
     var peps = 0;
     var specs = 0;
     var line = 0;

@@ -692,9 +692,14 @@ function node(data, c){
             case "protein":
                 
                 // draw fill
-                this.ctx.fillStyle = protein_fill_color;
+                this.ctx.fillStyle = this.proteins.length ? protein_fill_color : protein_disabled_fill_color;
                 this.ctx.fillRect(this.x - hw, this.y - hh, this.width, this.height);
        
+                this.ctx.save();
+                this.ctx.rect(this.x - hw, this.y - hh, this.width, this.height);
+                this.ctx.clip();
+                
+                
                 // draw content
                 this.ctx.textAlign = "left";
                 this.ctx.textBaseline = 'middle';
@@ -728,12 +733,15 @@ function node(data, c){
                 
                 var lhf = line_height * factor;
                 for (var i = 0, tty = ty - (this.proteins.length - 1) * lhf * 0.5; i < this.proteins.length; i += 1, tty += lhf){
-                    if (Math.abs(tty - this.y) <= hh - lhf * 0.5) this.proteins[i].draw(this.ctx, tx, tty);
+                    
+                    if (Math.abs(tty - this.y) <= hh + lhf) this.proteins[i].draw(this.ctx, tx, tty);
                 }
+                
+                this.ctx.restore();
                 
                 // draw stroke
                 this.ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
-                this.ctx.strokeStyle = protein_stroke_color;
+                this.ctx.strokeStyle = this.proteins.length ? protein_stroke_color :  protein_disabled_stroke_color;
                 this.ctx.strokeRect(this.x - hw, this.y - hh, this.width, this.height);
                 break;
                 
@@ -1233,7 +1241,6 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             var post_x = -1;
             var post_y = -1;
             var iii = 0;
-            //while (((curr_x != -1) || (curr_y != -1)) || (((curr_x != end_x) || (curr_y != end_y)) && (iii > 0)) && iii < 500){
             while ((curr_x != -1) || (curr_y != -1)){
                 matrix[curr_y][curr_x].in_path = true;
                 if (post_x != -1) matrix[curr_y][curr_x].post = [post_x, post_y];
@@ -1247,14 +1254,6 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
                 curr_x = matrix[post_y][post_x].pre[0];
                 curr_y = matrix[post_y][post_x].pre[1];
             }
-            /*
-            if (iii == 500 || ((curr_x == end_x) || (curr_y == end_y))){
-                console.log(end_x, end_y, this.edge_id);
-                console.log(cell_x_s, cell_y_s);
-                console.log(cell_x_e, cell_y_e);
-                return;
-            }
-            */
             
             // determining the points / corners of the path
             var curr_x = start_x;
@@ -1454,8 +1453,8 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node); 
     
     this.draw = function(){
-        this.ctx.strokeStyle = edge_color;
-        this.ctx.fillStyle = edge_color;
+        this.ctx.strokeStyle = data[data_ref[this.start_id]].proteins.length ? edge_color : edge_disabled_color;
+        this.ctx.fillStyle = data[data_ref[this.start_id]].proteins.length ? edge_color : edge_disabled_color;
         this.ctx.lineWidth = line_width * factor;
         this.ctx.beginPath();
         this.ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
