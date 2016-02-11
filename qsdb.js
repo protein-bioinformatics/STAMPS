@@ -88,51 +88,54 @@ preview_element = 0;
 
 
 
-pathways = [[34, "Ether lipid metabolism"],
-[15, "Alanine, aspartate and glutamate metabolism"],
+pathways = []; /*[15, "Alanine, aspartate and glutamate metabolism"],
             [163, "alpha-Linolenic acid metabolism"],
             [57, "Amino sugar and nucleotide sugar metabolism"],
-            [160, "Arachidonic acid metabolism"],
+            [337, "Arachidonic acid metabolism"],
             [200, "Arginine and proline metabolism"],
             [21, "Arginine biosynthesis"],
-            [78, "Ascorbate and aldarate metabolism"],
+            [338, "Ascorbate and aldarate metabolism"],
             [164, "Biosynthesis of unsaturated fatty acids"],
             [6, "Citrate Cycle"],
-            [228, "Cysteine and methionine metabolism"],
+            [339, "Cysteine and methionine metabolism"],
+            
             [34, "Ether lipid metabolism"],
             [11, "Fatty Acid Biosynthesis"],
             [13, "Fatty acid degradation"],
-            [137, "Fatty acid elongation"],
-            [66, "Fructose and mannose metabolism"],
+            [340, "Fatty acid elongation"],
+            [341, "Fructose and mannose metabolism"],
             [53, "Galactose metabolism"],
             [29, "Glycerolipid metabolism"],
             [28, "Glycerophospholipid metabolism"],
-            [206, "Glycine, serine and threonine metabolism"],
+            [342, "Glycine, serine and threonine metabolism"],
             [1, "Glycolysis"],
+            
             [9, "Glyoxylate and dicarboxylate metabolism"],
             [51, "Histidine metabolism"],
             [40, "Inositol phosphate metabolism"],
             [161, "Linoleic acid metabolism"],
             [118, "Lysine biosynthesis"],
             [258, "Lysine degradation"],
-            [48, "Pentose and glucuronate interconversions"],
             [3, "Pentose phosphate"],
+            [48, "Pentose and glucuronate interconversions"],
             [298, "Phenylalanine metabolism"],
             [292, "Phenylalanine, tyrosine and tryptophan biosynthesis"],
+            
             [155, "Primary bile acid biosynthesis"],
-            [50, "Pyrimidine metabolism"],
             [49, "Purine metabolism"],
+            [50, "Pyrimidine metabolism"],
             [5, "Pyruvate metabolism"],
             [41, "Sphingolipid metabolism"],
-            [151, "Steroid biosynthesis"],
+            [343, "Steroid biosynthesis"],
             [154, "Steroid hormone biosynthesis"],
             [109, "Synthesis and degradation of ketone bodies"],
             [300, "Tryptophan metabolism"],
             [16, "Tyrosine metabolism"],
+            
             [111, "Valine, leucine and isoleucine biosynthesis"],
             [17, "Valine, leucine and isoleucine degradation"]
            ];
-
+*/
 
 function debug(text){
     document.getElementById("hint").innerHTML = text;
@@ -279,6 +282,9 @@ function draw(sync){
 
 
 function init(){
+    
+    
+    
     strGET = document.location.search.substr(1,document.location.search.length);
     if(strGET!=''){
         gArr = strGET.split('&');
@@ -298,6 +304,16 @@ function init(){
     }
     xmlhttp.open("GET", "set-counter.py?counter=request", true);
     xmlhttp.send();
+    
+    var xmlhttp_pw = new XMLHttpRequest();
+    xmlhttp_pw.onreadystatechange = function() {
+        if (xmlhttp_pw.readyState == 4 && xmlhttp_pw.status == 200) {
+            pathways = JSON.parse(xmlhttp_pw.responseText);
+            
+        }
+    }
+    xmlhttp_pw.open("GET", "get-pathways.py", false);
+    xmlhttp_pw.send();
     
     
     var pathway_menu = "<table>";
@@ -367,7 +383,6 @@ function init(){
     };
     
     change_pathway(0);
-    //load_data(false);
 }
 
 
