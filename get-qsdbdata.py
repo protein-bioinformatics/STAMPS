@@ -1,34 +1,5 @@
 #!/home/dominik.kopczynski/anaconda3/bin/python3.5
 
-"""
-import socket
-
-print("Content-Type: text/html")
-print()
-
-from cgi import FieldStorage
-form = FieldStorage()
-species = ""
-try:
-    species = str(form.getvalue('species'))
-except:
-    species = ""
-response = []
-
-data = form.getvalue('request') + ";"
-data += form.getvalue('pathway') + ";"
-data += species
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(("localhost", 18000))
-s.send(data.encode()) 
-data = s.recv(65536).decode()
-print(data)
-s.close()
-
-
-exit()
-"""
-
 from pymysql import connect, cursors
 from cgi import FieldStorage
 from json import dumps
@@ -154,7 +125,7 @@ for i in range(ceil(l / t)):
             pep["spectra"].append({})
             pep["spectra"][-1]['id'] = row['sid']
             pep["spectra"][-1]['charge'] = row['charge']
-            pep["spectra"][-1]['mass'] = row['precursorMZ']
+            pep["spectra"][-1]['mass'] = "%.4f" % row['precursorMZ']
 
 sql_query = "(select n.id, p.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, '' c_number, '' formula, '' exact_mass from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = %s)"
 sql_query += "union "
@@ -165,43 +136,4 @@ my_cur.execute(sql_query, (pathway, pathway))
 for row in my_cur:
     response.append(row)
 
-
-
-
-"""
-
-
-
-
-
-for row in my_cur:
-    response.append(row)
-    r_last = response[-1]
-    r_last["proteins"] = []
-    r_last_prot = r_last["proteins"]
-    sql_protein = "SELECT p.id, p.name, p.definition, p.mass, p.accession, p.ec_number FROM proteins p INNER JOIN nodeproteincorrelations np ON p.id = np.protein_id WHERE np.node_id = %s and species in (%s)"
-    my_cur_prot.execute(sql_protein, (response[-1]["id"], species))
-    for row_protein in my_cur_prot:
-        r_last_prot.append(row_protein)
-        r_last_prot[-1]["peptides"] = []
-        r_last_pep = r_last_prot[-1]["peptides"]
-        sql_peptide = "SELECT pep.id, pep.peptide_seq FROM proteins pr INNER JOIN peptides pep ON pr.id = pep.protein_id WHERE pr.id = %s"
-        my_cur_pep.execute(sql_peptide, row_protein["id"])
-        for row_pep in my_cur_pep:
-            r_last_pep.append({})
-            r_last_pep[-1]['peptide_seq'] = row_pep['peptide_seq']
-            r_last_pep[-1]['spectra'] = []
-            
-            sql_charge = "SELECT charge FROM peptide_spectra ps INNER JOIN peptides p ON ps.peptide_id = p.id WHERE p.id = %s"
-            my_cur_charge.execute(sql_charge, row_pep['id'])
-            for row_spec in my_cur_charge:
-                sql_mass_id = "SELECT id, precursorMZ FROM RefSpectra WHERE peptideSeq = :peptide_seq and peptideModSeq = :peptide_seq and precursorCharge = :charge"
-                lite_cur.execute(sql_mass_id, {"peptide_seq": row_pep['peptide_seq'], "charge": row_spec['charge']})
-                for row_mass_id in lite_cur:
-                    r_last_pep[-1]['spectra'].append({})
-                    r_last_pep[-1]['spectra'][-1]['id'] = row_mass_id['id']
-                    r_last_pep[-1]['spectra'][-1]['charge'] = row_spec['charge']
-                    r_last_pep[-1]['spectra'][-1]['mass'] = row_mass_id['precursorMZ']
-
-"""
 print(dumps(response))

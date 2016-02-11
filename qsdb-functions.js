@@ -689,6 +689,7 @@ function node(data, c){
         var hw = this.width * 0.5;
     
         switch (this.type){
+            
             case "protein":
                 
                 // draw fill
@@ -744,6 +745,7 @@ function node(data, c){
                 this.ctx.strokeStyle = this.proteins.length ? protein_stroke_color :  protein_disabled_stroke_color;
                 this.ctx.strokeRect(this.x - hw, this.y - hh, this.width, this.height);
                 break;
+                
                 
             case "pathway":
                 this.ctx.fillStyle = pathway_fill_color;

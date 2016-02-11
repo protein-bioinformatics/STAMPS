@@ -1,6 +1,6 @@
 moved = false;
 HTTP_GET_VARS = [];
-current_pathway = 0;
+current_pathway = 1;
 highlight_element = 0;
 offsetX = 0;
 offsetY = 0;
@@ -88,7 +88,7 @@ preview_element = 0;
 
 
 
-pathways = [];
+pathways = [[15, "Alanine, aspartate and glutamate metabolism"]];
 
 function debug(text){
     document.getElementById("hint").innerHTML = text;
@@ -262,23 +262,22 @@ function init(){
     xmlhttp_pw.onreadystatechange = function() {
         if (xmlhttp_pw.readyState == 4 && xmlhttp_pw.status == 200) {
             pathways = JSON.parse(xmlhttp_pw.responseText);
-            
+            var pathway_menu = "<table>";
+            for (var i = 0; i < pathways.length; ++i){
+                pathway_menu += "<tr><td class=\"select_pathway_cell\" onclick=\"change_pathway(";
+                pathway_menu += i;
+                pathway_menu += ");\">";
+                pathway_menu += pathways[i][1]; 
+                pathway_menu += "</td></tr>";
+            }
+            pathway_menu += "</table>";
+            document.getElementById("select_pathway").innerHTML = pathway_menu;
         }
     }
-    xmlhttp_pw.open("GET", "get-pathways.py", false);
+    xmlhttp_pw.open("GET", "get-pathways.py", true);
     xmlhttp_pw.send();
     
     
-    var pathway_menu = "<table>";
-    for (var i = 0; i < pathways.length; ++i){
-        pathway_menu += "<tr><td class=\"select_pathway_cell\" onclick=\"change_pathway(";
-        pathway_menu += i;
-        pathway_menu += ");\">";
-        pathway_menu += pathways[i][1]; 
-        pathway_menu += "</td></tr>";
-    }
-    pathway_menu += "</table>";
-    document.getElementById("select_pathway").innerHTML = pathway_menu;
     
     
     document.documentElement.style.overflow = 'hidden';

@@ -1,5 +1,5 @@
 ms_zoom = 0;
-max_ms_zoom = 50;
+max_ms_zoom = 60;
 ms_scaling = 1.2;
 origin_x = 0;
 last_x = 0;
@@ -8,7 +8,7 @@ right_border = 0;
 top_border = 0;
 bottom_border = 0;
 spectrum_loaded = false;
-x_tics = [200, 100, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0.125, 0.0625, 0.03125];
+x_tics = [200, 100, 50, 25, 10, 5, 2, 1, 0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625, 0.0078125];
 y_tics = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5];
 peaks = [];
 acids = [];
