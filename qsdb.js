@@ -88,54 +88,7 @@ preview_element = 0;
 
 
 
-pathways = []; /*[15, "Alanine, aspartate and glutamate metabolism"],
-            [163, "alpha-Linolenic acid metabolism"],
-            [57, "Amino sugar and nucleotide sugar metabolism"],
-            [337, "Arachidonic acid metabolism"],
-            [200, "Arginine and proline metabolism"],
-            [21, "Arginine biosynthesis"],
-            [338, "Ascorbate and aldarate metabolism"],
-            [164, "Biosynthesis of unsaturated fatty acids"],
-            [6, "Citrate Cycle"],
-            [339, "Cysteine and methionine metabolism"],
-            
-            [34, "Ether lipid metabolism"],
-            [11, "Fatty Acid Biosynthesis"],
-            [13, "Fatty acid degradation"],
-            [340, "Fatty acid elongation"],
-            [341, "Fructose and mannose metabolism"],
-            [53, "Galactose metabolism"],
-            [29, "Glycerolipid metabolism"],
-            [28, "Glycerophospholipid metabolism"],
-            [342, "Glycine, serine and threonine metabolism"],
-            [1, "Glycolysis"],
-            
-            [9, "Glyoxylate and dicarboxylate metabolism"],
-            [51, "Histidine metabolism"],
-            [40, "Inositol phosphate metabolism"],
-            [161, "Linoleic acid metabolism"],
-            [118, "Lysine biosynthesis"],
-            [258, "Lysine degradation"],
-            [3, "Pentose phosphate"],
-            [48, "Pentose and glucuronate interconversions"],
-            [298, "Phenylalanine metabolism"],
-            [292, "Phenylalanine, tyrosine and tryptophan biosynthesis"],
-            
-            [155, "Primary bile acid biosynthesis"],
-            [49, "Purine metabolism"],
-            [50, "Pyrimidine metabolism"],
-            [5, "Pyruvate metabolism"],
-            [41, "Sphingolipid metabolism"],
-            [343, "Steroid biosynthesis"],
-            [154, "Steroid hormone biosynthesis"],
-            [109, "Synthesis and degradation of ketone bodies"],
-            [300, "Tryptophan metabolism"],
-            [16, "Tyrosine metabolism"],
-            
-            [111, "Valine, leucine and isoleucine biosynthesis"],
-            [17, "Valine, leucine and isoleucine degradation"]
-           ];
-*/
+pathways = [];
 
 function debug(text){
     document.getElementById("hint").innerHTML = text;
