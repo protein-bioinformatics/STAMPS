@@ -27,6 +27,8 @@ draw_code = 0;
 
 scaling = 1.25;
 zoom = 0;
+factor = Math.pow(scaling, zoom);
+factor_h = factor * 0.5;
 max_zoom = 5;
 min_zoom = -5;
 highlight_zoom = 3;
@@ -37,12 +39,14 @@ arrow_length = 10;
 round_rect_radius = 10;
 text_size = 15;
 check_len = 15;
+check_side = check_len * factor;
+check_side_h = check_side * 0.5;
+check_side_d = check_side * 2;
 line_height = 20;
 anchors = ['left', 'top', 'right', 'bottom'];
 next_anchor = {"left": "top", "top": "right", "right": "bottom", "bottom": "left"};
 administration = false;
 on_slide = false;
-factor = Math.pow(scaling, zoom);
 font_size = text_size * factor;
 radius = metabolite_radius * factor;
 last_keys = [];
@@ -92,6 +96,17 @@ pathways = [[15, "Alanine, aspartate and glutamate metabolism"]];
 
 function debug(text){
     document.getElementById("hint").innerHTML = text;
+}
+
+
+function change_zoom(){
+    factor = Math.pow(scaling, zoom);
+    font_size = text_size * factor;
+    radius = metabolite_radius * factor;
+    check_side = check_len * factor;
+    check_side_h = check_side * 0.5;
+    check_side_d = check_side * 2;
+    factor_h = factor * 0.5;
 }
 
 
@@ -342,10 +357,8 @@ function init(){
 function reset_view(){
     zoom = 0;
     null_x = 0;
-    null_y = 0;    
-    factor = Math.pow(scaling, zoom);
-    font_size = text_size * factor;
-    radius = metabolite_radius * factor;
+    null_y = 0;
+    change_zoom();
 }
 
 
@@ -495,6 +508,9 @@ function compute_edges(){
             }
             else{
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, nodes[i]['anchor_out']);
+                /*if (data[node_id].type == "metabolite"){
+                    angle_node = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y,  nodes[i]['anchor_out']);
+                }*/
                 connections.push([node_id, nodes[i]['anchor_out'], metabolite_id, nodes[i]['reagents'][j]['anchor'], true, i, j, nodes[i]['reagents'][j]['id']]);
                 nodes_anchors[node_id][nodes[i]['anchor_out']].push([metabolite_id, connections.length - 1, angle_node]);
                 
@@ -600,6 +616,49 @@ function compute_edges(){
                 }
                 break;
         }
+        
+        if (data[node_id].type == "metabolite"){
+            var metabolite_len = nodes_anchors[node_id][node_anchor].length;
+            for (var j = 0; j < nodes_anchors[node_id][node_anchor].length; ++j){
+                var current_entry = nodes_anchors[node_id][node_anchor][j];
+                if (current_entry[0] == metabolite_id && current_entry[1] == i){
+                    metabolite_pos = j;
+                }
+            }
+            var len_adjacent = diameter * (-1 / metabolite_len + 1);
+            var correction_shift = metabolite_pos / (metabolite_len - 1);
+            switch (node_anchor){
+                case "top":
+                    var w = len_adjacent;
+                    start_x -= w * 0.5;
+                    if (metabolite_len > 1){
+                        start_x += w * correction_shift;
+                    }
+                    break;
+                case "bottom":
+                    var w = len_adjacent;
+                    start_x += w * 0.5;
+                    if (metabolite_len > 1){
+                        start_x -= w * correction_shift;
+                    }
+                    break;
+                case "left":
+                    var h = len_adjacent;
+                    start_y += h * 0.5;
+                    if (metabolite_len > 1){
+                        start_y -= h * correction_shift;
+                    }
+                    break;
+                case "right":
+                    var h = len_adjacent;
+                    start_y -= h * 0.5;
+                    if (metabolite_len > 1){
+                        start_y += h * correction_shift;
+                    }
+                    break;
+            }
+        }
+        
         
         if ((node_anchor == 'top') || (node_anchor == 'bottom')){
             if (node_anchor == 'top'){
@@ -767,9 +826,7 @@ function zoom_in_out(dir, res){
     if (zoom + direction < min_zoom || max_zoom < zoom + direction)
         return;
     zoom += direction;
-    factor = Math.pow(scaling, zoom);
-    font_size = text_size * factor;
-    radius = metabolite_radius * factor;
+    change_zoom();
     var scale = scaling;
     if (dir) scale = 1. / scale;
     
@@ -1283,9 +1340,7 @@ function highlight_protein(node_id, prot_id){
             document.getElementById("animation_background").style.display = "none";
             clearInterval (moving);
             zoom = highlight_zoom;
-            factor = Math.pow(scaling, zoom);
-            font_size = text_size * factor;
-            radius = metabolite_radius * factor;
+            change_zoom();
             draw();
             
         }
@@ -1323,10 +1378,7 @@ function highlight_protein(node_id, prot_id){
             });
             
             zoom += zoom_scale;
-            factor = Math.pow(scaling, zoom);
-            font_size = text_size * factor;
-            radius = metabolite_radius * factor;
-            
+            change_zoom;
             draw();
             progress += 1 / steps;
         }

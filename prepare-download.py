@@ -1,6 +1,6 @@
 #!/home/dominik.kopczynski/anaconda3/bin/python3.5
 
-import pymysql
+from pymysql import connect, cursors
 import cgi, cgitb
 import sqlite3
 from random import random

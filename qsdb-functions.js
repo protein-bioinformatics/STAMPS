@@ -48,7 +48,7 @@ function Peptide(data){
     }
 }
 
-function Protein(data){
+function Protein(data, ctx){
     this.id = data['id'];
     this.name = data['name'];
     this.definition = data['definition'];
@@ -59,10 +59,17 @@ function Protein(data){
     this.peptides = [];
     this.marked = false;
     this.containing_spectra = 0;
+    this.fillStyle_rect = disabled_fill_color;
+    this.fillStyle_text = disabled_text_color;
+    this.ctx = ctx;
     
     for (var i = 0; i < data['peptides'].length; ++i){
         this.peptides.push(new Peptide(data['peptides'][i]));
         this.containing_spectra += this.peptides[i].spectra.length;
+    }
+    if (this.containing_spectra){
+        this.fillStyle_rect = "white";
+        this.fillStyle_text = text_color;
     }
     
     this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
@@ -87,56 +94,43 @@ function Protein(data){
     
     
     this.check_mouse_over_protein_name = function(ctx, x, y, line_number, num, mouse){
-        var check_side = check_len * factor;
         ctx.font = (text_size * factor).toString() + "px Arial";
-        y -= Math.floor((line_number - 1) * line_height * factor * 0.5) - num * line_height * factor;
-        var x_l = x + check_side * 2;
+        y -= Math.floor((line_number - 1) * line_height * factor_h) - num * line_height * factor;
+        var x_l = x + check_side_d;
         var x_r = x_l + ctx.measureText(this.name).width;
-        var y_l = y - line_height * factor * 0.5;
-        var y_r = y + line_height * factor * 0.5;
+        var y_l = y - line_height * factor_h;
+        var y_r = y + line_height * factor_h;
         if (x_l <= mouse.x && mouse.x <= x_r && y_l <= mouse.y && mouse.y <= y_r) return true;
         return false;
     }
     
     
     this.get_position = function(x, y, line_number, num){
-        var check_side = check_len * factor;
-        y -= (line_number - 1) * line_height * factor * 0.5 - num * line_height * factor;
-        x += check_side * 2;
+        y -= (line_number - 1) * line_height * factor_h - num * line_height * factor;
+        x += check_side_d;
         return [x, y];
     }
     
     
-    this.draw = function(ctx, x, y) {
+    this.draw = function(x, y) {
+        var x_c = x + check_side_h;
+        var y_c = y - check_side_h;
         ctx.lineWidth = 1;
-        var check_side = check_len * factor;
-        var check_side_h = check_side * 0.5;
-        
-        var def = this.name;
-        if (!this.peptides.length || !this.containing_spectra){
-            ctx.fillStyle = disabled_fill_color;
-            ctx.fillRect(x + check_side_h, y - check_side_h, check_side, check_side);
-            ctx.fillStyle = disabled_text_color;
-            ctx.fillText(def, x + check_side * 2, y);
-        }
-        else {
-            ctx.fillStyle = "white";
-            ctx.fillRect(x + check_side_h, y - check_side_h, check_side, check_side);
-            ctx.fillStyle = text_color;
-            ctx.fillText(def, x + check_side * 2, y);
-        }
-        // write text
-        // draw checkbox
+        ctx.fillStyle = this.fillStyle_rect;
         ctx.strokeStyle = "black";
-        ctx.strokeRect(x + check_side_h, y - check_side_h, check_side, check_side);
+        ctx.beginPath();
+        ctx.rect(x_c, y_c, check_side, check_side);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = this.fillStyle_text;
+        ctx.fillText(this.name, x + check_side_d, y);
         
         
         // draw hooklet
-        var x_check = x + check_side_h;
-        var y_check = y - check_side_h;
         if (this.marked){
-            x_check += check_side_h;
-            y_check += check_side_h;
+            var x_check = x + check_side;
+            var y_check = y;
             var x1 = x_check - check_side * 0.375;
             var y1 = y_check;
             var x2 = x_check - check_side * 0.125;
@@ -170,9 +164,8 @@ function Protein(data){
     }
     
     this.mouse_over_checkbox = function(x, y, x_m, y_m, line_number, num){
-        y -= Math.floor((line_number - 1) * line_height * factor * 0.5) - num * line_height * factor;
+        y -= Math.floor((line_number - 1) * line_height * factor_h) - num * line_height * factor;
         var check_side = check_len * factor;
-        var check_side_h = check_side * 0.5;
         var l = x + check_side_h;
         var r = x + check_side * 1.5;
         var t = y - check_side_h;
@@ -255,20 +248,11 @@ function preview(ctx){
         boundaries[3] = y_max - y_min;
         
         var image_data = this.ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
-        /*
-        if ((x_max - x_min) / window.innerWidth >= (y_max - y_min) / window.innerHeight) {
-            var sf = window.innerWidth / (x_max - x_min) * 0.2;
-        }
-        else {
-            var sf = window.innerHeight / (y_max - y_min) * 0.2;
-        }
-        this.width = Math.ceil((x_max - x_min) * sf);
-        this.height = Math.ceil((y_max - y_min) * sf);
-        */
         this.width = x_max - x_min;
         this.height = y_max - y_min;
         this.x = 0;
         this.y = window.innerHeight - this.height;
+        this.preview_image.crossOrigin = "anonymous";
         this.preview_image = this.ctx.createImageData(this.width, this.height);
         this.preview_image_original = this.ctx.createImageData(this.width, this.height);
         for (var i = 0; i < this.preview_image.data.length; i += 4){
@@ -277,27 +261,6 @@ function preview(ctx){
             this.preview_image.data[i + 2] = image_data.data[i + 2];
             this.preview_image.data[i + 3] = image_data.data[i + 3];
         }
-        
-        
-        /*
-        var wf = image_data.width / this.width;
-        var hf = image_data.height / this.height;
-       
-        var h = 0;
-        var w = 0;
-        for (var i = 0; i < this.preview_image.data.length; i += 4){
-            var ii = (Math.floor(h * hf) * image_data.width + Math.floor(w * wf)) * 4;
-            this.preview_image.data[i] = image_data.data[ii];
-            this.preview_image.data[i + 1] = image_data.data[ii + 1];
-            this.preview_image.data[i + 2] = image_data.data[ii + 2];
-            this.preview_image.data[i + 3] = image_data.data[ii + 3];
-            ++w;
-            if (w >= this.preview_image.width){
-                w = 0;
-                h += 1;
-            }
-        }
-        */
     }
     
     this.is_mouse_over = function(mouse){
@@ -485,7 +448,7 @@ function Infobox(ctx){
         this.ctx.lineWidth = infobox_stroke_width;
         
         var offset_x = this.width + infobox_offset_x;
-        var offset_y = this.height / 2;
+        var offset_y = this.height * 0.5;
         this.ctx.beginPath();
         this.ctx.moveTo(this.x - offset_x + rect_curve, this.y - offset_y);
         this.ctx.lineTo(this.x - offset_x + this.width - rect_curve, this.y - offset_y);
@@ -595,7 +558,8 @@ function node(data, c){
     this.slide_percent = 0;
     this.on_slide = false;
     this.ctx.font = (text_size * factor).toString() + "px Arial";
-    
+    this.containing_spectra = 0;
+    this.fill_style = protein_disabled_fill_color;
     
     switch (this.type){
         case "protein":
@@ -605,7 +569,9 @@ function node(data, c){
             this.lines = data['proteins'].length;
             this.slide = (data['proteins'].length > max_protein_line_number);
             for (var j = 0; j < data['proteins'].length; ++j){
-                this.proteins.push(new Protein(data['proteins'][j]));
+                var prot = new Protein(data['proteins'][j], this.ctx);
+                this.proteins.push(prot);
+                this.containing_spectra += prot.containing_spectra;
                 if (name.length) name += ", ";
                 var def = this.proteins[j].name;
                 var text_width = this.ctx.measureText(def).width;
@@ -613,6 +579,7 @@ function node(data, c){
                     this.width = text_width;
                 }
                 name += data['proteins'][j]['name'];
+                this.fill_style = protein_fill_color;
             }
             this.width += 50 + this.slide * 20;
             this.name = name;
@@ -693,7 +660,7 @@ function node(data, c){
             case "protein":
                 
                 // draw fill
-                this.ctx.fillStyle = this.proteins.length ? protein_fill_color : protein_disabled_fill_color;
+                this.ctx.fillStyle = this.fill_style;
                 this.ctx.fillRect(this.x - hw, this.y - hh, this.width, this.height);
        
                 this.ctx.save();
@@ -735,7 +702,7 @@ function node(data, c){
                 var lhf = line_height * factor;
                 for (var i = 0, tty = ty - (this.proteins.length - 1) * lhf * 0.5; i < this.proteins.length; i += 1, tty += lhf){
                     
-                    if (Math.abs(tty - this.y) <= hh + lhf) this.proteins[i].draw(this.ctx, tx, tty);
+                    if (Math.abs(tty - this.y) <= hh + lhf) this.proteins[i].draw(tx, tty);
                 }
                 
                 this.ctx.restore();
@@ -1036,7 +1003,8 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     this.reaction_id = reaction_id;
     this.reagent_id = reagent_id;
     this.edge_id = edge_id;
-    
+    this.bidirectional = data[data_ref[this.start_id]].type == "metabolite" && nodes[this.reaction_id]['reversible'];
+    this.tail_start = 0;
     
     
     this.is_mouse_over = function(mouse){
@@ -1064,7 +1032,6 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     
     this.mouse_down = function(mouse, key){
         if ((key != 1 && key != 3) || !administration) return false;
-        console.log(this.edge_id);
         
         var xmlhttp = new XMLHttpRequest();
         var request = "update_edge.py?id=";
@@ -1460,15 +1427,95 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
                     break;
             }
         }
-                 
+         
+        if (this.bidirectional){
+            var x_head = -1;
+            var y_head = -1;
+            var p2_x = this.point_list[0].x;
+            var p2_y = this.point_list[0].y;
+            var p1_x = this.point_list[1].x;
+            var p1_y = this.point_list[1].y;
+            var ct_x = -1;
+            var ct_y = -1;
+            switch (this.point_list[0].b){
+                case 0:
+                    ct_x = this.point_list[0].x;
+                    ct_y = this.point_list[1].y;
+                    break;
+                case 1:
+                    ct_x = this.point_list[1].x;
+                    ct_y = this.point_list[0].y;
+                    break;
+            }
+            
+            switch (this.point_list[0].b){
+                case 2:                    
+                    break;
+                
+                default:                    
+                    var mm = 0;
+                    var upper = 1;
+                    var lower = 0;
+                    var l1 = -1;
+                    var l = -1;
+                    {
+                        var a_x = p1_x - 2 * ct_x + p2_x;
+                        var a_y = p1_y - 2 * ct_y + p2_y;
+                        var b_x = 2 * ct_x - 2 * p1_x;
+                        var b_y = 2 * ct_y - 2 * p1_y;
+                        var A = 4 * (a_x * a_x + a_y * a_y);
+                        var B = 4 * (a_x * b_x + a_y * b_y);
+                        var C = b_x * b_x + b_y * b_y;
+
+                        var Sabc = 2 * Math.sqrt(A + B + C);
+                        var A_2 = Math.sqrt(A);
+                        var A_32 = 2 * A * A_2;
+                        var C_2 = 2 * Math.sqrt(C);
+                        var BA = B / A_2;
+
+                        l1 = (A_32 * Sabc + A_2 * B * (Sabc - C_2) + (4 * C * A - B * B) * Math.log((2 * A_2 + BA + Sabc) / (BA + C_2))) / (4 * A_32);
+                    }
+                    while (mm < 10){
+                        t = (upper + lower) * 0.5;
+                        x_head = (1 - t) * (1 - t) * p1_x + 2 * (1 - t) * t * ct_x + t * t * p2_x;
+                        y_head = (1 - t) * (1 - t) * p1_y + 2 * (1 - t) * t * ct_y + t * t * p2_y;
+                        var a_x = p1_x - 2 * ct_x + x_head;
+                        var a_y = p1_y - 2 * ct_y + y_head;
+                        var b_x = 2 * ct_x - 2 * p1_x;
+                        var b_y = 2 * ct_y - 2 * p1_y;
+                        var A = 4 * (a_x * a_x + a_y * a_y);
+                        var B = 4 * (a_x * b_x + a_y * b_y);
+                        var C = b_x * b_x + b_y * b_y;
+
+                        var Sabc = 2 * Math.sqrt(A + B + C);
+                        var A_2 = Math.sqrt(A);
+                        var A_32 = 2 * A * A_2;
+                        var C_2 = 2 * Math.sqrt(C);
+                        var BA = B / A_2;
+
+                        l = (A_32 * Sabc + A_2 * B * (Sabc - C_2) + (4 * C * A - B * B) * Math.log((2 * A_2 + BA + Sabc) / (BA + C_2))) / (4 * A_32);
+                        if (Math.abs(l1 - l - arrow_length * factor) < 5e-2) break;
+                        if (l1 - l < arrow_length * factor) upper = t;
+                        else lower = t;
+                        ++mm;
+                    }
+                    
+                    
+                    t *= 1.05;
+                    this.tail_start = t;
+                    break;
+            }
+        }
     }
     
     
-    this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node); 
+    this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node);
     
     this.draw = function(){
-        this.ctx.strokeStyle = data[data_ref[this.start_id]].proteins.length ? edge_color : edge_disabled_color;
-        this.ctx.fillStyle = data[data_ref[this.start_id]].proteins.length ? edge_color : edge_disabled_color;
+        var edge_enabled = data[data_ref[this.start_id]].proteins.length > 0;
+        
+        this.ctx.strokeStyle = edge_enabled ? edge_color : edge_disabled_color;
+        this.ctx.fillStyle = edge_enabled ? edge_color : edge_disabled_color;
         this.ctx.lineWidth = line_width * factor;
         this.ctx.beginPath();
         this.ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
@@ -1518,6 +1565,71 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             }
             
             switch (this.point_list[p_len - 2].b){
+                case 2:
+                    var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - p1_x) + sq(p2_y - p1_y)));
+                    x_head = p2_x + l * (p1_x - p2_x);
+                    y_head = p2_y + l * (p1_y - p2_y);
+                    
+                    this.ctx.lineWidth = line_width * factor;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p1_x, p1_y);
+                    this.ctx.lineTo(x_head, y_head);
+                    this.ctx.stroke();
+                    
+                    break;
+                
+                default:
+                    var t = this.head_start;
+                    x_head = (1 - t) * (1 - t) * p1_x + 2 * (1 - t) * t * ct_x + t * t * p2_x;
+                    y_head = (1 - t) * (1 - t) * p1_y + 2 * (1 - t) * t * ct_y + t * t * p2_y;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p1_x, p1_y);
+                    this.ctx.bezierCurveTo(ct_x, ct_y, x_head, y_head, x_head, y_head);
+                    this.ctx.stroke();
+                    break;
+                    
+            }
+            
+            var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - x_head) + sq(p2_y - y_head)));
+            var x_l = x_head - l * 0.5 * (y_head - p2_y);
+            var y_l = y_head + l * 0.5 * (x_head - p2_x);
+                    
+            var x_r = x_head + l * 0.5 * (y_head - p2_y);
+            var y_r = y_head - l * 0.5 * (x_head - p2_x);
+            
+            this.ctx.lineWidth = 1;
+            this.ctx.beginPath();
+            this.ctx.moveTo(p2_x, p2_y);
+            this.ctx.lineTo(x_r, y_r);
+            this.ctx.lineTo(x_l, y_l);
+            this.ctx.closePath();
+            this.ctx.fill();
+            
+            
+        }
+        
+        if (this.bidirectional){
+            var x_head = -1;
+            var y_head = -1;
+            var p2_x = this.point_list[0].x;
+            var p2_y = this.point_list[0].y;
+            var p1_x = this.point_list[1].x;
+            var p1_y = this.point_list[1].y;
+            var ct_x = -1;
+            var ct_y = -1;
+            switch (this.point_list[0].b){
+                case 0:
+                    ct_x = this.point_list[0].x;
+                    ct_y = this.point_list[1].y;
+                    break;
+                case 1:
+                    ct_x = this.point_list[1].x;
+                    ct_y = this.point_list[0].y;
+                    break;
+            }
+            
+            switch (this.point_list[0].b){
                 case 2:
                     var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - p1_x) + sq(p2_y - p1_y)));
                     x_head = p2_x + l * (p1_x - p2_x);

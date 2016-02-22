@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Feb 11, 2016 at 02:47 PM
+-- Generation Time: Feb 12, 2016 at 11:59 AM
 -- Server version: 5.5.47-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.14
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `metabolites` (
   `formula` varchar(100) NOT NULL,
   `exact_mass` varchar(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2265 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2264 ;
 
 --
 -- Dumping data for table `metabolites`
@@ -23262,7 +23262,7 @@ CREATE TABLE IF NOT EXISTS `request_counter` (
 INSERT INTO `request_counter` (`id`, `month_year`, `number`) VALUES
 (1, '2015-11-01', 163),
 (2, '2015-12-01', 880),
-(3, '2016-02-01', 317);
+(3, '2016-02-01', 345);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
