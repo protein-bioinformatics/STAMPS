@@ -1516,6 +1516,12 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
         
         this.ctx.strokeStyle = edge_enabled ? edge_color : edge_disabled_color;
         this.ctx.fillStyle = edge_enabled ? edge_color : edge_disabled_color;
+        
+        if (data[data_ref[this.start_id]].type == "metabolite"){
+            this.ctx.strokeStyle = "#ff0000";
+            this.ctx.fillStyle = "#ff0000";
+        }
+        
         this.ctx.lineWidth = line_width * factor;
         this.ctx.beginPath();
         this.ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
@@ -1592,11 +1598,11 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             }
             
             var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - x_head) + sq(p2_y - y_head)));
-            var x_l = x_head - l * 0.5 * (y_head - p2_y);
-            var y_l = y_head + l * 0.5 * (x_head - p2_x);
+            var x_l = x_head - l * 0.65 * (y_head - p2_y);
+            var y_l = y_head + l * 0.65 * (x_head - p2_x);
                     
-            var x_r = x_head + l * 0.5 * (y_head - p2_y);
-            var y_r = y_head - l * 0.5 * (x_head - p2_x);
+            var x_r = x_head + l * 0.65 * (y_head - p2_y);
+            var y_r = y_head - l * 0.65 * (x_head - p2_x);
             
             this.ctx.lineWidth = 1;
             this.ctx.beginPath();
@@ -1657,11 +1663,11 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             }
             
             var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - x_head) + sq(p2_y - y_head)));
-            var x_l = x_head - l * 0.5 * (y_head - p2_y);
-            var y_l = y_head + l * 0.5 * (x_head - p2_x);
+            var x_l = x_head - l * 0.65 * (y_head - p2_y);
+            var y_l = y_head + l * 0.65 * (x_head - p2_x);
                     
-            var x_r = x_head + l * 0.5 * (y_head - p2_y);
-            var y_r = y_head - l * 0.5 * (x_head - p2_x);
+            var x_r = x_head + l * 0.65 * (y_head - p2_y);
+            var y_r = y_head - l * 0.65 * (x_head - p2_x);
             
             this.ctx.lineWidth = 1;
             this.ctx.beginPath();

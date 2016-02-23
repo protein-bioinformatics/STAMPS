@@ -345,6 +345,14 @@ td.select_pathway_cell {
 }
 
 
+td.selected_pathway_cell {
+    border-bottom: 1px dashed #d3d3d3;
+    background: #eeeeee;
+    padding: 10px;
+    cursor: pointer;
+}
+
+
 td.select_pathway_cell:hover {
     border-bottom: 1px dashed #d3d3d3;
     background: #eeeeee;

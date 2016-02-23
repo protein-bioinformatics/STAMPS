@@ -246,13 +246,21 @@ function draw(sync){
     }
 }
 
-
-
+function set_pathway_menu(){
+    var pathway_menu = "<table>";
+    for (var i = 0; i < pathways.length; ++i){
+        var selected = (pathways[i][0] == current_pathway) ? "selected_pathway_cell" : "select_pathway_cell";
+        pathway_menu += "<tr><td class=\"" + selected + "\" onclick=\"change_pathway(";
+        pathway_menu += i;
+        pathway_menu += ");\">";
+        pathway_menu += pathways[i][1]; 
+        pathway_menu += "</td></tr>";
+    }
+    pathway_menu += "</table>";
+    document.getElementById("select_pathway").innerHTML = pathway_menu;
+}
 
 function init(){
-    
-    
-    
     strGET = document.location.search.substr(1,document.location.search.length);
     if(strGET!=''){
         gArr = strGET.split('&');
@@ -277,16 +285,7 @@ function init(){
     xmlhttp_pw.onreadystatechange = function() {
         if (xmlhttp_pw.readyState == 4 && xmlhttp_pw.status == 200) {
             pathways = JSON.parse(xmlhttp_pw.responseText);
-            var pathway_menu = "<table>";
-            for (var i = 0; i < pathways.length; ++i){
-                pathway_menu += "<tr><td class=\"select_pathway_cell\" onclick=\"change_pathway(";
-                pathway_menu += i;
-                pathway_menu += ");\">";
-                pathway_menu += pathways[i][1]; 
-                pathway_menu += "</td></tr>";
-            }
-            pathway_menu += "</table>";
-            document.getElementById("select_pathway").innerHTML = pathway_menu;
+            set_pathway_menu();
         }
     }
     xmlhttp_pw.open("GET", "get-pathways.py", true);
@@ -370,6 +369,10 @@ function load_data(reload){
         document.getElementById("search_field").value = "";
         hide_search();
     }
+    
+    
+    
+    
     
     elements = [];
     edges = [];
@@ -897,6 +900,7 @@ function mouse_click_listener(e){
 function change_pathway(p){
     hide_select_pathway();
     current_pathway = pathways[p][0];
+    set_pathway_menu();
     reset_view();
     document.getElementById("pathway_name").innerHTML = "Current pathway: " + pathways[p][1];
     load_data();
