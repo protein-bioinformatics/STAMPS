@@ -247,7 +247,20 @@ function preview(ctx){
         boundaries[2] = x_max - x_min;
         boundaries[3] = y_max - y_min;
         
-        var image_data = this.ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
+        var image_data;
+        
+        try {
+            try { 
+                image_data = this.ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
+            } catch (e) {
+                console.log(x_min + " " + y_min + " " + (x_max - x_min) + " " + (y_max - y_min));
+                //image_data = this.ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
+            }                                              
+        } catch (e) {
+            throw new Error("unable to access image data: " + e);
+        } 
+        
+        
         this.width = x_max - x_min;
         this.height = y_max - y_min;
         this.x = 0;
@@ -1517,10 +1530,11 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
         this.ctx.strokeStyle = edge_enabled ? edge_color : edge_disabled_color;
         this.ctx.fillStyle = edge_enabled ? edge_color : edge_disabled_color;
         
+        /*
         if (data[data_ref[this.start_id]].type == "metabolite"){
             this.ctx.strokeStyle = "#ff0000";
             this.ctx.fillStyle = "#ff0000";
-        }
+        }*/
         
         this.ctx.lineWidth = line_width * factor;
         this.ctx.beginPath();

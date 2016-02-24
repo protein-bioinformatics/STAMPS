@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Feb 23, 2016 at 08:33 AM
+-- Generation Time: Feb 24, 2016 at 09:01 AM
 -- Server version: 5.5.47-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.14
 
@@ -5269,7 +5269,7 @@ INSERT INTO `nodes` (`id`, `pathway_id`, `type`, `foreign_id`, `pathway_ref`, `x
 (109, 1, 'metabolite', 94, 0, -225, 1300),
 (110, 1, 'pathway', 3, 0, 650, -175),
 (111, 1, 'pathway', 4, 0, 500, -600),
-(112, 1, 'protein', 0, 0, 275, 1225),
+(112, 1, 'protein', 0, 0, 250, 1225),
 (113, 1, 'protein', 0, 0, 400, 1300),
 (115, 1, 'protein', 0, 0, 375, 1125),
 (117, 1, 'protein', 0, 0, 125, 1125),
@@ -5281,7 +5281,7 @@ INSERT INTO `nodes` (`id`, `pathway_id`, `type`, `foreign_id`, `pathway_ref`, `x
 (123, 1, 'protein', 0, 0, 500, 825),
 (124, 1, 'protein', 0, 0, 500, 675),
 (125, 1, 'protein', 0, 0, 500, 375),
-(126, 1, 'protein', 0, 0, 325, 275),
+(126, 1, 'protein', 0, 0, 325, 300),
 (127, 1, 'protein', 0, 0, 500, 0),
 (128, 1, 'protein', 0, 0, 600, 0),
 (129, 1, 'protein', 0, 0, 650, -300),
@@ -5305,7 +5305,7 @@ INSERT INTO `nodes` (`id`, `pathway_id`, `type`, `foreign_id`, `pathway_ref`, `x
 (154, 1, 'metabolite', 97, 0, 500, 750),
 (155, 1, 'metabolite', 98, 0, 50, -300),
 (156, 1, 'metabolite', 99, 0, 50, -75),
-(157, 1, 'metabolite', 100, 0, 225, 275),
+(157, 1, 'metabolite', 100, 0, 225, 300),
 (158, 1, 'metabolite', 101, 0, 275, -75),
 (159, 1, 'metabolite', 102, 0, 500, -300),
 (160, 1, 'metabolite', 103, 0, 500, -75),
@@ -5318,7 +5318,7 @@ INSERT INTO `nodes` (`id`, `pathway_id`, `type`, `foreign_id`, `pathway_ref`, `x
 (167, 1, 'metabolite', 110, 0, 500, 1125),
 (168, 1, 'metabolite', 111, 0, 250, 1125),
 (169, 1, 'metabolite', 112, 0, -225, 1125),
-(170, 1, 'metabolite', 113, 0, 275, 1300),
+(170, 1, 'metabolite', 113, 0, 250, 1300),
 (171, 1, 'metabolite', 114, 0, 0, 1125),
 (172, 1, 'metabolite', 115, 0, -150, 1200),
 (173, 1, 'metabolite', 116, 0, 500, 75),
@@ -18361,8 +18361,8 @@ INSERT INTO `reactions` (`id`, `node_id`, `anchor_in`, `anchor_out`, `reversible
 (2413, 2919, 'left', 'right', 0),
 (2414, 2915, 'left', 'right', 0),
 (2415, 2912, 'left', 'right', 0),
-(2416, 1074, 'bottom', 'top', 0),
-(2417, 1074, 'left', 'right', 0),
+(2416, 1074, 'bottom', 'top', 1),
+(2417, 1074, 'left', 'right', 1),
 (2418, 5131, 'top', 'bottom', 0),
 (2419, 5131, 'top', 'bottom', 0),
 (2420, 5120, 'top', 'bottom', 0),
@@ -23384,7 +23384,7 @@ INSERT INTO `reagents` (`id`, `reaction_id`, `node_id`, `type`, `anchor`) VALUES
 (4991, 2413, 2917, 'product', 'left'),
 (4992, 2414, 2912, 'product', 'left'),
 (4993, 2415, 2911, 'product', 'left'),
-(4994, 2416, 1975, 'product', 'bottom'),
+(4994, 2416, 1075, 'product', 'bottom'),
 (4995, 2417, 1073, 'product', 'left'),
 (4996, 2418, 5127, 'product', 'right'),
 (4997, 2419, 5125, 'product', 'right'),
@@ -23446,7 +23446,7 @@ CREATE TABLE IF NOT EXISTS `request_counter` (
 INSERT INTO `request_counter` (`id`, `month_year`, `number`) VALUES
 (1, '2015-11-01', 163),
 (2, '2015-12-01', 880),
-(3, '2016-02-01', 413);
+(3, '2016-02-01', 477);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

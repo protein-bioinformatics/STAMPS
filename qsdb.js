@@ -50,6 +50,7 @@ on_slide = false;
 font_size = text_size * factor;
 radius = metabolite_radius * factor;
 last_keys = [];
+highlighting = 0;
 
 
 line_width = 5;
@@ -329,9 +330,9 @@ function init(){
     document.getElementById("search_background").addEventListener("click", hide_search, false);
     document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
     document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
-    
-    
+    document.getElementById("disclaimer_background").addEventListener("click", hide_disclaimer, false);
     document.getElementById("check_spectra_background").addEventListener("click", hide_check_spectra, false);
+    
     window.addEventListener('resize', resize_ms_view, false);
     document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
     document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
@@ -376,6 +377,8 @@ function load_data(reload){
     
     elements = [];
     edges = [];
+    clearInterval(highlighting);
+    infobox.visible = false;
     
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
@@ -502,7 +505,12 @@ function compute_edges(){
         for (var j = 0; j < nodes[i]['reagents'].length; ++j){
             
             var metabolite_id = data_ref[nodes[i]['reagents'][j]['node_id']];
+            try {
             var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y, nodes[i]['reagents'][j]['anchor']);
+                
+            } catch(e){
+                console.log(nodes[i]['reagents'][j]['node_id']);
+            }
             
             if (nodes[i]['reagents'][j]['type'] == 'educt'){
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, nodes[i]['anchor_in']);
@@ -903,6 +911,7 @@ function change_pathway(p){
     set_pathway_menu();
     reset_view();
     document.getElementById("pathway_name").innerHTML = "Current pathway: " + pathways[p][1];
+    document.title = "QSDB Home - " + pathways[p][1];
     load_data();
 }
 
@@ -1232,6 +1241,18 @@ function check_spectra(){
 
 
 
+function open_disclaimer (){
+    document.getElementById("disclaimer").style.display = "inline";
+    document.getElementById("disclaimer_background").style.display = "inline";
+}
+
+function hide_disclaimer (){
+    document.getElementById("disclaimer").style.display = "none";
+    document.getElementById("disclaimer_background").style.display = "none";
+}
+
+
+
 function hide_check_spectra (){
     document.getElementById("check_spectra_background").style.display = "none";
     document.getElementById("check_spectra").style.display = "none";
@@ -1328,7 +1349,7 @@ function highlight_protein(node_id, prot_id){
         if (progress >= time) {
             zoom = highlight_zoom;
             var l = 0, ii = 0;
-            var highlighting = setInterval(function(){
+            highlighting = setInterval(function(){
                 if (ii >= 3){
                     clearInterval (highlighting);
                 }
@@ -1382,7 +1403,7 @@ function highlight_protein(node_id, prot_id){
             });
             
             zoom += zoom_scale;
-            change_zoom;
+            change_zoom();
             draw();
             progress += 1 / steps;
         }

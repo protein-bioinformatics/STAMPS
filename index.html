@@ -7,6 +7,7 @@
 <script src="qsdb.js"></script>
 <script src="qsdb-functions.js"></script>
 <script src="ms-view.js"></script>
+<title>QSDB Home</title>
 </head>
 
 <body>
@@ -34,6 +35,8 @@
     Check Spectra
   </td><td class="navigation_cell_click" onclick="close_navigation(0); download_assay();">
     Download Assay
+  </td><td class="navigation_cell_click" onclick="close_navigation(0); open_disclaimer();">
+    About QSDB
   </td><td id="pathway_name" class="navigation_cell_name">
     ---
   </td></tr>
@@ -66,6 +69,50 @@
 <div id="select_pathway_background" class="select_pathway_background"></div>
 <div id="animation_background" class="animation_background"></div>
 
+<div id="disclaimer" class="disclaimer" align="justify">
+<center><b>About QSDB</b></center><p>
+The quality standard database (QSDB) provides a pathway based approach to access proteomics assays for targeted proteomics.
+Currently, we are acquiring mass spectra for all proteins within the mouse organism.
+Our mass spetrometer is a QExactive Plus or HF, capable to produce high-resolution high-mass accuracy LC-MS/MS spectra.<p>
+Responsible people for this database are:<br>
+Dominik Kopczynski: Implementation of both front- and backend<br>
+Andreas Hentschel: Acquisition and processing of the data<br>
+Robert Ahrends: Coordination<p>
+The ISAS team is supported by the German network of bioinformatics services (<a href="www.denbi.de">de.NBI</a>).
+If you have questions, suggestions or other issues, please <a href="mail:foo@foo.de">contact</a> us.
+<p>&nbsp;<p>&nbsp;<p>
+
+
+<center><b>Disclaimer</b></center><p>
+<b>1. Liability limitation</b><br>
+Although we acquired our data with highest accurateness, we take no responsibility for the correctness, completeness or up-to-dateness of this data.
+The usage of the downloadable data available on this web page takes place at the users own risk.
+<p>
+ 
+<b>2. External links</b><br>
+This web page contains links forwarding to external web pages.
+For all external web pages we disclaim liability.
+During the linking no statutory violation was evident.
+As soon as a violation emerges, we delete these links.
+<p>
+
+<b>3. Copyright</b><br>
+The content of this web page is subject to the German copyright law and ancillary copyright.
+Every inadmissible utilization defined by the German copyright law and ancillary copyright is forbidden.
+This includes the disposal of the downloadable data. 
+Download and utilization of the available data for researching purposes is explicitly allowed.
+<p>
+ 
+<b>4. Privacy</b><br>
+For statistical purposes, we record the number of visits to this web page as well as the number of downloads.
+To ensure an unbiased record, we store a hash value of your IP address for several minutes.
+Since this method is not reversible, restoring your IP address is not possible, hence this value does not belong to personal-related data.
+We do not sell or hand out our collected statistical data to third parties.
+<p>
+The usage, selling or handing of the contact data written in this imprint is not allowed.
+<p>
+</div>
+<div id="disclaimer_background" class="disclaimer_background"></div>
 
 <div id="search_results" class="search_results"></div>
 <div id="search_background" class="search_background"></div>
