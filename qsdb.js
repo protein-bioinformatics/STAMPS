@@ -94,6 +94,7 @@ preview_element = 0;
 
 
 pathways = [[15, "Alanine, aspartate and glutamate metabolism"]];
+//pathways = [[28, "Alanine, aspartate and glutamate metabolism"]];
 
 function debug(text){
     document.getElementById("hint").innerHTML = text;
@@ -411,10 +412,12 @@ function load_data(reload){
     
     
     xmlhttp.open("GET", "get-qsdbdata.py?request=qsdbdata&pathway=" + current_pathway + "&species=" + species_string, true);
+    //xmlhttp.open("GET", "get-nodes.bin?pathway=" + current_pathway + "&species=" + species_string, true);
     xmlhttp.send();
     
     
     xmlhttp2.open("GET", "get-edgedata.py?pathway=" + current_pathway, true);
+    //xmlhttp2.open("GET", "get-edges.bin?pathway=" + current_pathway, true);
     xmlhttp2.send();
     
     
@@ -505,12 +508,7 @@ function compute_edges(){
         for (var j = 0; j < nodes[i]['reagents'].length; ++j){
             
             var metabolite_id = data_ref[nodes[i]['reagents'][j]['node_id']];
-            try {
             var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y, nodes[i]['reagents'][j]['anchor']);
-                
-            } catch(e){
-                console.log(nodes[i]['reagents'][j]['node_id']);
-            }
             
             if (nodes[i]['reagents'][j]['type'] == 'educt'){
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, nodes[i]['anchor_in']);
@@ -519,9 +517,6 @@ function compute_edges(){
             }
             else{
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, nodes[i]['anchor_out']);
-                /*if (data[node_id].type == "metabolite"){
-                    angle_node = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y,  nodes[i]['anchor_out']);
-                }*/
                 connections.push([node_id, nodes[i]['anchor_out'], metabolite_id, nodes[i]['reagents'][j]['anchor'], true, i, j, nodes[i]['reagents'][j]['id']]);
                 nodes_anchors[node_id][nodes[i]['anchor_out']].push([metabolite_id, connections.length - 1, angle_node]);
                 

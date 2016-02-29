@@ -36,6 +36,7 @@ print()
 response = []
 conn = connect(host = mysql_host, port = mysql_port, user = mysql_user, passwd = mysql_passwd, db = mysql_db)
 my_cur = conn.cursor(cursors.DictCursor)
+#my_cur_edges = conn.cursor(cursors.DictCursor)
 
 lite_db = sqlite3.connect(sqlite_file)
 lite_db.row_factory = dict_factory
@@ -135,5 +136,19 @@ my_cur.execute(sql_query, (pathway, pathway))
 
 for row in my_cur:
     response.append(row)
+    
+    
+"""
+sql_query = "SELECT r.* FROM reactions r INNER JOIN nodes n ON r.node_id = n.id WHERE n.pathway_id = %s"
+my_cur_edges.execute(sql_query, pathway)
+my_cur_reagent = conn.cursor(cursors.DictCursor)           
+for row in my_cur:
+    response.append(row)
+    response[-1]["reagents"] = []
+    sql_reagent = "SELECT * FROM reagents WHERE reaction_id = %s"
+    my_cur_reagent.execute(sql_reagent, row["id"])
+    for row_reagent in my_cur_reagent:
+        response[-1]["reagents"].append(row_reagent)
+"""
 
 print(dumps(response))
