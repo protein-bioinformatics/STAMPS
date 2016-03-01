@@ -1044,31 +1044,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     
     
     this.mouse_down = function(mouse, key){
-        if ((key != 1 && key != 3) || !administration) return false;
-        
-        var xmlhttp = new XMLHttpRequest();
-        var request = "update_edge.py?id=";
-        request += this.edge_id;
-        request += "&element=";
-        request += (key == 1) ? "protein" : "metabolite";
-        xmlhttp.open("GET", request, false);
-        xmlhttp.send();
-        
-        if (key == 1){
-            if (nodes[this.reaction_id]['reagents'][this.reagent_id]['type'] == "educt"){
-                nodes[this.reaction_id]['anchor_in'] = next_anchor[nodes[this.reaction_id]['anchor_in']];
-            }
-            else {
-                nodes[this.reaction_id]['anchor_out'] = next_anchor[nodes[this.reaction_id]['anchor_out']];
-            }
-        }
-        else {
-            var anchor = nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'];
-            nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'] = next_anchor[anchor];
-        }
-        compute_edges();
-        assemble_elements();
-        draw();
+        return false;
     }
     
     
