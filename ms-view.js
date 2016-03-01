@@ -246,6 +246,7 @@ function load_spectrum(spectrum_id){
     xmlhttp.open("GET", "/qsdb/cgi-bin/get-msdata.py?spectrum_id=" + spectrum_id, false);
     xmlhttp.send();
     
+    
     peptide = spectrum_data["peptideSeq"];
     precursor_mass = spectrum_data["precursorMZ"];
     charge = spectrum_data["precursorCharge"];
