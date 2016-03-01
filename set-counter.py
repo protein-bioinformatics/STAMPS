@@ -34,7 +34,6 @@ my_cur.execute(sql_query)
 cnt = 0
 for row in my_cur:
     cnt = int(row['cnt'])
-print("cnt: ", cnt, "<br>")
     
     
 if not cnt:

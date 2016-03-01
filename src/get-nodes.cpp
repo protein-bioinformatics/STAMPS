@@ -33,6 +33,22 @@ bool is_integer_number(const string& string){
 }
 
 
+string remove_newline(string str) {
+    size_t start_pos = 0;
+    while((start_pos = str.find("\n", start_pos)) != string::npos) {
+        str.replace(start_pos, 1, "\\n");
+        start_pos += 2; // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    }
+    string cf = "1";
+    cf[0] = 13;
+    start_pos = 0;
+    while((start_pos = str.find(cf, start_pos)) != string::npos) {
+        str.replace(start_pos, 1, "");
+    }
+    return str;
+}
+
+
 class spectrum {
     public:
         string id;
@@ -89,7 +105,7 @@ class protein {
             str += "\"mass\": \"" + mass + "\", ";
             str += "\"accession\": \"" + accession + "\", ";
             str += "\"ec_number\": \"" + ec_number + "\", ";
-            str += "\"fasta\": \"" + fasta + "\", ";
+            str += "\"fasta\": \"" + remove_newline(fasta) + "\", ";
             str += "\"peptides\": [";
             for (int i = 0; i < peptides.size(); ++i){
                 if (i) str += ", ";
@@ -286,7 +302,6 @@ main() {
             string pid = row[column_names_peptides[string("pid")]];
             string pep_id = row[column_names_peptides[string("id")]];
             string peptide_seq = row[column_names_peptides[string("peptide_seq")]];
-            cout << pid << endl;
             for (int i = 0; i < all_proteins[pid].size(); ++i){
                 peptide* last_peptide = new peptide();
                 all_proteins[pid][i]->peptides.push_back(*last_peptide);
@@ -331,6 +346,7 @@ main() {
     while ((row = mysql_fetch_row(res)) != NULL){
         node* last_node = new node();
         last_node->id = row[column_names_rest[string("id")]];
+        last_node->pathway_id = row[column_names_rest[string("pathway_id")]];
         last_node->name = row[column_names_rest[string("name")]];
         last_node->type = row[column_names_rest[string("type")]];
         last_node->pathway_ref = row[column_names_rest[string("pathway_ref")]]; 

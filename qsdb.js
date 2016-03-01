@@ -280,7 +280,8 @@ function init(){
             var receive = xmlhttp.responseText;
         }
     }
-    xmlhttp.open("GET", "set-counter.py?counter=request", true);
+    //xmlhttp.open("GET", "set-counter.py?counter=request", true);
+    xmlhttp.open("GET", "set-counter.bin?counter=request", true);
     xmlhttp.send();
     
     var xmlhttp_pw = new XMLHttpRequest();
@@ -290,7 +291,8 @@ function init(){
             set_pathway_menu();
         }
     }
-    xmlhttp_pw.open("GET", "get-pathways.py", true);
+    //xmlhttp_pw.open("GET", "get-pathways.py", true);
+    xmlhttp_pw.open("GET", "get-pathways.bin", true);
     xmlhttp_pw.send();
     
     
@@ -411,13 +413,13 @@ function load_data(reload){
     }
     
     
-    xmlhttp.open("GET", "get-qsdbdata.py?request=qsdbdata&pathway=" + current_pathway + "&species=" + species_string, true);
-    //xmlhttp.open("GET", "get-nodes.bin?pathway=" + current_pathway + "&species=" + species_string, true);
+    //xmlhttp.open("GET", "get-qsdbdata.py?request=qsdbdata&pathway=" + current_pathway + "&species=" + species_string, true);
+    xmlhttp.open("GET", "get-nodes.bin?pathway=" + current_pathway + "&species=" + species_string, true);
     xmlhttp.send();
     
     
-    xmlhttp2.open("GET", "get-edgedata.py?pathway=" + current_pathway, true);
-    //xmlhttp2.open("GET", "get-edges.bin?pathway=" + current_pathway, true);
+    //xmlhttp2.open("GET", "get-edgedata.py?pathway=" + current_pathway, true);
+    xmlhttp2.open("GET", "get-edges.bin?pathway=" + current_pathway, true);
     xmlhttp2.send();
     
     
@@ -1123,7 +1125,8 @@ function download_assay(){
             var receive = xmlhttp_c.responseText;
         }
     }
-    xmlhttp_c.open("GET", "set-counter.py?counter=download", true);
+    //xmlhttp_c.open("GET", "set-counter.py?counter=download", true);
+    xmlhttp_c.open("GET", "set-counter.bin?counter=download", true);
     xmlhttp_c.send();
     
     document.getElementById("downloadbackground").style.display = "inline";
