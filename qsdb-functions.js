@@ -2343,7 +2343,7 @@ function download_assay(){
     document.getElementById("navigation").style.filter = "blur(5px)";
     
     html = "<table width=100% height=100%><tr><td align=\"center\">";
-    html += "<img src=\"ajax-loader.gif\"></td></tr></table>"
+    html += "<img src=\"/qsdb/images/ajax-loader.gif\"></td></tr></table>"
     document.getElementById("download").innerHTML = html;
     
     var xmlhttp = new XMLHttpRequest();

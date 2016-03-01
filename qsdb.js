@@ -275,26 +275,6 @@ function mouse_move_listener(e){
 }
 
 
-function update_node(event) {
-    var c = document.getElementById("renderarea");
-    res = get_mouse_pos(c, event);
-    var x = Math.round(Math.floor((highlight_element.x - null_x) / factor) / base_grid) * base_grid;
-    var y = Math.round(Math.floor((highlight_element.y - null_y) / factor) / base_grid) * base_grid;
-    
-    
-    var xmlhttp = new XMLHttpRequest();
-    var request = "update_node.py?id=";
-    request += highlight_element.id;
-    request += "&x=";
-    request += x;
-    request += "&y=";
-    request += y;
-    xmlhttp.open("GET", request, false);
-    xmlhttp.send();
-    event_moving_node = false;
-}
-
-
 
 function key_down(event){
     // easter egg
