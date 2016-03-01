@@ -45,7 +45,6 @@ check_side_d = check_side * 2;
 line_height = 20;
 anchors = ['left', 'top', 'right', 'bottom'];
 next_anchor = {"left": "top", "top": "right", "right": "bottom", "bottom": "left"};
-administration = false;
 on_slide = false;
 font_size = text_size * factor;
 radius = metabolite_radius * factor;
@@ -263,16 +262,6 @@ function set_pathway_menu(){
 }
 
 function init(){
-    strGET = document.location.search.substr(1,document.location.search.length);
-    if(strGET!=''){
-        gArr = strGET.split('&');
-        for(var i = 0; i < gArr.length; ++i){
-            v='';vArr=gArr[i].split('=');
-            if(vArr.length>1){v=vArr[1];}
-            HTTP_GET_VARS[unescape(vArr[0])] = unescape(v);
-        }
-    }
-    if (HTTP_GET_VARS['admin']) administration = HTTP_GET_VARS['admin'] == 1;
     
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -758,10 +747,8 @@ function hide_management(event){
 
 
 function show_custom_menu(event){
-    if (!administration) return;
     var menu_points = new Array();
     unTip();
-    /*
     if (!highlight_element){
         menu_points.push(["Insert protein", "debug", 0, 1]);
         menu_points.push(["Insert metabolite", "debug", 0, 1]);
@@ -811,7 +798,6 @@ function show_custom_menu(event){
     
     cm.style.left = (event.clientX - (event.clientX + cm.offsetWidth > window.innerWidth ? cm.offsetWidth : 0)) + "px";
     cm.style.top = (event.clientY - (event.clientY + cm.offsetHeight > window.innerHeight ? cm.offsetHeight : 0)) + "px";
-    */
 }
 
 
@@ -971,7 +957,7 @@ function mouse_move_listener(e){
                 boundaries[0] += shift_x;
                 boundaries[1] += shift_y;
             }
-            else if (administration) {
+            else {
                 event_moving_node = true;
                 node_move_x += shift_x;
                 node_move_y += shift_y;
@@ -1006,7 +992,7 @@ function mouse_move_listener(e){
         }
         
     }
-    if(highlight_element && highlight_element.tipp && !(administration && event_key_down)) Tip(e, highlight_element.id + " " + highlight_element.name);
+    if(highlight_element && highlight_element.tipp && !event_key_down) Tip(e, highlight_element.id + " " + highlight_element.name);
     else unTip();
     
 }
@@ -1054,10 +1040,9 @@ function key_down(event){
         zoom_in_out(0, 0);
         draw();
     }
-    if (administration){
-        event_key_down = (event.which == 17);
-    }
     
+    event_key_down = (event.which == 17);
+       
 }
 
 
