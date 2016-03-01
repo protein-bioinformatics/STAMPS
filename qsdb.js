@@ -1,17 +1,6 @@
 
 
 function init(){
-    strGET = document.location.search.substr(1,document.location.search.length);
-    if(strGET!=''){
-        gArr = strGET.split('&');
-        for(var i = 0; i < gArr.length; ++i){
-            v='';vArr=gArr[i].split('=');
-            if(vArr.length>1){v=vArr[1];}
-            HTTP_GET_VARS[unescape(vArr[0])] = unescape(v);
-        }
-    }
-    if (HTTP_GET_VARS['admin']) administration = HTTP_GET_VARS['admin'] == 1;
-    
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -19,7 +8,7 @@ function init(){
         }
     }
     //xmlhttp.open("GET", "set-counter.py?counter=request", true);
-    xmlhttp.open("GET", "/qsdb/set-counter.bin?counter=request", true);
+    xmlhttp.open("GET", "/qsdb/cgi-bin/set-counter.bin?counter=request", true);
     xmlhttp.send();
     
     var xmlhttp_pw = new XMLHttpRequest();
@@ -30,7 +19,7 @@ function init(){
         }
     }
     //xmlhttp_pw.open("GET", "get-pathways.py", true);
-    xmlhttp_pw.open("GET", "/qsdb/get-pathways.bin", true);
+    xmlhttp_pw.open("GET", "/qsdb/cgi-bin/get-pathways.bin", true);
     xmlhttp_pw.send();
     
     
@@ -66,8 +55,6 @@ function init(){
     
     document.addEventListener('keydown', key_down, false);
     document.addEventListener('keyup', key_up, false);
-    document.getElementById("menubackground").addEventListener("click", hide_custom_menu, false);
-    document.getElementById("managementbackground").addEventListener("click", hide_management, false);
     document.getElementById("search_background").addEventListener("click", hide_search, false);
     document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
     document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
@@ -79,17 +66,8 @@ function init(){
     document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
     
     c.oncontextmenu = function (event){
-        show_custom_menu(event);
         return false;
     }
-    document.getElementById("menubackground").oncontextmenu = function(event){
-        hide_custom_menu(event);
-        return false;        
-    };
-    document.getElementById("custommenu").oncontextmenu = function(event){
-        return false;        
-    };
-    
     change_pathway(0);
 }
 
@@ -146,12 +124,12 @@ function load_data(reload){
     
     
     //xmlhttp.open("GET", "get-qsdbdata.py?request=qsdbdata&pathway=" + current_pathway + "&species=" + species_string, true);
-    xmlhttp.open("GET", "/qsdb/get-nodes.bin?pathway=" + current_pathway + "&species=" + species_string, true);
+    xmlhttp.open("GET", "/qsdb/cgi-bin/get-nodes.bin?pathway=" + current_pathway + "&species=" + species_string, true);
     xmlhttp.send();
     
     
     //xmlhttp2.open("GET", "get-edgedata.py?pathway=" + current_pathway, true);
-    xmlhttp2.open("GET", "/qsdb/get-edges.bin?pathway=" + current_pathway, true);
+    xmlhttp2.open("GET", "/qsdb/cgi-bin/get-edges.bin?pathway=" + current_pathway, true);
     xmlhttp2.send();
     
     
@@ -227,120 +205,6 @@ function load_data(reload){
 }
 
 
-
-function show_management(){
-    document.getElementById("managementbackground").style.display = "inline";
-    document.getElementById("renderarea").style.filter = "blur(5px)";
-    
-    proteins = null;
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            proteins = JSON.parse(xmlhttp.responseText);
-        }
-    }
-    xmlhttp.open("GET", "get-proteins.py", false);
-    xmlhttp.send();
-    
-    inner_html = "<table width='100%'>";
-    var close_all = "";
-    for (var i = 0; i < proteins.length; ++i){
-        close_all += "document.getElementById(\"managementtable_item" + i + "\").style.display = \"none\"; ";
-    }
-    for (var i = 0; i < proteins.length; ++i){
-        var color = (i % 2 == 1) ? "white" : "#eeeeee";
-        inner_html += "<tr><td bgcolor='" + color + "'>";
-        inner_html += "<table width='100%'><tr><td onclick='" + close_all + "document.getElementById(\"managementtable_item" + i + "\").style.display = \"inline\";' width='98%'><b>" + proteins[i]['name'] + "</b></td>";
-        inner_html += "<td align='right'><img src='delete.png' width=24 /></td></tr></table>";
-        inner_html += "<div id='managementtable_item" + i +  "' style='display: none;'>";
-        inner_html += "<table width='80%'><tr><td width='20%'>Name: </td><td><input size=100 id=\"name" + i + "\" value=\"" + proteins[i]['name'] + "\"></td></tr>";
-        inner_html += "<tr><td>Definition: </td><td><input size=100 id=\"definition" + i + "\" value=\"" + proteins[i]['definition'] + "\"></td></tr>";
-        inner_html += "<tr><td>KEGG URL: </td><td><input size=100 id=\"kegg_link" + i + "\" value=\"" + proteins[i]['kegg_link'] + "\"></td></tr>";
-        inner_html += "<tr><td>UniProt URL: </td><td><input size=100 id=\"uniprot_link" + i + "\" value=\"" + proteins[i]['uniprot_link'] + "\"></td></tr></table>";
-        inner_html += "</div></td></tr>";
-    }
-    inner_html += "</table>";
-    
-    document.getElementById("management").style.display = "inline";
-    document.getElementById("management").innerHTML = "<div style='position: absolute; top: 2%; left: 5%' onclick='alert(\"huhu\");'><table><tr><td><img src='add.png' width='24'>&nbsp;&nbsp;</td><td> New protein</td></tr></table></div><div id='managementtable' class='managementtable'></div><div style='position: absolute; top: 92%; left: 90%;'><button onclick='hide_management(\"event\");'>Close</button></div>";
-    document.getElementById("managementtable").innerHTML = inner_html;
-    document.getElementById("managementtable").scrollTo(0, 0);
-}
-
-
-function hide_management(event){
-    document.getElementById("managementbackground").style.display = "none";
-    document.getElementById("management").style.display = "none";
-    document.getElementById("renderarea").style.filter = "none";
-}
-
-
-function show_custom_menu(event){
-    if (!administration) return;
-    var menu_points = new Array();
-    unTip();
-    /*
-    if (!highlight_element){
-        menu_points.push(["Insert protein", "debug", 0, 1]);
-        menu_points.push(["Insert metabolite", "debug", 0, 1]);
-        menu_points.push(["Insert pathway", "debug", 0, 1]);
-        menu_points.push(["Manage reagents", "show_management", 0, 1]);
-    }
-    else if (highlight_element.type == "metabolite"){
-        menu_points.push(["Connect metabolite", "debug", 1, 1]);
-        menu_points.push(["Edit metabolite", "debug", 1, 1]);
-        menu_points.push(["Delete metabolite", "debug", 1, 1]);
-    }
-    else if (highlight_element.type == "protein"){
-        menu_points.push(["Edit protein(s)", "debug", 1, 1]);
-        var enable_del_reaction = false;
-        for (var i = 0; i < nodes.length; ++i){
-            var node_id = data_ref[nodes[i]['node_id']];
-            if (data_ref[nodes[i]['node_id']] == highlight_element){
-                enable_del_reaction = true;
-                break;
-            }
-        }
-        menu_points.push(["Delete reaction", "debug", 1, enable_del_reaction]);
-        menu_points.push(["Delete protein", "debug", 1, 1]);
-    }
-    else if (highlight_element.type == "pathway"){
-        menu_points.push(["Edit pathway", "debug", 1, 1]);
-        menu_points.push(["Delete pathway", "debug", 1, 1]);
-    }
-    
-    var inner_html = "<table id='custommenutable' class='custommenutable'>";
-    for (var i = 0; i < menu_points.length; ++i){
-        if (menu_points[i][3]){
-            var menu_command = menu_points[i][1] + "(";
-            if (menu_points[i][2]) menu_command += highlight_element.id;
-            menu_command += ")";
-            inner_html += "<tr><td onclick='hide_custom_menu(event); " + menu_command + "'; class='menuitem'>" + menu_points[i][0] + "</td></tr>";
-        }
-        else {
-            inner_html += "<tr><td class='menuitemdisabled'>" + menu_points[i][0] + "</td></tr>";
-        }
-    }
-    inner_html += "</table>";
-    document.getElementById("menubackground").style.display = "inline";
-    var cm = document.getElementById("custommenu");
-    cm.style.display = "inline";
-    cm.innerHTML = inner_html;
-    
-    cm.style.left = (event.clientX - (event.clientX + cm.offsetWidth > window.innerWidth ? cm.offsetWidth : 0)) + "px";
-    cm.style.top = (event.clientY - (event.clientY + cm.offsetHeight > window.innerHeight ? cm.offsetHeight : 0)) + "px";
-    */
-}
-
-
-function hide_custom_menu(event){
-    document.getElementById("menubackground").style.display = "none";
-    document.getElementById("custommenu").style.display = "none";
-}
-
-
-
-
 function mouse_move_listener(e){
     if (!pathway_is_loaded) return;
     
@@ -382,20 +246,8 @@ function mouse_move_listener(e){
                 boundaries[0] += shift_x;
                 boundaries[1] += shift_y;
             }
-            else if (administration) {
-                event_moving_node = true;
-                node_move_x += shift_x;
-                node_move_y += shift_y;
-                highlight_element.x = Math.floor(node_move_x - (1000 * (node_move_x - null_x) % grid) / 1000.);
-                highlight_element.y = Math.floor(node_move_y - (1000 * (node_move_y - null_y) % grid) / 1000.);
-                compute_edges();
-                assemble_elements();
-            }
         }
-        //var process_draw = setInterval(function(){
-            draw();
-        //    clearInterval(process_draw);
-        //}, 1);
+        draw();
         offsetX = res.x;
         offsetY = res.y;
     }
@@ -417,7 +269,7 @@ function mouse_move_listener(e){
         }
         
     }
-    if(highlight_element && highlight_element.tipp && !(administration && event_key_down)) Tip(e, highlight_element.id + " " + highlight_element.name);
+    if(highlight_element && highlight_element.tipp) Tip(e, highlight_element.id + " " + highlight_element.name);
     else unTip();
     
 }
@@ -471,41 +323,11 @@ function key_down(event){
         zoom_in_out(0, 0);
         draw();
     }
-    if (administration){
-        event_key_down = (event.which == 17);
-    }
     
 }
 
 
 
-edge.prototype.mouse_down = function(mouse, key){
-    if ((key != 1 && key != 3) || !administration) return false;
-    
-    var xmlhttp = new XMLHttpRequest();
-    var request = "update_edge.py?id=";
-    request += this.edge_id;
-    request += "&element=";
-    request += (key == 1) ? "protein" : "metabolite";
-    xmlhttp.open("GET", request, false);
-    xmlhttp.send();
-    
-    if (key == 1){
-        if (nodes[this.reaction_id]['reagents'][this.reagent_id]['type'] == "educt"){
-            nodes[this.reaction_id]['anchor_in'] = next_anchor[nodes[this.reaction_id]['anchor_in']];
-        }
-        else {
-            nodes[this.reaction_id]['anchor_out'] = next_anchor[nodes[this.reaction_id]['anchor_out']];
-        }
-    }
-    else {
-        var anchor = nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'];
-        nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'] = next_anchor[anchor];
-    }
-    compute_edges();
-    assemble_elements();
-    draw();
-}
 
 
 document.addEventListener('DOMContentLoaded', init, false);

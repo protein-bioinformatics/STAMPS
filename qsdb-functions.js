@@ -45,7 +45,6 @@ check_side_d = check_side * 2;
 line_height = 20;
 anchors = ['left', 'top', 'right', 'bottom'];
 next_anchor = {"left": "top", "top": "right", "right": "bottom", "bottom": "left"};
-administration = false;
 on_slide = false;
 font_size = text_size * factor;
 radius = metabolite_radius * factor;
@@ -2335,7 +2334,7 @@ function download_assay(){
         }
     }
     //xmlhttp_c.open("GET", "set-counter.py?counter=download", true);
-    xmlhttp_c.open("GET", "/qsdb/set-counter.bin?counter=download", true);
+    xmlhttp_c.open("GET", "/qsdb/cgi-bin/set-counter.bin?counter=download", true);
     xmlhttp_c.send();
     
     document.getElementById("downloadbackground").style.display = "inline";
