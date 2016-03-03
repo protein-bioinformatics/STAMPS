@@ -243,8 +243,9 @@ function load_spectrum(spectrum_id){
             spectrum_data = JSON.parse(xmlhttp.responseText);
         }
     }
-    xmlhttp.open("GET", "get-msdata.py?spectrum_id=" + spectrum_id, false);
+    xmlhttp.open("GET", "/qsdb/cgi-bin/get-msdata.py?spectrum_id=" + spectrum_id, false);
     xmlhttp.send();
+    
     
     peptide = spectrum_data["peptideSeq"];
     precursor_mass = spectrum_data["precursorMZ"];
