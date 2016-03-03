@@ -1,5 +1,6 @@
 /* Simple C program that connects to MySQL Database server*/
 #include <mysql.h>
+#include <fstream>
 #include <stdio.h>
 #include <iostream>
 #include <vector>
@@ -32,6 +33,19 @@ bool is_integer_number(const string& string){
   return string.size()>minSize && it == string.end();
 }
 
+
+
+void strip(string &str){
+    while (str.length() && (str[0] == ' ' || str[0] == 13 || str[0] == 10)){
+        str = str.substr(1);
+    }
+    int l = str.length();
+    while (l && (str[l - 1] == ' ' || str[l - 1] == 13 || str[l - 1] == 10)){
+        str = str.substr(0, l - 1);
+        --l;
+    }
+}
+
 main() {
     cout << "Content-Type: text/html" << endl << endl;
     
@@ -48,15 +62,31 @@ main() {
         return -1;
     }
     
+    string line;
+    map< string, string > parameters;
+    ifstream myfile ("../admin/qsdb.conf");
+    if (myfile.is_open()){
+        while ( getline (myfile,line) ){
+            strip(line);
+            if (line[0] == '#') continue;
+            vector< string > tokens = split(line, '=');
+            if (tokens.size() < 2) continue;
+            strip(tokens.at(0));
+            strip(tokens.at(1));
+            parameters.insert(pair< string, string >(tokens.at(0), tokens.at(1)));
+        }
+        myfile.close();
+    }
+    
     MYSQL *conn = mysql_init(NULL);
     MYSQL_RES *res;
     MYSQL_RES *res_reagents;
     MYSQL_ROW row;
     MYSQL_FIELD *field;
-    char *server = (char*)"localhost";
-    char *user = (char*)"qsdb_user";
-    char *password = (char*)"qsdb_password"; /* set me first */
-    char *database = (char*)"qsdb";
+    char *server = (char*)parameters["mysql_host"].c_str();
+    char *user = (char*)parameters["mysql_user"].c_str();
+    char *password = (char*)parameters["mysql_passwd"].c_str();
+    char *database = (char*)parameters["mysql_db"].c_str();
     map< string, int > column_names;
     
     /* Connect to database */

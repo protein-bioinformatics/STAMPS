@@ -1,7 +1,7 @@
-/* Simple C program that connects to MySQL Database server*/
 #include <mysql.h>
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <map>
 #include <string>
@@ -168,6 +168,18 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
 }
 
 
+void strip(string &str){
+    while (str.length() && (str[0] == ' ' || str[0] == 13 || str[0] == 10)){
+        str = str.substr(1);
+    }
+    int l = str.length();
+    while (l && (str[l - 1] == ' ' || str[l - 1] == 13 || str[l - 1] == 10)){
+        str = str.substr(0, l - 1);
+        --l;
+    }
+}
+
+
 main() {
     cout << "Content-Type: text/html" << endl << endl;
     
@@ -200,16 +212,35 @@ main() {
     species = "mouse";
     */
     
+       
+    
+    
+    string line;
+    map< string, string > parameters;
+    ifstream myfile ("../admin/qsdb.conf");
+    if (myfile.is_open()){
+        while ( getline (myfile,line) ){
+            strip(line);
+            if (line[0] == '#') continue;
+            vector< string > tokens = split(line, '=');
+            if (tokens.size() < 2) continue;
+            strip(tokens.at(0));
+            strip(tokens.at(1));
+            parameters.insert(pair< string, string >(tokens.at(0), tokens.at(1)));
+        }
+        myfile.close();
+    }
+    
     
     MYSQL *conn = mysql_init(NULL);
     MYSQL_RES *res;
     MYSQL_RES *res_reagents;
     MYSQL_ROW row;
     MYSQL_FIELD *field;
-    char *server = (char*)"localhost";
-    char *user = (char*)"qsdb_user";
-    char *password = (char*)"qsdb_password"; /* set me first */
-    char *database = (char*)"qsdb";
+    char *server = (char*)parameters["mysql_host"].c_str();
+    char *user = (char*)parameters["mysql_user"].c_str();
+    char *password = (char*)parameters["mysql_passwd"].c_str();
+    char *database = (char*)parameters["mysql_db"].c_str();
     map< string, int > column_names_nodes;
     map< string, int > column_names_proteins;
     map< string, int > column_names_peptides;
@@ -373,7 +404,7 @@ main() {
     int rc;
 
     /* Open database */
-    rc = sqlite3_open("/home/dominik.kopczynski/Data/blib/TestLibraryPS.blib", &db);
+    rc = sqlite3_open((char*)parameters["sqlite_file"].c_str(), &db);
     if( rc ){
         cout << -2 << endl;
         exit(-2);
@@ -451,15 +482,15 @@ main() {
     
     /*
     for (int i = 0; i < nodes.size(); ++i){
-        for (int j = 0; j < nodes.at(i).proteins.size(); ++j){
-            for (int k = 0; k < nodes.at(i).proteins.at(j).peptides.size(); ++k){
-                for (int l = 0; l < nodes.at(i).proteins.at(j).peptides.at(k).spectra.size(); ++l){
-                    cout << i << " " << j << " " << k << " " << l << "<br>" << endl;
+        for (int j = 0; j < nodes.at(i)->proteins.size(); ++j){
+            for (int k = 0; k < nodes.at(i)->proteins.at(j)->peptides.size(); ++k){
+                for (int l = 0; l < nodes.at(i)->proteins.at(j)->peptides.at(k)->spectra.size(); ++l){
+                    cout << i << " " << j << " " << k << " " << nodes.at(i)->proteins.at(j)->peptides.at(k)->spectra.at(l)->charge << "<br>" << endl;
                 }
             }
         }
-    }*/
-    
+    }
+    */
 
     string response = "[";
     for (int i = 0; i < nodes.size(); ++i){
