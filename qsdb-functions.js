@@ -1,6 +1,7 @@
 moved = false;
 HTTP_GET_VARS = [];
 current_pathway = 1;
+current_pathway_title = 0;
 highlight_element = 0;
 offsetX = 0;
 offsetY = 0;
@@ -478,6 +479,22 @@ CanvasRenderingContext2D.prototype.draw_line = function (x1, y1, x2, y2) {
     this.stroke();
 }
 
+
+pathway_title.prototype = new visual_element();
+pathway_title.prototype.constructor = pathway_title;
+
+function pathway_title(ctx){
+    this.ctx = ctx;
+    this.title = "---";
+    this.draw = function(){
+        this.ctx.font = "bold 30px Arial";
+        this.ctx.fillStyle = "#cccccc";
+        this.ctx.textAlign = "left";
+        this.ctx.textBaseline = 'top';
+        var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
+        this.ctx.fillText("Current pathway: " + this.title, 10, 10 + nav_height);
+    }
+}
 
 
 preview.prototype = new visual_element();
@@ -2142,6 +2159,7 @@ function compute_edges(){
 
 function assemble_elements(){
     elements = [];
+    elements.push(current_pathway_title);
     for (var i = 0; i < edges.length; ++i) elements.push(edges[i]);    
     for (var i = 0; i < data.length; ++i) elements.push(data[i]);
     elements.push(infobox);
@@ -2249,6 +2267,7 @@ function change_pathway(p){
     reset_view();
     document.getElementById("pathway_name").innerHTML = "Current pathway: " + pathways[p][1];
     document.title = "QSDB Home - " + pathways[p][1];
+    current_pathway_title.title = pathways[p][1];
     load_data();
 }
 

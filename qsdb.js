@@ -32,11 +32,10 @@ function init(){
     infobox = new Infobox(ctx);
     zoom_sign_in = new zoom_sign(ctx, 1);
     zoom_sign_out = new zoom_sign(ctx, 0);
+    current_pathway_title = new pathway_title(ctx);
     
-    
-    c.onclick = function (event)
-    {
-        if (event.region) {
+    c.onclick = function (event){
+        if (event.region){
             alert('You clicked ' + event.region);
         }
     }
@@ -65,9 +64,10 @@ function init(){
     document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
     document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
     
-    c.oncontextmenu = function (event){
+    /*c.oncontextmenu = function (event){
         return false;
     }
+    */
     change_pathway(0);
 }
 
@@ -178,6 +178,22 @@ function key_down(event){
 }
 
 
+
+
+function test_download() {
+  var text = "ich bin ein Berliner";
+  var filename = "test.svg";
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
 
 
 
