@@ -487,12 +487,18 @@ function pathway_title(ctx){
     this.ctx = ctx;
     this.title = "---";
     this.draw = function(){
-        this.ctx.font = "bold 30px Arial";
-        this.ctx.fillStyle = "#cccccc";
+        var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
+        this.ctx.fillStyle = "#f3f8ff";
+        this.ctx.strokeStyle = "#aaaaaa";
+        var curr_title_text = "Current pathway: " + this.title;
+        this.ctx.font = "bold 20px Arial";
         this.ctx.textAlign = "left";
         this.ctx.textBaseline = 'top';
-        var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
-        this.ctx.fillText("Current pathway: " + this.title, 10, 10 + nav_height);
+        var wdth = this.ctx.measureText(curr_title_text).width + 30;
+        this.ctx.fillRect(-2, nav_height - 2, wdth, 40);
+        this.ctx.strokeRect(-2, nav_height - 2, wdth, 40);
+        this.ctx.fillStyle = "#aaaaaa";
+        this.ctx.fillText(curr_title_text, 10, 10 + nav_height);
     }
 }
 
@@ -2159,13 +2165,13 @@ function compute_edges(){
 
 function assemble_elements(){
     elements = [];
-    elements.push(current_pathway_title);
     for (var i = 0; i < edges.length; ++i) elements.push(edges[i]);    
     for (var i = 0; i < data.length; ++i) elements.push(data[i]);
     elements.push(infobox);
     elements.push(zoom_sign_in);
     elements.push(zoom_sign_out);
     elements.push(preview_element);
+    elements.push(current_pathway_title);
 }
 
 

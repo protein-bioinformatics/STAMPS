@@ -437,7 +437,13 @@ main() {
                 spectrum *s1 = new spectrum;
                 s1->id = spectra_data[i][string("sid")];
                 s1->charge = spectra_data[i][string("charge")];
-                s1->mass = spectra_data[i][string("precursorMZ")];
+                char buffer [20];
+                int n;
+                string mass = spectra_data[i][string("precursorMZ")];
+                if (mass.find(".") != string::npos){
+                    mass = mass.substr(0, mass.find(".") + 5);
+                }
+                s1->mass = mass;
                 
                 peps->at(j)->spectra.push_back(s1);
             }

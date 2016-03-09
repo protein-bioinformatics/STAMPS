@@ -111,7 +111,7 @@ function annotation(){
     // annotate y-ions
     var tolerance = (document.getElementById("radio_ppm").checked ? tolerance_relative : tolerance_absolute);
     var rev_peptide = peptide.split("").reverse().join("");
-    var mass = H3O;
+    var mass = 0;
     
     for (var i = 0; i < peaks.length; ++i){
         peaks[i].type = ion_type.no_type;
@@ -119,33 +119,35 @@ function annotation(){
         peaks[i].highlight = false;
     }
     
-    for (var i = 0; i < rev_peptide.length; ++i){
-        mass += acids[rev_peptide[i]];
-        for (var crg = 1; crg <= charge; ++crg){
-            if (mass >= 600 * (crg - 1)){
-            var diff_mass = binary_search((mass + (crg - 1)) / crg);
-                if (diff_mass[0] < tolerance){
-                    peaks[diff_mass[1]].highlight = true;
-                    peaks[diff_mass[1]].type = ion_type.y_type;
-                    peaks[diff_mass[1]].annotation = "y" + subscripting(i + 1) + (crg > 1 ? charge_plus(crg) : "");
-                }
-            }
-        }
-    }
-    
     
     // annotate b-ions
-    var mass = H;
+    mass = H;
     for (var i = 0; i < peptide.length; ++i){
         mass += acids[peptide[i]];
         
         for (var crg = 1; crg <= charge; ++crg){
-            if (mass >= 600 * (crg - 1)){
+            if (mass >= 800 * (crg - 1)){
             var diff_mass = binary_search((mass + (crg - 1)) / crg);
                 if (diff_mass[0] < tolerance){
                     peaks[diff_mass[1]].highlight = true;
                     peaks[diff_mass[1]].type = ion_type.b_type;
                     peaks[diff_mass[1]].annotation = "b" + subscripting(i + 1) + (crg > 1 ? charge_plus(crg) : "");
+                }
+            }
+        }
+    }
+    
+    mass = H3O;
+    // annotate y-ions
+    for (var i = 0; i < rev_peptide.length; ++i){
+        mass += acids[rev_peptide[i]];
+        for (var crg = 1; crg <= charge; ++crg){
+            if (mass >= 800 * (crg - 1)){
+            var diff_mass = binary_search((mass + (crg - 1)) / crg);
+                if (diff_mass[0] < tolerance){
+                    peaks[diff_mass[1]].highlight = true;
+                    peaks[diff_mass[1]].type = ion_type.y_type;
+                    peaks[diff_mass[1]].annotation = "y" + subscripting(i + 1) + (crg > 1 ? charge_plus(crg) : "");
                 }
             }
         }
