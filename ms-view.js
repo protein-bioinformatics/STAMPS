@@ -137,8 +137,8 @@ function annotation(){
         }
     }
     
-    mass = H3O;
     // annotate y-ions
+    mass = H3O;
     for (var i = 0; i < rev_peptide.length; ++i){
         mass += acids[rev_peptide[i]];
         for (var crg = 1; crg <= charge; ++crg){
@@ -252,9 +252,10 @@ function load_spectrum(spectrum_id){
     peptide = spectrum_data["peptideSeq"];
     precursor_mass = spectrum_data["precursorMZ"];
     charge = spectrum_data["precursorCharge"];
+    var canvas_width = ctx.canvas.width;
     
-    left_border = ctx.canvas.width * 0.05;
-    right_border = ctx.canvas.width * 0.95;
+    left_border = canvas_width * 0.05;
+    right_border = canvas_width * 0.95;
     top_border = ctx.canvas.height * 0.05;
     bottom_border = ctx.canvas.height * 0.95;
     
@@ -264,19 +265,15 @@ function load_spectrum(spectrum_id){
     last_x = right_border;
     var max_mass = 0;
     for (var items in spectrum_data["peakMZ"]){
-        peaks.push(new peak(spectrum_data["peakMZ"][items], 0, 0));
-        max_mass = Math.max(max_mass, spectrum_data["peakMZ"][items]);
+        peaks.push(new peak(spectrum_data["peakMZ"][items], 0, spectrum_data["peakIntensity"][items]));
     }
+    var ii = peaks.length - 1;
+    peaks.push(new peak(peaks[ii].mass * 1.05, 0, 0));
+    var max_mass = peaks[ii + 1].mass;
+    
     for (var i = 0; i < peaks.length; ++i) {
-        peaks[i].x = origin_x + ctx.canvas.width * 0.9 * peaks[i].mass / max_mass;
+        peaks[i].x = origin_x + canvas_width * 0.9 * peaks[i].mass / max_mass;
     }
-    
-    var ii = 1;
-    for (var items in spectrum_data["peakIntensity"]){
-        peaks[ii].intensity = spectrum_data["peakIntensity"][items];
-        ii += 1;
-    }
-    
     spectrum_loaded = true;
     
     annotation();
