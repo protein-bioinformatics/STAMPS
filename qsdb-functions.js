@@ -2271,7 +2271,7 @@ function change_pathway(p){
     current_pathway = pathways[p][0];
     set_pathway_menu();
     reset_view();
-    document.getElementById("pathway_name").innerHTML = "Current pathway: " + pathways[p][1];
+    //document.getElementById("pathway_name").innerHTML = "Current pathway: " + pathways[p][1];
     document.title = "QSDB Home - " + pathways[p][1];
     current_pathway_title.title = pathways[p][1];
     load_data();
@@ -2663,9 +2663,29 @@ function select_species(){
 }
 
 
+function open_filter_panel(){
+    if (document.getElementById("filter_panel").style.display == "inline"){
+        hide_filter_panel();
+    }
+    else {
+        var rect = document.getElementById('filter_panel_nav').getBoundingClientRect();
+        document.getElementById("filter_panel").style.top = (rect.top + document.getElementById('filter_panel_nav').offsetHeight).toString() + "px";
+        document.getElementById("filter_panel").style.left = (rect.left).toString() + "px";
+        document.getElementById("filter_panel").style.display = "inline";
+        document.getElementById("filter_panel_background").style.display = "inline";
+    }
+}
+
+
 function hide_select_species(){
     document.getElementById("select_species").style.display = "none";
     document.getElementById("select_species_background").style.display = "none";
+}
+
+
+function hide_filter_panel(){
+    document.getElementById("filter_panel").style.display = "none";
+    document.getElementById("filter_panel_background").style.display = "none";
 }
 
 
@@ -2692,13 +2712,20 @@ function close_navigation(nav){
     switch (nav){
         case 1:
             hide_select_species();
+            hide_filter_panel();
             break;
         case 2:
+            hide_select_pathway();
+            hide_filter_panel();
+            break;
+        case 3:
+            hide_select_species();
             hide_select_pathway();
             break;
         default:
             hide_select_species();
             hide_select_pathway();
+            hide_filter_panel();
             break;
     }
 }

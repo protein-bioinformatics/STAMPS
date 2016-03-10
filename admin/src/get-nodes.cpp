@@ -418,7 +418,8 @@ main() {
             }
             sql_query_lite2 += sql_query_lite[j];
         }
-        sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, rs.id sid, rs.precursorMZ FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq and rs.peptideModSeq = ps.seq and rs.precursorCharge = ps.chrg;";
+        //sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, rs.id sid, rs.precursorMZ FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq and rs.peptideModSeq = ps.seq and rs.precursorCharge = ps.chrg;";
+        sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, rs.id sid, rs.precursorMZ FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq and rs.precursorCharge = ps.chrg;";
         
 
         vector< map< string, string > > spectra_data;

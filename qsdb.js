@@ -59,6 +59,7 @@ function init(){
     document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
     document.getElementById("disclaimer_background").addEventListener("click", hide_disclaimer, false);
     document.getElementById("check_spectra_background").addEventListener("click", hide_check_spectra, false);
+    document.getElementById("filter_panel_background").addEventListener("click", hide_filter_panel, false);
     
     window.addEventListener('resize', resize_ms_view, false);
     document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
