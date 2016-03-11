@@ -330,7 +330,7 @@ function Spectrum(data){
         this.occ_C = occurences(this.mod_sequence, 'C');
         this.occ_c = occurences(this.mod_sequence, 'c');
     }
-    this.prepare_modification();
+    this.prepare_modification();        
     
     
     this.filtering = function(){
@@ -634,17 +634,13 @@ function preview(ctx){
         
         var image_data;
         
-        try {
-            try { 
-                image_data = this.ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
-            } catch (e) {
-                console.log(x_min + " " + y_min + " " + (x_max - x_min) + " " + (y_max - y_min));
-                //image_data = this.ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
-            }                                              
+        try { 
+            image_data = this.ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
         } catch (e) {
-            throw new Error("unable to access image data: " + e);
-        } 
-        
+            //console.log(x_min + " " + y_min + " " + (x_max - x_min) + " " + (y_max - y_min));
+            console.log(this.ctx);
+            //image_data = this.ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
+        }
         
         this.width = x_max - x_min;
         this.height = y_max - y_min;
@@ -2956,7 +2952,7 @@ function load_data(reload){
     }
     
     
-    //xmlhttp.open("GET", "get-qsdbdata.py?request=qsdbdata&pathway=" + current_pathway + "&species=" + species_string, true);
+    //xmlhttp.open("GET", "/qsdb/cgi-bin/get-qsdbdata.py?pathway=" + current_pathway + "&species=" + species_string, true);
     xmlhttp.open("GET", "/qsdb/cgi-bin/get-nodes.bin?pathway=" + current_pathway + "&species=" + species_string, true);
     xmlhttp.send();
     
