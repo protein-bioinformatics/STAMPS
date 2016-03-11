@@ -19,10 +19,10 @@ print()
 rnd = str(int(random() * 1000000000))
 
 # create folder
-os.system("mkdir tmp/%s" % rnd)
+os.system("mkdir ../tmp/%s" % rnd)
 
 # create fasta file
-fasta_file = "tmp/%s/proteins.fasta" % rnd
+fasta_file = "../tmp/%s/proteins.fasta" % rnd
 conn = connect(host = mysql_host, port = mysql_port, user = mysql_user, passwd = mysql_passwd, db = mysql_db)
 my_cur = conn.cursor()
 sql_query = "SELECT fasta FROM proteins WHERE id IN (%s);" % proteins
@@ -34,7 +34,7 @@ with open(fasta_file, mode="wt") as fl:
 
 
 # create blib file
-blib_file = "tmp/%s/spectra.blib" % rnd
+blib_file = "../tmp/%s/spectra.blib" % rnd
 db = sqlite3.connect(sqlite_file)
 lite_cur = db.cursor()
 lite_cur.execute("ATTACH DATABASE '%s' As blib;" % blib_file)
@@ -77,9 +77,9 @@ db.commit()
 db.commit()
 
 # merge into zip file
-zip_file = "tmp/%s/assay.zip" % rnd
+zip_file = "../tmp/%s/assay.zip" % rnd
 os.system("zip -j %s %s %s" % (zip_file, fasta_file, blib_file))
 
 
 #send download link back
-print(zip_file)
+print("/qsdb/tmp/%s/assay.zip" % rnd)

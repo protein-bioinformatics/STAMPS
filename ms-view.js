@@ -21,6 +21,7 @@ H3O =    19.016742;
 O2 =     31.989829;
 acetyl = 43.016742;
 peptide = "";
+peptide_mod = "";
 charge = 0;
 precursor_mass = 0;
 grid_color = "#DDDDDD";
@@ -110,7 +111,7 @@ function subscripting(x){
 function annotation(){
     // annotate y-ions
     var tolerance = (document.getElementById("radio_ppm").checked ? tolerance_relative : tolerance_absolute);
-    var rev_peptide = peptide.split("").reverse().join("");
+    var rev_peptide = peptide_mod.split("").reverse().join("");
     var mass = 0;
     
     for (var i = 0; i < peaks.length; ++i){
@@ -122,8 +123,8 @@ function annotation(){
     
     // annotate b-ions
     mass = H;
-    for (var i = 0; i < peptide.length; ++i){
-        mass += acids[peptide[i]];
+    for (var i = 0; i < peptide_mod.length; ++i){
+        mass += acids[peptide_mod[i]];
         
         for (var crg = 1; crg <= charge; ++crg){
             if (mass >= 800 * (crg - 1)){
@@ -252,6 +253,13 @@ function load_spectrum(spectrum_id){
     peptide = spectrum_data["peptideSeq"];
     precursor_mass = spectrum_data["precursorMZ"];
     charge = spectrum_data["precursorCharge"];
+    peptide_mod = spectrum_data["peptideModSeq"];
+    while (peptide_mod.indexOf("M[+16.0]") != -1){
+        peptide_mod = peptide_mod.replace("M[+16.0]", "m");
+    }
+    while (peptide_mod.indexOf("C[+57.0]") != -1){
+        peptide_mod = peptide_mod.replace("C[+57.0]", "c");
+    }
     var canvas_width = ctx.canvas.width;
     
     left_border = canvas_width * 0.05;

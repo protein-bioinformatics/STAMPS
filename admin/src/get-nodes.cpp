@@ -56,10 +56,12 @@ class spectrum {
         string id;
         string charge;
         string mass;
+        string mod_sequence;
         
         string to_string(){
             string str = "{";
             str += "\"id\": " + id + ", ";
+            str += "\"mod_sequence\": \"" + mod_sequence + "\", ";
             str += "\"charge\": " + charge + ", ";
             str += "\"mass\": \"" + mass + "\"";
             str += "}";
@@ -419,7 +421,7 @@ main() {
             sql_query_lite2 += sql_query_lite[j];
         }
         //sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, rs.id sid, rs.precursorMZ FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq and rs.peptideModSeq = ps.seq and rs.precursorCharge = ps.chrg;";
-        sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, rs.id sid, rs.precursorMZ FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq and rs.precursorCharge = ps.chrg;";
+        sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, rs.id sid, rs.precursorMZ, rs.peptideModSeq FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq and rs.precursorCharge = ps.chrg;";
         
 
         vector< map< string, string > > spectra_data;
@@ -438,6 +440,7 @@ main() {
                 spectrum *s1 = new spectrum;
                 s1->id = spectra_data[i][string("sid")];
                 s1->charge = spectra_data[i][string("charge")];
+                s1->mod_sequence = spectra_data[i][string("peptideModSeq")];
                 char buffer [20];
                 int n;
                 string mass = spectra_data[i][string("precursorMZ")];

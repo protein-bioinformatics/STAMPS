@@ -293,17 +293,82 @@ function search_pattern(text, len_p, accept, masks, id1, id2){
     return results;
 }
 
+
+function occurences(text, char){
+    var cnt = 0;
+    for (var i = 0; i < text.length; ++i){
+        if (text[i] == char){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+
 function Spectrum(data){
     this.id = data['id'];
     this.mass = data['mass']
     this.charge = data['charge'];
+    this.mod_sequence = data['mod_sequence'];
+    this.filter_valid = false;
+    this.occ_M = 0;
+    this.occ_m = 0;
+    this.occ_C = 0;
+    this.occ_c = 0;
+    
+    
+    
+    this.prepare_modification = function(){
+        while (this.mod_sequence.indexOf("M[+16.0]") != -1){
+            this.mod_sequence = this.mod_sequence.replace("M[+16.0]", "m");
+        }
+        while (this.mod_sequence.indexOf("C[+57.0]") != -1){
+            this.mod_sequence = this.mod_sequence.replace("C[+57.0]", "c");
+        }
+        this.occ_M = occurences(this.mod_sequence, 'M');
+        this.occ_m = occurences(this.mod_sequence, 'm');
+        this.occ_C = occurences(this.mod_sequence, 'C');
+        this.occ_c = occurences(this.mod_sequence, 'c');
+    }
+    this.prepare_modification();
+    
+    
+    this.filtering = function(){
+        this.filter_valid = true;
+        
+        if (this.mod_sequence.indexOf("[") == -1){
+            // test for oxydation of M
+            if (document.getElementById("oxy_m_off").checked && this.occ_m > 0){
+                this.filter_valid = false;
+            }
+            else if (document.getElementById("oxy_m_fix").checked && this.occ_M > 0) {
+                this.filter_valid = false;
+            }
+            
+            // test for carbamidomethylation of C
+            if (document.getElementById("carba_c_off").checked && this.occ_c > 0){
+                this.filter_valid = false;
+            }
+            else if (document.getElementById("carba_c_fix").checked && this.occ_C > 0) {
+                this.filter_valid = false;
+            }
+        }
+        else {
+            this.filter_valid = false;
+        }
+        
+        this.filter_valid &= document.getElementById("min_precursor_charge").value <= this.charge && this.charge <= document.getElementById("max_precursor_charge").value;
+    }
+    this.filtering();
 }
 
 function Peptide(data){
     this.peptide_seq = data['peptide_seq'];
     this.spectra = [];
+    this.filter_valid = false;
     for (var i = 0; i < data['spectra'].length; ++i){
         this.spectra.push(new Spectrum(data['spectra'][i]));
+        this.filter_valid = true;
     }
     
     this.search = function(len_p, accept, masks, node_id, prot_id){
@@ -311,6 +376,16 @@ function Peptide(data){
         
         return results;
     }
+    
+    this.filtering = function(){
+        this.filter_valid = false;
+        for (var i = 0; i < this.spectra.length; ++i){
+            this.spectra[i].filtering();
+            this.filter_valid |= this.spectra[i].filter_valid;
+        }
+        this.filter_valid &= document.getElementById("min_peptide_length").value <= this.peptide_seq.length && this.peptide_seq.length <= document.getElementById("max_peptide_length").value;
+    }
+    this.filtering();
 }
 
 function Protein(data, ctx){
@@ -323,6 +398,7 @@ function Protein(data, ctx){
     this.mass = data['mass'];
     this.peptides = [];
     this.marked = false;
+    this.filter_valid = false;
     this.containing_spectra = 0;
     this.fillStyle_rect = disabled_fill_color;
     this.fillStyle_text = disabled_text_color;
@@ -331,13 +407,35 @@ function Protein(data, ctx){
     for (var i = 0; i < data['peptides'].length; ++i){
         this.peptides.push(new Peptide(data['peptides'][i]));
         this.containing_spectra += this.peptides[i].spectra.length;
+        this.filter_valid = true;
     }
     if (this.containing_spectra){
         this.fillStyle_rect = "white";
         this.fillStyle_text = text_color;
     }
     
-    this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
+    this.filtering = function(){
+        this.marked = false;
+        this.filter_valid = false;
+        for (var i = 0; i < this.peptides.length; ++i){
+            this.peptides[i].filtering();
+            this.filter_valid |= this.peptides[i].filter_valid;
+        }
+        if (this.filter_valid){
+            this.fillStyle_rect = "white";
+            this.fillStyle_text = text_color;
+            
+            //this.marked = true;
+        }
+        else {
+            this.fillStyle_rect = disabled_fill_color;
+            this.fillStyle_text = disabled_text_color;
+        }
+    }
+    this.filtering();
+    
+    
+    //this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
     
     this.search = function(len_p, accept, masks, node_id){
         var results = [];
@@ -950,6 +1048,15 @@ function node(data, c){
         return this.on_slide;
     }
     
+    
+    this.filtering = function(){
+        if (this.type == "protein"){
+            for (var i = 0; i < this.proteins.length; ++i){
+                this.proteins[i].filtering();
+            }
+        }
+    }
+    this.filtering();
     
     this.draw = function() {
         var hh = this.height * 0.5;
@@ -2385,7 +2492,7 @@ function download_assay(){
             document.getElementById("download").innerHTML = html;
         }
     }
-    xmlhttp.open("GET", "prepare-download.py?proteins=" + proteins, true);
+    xmlhttp.open("GET", "cgi-bin/prepare-download.py?proteins=" + proteins, true);
     xmlhttp.send();
 }
 
@@ -2451,12 +2558,14 @@ function check_spectra(){
         
         inner_html += "<tr><td><table id='peptide_" + peps + "' style=\"display: none;\">";
         for (var j = 0; j < data[p].proteins[pp].peptides.length; ++j){
+            if (!data[p].proteins[pp].peptides[j].filter_valid) continue;
             var n_specs = data[p].proteins[pp].peptides[j].spectra.length;
-            if (!n_specs) continue;
+            //if (!n_specs) continue;
             inner_html += "<tr><td onclick=\"document.getElementById('peptide_sign_" + specs + "').innerHTML = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('spectrum_" + specs + "').style.display = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: default; color: " + (n_specs ? "black" : disabled_text_color) + ";\">&nbsp;&nbsp;&nbsp;&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"peptide_sign_" + specs + "\">" + sign_right + "</div>&nbsp;" + data[p].proteins[pp].peptides[j].peptide_seq + "</td></tr>";
             
             inner_html += "<tr><td><table id='spectrum_" + specs + "' style=\"display: none;\">";
             for (var k = 0; k < n_specs; ++k){
+                if (!data[p].proteins[pp].peptides[j].spectra[k].filter_valid) continue;
                 inner_html += "<tr><td onclick=\"load_spectrum(" + data[p].proteins[pp].peptides[j].spectra[k]['id'] + ");\" style=\"cursor: default;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + data[p].proteins[pp].peptides[j].spectra[k]['mass'] + charge_plus(data[p].proteins[pp].peptides[j].spectra[k]['charge']) + "</td></tr>";
             }
             inner_html += "</table></td></tr>";
@@ -2684,6 +2793,12 @@ function hide_select_species(){
 
 
 function hide_filter_panel(){
+    if (document.getElementById("filter_panel").style.display == "inline"){
+        for (var i = 0; i < data.length; ++i){
+            data[i].filtering();
+        }
+        draw();
+    }
     document.getElementById("filter_panel").style.display = "none";
     document.getElementById("filter_panel_background").style.display = "none";
 }
