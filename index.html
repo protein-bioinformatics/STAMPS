@@ -39,11 +39,7 @@
     Download Assay
   </td><td class="navigation_cell_click" onclick="close_navigation(0); open_disclaimer();">
     About QSDB
-  </td><!--<td class="navigation_cell_click" onclick="close_navigation(0); test_download();">
-    Test
-  </td><td id="pathway_name" class="navigation_cell_name">
-    ---
-  </td>--></tr>
+  </td></tr>
   </table>
 </div>
 
@@ -143,6 +139,20 @@ The usage, selling or handing of the contact data written in this imprint is not
 <div id="download" class="download"></div>
 <div id="downloadbackground" class="downloadbackground"></div>
 
+<div id="statistics" class="statistics">
+  <font size="+2"><b>Statistics</b></font><p>
+  <table width="95%" cellpadding="5" style="border-top: 2px solid black; border-bottom: 2px solid black;">
+    <tr><td><b>Pathway: </b></td><td id="stat_pathway"></td></td>
+    <tr><td><b>Validation: </b></td><td id="stat_validation"></td></td>
+    <tr><td><b>No. of proteins: </b></td><td id="stat_num_prot"></td></td>
+    <tr><td><b>No. of avbl. proteins: </b></td><td id="stat_filter_prot"></td></td>
+    <tr><td><b>No. of peptides: </b></td><td id="stat_num_pep"></td></td>
+    <tr><td><b>No. of filtered peptides: </b></td><td id="stat_filter_pep"></td></td>
+    <tr><td><b>No. of spectra: </b></td><td id="stat_num_spec"></td></td>
+    <tr><td><b>No. of filtered spectra: </b></td><td id="stat_filter_spec"></td></td>
+  </table>
+</div>
+
 <div id="check_spectra" class="check_spectra">
   <canvas id="msarea" class="msarea"></canvas>
   <fieldset id="spectra_options" class="spectra_options" style="position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;">
@@ -155,6 +165,8 @@ The usage, selling or handing of the contact data written in this imprint is not
 <div id="check_spectra_background" class="check_spectra_background"></div>
 <img src="/qsdb/images/zoom_in.png" id="zoom_in" style="display: none;">
 <img src="/qsdb/images/zoom_out.png" id="zoom_out" style="display: none;">
+<img src="/qsdb/images/expand.png" id="expand" style="display: none;">
+<img src="/qsdb/images/collapse.png" id="collapse" style="display: none;">
 
 </body>
 </html> 

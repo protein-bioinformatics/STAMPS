@@ -33,6 +33,9 @@ function init(){
     infobox = new Infobox(ctx);
     zoom_sign_in = new zoom_sign(ctx, 1);
     zoom_sign_out = new zoom_sign(ctx, 0);
+    expand_obj = new expand_collapse(ctx, 1);
+    collapse_obj = new expand_collapse(ctx, 0);
+    collapse_obj.visible = false;
     current_pathway_title = new pathway_title(ctx);
     
     c.onclick = function (event){

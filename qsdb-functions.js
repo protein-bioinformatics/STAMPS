@@ -20,6 +20,8 @@ edges = [];
 infobox = 0;
 zoom_sign_in = 0;
 zoom_sign_out = 0;
+expand_obj = 0;
+collapse_obj = 0;
 elements = [];
 boundaries = [0, 0, 0, 0];
 pathway_is_loaded = false;
@@ -27,6 +29,7 @@ edge_count = 0;
 draw_code = 0;
 
 scaling = 1.25;
+expanding_percentage = 0.2;
 zoom = 0;
 factor = Math.pow(scaling, zoom);
 factor_h = factor * 0.5;
@@ -278,6 +281,7 @@ function visual_element() {
     this.draw = function(){};
     this.highlight = false;
     this.tipp = false;
+    this.visible = true;
 }
 
 
@@ -360,6 +364,10 @@ function Spectrum(data){
         this.filter_valid &= document.getElementById("min_precursor_charge").value <= this.charge && this.charge <= document.getElementById("max_precursor_charge").value;
     }
     this.filtering();
+    
+    this.get_statistics = function(){
+        return [1, this.filter_valid];
+    }
 }
 
 function Peptide(data){
@@ -386,6 +394,17 @@ function Peptide(data){
         this.filter_valid &= document.getElementById("min_peptide_length").value <= this.peptide_seq.length && this.peptide_seq.length <= document.getElementById("max_peptide_length").value;
     }
     this.filtering();
+    
+    this.get_statistics = function(){
+        var num_spectra = 0;
+        var valid_spectra = 0;
+        for (var i = 0; i < this.spectra.length; ++i){
+            var tmp = this.spectra[i].get_statistics();
+            num_spectra += tmp[0];
+            valid_spectra += tmp[1];
+        }
+        return [1, this.filter_valid, num_spectra, valid_spectra];
+    }
 }
 
 function Protein(data, ctx){
@@ -433,6 +452,21 @@ function Protein(data, ctx){
         }
     }
     this.filtering();
+    
+    this.get_statistics = function(){
+        var num_spectra = 0;
+        var valid_spectra = 0;
+        var num_peptides = 0;
+        var valid_peptides = 0;
+        for (var i = 0; i < this.peptides.length; ++i){
+            var tmp = this.peptides[i].get_statistics();
+            num_peptides += tmp[0];
+            valid_peptides += tmp[1];
+            num_spectra += tmp[2];
+            valid_spectra += tmp[3];
+        }
+        return [1, this.filter_valid, num_peptides, valid_peptides, num_spectra, valid_spectra];
+    }
     
     
     //this.marked = (this.peptides.length > 0) && (this.containing_spectra > 0);
@@ -747,14 +781,54 @@ function preview(ctx){
 }
 
 
+expand_collapse.prototype = new visual_element();
+expand_collapse.prototype.constructor = expand_collapse;
+
+function expand_collapse(ctx, dir){
+    this.dir = dir;
+    this.name = dir ? "expand" : "collapse";
+    this.img = document.getElementById(this.name);
+    var ratio = 0.02 * window.innerWidth / this.img.width;
+    this.width = this.img.width * ratio;
+    this.height = this.img.height * ratio;
+    this.x = window.innerWidth - this.width * 1.3;
+    var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
+    this.y = nav_height + this.height * 0.3;
+    this.ctx = ctx;
+    
+    this.mouse_click = function(mouse, key){
+        if (this.dir){
+            expand_statistics();
+        }
+        else {
+            collapse_statistics();
+        }
+    }
+    
+    this.is_mouse_over = function(mouse){
+        if (!this.visible) return false;
+        return (this.x <= mouse.x && mouse.x <= this.x + this.width && this.y <= mouse.y && mouse.y <= this.y + this.height);
+    }
+    
+    this.draw = function(){
+        this.x = this.ctx.canvas.width - this.width * 1.3;
+        if (this.visible){
+            this.ctx.globalAlpha = 0.3 + 0.7 * this.highlight;
+            this.ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+            this.ctx.globalAlpha = 1.;
+        }
+    }
+}
+
+
 
 zoom_sign.prototype = new visual_element();
 zoom_sign.prototype.constructor = zoom_sign;
 
 function zoom_sign(ctx, dir){
     this.dir = dir;
-    this.name = dir ? "zoom in" : "zoom out";
-    this.img = document.getElementById("zoom_" + (dir ? "in" : "out"));
+    this.name = dir ? "zoom_in" : "zoom_out";
+    this.img = document.getElementById(this.name);
     var ratio = 0.02 * window.innerWidth / this.img.width;
     this.width = this.img.width * ratio;
     this.height = this.img.height * ratio;
@@ -772,11 +846,13 @@ function zoom_sign(ctx, dir){
     }
     
     this.draw = function(){
+        this.x = this.ctx.canvas.width - this.width * 1.3;
         this.ctx.globalAlpha = 0.3 + 0.7 * this.highlight;
         this.ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
         this.ctx.globalAlpha = 1.;
     }
 }
+
 
 
 Infobox.prototype = new visual_element();
@@ -1002,6 +1078,24 @@ function node(data, c){
             break;
     }
     
+    this.get_statistics = function(){
+        var num_spectra = 0;
+        var valid_spectra = 0;
+        var num_peptides = 0;
+        var valid_peptides = 0;
+        var num_proteins = 0;
+        var valid_proteins = 0;
+        for (var i = 0; i < this.proteins.length; ++i){
+            var tmp = this.proteins[i].get_statistics();
+            num_proteins += tmp[0];
+            valid_proteins += tmp[1];
+            num_peptides += tmp[2];
+            valid_peptides += tmp[3];
+            num_spectra += tmp[4];
+            valid_spectra += tmp[5];
+        }
+        return [num_proteins, valid_proteins, num_peptides, valid_peptides, num_spectra, valid_spectra];
+    }
     
     this.search = function(len_p, accept, masks){
         var results = [];
@@ -2273,6 +2367,8 @@ function assemble_elements(){
     elements.push(infobox);
     elements.push(zoom_sign_in);
     elements.push(zoom_sign_out);
+    elements.push(expand_obj);
+    elements.push(collapse_obj);
     elements.push(preview_element);
     elements.push(current_pathway_title);
 }
@@ -2797,6 +2893,7 @@ function hide_filter_panel(){
     }
     document.getElementById("filter_panel").style.display = "none";
     document.getElementById("filter_panel_background").style.display = "none";
+    compute_statistics();
 }
 
 
@@ -2818,6 +2915,68 @@ function hide_select_pathway(){
     document.getElementById("select_pathway").style.display = "none";
     document.getElementById("select_pathway_background").style.display = "none";
 }
+
+function round10(value, decimals) {
+    return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+}
+
+function compute_statistics(){
+    document.getElementById("stat_pathway").innerHTML = current_pathway_title.title;
+    var num_spectra = 0;
+    var valid_spectra = 0;
+    var num_peptides = 0;
+    var valid_peptides = 0;
+    var num_proteins = 0;
+    var valid_proteins = 0;
+    for (var i = 0; i < data.length; ++i){
+        var tmp = this.data[i].get_statistics();
+        num_proteins += tmp[0];
+        valid_proteins += tmp[1];
+        num_peptides += tmp[2];
+        valid_peptides += tmp[3];
+        num_spectra += tmp[4];
+        valid_spectra += tmp[5];
+    }
+    document.getElementById("stat_num_prot").innerHTML = num_proteins;
+    document.getElementById("stat_filter_prot").innerHTML = valid_proteins + " / " + round10(valid_proteins / num_proteins * 100, 1) + "%";
+    document.getElementById("stat_num_pep").innerHTML = num_peptides;
+    document.getElementById("stat_filter_pep").innerHTML = valid_peptides;
+    document.getElementById("stat_num_spec").innerHTML = num_spectra;
+    document.getElementById("stat_filter_spec").innerHTML = valid_spectra;
+}
+
+
+function expand_statistics(){
+    var wdth = window.innerWidth * (1 - expanding_percentage);
+    var rect = document.getElementById('select_pathway_nav').getBoundingClientRect();
+    document.getElementById("statistics").style.top = (rect.top + document.getElementById('select_pathway_nav').offsetHeight).toString() + "px";
+    document.getElementById("renderarea").width = wdth;
+    document.getElementById("statistics").style.left = (wdth).toString() + "px";
+    document.getElementById("statistics").style.width = (window.innerWidth * expanding_percentage).toString() + "px";
+    document.getElementById("statistics").style.height = "100%";
+    document.getElementById("statistics").style.display = "inline";
+    expand_obj.visible = false;
+    collapse_obj.visible = true;
+    compute_statistics();
+    draw();
+}
+
+
+function collapse_statistics(){
+    document.getElementById("renderarea").width  = window.innerWidth;
+    document.getElementById("statistics").style.display = "none";
+    expand_obj.visible = true;
+    collapse_obj.visible = false;
+    draw();
+}
+
+
+
+
+
+
+
+
 
 function close_navigation(nav){
     switch (nav){
@@ -2921,6 +3080,7 @@ function load_data(reload){
     edges = [];
     clearInterval(highlighting);
     infobox.visible = false;
+    collapse_statistics();
     
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");

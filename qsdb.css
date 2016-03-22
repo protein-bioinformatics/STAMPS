@@ -68,6 +68,18 @@ div.downloadbackground {
 }
 
 
+div.statistics {
+    display: none;
+    position: fixed;
+    z-index: 10;
+    background-color: white;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+    padding: 10px;
+}
+
+
 div.disclaimer {
     top: 12%;
     display: none;
