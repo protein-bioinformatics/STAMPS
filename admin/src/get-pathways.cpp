@@ -88,7 +88,8 @@ main() {
     while ((row = mysql_fetch_row(res)) != NULL){
         if (index++) cout << ", ";
         cout << "[" << row[column_names[string("id")]] << ", ";
-        cout << "\"" << row[column_names[string("name")]] << "\"]";
+        cout << "\"" << row[column_names[string("name")]] << "\", ";
+        cout << "\"" << row[column_names[string("validation")]] << "\"]";
     }
     cout << "]" << endl;
     

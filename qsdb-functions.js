@@ -1,6 +1,7 @@
 moved = false;
 HTTP_GET_VARS = [];
 current_pathway = 1;
+current_pathway_list_index = 0;
 current_pathway_title = 0;
 highlight_element = 0;
 offsetX = 0;
@@ -115,8 +116,7 @@ function change_zoom(){
 }
 
 
-CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height) {
-    var rect_curve = round_rect_radius * factor;
+CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, rect_curve) {
     this.beginPath();
     this.moveTo(x + rect_curve, y);
     this.lineTo(x + width - rect_curve, y);
@@ -1215,7 +1215,7 @@ function node(data, c){
                 this.ctx.fillStyle = pathway_fill_color;
                 this.ctx.strokeStyle = pathway_stroke_color;
                 this.ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
-                this.ctx.roundRect(this.x - hw, this.y - hh, this.width, this.height);
+                this.ctx.roundRect(this.x - hw, this.y - hh, this.width, this.height, round_rect_radius * factor);
                 this.ctx.textAlign = "center";
                 this.ctx.textBaseline = 'middle';
                 this.ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
@@ -2468,9 +2468,9 @@ function mouse_click_listener(e){
 function change_pathway(p){
     hide_select_pathway();
     current_pathway = pathways[p][0];
+    current_pathway_list_index = p;
     set_pathway_menu();
     reset_view();
-    //document.getElementById("pathway_name").innerHTML = "Current pathway: " + pathways[p][1];
     document.title = "QSDB Home - " + pathways[p][1];
     current_pathway_title.title = pathways[p][1];
     load_data();
@@ -2921,7 +2921,24 @@ function round10(value, decimals) {
 }
 
 function compute_statistics(){
-    document.getElementById("stat_pathway").innerHTML = current_pathway_title.title;
+    document.getElementById("stat_pathway").innerHTML = pathways[current_pathway_list_index][1];
+    var validation = pathways[current_pathway_list_index][2];
+    if (validation == "is"){
+        document.getElementById("stat_val_type").style.background = "#a0ff90";
+        document.getElementById("stat_validation").style.background = "#a0ff90";
+        document.getElementById("stat_validation").innerHTML = "PRM + internal standard";
+        
+    }
+    else if (validation == "prm"){
+        document.getElementById("stat_val_type").style.background = "#feff90";
+        document.getElementById("stat_validation").style.background = "#feff90";
+        document.getElementById("stat_validation").innerHTML = "PRM";
+    }
+    else if (validation == "topn"){
+        document.getElementById("stat_val_type").style.background = "#ffbebe";
+        document.getElementById("stat_validation").style.background = "#ffbebe";
+        document.getElementById("stat_validation").innerHTML = "Top-<i>n</i> experiment";
+    }
     var num_spectra = 0;
     var valid_spectra = 0;
     var num_peptides = 0;
@@ -2943,6 +2960,46 @@ function compute_statistics(){
     document.getElementById("stat_filter_pep").innerHTML = valid_peptides;
     document.getElementById("stat_num_spec").innerHTML = num_spectra;
     document.getElementById("stat_filter_spec").innerHTML = valid_spectra;
+    
+    /*
+    var sem = document.getElementById("semaphore").getContext("2d");
+    var r = 8;
+    var r_in = r - 1;
+    var dst = 2;
+    var off = 2;
+    var w = 2 * (r + dst);
+    var h = 2 * off + 4 * dst + 6 * r;
+    sem.canvas.width = w + 1;
+    sem.canvas.height = h + 1;
+    sem.clearRect(0, 0, sem.canvas.width, sem.canvas.height);
+    sem.fillStyle = "black";
+    sem.strokeStyle = "black";
+    sem.lineWidth = 1;
+    sem.roundRect(0, 0, w, h, 7);
+    for (var i = 0; i < 3; ++i){
+        sem.fillStyle = "white";
+        sem.strokeStyle = "white";
+        sem.beginPath();
+        sem.arc(dst + r, off + (i + 1) * dst + (1 + 2 * i) * r, r, 0, 2 * Math.PI);
+        sem.closePath();
+        sem.fill();
+        sem.stroke();
+        
+        var sem_color = "#888888";
+        if (i == 0 && validation == "topn") sem_color = "red";
+        else if (i == 1 && validation == "prm") sem_color = "yellow";
+        else if (i == 2 && validation == "is") sem_color = "#24ff00";
+        
+        sem.fillStyle = sem_color;
+        sem.strokeStyle = sem_color;
+        sem.beginPath();
+        sem.arc(dst + r, off + (i + 1) * dst + (1 + 2 * i) * r, r_in, 0, 2 * Math.PI);
+        sem.closePath();
+        sem.fill();
+        sem.stroke();
+    }
+    */
+    
 }
 
 
