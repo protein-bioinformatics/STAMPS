@@ -10,6 +10,7 @@ null_x = 0;
 null_y = 0;
 mouse_x = 0;
 mouse_y = 0;
+filter_parameters = [];
 data = [];
 data_ref = [];
 nodes = 0;
@@ -2874,6 +2875,17 @@ function open_filter_panel(){
         document.getElementById("filter_panel").style.left = (rect.left).toString() + "px";
         document.getElementById("filter_panel").style.display = "inline";
         document.getElementById("filter_panel_background").style.display = "inline";
+        filter_parameters = [];
+        filter_parameters["min_peptide_length"] = document.getElementById("min_peptide_length").value;
+        filter_parameters["max_peptide_length"] = document.getElementById("max_peptide_length").value;
+        filter_parameters["min_precursor_charge"] = document.getElementById("min_precursor_charge").value;
+        filter_parameters["max_precursor_charge"] = document.getElementById("max_precursor_charge").value;
+        filter_parameters["oxy_m_off"] = document.getElementById("oxy_m_off").checked;
+        filter_parameters["oxy_m_var"] = document.getElementById("oxy_m_var").checked;
+        filter_parameters["oxy_m_fix"] = document.getElementById("oxy_m_fix").checked;
+        filter_parameters["carba_c_off"] = document.getElementById("carba_c_off").checked;
+        filter_parameters["carba_c_var"] = document.getElementById("carba_c_var").checked;
+        filter_parameters["carba_c_fix"] = document.getElementById("carba_c_fix").checked;
     }
 }
 
@@ -2884,16 +2896,67 @@ function hide_select_species(){
 }
 
 
+
+
+
 function hide_filter_panel(){
     if (document.getElementById("filter_panel").style.display == "inline"){
-        for (var i = 0; i < data.length; ++i){
-            data[i].filtering();
+        var filter_changed = false;
+        if (filter_parameters["min_peptide_length"] != document.getElementById("min_peptide_length").value) filter_changed = true;
+        if (filter_parameters["max_peptide_length"] != document.getElementById("max_peptide_length").value) filter_changed = true;
+        if (filter_parameters["min_precursor_charge"] != document.getElementById("min_precursor_charge").value) filter_changed = true;
+        if (filter_parameters["max_precursor_charge"] != document.getElementById("max_precursor_charge").value) filter_changed = true;
+        if (filter_parameters["oxy_m_off"] != document.getElementById("oxy_m_off").checked) filter_changed = true;
+        if (filter_parameters["oxy_m_var"] != document.getElementById("oxy_m_var").checked) filter_changed = true;
+        if (filter_parameters["oxy_m_fix"] != document.getElementById("oxy_m_fix").checked) filter_changed = true;
+        if (filter_parameters["carba_c_off"] != document.getElementById("carba_c_off").checked) filter_changed = true;
+        if (filter_parameters["carba_c_var"] != document.getElementById("carba_c_var").checked) filter_changed = true;
+        if (filter_parameters["carba_c_fix"] != document.getElementById("carba_c_fix").checked) filter_changed = true;
+        
+        
+        if (filter_changed){
+            var proceed = true;
+            var one_marked = false;
+            for (var i = 0; i < data.length && !one_marked; ++i){
+                for (var j = 0; j < data[i].proteins.length && !one_marked; ++j){
+                    if (data[i].proteins[j].marked){
+                        one_marked = true;
+                    }
+                }
+            }
+        
+            if (one_marked){
+                proceed = confirm('Filter settings were changed, all protein selections are being discarded, do you want to proceed?');
+            }
+            
+            if (proceed){
+                for (var i = 0; i < data.length; ++i){
+                    data[i].filtering();
+                }
+                draw();
+                compute_statistics();
+            }
+            else {
+                document.getElementById("min_peptide_length").value = filter_parameters["min_peptide_length"];
+                document.getElementById("max_peptide_length").value = filter_parameters["max_peptide_length"];
+                document.getElementById("min_precursor_charge").value = filter_parameters["min_precursor_charge"];
+                document.getElementById("max_precursor_charge").value = filter_parameters["max_precursor_charge"];
+                document.getElementById("oxy_m_off").checked = filter_parameters["oxy_m_off"];
+                document.getElementById("oxy_m_var").checked = filter_parameters["oxy_m_var"];
+                document.getElementById("oxy_m_fix").checked = filter_parameters["oxy_m_fix"];
+                document.getElementById("carba_c_off").checked = filter_parameters["carba_c_off"];
+                document.getElementById("carba_c_var").checked = filter_parameters["carba_c_var"];
+                document.getElementById("carba_c_fix").checked = filter_parameters["carba_c_fix"];
+                
+            }
+            
+            
         }
-        draw();
+        
+        
     }
     document.getElementById("filter_panel").style.display = "none";
     document.getElementById("filter_panel_background").style.display = "none";
-    compute_statistics();
 }
 
 
@@ -2960,46 +3023,6 @@ function compute_statistics(){
     document.getElementById("stat_filter_pep").innerHTML = valid_peptides;
     document.getElementById("stat_num_spec").innerHTML = num_spectra;
     document.getElementById("stat_filter_spec").innerHTML = valid_spectra;
-    
-    /*
-    var sem = document.getElementById("semaphore").getContext("2d");
-    var r = 8;
-    var r_in = r - 1;
-    var dst = 2;
-    var off = 2;
-    var w = 2 * (r + dst);
-    var h = 2 * off + 4 * dst + 6 * r;
-    sem.canvas.width = w + 1;
-    sem.canvas.height = h + 1;
-    sem.clearRect(0, 0, sem.canvas.width, sem.canvas.height);
-    sem.fillStyle = "black";
-    sem.strokeStyle = "black";
-    sem.lineWidth = 1;
-    sem.roundRect(0, 0, w, h, 7);
-    for (var i = 0; i < 3; ++i){
-        sem.fillStyle = "white";
-        sem.strokeStyle = "white";
-        sem.beginPath();
-        sem.arc(dst + r, off + (i + 1) * dst + (1 + 2 * i) * r, r, 0, 2 * Math.PI);
-        sem.closePath();
-        sem.fill();
-        sem.stroke();
-        
-        var sem_color = "#888888";
-        if (i == 0 && validation == "topn") sem_color = "red";
-        else if (i == 1 && validation == "prm") sem_color = "yellow";
-        else if (i == 2 && validation == "is") sem_color = "#24ff00";
-        
-        sem.fillStyle = sem_color;
-        sem.strokeStyle = sem_color;
-        sem.beginPath();
-        sem.arc(dst + r, off + (i + 1) * dst + (1 + 2 * i) * r, r_in, 0, 2 * Math.PI);
-        sem.closePath();
-        sem.fill();
-        sem.stroke();
-    }
-    */
-    
 }
 
 

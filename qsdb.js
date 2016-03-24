@@ -145,7 +145,7 @@ function mouse_move_listener(e){
         }
         
     }
-    if(highlight_element && highlight_element.tipp) Tip(e, highlight_element.id + " " + highlight_element.name);
+    if(highlight_element && highlight_element.tipp) Tip(e, highlight_element.name);
     else unTip();
     
 }
