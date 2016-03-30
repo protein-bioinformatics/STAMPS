@@ -236,7 +236,7 @@ function draw(sync){
             for (var i = 0; i < elements.length; ++i){
                 elements[i].draw();
             }
-            
+         
             clearInterval(dr);
         }, 1, dc);
     }
@@ -617,12 +617,11 @@ pathway_title.prototype.constructor = pathway_title;
 
 function pathway_title(ctx){
     this.ctx = ctx;
-    this.title = "---";
     this.draw = function(){
         var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
         this.ctx.fillStyle = "#f3f8ff";
         this.ctx.strokeStyle = "#aaaaaa";
-        var curr_title_text = "Current pathway: " + this.title;
+        var curr_title_text = "Current pathway: " + pathways[current_pathway_list_index][1];
         this.ctx.font = "bold 20px Arial";
         this.ctx.textAlign = "left";
         this.ctx.textBaseline = 'top';
@@ -671,9 +670,8 @@ function preview(ctx){
         try { 
             image_data = this.ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
         } catch (e) {
-            //console.log(x_min + " " + y_min + " " + (x_max - x_min) + " " + (y_max - y_min));
-            console.log(this.ctx);
-            //image_data = this.ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
+            console.log(e);
+            return;
         }
         
         this.width = x_max - x_min;
@@ -1067,10 +1065,11 @@ function node(data, c){
         case "metabolite":
             this.width = metabolite_radius * 2;
             this.height = metabolite_radius * 2;
-            //this.img = new Image();
+            this.img = new Image();
+            this.crossOrigin = 'anonymous';
             //this.img.src = "http://www.genome.jp/Fig/compound/" + nd.c_number + ".gif";
             var load_process = setInterval(function(nd){
-                nd.img = new Image();
+                //nd.img = new Image();
                 nd.img.src = "http://www.genome.jp/Fig/compound/" + nd.c_number + ".gif";
                 clearInterval(load_process);
             }, 1, this);
@@ -2360,17 +2359,19 @@ function compute_edges(){
 }
 
 
-function assemble_elements(){
+function assemble_elements(skip_rest){
     elements = [];
     for (var i = 0; i < edges.length; ++i) elements.push(edges[i]);    
     for (var i = 0; i < data.length; ++i) elements.push(data[i]);
-    elements.push(infobox);
-    elements.push(zoom_sign_in);
-    elements.push(zoom_sign_out);
-    elements.push(expand_obj);
-    elements.push(collapse_obj);
-    elements.push(preview_element);
-    elements.push(current_pathway_title);
+    if (typeof skip_rest == 'undefined') {
+        elements.push(infobox);
+        elements.push(zoom_sign_in);
+        elements.push(zoom_sign_out);
+        elements.push(expand_obj);
+        elements.push(collapse_obj);
+        elements.push(preview_element);
+        elements.push(current_pathway_title);
+    }
 }
 
 
@@ -2472,7 +2473,6 @@ function change_pathway(p){
     set_pathway_menu();
     reset_view();
     document.title = "QSDB Home - " + pathways[p][1];
-    current_pathway_title.title = pathways[p][1];
     load_data();
 }
 
@@ -3066,11 +3066,12 @@ function expand_statistics(){
     expand_obj.visible = false;
     collapse_obj.visible = true;
     compute_statistics();
-    draw();
+    if (pathway_is_loaded) draw();
 }
 
 
 function collapse_statistics(){
+    if (!pathway_is_loaded) return;
     document.getElementById("renderarea").width  = window.innerWidth;
     document.getElementById("statistics").style.display = "none";
     expand_obj.visible = true;
@@ -3172,7 +3173,6 @@ function prepare_infobox(prot){
 
 
 function load_data(reload){
-    
     pathway_is_loaded = false;
     if (!reload){
         reset_view();
@@ -3181,18 +3181,39 @@ function load_data(reload){
     }
     
     
-    
-    
-    
     elements = [];
     edges = [];
     clearInterval(highlighting);
     infobox.visible = false;
     collapse_statistics();
     
+    
+    document.getElementById("renderarea_wrapper").innerHTML = "<canvas id=\"renderarea\" class=\"renderarea\">Your browser does not support the HTML5 canvas tag.</canvas>";
+    
+    
+    
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
+    c.onmousedown = mouse_down_listener;
+    c.onmouseup = mouse_up_listener;
+    c.onmousemove = mouse_move_listener;
+    c.addEventListener("click", mouse_click_listener, false);
+    c.addEventListener("dblclick", mouse_dblclick_listener, false);
+    c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
+    
+    
+    
+    infobox = new Infobox(ctx);
+    zoom_sign_in = new zoom_sign(ctx, 1);
+    zoom_sign_out = new zoom_sign(ctx, 0);
+    expand_obj = new expand_collapse(ctx, 1);
+    collapse_obj = new expand_collapse(ctx, 0);
     preview_element = new preview(ctx);
+    collapse_obj.visible = false;
+    current_pathway_title = new pathway_title(ctx);
+    ctx.canvas.width  = window.innerWidth;
+    ctx.canvas.height = window.innerHeight;
+    
     
     var species = [];
     if(document.getElementById("species_mouse").checked) species.push("mouse");
@@ -3283,15 +3304,19 @@ function load_data(reload){
         }
     }, 1);
         
-    var start_time = new Date().getTime();
     var process_edges = setInterval(function(){
         if (tmp_data && nodes){
             compute_edges();
-            assemble_elements();
+            assemble_elements(1);
             min_zoom = preview_zoom;
             for (var i = zoom; i >= preview_zoom; --i) zoom_in_out(1, 0);
             draw(1);
+            
+            
+            
+            
             preview_element.snapshot();
+            assemble_elements();
             for (var i = 0; i < (m_zoom - preview_zoom); ++i) zoom_in_out(0, 0);
             min_zoom = m_zoom;
             draw();

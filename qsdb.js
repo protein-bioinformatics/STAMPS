@@ -28,33 +28,6 @@ function init(){
     
     document.documentElement.style.overflow = 'hidden';
     document.body.scroll = "no";
-    var c = document.getElementById("renderarea");
-    var ctx = c.getContext("2d");
-    infobox = new Infobox(ctx);
-    zoom_sign_in = new zoom_sign(ctx, 1);
-    zoom_sign_out = new zoom_sign(ctx, 0);
-    expand_obj = new expand_collapse(ctx, 1);
-    collapse_obj = new expand_collapse(ctx, 0);
-    collapse_obj.visible = false;
-    current_pathway_title = new pathway_title(ctx);
-    
-    c.onclick = function (event){
-        if (event.region){
-            alert('You clicked ' + event.region);
-        }
-    }
-    
-    
-    ctx.canvas.width  = window.innerWidth;
-    ctx.canvas.height = window.innerHeight;
-    c.onmousedown = mouse_down_listener;
-    c.onmouseup = mouse_up_listener;
-    c.onmousemove = mouse_move_listener;
-    c.addEventListener("click", mouse_click_listener, false);
-    c.addEventListener("dblclick", mouse_dblclick_listener, false);
-    //c.addEventListener("wheel", mouse_wheel_listener, false);
-    //c.addEventListener("mousewheel", mouse_wheel_listener, false);
-    c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
     
     document.addEventListener('keydown', key_down, false);
     document.addEventListener('keyup', key_up, false);
