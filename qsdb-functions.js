@@ -3193,6 +3193,7 @@ function load_data(reload){
     
     
     var c = document.getElementById("renderarea");
+    c.style.display = "none";
     var ctx = c.getContext("2d");
     c.onmousedown = mouse_down_listener;
     c.onmouseup = mouse_up_listener;
@@ -3311,16 +3312,13 @@ function load_data(reload){
             min_zoom = preview_zoom;
             for (var i = zoom; i >= preview_zoom; --i) zoom_in_out(1, 0);
             draw(1);
-            
-            
-            
-            
             preview_element.snapshot();
             assemble_elements();
             for (var i = 0; i < (m_zoom - preview_zoom); ++i) zoom_in_out(0, 0);
             min_zoom = m_zoom;
-            draw();
+            draw(1);
             pathway_is_loaded = true;
+            c.style.display = "inline";
             clearInterval(process_edges);
         }
     }, 1);
