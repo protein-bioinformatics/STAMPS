@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 23, 2016 at 11:34 AM
--- Server version: 5.5.47-0ubuntu0.14.04.1
--- PHP Version: 5.5.9-1ubuntu4.14
+-- Generation Time: Jul 22, 2016 at 07:45 AM
+-- Server version: 5.5.49-0ubuntu0.14.04.1
+-- PHP Version: 5.5.9-1ubuntu4.17
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `download_counter` (
   `month_year` date NOT NULL,
   `number` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
 
 --
 -- Dumping data for table `download_counter`
@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS `download_counter` (
 
 INSERT INTO `download_counter` (`id`, `month_year`, `number`) VALUES
 (1, '2015-11-01', 2),
-(2, '2016-03-01', 5);
+(2, '2016-03-01', 5),
+(3, '2016-05-01', 1);
 
 -- --------------------------------------------------------
 
@@ -23406,7 +23407,7 @@ CREATE TABLE IF NOT EXISTS `request_counter` (
   `month_year` date NOT NULL,
   `number` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
 
 --
 -- Dumping data for table `request_counter`
@@ -23416,7 +23417,10 @@ INSERT INTO `request_counter` (`id`, `month_year`, `number`) VALUES
 (1, '2015-11-01', 163),
 (2, '2015-12-01', 880),
 (3, '2016-02-01', 529),
-(4, '2016-03-01', 333);
+(4, '2016-03-01', 473),
+(5, '2016-04-01', 14),
+(6, '2016-05-01', 2),
+(7, '2016-06-01', 3);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
