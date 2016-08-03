@@ -1,5 +1,6 @@
 #include <mysql.h>
 #include <stdio.h>
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -8,6 +9,8 @@
 #include <sstream>
 #include <sqlite3.h> 
 #include <math.h>
+#include <sys/time.h>
+#include <zlib.h>
 
 using namespace std;
 
@@ -32,6 +35,45 @@ bool is_integer_number(const string& string){
   }
   while (it != string.end() && isdigit(*it)) ++it;
   return string.size()>minSize && it == string.end();
+}
+
+string compress_string(const string& str, int compressionlevel = Z_BEST_COMPRESSION){
+    z_stream zs;                        // z_stream is zlib's control structure
+    memset(&zs, 0, sizeof(zs));
+ 
+    if (deflateInit(&zs, compressionlevel) != Z_OK)
+        throw(runtime_error("deflateInit failed while compressing."));
+ 
+    zs.next_in = (Bytef*)str.data();
+    zs.avail_in = str.size();           // set the z_stream's input
+ 
+    int ret;
+    char outbuffer[32768];
+    string outstring;
+ 
+    // retrieve the compressed bytes blockwise
+    do {
+        zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
+        zs.avail_out = sizeof(outbuffer);
+ 
+        ret = deflate(&zs, Z_FINISH);
+ 
+        if (outstring.size() < zs.total_out) {
+            // append the block to the output string
+            outstring.append(outbuffer,
+                             zs.total_out - outstring.size());
+        }
+    } while (ret == Z_OK);
+ 
+    deflateEnd(&zs);
+ 
+    if (ret != Z_STREAM_END) {          // an error occurred that was not EOF
+        ostringstream oss;
+        oss << "Exception during zlib compression: (" << ret << ") " << zs.msg;
+        throw(runtime_error(oss.str()));
+    }
+ 
+    return outstring;
 }
 
 
@@ -111,6 +153,7 @@ class protein {
             str += "\"ec_number\": \"" + ec_number + "\", ";
             str += "\"fasta\": \"" + remove_newline(fasta) + "\", ";
             str += "\"peptides\": [";
+            
             for (int i = 0; i < peptides.size(); ++i){
                 if (i) str += ", ";
                 str += peptides.at(i)->to_string();
@@ -182,8 +225,10 @@ void strip(string &str){
 }
 
 
-main() {
-    cout << "Content-Type: text/html" << endl << endl;
+main(int argc, char** argv) {
+    //cout << "Content-Type: text/html" << endl << endl;
+    cout << "Content-Type: text/html" << endl;
+    cout << "Content-Encoding: deflate" << endl << endl;
     
     string pathway_id = "";    
     string species = "";
@@ -210,12 +255,9 @@ main() {
     }
     
     /*
-    pathway_id = 49;
+    pathway_id = "49";
     species = "mouse";
     */
-    
-       
-    
     
     string line;
     map< string, string > parameters;
@@ -285,7 +327,8 @@ main() {
     
     
     
-    string sql_query_proteins = "select n.id nid, p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ";
+    string sql_query_proteins = "select n.id nid, p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where p.unreviewed = false and n.pathway_id = ";
+    //string sql_query_proteins = "select n.id nid, p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ";
     sql_query_proteins += pathway_id;
     sql_query_proteins += " and n.type = 'protein' and p.species = '";
     sql_query_proteins += species;
@@ -318,7 +361,7 @@ main() {
         last_protein->mass = row[column_names_proteins[string("mass")]];
         last_protein->accession = row[column_names_proteins[string("accession")]];
         last_protein->ec_number = row[column_names_proteins[string("ec_number")]];
-        last_protein->fasta = row[column_names_proteins[string("fasta")]];
+        //last_protein->fasta = row[column_names_proteins[string("fasta")]];
         nodes.at(pi)->proteins.push_back(last_protein);
         
         if (all_proteins.find(pid) == all_proteins.end()){
@@ -404,6 +447,8 @@ main() {
     sqlite3 *db;
     char *zErrMsg = 0;
     int rc;
+    
+    
 
     /* Open database */
     rc = sqlite3_open((char*)parameters["sqlite_file"].c_str(), &db);
@@ -490,17 +535,7 @@ main() {
         nodes.push_back(last_node);
     }
     
-    /*
-    for (int i = 0; i < nodes.size(); ++i){
-        for (int j = 0; j < nodes.at(i)->proteins.size(); ++j){
-            for (int k = 0; k < nodes.at(i)->proteins.at(j)->peptides.size(); ++k){
-                for (int l = 0; l < nodes.at(i)->proteins.at(j)->peptides.at(k)->spectra.size(); ++l){
-                    cout << i << " " << j << " " << k << " " << nodes.at(i)->proteins.at(j)->peptides.at(k)->spectra.at(l)->charge << "<br>" << endl;
-                }
-            }
-        }
-    }
-    */
+    
 
     string response = "[";
     for (int i = 0; i < nodes.size(); ++i){
@@ -508,7 +543,9 @@ main() {
         response += nodes.at(i)->to_string();
     }
     response += "]";
-    cout << response;
+    //cout << response;
+    cout << compress_string(response);
+    
     
     
     mysql_free_result(res);

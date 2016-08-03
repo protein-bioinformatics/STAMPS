@@ -95,7 +95,7 @@ infobox_stroke_color = "#777777";
 infobox_stroke_width = 1;
 infobox_offset_x = 20;
 preview_element = 0;
-
+select_field_element = 0;
 
 
 pathways = [[15, "Alanine, aspartate and glutamate metabolism"]];
@@ -630,6 +630,41 @@ function pathway_title(ctx){
         this.ctx.strokeRect(-2, nav_height - 2, wdth, 40);
         this.ctx.fillStyle = "#aaaaaa";
         this.ctx.fillText(curr_title_text, 10, 10 + nav_height);
+    }
+}
+
+select_field.prototype = new visual_element();
+select_field.prototype.constructor = select_field;
+
+function select_field(ctx){
+    this.ctx = ctx;
+    this.start_position = false;
+    this.end_position = false;
+    
+    
+    this.is_mouse_over = function(mouse){
+        return false;
+    }
+    
+    this.mouse_down = function(mouse, key){
+        return false;
+    }
+    
+    this.mouse_down_move = function(mouse, key){
+        return false;
+    }
+    
+    this.mouse_up = function(mouse){
+        return false;
+    }
+    
+    this.draw = function(){
+        if (this.visible){
+            this.ctx.globalAlpha = .4;
+            this.ctx.fillStyle = "black";
+            this.ctx.fillRect(this.start_position.x, this.start_position.y, this.end_position.x - this.start_position.x, this.end_position.y - this.start_position.y);
+            this.ctx.globalAlpha = 1;
+        }
     }
 }
 
@@ -2370,6 +2405,7 @@ function assemble_elements(skip_rest){
         elements.push(expand_obj);
         elements.push(collapse_obj);
         elements.push(preview_element);
+        elements.push(select_field_element);
         elements.push(current_pathway_title);
     }
 }
@@ -2453,6 +2489,7 @@ function mouse_dblclick_listener(e){
 
 
 function mouse_click_listener(e){
+    
     if (!pathway_is_loaded) return;
     if (!moved){
         if (highlight_element){
@@ -2479,17 +2516,24 @@ function change_pathway(p){
 
 function mouse_down_listener(e){
     if (!pathway_is_loaded) return;
-    
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, e);
-    
-    if (highlight_element){
-        highlight_element.mouse_down(res, e.which);
-        node_move_x = highlight_element.x;
-        node_move_y = highlight_element.y;        
+    if (e.buttons & 1){
+        
+        
+        if (highlight_element){
+            highlight_element.mouse_down(res, e.which);
+            node_move_x = highlight_element.x;
+            node_move_y = highlight_element.y;        
+        }
+        offsetX = res.x;
+        offsetY = res.y;
     }
-    offsetX = res.x;
-    offsetY = res.y;
+    else if (e.buttons & 7){
+        select_field_element.visible = true;
+        select_field_element.start_position = res;
+        select_field_element.end_position = res;
+    }
 }
 
 
@@ -2527,6 +2571,25 @@ function key_up(event){
 function mouse_up_listener(event){
     if (!pathway_is_loaded) return;
     
+    if (select_field_element.visible) {
+        select_field_element.visible = false;
+        
+        var sx = Math.min(select_field_element.start_position.x, select_field_element.end_position.x);
+        var ex = Math.max(select_field_element.start_position.x, select_field_element.end_position.x);
+        var sy = Math.min(select_field_element.start_position.y, select_field_element.end_position.y);
+        var ey = Math.max(select_field_element.start_position.y, select_field_element.end_position.y);
+        
+        for (var i = 0; i < data.length; ++i){
+            data[i].highlight = false;
+            if (data[i].type == "protein" && sx <= data[i].x && sy <= data[i].y && data[i].x <= ex && data[i].y <= ey){
+                for (var j = 0; j < data[i].proteins.length; ++j){
+                    data[i].proteins[j].toggle_marked();
+                }
+            }
+        }
+        
+        draw();
+    }
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, event);
     c.style.cursor = "auto";
@@ -2646,7 +2709,13 @@ function check_spectra(){
         
         var bg_color = (line & 1) ? "#DDDDDD" : "white";
         ++line;
-        inner_html += "<tr><td width=\"100%\" bgcolor=\"" + bg_color + "\" onclick=\"document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: default;\">&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"protein_sign_" + i + "\">" + sign_right + "</div>&nbsp;" + spectra_content[i][0] + " | " + data[p].proteins[pp].accession + "</td></tr>";
+        var num_pep = 0;
+        for (var j = 0; j < data[p].proteins[pp].peptides.length; ++j){
+            if (!data[p].proteins[pp].peptides[j].filter_valid) continue;
+            num_pep += 1;
+        }
+        
+        inner_html += "<tr><td width=\"100%\" bgcolor=\"" + bg_color + "\" onclick=\"document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: default;\">&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"protein_sign_" + i + "\">" + sign_right + "</div>&nbsp;" + spectra_content[i][0] + " | " + data[p].proteins[pp].accession + " | " + num_pep + " Peptides</td></tr>";
         
         inner_html += "<tr><td><table id='peptide_" + peps + "' style=\"display: none;\">";
         for (var j = 0; j < data[p].proteins[pp].peptides.length; ++j){
@@ -3082,11 +3151,6 @@ function collapse_statistics(){
 
 
 
-
-
-
-
-
 function close_navigation(nav){
     switch (nav){
         case 1:
@@ -3201,6 +3265,7 @@ function load_data(reload){
     c.addEventListener("click", mouse_click_listener, false);
     c.addEventListener("dblclick", mouse_dblclick_listener, false);
     c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
+    c.addEventListener('contextmenu', function(event){event.preventDefault(); return false;}, false);
     
     
     
@@ -3210,6 +3275,8 @@ function load_data(reload){
     expand_obj = new expand_collapse(ctx, 1);
     collapse_obj = new expand_collapse(ctx, 0);
     preview_element = new preview(ctx);
+    select_field_element = new select_field(ctx);
+    select_field_element.visible = false;
     collapse_obj.visible = false;
     current_pathway_title = new pathway_title(ctx);
     ctx.canvas.width  = window.innerWidth;

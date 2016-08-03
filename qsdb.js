@@ -19,11 +19,9 @@ function init(){
             set_pathway_menu();
         }
     }
-    //xmlhttp_pw.open("GET", "get-pathways.py", true);
+    
     xmlhttp_pw.open("GET", "/qsdb/cgi-bin/get-pathways.bin", true);
     xmlhttp_pw.send();
-    
-    
     
     
     document.documentElement.style.overflow = 'hidden';
@@ -42,19 +40,19 @@ function init(){
     document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
     document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
     
-    /*c.oncontextmenu = function (event){
-        return false;
-    }
-    */
     change_pathway(0);
 }
 
 
-
+function right_mouse_down_listener(e){
+    if (e.button != 2) return;
+    right_mouse_down_start = get_mouse_pos(document.getElementById("renderarea"), e);
+}
 
 
 
 function mouse_move_listener(e){
+    
     if (!pathway_is_loaded) return;
     
     var c = document.getElementById("renderarea");
@@ -63,7 +61,7 @@ function mouse_move_listener(e){
     var grid = Math.floor(base_grid * factor * 1000);
     mouse_x = res.x;
     mouse_y = res.y;
-    
+        
     // shift all nodes
     if (e.buttons & 1){
         if (!highlight_element || !highlight_element.mouse_down_move(res, e.which)){
@@ -99,6 +97,23 @@ function mouse_move_listener(e){
         draw();
         offsetX = res.x;
         offsetY = res.y;
+    }
+    else if (e.buttons & 7){
+        select_field_element.end_position = res;
+        var sx = Math.min(select_field_element.start_position.x, select_field_element.end_position.x);
+        var ex = Math.max(select_field_element.start_position.x, select_field_element.end_position.x);
+        var sy = Math.min(select_field_element.start_position.y, select_field_element.end_position.y);
+        var ey = Math.max(select_field_element.start_position.y, select_field_element.end_position.y);
+        
+        for (var i = 0; i < data.length; ++i){
+            if (data[i].type == "protein" && sx <= data[i].x && sy <= data[i].y && data[i].x <= ex && data[i].y <= ey){
+                data[i].highlight = true;
+            }
+            else {
+                data[i].highlight = false;
+            }
+        }
+        draw();
     }
     else {
         // find active node
@@ -155,23 +170,6 @@ function key_down(event){
     
 }
 
-
-
-
-function test_download() {
-  var text = "ich bin ein Berliner";
-  var filename = "test.svg";
-  var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-  element.setAttribute('download', filename);
-
-  element.style.display = 'none';
-  document.body.appendChild(element);
-
-  element.click();
-
-  document.body.removeChild(element);
-}
 
 
 
