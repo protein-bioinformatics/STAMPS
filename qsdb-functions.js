@@ -2505,6 +2505,7 @@ function mouse_click_listener(e){
 
 function change_pathway(p){
     hide_select_pathway();
+    collapse_statistics();
     current_pathway = pathways[p][0];
     current_pathway_list_index = p;
     set_pathway_menu();
@@ -3075,14 +3076,19 @@ function compute_statistics(){
     var num_proteins = 0;
     var proteins_content = [];
     for (var i = 0; i < data.length; ++i){
+        num_proteins += data[i].proteins.length;
         for (var j = 0; j < data[i].proteins.length; ++j){
             proteins_content.push([data[i].proteins[j].name, i, j, data[i].proteins[j].marked]);
-            num_proteins += 1;
         }
     }
     proteins_content.sort();
     for (var i = proteins_content.length - 1; i > 0; --i){
         if (proteins_content[i][0] == proteins_content[i - 1][0]){
+            if (proteins_content[i][3] && !proteins_content[i - 1][3]){
+                tmp = proteins_content[i];
+                proteins_content[i] = proteins_content[i - 1];
+                proteins_content[i - 1] = tmp;
+            }
             proteins_content.splice(i, 1);
         }
     }
