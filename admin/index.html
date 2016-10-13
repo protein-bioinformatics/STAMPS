@@ -4,20 +4,15 @@
 <head>
 <meta charset="utf-8"/>
 <link rel="stylesheet" type="text/css" href="../qsdb.css">
-<<<<<<< HEAD
-<script src="qsdb.js"></script>
-<script src="qsdb-functions.js"></script>
-<script src="../ms-view.js"></script>
-=======
 <script src="../qsdb-functions.js"></script>
 <script src="../ms-view.js"></script>
 <script src="qsdb.js"></script>
->>>>>>> admin-interface
 <title>QSDB Home</title>
 </head>
 
 <body>
-<canvas id="renderarea" class="renderarea">Your browser does not support the HTML5 canvas tag.</canvas>
+<!-- <canvas id="renderarea" class="renderarea">Your browser does not support the HTML5 canvas tag.</canvas> -->
+<div id="renderarea_wrapper" class="renderarea_wrapper"></div>
 <canvas id="refarea" class="refarea" style="display: none;">Your browser does not support the HTML5 canvas tag.</canvas>
 
 <div id="hint" style="position: fixed; top: 10px; left: 10px;">--</div>
@@ -37,17 +32,46 @@
     Select Species
   </td><td id="search_field_nav" class="navigation_cell" title="Search for name, definition, UniProt accession number, EC number or peptide amino sequence.">
     Search: <input type="text" onkeyup="start_search();" onfocus="close_navigation(0); start_search();" class="search_field" id="search_field" size=24>
+  </td><td id="filter_panel_nav"  class="navigation_cell_click" onclick="close_navigation(3); open_filter_panel();">
+    Filter
   </td><td class="navigation_cell_click" onclick="close_navigation(0); check_spectra();">
     Check Spectra
   </td><td class="navigation_cell_click" onclick="close_navigation(0); download_assay();">
     Download Assay
   </td><td class="navigation_cell_click" onclick="close_navigation(0); open_disclaimer();">
     About QSDB
-  </td><td id="pathway_name" class="navigation_cell_name">
-    ---
   </td></tr>
   </table>
 </div>
+
+<div id="filter_panel" class="filter_panel">
+  <table>
+    <tr><td>Min. peptide length</td><td><input type="number" min="8" max="25" id="min_peptide_length" value="8" /><td></tr>
+    <tr><td>Max. peptide length</td><td><input type="number" min="8" max="25" id="max_peptide_length" value="25" /><td></tr>
+    <tr><td>Min. precursor charge</td><td><input type="number" min="2" max="6" id="min_precursor_charge" value="2" /><td></tr>
+    <tr><td>Max. precursor charge</td><td><input type="number" min="2" max="6" id="max_precursor_charge" value="3" /><td></tr>
+    <tr><td colspan="2">&nbsp;<br>Modifications:</td><td></tr>
+    <tr><td>Oxydation of M</td><td>
+      <input type="radio" id="oxy_m_off" name="oxy_m" checked /> off
+      <input type="radio" id="oxy_m_var" name="oxy_m" /> variable
+      <input type="radio" id="oxy_m_fix" name="oxy_m" /> fixed
+    <td></tr>
+    <tr><td>Carbamidomethylation of C</td><td>
+      <input type="radio" id="carba_c_off" name="carba_c" checked /> off
+      <input type="radio" id="carba_c_var" name="carba_c" /> variable
+      <input type="radio" id="carba_c_fix" name="carba_c" /> fixed
+    <td></tr>
+    <tr><td colspan="2">&nbsp;<br><font size="1" color="blue" style="cursor: pointer;" onclick="
+      document.getElementById('min_peptide_length').value = 8;
+      document.getElementById('max_peptide_length').value = 25;
+      document.getElementById('min_precursor_charge').value = 2;
+      document.getElementById('max_precursor_charge').value = 3;
+      document.getElementById('oxy_m_off').checked = true;
+      document.getElementById('carba_c_off').checked = true;
+    ;">default settings</td></tr>
+  </table>
+</div>
+<div id="filter_panel_background" class="filter_panel_background"></div>
 
 <div id="select_species" class="select_species">
   <table>
@@ -62,18 +86,6 @@
 <div id="select_species_background" class="select_species_background"></div>
 
 <div id="select_pathway" class="select_pathway">
-<<<<<<< HEAD
-  <!-- <table>
-    <tr><td class="select_pathway_cell" onclick="change_pathway(6, 'Citrate Cycle');">Citrate Cycle</td></tr>
-    <tr><td class="select_pathway_cell" onclick="change_pathway(11, 'Fatty Acid Biosynthesis');">Fatty Acid Biosynthesis</td></tr>
-    <tr><td class="select_pathway_cell" onclick="change_pathway(29, 'Glycerolipid metabolism');">Glycerolipid metabolism</td></tr>
-    <tr><td class="select_pathway_cell" onclick="change_pathway(28, 'Glycerophospholipid metabolism');">Glycerophospholipid metabolism</td></tr>
-    <tr><td class="select_pathway_cell" onclick="change_pathway(1, 'Glycolysis');">Glycolysis</td></tr>
-    <tr><td class="select_pathway_cell" onclick="change_pathway(3, 'Pentose phosphate');">Pentose phosphate</td></tr>
-    <tr><td class="select_pathway_cell" onclick="change_pathway(41, 'Sphingolipid metabolism');">Sphingolipid metabolism</td></tr>
-  </table> -->
-=======
->>>>>>> admin-interface
 </div>
 <div id="select_pathway_background" class="select_pathway_background"></div>
 <div id="animation_background" class="animation_background"></div>
@@ -87,7 +99,7 @@ Responsible people for this database are:<br>
 Dominik Kopczynski: Implementation of both front- and backend<br>
 Andreas Hentschel: Acquisition and processing of the data<br>
 Robert Ahrends: Coordination<p>
-The ISAS team is supported by the German network of bioinformatics services (<a href="www.denbi.de">de.NBI</a>).
+The ISAS team is supported by the German network of bioinformatics services (<a href="http://www.denbi.de">de.NBI</a>).
 If you have questions, suggestions or other issues, please <a href="mail:foo@foo.de">contact</a> us.
 <p>&nbsp;<p>&nbsp;<p>
 
@@ -128,6 +140,31 @@ The usage, selling or handing of the contact data written in this imprint is not
 <div id="download" class="download"></div>
 <div id="downloadbackground" class="downloadbackground"></div>
 
+<div id="statistics" class="statistics">
+  <font size="+2"><b>Statistics</b></font><p>
+  <table width="95%" cellpadding="5" cellspacing="0" style="border-top: 2px solid black; border-bottom: 2px solid black;">
+    <tr><td width="60%"><b>Pathway: </b></td><td id="stat_pathway"></td></td>
+    <tr><td id="stat_val_type"><b>Validation: </b></td><td id="stat_validation"></td></td>
+    <tr><td><b>No. of total proteins: </b></td><td id="stat_num_prot"></td></td>
+    <tr><td><b>No. of distinct proteins: </b></td><td id="stat_dist_prot"></td></td>
+    <tr><td><b>No. of avbl. proteins: </b></td><td id="stat_filter_prot"></td></td>
+    <tr><td style="padding-bottom: 15px;"><b>No. of selected proteins: </b></td><td id="stat_sel_prot"></td></td>
+    <tr><td><b>No. of peptides: </b></td><td id="stat_num_pep"></td></td>
+    <tr><td><b>No. of filtered peptides: </b></td><td id="stat_filter_pep"></td></td>
+    <tr><td style="padding-bottom: 15px;"><b>No. of selected peptides: </b></td><td id="stat_sel_pep"></td></td>
+    <tr><td><b>No. of spectra: </b></td><td id="stat_num_spec"></td></td>
+    <tr><td><b>No. of filtered spectra: </b></td><td id="stat_filter_spec"></td></td>
+    <tr><td><b>No. of selected spectra: </b></td><td id="stat_sel_spec"></td></td>
+  </table><p />&nbsp;<p />
+  
+  <b>Validation types:</b>
+  <table>
+    <tr><td bgcolor="#ffbebe" width="25">&nbsp;</td><td>Top-<i>n</i> experiment</td></tr>
+    <tr><td bgcolor="#feff90" width="25">&nbsp;</td><td>PRM</td></tr>
+    <tr><td bgcolor="#a0ff90" width="25">&nbsp;</td><td>PRM + internal standard</td></tr>
+  </table>
+</div>
+
 <div id="check_spectra" class="check_spectra">
   <canvas id="msarea" class="msarea"></canvas>
   <fieldset id="spectra_options" class="spectra_options" style="position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;">
@@ -140,6 +177,8 @@ The usage, selling or handing of the contact data written in this imprint is not
 <div id="check_spectra_background" class="check_spectra_background"></div>
 <img src="/qsdb/images/zoom_in.png" id="zoom_in" style="display: none;">
 <img src="/qsdb/images/zoom_out.png" id="zoom_out" style="display: none;">
+<img src="/qsdb/images/expand.png" id="expand" style="display: none;">
+<img src="/qsdb/images/collapse.png" id="collapse" style="display: none;">
 
 </body>
 </html> 

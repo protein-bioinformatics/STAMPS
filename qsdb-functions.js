@@ -234,7 +234,7 @@ function draw(sync){
             
             //draw elements visual elements
             for (var i = 0; i < elements.length; ++i){
-                elements[i].draw();
+                if (elements[i].visible) elements[i].draw();
             }
          
             clearInterval(dr);
@@ -247,7 +247,7 @@ function draw(sync){
         
         //draw elements visual elements
         for (var i = 0; i < elements.length; ++i){
-            elements[i].draw();
+            if (elements[i].visible) elements[i].draw();
         }
     }
 }

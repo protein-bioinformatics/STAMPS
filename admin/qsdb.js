@@ -1,4 +1,6 @@
 function init(){
+    
+    
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -16,28 +18,36 @@ function init(){
             set_pathway_menu();
         }
     }
-    //xmlhttp_pw.open("GET", "get-pathways.py", true);
+    
     xmlhttp_pw.open("GET", "/qsdb/cgi-bin/get-pathways.bin", true);
     xmlhttp_pw.send();
     
     
-    
-    
     document.documentElement.style.overflow = 'hidden';
     document.body.scroll = "no";
+    
+    document.addEventListener('keydown', key_down, false);
+    document.addEventListener('keyup', key_up, false);
+    document.getElementById("search_background").addEventListener("click", hide_search, false);
+    document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
+    document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
+    document.getElementById("disclaimer_background").addEventListener("click", hide_disclaimer, false);
+    document.getElementById("check_spectra_background").addEventListener("click", hide_check_spectra, false);
+    document.getElementById("filter_panel_background").addEventListener("click", hide_filter_panel, false);
+    document.getElementById("menubackground").addEventListener("click", hide_custom_menu, false);
+    document.getElementById("managementbackground").addEventListener("click", hide_management, false);
+    
+    window.addEventListener('resize', resize_ms_view, false);
+    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
+    document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
+    
+    change_pathway(0);
+    
+    
+    
+    
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
-    infobox = new Infobox(ctx);
-    zoom_sign_in = new zoom_sign(ctx, 1);
-    zoom_sign_out = new zoom_sign(ctx, 0);
-    
-    
-    c.onclick = function (event)
-    {
-        if (event.region) {
-            alert('You clicked ' + event.region);
-        }
-    }
     
     
     ctx.canvas.width  = window.innerWidth;
@@ -51,19 +61,7 @@ function init(){
     //c.addEventListener("mousewheel", mouse_wheel_listener, false);
     c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
     
-    document.addEventListener('keydown', key_down, false);
-    document.addEventListener('keyup', key_up, false);
-    document.getElementById("menubackground").addEventListener("click", hide_custom_menu, false);
-    document.getElementById("managementbackground").addEventListener("click", hide_management, false);
-    document.getElementById("search_background").addEventListener("click", hide_search, false);
-    document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
-    document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
-    document.getElementById("disclaimer_background").addEventListener("click", hide_disclaimer, false);
-    document.getElementById("check_spectra_background").addEventListener("click", hide_check_spectra, false);
     
-    window.addEventListener('resize', resize_ms_view, false);
-    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
-    document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
     
     c.oncontextmenu = function (event){
         show_custom_menu(event);
@@ -77,7 +75,6 @@ function init(){
         return false;        
     };
     
-    change_pathway(0);
 }
 
 

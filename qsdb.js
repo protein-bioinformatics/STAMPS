@@ -154,7 +154,7 @@ function key_down(event){
             }
         }
         if (k_is_valid){
-            alert("You breaked the master code - you sneaky hacker. We'll flood your mailbox with yellow bananas. Your database will be dropped, your client destroyed. All your base are belong to us!!!");
+            alert("You broke the master code - you sneaky hacker. We'll flood your mailbox with yellow bananas. Your database will be dropped, your client destroyed. All your base are belong to us!!!");
         }
     }    
     if (!pathway_is_loaded) return;
