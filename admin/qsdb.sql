@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 25, 2016 at 08:09 AM
+-- Generation Time: Mar 22, 2017 at 09:34 AM
 -- Server version: 5.7.13-0ubuntu0.16.04.2
--- PHP Version: 7.0.8-0ubuntu0.16.04.3
+-- PHP Version: 7.0.13-0ubuntu0.16.04.1
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -46,7 +46,9 @@ INSERT INTO `download_counter` (`id`, `month_year`, `number`) VALUES
 (3, '2016-05-01', 1),
 (4, '2016-07-01', 1),
 (5, '2016-08-01', 2),
-(6, '2016-10-01', 3);
+(6, '2016-10-01', 3),
+(7, '2016-12-01', 2),
+(8, '2017-01-01', 1);
 
 -- --------------------------------------------------------
 
@@ -96120,7 +96122,11 @@ INSERT INTO `request_counter` (`id`, `month_year`, `number`) VALUES
 (9, '2016-08-01', 84),
 (10, '2016-09-01', 9),
 (11, '2016-10-01', 21),
-(12, '2016-11-01', 7);
+(12, '2016-11-01', 9),
+(13, '2016-12-01', 6),
+(14, '2017-01-01', 7),
+(15, '2017-02-01', 4),
+(16, '2017-03-01', 10);
 
 --
 -- Indexes for dumped tables
@@ -96200,7 +96206,7 @@ ALTER TABLE `request_counter`
 -- AUTO_INCREMENT for table `download_counter`
 --
 ALTER TABLE `download_counter`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 --
 -- AUTO_INCREMENT for table `metabolites`
 --
@@ -96245,7 +96251,7 @@ ALTER TABLE `reagents`
 -- AUTO_INCREMENT for table `request_counter`
 --
 ALTER TABLE `request_counter`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
