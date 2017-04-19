@@ -436,7 +436,9 @@ main(int argc, char** argv) {
             sql_part += all_peptides[row[column_names_spectra[string("pep_id")]]]->at(0)->peptide_seq;
             sql_part += "' seq, ";
             sql_part += row[column_names_spectra[string("charge")]];
-            sql_part += " chrg";
+            sql_part += " chrg, ";
+            sql_part += row[column_names_spectra[string("id")]];
+            sql_part += " sid";
             sql_query_lite.push_back(sql_part);
         }
     }
@@ -466,7 +468,7 @@ main(int argc, char** argv) {
             sql_query_lite2 += sql_query_lite[j];
         }
         //sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, rs.id sid, rs.precursorMZ FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq and rs.peptideModSeq = ps.seq and rs.precursorCharge = ps.chrg;";
-        sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, rs.id sid, rs.precursorMZ, rs.peptideModSeq FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq and rs.precursorCharge = ps.chrg;";
+        sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, ps.sid sid, rs.precursorMZ, rs.peptideModSeq FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq and rs.precursorCharge = ps.chrg;";
         
 
         vector< map< string, string > > spectra_data;

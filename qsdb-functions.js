@@ -2639,6 +2639,9 @@ function download_assay(){
         return;
     }
     
+    console.log(spectra_list);
+    //return;
+    
     var xmlhttp_c = new XMLHttpRequest();
     xmlhttp_c.onreadystatechange = function() {
         if (xmlhttp_c.readyState == 4 && xmlhttp_c.status == 200) {
