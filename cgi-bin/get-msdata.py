@@ -18,12 +18,11 @@ with open("../admin/qsdb.conf", mode="rt") as fl:
         if len(token) < 2: continue
         conf[token[0].strip(" ")] = token[1].strip(" ")
 
-form = cgi.FieldStorage()
-proteins = form.getvalue('proteins')
 
 def make_dict(cur):
     return {key[0]: value for key, value in zip(cur.description, cur.fetchall()[0])}
 
+form = cgi.FieldStorage()
 spectrum_id = int(form.getvalue('spectrum_id'))
    
 db = sqlite3.connect(conf["sqlite_file"])

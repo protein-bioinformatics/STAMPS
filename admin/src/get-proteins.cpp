@@ -96,7 +96,6 @@ string remove_newline(string str) {
 class spectrum {
     public:
         string id;
-        string lib_id;
         string charge;
         string mass;
         string mod_sequence;
@@ -104,7 +103,6 @@ class spectrum {
         string to_string(){
             string str = "{";
             str += "\"id\": " + id + ", ";
-            str += "\"lib_id\": " + lib_id + ", ";
             str += "\"mod_sequence\": \"" + mod_sequence + "\", ";
             str += "\"charge\": " + charge + ", ";
             str += "\"mass\": \"" + mass + "\"";
@@ -165,45 +163,6 @@ class protein {
         }
 };
 
-
-class node {
-    public:
-        string id;
-        string name;
-        string pathway_id;
-        string type;
-        string pathway_ref;
-        string x;
-        string y;
-        string c_number;
-        string formula;
-        string exact_mass;
-        vector<protein*> proteins;
-        
-        
-        string to_string(){
-            string str = "{";
-            str += "\"id\": " + id + ", ";
-            str += "\"name\": \"" + name + "\", ";
-            str += "\"pathway_id\": " + pathway_id + ", ";
-            str += "\"type\": \"" + type + "\", ";
-            str += "\"pathway_ref\": " + (pathway_ref.length() ? pathway_ref : "0") + ", ";
-            str += "\"x\": " + x + ", ";
-            str += "\"y\": " + y + ", ";
-            str += "\"c_number\": \"" + c_number + "\", ";
-            str += "\"formula\": \"" + formula + "\", ";
-            str += "\"exact_mass\": \"" + exact_mass + "\", ";
-            str += "\"proteins\": [";
-            for (int i = 0; i < proteins.size(); ++i){
-                if (i) str += ", ";
-                str += proteins.at(i)->to_string();
-            }
-            str += "]}";
-            return str;
-        }
-};
-
-
 static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
     vector< map< string, string > > *spectra_data = (vector< map< string, string > >*)data;
     map< string, string > *dataset = new map< string, string >;
@@ -212,6 +171,16 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
     }
     spectra_data->push_back(*dataset);
     return 0;
+}
+
+void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+    if(from.empty())
+        return;
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    }
 }
 
 
@@ -229,11 +198,11 @@ void strip(string &str){
 
 main(int argc, char** argv) {
     //cout << "Content-Type: text/html" << endl << endl;
+    
     cout << "Content-Type: text/html" << endl;
     cout << "Content-Encoding: deflate" << endl << endl;
     
-    string pathway_id = "";    
-    string species = "";
+    string accessions = "";
     
     
     string get_string = getenv("QUERY_STRING");
@@ -244,22 +213,18 @@ main(int argc, char** argv) {
     vector<string> get_entries = split(get_string, '&');  
     for (int i = 0; i < get_entries.size(); ++i){
         vector<string> get_values = split(get_entries.at(i), '=');
-        if (get_values.size() && get_values.at(0) == "pathway"){
-            pathway_id = get_values.at(1);
+        if (get_values.size() && get_values.at(0) == "accessions"){
+            accessions = get_values.at(1);
         }
-        else if (get_values.size() && get_values.at(0) == "species"){
-            species = get_values.at(1);
-        }
-    }
-    if (pathway_id == "" || species == "" || !is_integer_number(pathway_id) || species.find("'") != string::npos){
-        cout << -1 << endl;
-        return -1;
     }
     
-    /*
-    pathway_id = "49";
-    species = "mouse";
-    */
+    
+    //accessions = "P54822:O09046";
+    if (accessions == "" || accessions.find("'") != string::npos){
+        cout << -1 << endl;
+        return -1;
+    }    
+    replaceAll(accessions, string(":"), string("','"));
     
     string line;
     map< string, string > parameters;
@@ -287,54 +252,24 @@ main(int argc, char** argv) {
     char *user = (char*)parameters["mysql_user"].c_str();
     char *password = (char*)parameters["mysql_passwd"].c_str();
     char *database = (char*)parameters["mysql_db"].c_str();
-    map< string, int > column_names_nodes;
     map< string, int > column_names_proteins;
     map< string, int > column_names_peptides;
     map< string, int > column_names_spectra;
     map< string, int > column_names_rest;
-    vector<node*> nodes;
+    vector < protein* > proteins;
     
     /* Connect to database */
     if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
         cout << "error: " << mysql_error(conn) << endl;
         return 1;
     }
-    /* send SQL query */
-    string sql_query_nodes = "select * from nodes where pathway_id = ";
-    sql_query_nodes += pathway_id;
-    sql_query_nodes += " and type = 'protein';";
-    
-    
-    if (mysql_query(conn, sql_query_nodes.c_str())) {
-        cout << "error: " << mysql_error(conn) << endl;
-        return 1;
-    }
-    res = mysql_use_result(conn);
-        
-    for(unsigned int i = 0; (field = mysql_fetch_field(res)); i++) {
-        column_names_nodes.insert(pair<string,int>(field->name, i));
-    }
-    
-    while ((row = mysql_fetch_row(res)) != NULL){
-        node* last_node = new node;
-        last_node->id = row[column_names_nodes[string("id")]];
-        last_node->pathway_id = row[column_names_nodes[string("pathway_id")]];
-        last_node->type = row[column_names_nodes[string("type")]];
-        last_node->x = row[column_names_nodes[string("x")]];
-        last_node->y = row[column_names_nodes[string("y")]];
-        nodes.push_back(last_node);
-    }
     
     
     
     
-    
-    string sql_query_proteins = "select n.id nid, p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where p.unreviewed = false and n.pathway_id = ";
-    //string sql_query_proteins = "select n.id nid, p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ";
-    sql_query_proteins += pathway_id;
-    sql_query_proteins += " and n.type = 'protein' and p.species = '";
-    sql_query_proteins += species;
-    sql_query_proteins += "';";
+    string sql_query_proteins = "select * from proteins where unreviewed = false and accession in ('";
+    sql_query_proteins += accessions;
+    sql_query_proteins += "');";
     
     if (mysql_query(conn, sql_query_proteins.c_str())) {
         cout << "error: " << mysql_error(conn) << endl;
@@ -351,10 +286,7 @@ main(int argc, char** argv) {
     string sql_query_peptides;
     int pi = 0;
     while ((row = mysql_fetch_row(res)) != NULL){
-        int int_nid = atoi(row[column_names_proteins[string("nid")]]);
-        while (atoi(nodes.at(pi)->id.c_str()) < int_nid){
-            ++pi;
-        }
+        ++pi;
         string pid = row[column_names_proteins[string("id")]];
         protein* last_protein = new protein();
         last_protein->id = pid;
@@ -363,8 +295,7 @@ main(int argc, char** argv) {
         last_protein->mass = row[column_names_proteins[string("mass")]];
         last_protein->accession = row[column_names_proteins[string("accession")]];
         last_protein->ec_number = row[column_names_proteins[string("ec_number")]];
-        //last_protein->fasta = row[column_names_proteins[string("fasta")]];
-        nodes.at(pi)->proteins.push_back(last_protein);
+        proteins.push_back(last_protein);
         
         if (all_proteins.find(pid) == all_proteins.end()){
             all_proteins.insert(pair<string, vector<protein*>* >(pid, new vector<protein*>()));
@@ -378,7 +309,7 @@ main(int argc, char** argv) {
     
     
     map<string, vector<peptide*>* > all_peptides;
-    string sql_query_spectra;
+    vector< string > sql_query_lite;
     if (pi){
         sql_query_peptides = "select p.pid, pep.* from (" + sql_query_peptides + ") p inner join peptides pep on p.pid = pep.protein_id;";
         
@@ -401,6 +332,12 @@ main(int argc, char** argv) {
                 last_peptide->id = pep_id;
                 last_peptide->peptide_seq = peptide_seq;
                 
+                string sql_part = "select ";
+                sql_part += pep_id;
+                sql_part += " pep_id, '";
+                sql_part += peptide_seq;
+                sql_part += "' seq";
+                sql_query_lite.push_back(sql_part);
                 
                 if (all_peptides.find(pep_id) == all_peptides.end()){
                     all_peptides.insert(pair<string, vector<peptide*>* >(pep_id, new vector<peptide*>()));
@@ -408,17 +345,10 @@ main(int argc, char** argv) {
                 all_peptides[pep_id]->push_back(last_peptide);
             }
         }
-        
-        for (map < string, vector<peptide*>* >::iterator it = all_peptides.begin(); it != all_peptides.end(); ++it){
-            if (sql_query_spectra.length()) {
-                sql_query_spectra += " union ";
-            }
-            sql_query_spectra += "select " + it->first + " pep_id";
-        }
     }
     
-    
-    vector< string > sql_query_lite;
+    /*
+    string sql_query_spectra = "";
     if (sql_query_spectra.length()){
         sql_query_spectra = "select pep.pep_id, ps.* from (" + sql_query_spectra + ") pep inner join peptide_spectra ps on pep.pep_id = ps.peptide_id;";
         
@@ -444,6 +374,7 @@ main(int argc, char** argv) {
             sql_query_lite.push_back(sql_part);
         }
     }
+    */
        
     double t = 500;
     double l = sql_query_lite.size();
@@ -469,8 +400,7 @@ main(int argc, char** argv) {
             }
             sql_query_lite2 += sql_query_lite[j];
         }
-        //sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, rs.id sid, rs.precursorMZ FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq and rs.peptideModSeq = ps.seq and rs.precursorCharge = ps.chrg;";
-        sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, ps.sid sid, rs.id lib_id, rs.precursorMZ, rs.peptideModSeq FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq and rs.precursorCharge = ps.chrg;";
+        sql_query_lite2 = "SELECT ps.pep_id, rs.precursorCharge charge, rs.id sid, rs.precursorMZ, rs.peptideModSeq FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq;";
         
 
         vector< map< string, string > > spectra_data;
@@ -488,7 +418,6 @@ main(int argc, char** argv) {
             for (int j = 0; j < peps->size(); ++j){
                 spectrum *s1 = new spectrum;
                 s1->id = spectra_data[i][string("sid")];
-                s1->lib_id = spectra_data[i][string("lib_id")];
                 s1->charge = spectra_data[i][string("charge")];
                 s1->mod_sequence = spectra_data[i][string("peptideModSeq")];
                 char buffer [20];
@@ -507,45 +436,11 @@ main(int argc, char** argv) {
     sqlite3_close(db);
     
     
-    
-    string sql_query_rest = "(select n.id, p.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, '' c_number, '' formula, '' exact_mass from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ";
-    sql_query_rest += pathway_id; 
-    sql_query_rest += ") union ";
-    sql_query_rest += "(select n.id, m.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, m.c_number, m.formula, m.exact_mass from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ";
-    sql_query_rest += pathway_id;
-    sql_query_rest += ");";
-    
-    if (mysql_query(conn, sql_query_rest.c_str())) {
-        cout << "error: " << mysql_error(conn) << endl;
-        return 1;
-    }
-    res = mysql_use_result(conn);
-    
-    for(unsigned int i = 0; (field = mysql_fetch_field(res)); i++) {
-        column_names_rest.insert(pair<string,int>(field->name, i));
-    }
-    
-    while ((row = mysql_fetch_row(res)) != NULL){
-        node* last_node = new node();
-        last_node->id = row[column_names_rest[string("id")]];
-        last_node->pathway_id = row[column_names_rest[string("pathway_id")]];
-        last_node->name = row[column_names_rest[string("name")]];
-        last_node->type = row[column_names_rest[string("type")]];
-        last_node->pathway_ref = row[column_names_rest[string("pathway_ref")]]; 
-        last_node->x = row[column_names_rest[string("x")]];
-        last_node->y = row[column_names_rest[string("y")]];
-        last_node->c_number = row[column_names_rest[string("c_number")]];
-        last_node->formula = row[column_names_rest[string("formula")]];
-        last_node->exact_mass = row[column_names_rest[string("exact_mass")]];
-        nodes.push_back(last_node);
-    }
-    
-    
 
     string response = "[";
-    for (int i = 0; i < nodes.size(); ++i){
+    for (int i = 0; i < proteins.size(); ++i){
         if (i) response += ", ";
-        response += nodes.at(i)->to_string();
+        response += proteins.at(i)->to_string();
     }
     response += "]";
     //cout << response;

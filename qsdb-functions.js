@@ -2621,8 +2621,11 @@ function mouse_up_listener(event){
 
 function download_assay(){
     var spectra_list = "";
+    var proteins_list = "";
     for (key in basket){
         var prot = basket[key];
+        if (proteins_list.length) proteins_list += ":";
+        proteins_list += prot.id;
         for (var i = 0; i < prot.peptides.length; ++i){
             var pep = prot.peptides[i];
             if (!pep.filter_valid) continue;
@@ -2639,8 +2642,9 @@ function download_assay(){
         return;
     }
     
+    console.log(proteins_list);
     console.log(spectra_list);
-    //return;
+    
     
     var xmlhttp_c = new XMLHttpRequest();
     xmlhttp_c.onreadystatechange = function() {
@@ -2648,14 +2652,15 @@ function download_assay(){
             var receive = xmlhttp_c.responseText;
         }
     }
-    //xmlhttp_c.open("GET", "set-counter.py?counter=download", true);
     xmlhttp_c.open("GET", "/qsdb/cgi-bin/set-counter.bin?counter=download", true);
     xmlhttp_c.send();
     
     document.getElementById("downloadbackground").style.display = "inline";
     document.getElementById("download").style.display = "inline";
-    document.getElementById("renderarea").style.filter = "blur(5px)";
-    document.getElementById("navigation").style.filter = "blur(5px)";
+    if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
+        document.getElementById("renderarea").style.filter = "blur(5px)";
+        document.getElementById("navigation").style.filter = "blur(5px)";
+    }
     
     html = "<table width=100% height=100%><tr><td align=\"center\">";
     html += "<img src=\"/qsdb/images/ajax-loader.gif\"></td></tr></table>"
@@ -2675,7 +2680,7 @@ function download_assay(){
             document.getElementById("download").innerHTML = html;
         }
     }
-    xmlhttp.open("GET", "cgi-bin/prepare-download.py?spectra=" + spectra_list, true);
+    xmlhttp.open("GET", "cgi-bin/prepare-download.py?spectra=" + spectra_list + "&proteins=" + proteins_list, true);
     xmlhttp.send();
 }
 
@@ -2684,8 +2689,10 @@ function download_assay(){
 function hide_download (){
     document.getElementById("downloadbackground").style.display = "none";
     document.getElementById("download").style.display = "none";
-    document.getElementById("renderarea").style.filter = "none";
-    document.getElementById("navigation").style.filter = "none";
+    if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
+        document.getElementById("renderarea").style.filter = "none";
+        document.getElementById("navigation").style.filter = "none";
+    }
 }
 
 
@@ -2698,15 +2705,17 @@ function charge_plus(x){
 function delete_from_protein_table(prot_id){
     basket[prot_id].mark(false);
     delete basket[prot_id];
-    draw();
+    if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null) draw();
     check_spectra();
 }
 
 function check_spectra(){
-    document.getElementById("check_spectra_background").style.display = "inline";
     document.getElementById("check_spectra").style.display = "inline";
-    document.getElementById("renderarea").style.filter = "blur(5px)";
-    document.getElementById("navigation").style.filter = "blur(5px)";
+    document.getElementById("check_spectra_background").style.display = "inline";
+    if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
+        document.getElementById("renderarea").style.filter = "blur(5px)";
+        document.getElementById("navigation").style.filter = "blur(5px)";
+    }
     resize_ms_view();
     spectrum_loaded = false;
     draw_spectrum();
@@ -2755,7 +2764,7 @@ function check_spectra(){
             inner_html += "<tr><td colspan=\"2\"><table id='spectrum_" + specs + "' style=\"display: none;\">";
             for (var k = 0; k < n_specs; ++k){
                 if (!current_prot.peptides[j].spectra[k].filter_valid) continue;
-                inner_html += "<tr><td onclick=\"load_spectrum(" + current_prot.peptides[j].spectra[k]['id'] + ");\" style=\"cursor: default;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + current_prot.peptides[j].spectra[k]['mass'] + charge_plus(current_prot.peptides[j].spectra[k]['charge']) + "</td></tr>";
+                inner_html += "<tr><td onclick=\"load_spectrum(" + current_prot.peptides[j].spectra[k].id + ");\" style=\"cursor: default;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + current_prot.peptides[j].spectra[k]['mass'] + charge_plus(current_prot.peptides[j].spectra[k]['charge']) + "</td></tr>";
             }
             inner_html += "</table></td></tr>";
             ++specs;
@@ -2785,8 +2794,10 @@ function hide_disclaimer (){
 function hide_check_spectra (){
     document.getElementById("check_spectra_background").style.display = "none";
     document.getElementById("check_spectra").style.display = "none";
-    document.getElementById("renderarea").style.filter = "none";
-    document.getElementById("navigation").style.filter = "none";
+    if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
+        document.getElementById("renderarea").style.filter = "none";
+        document.getElementById("navigation").style.filter = "none";
+    }
 }
 
 
@@ -3081,6 +3092,7 @@ function round10(value, decimals) {
 }
 
 function compute_statistics(){
+    if (typeof qsdb_domain === 'undefined' || qsdb_domain === null) return;
     document.getElementById("stat_pathway").innerHTML = pathways[current_pathway_list_index][1];
     var validation = pathways[current_pathway_list_index][2];
     if (validation == "is"){
@@ -3345,12 +3357,10 @@ function load_data(reload){
     }
     
     
-    //xmlhttp.open("GET", "/qsdb/cgi-bin/get-qsdbdata.py?pathway=" + current_pathway + "&species=" + species_string, true);
     xmlhttp.open("GET", "/qsdb/cgi-bin/get-nodes.bin?pathway=" + current_pathway + "&species=" + species_string, true);
     xmlhttp.send();
     
     
-    //xmlhttp2.open("GET", "get-edgedata.py?pathway=" + current_pathway, true);
     xmlhttp2.open("GET", "/qsdb/cgi-bin/get-edges.bin?pathway=" + current_pathway, true);
     xmlhttp2.send();
     
@@ -3426,4 +3436,52 @@ function load_data(reload){
             clearInterval(process_edges);
         }
     }, 1);
+}
+
+
+function accession_search_init(){
+    window.addEventListener('resize', resize_ms_view, false);
+    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
+    document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
+}
+
+
+function accession_search_upload_file(){
+    basket = {};
+    
+}
+
+
+function replaceAll(str, find, replace) {
+  return str.replace(new RegExp(find, 'g'), replace);
+}
+
+
+function accession_search_parse_accessions(){
+    basket = {};
+    var accessions = document.getElementById("accessions").value;
+    accessions = replaceAll(accessions, "\n", ":");
+    accessions = replaceAll(accessions, " ", "");
+    accessions = replaceAll(accessions, "\t", "");
+    
+    // get nodes information
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            accession_search_load_proteins(JSON.parse(xmlhttp.responseText));
+        }
+    }
+    
+    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?accessions=" + accessions, true);
+    xmlhttp.send();
+}
+
+function accession_search_load_proteins(data){
+    for (var i = 0; i < data.length; ++i){
+        var p_id = data[i]["id"];
+        if (p_id in basket) continue;
+        var prot = new Protein(data[i], 0);
+        basket[prot.id] = prot;
+    }
+    check_spectra();
 }

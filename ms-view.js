@@ -165,6 +165,11 @@ function annotation(){
 
 
 function resize_ms_view(){
+    var t_top = 0.05;
+    if (typeof qsdb_domain === 'undefined' || qsdb_domain === null){
+        t_top = 0.02;
+    }
+    
     document.getElementById("msarea").width = document.getElementById('check_spectra').offsetWidth * 0.695;
     document.getElementById("msarea").height = document.getElementById('check_spectra').offsetHeight * 0.9;
     document.getElementById("spectra_panel").style.width = (document.getElementById('check_spectra').offsetWidth * 0.29).toString() + "px";
@@ -172,11 +177,11 @@ function resize_ms_view(){
     
     
     var rect = document.getElementById('check_spectra').getBoundingClientRect();
-    document.getElementById("msarea").style.top = (rect.top + (rect.bottom - rect.top) * 0.05).toString() + "px";
+    document.getElementById("msarea").style.top = (rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
     document.getElementById("msarea").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
-    document.getElementById("spectra_panel").style.top = (rect.top + (rect.bottom - rect.top) * 0.05).toString() + "px";
+    document.getElementById("spectra_panel").style.top = (rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
     document.getElementById("spectra_panel").style.left = (rect.left + (rect.right - rect.left) * 0.005).toString() + "px";
-    document.getElementById("spectra_options").style.top = (rect.top + (rect.bottom - rect.top) * 0.05).toString() + "px";
+    document.getElementById("spectra_options").style.top = (rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
     document.getElementById("spectra_options").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
     
     var scl = (document.getElementById("msarea").width * 0.95 - document.getElementById("msarea").width * 0.05) / (right_border - left_border);
@@ -234,6 +239,7 @@ function change_match_error(){
 
 
 function load_spectrum(spectrum_id){
+    console.log(spectrum_id);
     var c = document.getElementById("msarea");
     var ctx = c.getContext("2d");
     ms_zoom = 0;

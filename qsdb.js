@@ -1,4 +1,4 @@
-
+var qsdb_domain = true;
 
 function init(){
     
@@ -8,7 +8,6 @@ function init(){
             var receive = xmlhttp.responseText;
         }
     }
-    //xmlhttp.open("GET", "set-counter.py?counter=request", true);
     xmlhttp.open("GET", "/qsdb/cgi-bin/set-counter.bin?counter=request", true);
     xmlhttp.send();
     
