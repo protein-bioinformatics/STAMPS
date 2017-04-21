@@ -219,7 +219,6 @@ main(int argc, char** argv) {
     }
     
     
-    //accessions = "P54822:O09046";
     if (accessions == "" || accessions.find("'") != string::npos){
         cout << -1 << endl;
         return -1;
@@ -346,35 +345,6 @@ main(int argc, char** argv) {
             }
         }
     }
-    
-    /*
-    string sql_query_spectra = "";
-    if (sql_query_spectra.length()){
-        sql_query_spectra = "select pep.pep_id, ps.* from (" + sql_query_spectra + ") pep inner join peptide_spectra ps on pep.pep_id = ps.peptide_id;";
-        
-        if (mysql_query(conn, sql_query_spectra.c_str())) {
-            cout << "error: " << mysql_error(conn) << endl;
-            return 1;
-        }
-        res = mysql_use_result(conn);
-        
-        for(unsigned int i = 0; (field = mysql_fetch_field(res)); i++) {
-            column_names_spectra.insert(pair<string,int>(field->name, i));
-        }
-        while ((row = mysql_fetch_row(res)) != NULL){
-            string sql_part = "select ";
-            sql_part += row[column_names_spectra[string("pep_id")]];
-            sql_part += " pep_id, '";
-            sql_part += all_peptides[row[column_names_spectra[string("pep_id")]]]->at(0)->peptide_seq;
-            sql_part += "' seq, ";
-            sql_part += row[column_names_spectra[string("charge")]];
-            sql_part += " chrg, ";
-            sql_part += row[column_names_spectra[string("id")]];
-            sql_part += " sid";
-            sql_query_lite.push_back(sql_part);
-        }
-    }
-    */
        
     double t = 500;
     double l = sql_query_lite.size();

@@ -96,7 +96,6 @@ string remove_newline(string str) {
 class spectrum {
     public:
         string id;
-        string lib_id;
         string charge;
         string mass;
         string mod_sequence;
@@ -104,7 +103,6 @@ class spectrum {
         string to_string(){
             string str = "{";
             str += "\"id\": " + id + ", ";
-            str += "\"lib_id\": " + lib_id + ", ";
             str += "\"mod_sequence\": \"" + mod_sequence + "\", ";
             str += "\"charge\": " + charge + ", ";
             str += "\"mass\": \"" + mass + "\"";
@@ -378,7 +376,7 @@ main(int argc, char** argv) {
     
     
     map<string, vector<peptide*>* > all_peptides;
-    string sql_query_spectra;
+    vector< string > sql_query_lite;
     if (pi){
         sql_query_peptides = "select p.pid, pep.* from (" + sql_query_peptides + ") p inner join peptides pep on p.pid = pep.protein_id;";
         
@@ -401,6 +399,13 @@ main(int argc, char** argv) {
                 last_peptide->id = pep_id;
                 last_peptide->peptide_seq = peptide_seq;
                 
+                string sql_part = "select ";
+                sql_part += pep_id;
+                sql_part += " pep_id, '";
+                sql_part += peptide_seq;
+                sql_part += "' seq";
+                sql_query_lite.push_back(sql_part);
+                
                 
                 if (all_peptides.find(pep_id) == all_peptides.end()){
                     all_peptides.insert(pair<string, vector<peptide*>* >(pep_id, new vector<peptide*>()));
@@ -408,44 +413,9 @@ main(int argc, char** argv) {
                 all_peptides[pep_id]->push_back(last_peptide);
             }
         }
-        
-        for (map < string, vector<peptide*>* >::iterator it = all_peptides.begin(); it != all_peptides.end(); ++it){
-            if (sql_query_spectra.length()) {
-                sql_query_spectra += " union ";
-            }
-            sql_query_spectra += "select " + it->first + " pep_id";
-        }
-    }
-    
-    
-    vector< string > sql_query_lite;
-    if (sql_query_spectra.length()){
-        sql_query_spectra = "select pep.pep_id, ps.* from (" + sql_query_spectra + ") pep inner join peptide_spectra ps on pep.pep_id = ps.peptide_id;";
-        
-        if (mysql_query(conn, sql_query_spectra.c_str())) {
-            cout << "error: " << mysql_error(conn) << endl;
-            return 1;
-        }
-        res = mysql_use_result(conn);
-        
-        for(unsigned int i = 0; (field = mysql_fetch_field(res)); i++) {
-            column_names_spectra.insert(pair<string,int>(field->name, i));
-        }
-        while ((row = mysql_fetch_row(res)) != NULL){
-            string sql_part = "select ";
-            sql_part += row[column_names_spectra[string("pep_id")]];
-            sql_part += " pep_id, '";
-            sql_part += all_peptides[row[column_names_spectra[string("pep_id")]]]->at(0)->peptide_seq;
-            sql_part += "' seq, ";
-            sql_part += row[column_names_spectra[string("charge")]];
-            sql_part += " chrg, ";
-            sql_part += row[column_names_spectra[string("id")]];
-            sql_part += " sid";
-            sql_query_lite.push_back(sql_part);
-        }
     }
        
-    double t = 500;
+    double t = 400;
     double l = sql_query_lite.size();
         
     sqlite3 *db;
@@ -469,9 +439,7 @@ main(int argc, char** argv) {
             }
             sql_query_lite2 += sql_query_lite[j];
         }
-        //sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, rs.id sid, rs.precursorMZ FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq and rs.peptideModSeq = ps.seq and rs.precursorCharge = ps.chrg;";
-        sql_query_lite2 = "SELECT ps.pep_id, ps.chrg charge, ps.sid sid, rs.id lib_id, rs.precursorMZ, rs.peptideModSeq FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq and rs.precursorCharge = ps.chrg;";
-        
+        sql_query_lite2 = "SELECT ps.pep_id, rs.precursorCharge charge, rs.id sid, rs.precursorMZ, rs.peptideModSeq FROM RefSpectra rs inner join (" + sql_query_lite2 + ") ps on rs.peptideSeq = ps.seq;";
 
         vector< map< string, string > > spectra_data;
         
@@ -488,7 +456,6 @@ main(int argc, char** argv) {
             for (int j = 0; j < peps->size(); ++j){
                 spectrum *s1 = new spectrum;
                 s1->id = spectra_data[i][string("sid")];
-                s1->lib_id = spectra_data[i][string("lib_id")];
                 s1->charge = spectra_data[i][string("charge")];
                 s1->mod_sequence = spectra_data[i][string("peptideModSeq")];
                 char buffer [20];
