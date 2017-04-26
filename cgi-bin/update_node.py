@@ -2,7 +2,14 @@
 
 from pymysql import connect, cursors
 from cgi import FieldStorage
-from defines import *
+
+conf = {}
+with open("../admin/qsdb.conf", mode="rt") as fl:
+    for line in fl:
+        if line.strip().strip(" ")[0] == "#": continue
+        token = line.strip().strip(" ").split("=")
+        if len(token) < 2: continue
+        conf[token[0].strip(" ")] = token[1].strip(" ")
 
 form = FieldStorage()
 idx = form.getvalue('id')
@@ -24,7 +31,7 @@ except:
     
 x = round(int(x) / 25) * 25
 y = round(int(y) / 25) * 25
-conn = connect(host = mysql_host, port = mysql_port, user = mysql_user, passwd = mysql_passwd, db = mysql_db)
+conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
 my_cur = conn.cursor(cursors.DictCursor)
 sql_query = "UPDATE nodes SET x = %s, y = %s WHERE id = %s"
 my_cur.execute(sql_query, (x, y, idx))

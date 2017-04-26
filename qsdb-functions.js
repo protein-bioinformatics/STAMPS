@@ -31,6 +31,7 @@ edge_count = 0;
 draw_code = 0;
 process_edges_semaphore = false;
 protein_dictionary = {};
+toggled_proteins = new Set();
 
 scaling = 1.25;
 expanding_percentage = 0.25;
@@ -1090,7 +1091,10 @@ function node(data, c){
                 }
                 if (prot.id in basket){
                     basket[prot.id] = prot;
-                    prot.toggle_marked();
+                    if (!toggled_proteins.has(prot.id)){
+                        prot.toggle_marked();
+                        toggled_proteins.add(prot.id);
+                    }
                 }
                 this.proteins.push(prot);
                 this.containing_spectra += prot.containing_spectra;
@@ -2254,7 +2258,7 @@ function compute_edges(){
             var len = node_p.length;
             if (node_p.length > 1){
                 
-                // bubble sort
+                // bubble sort, don't worry, the array are very short, not longer than 5
                 for (var j = 0; j < len; ++j){
                     var swps = 0;
                     for (var k = 0; k < len - 1; ++k){
@@ -2547,9 +2551,14 @@ function mouse_down_listener(e){
         offsetY = res.y;
     }
     else if (e.buttons & 7){
-        select_field_element.visible = true;
-        select_field_element.start_position = res;
-        select_field_element.end_position = res;
+        if (highlight_element){
+            highlight_element.mouse_down(res, e.which);
+        }
+        else {
+            select_field_element.visible = true;
+            select_field_element.start_position = res;
+            select_field_element.end_position = res;
+        }
     }
 }
 
@@ -2641,10 +2650,6 @@ function download_assay(){
         alert("No proteins are selected.");
         return;
     }
-    
-    console.log(proteins_list);
-    console.log(spectra_list);
-    
     
     var xmlhttp_c = new XMLHttpRequest();
     xmlhttp_c.onreadystatechange = function() {
@@ -3340,6 +3345,7 @@ function load_data(reload){
     var tmp_data = 0;
     nodes = 0;
     protein_dictionary = {};
+    toggled_proteins = new Set();
     process_edges_semaphore = false;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -3419,6 +3425,7 @@ function load_data(reload){
         }
     }, 1);
         
+    
     var process_edges = setInterval(function(){
         if (tmp_data && nodes && process_edges_semaphore){
             compute_edges();
