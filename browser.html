@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="qsdb.css">
+<script src="qsdb-functions.js"></script>
+<script src="ms-view.js"></script>
+<script src="qsdb.js"></script>
+<title>QSDB Home</title>
+</head>
+
+<body>
+<!-- <canvas id="renderarea" class="renderarea">Your browser does not support the HTML5 canvas tag.</canvas> -->
+<div id="renderarea_wrapper" class="renderarea_wrapper"></div>
+<canvas id="refarea" class="refarea" style="display: none;">Your browser does not support the HTML5 canvas tag.</canvas>
+
+<div id="hint" style="position: fixed; top: 10px; left: 10px;">--</div>
+<div id="tooltip" class="tooltip"></div>
+
+<div id="menubackground" class="menubackground"></div>
+<div id="custommenu" class="custommenu"></div>
+
+<div id="managementbackground" class="managementbackground"></div>
+<div id="management" class="management"></div>
+
+<div id="navigation" class="navigation">
+  <table>
+  <tr><td id="select_pathway_nav" class="navigation_cell_click" onclick="close_navigation(1); select_pathway();">
+    Select Pathway
+  </td><td id="select_species_nav" class="navigation_cell_click" onclick="close_navigation(2); select_species();">
+    Select Species
+  </td><td id="search_field_nav" class="navigation_cell" title="Search for name, definition, UniProt accession number, EC number or peptide amino sequence.">
+    Search: <input type="text" onkeyup="start_search();" onfocus="close_navigation(0); start_search();" class="search_field" id="search_field" size=24>
+  </td><td id="filter_panel_nav"  class="navigation_cell_click" onclick="close_navigation(3); open_filter_panel();" style="min-width: 100px; text-align: center;">
+    Filter
+  </td><td class="navigation_cell_click" onclick="close_navigation(0); check_spectra();">
+    Check Spectra
+  </td><td class="navigation_cell_click" onclick="close_navigation(0); download_assay();">
+    Download Assay
+  </td><td class="navigation_cell_click" onclick="location.href = '.';" style="min-width: 100px; text-align: center;">
+    Back
+  </td>
+  <!--</td><td class="navigation_cell_click" onclick="close_navigation(0); open_disclaimer();">
+    About QSDB
+  </td>-->
+  </tr>
+  </table>
+</div>
+
+<div id="filter_panel" class="filter_panel">
+  <table>
+    <tr><td>Min. peptide length</td><td><input type="number" min="8" max="25" id="min_peptide_length" value="8" /><td></tr>
+    <tr><td>Max. peptide length</td><td><input type="number" min="8" max="25" id="max_peptide_length" value="25" /><td></tr>
+    <tr><td>Min. precursor charge</td><td><input type="number" min="2" max="6" id="min_precursor_charge" value="2" /><td></tr>
+    <tr><td>Max. precursor charge</td><td><input type="number" min="2" max="6" id="max_precursor_charge" value="3" /><td></tr>
+    <tr><td colspan="2">&nbsp;<br>Modifications:</td><td></tr>
+    <tr><td>Oxydation of M</td><td>
+      <input type="radio" id="oxy_m_off" name="oxy_m" checked /> off
+      <input type="radio" id="oxy_m_var" name="oxy_m" /> variable
+      <input type="radio" id="oxy_m_fix" name="oxy_m" /> fixed
+    <td></tr>
+    <tr><td>Carbamidomethylation of C</td><td>
+      <input type="radio" id="carba_c_off" name="carba_c" checked /> off
+      <input type="radio" id="carba_c_var" name="carba_c" /> variable
+      <input type="radio" id="carba_c_fix" name="carba_c" /> fixed
+    <td></tr>
+    <tr><td colspan="2">&nbsp;<br><font size="1" color="blue" style="cursor: pointer;" onclick="
+      document.getElementById('min_peptide_length').value = 8;
+      document.getElementById('max_peptide_length').value = 25;
+      document.getElementById('min_precursor_charge').value = 2;
+      document.getElementById('max_precursor_charge').value = 3;
+      document.getElementById('oxy_m_off').checked = true;
+      document.getElementById('carba_c_off').checked = true;
+    ;">default settings</td></tr>
+  </table>
+</div>
+<div id="filter_panel_background" class="filter_panel_background"></div>
+
+<div id="select_species" class="select_species">
+  <table>
+    <tr><td class="select_species_cell">
+      <input type="checkbox" id="species_mouse" name="species" value="mouse" checked disabled>Mouse
+    </td></tr>
+    <!-- <tr><td class="select_species_cell">
+      <input type="checkbox" id="species_human" name="species" value="human">Human
+    </td></tr> -->
+  </table>
+</div>
+<div id="select_species_background" class="select_species_background"></div>
+
+<div id="select_pathway" class="select_pathway">
+</div>
+<div id="select_pathway_background" class="select_pathway_background"></div>
+<div id="animation_background" class="animation_background"></div>
+
+
+<div id="search_results" class="search_results"></div>
+<div id="search_background" class="search_background"></div>
+<div id="download" class="download"></div>
+<div id="downloadbackground" class="downloadbackground"></div>
+
+<div id="statistics" class="statistics">
+  <font size="+2"><b>Statistics</b></font><p>
+  <table width="95%" cellpadding="5" cellspacing="0" style="border-top: 2px solid black; border-bottom: 2px solid black;">
+    <tr><td width="60%"><b>Pathway: </b></td><td id="stat_pathway"></td></td>
+    <tr><td id="stat_val_type"><b>Validation: </b></td><td id="stat_validation"></td></td>
+    <tr><td><b>No. of total proteins: </b></td><td id="stat_num_prot"></td></td>
+    <tr><td><b>No. of distinct proteins: </b></td><td id="stat_dist_prot"></td></td>
+    <tr><td><b>No. of avbl. proteins: </b></td><td id="stat_filter_prot"></td></td>
+    <tr><td style="padding-bottom: 15px;"><b>No. of selected proteins: </b></td><td id="stat_sel_prot"></td></td>
+    <tr><td><b>No. of peptides: </b></td><td id="stat_num_pep"></td></td>
+    <tr><td><b>No. of filtered peptides: </b></td><td id="stat_filter_pep"></td></td>
+    <tr><td style="padding-bottom: 15px;"><b>No. of selected peptides: </b></td><td id="stat_sel_pep"></td></td>
+    <tr><td><b>No. of spectra: </b></td><td id="stat_num_spec"></td></td>
+    <tr><td><b>No. of filtered spectra: </b></td><td id="stat_filter_spec"></td></td>
+    <tr><td><b>No. of selected spectra: </b></td><td id="stat_sel_spec"></td></td>
+  </table><p />&nbsp;<p />
+  
+  <b>Validation types:</b>
+  <table>
+    <tr><td bgcolor="#ffbebe" width="25">&nbsp;</td><td>Top-<i>n</i> experiment</td></tr>
+    <tr><td bgcolor="#feff90" width="25">&nbsp;</td><td>PRM</td></tr>
+    <tr><td bgcolor="#a0ff90" width="25">&nbsp;</td><td>PRM + internal standard</td></tr>
+  </table>
+</div>
+
+<div id="check_spectra" class="check_spectra">
+  <canvas id="msarea" class="msarea"></canvas>
+  <fieldset id="spectra_options" class="spectra_options" style="position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;">
+    <input type="radio" onchange="change_match_error();" id="radio_ppm" name="select_error" value="ppm" style="border: 0px; margin: 0px; top: 0px; padding: 0px;" checked><label for="radio_ppm">Relative</label>
+    <input type="radio" onchange="change_match_error();" id="radio_da" name="select_error" value="Da" style="border: 0px; margin: 0px; top: 0px; padding: 0px;"><label for="radio_da">Absolute</label>
+    <input type="text" onchange="change_match_error_value();" id="error_value" value="-" size=1 style="text-align: right;"><label id="unit">ppm</label>
+  </fieldset>
+  <div id="spectra_panel" class="spectra_panel"></div>
+</div>
+<div id="check_spectra_background" class="check_spectra_background"></div>
+<img src="/qsdb/images/zoom_in.png" id="zoom_in" style="display: none;">
+<img src="/qsdb/images/zoom_out.png" id="zoom_out" style="display: none;">
+<img src="/qsdb/images/expand.png" id="expand" style="display: none;">
+<img src="/qsdb/images/collapse.png" id="collapse" style="display: none;">
+
+</body>
+<script>
+  var qsdb_domain = true;
+  document.addEventListener('DOMContentLoaded', init, false);
+</script>
+</html> 

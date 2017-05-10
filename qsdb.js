@@ -1,4 +1,4 @@
-var qsdb_domain = true;
+
 
 function init(){
     
@@ -31,7 +31,6 @@ function init(){
     document.getElementById("search_background").addEventListener("click", hide_search, false);
     document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
     document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
-    document.getElementById("disclaimer_background").addEventListener("click", hide_disclaimer, false);
     document.getElementById("check_spectra_background").addEventListener("click", hide_check_spectra, false);
     document.getElementById("filter_panel_background").addEventListener("click", hide_filter_panel, false);
     
@@ -172,4 +171,3 @@ function key_down(event){
 
 
 
-document.addEventListener('DOMContentLoaded', init, false);

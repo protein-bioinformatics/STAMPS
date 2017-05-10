@@ -2789,11 +2789,21 @@ function open_disclaimer (){
     document.getElementById("disclaimer_background").style.display = "inline";
 }
 
+function open_accession_search (){
+    document.getElementById("accession_search").style.display = "inline";
+    document.getElementById("accession_search_background").style.display = "inline";
+    document.getElementById("error_filter_text").innerHTML = "";
+}
+
+function hide_accession_search (){
+    document.getElementById("accession_search").style.display = "none";
+    document.getElementById("accession_search_background").style.display = "none";
+}
+
 function hide_disclaimer (){
     document.getElementById("disclaimer").style.display = "none";
     document.getElementById("disclaimer_background").style.display = "none";
 }
-
 
 
 function hide_check_spectra (){
@@ -3466,6 +3476,7 @@ function replaceAll(str, find, replace) {
 
 function accession_search_parse_accessions(){
     basket = {};
+    document.getElementById("check_spectra_background").style.display = "inline";
     var accessions = document.getElementById("accessions").value;
     accessions = replaceAll(accessions, "\n", ":");
     accessions = replaceAll(accessions, " ", "");

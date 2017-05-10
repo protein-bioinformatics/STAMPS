@@ -21,6 +21,36 @@ footer{
     bottom: 0; 
 }
 
+div.headerbutton {
+    min-width: 150px;
+    padding: 15px;
+    text-align: center;
+    cursor: default;
+    display: inline;
+}
+
+div.headerbutton:hover {
+    background-color: #ffffff;
+    cursor: pointer;
+}
+
+div.headerborder {
+    min-width: 150px;
+    padding: 15px;
+    border-right: #640000;
+    border-right-style: solid;
+    border-right-width: 1px;
+    text-align: center;
+    cursor: default;
+    display: inline;
+}
+
+div.headerborder:hover {
+    background-color: #ffffff;
+    cursor: pointer;
+}
+
+
 div.animation_background {
     margin: 0px;
     top: 0px;
@@ -117,8 +147,6 @@ div.disclaimer_background {
     background-color: black;
     opacity: 0.4;
 }
-
-
 
 div.check_spectra {
     top: 10%;
