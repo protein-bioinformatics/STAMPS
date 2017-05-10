@@ -553,7 +553,7 @@ function Protein(data, ctx){
     }
     
     this.mark = function(m){
-        if (this.peptides.length && this.containing_spectra){
+        if (this.filter_valid){
             this.marked = m;
             compute_statistics();
         }

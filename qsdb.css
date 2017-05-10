@@ -9,6 +9,16 @@ body {
     background-color: #f3f8ff;
     /* background-color: white; */
     z-index: 0;
+    min-height: 100%;
+}
+
+
+footer{
+    height: 100px; 
+    width:100%;
+    position: absolute;
+    left: 0;
+    bottom: 0; 
 }
 
 div.animation_background {
@@ -175,6 +185,17 @@ input.search_field {
 div.navigation {
     font-weight: bold;
     top: 0px;
+    left: 0px;
+    width: 100%;
+    background-color: #640000;
+    color: white;
+    position: fixed;    
+    z-index: 100;
+}
+
+
+div.navigation_startpage {
+    font-weight: bold;
     left: 0px;
     width: 100%;
     background-color: #640000;
