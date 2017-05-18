@@ -2791,13 +2791,35 @@ function open_disclaimer (){
 
 function open_accession_search (){
     document.getElementById("accession_search").style.display = "inline";
+    document.getElementById("filter_panel_accession").innerHTML = filter_panel_data;
+    document.getElementById("filter_panel").style.display = "inline";
     document.getElementById("accession_search_background").style.display = "inline";
-    document.getElementById("error_filter_text").innerHTML = "";
+    document.getElementById("error_filter_text_accession").innerHTML = "";
 }
 
 function hide_accession_search (){
     document.getElementById("accession_search").style.display = "none";
     document.getElementById("accession_search_background").style.display = "none";
+    document.getElementById("filter_panel_accession").innerHTML = "";
+}
+
+function open_locus_search (){
+    document.getElementById("locus_search").style.display = "inline";
+    document.getElementById("filter_panel_locus").innerHTML = filter_panel_data;
+    document.getElementById("filter_panel").style.display = "inline";
+    document.getElementById("locus_search_background").style.display = "inline";
+    document.getElementById("error_filter_text_locus").innerHTML = "";
+}
+
+function hide_locus_search (){
+    document.getElementById("accession_search").style.display = "none";
+    document.getElementById("accession_search_background").style.display = "none";
+    document.getElementById("filter_panel_locus").innerHTML = "";
+}
+
+function hide_locus_search (){
+    document.getElementById("locus_search").style.display = "none";
+    document.getElementById("locus_search_background").style.display = "none";
 }
 
 function hide_disclaimer (){
@@ -3454,6 +3476,15 @@ function load_data(reload){
         }
     }, 1);
 }
+
+
+function accession_search_init(){
+    window.addEventListener('resize', resize_ms_view, false);
+    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
+    document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
+}
+
+
 
 
 function accession_search_init(){

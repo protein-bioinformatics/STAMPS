@@ -26,21 +26,24 @@
 
 <div id="navigation" class="navigation">
   <table>
-  <tr><td id="select_pathway_nav" class="navigation_cell_click" onclick="close_navigation(1); select_pathway();">
-    Select Pathway
+  <tr>
+  <td width="50%"></td>
+  <td id="select_pathway_nav" style="border-left: white; border-left-style: solid; border-left-width: 1px;" class="navigation_cell_click" onclick="close_navigation(1); select_pathway();">
+    Select&nbsp;Pathway
   </td><td id="select_species_nav" class="navigation_cell_click" onclick="close_navigation(2); select_species();">
-    Select Species
+    Select&nbsp;Species
   </td><td id="search_field_nav" class="navigation_cell" title="Search for name, definition, UniProt accession number, EC number or peptide amino sequence.">
-    Search: <input type="text" onkeyup="start_search();" onfocus="close_navigation(0); start_search();" class="search_field" id="search_field" size=24>
+    <table><tr><td>Search: </td><td><input type="text" onkeyup="start_search();" onfocus="close_navigation(0); start_search();" class="search_field" id="search_field" size=24></td></tr></table>
   </td><td id="filter_panel_nav"  class="navigation_cell_click" onclick="close_navigation(3); open_filter_panel();" style="min-width: 100px; text-align: center;">
     Filter
   </td><td class="navigation_cell_click" onclick="close_navigation(0); check_spectra();">
-    Check Spectra
+    Check&nbsp;Spectra
   </td><td class="navigation_cell_click" onclick="close_navigation(0); download_assay();">
-    Download Assay
+    Download&nbsp;Assay
   </td><td class="navigation_cell_click" onclick="location.href = '.';" style="min-width: 100px; text-align: center;">
     Back
   </td>
+  <td width="50%"></td>
   <!--</td><td class="navigation_cell_click" onclick="close_navigation(0); open_disclaimer();">
     About QSDB
   </td>-->

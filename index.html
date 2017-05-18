@@ -29,8 +29,16 @@
     <table width=100% height=100%><tr>
         <td width=50% align="center" valign="middle"><img src="database-logo.svg"></td>
         <td width=50% height=100% align="center" valign="middle">
-            <div style="border-width: 3px; border-color: #999999; border-style: solid; width: 60%; height: 60%; padding: 10px; text-align: left; border-radius: 25px; box-shadow: 5px 5px 10px grey;">
-                <div style="font-size: 150%;">Overview</div>
+            <div style="border-width: 3px; border-color: #999999; border-style: solid; width: 60%; height: 60%; padding-left: 20px; padding-top: 10px; text-align: left; border-radius: 25px; box-shadow: 5px 5px 10px grey; border-collapse: separate;">
+                <div style="font-size: 150%;">Overview</div><p>
+                <table width=80% cellpadding=5>
+                    <tr><td width=50%>Version:</td><td align="right">v1.0.0</td></tr>
+                    <tr><td>Organisms:</td><td align="right">1 (Mouse)</td></tr>
+                    <tr><td>Proteins:</td><td align="right">11664 of 16802 (69.42%)</td></tr>
+                    <tr><td>Proteins in pathways:</td><td align="right">1203 of 1656 (72.64%)</td></tr>
+                    <tr><td>Unique Peptides:</td><td align="right">125,608</td></tr>
+                    <tr><td>Spectra:</td><td align="right">165,798</td></tr>
+                </table>
             </div>
         </td>
     </tr></table>
@@ -50,6 +58,11 @@
     <td style="min-width: 200px;" class="navigation_cell_click" align="center" onclick="location.href = 'browser.html';">
         <img src="pathway-browser.svg" height=80><br>
         Pathway&nbsp;Browser
+    </td>
+    
+    <td style="min-width: 200px;" class="navigation_cell_click" align="center" onclick="accession_search_init(); open_locus_search();">
+        <img src="accession-search.svg" height=80><br>
+        Locus&nbsp;Search
     </td>
     
     <td style="min-width: 200px;" class="navigation_cell_click" align="center" onclick="accession_search_init(); open_accession_search();">
@@ -132,46 +145,45 @@ The usage, selling or handing of the contact data written in this imprint is not
     </div>
     </td><td width=100% height=100% style="border-width: 2px; border-style: solid; border-color: black; border-radius: 25px;">
     <b>Filter criteria:</b><p>&nbsp;<p>&nbsp;<p>
-    <div id="filter_panel">
-        <table>
-            <tr><td>Min. peptide length</td><td><input type="number" min="8" max="25" id="min_peptide_length" value="8" /><td></tr>
-            <tr><td>Max. peptide length</td><td><input type="number" min="8" max="25" id="max_peptide_length" value="25" /><td></tr>
-            <tr><td>Min. precursor charge</td><td><input type="number" min="2" max="6" id="min_precursor_charge" value="2" /><td></tr>
-            <tr><td>Max. precursor charge</td><td><input type="number" min="2" max="6" id="max_precursor_charge" value="3" /><td></tr>
-            <tr><td colspan="2">&nbsp;<br>Modifications:</td><td></tr>
-            <tr><td>Oxydation of M</td><td>
-            <input type="radio" id="oxy_m_off" name="oxy_m" checked /> off
-            <input type="radio" id="oxy_m_var" name="oxy_m" /> variable
-            <input type="radio" id="oxy_m_fix" name="oxy_m" /> fixed
-            <td></tr>
-            <tr><td>Carbamidomethylation of C</td><td>
-            <input type="radio" id="carba_c_off" name="carba_c" checked /> off
-            <input type="radio" id="carba_c_var" name="carba_c" /> variable
-            <input type="radio" id="carba_c_fix" name="carba_c" /> fixed
-            <td></tr>
-            <tr><td colspan="2">&nbsp;<br><font size="1" color="blue" style="cursor: pointer;" onclick="
-            document.getElementById('min_peptide_length').value = 8;
-            document.getElementById('max_peptide_length').value = 25;
-            document.getElementById('min_precursor_charge').value = 2;
-            document.getElementById('max_precursor_charge').value = 3;
-            document.getElementById('oxy_m_off').checked = true;
-            document.getElementById('carba_c_off').checked = true;
-            ;">default settings</td></tr>
-        </table>
-        
-        
+    <div id="filter_panel_accession">
     </div>
     </td></tr>
     <tr>
         <td colspan=2>
-            <table width=100%><tr><td id="error_filter_text" style="color: red; font-weight: bold;">
-            </td><td align=right><button onclick="hide_accession_search();" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid();">Next</button>
+            <table width=100%><tr><td id="error_filter_text_accession" style="color: red; font-weight: bold;">
+            </td><td align=right><button onclick="hide_accession_search();" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid_accessions();">Next</button>
             </td></tr></table>
         </td>
     </tr>
     </table>
 </div>
 <div id="accession_search_background" class="disclaimer_background"></div>
+
+
+<div id="locus_search" class="disclaimer">
+    <table cellspacing=20><tr><td>
+    <div id="accession_search_field" style="display: inline;">
+    Paste UniProt accession numbers:<br>
+        <select id="loci" size=20 style="width:300px; height:480px;" multiple></select>Hold <b>[ctrl]</b> for multiple selection.
+    </div>
+    </td><td width=100% height=100% style="border-width: 2px; border-style: solid; border-color: black; border-radius: 25px;">
+    <b>Filter criteria:</b><p>&nbsp;<p>&nbsp;<p>
+    <div id="filter_panel_locus">
+    </div>
+    </td></tr>
+    <tr>
+        <td colspan=2>
+            <table width=100%><tr><td id="error_filter_text_locus" style="color: red; font-weight: bold;">
+            </td><td align=right><button onclick="hide_locus_search();" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid_loci();">Next</button>
+            </td></tr></table>
+        </td>
+    </tr>
+    </table>
+</div>
+<div id="locus_search_background" class="disclaimer_background"></div>
+
+
+
 
 <div id="download" class="download"></div>
 <div id="downloadbackground" class="downloadbackground"></div>
@@ -184,27 +196,89 @@ The usage, selling or handing of the contact data written in this imprint is not
         <input type="text" onchange="change_match_error_value();" id="error_value" value="-" size=1 style="text-align: right;"><label id="unit">ppm</label>
     </fieldset>
     <div id="spectra_panel" class="spectra_panel"></div>
-    <table width="100%" height="100%"><tr><td valign="bottom" align="right"><button onclick="hide_check_spectra();" style="display: inline;">Cancel</button> <button onclick="hide_check_spectra(); open_accession_search();">Back</button> <button onclick="hide_check_spectra(); download_assay();">Next</button></td></tr></table>
+    <table width="100%" height="100%"><tr><td valign="bottom" align="right"><button onclick="hide_check_spectra();" style="display: inline;">Cancel</button> <button onclick="hide_check_spectra(); open_accession_search();">Back</button> <button onclick="hide_check_spectra(); download_assay();">Go to Download</button></td></tr></table>
 </div>
 <div id="check_spectra_background" class="check_spectra_background"></div>
 
 </body>
 <script>
-function check_filter_valid(){
+function check_filter_valid_accessions(){
     if (document.getElementById("accessions").value.length == 0){
-        document.getElementById("error_filter_text").innerHTML = "Error: no accession number provided!";
+        document.getElementById("error_filter_text_accession").innerHTML = "Error: no accession number provided!";
     }
     else if (parseInt(document.getElementById("min_peptide_length").value) > parseInt(document.getElementById("max_peptide_length").value)){
-        document.getElementById("error_filter_text").innerHTML = "Error: minimal peptide length higher than maximal!";
+        document.getElementById("error_filter_text_accession").innerHTML = "Error: minimal peptide length higher than maximal!";
     }
     else if (parseInt(document.getElementById("min_precursor_charge").value) > parseInt(document.getElementById("max_precursor_charge").value)) {
-        document.getElementById("error_filter_text").innerHTML = "Error: minimal precursor charge higher than maximal!";
+        document.getElementById("error_filter_text_accession").innerHTML = "Error: minimal precursor charge higher than maximal!";
     }
     else {
         hide_accession_search();
         accession_search_parse_accessions();
     }
 }
+
+
+function check_filter_valid_loci(){
+    if (parseInt(document.getElementById("min_peptide_length").value) > parseInt(document.getElementById("max_peptide_length").value)){
+        document.getElementById("error_filter_text_locus").innerHTML = "Error: minimal peptide length higher than maximal!";
+    }
+    else if (parseInt(document.getElementById("min_precursor_charge").value) > parseInt(document.getElementById("max_precursor_charge").value)) {
+        document.getElementById("error_filter_text_locus").innerHTML = "Error: minimal precursor charge higher than maximal!";
+    }
+    else {
+        hide_locus_search();
+        //accession_search_parse_accessions();
+    }
+}
+
+var filter_panel_data = "<div id=\"filter_panel\" style=\"display: none;\"> \
+    <table> \
+        <tr><td>Min. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"min_peptide_length\" value=\"8\" /><td></tr> \
+        <tr><td>Max. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"max_peptide_length\" value=\"25\" /><td></tr> \
+        <tr><td>Min. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"min_precursor_charge\" value=\"2\" /><td></tr> \
+        <tr><td>Max. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"max_precursor_charge\" value=\"3\" /><td></tr> \
+        <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td><td></tr> \
+        <tr><td>Oxydation of M</td><td> \
+        <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" checked /> off \
+        <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
+        <input type=\"radio\" id=\"oxy_m_fix\" name=\"oxy_m\" /> fixed \
+        <td></tr> \
+        <tr><td>Carbamidomethylation of C</td><td> \
+        <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" checked /> off \
+        <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
+        <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
+        <td></tr> \
+        <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
+        document.getElementById('min_peptide_length').value = 8; \
+        document.getElementById('max_peptide_length').value = 25; \
+        document.getElementById('min_precursor_charge').value = 2; \
+        document.getElementById('max_precursor_charge').value = 3; \
+        document.getElementById('oxy_m_off').checked = true; \
+        document.getElementById('carba_c_off').checked = true; \
+        ;\">default settings</td></tr> \
+    </table> \
+</div>";
+
+
+// get loci
+var xmlhttploci = new XMLHttpRequest();
+xmlhttploci.onreadystatechange = function() {
+    if (xmlhttploci.readyState == 4 && xmlhttploci.status == 200) {
+        var loci_data = JSON.parse(xmlhttploci.responseText);
+        var loci_select = document.getElementById("loci");
+        for (var i = 0; i < loci_data.length; ++i){
+            var option = document.createElement("option");
+            option.text = loci_data[i][1];
+            option.id = loci_data[i][0];
+            loci_select.add(option);
+        }
+    }
+}
+xmlhttploci.open("GET", "/qsdb/cgi-bin/get-loci.py", true);
+xmlhttploci.send();
+
+
 
 document.getElementById("disclaimer_background").addEventListener("click", hide_disclaimer, false);
 </script>
