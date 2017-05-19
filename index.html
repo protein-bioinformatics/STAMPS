@@ -209,7 +209,7 @@ The usage, selling or handing of the contact data written in this imprint is not
     </tr>
     </table>
 </div>
-<div id="locus_search_background" class="disclaimer_background"></div>
+<div id="function_search_background" class="disclaimer_background"></div>
 
 
 
@@ -225,7 +225,7 @@ The usage, selling or handing of the contact data written in this imprint is not
         <input type="text" onchange="change_match_error_value();" id="error_value" value="-" size=1 style="text-align: right;"><label id="unit">ppm</label>
     </fieldset>
     <div id="spectra_panel" class="spectra_panel"></div>
-    <table width="100%" height="100%"><tr><td valign="bottom" align="right"><button onclick="hide_check_spectra();" style="display: inline;">Cancel</button> <button onclick="hide_check_spectra(); open_accession_search();">Back</button> <button onclick="hide_check_spectra(); download_assay();">Go to Download</button></td></tr></table>
+    <table width="100%" height="100%"><tr><td valign="bottom" align="right"><button onclick="hide_check_spectra();" style="display: inline;">Cancel</button> <button onclick="hide_check_spectra(); back_function();">Back</button> <button onclick="hide_check_spectra(); download_assay();">Go to Download</button></td></tr></table>
 </div>
 <div id="check_spectra_background" class="check_spectra_background"></div>
 
@@ -244,6 +244,7 @@ function check_filter_valid_accessions(){
     }
     else {
         adopt_filter_parameters();
+        back_function = open_accession_search;
         hide_accession_search();
         accession_search_parse_accessions();
     }
@@ -259,13 +260,14 @@ function check_filter_valid_loci(){
     }
     else {
         adopt_filter_parameters();
+        back_function = open_locus_search;
         hide_locus_search();
         locus_search_request_data();
     }
 }
 
 
-function check_filter_valid_loci(){
+function check_filter_valid_function(){
     if (parseInt(document.getElementById("min_peptide_length").value) > parseInt(document.getElementById("max_peptide_length").value)){
         document.getElementById("error_filter_text_function").innerHTML = "Error: minimal peptide length higher than maximal!";
     }
@@ -349,6 +351,9 @@ function key_down(event){
     // easter egg
     var k_code = [75, 78, 73, 71, 72, 84, 82, 73, 68, 69, 82];
     
+    
+    //console.log(document.getElementById("how_to_nav").style);
+    
     kr_keys.push(event.which);
     while (kr_keys.length > 11) kr_keys.shift();
     if (kr_keys.length == 11){
@@ -364,7 +369,7 @@ function key_down(event){
             
             var scanner_light = setInterval(function(scanner_data, nav_ids){
                 for (var i = 0; i < nav_ids.length; ++i){
-                    document.getElementById(nav_ids[i]).style.backgroundColor = "#640000";
+                    document.getElementById(nav_ids[i]).style.backgroundColor = "";
                 }
                 document.getElementById(nav_ids[scanner_data[1]]).style.backgroundColor = "#a20000";
                 
@@ -381,7 +386,7 @@ function key_down(event){
                 
                 if (scanner_data[2] >= 37){
                     for (var i = 0; i < nav_ids.length; ++i){
-                        document.getElementById(nav_ids[i]).style.backgroundColor = "#640000";
+                        document.getElementById(nav_ids[i]).style.backgroundColor = "";
                     }
                     clearInterval(scanner_light);
                 }
@@ -391,6 +396,7 @@ function key_down(event){
 }
 
 var kr_keys = [];
+var back_function = 0;
 var scanner_data = [1, 0, 0]; // scanner_up, scanner_index, scanner_count
 var nav_ids = ["how_to_nav", "pathway_browser_nav", "subcellular_search_nav", "functional_search_nav", "accession_search_nav", "statistics_nav", "about_nav"];
 document.addEventListener('keydown', key_down, false);
