@@ -1,7 +1,6 @@
 
 
 function init(){
-    
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -152,7 +151,7 @@ function key_down(event){
             }
         }
         if (k_is_valid){
-            alert("You broke the master code - you sneaky hacker. We'll flood your mailbox with yellow bananas. Your database will be dropped, your client destroyed. All your base are belong to us!!!");
+            alert("You broke the master code - you sneaky hacker. We'll flood your mailbox with yellow bananas. Your database will be dropped, your client destroyed. All your base are belong to us. Resistance is futile!!!");
         }
     }    
     if (!pathway_is_loaded) return;

@@ -13,9 +13,9 @@
 <div class="navigation">
     <table width="100%" height=50><tr>
         <td class="navigation_cell" style="font-size: 150%; display: inline; border-width: 0px;">
-            <div style="display: inline; color: #ffe355; font-weight: bold;">Q</div>uality 
-            <div style="display: inline; color: #ffe355; font-weight: bold;">S</div>tandard
-            <div style="display: inline; color: #ffe355; font-weight: bold;">D</div>ata<div style="display: inline; color: #ffe355; font-weight: bold;">b</div>ase
+            <div style="display: inline; font-weight: bold;">Q</div>uality 
+            <div style="display: inline; font-weight: bold;">S</div>tandard
+            <div style="display: inline; font-weight: bold;">D</div>ata<div style="display: inline; font-weight: bold;">b</div>ase
             <div width="80%" style="display: inline; min-width: 80%;">&nbsp;</div>
         </td>
     
@@ -31,7 +31,7 @@
         <td width=50% height=100% align="center" valign="middle">
             <div style="border-width: 3px; border-color: #999999; border-style: solid; width: 60%; height: 60%; padding-left: 20px; padding-top: 10px; text-align: left; border-radius: 25px; box-shadow: 5px 5px 10px grey; border-collapse: separate;">
                 <div style="font-size: 150%;">Overview</div><p>
-                <table width=80% cellpadding=5>
+                <table width=80% cellpadding=5 style="font-size: 120%">
                     <tr><td width=50%>Version:</td><td align="right">v1.0.0</td></tr>
                     <tr><td>Organisms:</td><td align="right">1 (Mouse)</td></tr>
                     <tr><td>Proteins:</td><td align="right">11664 of 16802 (69.42%)</td></tr>
@@ -50,32 +50,37 @@
     <tr><td width="50%">
     </td>
     
-    <td style="min-width: 200px; border-left: white; border-left-style: solid; border-left-width: 1px;" id="select_pathway_nav" class="navigation_cell_click" align="center">
+    <td style="min-width: 200px; border-left: white; border-left-style: solid; border-left-width: 1px;" id="how_to_nav" class="navigation_cell_click" align="center">
         <img src="how-to.svg" height=80><br>
         How&nbsp;To
     </td>
     
-    <td style="min-width: 200px;" class="navigation_cell_click" align="center" onclick="location.href = 'browser.html';">
+    <td style="min-width: 200px;" class="navigation_cell_click" id="pathway_browser_nav" align="center" onclick="location.href = 'browser.html';">
         <img src="pathway-browser.svg" height=80><br>
         Pathway&nbsp;Browser
     </td>
     
-    <td style="min-width: 200px;" class="navigation_cell_click" align="center" onclick="accession_search_init(); open_locus_search();">
-        <img src="accession-search.svg" height=80><br>
-        Locus&nbsp;Search
+    <td style="min-width: 200px;" class="navigation_cell_click" id="subcellular_search_nav" align="center" onclick="accession_search_init(); open_locus_search();">
+        <img src="cell.svg" height=80><br>
+        Subcellular&nbsp;Search
     </td>
     
-    <td style="min-width: 200px;" class="navigation_cell_click" align="center" onclick="accession_search_init(); open_accession_search();">
+    <td style="min-width: 200px;" class="navigation_cell_click" id="functional_search_nav" align="center" onclick="accession_search_init(); open_locus_search();">
+        <img src="cell2.svg" height=80><br>
+        Functional&nbsp;Search
+    </td>
+    
+    <td style="min-width: 200px;" class="navigation_cell_click" id="accession_search_nav" align="center" onclick="accession_search_init(); open_accession_search();">
         <img src="accession-search.svg" height=80><br>
         Accession&nbsp;Search
     </td>
     
-    <td style="min-width: 200px;" class="navigation_cell_click" align="center">
+    <td style="min-width: 200px;" id="statistics_nav" class="navigation_cell_click" align="center">
         <img src="statistics.svg" height=80><br>
         Statistics
     </td>
     
-    <td style="min-width: 200px;" class="navigation_cell_click" align="center" onclick="open_disclaimer();">
+    <td style="min-width: 200px;" id="about_nav" class="navigation_cell_click" align="center" onclick="open_disclaimer();">
         <img src="about.svg" height=80><br>
         About
     </td><td width="50%"></tr>
@@ -163,7 +168,7 @@ The usage, selling or handing of the contact data written in this imprint is not
 <div id="locus_search" class="disclaimer">
     <table cellspacing=20><tr><td>
     <div id="accession_search_field" style="display: inline;">
-    Paste UniProt accession numbers:<br>
+    Select subcellular compartment(s):<br>
         <select id="loci" size=20 style="width:300px; height:480px;" multiple></select>Hold <b>[ctrl]</b> for multiple selection.
     </div>
     </td><td width=100% height=100% style="border-width: 2px; border-style: solid; border-color: black; border-radius: 25px;">
@@ -175,6 +180,30 @@ The usage, selling or handing of the contact data written in this imprint is not
         <td colspan=2>
             <table width=100%><tr><td id="error_filter_text_locus" style="color: red; font-weight: bold;">
             </td><td align=right><button onclick="hide_locus_search();" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid_loci();">Next</button>
+            </td></tr></table>
+        </td>
+    </tr>
+    </table>
+</div>
+<div id="locus_search_background" class="disclaimer_background"></div>
+
+
+
+<div id="function_search" class="disclaimer">
+    <table cellspacing=20><tr><td>
+    <div id="accession_search_field" style="display: inline;">
+    Select protein function(s):<br>
+        <select id="functions" size=20 style="width:300px; height:480px;" multiple></select>Hold <b>[ctrl]</b> for multiple selection.
+    </div>
+    </td><td width=100% height=100% style="border-width: 2px; border-style: solid; border-color: black; border-radius: 25px;">
+    <b>Filter criteria:</b><p>&nbsp;<p>&nbsp;<p>
+    <div id="filter_panel_function">
+    </div>
+    </td></tr>
+    <tr>
+        <td colspan=2>
+            <table width=100%><tr><td id="error_filter_text_function" style="color: red; font-weight: bold;">
+            </td><td align=right><button onclick="hide_function_search();" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid_function();">Next</button>
             </td></tr></table>
         </td>
     </tr>
@@ -200,6 +229,7 @@ The usage, selling or handing of the contact data written in this imprint is not
 </div>
 <div id="check_spectra_background" class="check_spectra_background"></div>
 
+<audio style="display: none;"><source src="kns.mp3"></source>
 </body>
 <script>
 function check_filter_valid_accessions(){
@@ -213,6 +243,7 @@ function check_filter_valid_accessions(){
         document.getElementById("error_filter_text_accession").innerHTML = "Error: minimal precursor charge higher than maximal!";
     }
     else {
+        adopt_filter_parameters();
         hide_accession_search();
         accession_search_parse_accessions();
     }
@@ -227,25 +258,41 @@ function check_filter_valid_loci(){
         document.getElementById("error_filter_text_locus").innerHTML = "Error: minimal precursor charge higher than maximal!";
     }
     else {
+        adopt_filter_parameters();
         hide_locus_search();
-        //accession_search_parse_accessions();
+        locus_search_request_data();
+    }
+}
+
+
+function check_filter_valid_loci(){
+    if (parseInt(document.getElementById("min_peptide_length").value) > parseInt(document.getElementById("max_peptide_length").value)){
+        document.getElementById("error_filter_text_function").innerHTML = "Error: minimal peptide length higher than maximal!";
+    }
+    else if (parseInt(document.getElementById("min_precursor_charge").value) > parseInt(document.getElementById("max_precursor_charge").value)) {
+        document.getElementById("error_filter_text_function").innerHTML = "Error: minimal precursor charge higher than maximal!";
+    }
+    else {
+        adopt_filter_parameters();
+        hide_function_search();
+        function_serch_request_data();
     }
 }
 
 var filter_panel_data = "<div id=\"filter_panel\" style=\"display: none;\"> \
     <table> \
-        <tr><td>Min. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"min_peptide_length\" value=\"8\" /><td></tr> \
-        <tr><td>Max. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"max_peptide_length\" value=\"25\" /><td></tr> \
-        <tr><td>Min. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"min_precursor_charge\" value=\"2\" /><td></tr> \
-        <tr><td>Max. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"max_precursor_charge\" value=\"3\" /><td></tr> \
+        <tr><td>Min. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"min_peptide_length\" /><td></tr> \
+        <tr><td>Max. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"max_peptide_length\" /><td></tr> \
+        <tr><td>Min. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"min_precursor_charge\" /><td></tr> \
+        <tr><td>Max. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"max_precursor_charge\" /><td></tr> \
         <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td><td></tr> \
         <tr><td>Oxydation of M</td><td> \
-        <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" checked /> off \
+        <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" /> off \
         <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
         <input type=\"radio\" id=\"oxy_m_fix\" name=\"oxy_m\" /> fixed \
         <td></tr> \
         <tr><td>Carbamidomethylation of C</td><td> \
-        <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" checked /> off \
+        <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" /> off \
         <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
         <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
         <td></tr> \
@@ -265,21 +312,88 @@ var filter_panel_data = "<div id=\"filter_panel\" style=\"display: none;\"> \
 var xmlhttploci = new XMLHttpRequest();
 xmlhttploci.onreadystatechange = function() {
     if (xmlhttploci.readyState == 4 && xmlhttploci.status == 200) {
-        var loci_data = JSON.parse(xmlhttploci.responseText);
-        var loci_select = document.getElementById("loci");
-        for (var i = 0; i < loci_data.length; ++i){
+        var locus_data = JSON.parse(xmlhttploci.responseText);
+        var locus_select = document.getElementById("loci");
+        for (var i = 0; i < locus_data.length; ++i){
             var option = document.createElement("option");
-            option.text = loci_data[i][1];
-            option.id = loci_data[i][0];
-            loci_select.add(option);
+            option.text = locus_data[i][1];
+            option.id = locus_data[i][0];
+            locus_select.add(option);
         }
     }
 }
 xmlhttploci.open("GET", "/qsdb/cgi-bin/get-loci.py", true);
 xmlhttploci.send();
 
+/*
+// get functions
+var xmlhttpfunctions = new XMLHttpRequest();
+xmlhttpfunctions.onreadystatechange = function() {
+    if (xmlhttpfunctions.readyState == 4 && xmlhttpfunctions.status == 200) {
+        var locus_data = JSON.parse(xmlhttpfunctions.responseText);
+        var locus_select = document.getElementById("functions");
+        for (var i = 0; i < locus_data.length; ++i){
+            var option = document.createElement("option");
+            option.text = locus_data[i][1];
+            option.id = locus_data[i][0];
+            locus_select.add(option);
+        }
+    }
+}
+xmlhttpfunctions.open("GET", "/qsdb/cgi-bin/get-functions.py", true);
+xmlhttpfunctions.send();
+*/
 
 
+function key_down(event){
+    // easter egg
+    var k_code = [75, 78, 73, 71, 72, 84, 82, 73, 68, 69, 82];
+    
+    kr_keys.push(event.which);
+    while (kr_keys.length > 11) kr_keys.shift();
+    if (kr_keys.length == 11){
+        var k_is_valid = true;
+        for (var i = 0; i < 11; ++i){
+            if (k_code[i] != kr_keys[i]){
+                k_is_valid = false;
+                break;
+            }
+        }
+        if (k_is_valid){
+            scanner_data = [1, 0, 0];
+            
+            var scanner_light = setInterval(function(scanner_data, nav_ids){
+                for (var i = 0; i < nav_ids.length; ++i){
+                    document.getElementById(nav_ids[i]).style.backgroundColor = "#640000";
+                }
+                document.getElementById(nav_ids[scanner_data[1]]).style.backgroundColor = "#a20000";
+                
+                if (scanner_data[0] == -1 && scanner_data[1] == 0) scanner_data[0] = 1;
+                if (scanner_data[0] == 1 && scanner_data[1] == 6) scanner_data[0] = -1;
+                scanner_data[1] += scanner_data[0];
+                
+                if (scanner_data[2] % 13 == 0){
+                    var audio = document.getElementsByTagName("audio")[0];
+                    audio.currentTime = 0;
+                    audio.play();
+                }
+                scanner_data[2] += 1;
+                
+                if (scanner_data[2] >= 37){
+                    for (var i = 0; i < nav_ids.length; ++i){
+                        document.getElementById(nav_ids[i]).style.backgroundColor = "#640000";
+                    }
+                    clearInterval(scanner_light);
+                }
+            }, 80, scanner_data, nav_ids);
+        }
+    }    
+}
+
+var kr_keys = [];
+var scanner_data = [1, 0, 0]; // scanner_up, scanner_index, scanner_count
+var nav_ids = ["how_to_nav", "pathway_browser_nav", "subcellular_search_nav", "functional_search_nav", "accession_search_nav", "statistics_nav", "about_nav"];
+document.addEventListener('keydown', key_down, false);
 document.getElementById("disclaimer_background").addEventListener("click", hide_disclaimer, false);
 </script>
 </html> 

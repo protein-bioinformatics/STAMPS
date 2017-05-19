@@ -274,6 +274,8 @@ void strip(string &str){
 
 main(int argc, char** argv) {
     bool compress = true;
+    bool via_accessions = false;
+    bool via_loci = false;
     
     if (compress){
         cout << "Content-Type: text/html" << endl;
@@ -284,6 +286,7 @@ main(int argc, char** argv) {
     }
     
     string accessions = "";
+    string loci_ids = "";
     
     
     string get_string = getenv("QUERY_STRING");
@@ -296,9 +299,18 @@ main(int argc, char** argv) {
         vector<string> get_values = split(get_entries.at(i), '=');
         if (get_values.size() && get_values.at(0) == "accessions"){
             accessions = get_values.at(1);
+            via_accessions = true;
+        }
+        else if (get_values.size() && get_values.at(0) == "loci"){
+            loci_ids = get_values.at(1);
+            via_loci = true;
         }
     }
     
+    if (via_accessions == via_loci){
+        cout << -5;
+        return -5;
+    }
     
     
     all_peptides = new map<string, peptide* >();
@@ -306,14 +318,9 @@ main(int argc, char** argv) {
     spectra = new vector < spectrum* >();
     all_spectra = new map< string, spectrum* >();
     all_proteins = new map < string, protein* >();
+    string sql_query_proteins = "";
     
     
-    //accessions = "B2RQC6:Q9CZW5:Q9DCC8:Q9CPQ3:Q9DCC8:Q9QYA2";
-    if (accessions == "" || accessions.find("'") != string::npos){
-        cout << -1 << endl;
-        return -1;
-    }    
-    replaceAll(accessions, string(":"), string("','"));
     
     string line;
     map< string, string > parameters;
@@ -352,12 +359,31 @@ main(int argc, char** argv) {
         return 1;
     }
     
+    if (via_accessions){
     
+        //accessions = "B2RQC6:Q9CZW5:Q9DCC8:Q9CPQ3:Q9DCC8:Q9QYA2";
+        if (accessions == "" || accessions.find("'") != string::npos){
+            cout << -1 << endl;
+            return -1;
+        }    
+        replaceAll(accessions, string(":"), string("','"));
+        
+        sql_query_proteins = "select distinct * from proteins where unreviewed = false and accession in ('";
+        sql_query_proteins += accessions;
+        sql_query_proteins += "');";
+    }
+    else {
+        if (loci_ids == "" || loci_ids.find("'") != string::npos){
+            cout << -1 << endl;
+            return -1;
+        }    
+        replaceAll(loci_ids, string(":"), string("','"));
+        
+        sql_query_proteins = "select distinct p.* from proteins p inner join protein_loci pl on p.id = pl.protein_id where unreviewed = false and pl.locus_id in ('";
+        sql_query_proteins += loci_ids;
+        sql_query_proteins += "');";
+    }
     
-    
-    string sql_query_proteins = "select distinct * from proteins where unreviewed = false and accession in ('";
-    sql_query_proteins += accessions;
-    sql_query_proteins += "');";
     
     if (mysql_query(conn, sql_query_proteins.c_str())) {
         cout << "error: " << mysql_error(conn) << endl;

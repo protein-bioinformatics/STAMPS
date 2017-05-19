@@ -11,6 +11,16 @@ null_y = 0;
 mouse_x = 0;
 mouse_y = 0;
 filter_parameters = [];
+filter_parameters["min_peptide_length"] = 8;
+filter_parameters["max_peptide_length"] = 25;
+filter_parameters["min_precursor_charge"] = 2;
+filter_parameters["max_precursor_charge"] = 3;
+filter_parameters["oxy_m_off"] = true;
+filter_parameters["oxy_m_var"] = false;
+filter_parameters["oxy_m_fix"] = false;
+filter_parameters["carba_c_off"] = true;
+filter_parameters["carba_c_var"] = false;
+filter_parameters["carba_c_fix"] = false;
 data = [];
 data_ref = [];
 nodes = 0;
@@ -60,7 +70,6 @@ radius = metabolite_radius * factor;
 last_keys = [];
 highlighting = 0;
 basket = {};
-
 
 
 line_width = 5;
@@ -348,18 +357,18 @@ function Spectrum(data){
         
         if (this.mod_sequence.indexOf("[") == -1){
             // test for oxydation of M
-            if (document.getElementById("oxy_m_off").checked && this.occ_m > 0){
+            if (filter_parameters["oxy_m_off"] && this.occ_m > 0){
                 this.filter_valid = false;
             }
-            else if (document.getElementById("oxy_m_fix").checked && this.occ_M > 0) {
+            else if (filter_parameters["oxy_m_fix"] && this.occ_M > 0) {
                 this.filter_valid = false;
             }
             
             // test for carbamidomethylation of C
-            if (document.getElementById("carba_c_off").checked && this.occ_c > 0){
+            if (filter_parameters["carba_c_off"] && this.occ_c > 0){
                 this.filter_valid = false;
             }
-            else if (document.getElementById("carba_c_fix").checked && this.occ_C > 0) {
+            else if (filter_parameters["carba_c_fix"] && this.occ_C > 0) {
                 this.filter_valid = false;
             }
         }
@@ -367,7 +376,7 @@ function Spectrum(data){
             this.filter_valid = false;
         }
         
-        this.filter_valid &= document.getElementById("min_precursor_charge").value <= this.charge && this.charge <= document.getElementById("max_precursor_charge").value;
+        this.filter_valid &= filter_parameters["min_precursor_charge"] <= this.charge && this.charge <= filter_parameters["max_precursor_charge"];
     }
     this.filtering();
     
@@ -397,7 +406,7 @@ function Peptide(data){
             this.spectra[i].filtering();
             this.filter_valid |= this.spectra[i].filter_valid;
         }
-        this.filter_valid &= document.getElementById("min_peptide_length").value <= this.peptide_seq.length && this.peptide_seq.length <= document.getElementById("max_peptide_length").value;
+        this.filter_valid &= filter_parameters["min_peptide_length"] <= this.peptide_seq.length && this.peptide_seq.length <= filter_parameters["max_peptide_length"];
     }
     this.filtering();
     
@@ -2741,7 +2750,6 @@ function check_spectra(){
             proteins_content.splice(i, 1);
         }
     }
-    
     var peps = 0;
     var specs = 0;
     var line = 0;
@@ -2749,6 +2757,7 @@ function check_spectra(){
     var sign_down = String.fromCharCode(9662);
     for (var i = 0; i < proteins_content.length; ++i){
         var current_prot = basket[proteins_content[i][1]];
+if (current_prot.peptides.length > 0) console.log(current_prot.accession);
         
         var bg_color = (line & 1) ? "#DDDDDD" : "white";
         ++line;
@@ -2757,6 +2766,7 @@ function check_spectra(){
             if (!current_prot.peptides[j].filter_valid) continue;
             num_pep += 1;
         }
+        
         
         inner_html += "<tr id=\"" + current_prot.id + "\"><td width=\"80%\" bgcolor=\"" + bg_color + "\" onclick=\"document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: default;\">&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"protein_sign_" + i + "\">" + sign_right + "</div>&nbsp;" + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " Peptides</td><td bgcolor=\"" + bg_color + "\" align=\"right\"><img src=\"images/delete.png\" width=\"16\" height=\"16\" onclick=\"delete_from_protein_table(" + current_prot.id + ");\" /></td></tr>";
         
@@ -2791,7 +2801,10 @@ function open_disclaimer (){
 
 function open_accession_search (){
     document.getElementById("accession_search").style.display = "inline";
+    document.getElementById("filter_panel_locus").innerHTML = "";
+    document.getElementById("filter_panel_function").innerHTML = "";
     document.getElementById("filter_panel_accession").innerHTML = filter_panel_data;
+    load_filter_parameters();
     document.getElementById("filter_panel").style.display = "inline";
     document.getElementById("accession_search_background").style.display = "inline";
     document.getElementById("error_filter_text_accession").innerHTML = "";
@@ -2800,26 +2813,38 @@ function open_accession_search (){
 function hide_accession_search (){
     document.getElementById("accession_search").style.display = "none";
     document.getElementById("accession_search_background").style.display = "none";
-    document.getElementById("filter_panel_accession").innerHTML = "";
 }
 
 function open_locus_search (){
     document.getElementById("locus_search").style.display = "inline";
+    document.getElementById("filter_panel_accession").innerHTML = "";
+    document.getElementById("filter_panel_function").innerHTML = "";
     document.getElementById("filter_panel_locus").innerHTML = filter_panel_data;
+    load_filter_parameters();
     document.getElementById("filter_panel").style.display = "inline";
     document.getElementById("locus_search_background").style.display = "inline";
     document.getElementById("error_filter_text_locus").innerHTML = "";
 }
 
-function hide_locus_search (){
-    document.getElementById("accession_search").style.display = "none";
-    document.getElementById("accession_search_background").style.display = "none";
+function open_function_search (){
+    document.getElementById("function_search").style.display = "inline";
+    document.getElementById("filter_panel_accession").innerHTML = "";
     document.getElementById("filter_panel_locus").innerHTML = "";
+    document.getElementById("filter_panel_function").innerHTML = filter_panel_data;
+    load_filter_parameters();
+    document.getElementById("filter_panel").style.display = "inline";
+    document.getElementById("function_search_background").style.display = "inline";
+    document.getElementById("error_filter_text_function").innerHTML = "";
 }
 
 function hide_locus_search (){
-    document.getElementById("locus_search").style.display = "none";
-    document.getElementById("locus_search_background").style.display = "none";
+    document.getElementById("accession_search").style.display = "none";
+    document.getElementById("accession_search_background").style.display = "none";
+}
+
+function hide_function_search (){
+    document.getElementById("function_search").style.display = "none";
+    document.getElementById("function_search_background").style.display = "none";
 }
 
 function hide_disclaimer (){
@@ -3015,21 +3040,11 @@ function open_filter_panel(){
     }
     else {
         var rect = document.getElementById('filter_panel_nav').getBoundingClientRect();
+        load_filter_parameters();
         document.getElementById("filter_panel").style.top = (rect.top + document.getElementById('filter_panel_nav').offsetHeight).toString() + "px";
         document.getElementById("filter_panel").style.left = (rect.left).toString() + "px";
         document.getElementById("filter_panel").style.display = "inline";
         document.getElementById("filter_panel_background").style.display = "inline";
-        filter_parameters = [];
-        filter_parameters["min_peptide_length"] = document.getElementById("min_peptide_length").value;
-        filter_parameters["max_peptide_length"] = document.getElementById("max_peptide_length").value;
-        filter_parameters["min_precursor_charge"] = document.getElementById("min_precursor_charge").value;
-        filter_parameters["max_precursor_charge"] = document.getElementById("max_precursor_charge").value;
-        filter_parameters["oxy_m_off"] = document.getElementById("oxy_m_off").checked;
-        filter_parameters["oxy_m_var"] = document.getElementById("oxy_m_var").checked;
-        filter_parameters["oxy_m_fix"] = document.getElementById("oxy_m_fix").checked;
-        filter_parameters["carba_c_off"] = document.getElementById("carba_c_off").checked;
-        filter_parameters["carba_c_var"] = document.getElementById("carba_c_var").checked;
-        filter_parameters["carba_c_fix"] = document.getElementById("carba_c_fix").checked;
     }
 }
 
@@ -3040,6 +3055,34 @@ function hide_select_species(){
 }
 
 
+
+function adopt_filter_parameters(){
+    filter_parameters = [];
+    filter_parameters["min_peptide_length"] = document.getElementById("min_peptide_length").value;
+    filter_parameters["max_peptide_length"] = document.getElementById("max_peptide_length").value;
+    filter_parameters["min_precursor_charge"] = document.getElementById("min_precursor_charge").value;
+    filter_parameters["max_precursor_charge"] = document.getElementById("max_precursor_charge").value;
+    filter_parameters["oxy_m_off"] = document.getElementById("oxy_m_off").checked;
+    filter_parameters["oxy_m_var"] = document.getElementById("oxy_m_var").checked;
+    filter_parameters["oxy_m_fix"] = document.getElementById("oxy_m_fix").checked;
+    filter_parameters["carba_c_off"] = document.getElementById("carba_c_off").checked;
+    filter_parameters["carba_c_var"] = document.getElementById("carba_c_var").checked;
+    filter_parameters["carba_c_fix"] = document.getElementById("carba_c_fix").checked;
+}
+
+
+function load_filter_parameters(){
+    document.getElementById("min_peptide_length").value = filter_parameters["min_peptide_length"];
+    document.getElementById("max_peptide_length").value = filter_parameters["max_peptide_length"];
+    document.getElementById("min_precursor_charge").value = filter_parameters["min_precursor_charge"];
+    document.getElementById("max_precursor_charge").value = filter_parameters["max_precursor_charge"];
+    document.getElementById("oxy_m_off").checked = filter_parameters["oxy_m_off"];
+    document.getElementById("oxy_m_var").checked = filter_parameters["oxy_m_var"];
+    document.getElementById("oxy_m_fix").checked = filter_parameters["oxy_m_fix"];
+    document.getElementById("carba_c_off").checked = filter_parameters["carba_c_off"];
+    document.getElementById("carba_c_var").checked = filter_parameters["carba_c_var"];
+    document.getElementById("carba_c_fix").checked = filter_parameters["carba_c_fix"];
+}
 
 
 
@@ -3075,12 +3118,13 @@ function hide_filter_panel(){
             
             if (proceed){
                 basket = {};
+                adopt_filter_parameters();
                 for (var i = 0; i < data.length; ++i){
                     data[i].filtering();
                 }
                 draw();
                 compute_statistics();
-            }
+            }/*
             else {
                 document.getElementById("min_peptide_length").value = filter_parameters["min_peptide_length"];
                 document.getElementById("max_peptide_length").value = filter_parameters["max_peptide_length"];
@@ -3093,7 +3137,7 @@ function hide_filter_panel(){
                 document.getElementById("carba_c_var").checked = filter_parameters["carba_c_var"];
                 document.getElementById("carba_c_fix").checked = filter_parameters["carba_c_fix"];
                 
-            }
+            }*/
             
             
         }
@@ -3487,19 +3531,6 @@ function accession_search_init(){
 
 
 
-function accession_search_init(){
-    window.addEventListener('resize', resize_ms_view, false);
-    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
-    document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
-}
-
-
-function accession_search_upload_file(){
-    basket = {};
-    
-}
-
-
 function replaceAll(str, find, replace) {
   return str.replace(new RegExp(find, 'g'), replace);
 }
@@ -3517,7 +3548,7 @@ function accession_search_parse_accessions(){
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            accession_search_load_proteins(JSON.parse(xmlhttp.responseText));
+            request_load_proteins(JSON.parse(xmlhttp.responseText));
         }
     }
     
@@ -3525,7 +3556,8 @@ function accession_search_parse_accessions(){
     xmlhttp.send();
 }
 
-function accession_search_load_proteins(data){
+
+function request_load_proteins(data){
     for (var i = 0; i < data.length; ++i){
         var p_id = data[i]["id"];
         if (p_id in basket) continue;
@@ -3533,4 +3565,56 @@ function accession_search_load_proteins(data){
         basket[prot.id] = prot;
     }
     check_spectra();
+}
+
+
+function locus_search_request_data(){
+    basket = {};
+    document.getElementById("check_spectra_background").style.display = "inline";
+    var loci_select = document.getElementById("loci");
+    var IDs = "";
+    for (var i = 0; i < loci_select.options.length; ++i){
+        if (loci_select.options[i].selected){
+            if (IDs.length > 0) IDs += ":";
+            IDs += loci_select.options[i].id;
+        }
+    }
+    
+    // request proteins
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            request_load_proteins(JSON.parse(xmlhttp.responseText));
+        }
+    }
+    
+    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?loci=" + IDs, true);
+    xmlhttp.send();
+}
+
+
+
+
+function function_search_request_data(){
+    basket = {};
+    document.getElementById("check_spectra_background").style.display = "inline";
+    var loci_select = document.getElementById("functions");
+    var IDs = "";
+    for (var i = 0; i < loci_select.options.length; ++i){
+        if (loci_select.options[i].selected){
+            if (IDs.length > 0) IDs += ":";
+            IDs += loci_select.options[i].id;
+        }
+    }
+    
+    // request proteins
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            request_load_proteins(JSON.parse(xmlhttp.responseText));
+        }
+    }
+    
+    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?functions=" + IDs, true);
+    xmlhttp.send();
 }
