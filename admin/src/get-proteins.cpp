@@ -276,6 +276,7 @@ main(int argc, char** argv) {
     bool compress = true;
     bool via_accessions = false;
     bool via_loci = false;
+    bool via_functions = false;
     
     if (compress){
         cout << "Content-Type: text/html" << endl;
@@ -287,6 +288,7 @@ main(int argc, char** argv) {
     
     string accessions = "";
     string loci_ids = "";
+    string function_ids = "";
     
     
     string get_string = getenv("QUERY_STRING");
@@ -305,9 +307,13 @@ main(int argc, char** argv) {
             loci_ids = get_values.at(1);
             via_loci = true;
         }
+        else if (get_values.size() && get_values.at(0) == "functions"){
+            function_ids = get_values.at(1);
+            via_functions = true;
+        }
     }
     
-    if (via_accessions == via_loci){
+    if (via_accessions + via_loci + via_functions != 1){
         cout << -5;
         return -5;
     }
@@ -372,7 +378,7 @@ main(int argc, char** argv) {
         sql_query_proteins += accessions;
         sql_query_proteins += "');";
     }
-    else {
+    else if (via_loci) {
         if (loci_ids == "" || loci_ids.find("'") != string::npos){
             cout << -1 << endl;
             return -1;
@@ -381,6 +387,17 @@ main(int argc, char** argv) {
         
         sql_query_proteins = "select distinct p.* from proteins p inner join protein_loci pl on p.id = pl.protein_id where unreviewed = false and pl.locus_id in ('";
         sql_query_proteins += loci_ids;
+        sql_query_proteins += "');";
+    }
+    else if (via_functions) {
+        if (function_ids == "" || function_ids.find("'") != string::npos){
+            cout << -1 << endl;
+            return -1;
+        }    
+        replaceAll(function_ids, string(":"), string("','"));
+        
+        sql_query_proteins = "select distinct p.* from proteins p inner join protein_functions pf on p.id = pf.protein_id where unreviewed = false and pf.function_id in ('";
+        sql_query_proteins += function_ids;
         sql_query_proteins += "');";
     }
     

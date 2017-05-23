@@ -3518,14 +3518,6 @@ function load_data(reload){
 }
 
 
-function accession_search_init(){
-    window.addEventListener('resize', resize_ms_view, false);
-    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
-    document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
-}
-
-
-
 
 function replaceAll(str, find, replace) {
   return str.replace(new RegExp(find, 'g'), replace);
@@ -3594,12 +3586,12 @@ function locus_search_request_data(){
 function function_search_request_data(){
     basket = {};
     document.getElementById("check_spectra_background").style.display = "inline";
-    var loci_select = document.getElementById("functions");
+    var function_select = document.getElementById("function_search_field").getElementsByTagName("li");
     var IDs = "";
-    for (var i = 0; i < loci_select.options.length; ++i){
-        if (loci_select.options[i].selected){
+    for (var i = 0; i < function_select.length; ++i){
+        if (function_select[i].style.backgroundColor != ""){
             if (IDs.length > 0) IDs += ":";
-            IDs += loci_select.options[i].id;
+            IDs += function_select[i].id;
         }
     }
     

@@ -60,17 +60,17 @@
         Pathway&nbsp;Browser
     </td>
     
-    <td style="min-width: 200px;" class="navigation_cell_click" id="subcellular_search_nav" align="center" onclick="accession_search_init(); open_locus_search();">
+    <td style="min-width: 200px;" class="navigation_cell_click" id="subcellular_search_nav" align="center" onclick="advanced_search_init(); open_locus_search();">
         <img src="cell.svg" height=80><br>
         Subcellular&nbsp;Search
     </td>
     
-    <td style="min-width: 200px;" class="navigation_cell_click" id="functional_search_nav" align="center" onclick="accession_search_init(); open_locus_search();">
-        <img src="cell2.svg" height=80><br>
+    <td style="min-width: 200px;" class="navigation_cell_click" id="functional_search_nav" align="center" onclick="advanced_search_init(); open_function_search();">
+        <img src="gears.svg" height=80><br>
         Functional&nbsp;Search
     </td>
     
-    <td style="min-width: 200px;" class="navigation_cell_click" id="accession_search_nav" align="center" onclick="accession_search_init(); open_accession_search();">
+    <td style="min-width: 200px;" class="navigation_cell_click" id="accession_search_nav" align="center" onclick="advanced_search_init(); open_accession_search();">
         <img src="accession-search.svg" height=80><br>
         Accession&nbsp;Search
     </td>
@@ -191,9 +191,10 @@ The usage, selling or handing of the contact data written in this imprint is not
 
 <div id="function_search" class="disclaimer">
     <table cellspacing=20><tr><td>
-    <div id="accession_search_field" style="display: inline;">
     Select protein function(s):<br>
-        <select id="functions" size=20 style="width:300px; height:480px;" multiple></select>Hold <b>[ctrl]</b> for multiple selection.
+    <div id="function_search_field" style="min-width: 500px; width: 500px; min-height: 500px; height: 500px; border-width: 1px; border-color: gray; border-style: solid; overflow-y: scroll;">
+    
+        
     </div>
     </td><td width=100% height=100% style="border-width: 2px; border-style: solid; border-color: black; border-radius: 25px;">
     <b>Filter criteria:</b><p>&nbsp;<p>&nbsp;<p>
@@ -267,6 +268,7 @@ function check_filter_valid_loci(){
 }
 
 
+
 function check_filter_valid_function(){
     if (parseInt(document.getElementById("min_peptide_length").value) > parseInt(document.getElementById("max_peptide_length").value)){
         document.getElementById("error_filter_text_function").innerHTML = "Error: minimal peptide length higher than maximal!";
@@ -277,7 +279,7 @@ function check_filter_valid_function(){
     else {
         adopt_filter_parameters();
         hide_function_search();
-        function_serch_request_data();
+        function_search_request_data();
     }
 }
 
@@ -310,6 +312,60 @@ var filter_panel_data = "<div id=\"filter_panel\" style=\"display: none;\"> \
 </div>";
 
 
+function activateTree(oList) {
+    // Collapse the tree
+    for (var i = 0; i < oList.getElementsByTagName("ul").length; ++i) {
+        oList.getElementsByTagName("ul")[i].style.display = "none";
+    }
+    for (var i = 0; i < oList.getElementsByTagName("li").length; ++i) {
+        if (oList.getElementsByTagName("li")[i].getElementsByTagName("ul").length > 0){
+            oList.getElementsByTagName("li")[i].style.fontWeight = "bold";
+            oList.getElementsByTagName("li")[i].className = "collapsed";
+        }
+        else {
+            oList.getElementsByTagName("li")[i].style.fontWeight = "normal";
+            oList.getElementsByTagName("li")[i].className = "empty";
+        }
+    }
+    // Add the click-event handler to the list items
+    if (oList.addEventListener) {
+        oList.addEventListener("click", toggleBranch, false);
+    } else if (oList.attachEvent) { // For IE
+        oList.attachEvent("onclick", toggleBranch);
+    }
+}
+
+
+function toggleBranch(event) {
+    var oBranch, cSubBranches;
+    if (event.target) {
+        oBranch = event.target;
+    } else if (event.srcElement) { // For IE
+        oBranch = event.srcElement;
+    }
+    cSubBranches = oBranch.getElementsByTagName("ul");
+    if (cSubBranches.length > 0) {
+        if (cSubBranches[0].style.display == "block") {
+            cSubBranches[0].style.display = "none";
+            oBranch.className = "collapsed";
+            
+        } else {
+            cSubBranches[0].style.display = "block";
+            oBranch.className = "expanded";
+        }
+    }
+    else {
+        if (oBranch.style.backgroundColor == ""){
+            oBranch.style.backgroundColor = "#4a79ba";
+            oBranch.style.color = "#ffffff";
+        }
+        else {
+            oBranch.style.backgroundColor = "";
+            oBranch.style.color = "#000000";
+        }
+    }
+}
+
 // get loci
 var xmlhttploci = new XMLHttpRequest();
 xmlhttploci.onreadystatechange = function() {
@@ -327,24 +383,61 @@ xmlhttploci.onreadystatechange = function() {
 xmlhttploci.open("GET", "/qsdb/cgi-bin/get-loci.py", true);
 xmlhttploci.send();
 
-/*
+
+function recursive_list_adding(function_tree){
+    var ret_text = "";
+    for (var i = 0; i < function_tree.length; ++i){
+        ret_text += "<li id=\"" + function_tree[i][0] + "\">" + function_tree[i][1];
+        if (function_tree[i][2].length > 0) ret_text += "<ul>" + recursive_list_adding(function_tree[i][2]) + "</ul>";
+        ret_text += "</li>";
+    }
+    return ret_text;
+}
+
+
 // get functions
 var xmlhttpfunctions = new XMLHttpRequest();
 xmlhttpfunctions.onreadystatechange = function() {
     if (xmlhttpfunctions.readyState == 4 && xmlhttpfunctions.status == 200) {
-        var locus_data = JSON.parse(xmlhttpfunctions.responseText);
-        var locus_select = document.getElementById("functions");
-        for (var i = 0; i < locus_data.length; ++i){
-            var option = document.createElement("option");
-            option.text = locus_data[i][1];
-            option.id = locus_data[i][0];
-            locus_select.add(option);
+        var function_data = JSON.parse(xmlhttpfunctions.responseText);
+        var id_dict = {};
+        var function_tree = [];
+        
+        for (var i = 0; i < function_data.length; ++i){
+            var function_row = function_data[i];
+            if (function_row[2] == 0){
+                function_tree = [function_row[0], function_row[1], []];
+                id_dict[function_row[0]] = function_tree;
+                continue;
+            }
+            if (function_row[2] in id_dict){
+                var node = [function_row[0], function_row[1], []];
+                id_dict[function_row[2]][2].push(node);
+                id_dict[function_row[0]] = node;
+            }
+            else {
+                console.log("Error while loading functions, index " + function_row[2] + " is missing!");
+                return;
+            }
         }
+        
+        var functions_tree_content = "<ul id=\"LinkedList1\" class=\"LinkedList\" style=\"padding-left:0;\">";
+        functions_tree_content += recursive_list_adding(function_tree[2]);
+        functions_tree_content += "</ul>";
+        document.getElementById("function_search_field").innerHTML = functions_tree_content;
+        activateTree(document.getElementById("LinkedList1"));
     }
 }
 xmlhttpfunctions.open("GET", "/qsdb/cgi-bin/get-functions.py", true);
 xmlhttpfunctions.send();
-*/
+
+
+
+function advanced_search_init(){
+    window.addEventListener('resize', resize_ms_view, false);
+    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
+    document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
+}
 
 
 function key_down(event){
