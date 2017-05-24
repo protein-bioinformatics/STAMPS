@@ -42,6 +42,7 @@ draw_code = 0;
 process_edges_semaphore = false;
 protein_dictionary = {};
 toggled_proteins = new Set();
+spectra_exclude = [];
 
 scaling = 1.25;
 expanding_percentage = 0.25;
@@ -3526,6 +3527,7 @@ function replaceAll(str, find, replace) {
 
 function accession_search_parse_accessions(){
     basket = {};
+    spectra_exclude = [];
     document.getElementById("check_spectra_background").style.display = "inline";
     var accessions = document.getElementById("accessions").value;
     accessions = replaceAll(accessions, "\n", ":");
@@ -3558,6 +3560,7 @@ function request_load_proteins(data){
 
 function locus_search_request_data(){
     basket = {};
+    spectra_exclude = [];
     document.getElementById("check_spectra_background").style.display = "inline";
     var loci_select = document.getElementById("loci");
     var IDs = "";
@@ -3585,6 +3588,7 @@ function locus_search_request_data(){
 
 function function_search_request_data(){
     basket = {};
+    spectra_exclude = [];
     document.getElementById("check_spectra_background").style.display = "inline";
     var function_select = document.getElementById("function_search_field").getElementsByTagName("li");
     var IDs = "";
