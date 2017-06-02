@@ -123,8 +123,8 @@ div.statistics {
 div.disclaimer {
     top: 12%;
     display: none;
-    left: 25%;
-    width: 50%;
+    left: 20%;
+    width: 60%;
     height: 76%;
     position: fixed;
     z-index: 120;
@@ -133,6 +133,23 @@ div.disclaimer {
     border-width: 1px;
     border-style: solid;
     padding: 30px;
+    overflow-y: scroll;
+}
+
+
+div.disclaimer-90 {
+    top: 7%;
+    display: none;
+    left: 5%;
+    width: 90%;
+    height: 85%;
+    position: fixed;
+    z-index: 120;
+    background-color: white;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+    padding: 0px;
     overflow-y: scroll;
 }
 

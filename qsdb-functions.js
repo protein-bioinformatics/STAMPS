@@ -2840,6 +2840,7 @@ function open_accession_search (){
     document.getElementById("accession_search").style.display = "inline";
     document.getElementById("filter_panel_locus").innerHTML = "";
     document.getElementById("filter_panel_function").innerHTML = "";
+    document.getElementById("filter_panel_chromosome").innerHTML = "";
     document.getElementById("filter_panel_accession").innerHTML = filter_panel_data;
     load_filter_parameters();
     document.getElementById("filter_panel").style.display = "inline";
@@ -2856,6 +2857,7 @@ function open_locus_search (){
     document.getElementById("locus_search").style.display = "inline";
     document.getElementById("filter_panel_accession").innerHTML = "";
     document.getElementById("filter_panel_function").innerHTML = "";
+    document.getElementById("filter_panel_chromosome").innerHTML = "";
     document.getElementById("filter_panel_locus").innerHTML = filter_panel_data;
     load_filter_parameters();
     document.getElementById("filter_panel").style.display = "inline";
@@ -2867,11 +2869,24 @@ function open_function_search (){
     document.getElementById("function_search").style.display = "inline";
     document.getElementById("filter_panel_accession").innerHTML = "";
     document.getElementById("filter_panel_locus").innerHTML = "";
+    document.getElementById("filter_panel_chromosome").innerHTML = "";
     document.getElementById("filter_panel_function").innerHTML = filter_panel_data;
     load_filter_parameters();
     document.getElementById("filter_panel").style.display = "inline";
     document.getElementById("function_search_background").style.display = "inline";
     document.getElementById("error_filter_text_function").innerHTML = "";
+}
+
+function open_chromosome_search (){
+    document.getElementById("chromosome_search").style.display = "inline";
+    document.getElementById("filter_panel_accession").innerHTML = "";
+    document.getElementById("filter_panel_function").innerHTML = "";
+    document.getElementById("filter_panel_locus").innerHTML = "";
+    document.getElementById("filter_panel_chromosome").innerHTML = filter_panel_data;
+    load_filter_parameters();
+    document.getElementById("filter_panel").style.display = "inline";
+    document.getElementById("chromosome_search_background").style.display = "inline";
+    document.getElementById("error_filter_text_chromosome").innerHTML = "";
 }
 
 function hide_locus_search (){
@@ -2882,6 +2897,11 @@ function hide_locus_search (){
 function hide_function_search (){
     document.getElementById("function_search").style.display = "none";
     document.getElementById("function_search_background").style.display = "none";
+}
+
+function hide_chromosome_search (){
+    document.getElementById("chromosome_search").style.display = "none";
+    document.getElementById("chromosome_search_background").style.display = "none";
 }
 
 function hide_disclaimer (){
@@ -3161,21 +3181,7 @@ function hide_filter_panel(){
                 }
                 draw();
                 compute_statistics();
-            }/*
-            else {
-                document.getElementById("min_peptide_length").value = filter_parameters["min_peptide_length"];
-                document.getElementById("max_peptide_length").value = filter_parameters["max_peptide_length"];
-                document.getElementById("min_precursor_charge").value = filter_parameters["min_precursor_charge"];
-                document.getElementById("max_precursor_charge").value = filter_parameters["max_precursor_charge"];
-                document.getElementById("oxy_m_off").checked = filter_parameters["oxy_m_off"];
-                document.getElementById("oxy_m_var").checked = filter_parameters["oxy_m_var"];
-                document.getElementById("oxy_m_fix").checked = filter_parameters["oxy_m_fix"];
-                document.getElementById("carba_c_off").checked = filter_parameters["carba_c_off"];
-                document.getElementById("carba_c_var").checked = filter_parameters["carba_c_var"];
-                document.getElementById("carba_c_fix").checked = filter_parameters["carba_c_fix"];
-                
-            }*/
-            
+            }            
             
         }
         
