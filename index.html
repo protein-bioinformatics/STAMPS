@@ -56,7 +56,7 @@
     </td>
     
     <td style="min-width: 150px;" class="navigation_cell_click" id="pathway_browser_nav" align="center" onclick="location.href = 'browser.html';">
-        <img src="pathway-browser.svg" height=80><br>
+        <img src="Pathway-browser.svg" height=80><br>
         Pathway&nbsp;Browser
     </td>
     
@@ -289,19 +289,22 @@ function Chromosome(name, data, ctx, wdt, hgt){
     this.inner_width = wdt * 2 / 3;
     this.margin = (this.width - this.inner_width) / 2;
     this.height = hgt;
+    this.inner_height = this.height;
+    this.panel_base_start = 0;
     this.offset = 0;
     this.ctx = ctx;
     this.bases = 0;
     for (var i = 0; i < data.length; ++i) this.bands.push(new Band(data[i]));
     this.bands.sort(function(a, b){return a.start - b.start});
     for (var i = 0; i < this.bands.length; ++i) this.bases += this.bands[i].end - this.bands[i].start;
+    this.panel_base_end = Math.floor(this.bases * 0.1);
     
     
     this.prepare_modification = function(){}
     
     this.draw = function(){
         ctx.canvas.width  = this.width;
-        ctx.canvas.height = hgt;
+        ctx.canvas.height = this.height;
         ctx.beginPath();
         var len = this.bands.length;
 
@@ -315,15 +318,48 @@ function Chromosome(name, data, ctx, wdt, hgt){
         var has_two_arms = -1;
         var band_height = 0;
         for (var i = 0; i < len; ++i){
-            var curr_height = (this.bands[i].end - this.bands[i].start) / this.bases * this.height * (1 - this.offset / this.height);
+            var curr_height = (this.bands[i].end - this.bands[i].start) / this.bases * this.inner_height;
             this.bands[i].height = curr_height;
             band_height += curr_height;
             if (i < len - 1 && this.bands[i].arm != this.bands[i + 1].arm) has_two_arms = band_height;
         }
+        
+        
 
-
+        
         ctx.save();
+        band_height = 0;
+        // prepare clip
+        var l_1 = this.inner_width / 2
+        var l_2 = this.margin + l_1;
+        var l_3 = this.width / 2;
+        if (has_two_arms == -1){
+            ctx.beginPath();
+            ctx.arc(l_2, this.offset + l_3, l_1, Math.PI, 2 * Math.PI, false);
+            ctx.arc(l_2, this.height - l_3, l_1, 0, Math.PI, false);
+            ctx.closePath();
+        }
+        else {
+            ctx.beginPath();
+            ctx.arc(l_2, this.offset + l_3, l_1, Math.PI, 2 * Math.PI, false);
+            ctx.arc(l_2, this.offset + has_two_arms - l_3, l_1, 0, Math.PI, false);
+            ctx.arc(l_2, this.offset + has_two_arms + l_3, l_1, Math.PI, 2 * Math.PI, false);
+            ctx.arc(l_2, this.height - l_3, l_1, 0, Math.PI, false);
+            ctx.closePath();
+        }
+        ctx.clip();
+        ctx.fillRect(0, this.offset, this.width, this.inner_height);
+        ctx.restore();
+        
+        ctx.shadowColor = '#666666';
+        ctx.shadowBlur = 5;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = -2;
+        ctx.fill();
 
+        
+        
+        ctx.save();
         // prepare clip
         band_height = 0;
         var l_1 = this.inner_width / 2
@@ -363,7 +399,17 @@ function Chromosome(name, data, ctx, wdt, hgt){
             band_height += curr_height;
         }
         ctx.restore();
+        
+        
     
+        // draw panel
+        ctx.fillStyle = "rgba(100, 100, 100, 0.5)";
+        var h_start = Math.floor(this.offset + this.panel_base_start / this.bases * this.inner_height);
+        var h_end = Math.floor(this.offset + this.panel_base_end / this.bases * this.inner_height) - h_start;
+        console.log(this.name + " " + h_start + " " + h_end);
+        //ctx.fillRect(0, h_start, this.width, h_end);
+        //ctx.fillRect(0, h_start, this.width, 30);
+        
     }
 }
 
@@ -400,7 +446,6 @@ xmlhttp_chr.onreadystatechange = function() {
         }
         chroms_innerHTML += "</tr></table>";
         chroms.innerHTML = chroms_innerHTML;
-        console.log(chroms.innerHTML);
         
         for (var i = 0; i < all_keys.length; ++i){
             var key = all_keys[i][0];
@@ -411,6 +456,7 @@ xmlhttp_chr.onreadystatechange = function() {
         }
         for (var i = 0; i < chromosomes.length; ++i){
             chromosomes[i].offset = Math.min(hgt * (1 - chromosomes[i].bases / max_bases), hgt - wdt);
+            chromosomes[i].inner_height = chromosomes[i].height - chromosomes[i].offset;
         }
         for (var i = 0; i < chromosomes.length; ++i){
             chromosomes[i].draw();
