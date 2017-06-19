@@ -2877,7 +2877,7 @@ function open_function_search (){
     document.getElementById("error_filter_text_function").innerHTML = "";
 }
 
-function open_chromosome_search (){
+function open_chromosome_search(){
     document.getElementById("chromosome_search").style.display = "inline";
     document.getElementById("filter_panel_accession").innerHTML = "";
     document.getElementById("filter_panel_function").innerHTML = "";
