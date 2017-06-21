@@ -518,62 +518,12 @@ function chromosome_mouse_wheel(e){
     }
 }
 
-
-// get functions
 var wdt = 30;
 var hgt = 300;
 chroms = document.getElementById("function_chromosome_field");
 chroms.innerHTML = "";
-var xmlhttp_chr = new XMLHttpRequest();
-xmlhttp_chr.onreadystatechange = function() {
-    if (xmlhttp_chr.readyState == 4 && xmlhttp_chr.status == 200) {
-        var ideom_data = JSON.parse(xmlhttp_chr.responseText);
-        var max_bases = 0;
-        var all_keys = Object.keys(ideom_data);
-        var max_len = 0;
-        for (var i = 0; i < all_keys.length; ++i){
-            all_keys[i] = [all_keys[i], all_keys[i]];
-            max_len = Math.max(all_keys[i].length, max_len);
-        }
-        
-        
-        for (var i = 0; i < all_keys.length; ++i){
-            while (all_keys[i][1].length < max_len && 48 <= all_keys[i][1].charCodeAt(0) && all_keys[i][1].charCodeAt(0) < 58){
-                all_keys[i][1] = "0" + all_keys[i][1];
-            }
-        }
-        
-        all_keys.sort(function(a, b){return a[1].localeCompare(b[1]);});
-        var chroms_innerHTML = "";
-        chroms_innerHTML += "<table width=\"100%\" border=0 cellspacing=0 cellpadding=0><tr>";
-        for (var i = 0; i < all_keys.length; ++i){
-            chroms_innerHTML += "<td align=\"center\"><canvas id=\"chromosome-" + all_keys[i][0] + "\">Your browser does not support the HTML5 canvas tag.</canvas></td>";
-            chromosome_map["chromosome-" + all_keys[i][0]] = i;
-        }
-        chroms_innerHTML += "</tr></table>";
-        chroms.innerHTML = chroms_innerHTML;
-        
-        for (var i = 0; i < all_keys.length; ++i){
-            var key = all_keys[i][0];
-            var chrm = document.getElementById("chromosome-" + key);
-            var new_chromosome = new Chromosome(key, ideom_data[key], chrm.getContext("2d"), wdt, hgt);
-            chromosomes.push(new_chromosome);
-            max_bases = Math.max(max_bases, new_chromosome.bases);
-            
-            chrm.addEventListener("click", chromosome_clicked, false);
-            chrm.addEventListener("mousedown", chromosome_mousedown, false);
-        }
-        for (var i = 0; i < chromosomes.length; ++i){
-            chromosomes[i].offset = Math.min(hgt * (1 - chromosomes[i].bases / max_bases), hgt - wdt);
-            chromosomes[i].inner_height = chromosomes[i].height - chromosomes[i].offset;
-        }
-        for (var i = 0; i < chromosomes.length; ++i){
-            chromosomes[i].draw();
-        }
-    }
-}
-xmlhttp_chr.open("GET", "/qsdb/cgi-bin/get-chromosomes.py", true);
-xmlhttp_chr.send();
+
+
 
 
 
@@ -703,22 +653,6 @@ function toggleBranch(event) {
     }
 }
 
-// get loci
-var xmlhttploci = new XMLHttpRequest();
-xmlhttploci.onreadystatechange = function() {
-    if (xmlhttploci.readyState == 4 && xmlhttploci.status == 200) {
-        var locus_data = JSON.parse(xmlhttploci.responseText);
-        var locus_select = document.getElementById("loci");
-        for (var i = 0; i < locus_data.length; ++i){
-            var option = document.createElement("option");
-            option.text = locus_data[i][1];
-            option.id = locus_data[i][0];
-            locus_select.add(option);
-        }
-    }
-}
-xmlhttploci.open("GET", "/qsdb/cgi-bin/get-loci.py", true);
-xmlhttploci.send();
 
 
 function recursive_list_adding(function_tree){
@@ -733,43 +667,6 @@ function recursive_list_adding(function_tree){
     }
     return ret_text;
 }
-
-
-// get functions
-var xmlhttpfunctions = new XMLHttpRequest();
-xmlhttpfunctions.onreadystatechange = function() {
-    if (xmlhttpfunctions.readyState == 4 && xmlhttpfunctions.status == 200) {
-        var function_data = JSON.parse(xmlhttpfunctions.responseText);
-        var id_dict = {};
-        var function_tree = [];
-        
-        for (var i = 0; i < function_data.length; ++i){
-            var function_row = function_data[i];
-            if (function_row[2] == 0){
-                function_tree = [function_row[0], function_row[1], function_row[3], []];
-                id_dict[function_row[0]] = function_tree;
-                continue;
-            }
-            if (function_row[2] in id_dict){
-                var node = [function_row[0], function_row[1], function_row[3], []];
-                id_dict[function_row[2]][3].push(node);
-                id_dict[function_row[0]] = node;
-            }
-            else {
-                console.log("Error while loading functions, index " + function_row[2] + " is missing!");
-                return;
-            }
-        }
-        
-        var functions_tree_content = "<ul id=\"LinkedList1\" class=\"LinkedList\" style=\"padding-left:0;\">";
-        functions_tree_content += recursive_list_adding(function_tree[3]);
-        functions_tree_content += "</ul>";
-        document.getElementById("function_search_field").innerHTML = functions_tree_content;
-        activateTree(document.getElementById("LinkedList1"));
-    }
-}
-xmlhttpfunctions.open("GET", "/qsdb/cgi-bin/get-functions.py", true);
-xmlhttpfunctions.send();
 
 
 
@@ -827,6 +724,117 @@ function key_down(event){
         }
     }    
 }
+
+// function for loading chromosome, loci, functions data
+function load_all_data(){
+    // get functions
+    var xmlhttpfunctions = new XMLHttpRequest();
+    xmlhttpfunctions.onreadystatechange = function() {
+        if (xmlhttpfunctions.readyState == 4 && xmlhttpfunctions.status == 200) {
+            var function_data = JSON.parse(xmlhttpfunctions.responseText);
+            var id_dict = {};
+            var function_tree = [];
+            
+            for (var i = 0; i < function_data.length; ++i){
+                var function_row = function_data[i];
+                if (function_row[2] == 0){
+                    function_tree = [function_row[0], function_row[1], function_row[3], []];
+                    id_dict[function_row[0]] = function_tree;
+                    continue;
+                }
+                if (function_row[2] in id_dict){
+                    var node = [function_row[0], function_row[1], function_row[3], []];
+                    id_dict[function_row[2]][3].push(node);
+                    id_dict[function_row[0]] = node;
+                }
+                else {
+                    console.log("Error while loading functions, index " + function_row[2] + " is missing!");
+                    return;
+                }
+            }
+            
+            var functions_tree_content = "<ul id=\"LinkedList1\" class=\"LinkedList\" style=\"padding-left:0;\">";
+            functions_tree_content += recursive_list_adding(function_tree[3]);
+            functions_tree_content += "</ul>";
+            document.getElementById("function_search_field").innerHTML = functions_tree_content;
+            activateTree(document.getElementById("LinkedList1"));
+        }
+    }
+    xmlhttpfunctions.open("GET", "/qsdb/cgi-bin/get-functions.py", true);
+    xmlhttpfunctions.send();
+    
+    
+    // get loci
+    var xmlhttploci = new XMLHttpRequest();
+    xmlhttploci.onreadystatechange = function() {
+        if (xmlhttploci.readyState == 4 && xmlhttploci.status == 200) {
+            var locus_data = JSON.parse(xmlhttploci.responseText);
+            var locus_select = document.getElementById("loci");
+            for (var i = 0; i < locus_data.length; ++i){
+                var option = document.createElement("option");
+                option.text = locus_data[i][1];
+                option.id = locus_data[i][0];
+                locus_select.add(option);
+            }
+        }
+    }
+    xmlhttploci.open("GET", "/qsdb/cgi-bin/get-loci.py", true);
+    xmlhttploci.send();
+    
+    
+    // get chromosome data
+    var xmlhttp_chr = new XMLHttpRequest();
+    xmlhttp_chr.onreadystatechange = function() {
+        if (xmlhttp_chr.readyState == 4 && xmlhttp_chr.status == 200) {
+            var ideom_data = JSON.parse(xmlhttp_chr.responseText);
+            var max_bases = 0;
+            var all_keys = Object.keys(ideom_data);
+            var max_len = 0;
+            for (var i = 0; i < all_keys.length; ++i){
+                all_keys[i] = [all_keys[i], all_keys[i]];
+                max_len = Math.max(all_keys[i].length, max_len);
+            }
+            
+            
+            for (var i = 0; i < all_keys.length; ++i){
+                while (all_keys[i][1].length < max_len && 48 <= all_keys[i][1].charCodeAt(0) && all_keys[i][1].charCodeAt(0) < 58){
+                    all_keys[i][1] = "0" + all_keys[i][1];
+                }
+            }
+            
+            all_keys.sort(function(a, b){return a[1].localeCompare(b[1]);});
+            var chroms_innerHTML = "";
+            chroms_innerHTML += "<table width=\"100%\" border=0 cellspacing=0 cellpadding=0><tr>";
+            for (var i = 0; i < all_keys.length; ++i){
+                chroms_innerHTML += "<td align=\"center\"><canvas id=\"chromosome-" + all_keys[i][0] + "\">Your browser does not support the HTML5 canvas tag.</canvas></td>";
+                chromosome_map["chromosome-" + all_keys[i][0]] = i;
+            }
+            chroms_innerHTML += "</tr></table>";
+            chroms.innerHTML = chroms_innerHTML;
+            
+            for (var i = 0; i < all_keys.length; ++i){
+                var key = all_keys[i][0];
+                var chrm = document.getElementById("chromosome-" + key);
+                var new_chromosome = new Chromosome(key, ideom_data[key], chrm.getContext("2d"), wdt, hgt);
+                chromosomes.push(new_chromosome);
+                max_bases = Math.max(max_bases, new_chromosome.bases);
+                
+                chrm.addEventListener("click", chromosome_clicked, false);
+                chrm.addEventListener("mousedown", chromosome_mousedown, false);
+            }
+            for (var i = 0; i < chromosomes.length; ++i){
+                chromosomes[i].offset = Math.min(hgt * (1 - chromosomes[i].bases / max_bases), hgt - wdt);
+                chromosomes[i].inner_height = chromosomes[i].height - chromosomes[i].offset;
+            }
+            for (var i = 0; i < chromosomes.length; ++i){
+                chromosomes[i].draw();
+            }
+        }
+    }
+    xmlhttp_chr.open("GET", "/qsdb/cgi-bin/get-chromosomes.py", true);
+    xmlhttp_chr.send();
+}
+load_all_data();
 
 var kr_keys = [];
 var back_function = 0;
