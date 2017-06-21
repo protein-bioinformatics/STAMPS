@@ -1,4 +1,4 @@
-#!/home/dominik.kopczynski/anaconda3/bin/python3.5
+#!/usr/bin/python3
 
 from pymysql import connect, cursors
 from cgi import FieldStorage
