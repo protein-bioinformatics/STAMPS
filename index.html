@@ -224,7 +224,11 @@ The usage, selling or handing of the contact data written in this imprint is not
     
         
     </div>
-    </td><td rowspan=2 width=100%>
+    </td><td rowspan=2 width=100% valign="top">
+        <div id="chromosome_information">Mouse</div>
+        <table height="100%" width=100%>
+            <tr><td>aenae</td></tr>
+        </table>
         <table width=100%><tr><td id="error_filter_text_chromosome" style="color: red; font-weight: bold;">
         </td><td align=right><button onclick="hide_chromosome_search();" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(3);">Next</button>
         </td></tr></table>
@@ -259,9 +263,11 @@ The usage, selling or handing of the contact data written in this imprint is not
 </body>
 <script>
 
-var chromosomes = [];
+var chromosomes = {};
+var chromosome_keys = [];
 var chromosome_map = {};
 var chromosome_data = {};
+var chromosome_selected = -1;
 
 function Band(data){
     this.arm = data[0];
@@ -282,10 +288,24 @@ function Band(data){
 }
 
 function unset_chromosome_panels(){
-    for (var i = 0; i < chromosomes.length; ++i){
-        chromosomes[i].unset_panel();
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        var key = chromosome_keys[i];
+        chromosomes[key].unset_panel();
     }
 }
+
+
+function change_chromosome_information(){
+    var chr_info = "Mouse";
+    
+    if (chromosome_selected != -1){
+        chr_info += ", chromosome " + chromosome_selected;
+        chr_info += ", bp: " + chromosomes[chromosome_selected].panel_base_start;
+        chr_info += " - " + (chromosomes[chromosome_selected].panel_base_start + chromosomes[chromosome_selected].panel_height);
+    }
+    document.getElementById("chromosome_information").innerHTML = chr_info;
+}
+
 
 function Chromosome(name, data, ctx, wdt, hgt){
     this.name = name;
@@ -429,12 +449,14 @@ function Chromosome(name, data, ctx, wdt, hgt){
         if (mouse_pos.y < this.offset) return;
         if (this.panel_visible && this.mouse_over_panel(e, mouse_pos)) return;
         
-        this.panel_base_start = (mouse_pos.y - this.offset) / this.inner_height * this.bases - this.panel_height / 2;
-            this.panel_base_start = Math.max(0, this.panel_base_start);
-            this.panel_base_start = Math.min(this.panel_base_start, this.bases - this.panel_height);
+        this.panel_base_start = Math.floor((mouse_pos.y - this.offset) / this.inner_height * this.bases - this.panel_height / 2);
+        this.panel_base_start = Math.max(0, this.panel_base_start);
+        this.panel_base_start = Math.min(this.panel_base_start, this.bases - this.panel_height);
     
         unset_chromosome_panels();
         this.panel_visible = true;
+        chromosome_selected = this.name;
+        change_chromosome_information();
         this.draw();
     }
     
@@ -460,6 +482,7 @@ function Chromosome(name, data, ctx, wdt, hgt){
             this.panel_base_start = Math.floor((mouse_pos.y - this.panel_move + this.panel_move_start) / this.inner_height * this.bases);
             this.panel_base_start = Math.max(0, this.panel_base_start);
             this.panel_base_start = Math.min(this.panel_base_start, this.bases - this.panel_height);
+            change_chromosome_information();
             this.draw();
         }
     }
@@ -470,15 +493,16 @@ function Chromosome(name, data, ctx, wdt, hgt){
         if (this.panel_visible){
             var diff = ft * (e.detail < 0 ? 1 : -1);
             if (this.panel_height + diff >= 10000000){
-                this.panel_base_start -= ft / 2 * (e.detail < 0 ? 1 : -1);
+                this.panel_base_start -= Math.floor(ft / 2 * (e.detail < 0 ? 1 : -1));
             }
-            this.panel_height += ft * (e.detail < 0 ? 1 : -1);
+            this.panel_height += Math.floor(ft * (e.detail < 0 ? 1 : -1));
             this.panel_height = Math.max(10000000, this.panel_height);
             this.panel_height = Math.min(this.bases, this.panel_height);
             
             
             if (this.panel_base_start < 0) this.panel_base_start = 0;
-            if (this.panel_base_start + this.panel_height >= this.bases) this.panel_base_start = this.bases - this.panel_height;
+            if (this.panel_base_start + this.panel_height >= this.bases) this.panel_base_start = Math.floor(this.bases - this.panel_height);
+            change_chromosome_information();
             this.draw();
         }
     }
@@ -487,12 +511,14 @@ function Chromosome(name, data, ctx, wdt, hgt){
 
 function chromosome_clicked(e){
     var mouse_pos = get_mouse_pos(e.target, e);
-    chromosomes[chromosome_map[e.target.id]].clicked(e, mouse_pos);
+    var key = e.target.id.replace("chromosome-", "");
+    chromosomes[key].clicked(e, mouse_pos);
 }
 
 function chromosome_mousedown(e){
     var mouse_pos = get_mouse_pos(e.target, e);
-    chromosomes[chromosome_map[e.target.id]].mouse_down(e, mouse_pos, e.target.getBoundingClientRect());
+    var key = e.target.id.replace("chromosome-", "");
+    chromosomes[key].mouse_down(e, mouse_pos, e.target.getBoundingClientRect());
 }
 
 
@@ -501,20 +527,23 @@ function chromosome_mousemove(e){
         x: e.clientX,
         y: e.clientY
     };
-    for (var i = 0; i < chromosomes.length; ++i){
-        chromosomes[i].mouse_move(e, mouse_pos);
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        var key = chromosome_keys[i];
+        chromosomes[key].mouse_move(e, mouse_pos);
     }
 }
 
 function chromosome_mouseup(e){
-    for (var i = 0; i < chromosomes.length; ++i){
-        chromosomes[i].mouse_up(e);
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        var key = chromosome_keys[i];
+        chromosomes[key].mouse_up(e);
     }
 }
 
 function chromosome_mouse_wheel(e){
-    for (var i = 0; i < chromosomes.length; ++i){
-        chromosomes[i].mouse_wheel(e);
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        var key = chromosome_keys[i];
+        chromosomes[key].mouse_wheel(e);
     }
 }
 
@@ -682,7 +711,6 @@ function key_down(event){
     var k_code = [75, 78, 73, 71, 72, 84, 82, 73, 68, 69, 82];
     
     
-    //console.log(document.getElementById("how_to_nav").style);
     
     kr_keys.push(event.which);
     while (kr_keys.length > 11) kr_keys.shift();
@@ -782,52 +810,75 @@ function load_all_data(){
     xmlhttploci.send();
     
     
-    // get chromosome data
+    // get chromosome bands
     var xmlhttp_chr = new XMLHttpRequest();
     xmlhttp_chr.onreadystatechange = function() {
         if (xmlhttp_chr.readyState == 4 && xmlhttp_chr.status == 200) {
             var ideom_data = JSON.parse(xmlhttp_chr.responseText);
             var max_bases = 0;
-            var all_keys = Object.keys(ideom_data);
+            chromosome_keys = Object.keys(ideom_data);
             var max_len = 0;
-            for (var i = 0; i < all_keys.length; ++i){
-                all_keys[i] = [all_keys[i], all_keys[i]];
-                max_len = Math.max(all_keys[i].length, max_len);
+            for (var i = 0; i < chromosome_keys.length; ++i){
+                chromosome_keys[i] = [chromosome_keys[i], chromosome_keys[i]];
+                max_len = Math.max(chromosome_keys[i].length, max_len);
             }
             
             
-            for (var i = 0; i < all_keys.length; ++i){
-                while (all_keys[i][1].length < max_len && 48 <= all_keys[i][1].charCodeAt(0) && all_keys[i][1].charCodeAt(0) < 58){
-                    all_keys[i][1] = "0" + all_keys[i][1];
+            for (var i = 0; i < chromosome_keys.length; ++i){
+                while (chromosome_keys[i][1].length < max_len && 48 <= chromosome_keys[i][1].charCodeAt(0) && chromosome_keys[i][1].charCodeAt(0) < 58){
+                    chromosome_keys[i][1] = "0" + chromosome_keys[i][1];
                 }
             }
             
-            all_keys.sort(function(a, b){return a[1].localeCompare(b[1]);});
+            chromosome_keys.sort(function(a, b){return a[1].localeCompare(b[1]);});
+            var chr_tmp = chromosome_keys;
+            chromosome_keys = [];
+            for (var i = 0; i < chr_tmp.length; ++i) chromosome_keys.push(chr_tmp[i][0]);
+            
+        
             var chroms_innerHTML = "";
             chroms_innerHTML += "<table width=\"100%\" border=0 cellspacing=0 cellpadding=0><tr>";
-            for (var i = 0; i < all_keys.length; ++i){
-                chroms_innerHTML += "<td align=\"center\"><canvas id=\"chromosome-" + all_keys[i][0] + "\">Your browser does not support the HTML5 canvas tag.</canvas></td>";
-                chromosome_map["chromosome-" + all_keys[i][0]] = i;
+            for (var i = 0; i < chromosome_keys.length; ++i){
+                chroms_innerHTML += "<td align=\"center\"><canvas id=\"chromosome-" + chromosome_keys[i] + "\">Your browser does not support the HTML5 canvas tag.</canvas></td>";
+                chromosome_map["chromosome-" + chromosome_keys[i]] = i;
             }
             chroms_innerHTML += "</tr></table>";
             chroms.innerHTML = chroms_innerHTML;
             
-            for (var i = 0; i < all_keys.length; ++i){
-                var key = all_keys[i][0];
+            for (var i = 0; i < chromosome_keys.length; ++i){
+                var key = chromosome_keys[i];
                 var chrm = document.getElementById("chromosome-" + key);
                 var new_chromosome = new Chromosome(key, ideom_data[key], chrm.getContext("2d"), wdt, hgt);
-                chromosomes.push(new_chromosome);
+                chromosomes[key] = new_chromosome;
                 max_bases = Math.max(max_bases, new_chromosome.bases);
                 
                 chrm.addEventListener("click", chromosome_clicked, false);
                 chrm.addEventListener("mousedown", chromosome_mousedown, false);
             }
-            for (var i = 0; i < chromosomes.length; ++i){
-                chromosomes[i].offset = Math.min(hgt * (1 - chromosomes[i].bases / max_bases), hgt - wdt);
-                chromosomes[i].inner_height = chromosomes[i].height - chromosomes[i].offset;
+            for (var i = 0; i < chromosome_keys.length; ++i){
+                var key = chromosome_keys[i];
+                chromosomes[key].offset = Math.min(hgt * (1 - chromosomes[key].bases / max_bases), hgt - wdt);
+                chromosomes[key].inner_height = chromosomes[key].height - chromosomes[key].offset;
             }
-            for (var i = 0; i < chromosomes.length; ++i){
-                chromosomes[i].draw();
+            for (var i = 0; i < chromosome_keys.length; ++i){
+                var key = chromosome_keys[i];
+                chromosomes[key].draw();
+            }
+            
+            
+            // get chromosome data
+            var chromosome_requests = {};
+            for (var i = 0; i < chromosome_keys.length; ++i){
+                var key = chromosome_keys[i];
+                chromosome_requests[key] = new XMLHttpRequest();
+                chromosome_requests[key].chromosome_key = key;
+                chromosome_requests[key].onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        chromosome_data[this.chromosome_key] = JSON.parse(this.responseText);
+                    }
+                }
+                chromosome_requests[key].open("GET", "/qsdb/cgi-bin/get-chromosome-data.py?chromosome=" + key, true);
+                chromosome_requests[key].send();
             }
         }
     }
