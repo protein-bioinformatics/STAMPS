@@ -1,4 +1,4 @@
-#!/usr//bin/python3
+#!/usr/bin/python3
 
 import json
 from pymysql import connect, cursors
