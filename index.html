@@ -44,7 +44,7 @@
     </tr></table>
 </div>
 
-<div style="position:fixed; width:100%; height: 130px; bottom:0px;">
+<div style="position:fixed; width:100%; height: 130px; bottom: 0px;">
     <div id="navigation_startpage" class="navigation_startpage">
     <table height=130>
     <tr><td width="50%">
@@ -219,27 +219,31 @@ The usage, selling or handing of the contact data written in this imprint is not
 
 
 <div id="chromosome_search" class="disclaimer-90">
-    <table cellspacing=20><tr><td>
-    <div id="function_chromosome_field" style="min-width: 800px; width: 800px; border-width: 1px; overflow-x: scroll;">
-    
-        
+    <div style="width: 48%; height: 90%; margin: 10px; overflow-y: auto; float: left;">
+        <div id="function_chromosome_field" style="border-width: 1px;"></div>
+
+        <div height=100% style="border-width: 2px; border-style: solid; border-color: black; border-radius: 25px;">
+            &nbsp;<br>
+            <b>Filter criteria:</b><p>
+            <div id="filter_panel_chromosome"></div><br>
+        </div>
     </div>
-    </td><td rowspan=2 width=100% valign="top">
-        <div id="chromosome_information">Mouse</div>
-        <table height="100%" width=100%>
-            <tr><td>aenae</td></tr>
-        </table>
-        <table width=100%><tr><td id="error_filter_text_chromosome" style="color: red; font-weight: bold;">
-        </td><td align=right><button onclick="hide_chromosome_search();" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(3);">Next</button>
-        </td></tr></table>
-    </td></tr><tr>
+    <div id="chromosome_information" style="margin-top: 10px; margin-right: 10px; margin-left: 10px;">Mouse</div><p>
+    <div style="width: 48%; height: 85%; overflow: auto;">
+        <div id="chromosome_information_table"></div>
+    </div>
     
-    <td height=100% style="border-width: 2px; border-style: solid; border-color: black; border-radius: 25px;">&nbsp;<br>
-    <b>Filter criteria:</b><p>
-    <div id="filter_panel_chromosome">
-    </div><br>
-    </td></tr>
-    </table>
+    <div style="position: absolute; width:100%; bottom: 0px;">
+        <table width="100%" cellspacing=20>
+            <tr>
+                <td id="error_filter_text_chromosome" style="color: red; font-weight: bold;"></td>
+                <td align=right>
+                    <button onclick="hide_chromosome_search();" style="display: inline;">Cancel</button>&nbsp;
+                    <button onclick="check_filter_valid(3);">Next</button>
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
 <div id="chromosome_search_background" class="disclaimer_background"></div>
 
@@ -295,15 +299,39 @@ function unset_chromosome_panels(){
 }
 
 
-function change_chromosome_information(){
+function chromosome_selection_changed(content){
     var chr_info = "Mouse";
+    var chr_content = "";
     
     if (chromosome_selected != -1){
         chr_info += ", chromosome " + chromosome_selected;
         chr_info += ", bp: " + chromosomes[chromosome_selected].panel_base_start;
         chr_info += " - " + (chromosomes[chromosome_selected].panel_base_start + chromosomes[chromosome_selected].panel_height);
+        
+        var chrm_dat = chromosome_data[chromosome_selected];
+        var chr_tab_colors = ["#eeeeee", "#ffffff"];
+        if (content){
+            chr_content += "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">";
+            for (var i = 0, j = 0; i < chrm_dat.length; ++i){
+                if (j % 20 == 0){
+                    chr_content += "<tr><td width=\"50%\" bgcolor=\"" + chr_tab_colors[j & 1] + "\"><b><i>Accession</i></b></td><td bgcolor=\"" + chr_tab_colors[j & 1] + "\"><b><i>Name</i><b></td></tr>";
+                    j += 1;
+                }
+                var chr_strt = parseInt(chrm_dat[i][7]);
+                if (chr_strt >= chromosomes[chromosome_selected].panel_base_start + chromosomes[chromosome_selected].panel_height) break;
+                
+                // filtern
+                if (chr_strt >= chromosomes[chromosome_selected].panel_base_start){
+                    chr_content += "<tr><td bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][5] + "</td><td bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][1] + "</td></tr>";
+                    j += 1;
+                }
+            }
+            chr_content += "</table>";
+        }
+        
     }
     document.getElementById("chromosome_information").innerHTML = chr_info;
+    if (content) document.getElementById("chromosome_information_table").innerHTML = chr_content;
 }
 
 
@@ -456,7 +484,7 @@ function Chromosome(name, data, ctx, wdt, hgt){
         unset_chromosome_panels();
         this.panel_visible = true;
         chromosome_selected = this.name;
-        change_chromosome_information();
+        chromosome_selection_changed(true);
         this.draw();
     }
     
@@ -474,6 +502,7 @@ function Chromosome(name, data, ctx, wdt, hgt){
     }
 
     this.mouse_up = function(e){
+        if (this.panel_move != -1) chromosome_selection_changed(true);
         this.panel_move = -1;
     }
 
@@ -482,7 +511,7 @@ function Chromosome(name, data, ctx, wdt, hgt){
             this.panel_base_start = Math.floor((mouse_pos.y - this.panel_move + this.panel_move_start) / this.inner_height * this.bases);
             this.panel_base_start = Math.max(0, this.panel_base_start);
             this.panel_base_start = Math.min(this.panel_base_start, this.bases - this.panel_height);
-            change_chromosome_information();
+            chromosome_selection_changed(false);
             this.draw();
         }
     }
@@ -502,7 +531,7 @@ function Chromosome(name, data, ctx, wdt, hgt){
             
             if (this.panel_base_start < 0) this.panel_base_start = 0;
             if (this.panel_base_start + this.panel_height >= this.bases) this.panel_base_start = Math.floor(this.bases - this.panel_height);
-            change_chromosome_information();
+            chromosome_selection_changed(true);
             this.draw();
         }
     }

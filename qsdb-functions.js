@@ -2767,6 +2767,7 @@ function check_spectra(){
     var line = 0;
     var sign_right = String.fromCharCode(9656);
     var sign_down = String.fromCharCode(9662);
+    var organ_origins = ["images/heart.svg", "images/liver.svg", "images/kidney.svg", "images/lung.svg", "images/brain.svg"];
     for (var i = 0; i < proteins_content.length; ++i){
         var current_prot = basket[proteins_content[i][1]];
         
@@ -2781,7 +2782,11 @@ function check_spectra(){
         
         
         
-        inner_html += "<tr id=\"" + current_prot.id + "\"><td width=\"80%\" bgcolor=\"" + bg_color + "\" onclick=\"document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: pointer;\">&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"protein_sign_" + i + "\">" + sign_right + "</div>&nbsp;" + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " Peptides</td><td bgcolor=\"" + bg_color + "\" align=\"right\"><img src=\"images/delete.png\" width=\"16\" height=\"16\" onclick=\"delete_from_protein_table(" + current_prot.id + ");\" /></td></tr>";
+        inner_html += "<tr id=\"" + current_prot.id + "\"><td width=\"70%\" bgcolor=\"" + bg_color + "\" onclick=\"document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: pointer;\">&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"protein_sign_" + i + "\">" + sign_right + "</div>&nbsp;" + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " Peptides</td><td width=\"25%\" bgcolor=\"" + bg_color + "\">";
+        for (var ii = 0; ii < organ_origins.length; ++ii){
+            inner_html += "<img src=\"" + organ_origins[ii] + "\" height=20 width=20 />";
+        }
+        inner_html += "</td><td bgcolor=\"" + bg_color + "\" align=\"right\"><img src=\"images/delete.png\" width=\"16\" height=\"16\" onclick=\"delete_from_protein_table(" + current_prot.id + ");\" /></td></tr>";
         
         inner_html += "<tr><td colspan=\"2\" width=\"100%\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" id='peptide_" + peps + "' style=\"display: none;\">";
         for (var j = 0; j < current_prot.peptides.length; ++j){
