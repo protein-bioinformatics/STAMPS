@@ -259,7 +259,8 @@ The usage, selling or handing of the contact data written in this imprint is not
         <input type="text" onchange="change_match_error_value();" id="error_value" value="-" size=1 style="text-align: right;"><label id="unit">ppm</label>
     </fieldset>
     <div id="spectra_panel" class="spectra_panel"></div>
-    <table width="100%" height="100%"><tr><td valign="bottom" align="right"><button onclick="hide_check_spectra();" style="display: inline;">Cancel</button> <button onclick="hide_check_spectra(); back_function();">Back</button> <button onclick="hide_check_spectra(); download_assay();">Go to Download</button></td></tr></table>
+    <div id="filter_panel_check_spectra" class="filter_panel_check_spectra">uia</div>
+    <table width="100%" height="100%"><tr><td valign="bottom"><font color="blue" style="cursor: pointer;" onclick="filter_settings_clicked();" id="filter_label">Show filter settings</font></td><td valign="bottom" align="right"><button onclick="hide_check_spectra();" style="display: inline;">Cancel</button> <button onclick="hide_check_spectra(); back_function();">Back</button> <button onclick="hide_check_spectra(); download_assay();">Go to Download</button></td></tr></table>
 </div>
 <div id="check_spectra_background" class="check_spectra_background"></div>
 
@@ -272,6 +273,69 @@ var chromosome_keys = [];
 var chromosome_map = {};
 var chromosome_data = {};
 var chromosome_selected = -1;
+
+
+var filter_panel_data = "<div id=\"filter_panel\" style=\"display: none;\"> \
+    <table> \
+        <tr><td>Min. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"min_peptide_length\" /><td></tr> \
+        <tr><td>Max. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"max_peptide_length\" /><td></tr> \
+        <tr><td>Min. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"min_precursor_charge\" /><td></tr> \
+        <tr><td>Max. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"max_precursor_charge\" /><td></tr> \
+        <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td><td></tr> \
+        <tr><td>Oxydation of M</td><td> \
+        <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" /> off \
+        <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
+        <input type=\"radio\" id=\"oxy_m_fix\" name=\"oxy_m\" /> fixed \
+        <td></tr> \
+        <tr><td>Carbamidomethylation of C</td><td> \
+        <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" /> off \
+        <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
+        <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
+        <td></tr> \
+        <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
+        document.getElementById('min_peptide_length').value = 8; \
+        document.getElementById('max_peptide_length').value = 25; \
+        document.getElementById('min_precursor_charge').value = 2; \
+        document.getElementById('max_precursor_charge').value = 3; \
+        document.getElementById('oxy_m_off').checked = true; \
+        document.getElementById('carba_c_off').checked = true; \
+        ;\">default settings</td></tr> \
+    </table> \
+</div>";
+
+
+var filter_panel_data_landscape = "<div id=\"filter_panel\" style=\"display: none;\"> \
+    <table><tr><td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \
+        <table> \
+            <tr><td>Min. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"min_peptide_length\" /><td></tr> \
+            <tr><td>Max. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"max_peptide_length\" /><td></tr> \
+            <tr><td>Min. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"min_precursor_charge\" /><td></tr> \
+            <tr><td>Max. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"max_precursor_charge\" /><td></tr> \
+            <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
+            document.getElementById('min_peptide_length').value = 8; \
+            document.getElementById('max_peptide_length').value = 25; \
+            document.getElementById('min_precursor_charge').value = 2; \
+            document.getElementById('max_precursor_charge').value = 3; \
+            document.getElementById('oxy_m_off').checked = true; \
+            document.getElementById('carba_c_off').checked = true; \
+            ;\">default settings</td></tr> \
+        </table></td> \
+        <td valign=\"top\"><table> \
+            <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td><td></tr> \
+            <tr><td>Oxydation of M</td><td> \
+            <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" /> off \
+            <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
+            <input type=\"radio\" id=\"oxy_m_fix\" name=\"oxy_m\" /> fixed \
+            <td></tr> \
+            <tr><td>Carbamidomethylation of C</td><td> \
+            <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" /> off \
+            <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
+            <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
+            <td></tr> \
+        </table></td> \
+    </td></tr></table> \
+</div>";
+
 
 function Band(data){
     this.arm = data[0];
@@ -288,6 +352,37 @@ function Band(data){
     
     this.mouse_click = function(mouse){
         return false;
+    }
+}
+
+
+function filter_settings_clicked(){
+    if (!filter_parameters["filter_panel_visible"]){
+        document.getElementById("filter_label").innerHTML = "Apply filter settings";
+        document.getElementById("filter_panel_accession").innerHTML = "";
+        document.getElementById("filter_panel_locus").innerHTML = "";
+        document.getElementById("filter_panel_chromosome").innerHTML = "";
+        document.getElementById("filter_panel_function").innerHTML = "";
+        document.getElementById("filter_panel_check_spectra").style.display = "block";
+        document.getElementById("filter_panel_check_spectra").innerHTML = filter_panel_data_landscape;
+        document.getElementById("filter_panel").style.display = "block";
+        load_filter_parameters();
+        filter_parameters["filter_panel_visible"] = true;
+        resize_ms_view();
+        console.log(document.getElementById("filter_panel_check_spectra").innerHTML);
+    }
+    else {
+        adopt_filter_parameters();
+        document.getElementById("filter_label").innerHTML = "Show filter settings";
+        document.getElementById("filter_panel_check_spectra").innerHTML = "";
+        document.getElementById("filter_panel_check_spectra").style.display = "none";
+        filter_parameters["filter_panel_visible"] = false;
+        basket = {};
+        for (var key in protein_dictionary){
+            protein_dictionary[key].filtering();
+            if (protein_dictionary[key].filter_valid) basket[key] = protein_dictionary[key];
+        }
+        check_spectra();
     }
 }
 
@@ -587,6 +682,18 @@ chroms.innerHTML = "";
 
 // tpyes 0: accession, 1: locus, 2: function, 3: chromosome
 function check_filter_valid(filter_type){
+
+    var selected_functions = false;
+    if (filter_type == 1){
+        var loci_select = document.getElementById("loci");
+        for (var i = 0; i < loci_select.options.length; ++i){
+            if (loci_select.options[i].selected){
+                selected_functions = true;
+                break;
+            }
+        }
+    }
+
     
     if (filter_type == 0 && document.getElementById("accessions").value.length == 0){
         document.getElementById("error_filter_text_accession").innerHTML = "Error: no accession number provided!";
@@ -596,6 +703,9 @@ function check_filter_valid(filter_type){
     }
     else if (parseInt(document.getElementById("min_precursor_charge").value) > parseInt(document.getElementById("max_precursor_charge").value)) {
         document.getElementById("error_filter_text_accession").innerHTML = "Error: minimal precursor charge higher than maximal!";
+    }
+    else if (filter_type == 1 && !selected_functions){
+        document.getElementById("error_filter_text_locus").innerHTML = "Error: no compartment selected!";
     }
     else {
         adopt_filter_parameters();
@@ -626,35 +736,6 @@ function check_filter_valid(filter_type){
         }
     }
 }
-
-
-var filter_panel_data = "<div id=\"filter_panel\" style=\"display: none;\"> \
-    <table> \
-        <tr><td>Min. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"min_peptide_length\" /><td></tr> \
-        <tr><td>Max. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"max_peptide_length\" /><td></tr> \
-        <tr><td>Min. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"min_precursor_charge\" /><td></tr> \
-        <tr><td>Max. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"max_precursor_charge\" /><td></tr> \
-        <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td><td></tr> \
-        <tr><td>Oxydation of M</td><td> \
-        <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" /> off \
-        <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
-        <input type=\"radio\" id=\"oxy_m_fix\" name=\"oxy_m\" /> fixed \
-        <td></tr> \
-        <tr><td>Carbamidomethylation of C</td><td> \
-        <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" /> off \
-        <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
-        <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
-        <td></tr> \
-        <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
-        document.getElementById('min_peptide_length').value = 8; \
-        document.getElementById('max_peptide_length').value = 25; \
-        document.getElementById('min_precursor_charge').value = 2; \
-        document.getElementById('max_precursor_charge').value = 3; \
-        document.getElementById('oxy_m_off').checked = true; \
-        document.getElementById('carba_c_off').checked = true; \
-        ;\">default settings</td></tr> \
-    </table> \
-</div>";
 
 
 function activateTree(oList) {

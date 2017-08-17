@@ -330,8 +330,18 @@ div.spectra_panel {
     border: 1px solid #d3d3d3;
     margin: 0px;
     position: fixed;
-    overflow-x: hidden;
+    overflow-x: auto;
     overflow-y: scroll;
+}
+
+div.filter_panel_check_spectra {
+    background-color: white;
+    border: 1px solid #d3d3d3;
+    margin: 0px;
+    position: fixed;
+    overflow-x: auto;
+    overflow-y: auto;
+    display: none;
 }
 
 canvas.msarea {

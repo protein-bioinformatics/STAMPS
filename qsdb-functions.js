@@ -21,6 +21,7 @@ filter_parameters["oxy_m_fix"] = false;
 filter_parameters["carba_c_off"] = true;
 filter_parameters["carba_c_var"] = false;
 filter_parameters["carba_c_fix"] = false;
+filter_parameters["filte_panel_visible"] = false;
 data = [];
 data_ref = [];
 nodes = 0;
@@ -2784,7 +2785,7 @@ function check_spectra(){
         
         inner_html += "<tr id=\"" + current_prot.id + "\"><td width=\"70%\" bgcolor=\"" + bg_color + "\" onclick=\"document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: pointer;\">&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"protein_sign_" + i + "\">" + sign_right + "</div>&nbsp;" + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " Peptides</td><td width=\"25%\" bgcolor=\"" + bg_color + "\">";
         for (var ii = 0; ii < organ_origins.length; ++ii){
-            inner_html += "<img src=\"" + organ_origins[ii] + "\" height=20 width=20 />";
+            if (Math.random() > 0.5) inner_html += "<img src=\"" + organ_origins[ii] + "\" height=\"16\" width=\"16\" />";
         }
         inner_html += "</td><td bgcolor=\"" + bg_color + "\" align=\"right\"><img src=\"images/delete.png\" width=\"16\" height=\"16\" onclick=\"delete_from_protein_table(" + current_prot.id + ");\" /></td></tr>";
         
@@ -3604,6 +3605,7 @@ function request_load_proteins(data){
         if (p_id in basket) continue;
         var prot = new Protein(data[i], 0);
         protein_dictionary[prot.id] = prot;
+        prot.filtering();
         if (prot.filter_valid) basket[prot.id] = prot;
     }
     check_spectra();

@@ -170,10 +170,12 @@ function resize_ms_view(){
         t_top = 0.02;
     }
     
+    var filter_height = filter_parameters["filter_panel_visible"] ? 0.3 : 0;
+    
     document.getElementById("msarea").width = document.getElementById('check_spectra').offsetWidth * 0.695;
-    document.getElementById("msarea").height = document.getElementById('check_spectra').offsetHeight * 0.9;
+    document.getElementById("msarea").height = document.getElementById('check_spectra').offsetHeight * (0.9 - filter_height);
     document.getElementById("spectra_panel").style.width = (document.getElementById('check_spectra').offsetWidth * 0.29).toString() + "px";
-    document.getElementById("spectra_panel").style.height = (document.getElementById('check_spectra').offsetHeight * 0.9).toString() + "px";
+    document.getElementById("spectra_panel").style.height = (document.getElementById('check_spectra').offsetHeight * (0.9 - filter_height)).toString() + "px";
     
     
     var rect = document.getElementById('check_spectra').getBoundingClientRect();
@@ -183,6 +185,14 @@ function resize_ms_view(){
     document.getElementById("spectra_panel").style.left = (rect.left + (rect.right - rect.left) * 0.005).toString() + "px";
     document.getElementById("spectra_options").style.top = (rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
     document.getElementById("spectra_options").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
+    
+    if (filter_parameters["filter_panel_visible"]){
+        document.getElementById("filter_panel_check_spectra").style.left = (rect.left + (rect.right - rect.left) * 0.005).toString() + "px";
+        document.getElementById("filter_panel_check_spectra").style.top = (rect.top + (rect.bottom - rect.top) * t_top + document.getElementById("msarea").height + 5).toString() + "px";
+        document.getElementById("filter_panel_check_spectra").style.width = ((document.getElementById('check_spectra').offsetWidth * 0.695) + (rect.left + (rect.right - rect.left) * 0.3) - (rect.left + (rect.right - rect.left) * 0.005)).toString() + "px";
+        document.getElementById("filter_panel_check_spectra").style.height = (document.getElementById('check_spectra').offsetHeight * filter_height).toString() + "px";
+    }
+    
     
     var scl = (document.getElementById("msarea").width * 0.95 - document.getElementById("msarea").width * 0.05) / (right_border - left_border);
     origin_x *= scl;
