@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <set>
 #include <string>
 #include <sstream>
 #include <sqlite3.h> 
@@ -100,6 +101,7 @@ class spectrum {
         string charge;
         string mass;
         string mod_sequence;
+        set<string> tissues;
         
         spectrum(string _id) : id(_id) {}
         
@@ -118,6 +120,7 @@ class spectrum {
 class peptide {
     public:
         string peptide_seq;
+        set<string> tissues;
         vector<spectrum*> spectra;
         
         peptide(string ps) : peptide_seq(ps) {}
@@ -129,6 +132,14 @@ class peptide {
             for (int i = 0; i < spectra.size(); ++i){
                 if (i) str += ", ";
                 str += spectra.at(i)->to_string();
+                tissues.insert(spectra.at(i)->tissues.begin(), spectra.at(i)->tissues.end());
+            }
+            str += "], ";
+            str += "\"tissues\": [";
+            set<string>::iterator it = tissues.begin();
+            for (int i = 0; it != tissues.end(); ++it, ++i){
+                if (i) str += ", ";
+                str += *it;
             }
             str += "]}";
             return str;
@@ -310,8 +321,19 @@ string cleanFasta(string str){
 }
 
 
+void print_out(string response, bool compress){
+    if (compress){
+        cout << compress_string(response);        
+    }
+    else {
+        cout << response;
+    }
+}
+
+
 main(int argc, char** argv) {
     bool compress = true;
+    string response = "";
     
     if (compress){
         cout << "Content-Type: text/html" << endl;
@@ -327,7 +349,8 @@ main(int argc, char** argv) {
     
     string get_string = getenv("QUERY_STRING");
     if (!get_string.length()){
-        cout << -1;
+        response += "-1";
+        print_out(response, compress);
         return -1;
     }
     vector<string> get_entries = split(get_string, '&');  
@@ -341,7 +364,8 @@ main(int argc, char** argv) {
         }
     }
     if (pathway_id == "" || species == "" || !is_integer_number(pathway_id) || species.find("'") != string::npos){
-        cout << -1 << endl;
+        response += "-1";
+        print_out(response, compress);
         return -1;
     }
     
@@ -390,7 +414,8 @@ main(int argc, char** argv) {
     
     /* Connect to database */
     if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
-        cout << "error: " << mysql_error(conn) << endl;
+        response += "error: " + string(mysql_error(conn)) + "\n";
+        print_out(response, compress);
         return 1;
     }
     /* send SQL query */
@@ -400,7 +425,8 @@ main(int argc, char** argv) {
     
     
     if (mysql_query(conn, sql_query_nodes.c_str())) {
-        cout << "error: " << mysql_error(conn) << endl;
+        response += "error: " + string(mysql_error(conn)) + "\n";
+        print_out(response, compress);
         return 1;
     }
     res = mysql_use_result(conn);
@@ -427,7 +453,8 @@ main(int argc, char** argv) {
     sql_query_proteins += "';";
     
     if (mysql_query(conn, sql_query_proteins.c_str())) {
-        cout << "error: " << mysql_error(conn) << endl;
+        response += "error: " + string(mysql_error(conn)) + "\n";
+        print_out(response, compress);
         return 1;
     }
     res = mysql_use_result(conn);
@@ -510,8 +537,9 @@ main(int argc, char** argv) {
     
     rc = sqlite3_open((char*)parameters["sqlite_file"].c_str(), &db);
     if( rc ){
-        cout << -2 << endl;
-        exit(-2);
+        response += "-2\n";
+        print_out(response, compress);
+        return -2;
     }
     //, precursorCharge c, precursorMZ m, peptideModSeq s
     string sql_query_lite2 = "SELECT id i, peptideSeq p FROM RefSpectra;";
@@ -520,9 +548,10 @@ main(int argc, char** argv) {
     char tmp_data;
     rc = sqlite3_exec(db, sql_query_lite2.c_str(), sqlite_callback, (void*)&tmp_data, &zErrMsg);
     if( rc != SQLITE_OK ){
-        cout << -3 << endl;
+        response += "-3\n";
+        print_out(response, compress);
         sqlite3_free(zErrMsg);
-        exit(-3);
+        return -3;
     }
     
     delete occ;
@@ -535,6 +564,7 @@ main(int argc, char** argv) {
     string text_pc = "c";
     string text_mz = "m";
     string text_mod = "s";
+    string text_tissue = "t";
     for (int i = 0; i < ceil(l / t); ++i){
         string sql_query_lite = "";
         for (int j = i * t; j < min((i + 1) * t, l); ++j){
@@ -544,13 +574,15 @@ main(int argc, char** argv) {
             sql_query_lite += spectra->at(j)->id;
         }
         
-        sql_query_lite = "SELECT id i, precursorCharge c, precursorMZ m, peptideModSeq s FROM RefSpectra WHERE id IN (" + sql_query_lite + ");";
+        // quering precursor charge, m/z and modified sequence
+        string sql_query = "SELECT id i, precursorCharge c, precursorMZ m, peptideModSeq s FROM RefSpectra WHERE id IN (" + sql_query_lite + ");";
         vector< map< string, string > > spectra_data;
-        rc = sqlite3_exec(db, sql_query_lite.c_str(), sqlite_callback2, (void*)&spectra_data, &zErrMsg);
+        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback2, (void*)&spectra_data, &zErrMsg);
         if( rc != SQLITE_OK ){
-            cout << -4 << endl;
+            response += "-4\n";
+            print_out(response, compress);
             sqlite3_free(zErrMsg);
-            exit(-4);
+            return -4;
         }
         
         for(int i = 0; i < spectra_data.size(); ++i){
@@ -566,6 +598,19 @@ main(int argc, char** argv) {
             }
             s1->mass = mass;
         }
+        
+        
+        // quering possible tissue origins
+        sql_query = "SELECT RefSpectraId i, tissue t FROM Tissues WHERE RefSpectraId IN (" + sql_query_lite + ");";
+        vector< map< string, string > > tissue_data;
+        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback2, (void*)&tissue_data, &zErrMsg);
+        if( rc == SQLITE_OK ){
+            for(int i = 0; i < tissue_data.size(); ++i){
+                map< string, string > spd = tissue_data[i];
+                spectrum* s1 = all_spectra->at(spd[text_id]);
+                s1->tissues.insert(spd[text_tissue]);
+            }
+        }
     }
     
     sqlite3_close(db);
@@ -579,7 +624,8 @@ main(int argc, char** argv) {
     sql_query_rest += ");";
     
     if (mysql_query(conn, sql_query_rest.c_str())) {
-        cout << "error: " << mysql_error(conn) << endl;
+        response += "error: " + string(mysql_error(conn)) + "\n";
+        print_out(response, compress);
         return 1;
     }
     res = mysql_use_result(conn);
@@ -605,18 +651,13 @@ main(int argc, char** argv) {
     
     
 
-    string response = "[";
+    response += "[";
     for (int i = 0; i < nodes.size(); ++i){
         if (i) response += ", ";
         response += nodes.at(i)->to_string();
     }
     response += "]";
-    if (compress){
-        cout << compress_string(response);        
-    }
-    else {
-        cout << response;
-    }
+    print_out(response, compress);
     
     
     delete all_peptides;
