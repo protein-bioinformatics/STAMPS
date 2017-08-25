@@ -60,7 +60,7 @@ function mouse_move_listener(e){
     mouse_y = res.y;
         
     // shift all nodes
-    if (e.buttons & 1){
+    if (e.buttons & 2){
         if (!highlight_element || !highlight_element.mouse_down_move(res, e.which)){
             var shift_x = res.x - offsetX;
             var shift_y = res.y - offsetY;
@@ -95,7 +95,7 @@ function mouse_move_listener(e){
         offsetX = res.x;
         offsetY = res.y;
     }
-    else if (e.buttons & 7){
+    else if (e.buttons & 1){
         select_field_element.end_position = res;
         var sx = Math.min(select_field_element.start_position.x, select_field_element.end_position.x);
         var ex = Math.max(select_field_element.start_position.x, select_field_element.end_position.x);
@@ -132,7 +132,6 @@ function mouse_move_listener(e){
     }
     if(highlight_element && highlight_element.tipp) Tip(e, highlight_element.name);
     else unTip();
-    
 }
 
 

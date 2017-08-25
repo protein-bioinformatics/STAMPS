@@ -72,6 +72,8 @@ radius = metabolite_radius * factor;
 last_keys = [];
 highlighting = 0;
 basket = {};
+//tissues = {1: "images/brain.svg", 2: "images/liver.svg", 3: "images/kidney.svg", 4: milz, 5: "images/heart.svg", 6: blood, 7: fat, 8: "images/lung.svg"}
+tissues = {1: "images/brain.svg", 2: "images/liver.svg", 3: "images/kidney.svg", 5: "images/heart.svg", 8: "images/lung.svg"}
 
 
 line_width = 5;
@@ -392,8 +394,12 @@ function Peptide(data){
     this.spectra = [];
     this.filter_valid = false;
     this.user_selected = true;
+    this.tissues = new Set();
+    if ("tissues" in data) this.tissues = new Set(data['tissues']);
+    
     for (var i = 0; i < data['spectra'].length; ++i){
         this.spectra.push(new Spectrum(data['spectra'][i]));
+        
     }
     
     this.search = function(len_p, accept, masks, node_id, prot_id){
@@ -442,10 +448,12 @@ function Protein(data, ctx){
     this.fillStyle_text = disabled_text_color;
     this.ctx = ctx;
     this.user_selected = true;
+    this.tissues = new Set();
     
     for (var i = 0; i < data['peptides'].length; ++i){
         this.peptides.push(new Peptide(data['peptides'][i]));
         this.containing_spectra += this.peptides[i].spectra.length;
+        this.tissues = new Set([...this.tissues, ...this.peptides[i].tissues]);
     }
     if (this.containing_spectra){
         this.fillStyle_rect = "white";
@@ -2550,7 +2558,7 @@ function mouse_down_listener(e){
     if (!pathway_is_loaded) return;
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, e);
-    if (e.buttons & 1){
+    if (e.buttons & 2){
         
         
         if (highlight_element){
@@ -2561,7 +2569,7 @@ function mouse_down_listener(e){
         offsetX = res.x;
         offsetY = res.y;
     }
-    else if (e.buttons & 7){
+    else if (e.buttons & 1){
         if (highlight_element){
             highlight_element.mouse_down(res, e.which);
         }
@@ -2781,11 +2789,12 @@ function check_spectra(){
         }
         
         
-        
-        
         inner_html += "<tr id=\"" + current_prot.id + "\"><td width=\"70%\" bgcolor=\"" + bg_color + "\" onclick=\"document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: pointer;\">&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"protein_sign_" + i + "\">" + sign_right + "</div>&nbsp;" + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " Peptides</td><td width=\"25%\" bgcolor=\"" + bg_color + "\">";
-        for (var ii = 0; ii < organ_origins.length; ++ii){
-            if (Math.random() > 0.5) inner_html += "<img src=\"" + organ_origins[ii] + "\" height=\"16\" width=\"16\" />";
+        
+        var curr_tissues = Array.from(current_prot.tissues).sort();
+        
+        for (var t = 0; t < curr_tissues.length; ++t){
+            if (curr_tissues[t] in tissues) inner_html += "<img src=\"" + tissues[curr_tissues[t]] + "\" alt=\"huhu\" height=\"16\" width=\"16\" />";
         }
         inner_html += "</td><td bgcolor=\"" + bg_color + "\" align=\"right\"><img src=\"images/delete.png\" width=\"16\" height=\"16\" onclick=\"delete_from_protein_table(" + current_prot.id + ");\" /></td></tr>";
         

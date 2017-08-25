@@ -10,8 +10,9 @@ import hashlib
 conf = {}
 with open("../admin/qsdb.conf", mode="rt") as fl:
     for line in fl:
-        if line.strip().strip(" ")[0] == "#": continue
-        token = line.strip().strip(" ").split("=")
+        line = line.strip().strip(" ")
+        if len(line) < 1 or line[0] == "#": continue
+        token = line.split("=")
         if len(token) < 2: continue
         conf[token[0].strip(" ")] = token[1].strip(" ")
 
