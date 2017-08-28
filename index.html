@@ -223,9 +223,6 @@ The usage, selling or handing of the contact data written in this imprint is not
         <div id="function_chromosome_field" style="border-width: 1px;"></div>
 
         <div height=100% style="border-width: 2px; border-style: solid; border-color: black; border-radius: 25px;">
-            &nbsp;<br>
-            <b>Filter criteria:</b><p>
-            <div id="filter_panel_chromosome"></div><br>
         </div>
     </div>
     <div id="chromosome_information" style="margin-top: 10px; margin-right: 10px; margin-left: 10px;">Mouse</div><p>
@@ -361,7 +358,6 @@ function filter_settings_clicked(){
         document.getElementById("filter_label").innerHTML = "Apply filter settings";
         document.getElementById("filter_panel_accession").innerHTML = "";
         document.getElementById("filter_panel_locus").innerHTML = "";
-        document.getElementById("filter_panel_chromosome").innerHTML = "";
         document.getElementById("filter_panel_function").innerHTML = "";
         document.getElementById("filter_panel_check_spectra").style.display = "block";
         document.getElementById("filter_panel_check_spectra").innerHTML = filter_panel_data_landscape;
@@ -672,7 +668,7 @@ function chromosome_mouse_wheel(e){
 }
 
 var wdt = 30;
-var hgt = 300;
+var hgt = 500;
 chroms = document.getElementById("function_chromosome_field");
 chroms.innerHTML = "";
 

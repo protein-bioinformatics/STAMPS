@@ -80,7 +80,9 @@ tissues = {1: ["images/brain.svg", "Brain"],
            5: ["images/heart.svg", "Heart"],
            6: ["images/blood.svg", "Blood"],
            7: ["images/fat.svg", "Fat"],
-           8: ["images/lung.svg", "Lung"]}
+           8: ["images/lung.svg", "Lung"],
+           9: ["images/eye.svg", "Eye"],
+           10: ["images/gut.svg", "Gut"]}
 
 
 line_width = 5;
@@ -2861,7 +2863,6 @@ function open_accession_search (){
     document.getElementById("accession_search").style.display = "inline";
     document.getElementById("filter_panel_locus").innerHTML = "";
     document.getElementById("filter_panel_function").innerHTML = "";
-    document.getElementById("filter_panel_chromosome").innerHTML = "";
     document.getElementById("filter_panel_accession").innerHTML = filter_panel_data;
     load_filter_parameters();
     document.getElementById("filter_panel").style.display = "inline";
@@ -2878,7 +2879,6 @@ function open_locus_search (){
     document.getElementById("locus_search").style.display = "inline";
     document.getElementById("filter_panel_accession").innerHTML = "";
     document.getElementById("filter_panel_function").innerHTML = "";
-    document.getElementById("filter_panel_chromosome").innerHTML = "";
     document.getElementById("filter_panel_locus").innerHTML = filter_panel_data;
     load_filter_parameters();
     document.getElementById("filter_panel").style.display = "inline";
@@ -2890,7 +2890,6 @@ function open_function_search (){
     document.getElementById("function_search").style.display = "inline";
     document.getElementById("filter_panel_accession").innerHTML = "";
     document.getElementById("filter_panel_locus").innerHTML = "";
-    document.getElementById("filter_panel_chromosome").innerHTML = "";
     document.getElementById("filter_panel_function").innerHTML = filter_panel_data;
     load_filter_parameters();
     document.getElementById("filter_panel").style.display = "inline";
@@ -2903,9 +2902,6 @@ function open_chromosome_search(){
     document.getElementById("filter_panel_accession").innerHTML = "";
     document.getElementById("filter_panel_function").innerHTML = "";
     document.getElementById("filter_panel_locus").innerHTML = "";
-    document.getElementById("filter_panel_chromosome").innerHTML = filter_panel_data;
-    load_filter_parameters();
-    document.getElementById("filter_panel").style.display = "inline";
     document.getElementById("chromosome_search_background").style.display = "inline";
     document.getElementById("error_filter_text_chromosome").innerHTML = "";
 }
