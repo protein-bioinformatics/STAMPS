@@ -72,8 +72,8 @@ radius = metabolite_radius * factor;
 last_keys = [];
 highlighting = 0;
 basket = {};
-//tissues = {1: "images/brain.svg", 2: "images/liver.svg", 3: "images/kidney.svg", 4: milz, 5: "images/heart.svg", 6: blood, 7: fat, 8: "images/lung.svg"}
-tissues = {1: "images/brain.svg", 2: "images/liver.svg", 3: "images/kidney.svg", 5: "images/heart.svg", 8: "images/lung.svg"}
+//tissues = {1: "images/brain.svg", 2: "images/liver.svg", 3: "images/kidney.svg", 4: spleen, 5: "images/heart.svg", 6: blood, 7: fat, 8: "images/lung.svg"}
+tissues = {1: ["images/brain.svg", "Brain"], 2: ["images/liver.svg", "Liver"], 3: ["images/kidney.svg", "Kidney"], 4: ["images/spleen.svg", "Spleen"], 5: ["images/heart.svg", "Heart"], 8: ["images/lung.svg", "Lung"]}
 
 
 line_width = 5;
@@ -2776,7 +2776,6 @@ function check_spectra(){
     var line = 0;
     var sign_right = String.fromCharCode(9656);
     var sign_down = String.fromCharCode(9662);
-    var organ_origins = ["images/heart.svg", "images/liver.svg", "images/kidney.svg", "images/lung.svg", "images/brain.svg"];
     for (var i = 0; i < proteins_content.length; ++i){
         var current_prot = basket[proteins_content[i][1]];
         
@@ -2794,7 +2793,7 @@ function check_spectra(){
         var curr_tissues = Array.from(current_prot.tissues).sort();
         
         for (var t = 0; t < curr_tissues.length; ++t){
-            if (curr_tissues[t] in tissues) inner_html += "<img src=\"" + tissues[curr_tissues[t]] + "\" alt=\"huhu\" height=\"16\" width=\"16\" />";
+            if (curr_tissues[t] in tissues) inner_html += "<img src=\"" + tissues[curr_tissues[t]][0] + "\" title=\"" + tissues[curr_tissues[t]][1] + "\" height=\"16\" width=\"16\" />";
         }
         inner_html += "</td><td bgcolor=\"" + bg_color + "\" align=\"right\"><img src=\"images/delete.png\" width=\"16\" height=\"16\" onclick=\"delete_from_protein_table(" + current_prot.id + ");\" /></td></tr>";
         
