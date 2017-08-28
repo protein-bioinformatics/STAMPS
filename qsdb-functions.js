@@ -73,7 +73,14 @@ last_keys = [];
 highlighting = 0;
 basket = {};
 //tissues = {1: "images/brain.svg", 2: "images/liver.svg", 3: "images/kidney.svg", 4: spleen, 5: "images/heart.svg", 6: blood, 7: fat, 8: "images/lung.svg"}
-tissues = {1: ["images/brain.svg", "Brain"], 2: ["images/liver.svg", "Liver"], 3: ["images/kidney.svg", "Kidney"], 4: ["images/spleen.svg", "Spleen"], 5: ["images/heart.svg", "Heart"], 8: ["images/lung.svg", "Lung"]}
+tissues = {1: ["images/brain.svg", "Brain"],
+           2: ["images/liver.svg", "Liver"],
+           3: ["images/kidney.svg", "Kidney"],
+           4: ["images/spleen.svg", "Spleen"],
+           5: ["images/heart.svg", "Heart"],
+           6: ["images/blood.svg", "Blood"],
+           7: ["images/fat.svg", "Fat"],
+           8: ["images/lung.svg", "Lung"]}
 
 
 line_width = 5;
@@ -2793,7 +2800,7 @@ function check_spectra(){
         var curr_tissues = Array.from(current_prot.tissues).sort();
         
         for (var t = 0; t < curr_tissues.length; ++t){
-            if (curr_tissues[t] in tissues) inner_html += "<img src=\"" + tissues[curr_tissues[t]][0] + "\" title=\"" + tissues[curr_tissues[t]][1] + "\" height=\"16\" width=\"16\" />";
+            if (curr_tissues[t] in tissues) inner_html += "<img src=\"" + tissues[curr_tissues[t]][0] + "\" title=\"" + tissues[curr_tissues[t]][1] + "\" height=\"16\" />";
         }
         inner_html += "</td><td bgcolor=\"" + bg_color + "\" align=\"right\"><img src=\"images/delete.png\" width=\"16\" height=\"16\" onclick=\"delete_from_protein_table(" + current_prot.id + ");\" /></td></tr>";
         
