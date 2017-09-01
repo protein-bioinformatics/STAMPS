@@ -113,6 +113,8 @@ function mouse_move_listener(e){
         draw();
     }
     else {
+        mouse_up_listener(e);
+        
         // find active node
         var newhighlight = 0;
         for (var i = elements.length - 1; i >= 0; --i){

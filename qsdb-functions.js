@@ -73,16 +73,17 @@ last_keys = [];
 highlighting = 0;
 basket = {};
 //tissues = {1: "images/brain.svg", 2: "images/liver.svg", 3: "images/kidney.svg", 4: spleen, 5: "images/heart.svg", 6: blood, 7: fat, 8: "images/lung.svg"}
-tissues = {1: ["images/brain.svg", "Brain"],
-           2: ["images/liver.svg", "Liver"],
-           3: ["images/kidney.svg", "Kidney"],
-           4: ["images/spleen.svg", "Spleen"],
-           5: ["images/heart.svg", "Heart"],
-           6: ["images/blood.svg", "Blood"],
-           7: ["images/fat.svg", "Fat"],
-           8: ["images/lung.svg", "Lung"],
-           9: ["images/eye.svg", "Eye"],
-           10: ["images/gut.svg", "Gut"]}
+tissues = {1: ["images/brain.svg", "Brain", 0],
+           2: ["images/liver.svg", "Liver", 0],
+           3: ["images/kidney.svg", "Kidney", 0],
+           4: ["images/spleen.svg", "Spleen", 0],
+           5: ["images/heart.svg", "Heart", 0],
+           6: ["images/blood.svg", "Blood", 0],
+           7: ["images/fat.svg", "Fat", 0],
+           8: ["images/lung.svg", "Lung", 0],
+           9: ["images/eye.svg", "Eye", 0],
+           10: ["images/gut.svg", "Gut", 0]}
+           
 
 
 line_width = 5;
@@ -2802,7 +2803,11 @@ function check_spectra(){
         var curr_tissues = Array.from(current_prot.tissues).sort();
         
         for (var t = 0; t < curr_tissues.length; ++t){
-            if (curr_tissues[t] in tissues) inner_html += "<img src=\"" + tissues[curr_tissues[t]][0] + "\" title=\"" + tissues[curr_tissues[t]][1] + "\" height=\"16\" />";
+            if (curr_tissues[t] in tissues){
+                var orientation = "height";
+                if (tissues[curr_tissues[t]][2].width > tissues[curr_tissues[t]][2].height) orientation = "width";
+                inner_html += "<img src=\"" + tissues[curr_tissues[t]][0] + "\" style=\"margin-right: 2px;\" title=\"" + tissues[curr_tissues[t]][1] + "\" " + orientation + "=\"16\" />";
+            }
         }
         inner_html += "</td><td bgcolor=\"" + bg_color + "\" align=\"right\"><img src=\"images/delete.png\" width=\"16\" height=\"16\" onclick=\"delete_from_protein_table(" + current_prot.id + ");\" /></td></tr>";
         
@@ -2903,7 +2908,10 @@ function open_chromosome_search(){
     document.getElementById("filter_panel_function").innerHTML = "";
     document.getElementById("filter_panel_locus").innerHTML = "";
     document.getElementById("chromosome_search_background").style.display = "inline";
-    document.getElementById("error_filter_text_chromosome").innerHTML = "";
+    //document.getElementById("chromosome_information_table").style.overflow = "auto";
+    chromosome_height = document.getElementById("chromosome_search").offsetHeight * 0.8;
+    document.getElementById("chromosome_information_table_wrapper").style.height = chromosome_height.toString() + "px";
+    draw_chromosome_ideograms();
 }
 
 function hide_locus_search (){
@@ -3453,8 +3461,12 @@ function load_data(reload){
     c.addEventListener("dblclick", mouse_dblclick_listener, false);
     c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
     c.addEventListener('contextmenu', function(event){event.preventDefault(); return false;}, false);
-    
-    
+    c.addEventListener("mouseout", mouse_up_listener, false);
+    for (var key in tissues){
+        tissue = tissues[key];
+        tissue[2] = new Image();
+        tissue[2].src = tissue[0];
+    }
     
     infobox = new Infobox(ctx);
     zoom_sign_in = new zoom_sign(ctx, 1);
