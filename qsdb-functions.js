@@ -2908,10 +2908,9 @@ function open_chromosome_search(){
     document.getElementById("filter_panel_function").innerHTML = "";
     document.getElementById("filter_panel_locus").innerHTML = "";
     document.getElementById("chromosome_search_background").style.display = "inline";
-    //document.getElementById("chromosome_information_table").style.overflow = "auto";
     chromosome_height = document.getElementById("chromosome_search").offsetHeight * 0.8;
     document.getElementById("chromosome_information_table_wrapper").style.height = chromosome_height.toString() + "px";
-    draw_chromosome_ideograms();
+    if (chromosome_selected == -1) draw_chromosome_ideograms();
 }
 
 function hide_locus_search (){
