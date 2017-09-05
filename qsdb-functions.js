@@ -2911,6 +2911,7 @@ function open_chromosome_search(){
     chromosome_height = document.getElementById("chromosome_search").offsetHeight * 0.8;
     document.getElementById("chromosome_information_table_wrapper").style.height = chromosome_height.toString() + "px";
     if (chromosome_selected == -1) draw_chromosome_ideograms();
+    document.getElementById("error_filter_text_chromosome").innerHTML = "";
 }
 
 function hide_locus_search (){
@@ -3684,5 +3685,37 @@ function function_search_request_data(){
     }
     
     xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?functions=" + IDs, true);
+    xmlhttp.send();
+}
+
+
+
+
+
+
+
+function chromosome_search_request_data(){
+    basket = {};
+    spectra_exclude = [];
+    document.getElementById("check_spectra_background").style.display = "inline";
+    var accessionIDs = "";
+    for (var chromosome_key in chromosome_data){
+        for (var i = 0; i < chromosome_data[chromosome_key].length; ++i){
+            if (chromosome_data[chromosome_key][i][9]){
+                if (accessionIDs.length > 0) accessionIDs += ":";
+                accessionIDs += chromosome_data[chromosome_key][i][5];
+            }
+        }
+    }
+    
+    // request proteins
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            request_load_proteins(JSON.parse(xmlhttp.responseText));
+        }
+    }
+    
+    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?accessions=" + accessionIDs, true);
     xmlhttp.send();
 }

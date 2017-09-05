@@ -218,21 +218,29 @@ The usage, selling or handing of the contact data written in this imprint is not
 <div id="function_search_background" class="disclaimer_background"></div>
 
 
+
 <div id="chromosome_search" class="disclaimer-90">
     <table width="100%" height="100%">
         <tr>
-            <td height="10%" id="chromosome_information" colspan="2" style="border-bottom: 1px solid #000;">Mouse</td>
+            <td height="10%" id="chromosome_information" colspan="2" style="border-bottom: 1px solid #000;">Mouse, chromosome  <select onchange="change_chromosome_view_combo();" id="chromosome_selection_combo"></select>, bp: <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_start" value="0"></input> - <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_end" value="0"></input></td>
         </tr><tr>
             <td width="50%" height="80%" id="function_chromosome_field" style="overflow: hidden;"></td>
             <td>
-                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0px;"><tr><th width="40%">Accession</th><th>Gene name</th></tr></table>
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0px;"><tr><th width="40%">Accession</th><th>Gene name</th><th align="right"><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(true);">select all</font><font size="-2"> / </font><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(false);">deselect all</font></th></tr></table>
                 <div style="height: 500px; overflow-y: auto;" id="chromosome_information_table_wrapper"><div id="chromosome_information_table"></div></div>
             </td>
         </tr>
         <tr>
-            <td colspan="2" style="border-top: 1px solid #000;" align="right" valign="bottom">
-                <button onclick="hide_chromosome_search();" style="display: inline;">Cancel</button>&nbsp;
-                <button onclick="check_filter_valid(3);">Next</button>
+            <td colspan="2" style="border-top: 1px solid #000;" >
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="70%" id="error_filter_text_chromosome" style="color: red; font-weight: bold;"></td>
+                        <td align="right" valign="bottom">
+                            <button onclick="hide_chromosome_search();" style="display: inline;">Cancel</button>&nbsp;
+                            <button onclick="check_filter_valid(3);">Next</button>
+                        </td>
+                    </tr>
+                </table>
             </td>
         </tr>
     </table>
@@ -264,8 +272,10 @@ var chromosomes = {};
 var chromosome_keys = [];
 var chromosome_map = {};
 var chromosome_data = {};
+var chromosome_data_dict = {};
 var chromosome_selected = -1;
 var loaded_chromosomes = 0;
+var currently_visible_proteins = [];
 
 
 var filter_panel_data = "<div id=\"filter_panel\" style=\"display: none;\"> \
@@ -378,13 +388,6 @@ function filter_settings_clicked(){
     }
 }
 
-function unset_chromosome_panels(){
-    for (var i = 0; i < chromosome_keys.length; ++i){
-        var key = chromosome_keys[i];
-        chromosomes[key].unset_panel();
-    }
-}
-
 function isNumber(n) {
   return !isNaN(parseInt(n)) && isFinite(n);
 }
@@ -448,45 +451,50 @@ function add_numeric_separators(number){
 }
 
 
+function toggle_chromosome_protein(protein_id){
+    chromosome_data_dict[chromosome_selected][protein_id][9] = !chromosome_data_dict[chromosome_selected][protein_id][9];
+}
+
+function de_select_all_chromosome_proteins(to_select){
+    for (var i = 0; i < currently_visible_proteins.length; ++i){
+        currently_visible_proteins[i][9] = to_select;
+    }
+    chromosome_selection_changed(true);
+}
+
 function chromosome_selection_changed(content){
     if (loaded_chromosomes < chromosome_keys.length) return;
-    var chr_info = "Mouse";
-    var chr_content = "";
     
-    if (chromosome_selected != -1){
-        chr_info += ", chromosome <select onchange=\"change_chromosome_view_combo();\" id=\"chromosome_selection_combo\">" + chromosome_selected;
+    if (chromosome_selected != -1){   
+        currently_visible_proteins = [];
+        var chrom_start = chromosomes[chromosome_selected].panel_base_start;
+        var chrom_end = chrom_start + chromosomes[chromosome_selected].panel_height;
+        var strt = add_numeric_separators(chrom_start + 1);
+        var end = add_numeric_separators(chrom_end);
+        document.getElementById("chromosome_selection_start").value = strt;
+        document.getElementById("chromosome_selection_end").value = end;
         
-        for (var key in chromosomes){
-            var selected = (key == chromosome_selected) ? "selected" : "";
-            chr_info += "<option " + selected + ">" + key + "</option>";
-        }
-        
-        var strt = add_numeric_separators(chromosomes[chromosome_selected].panel_base_start + 1);
-        var end = add_numeric_separators(chromosomes[chromosome_selected].panel_base_start + chromosomes[chromosome_selected].panel_height);
-        chr_info += "</select>, bp: <input type=\"text\" size=\"7\" onkeydown=\"change_chromosome_view_keydown(event);\" onblur=\"change_chromosome_view();\" id=\"chromosome_selection_start\" value=\"" + strt;
-        chr_info += "\"></input> - <input type=\"text\" size=\"7\" onkeydown=\"change_chromosome_view_keydown(event);\" onblur=\"change_chromosome_view();\" id=\"chromosome_selection_end\" value=\"" + end + "\"></input>";
-        
-        var chrm_dat = chromosome_data[chromosome_selected];
-        var chr_tab_colors = ["#eeeeee", "#ffffff"];
         if (content){
-            chr_content += "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"> \
-            <table width=\"100%\" class=\"scrollTable\" cellpadding=\"0\" cellspacing=\"0\">";
+            var chrm_dat = chromosome_data[chromosome_selected];
+            var chr_tab_colors = ["#eeeeee", "#ffffff"];
+            var chr_content = "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"> \
+            <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">";
             for (var i = 0, j = 0; i < chrm_dat.length; ++i){
                 var chr_strt = parseInt(chrm_dat[i][7]);
-                if (chr_strt >= chromosomes[chromosome_selected].panel_base_start + chromosomes[chromosome_selected].panel_height) break;
+                if (chr_strt >= chrom_end) break;
                 
                 // filtern
-                if (chr_strt >= chromosomes[chromosome_selected].panel_base_start){
-                    chr_content += "<tr><td width=\"40%\" bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][5] + "</td><td bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][1] + "</td></tr>";
+                if (chr_strt >= chrom_start){
+                    var checked = chrm_dat[i][9] ? "checked" : "";
+                    chr_content += "<tr><td width=\"40%\" bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][5] + "</td><td width=\"50%\" bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][1] + "</td><td bgcolor=\"" + chr_tab_colors[j & 1] + "\" align=\"right\"><input type=\"checkbox\" " + checked + " onclick=\"toggle_chromosome_protein(" + chrm_dat[i][0] + ");\"></td></tr>";
+                    currently_visible_proteins.push(chrm_dat[i]);
                     j += 1;
                 }
             }
             chr_content += "</table>";
+            document.getElementById("chromosome_information_table").innerHTML = chr_content;
         }
-        
     }
-    document.getElementById("chromosome_information").innerHTML = chr_info;
-    if (content) document.getElementById("chromosome_information_table").innerHTML = chr_content;
 }
 
 
@@ -619,23 +627,17 @@ function Chromosome(name, data, ctx, chromosome_width, chromosome_height){
             ctx.fillRect(0, h_start, this.width, h_base);
         }
         
-    }
-    
-    this.unset_panel = function(){
-        this.draw();
-    }    
+    } 
     
     this.clicked = function(e, mouse_pos){
         // check where the panel was clicked
         if (mouse_pos.y < this.offset) return;
-        if ((chromosome_selected == this.name) && this.mouse_over_panel(e, mouse_pos)) return;
+        if (!(chromosome_selected == this.name) || !this.mouse_over_panel(e, mouse_pos)){
+            this.panel_base_start = Math.floor((mouse_pos.y - this.offset) / this.inner_height * this.bases - this.panel_height / 2);
+            this.panel_base_start = Math.max(0, this.panel_base_start);
+            this.panel_base_start = Math.min(this.panel_base_start, this.bases - this.panel_height);
+        }
         
-        this.panel_base_start = Math.floor((mouse_pos.y - this.offset) / this.inner_height * this.bases - this.panel_height / 2);
-        this.panel_base_start = Math.max(0, this.panel_base_start);
-        this.panel_base_start = Math.min(this.panel_base_start, this.bases - this.panel_height);
-    
-        unset_chromosome_panels();
-        chromosome_selected = this.name;
         chromosome_selection_changed(true);
         this.draw();
     }
@@ -691,13 +693,21 @@ function Chromosome(name, data, ctx, chromosome_width, chromosome_height){
 
 
 function chromosome_clicked(e){
-    var mouse_pos = get_mouse_pos(e.target, e);
-    var key = e.target.id.replace("chromosome-", "");
-    chromosomes[key].clicked(e, mouse_pos);
-    for (var i = 0; i < chromosome_keys.length; ++i){
-        var key = chromosome_keys[i];
-        chromosomes[key].unset_panel(e);
+    var old_key = chromosome_selected;
+    chromosome_selected = e.target.id.replace("chromosome-", "");
+    
+    chromosomes[chromosome_selected].clicked(e, get_mouse_pos(e.target, e));
+    
+    var opt = document.getElementById("chromosome_selection_combo");
+    for (var i = 0; i < opt.options.length; ++i){
+        if (opt.options[i].value == chromosome_selected){
+            opt.options[i].selected = true;
+            break;
+        }
     }
+    
+    chromosomes[old_key].draw();
+    chromosomes[chromosome_selected].draw();
 }
 
 function chromosome_mousedown(e){
@@ -708,14 +718,8 @@ function chromosome_mousedown(e){
 
 
 function chromosome_mousemove(e){
-    var mouse_pos = {
-        x: e.clientX,
-        y: e.clientY
-    };
-    for (var i = 0; i < chromosome_keys.length; ++i){
-        var key = chromosome_keys[i];
-        chromosomes[key].mouse_move(e, mouse_pos);
-    }
+    var mouse_pos = { x: e.clientX, y: e.clientY};
+    if (chromosome_selected in chromosomes) chromosomes[chromosome_selected].mouse_move(e, mouse_pos);
 }
 
 function chromosome_mouseup(e){
@@ -746,6 +750,7 @@ chroms.innerHTML = "";
 function check_filter_valid(filter_type){
 
     var selected_functions = false;
+    var chromosomes_selected_protein = false;
     if (filter_type == 1){
         var loci_select = document.getElementById("loci");
         for (var i = 0; i < loci_select.options.length; ++i){
@@ -755,25 +760,27 @@ function check_filter_valid(filter_type){
             }
         }
     }
-    
-    
-        
-
+    else if (filter_type == 3){
+        for (var chromosome_key in chromosome_data){
+            for (var i = 0; i < chromosome_data[chromosome_key].length; ++i){
+                if (chromosome_data[chromosome_key][i][9]){
+                    chromosomes_selected_protein = true;
+                    break;
+                }
+            }
+        }
+    }
     
     if (filter_type == 0 && document.getElementById("accessions").value.length == 0){
         document.getElementById("error_filter_text_accession").innerHTML = "Error: no accession number provided!";
     }
-    else if (parseInt(document.getElementById("min_peptide_length").value) > parseInt(document.getElementById("max_peptide_length").value)){
-        document.getElementById("error_filter_text_accession").innerHTML = "Error: minimal peptide length higher than maximal!";
-    }
-    else if (parseInt(document.getElementById("min_precursor_charge").value) > parseInt(document.getElementById("max_precursor_charge").value)) {
-        document.getElementById("error_filter_text_accession").innerHTML = "Error: minimal precursor charge higher than maximal!";
-    }
     else if (filter_type == 1 && !selected_functions){
         document.getElementById("error_filter_text_locus").innerHTML = "Error: no compartment selected!";
     }
+    else if (filter_type == 3 && !chromosomes_selected_protein){
+        document.getElementById("error_filter_text_chromosome").innerHTML = "Error: no protein selected!";
+    }
     else {
-        adopt_filter_parameters();
         switch (filter_type){
             case 0:
                 back_function = open_accession_search;
@@ -1048,6 +1055,9 @@ function draw_chromosome_ideograms(){
     for (var i = 0; i < chromosome_keys.length; ++i){
         var key = chromosome_keys[i];
         chromosomes[key].draw();
+        var option = document.createElement("option");
+        option.text = key;
+        document.getElementById("chromosome_selection_combo").add(option); 
     }
     
     if (chromosome_selected == -1){
@@ -1063,7 +1073,17 @@ function draw_chromosome_ideograms(){
         chromosome_requests[key].chromosome_key = key;
         chromosome_requests[key].onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                chromosome_data[this.chromosome_key] = JSON.parse(this.responseText);
+                var input_dat = JSON.parse(this.responseText);
+                chromosome_data[this.chromosome_key] = input_dat;
+                chromosome_data_dict[this.chromosome_key] = {};
+                var chrm_dat_dict = chromosome_data_dict[this.chromosome_key];
+                
+                for (var i = 0; i < input_dat.length; ++i){
+                    input_dat[i].push(false);
+                    chrm_dat_dict[input_dat[i][0]] = input_dat[i];
+                }
+                
+                
                 loaded_chromosomes += 1;
                 chromosome_selection_changed(true);
                 chromosomes[this.chromosome_key].draw();
