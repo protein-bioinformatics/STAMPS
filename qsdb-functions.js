@@ -102,7 +102,7 @@ pathway_fill_color = "white";
 edge_color = "#f69301";
 edge_disabled_color = "#cccccc";
 slide_color = "#5792da";
-
+background_hiding = 0;
 
 /*
 // corporate design
@@ -2955,57 +2955,49 @@ function check_spectra(){
 
 function open_disclaimer (){
     document.getElementById("disclaimer").style.display = "inline";
-    //document.getElementById("disclaimer_background").style.display = "inline";
-    document.getElementById("waiting_background").style.display = "inline";
+    document.getElementById("click_background").style.display = "inline";
+    background_hiding = hide_disclaimer;
 }
 
 function open_accession_search (){
     document.getElementById("accession_search").style.display = "inline";
-    document.getElementById("filter_panel_locus").innerHTML = "";
-    document.getElementById("filter_panel_function").innerHTML = "";
-    document.getElementById("filter_panel_accession").innerHTML = filter_panel_data;
-    load_filter_parameters();
-    document.getElementById("filter_panel").style.display = "inline";
-    //document.getElementById("accession_search_background").style.display = "inline";
     document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("error_filter_text_accession").innerHTML = "";
 }
 
 function open_locus_search (){
     document.getElementById("locus_search").style.display = "inline";
-    document.getElementById("filter_panel_accession").innerHTML = "";
-    document.getElementById("filter_panel_function").innerHTML = "";
-    document.getElementById("filter_panel_locus").innerHTML = filter_panel_data;
-    load_filter_parameters();
-    document.getElementById("filter_panel").style.display = "inline";
     document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("error_filter_text_locus").innerHTML = "";
 }
 
 function open_function_search (){
     document.getElementById("function_search").style.display = "inline";
-    document.getElementById("filter_panel_accession").innerHTML = "";
-    document.getElementById("filter_panel_locus").innerHTML = "";
-    document.getElementById("filter_panel_function").innerHTML = filter_panel_data;
-    load_filter_parameters();
-    document.getElementById("filter_panel").style.display = "inline";
-    //document.getElementById("function_search_background").style.display = "inline";
     document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("error_filter_text_function").innerHTML = "";
 }
+
 
 function open_chromosome_search(){
     document.getElementById("chromosome_search").style.display = "inline";
     document.getElementById("filter_panel_accession").innerHTML = "";
     document.getElementById("filter_panel_function").innerHTML = "";
     document.getElementById("filter_panel_locus").innerHTML = "";
-    //document.getElementById("chromosome_search_background").style.display = "inline";
     document.getElementById("waiting_background").style.display = "inline";
     chromosome_height = document.getElementById("chromosome_search").offsetHeight * 0.8;
     document.getElementById("chromosome_information_table_wrapper").style.height = chromosome_height.toString() + "px";
     if (chromosome_selected == -1) draw_chromosome_ideograms();
     document.getElementById("error_filter_text_chromosome").innerHTML = "";
 }
+
+
+function hide_background(){
+    if (background_hiding != 0){
+        document.getElementById("click_background").style.display = "none";
+        background_hiding();
+    }
+}
+
 
 function hide_accession_search (forward){
     document.getElementById("accession_search").style.display = "none";

@@ -103,7 +103,7 @@ div.download {
 }
 
 
-div.clickbackground {
+div.click_background {
     top: 0px;
     display: none;
     left: 0px;
@@ -147,6 +147,24 @@ div.disclaimer {
     height: 76%;
     position: fixed;
     z-index: 120;
+    background-color: white;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+    padding: 30px;
+    overflow-y: scroll;
+}
+
+
+div.accession_search {
+    display: none;
+    position: fixed;
+    z-index: 120;
+    width: 100%;
+    height: 100%;
+}
+    
+table.accession_search_content {
     background-color: white;
     border-color: black;
     border-width: 1px;
