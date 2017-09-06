@@ -129,6 +129,99 @@ select_field_element = 0;
 pathways = [[15, "Alanine, aspartate and glutamate metabolism"]];
 //pathways = [[28, "Alanine, aspartate and glutamate metabolism"]];
 
+
+var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
+    <table> \
+        <tr><td>Min. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"min_peptide_length\" /><td></tr> \
+        <tr><td>Max. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"max_peptide_length\" /><td></tr> \
+        <tr><td>Min. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"min_precursor_charge\" /><td></tr> \
+        <tr><td>Max. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"max_precursor_charge\" /><td></tr> \
+        <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td><td></tr> \
+        <tr><td>Oxydation of M</td><td> \
+        <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" /> off \
+        <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
+        <input type=\"radio\" id=\"oxy_m_fix\" name=\"oxy_m\" /> fixed \
+        <td></tr> \
+        <tr><td>Carbamidomethylation of C</td><td> \
+        <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" /> off \
+        <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
+        <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
+        <td></tr> \
+        <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
+        document.getElementById('min_peptide_length').value = 8; \
+        document.getElementById('max_peptide_length').value = 25; \
+        document.getElementById('min_precursor_charge').value = 2; \
+        document.getElementById('max_precursor_charge').value = 3; \
+        document.getElementById('oxy_m_off').checked = true; \
+        document.getElementById('carba_c_off').checked = true; \
+        ;\">default settings</td></tr> \
+    </table> \
+</div>";
+
+
+var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
+    <table><tr><td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \
+        <table> \
+            <tr><td>Min. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"min_peptide_length\" /><td></tr> \
+            <tr><td>Max. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"max_peptide_length\" /><td></tr> \
+            <tr><td>Min. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"min_precursor_charge\" /><td></tr> \
+            <tr><td>Max. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"max_precursor_charge\" /><td></tr> \
+            <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
+            document.getElementById('min_peptide_length').value = 8; \
+            document.getElementById('max_peptide_length').value = 25; \
+            document.getElementById('min_precursor_charge').value = 2; \
+            document.getElementById('max_precursor_charge').value = 3; \
+            document.getElementById('oxy_m_off').checked = true; \
+            document.getElementById('carba_c_off').checked = true; \
+            ;\">default settings</td></tr> \
+        </table></td> \
+        <td valign=\"top\"><table> \
+            <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td><td></tr> \
+            <tr><td>Oxydation of M</td><td> \
+            <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" /> off \
+            <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
+            <input type=\"radio\" id=\"oxy_m_fix\" name=\"oxy_m\" /> fixed \
+            <td></tr> \
+            <tr><td>Carbamidomethylation of C</td><td> \
+            <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" /> off \
+            <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
+            <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
+            <td></tr> \
+        </table></td> \
+    </td></tr></table> \
+</div>";
+
+
+
+function get_check_spectra_content(){
+    return "<canvas id=\"msarea\" class=\"msarea\"></canvas> \
+    <fieldset id=\"spectra_options\" class=\"spectra_options\" style=\"position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;\"> \
+        <input type=\"radio\" onchange=\"change_match_error();\" id=\"radio_ppm\" name=\"select_error\" value=\"ppm\" style=\"border: 0px; margin: 0px; top: 0px; padding: 0px;\" \ checked><label for=\"radio_ppm\">Relative</label> \
+        <input type=\"radio\" onchange=\"change_match_error();\" id=\"radio_da\" name=\"select_error\" value=\"Da\" style=\"border: 0px; margin: 0px; top: 0px; padding: 0px;\"><label for=\"radio_da\">Absolute</label> \
+        <input type=\"text\" onchange=\"change_match_error_value();\" id=\"error_value\" value=\"-\" size=1 style=\"text-align: right;\"><label id=\"unit\">ppm</label> \
+    </fieldset> \
+    <div id=\"spectra_panel\" class=\"spectra_panel\"></div> \
+    <div id=\"filter_panel_check_spectra\" class=\"filter_panel_check_spectra\">uia</div> \
+    <table width=\"100%\" height=\"100%\"><tr><td valign=\"bottom\"><font color=\"blue\" style=\"cursor: pointer;\" onclick=\"filter_settings_clicked();\" id=\"filter_label\">Show \ filter settings</font></td><td valign=\"bottom\" align=\"right\"><button onclick=\"hide_check_spectra(false);\" style=\"display: inline;\">Cancel</button> <button onclick=\"hide_check_spectra(); back_function();\">Back</button> <button onclick=\"hide_check_spectra(); download_assay();\">Go to Download</button></td></tr></table>";
+}
+
+
+function get_waiting_background_content(){
+    return "<div id=\"waiting_black\" style=\"top: 0px; left: 0px; width: 100%; height: 100%; position: fixed; z-index: 10; background-color: black; opacity: 0.4;\"> \
+    </div> \
+    <div style=\"top: 40%; left: 40%; width: 20%; height: 20%; position: fixed; z-index: 10; opacity: 40%; background-color: white; border: 1px black solid; border-radius: 15px;\"> \
+        <table width=\"100%\" height=\"100%\"> \
+            <tr> \
+                <td align=\"center\" valign=\"middle\"> \
+                    &nbsp;<p><img src=\"images/ajax-loader.gif\" /><p>&nbsp;<p> \
+                    Request in progress, please wait. \
+                </td> \
+            </tr> \
+        </table> \
+    </div>";
+}
+
+
 function debug(text){
     document.getElementById("hint").innerHTML = text;
 }
@@ -2756,7 +2849,7 @@ function toggle_peptide_selection(pep_id){
 
 function check_spectra(){
     document.getElementById("check_spectra").style.display = "inline";
-    document.getElementById("check_spectra_background").style.display = "inline";
+    document.getElementById("waiting_background").style.display = "inline";
     if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
         document.getElementById("renderarea").style.filter = "blur(5px)";
         document.getElementById("navigation").style.filter = "blur(5px)";
@@ -2802,6 +2895,7 @@ function check_spectra(){
         
         var curr_tissues = Array.from(current_prot.tissues).sort();
         
+            console.log(curr_tissues.length);
         for (var t = 0; t < curr_tissues.length; ++t){
             if (curr_tissues[t] in tissues){
                 var orientation = "height";
@@ -2861,7 +2955,8 @@ function check_spectra(){
 
 function open_disclaimer (){
     document.getElementById("disclaimer").style.display = "inline";
-    document.getElementById("disclaimer_background").style.display = "inline";
+    //document.getElementById("disclaimer_background").style.display = "inline";
+    document.getElementById("waiting_background").style.display = "inline";
 }
 
 function open_accession_search (){
@@ -2871,13 +2966,9 @@ function open_accession_search (){
     document.getElementById("filter_panel_accession").innerHTML = filter_panel_data;
     load_filter_parameters();
     document.getElementById("filter_panel").style.display = "inline";
-    document.getElementById("accession_search_background").style.display = "inline";
+    //document.getElementById("accession_search_background").style.display = "inline";
+    document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("error_filter_text_accession").innerHTML = "";
-}
-
-function hide_accession_search (){
-    document.getElementById("accession_search").style.display = "none";
-    document.getElementById("accession_search_background").style.display = "none";
 }
 
 function open_locus_search (){
@@ -2887,7 +2978,7 @@ function open_locus_search (){
     document.getElementById("filter_panel_locus").innerHTML = filter_panel_data;
     load_filter_parameters();
     document.getElementById("filter_panel").style.display = "inline";
-    document.getElementById("locus_search_background").style.display = "inline";
+    document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("error_filter_text_locus").innerHTML = "";
 }
 
@@ -2898,7 +2989,8 @@ function open_function_search (){
     document.getElementById("filter_panel_function").innerHTML = filter_panel_data;
     load_filter_parameters();
     document.getElementById("filter_panel").style.display = "inline";
-    document.getElementById("function_search_background").style.display = "inline";
+    //document.getElementById("function_search_background").style.display = "inline";
+    document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("error_filter_text_function").innerHTML = "";
 }
 
@@ -2907,36 +2999,48 @@ function open_chromosome_search(){
     document.getElementById("filter_panel_accession").innerHTML = "";
     document.getElementById("filter_panel_function").innerHTML = "";
     document.getElementById("filter_panel_locus").innerHTML = "";
-    document.getElementById("chromosome_search_background").style.display = "inline";
+    //document.getElementById("chromosome_search_background").style.display = "inline";
+    document.getElementById("waiting_background").style.display = "inline";
     chromosome_height = document.getElementById("chromosome_search").offsetHeight * 0.8;
     document.getElementById("chromosome_information_table_wrapper").style.height = chromosome_height.toString() + "px";
     if (chromosome_selected == -1) draw_chromosome_ideograms();
     document.getElementById("error_filter_text_chromosome").innerHTML = "";
 }
 
-function hide_locus_search (){
+function hide_accession_search (forward){
+    document.getElementById("accession_search").style.display = "none";
+    //document.getElementById("accession_search_background").style.display = "none";
+    if (!forward) document.getElementById("waiting_background").style.display = "none";
+}
+
+function hide_locus_search (forward){
     document.getElementById("locus_search").style.display = "none";
-    document.getElementById("locus_search_background").style.display = "none";
+    //document.getElementById("locus_search_background").style.display = "none";
+    if (!forward) document.getElementById("waiting_background").style.display = "none";
 }
 
-function hide_function_search (){
+function hide_function_search (forward){
     document.getElementById("function_search").style.display = "none";
-    document.getElementById("function_search_background").style.display = "none";
+    //document.getElementById("function_search_background").style.display = "none";
+    if (!forward) document.getElementById("waiting_background").style.display = "none";
 }
 
-function hide_chromosome_search (){
+function hide_chromosome_search (forward){
     document.getElementById("chromosome_search").style.display = "none";
-    document.getElementById("chromosome_search_background").style.display = "none";
+    //document.getElementById("chromosome_search_background").style.display = "none";
+    if (!forward) document.getElementById("waiting_background").style.display = "none";
 }
 
 function hide_disclaimer (){
     document.getElementById("disclaimer").style.display = "none";
-    document.getElementById("disclaimer_background").style.display = "none";
+    //document.getElementById("disclaimer_background").style.display = "none";
+    document.getElementById("waiting_background").style.display = "none";
 }
 
 
 function hide_check_spectra (){
-    document.getElementById("check_spectra_background").style.display = "none";
+    document.getElementById("waiting_background").style.display = "none";
+    //document.getElementById("check_spectra_background").style.display = "none";
     document.getElementById("check_spectra").style.display = "none";
     if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
         document.getElementById("renderarea").style.filter = "none";
@@ -3117,15 +3221,18 @@ function select_species(){
 
 
 function open_filter_panel(){
-    if (document.getElementById("filter_panel").style.display == "inline"){
+    if (document.getElementById("filter_panel_wrapper").style.display == "inline"){
         hide_filter_panel();
     }
     else {
+        document.getElementById("filter_panel_check_spectra").innerHTML = "";
+        document.getElementById("filter_panel_wrapper").innerHTML = filter_panel_data;
+        document.getElementById("filter_panel_wrapper").style.display = "inline";
+        console.log(document.getElementById("filter_panel_wrapper").innerHTML);
         var rect = document.getElementById('filter_panel_nav').getBoundingClientRect();
         load_filter_parameters();
-        document.getElementById("filter_panel").style.top = (rect.top + document.getElementById('filter_panel_nav').offsetHeight).toString() + "px";
-        document.getElementById("filter_panel").style.left = (rect.left).toString() + "px";
-        document.getElementById("filter_panel").style.display = "inline";
+        document.getElementById("filter_panel_wrapper").style.top = (rect.top + document.getElementById('filter_panel_nav').offsetHeight).toString() + "px";
+        document.getElementById("filter_panel_wrapper").style.left = (rect.left).toString() + "px";
         document.getElementById("filter_panel_background").style.display = "inline";
     }
 }
@@ -3169,7 +3276,7 @@ function load_filter_parameters(){
 
 
 function hide_filter_panel(){
-    if (document.getElementById("filter_panel").style.display == "inline"){
+    if (document.getElementById("filter_panel_wrapper").style.display == "inline"){
         var filter_changed = false;
         if (filter_parameters["min_peptide_length"] != document.getElementById("min_peptide_length").value) filter_changed = true;
         if (filter_parameters["max_peptide_length"] != document.getElementById("max_peptide_length").value) filter_changed = true;
@@ -3211,9 +3318,9 @@ function hide_filter_panel(){
         }
         
         
+        document.getElementById("filter_panel_wrapper").style.display = "none";
+        document.getElementById("filter_panel_background").style.display = "none";
     }
-    document.getElementById("filter_panel").style.display = "none";
-    document.getElementById("filter_panel_background").style.display = "none";
 }
 
 
@@ -3603,7 +3710,6 @@ function replaceAll(str, find, replace) {
 function accession_search_parse_accessions(){
     basket = {};
     spectra_exclude = [];
-    document.getElementById("check_spectra_background").style.display = "inline";
     var accessions = document.getElementById("accessions").value;
     accessions = replaceAll(accessions, "\n", ":");
     accessions = replaceAll(accessions, " ", "");
@@ -3622,6 +3728,8 @@ function accession_search_parse_accessions(){
 }
 
 
+
+
 function request_load_proteins(data){
     for (var i = 0; i < data.length; ++i){
         var p_id = data[i]["id"];
@@ -3635,10 +3743,11 @@ function request_load_proteins(data){
 }
 
 
+
+
 function locus_search_request_data(){
     basket = {};
     spectra_exclude = [];
-    document.getElementById("check_spectra_background").style.display = "inline";
     var loci_select = document.getElementById("loci");
     var IDs = "";
     for (var i = 0; i < loci_select.options.length; ++i){
@@ -3666,7 +3775,6 @@ function locus_search_request_data(){
 function function_search_request_data(){
     basket = {};
     spectra_exclude = [];
-    document.getElementById("check_spectra_background").style.display = "inline";
     var function_select = document.getElementById("function_search_field").getElementsByTagName("li");
     var IDs = "";
     for (var i = 0; i < function_select.length; ++i){
@@ -3690,14 +3798,9 @@ function function_search_request_data(){
 
 
 
-
-
-
-
 function chromosome_search_request_data(){
     basket = {};
     spectra_exclude = [];
-    document.getElementById("check_spectra_background").style.display = "inline";
     var accessionIDs = "";
     for (var chromosome_key in chromosome_data){
         for (var i = 0; i < chromosome_data[chromosome_key].length; ++i){
@@ -3718,4 +3821,32 @@ function chromosome_search_request_data(){
     
     xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?accessions=" + accessionIDs, true);
     xmlhttp.send();
+}
+
+
+function filter_settings_clicked(){
+    if (!filter_parameters["filter_panel_visible"]){
+        document.getElementById("filter_label").innerHTML = "Apply filter settings";
+        document.getElementById("filter_panel_check_spectra").style.display = "block";
+        if (document.getElementById("filter_panel_check_spectra") != 'undefined') document.getElementById("filter_panel_check_spectra").innerHTML = "";
+        document.getElementById("filter_panel_check_spectra").innerHTML = filter_panel_data_landscape;
+        console.log(filter_panel_data_landscape);
+        document.getElementById("filter_panel").style.display = "block";
+        load_filter_parameters();
+        filter_parameters["filter_panel_visible"] = true;
+        resize_ms_view();
+    }
+    else {
+        adopt_filter_parameters();
+        document.getElementById("filter_label").innerHTML = "Show filter settings";
+        document.getElementById("filter_panel_check_spectra").innerHTML = "";
+        document.getElementById("filter_panel_check_spectra").style.display = "none";
+        filter_parameters["filter_panel_visible"] = false;
+        basket = {};
+        for (var key in protein_dictionary){
+            protein_dictionary[key].filtering();
+            if (protein_dictionary[key].filter_valid) basket[key] = protein_dictionary[key];
+        }
+        check_spectra();
+    }
 }

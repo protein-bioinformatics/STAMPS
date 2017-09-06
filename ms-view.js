@@ -165,10 +165,7 @@ function annotation(){
 
 
 function resize_ms_view(){
-    var t_top = 0.05;
-    if (typeof qsdb_domain === 'undefined' || qsdb_domain === null){
-        t_top = 0.02;
-    }
+    var t_top = 0.02;
     
     var filter_height = filter_parameters["filter_panel_visible"] ? 0.3 : 0;
     

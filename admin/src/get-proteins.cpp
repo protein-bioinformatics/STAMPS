@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <set>
 #include <string>
 #include <sstream>
 #include <sqlite3.h> 
@@ -100,6 +101,7 @@ class spectrum {
         string charge;
         string mass;
         string mod_sequence;
+        set<string> tissues;
         
         spectrum(string _id) : id(_id) {}
         
@@ -118,18 +120,26 @@ class spectrum {
 class peptide {
     public:
         string peptide_seq;
+        set<string> tissues;
         vector<spectrum*> spectra;
         
         peptide(string ps) : peptide_seq(ps) {}
         
         string to_string(){
             string str = "{";
-            //str += "\"id\": " + id + ", ";
             str += "\"peptide_seq\": \"" + peptide_seq + "\", ";
             str += "\"spectra\": [";
             for (int i = 0; i < spectra.size(); ++i){
                 if (i) str += ", ";
                 str += spectra.at(i)->to_string();
+                tissues.insert(spectra.at(i)->tissues.begin(), spectra.at(i)->tissues.end());
+            }
+            str += "], ";
+            str += "\"tissues\": [";
+            set<string>::iterator it = tissues.begin();
+            for (int i = 0; it != tissues.end(); ++it, ++i){
+                if (i) str += ", ";
+                str += *it;
             }
             str += "]}";
             return str;
@@ -505,6 +515,7 @@ main(int argc, char** argv) {
     string text_pc = "c";
     string text_mz = "m";
     string text_mod = "s";
+    string text_tissue = "t";
     for (int i = 0; i < ceil(l / t); ++i){
         string sql_query_lite = "";
         for (int j = i * t; j < min((i + 1) * t, l); ++j){
@@ -514,9 +525,9 @@ main(int argc, char** argv) {
             sql_query_lite += spectra->at(j)->id;
         }
         
-        sql_query_lite = "SELECT id i, precursorCharge c, precursorMZ m, peptideModSeq s FROM RefSpectra WHERE id IN (" + sql_query_lite + ");";
+        string sql_query = "SELECT id i, precursorCharge c, precursorMZ m, peptideModSeq s FROM RefSpectra WHERE id IN (" + sql_query_lite + ");";
         vector< map< string, string > > spectra_data;
-        rc = sqlite3_exec(db, sql_query_lite.c_str(), sqlite_callback2, (void*)&spectra_data, &zErrMsg);
+        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback2, (void*)&spectra_data, &zErrMsg);
         if( rc != SQLITE_OK ){
             cout << -4 << endl;
             sqlite3_free(zErrMsg);
@@ -535,6 +546,18 @@ main(int argc, char** argv) {
                 mass = mass.substr(0, mass.find(".") + 5);
             }
             s1->mass = mass;
+        }
+        
+        // quering possible tissue origins
+        sql_query = "SELECT RefSpectraId i, tissue t FROM Tissues WHERE RefSpectraId IN (" + sql_query_lite + ");";
+        vector< map< string, string > > tissue_data;
+        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback2, (void*)&tissue_data, &zErrMsg);
+        if( rc == SQLITE_OK ){
+            for(int i = 0; i < tissue_data.size(); ++i){
+                map< string, string > spd = tissue_data[i];
+                spectrum* s1 = all_spectra->at(spd[text_id]);
+                s1->tissues.insert(spd[text_tissue]);
+            }
         }
     }
     

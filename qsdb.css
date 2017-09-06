@@ -3,6 +3,7 @@ html {
     top: 0px;
 }
 
+
 body {
     margin: 0px;
     top: 0px;
@@ -21,6 +22,7 @@ footer{
     bottom: 0; 
 }
 
+
 div.headerbutton {
     min-width: 150px;
     padding: 15px;
@@ -29,10 +31,12 @@ div.headerbutton {
     display: inline;
 }
 
+
 div.headerbutton:hover {
     background-color: #ffffff;
     cursor: pointer;
 }
+
 
 div.headerborder {
     min-width: 150px;
@@ -44,6 +48,7 @@ div.headerborder {
     cursor: default;
     display: inline;
 }
+
 
 div.headerborder:hover {
     background-color: #ffffff;
@@ -61,6 +66,7 @@ div.animation_background {
     display: none;
 }
 
+
 div.custommenu {
     top: 0px;
     display: none;
@@ -69,6 +75,7 @@ div.custommenu {
     position: absolute;
     z-index: 80;
 }
+
 
 div.menubackground {
     top: 0px;
@@ -95,7 +102,8 @@ div.download {
     border-style: solid;
 }
 
-div.downloadbackground {
+
+div.clickbackground {
     top: 0px;
     display: none;
     left: 0px;
@@ -105,6 +113,17 @@ div.downloadbackground {
     z-index: 110;
     background-color: black;
     opacity: 0.4;
+}
+
+
+div.waiting_background {
+    top: 0px;
+    display: none;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: 110;
 }
 
 
@@ -152,6 +171,7 @@ div.disclaimer-90 {
     padding: 0px;
 }
 
+
 div.disclaimer_background {
     top: 0px;
     display: none;
@@ -163,6 +183,7 @@ div.disclaimer_background {
     background-color: black;
     opacity: 0.4;
 }
+
 
 div.check_spectra {
     top: 10%;
@@ -191,6 +212,7 @@ div.check_spectra_background {
     opacity: 0.4;
 }
 
+
 div.search_results {
     display: none;
     background: white;
@@ -198,6 +220,7 @@ div.search_results {
     border:1px solid #d3d3d3;
     z-index: 80;
 }
+
 
 div.search_background {
     top: 0px;
@@ -209,11 +232,14 @@ div.search_background {
     z-index: 70;
 }
 
+
 td.single_search_result {
     border-bottom: 1px dashed #d3d3d3;
     background: white;
     padding: 10px;
 }
+
+
 td.single_search_result:hover {
     border-bottom: 1px dashed #d3d3d3;
     background: #eeeeee;
@@ -248,6 +274,7 @@ div.navigation_startpage {
     z-index: 100;
 }
 
+
 td.navigation_cell {
     color: #fff6d5;
     padding: 8px;
@@ -257,11 +284,13 @@ td.navigation_cell {
     border-right-width: 1px;
 }
 
+
 td.navigation_cell_name {
     color: #fff6d5;
     padding: 8px;
     margin: 5px;
 }
+
 
 td.navigation_cell_click {
     color: #fff6d5;
@@ -272,10 +301,12 @@ td.navigation_cell_click {
     border-right-width: 1px;
 }
 
+
 td.navigation_cell_click:hover {
     background-color: #a20000;
     cursor: pointer;
 }
+
 
 table.custommenutable {
     width: 180px;
@@ -296,16 +327,19 @@ table.custommenutable {
     -ms-user-select: none; /* IE10+ */
 }
 
+
 td.menuitem {
     padding: 3px;
     cursor: default;
 }
+
 
 td.menuitem:hover {
     padding: 3px;
     background-color: #3d9fd7;
     color: white;
 }
+
 
 td.menuitemdisabled {
     padding: 3px;
@@ -314,16 +348,19 @@ td.menuitemdisabled {
     cursor: default;
 }
 
+
 td.menuitemdisabled:hover {
     padding: 3px;
     background-color: #cccccc;
     color: #b0b0b0;
 }
 
+
 canvas.renderarea {
     border:1px solid #d3d3d3;
     margin: 0px;
 }
+
 
 div.spectra_panel {
     background-color: white;
@@ -333,6 +370,7 @@ div.spectra_panel {
     overflow-x: auto;
     overflow-y: scroll;
 }
+
 
 div.filter_panel_check_spectra {
     background-color: white;
@@ -344,12 +382,14 @@ div.filter_panel_check_spectra {
     display: none;
 }
 
+
 canvas.msarea {
     background-color: white;
     border:1px solid #d3d3d3;
     margin: 0px;
     position: fixed;
 }
+
 
 div.tooltip {
     position: absolute;
@@ -364,6 +404,7 @@ div.tooltip {
     padding-bottom: 1px;
 }
 
+
 div.managementbackground {
     top: 0px;
     display: none;
@@ -375,6 +416,7 @@ div.managementbackground {
     background-color: black;
     opacity: 0.4;
 }
+
 
 div.management {
     top: 10%;
@@ -389,6 +431,7 @@ div.management {
     border-width: 1px;
     border-style: solid;
 }
+
 
 div.managementtable {
     top: 8%;
@@ -412,6 +455,7 @@ div.select_species {
     border:1px solid #d3d3d3;
     z-index: 80;
 }
+
 
 div.select_species_background {
     top: 0px;
@@ -442,6 +486,7 @@ div.select_pathway {
     overflow-y: scroll;
 }
 
+
 div.select_pathway_background {
     top: 0px;
     display: none;
@@ -453,9 +498,7 @@ div.select_pathway_background {
 }
 
 
-
 div.filter_panel {
-    display: none;
     background: white;
     position: fixed;
     border:1px solid #d3d3d3;
@@ -497,6 +540,7 @@ td.select_pathway_cell:hover {
     padding: 10px;
 }
 
+
 ul {
     list-style: none;
 }
@@ -504,14 +548,17 @@ ul {
 ul li.empty:before {
     content: '';
 }
+
  
 ul li.collapsed:before {
     content: '▸ ';
 }
+
  
 ul li.expanded:before {
     content: '▾ ';
 }
+
  
 ul li:hover {
     cursor: pointer;

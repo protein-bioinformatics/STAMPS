@@ -140,8 +140,9 @@ We do not sell or hand out our collected statistical data to third parties.
 The usage, selling or handing of the contact data written in this imprint is not allowed.
 <p>
 </div>
+<!--
 <div id="disclaimer_background" class="disclaimer_background"></div>
-
+-->
 
 
 
@@ -167,8 +168,9 @@ The usage, selling or handing of the contact data written in this imprint is not
     </tr>
     </table>
 </div>
+<!--
 <div id="accession_search_background" class="disclaimer_background"></div>
-
+-->
 
 <div id="locus_search" class="disclaimer">
     <table cellspacing=20><tr><td>
@@ -184,7 +186,7 @@ The usage, selling or handing of the contact data written in this imprint is not
     <tr>
         <td colspan=2>
             <table width=100%><tr><td id="error_filter_text_locus" style="color: red; font-weight: bold;">
-            </td><td align=right><button onclick="hide_locus_search();" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(1);">Next</button>
+            </td><td align=right><button onclick="hide_locus_search(false);" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(1);">Next</button>
             </td></tr></table>
         </td>
     </tr>
@@ -209,14 +211,15 @@ The usage, selling or handing of the contact data written in this imprint is not
     <tr>
         <td colspan=2>
             <table width=100%><tr><td id="error_filter_text_function" style="color: red; font-weight: bold;">
-            </td><td align=right><button onclick="hide_function_search();" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(2);">Next</button>
+            </td><td align=right><button onclick="hide_function_search(false);" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(2);">Next</button>
             </td></tr></table>
         </td>
     </tr>
     </table>
 </div>
+<!--
 <div id="function_search_background" class="disclaimer_background"></div>
-
+-->
 
 
 <div id="chromosome_search" class="disclaimer-90">
@@ -236,7 +239,7 @@ The usage, selling or handing of the contact data written in this imprint is not
                     <tr>
                         <td width="70%" id="error_filter_text_chromosome" style="color: red; font-weight: bold;"></td>
                         <td align="right" valign="bottom">
-                            <button onclick="hide_chromosome_search();" style="display: inline;">Cancel</button>&nbsp;
+                            <button onclick="hide_chromosome_search(false);" style="display: inline;">Cancel</button>&nbsp;
                             <button onclick="check_filter_valid(3);">Next</button>
                         </td>
                     </tr>
@@ -245,13 +248,17 @@ The usage, selling or handing of the contact data written in this imprint is not
         </tr>
     </table>
 </div>
+<!--
 <div id="chromosome_search_background" class="disclaimer_background"></div>
-
+-->
 
 <div id="download" class="download"></div>
+<!--
 <div id="downloadbackground" class="downloadbackground"></div>
+-->
 
 <div id="check_spectra" class="check_spectra">
+<!--
     <canvas id="msarea" class="msarea"></canvas>
     <fieldset id="spectra_options" class="spectra_options" style="position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;">
         <input type="radio" onchange="change_match_error();" id="radio_ppm" name="select_error" value="ppm" style="border: 0px; margin: 0px; top: 0px; padding: 0px;" checked><label for="radio_ppm">Relative</label>
@@ -260,9 +267,32 @@ The usage, selling or handing of the contact data written in this imprint is not
     </fieldset>
     <div id="spectra_panel" class="spectra_panel"></div>
     <div id="filter_panel_check_spectra" class="filter_panel_check_spectra">uia</div>
-    <table width="100%" height="100%"><tr><td valign="bottom"><font color="blue" style="cursor: pointer;" onclick="filter_settings_clicked();" id="filter_label">Show filter settings</font></td><td valign="bottom" align="right"><button onclick="hide_check_spectra();" style="display: inline;">Cancel</button> <button onclick="hide_check_spectra(); back_function();">Back</button> <button onclick="hide_check_spectra(); download_assay();">Go to Download</button></td></tr></table>
+    <table width="100%" height="100%"><tr><td valign="bottom"><font color="blue" style="cursor: pointer;" onclick="filter_settings_clicked();" id="filter_label">Show filter settings</font></td><td valign="bottom" align="right"><button onclick="hide_check_spectra(false);" style="display: inline;">Cancel</button> <button onclick="hide_check_spectra(); back_function();">Back</button> <button onclick="hide_check_spectra(); download_assay();">Go to Download</button></td></tr></table>
+-->
 </div>
+<!--
 <div id="check_spectra_background" class="check_spectra_background"></div>
+-->
+<div id="clickbackground" class="clickbackground"></div>
+
+
+<div id="waiting_background" class="waiting_background">
+<!--
+    <div id="waiting_black" style="top: 0px; left: 0px; width: 100%; height: 100%; position: fixed; z-index: 10; background-color: black; opacity: 0.4;">
+    </div>
+    <div style="top: 40%; left: 40%; width: 20%; height: 20%; position: fixed; z-index: 10; opacity: 40%; background-color: white; border: 1px black solid; border-radius: 15px;">
+        <table width="100%" height="100%">
+            <tr>
+                <td align="center" valign="middle">
+                    &nbsp;<p><img src="images/ajax-loader.gif" /><p>&nbsp;<p>
+                    Request in progress, please wait.
+                </td>
+            </tr>
+        </table>
+    </div>
+-->
+</div>
+
 
 <audio style="display: none;"><source src="kns.mp3"></source>
 </body>
@@ -278,66 +308,6 @@ var loaded_chromosomes = 0;
 var currently_visible_proteins = [];
 
 
-var filter_panel_data = "<div id=\"filter_panel\" style=\"display: none;\"> \
-    <table> \
-        <tr><td>Min. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"min_peptide_length\" /><td></tr> \
-        <tr><td>Max. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"max_peptide_length\" /><td></tr> \
-        <tr><td>Min. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"min_precursor_charge\" /><td></tr> \
-        <tr><td>Max. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"max_precursor_charge\" /><td></tr> \
-        <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td><td></tr> \
-        <tr><td>Oxydation of M</td><td> \
-        <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" /> off \
-        <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
-        <input type=\"radio\" id=\"oxy_m_fix\" name=\"oxy_m\" /> fixed \
-        <td></tr> \
-        <tr><td>Carbamidomethylation of C</td><td> \
-        <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" /> off \
-        <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
-        <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
-        <td></tr> \
-        <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
-        document.getElementById('min_peptide_length').value = 8; \
-        document.getElementById('max_peptide_length').value = 25; \
-        document.getElementById('min_precursor_charge').value = 2; \
-        document.getElementById('max_precursor_charge').value = 3; \
-        document.getElementById('oxy_m_off').checked = true; \
-        document.getElementById('carba_c_off').checked = true; \
-        ;\">default settings</td></tr> \
-    </table> \
-</div>";
-
-
-var filter_panel_data_landscape = "<div id=\"filter_panel\" style=\"display: none;\"> \
-    <table><tr><td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \
-        <table> \
-            <tr><td>Min. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"min_peptide_length\" /><td></tr> \
-            <tr><td>Max. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"max_peptide_length\" /><td></tr> \
-            <tr><td>Min. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"min_precursor_charge\" /><td></tr> \
-            <tr><td>Max. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"max_precursor_charge\" /><td></tr> \
-            <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
-            document.getElementById('min_peptide_length').value = 8; \
-            document.getElementById('max_peptide_length').value = 25; \
-            document.getElementById('min_precursor_charge').value = 2; \
-            document.getElementById('max_precursor_charge').value = 3; \
-            document.getElementById('oxy_m_off').checked = true; \
-            document.getElementById('carba_c_off').checked = true; \
-            ;\">default settings</td></tr> \
-        </table></td> \
-        <td valign=\"top\"><table> \
-            <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td><td></tr> \
-            <tr><td>Oxydation of M</td><td> \
-            <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" /> off \
-            <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
-            <input type=\"radio\" id=\"oxy_m_fix\" name=\"oxy_m\" /> fixed \
-            <td></tr> \
-            <tr><td>Carbamidomethylation of C</td><td> \
-            <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" /> off \
-            <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
-            <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
-            <td></tr> \
-        </table></td> \
-    </td></tr></table> \
-</div>";
 
 
 function Band(data){
@@ -359,38 +329,10 @@ function Band(data){
 }
 
 
-function filter_settings_clicked(){
-    if (!filter_parameters["filter_panel_visible"]){
-        document.getElementById("filter_label").innerHTML = "Apply filter settings";
-        document.getElementById("filter_panel_accession").innerHTML = "";
-        document.getElementById("filter_panel_locus").innerHTML = "";
-        document.getElementById("filter_panel_function").innerHTML = "";
-        document.getElementById("filter_panel_check_spectra").style.display = "block";
-        document.getElementById("filter_panel_check_spectra").innerHTML = filter_panel_data_landscape;
-        document.getElementById("filter_panel").style.display = "block";
-        load_filter_parameters();
-        filter_parameters["filter_panel_visible"] = true;
-        resize_ms_view();
-        console.log(document.getElementById("filter_panel_check_spectra").innerHTML);
-    }
-    else {
-        adopt_filter_parameters();
-        document.getElementById("filter_label").innerHTML = "Show filter settings";
-        document.getElementById("filter_panel_check_spectra").innerHTML = "";
-        document.getElementById("filter_panel_check_spectra").style.display = "none";
-        filter_parameters["filter_panel_visible"] = false;
-        basket = {};
-        for (var key in protein_dictionary){
-            protein_dictionary[key].filtering();
-            if (protein_dictionary[key].filter_valid) basket[key] = protein_dictionary[key];
-        }
-        check_spectra();
-    }
-}
-
 function isNumber(n) {
   return !isNaN(parseInt(n)) && isFinite(n);
 }
+
 
 function change_chromosome_view_keydown(e){
     if(e.keyCode == 13) {
@@ -433,6 +375,7 @@ function change_chromosome_view_combo(){
     chromosome_selection_changed(true);    
 }
 
+
 if (!String.prototype.splice) {
     String.prototype.splice = function(start, newSubStr) {
         return this.slice(0, start) + newSubStr + this.slice(start);
@@ -455,12 +398,14 @@ function toggle_chromosome_protein(protein_id){
     chromosome_data_dict[chromosome_selected][protein_id][9] = !chromosome_data_dict[chromosome_selected][protein_id][9];
 }
 
+
 function de_select_all_chromosome_proteins(to_select){
     for (var i = 0; i < currently_visible_proteins.length; ++i){
         currently_visible_proteins[i][9] = to_select;
     }
     chromosome_selection_changed(true);
 }
+
 
 function chromosome_selection_changed(content){
     if (loaded_chromosomes < chromosome_keys.length) return;
@@ -710,6 +655,7 @@ function chromosome_clicked(e){
     chromosomes[chromosome_selected].draw();
 }
 
+
 function chromosome_mousedown(e){
     var mouse_pos = get_mouse_pos(e.target, e);
     var key = e.target.id.replace("chromosome-", "");
@@ -721,6 +667,7 @@ function chromosome_mousemove(e){
     var mouse_pos = { x: e.clientX, y: e.clientY};
     if (chromosome_selected in chromosomes) chromosomes[chromosome_selected].mouse_move(e, mouse_pos);
 }
+
 
 function chromosome_mouseup(e){
     for (var i = 0; i < chromosome_keys.length; ++i){
@@ -736,13 +683,12 @@ function chromosome_mouse_wheel(e){
     }
 }
 
+
 var chromosome_width = 30;
 var chromosome_height = 500;
 var ideom_data = "";
 chroms = document.getElementById("function_chromosome_field");
 chroms.innerHTML = "";
-
-
 
 
 
@@ -784,25 +730,25 @@ function check_filter_valid(filter_type){
         switch (filter_type){
             case 0:
                 back_function = open_accession_search;
-                hide_accession_search();
+                hide_accession_search(true);
                 accession_search_parse_accessions();
                 break;
                 
             case 1:
                 back_function = open_locus_search;
-                hide_locus_search();
+                hide_locus_search(true);
                 locus_search_request_data();
                 break;
                 
             case 2:
                 back_function = open_function_search;
-                hide_function_search();
+                hide_function_search(true);
                 function_search_request_data();
                 break;
                 
             case 3:
                 back_function = open_chromosome_search;
-                hide_chromosome_search();
+                hide_chromosome_search(true);
                 chromosome_search_request_data();
                 break;
         }
@@ -865,7 +811,6 @@ function toggleBranch(event) {
 }
 
 
-
 function recursive_list_adding(function_tree){
     var ret_text = "";
     for (var i = 0; i < function_tree.length; ++i){
@@ -878,7 +823,6 @@ function recursive_list_adding(function_tree){
     }
     return ret_text;
 }
-
 
 
 function advanced_search_init(){
@@ -1103,6 +1047,8 @@ document.addEventListener('keydown', key_down, false);
 document.addEventListener("mousemove", chromosome_mousemove, false);
 document.addEventListener("mouseup", chromosome_mouseup, false);
 document.getElementById("function_chromosome_field").addEventListener('DOMMouseScroll', chromosome_mouse_wheel, false);
-document.getElementById("disclaimer_background").addEventListener("click", hide_disclaimer, false);
+document.getElementById("clickbackground").addEventListener("click", hide_disclaimer, false);
+document.getElementById("check_spectra").innerHTML = get_check_spectra_content();
+document.getElementById("waiting_background").innerHTML = get_waiting_background_content();
 </script>
 </html> 
