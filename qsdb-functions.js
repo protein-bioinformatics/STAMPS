@@ -137,7 +137,7 @@ infobox_offset_x = 20;
 preview_element = 0;
 select_field_element = 0;
 
-
+pathway_dict = {};
 pathways = [[15, "Alanine, aspartate and glutamate metabolism"]];
 //pathways = [[28, "Alanine, aspartate and glutamate metabolism"]];
 
@@ -1575,6 +1575,11 @@ function node(data, c){
         else if (this.type == 'metabolite'){
             prepare_infobox(this.is_mouse_over(mouse) - 1);
         }
+        else if (this.type == 'pathway'){
+            if (this.pathway_ref != 0 && (this.pathway_ref in pathway_dict)){
+                change_pathway(pathway_dict[this.pathway_ref]);
+            }
+        }
     }
     
     this.mouse_dbl_click = function(res, key){
@@ -2243,9 +2248,11 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     
     this.draw = function(){
         var edge_enabled = data[data_ref[this.start_id]].proteins.length > 0;
+        var dashed_edge = data[data_ref[this.start_id]].type == "pathway";
         
         this.ctx.strokeStyle = edge_enabled ? edge_color : edge_disabled_color;
         this.ctx.fillStyle = edge_enabled ? edge_color : edge_disabled_color;
+        if (dashed_edge) this.ctx.setLineDash([10 * factor, 10 * factor]);
         
         /*
         if (data[data_ref[this.start_id]].type == "metabolite"){
@@ -2410,6 +2417,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             
             
         }
+        this.ctx.setLineDash([]);
     }
 };
 

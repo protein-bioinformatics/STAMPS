@@ -14,6 +14,9 @@ function init(){
     xmlhttp_pw.onreadystatechange = function() {
         if (xmlhttp_pw.readyState == 4 && xmlhttp_pw.status == 200) {
             pathways = JSON.parse(xmlhttp_pw.responseText);
+            for (var i = 0; i < pathways.length; ++i){
+                pathway_dict[pathways[i][0]] = i;
+            }
             set_pathway_menu();
         }
     }
@@ -30,7 +33,6 @@ function init(){
     document.getElementById("search_background").addEventListener("click", hide_search, false);
     document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
     document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
-    //document.getElementById("check_spectra_background").addEventListener("click", hide_check_spectra, false);
     document.getElementById("filter_panel_background").addEventListener("click", hide_filter_panel, false);
     
     window.addEventListener('resize', resize_ms_view, false);
