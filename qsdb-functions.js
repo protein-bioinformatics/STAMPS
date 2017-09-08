@@ -22,6 +22,16 @@ filter_parameters["carba_c_off"] = true;
 filter_parameters["carba_c_var"] = false;
 filter_parameters["carba_c_fix"] = false;
 filter_parameters["filte_panel_visible"] = false;
+filter_parameters["tissue_brain"] = true;
+filter_parameters["tissue_liver"] = true;
+filter_parameters["tissue_kidney"] = true;
+filter_parameters["tissue_spleen"] = true;
+filter_parameters["tissue_heart"] = true;
+filter_parameters["tissue_blood"] = true;
+filter_parameters["tissue_fat"] = true;
+filter_parameters["tissue_lung"] = true;
+filter_parameters["tissue_eye"] = true;
+filter_parameters["tissue_gut"] = true;
 data = [];
 data_ref = [];
 nodes = 0;
@@ -44,6 +54,7 @@ process_edges_semaphore = false;
 protein_dictionary = {};
 toggled_proteins = new Set();
 spectra_exclude = [];
+back_function = 0;
 
 scaling = 1.25;
 expanding_percentage = 0.25;
@@ -72,6 +83,7 @@ radius = metabolite_radius * factor;
 last_keys = [];
 highlighting = 0;
 basket = {};
+filtered_basket = {};
 //tissues = {1: "images/brain.svg", 2: "images/liver.svg", 3: "images/kidney.svg", 4: spleen, 5: "images/heart.svg", 6: blood, 7: fat, 8: "images/lung.svg"}
 tissues = {1: ["images/brain.svg", "Brain", 0],
            2: ["images/liver.svg", "Liver", 0],
@@ -175,26 +187,49 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
             document.getElementById('carba_c_off').checked = true; \
             ;\">default settings</td></tr> \
         </table></td> \
-        <td valign=\"top\"><table> \
-            <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td><td></tr> \
-            <tr><td>Oxydation of M</td><td> \
-            <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" /> off \
-            <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
-            <input type=\"radio\" id=\"oxy_m_fix\" name=\"oxy_m\" /> fixed \
-            <td></tr> \
-            <tr><td>Carbamidomethylation of C</td><td> \
-            <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" /> off \
-            <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
-            <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
-            <td></tr> \
-        </table></td> \
+        <td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \
+            <table> \
+                <tr><td colspan=\"2\">Modifications:</td><td></tr> \
+                <tr><td>Oxydation of M</td><td> \
+                <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" /> off \
+                <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
+                <input type=\"radio\" id=\"oxy_m_fix\" name=\"oxy_m\" /> fixed \
+                <td></tr> \
+                <tr><td>Carbamidomethylation of C</td><td> \
+                <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" /> off \
+                <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
+                <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
+                <td></tr> \
+            </table> \
+        </td> \
+        <td valign=\"top\"> \
+            <table> \
+                <tr><td colspan=\"2\">Tissues:</td><td></tr> \
+                <tr><td><input type=\"checkbox\" id=\"check_brain\" /> Brain</td> \
+                    <td><input type=\"checkbox\" id=\"check_liver\" /> Liver</td> \
+                </tr> \
+                <tr><td><input type=\"checkbox\" id=\"check_kidney\" /> Kidney</td> \
+                    <td><input type=\"checkbox\" id=\"check_spleen\" /> Spleen</td> \
+                </tr> \
+                <tr><td><input type=\"checkbox\" id=\"check_heart\" /> Heart</td> \
+                    <td><input type=\"checkbox\" id=\"check_blood\" /> Blood</td> \
+                </tr> \
+                <tr><td><input type=\"checkbox\" id=\"check_fat\" /> Fat</td> \
+                    <td><input type=\"checkbox\" id=\"check_lung\" /> Lung</td> \
+                </tr> \
+                <tr><td><input type=\"checkbox\" id=\"check_eye\" /> Eye</td> \
+                    <td><input type=\"checkbox\" id=\"check_gut\" /> Gut</td> \
+                </tr> \
+            </table> \
+        </td> \
     </td></tr></table> \
 </div>";
 
 
 
+
 function get_check_spectra_content(){
-    return "<canvas id=\"msarea\" class=\"msarea\"></canvas> \
+    var return_text = "<canvas id=\"msarea\" class=\"msarea\"></canvas> \
     <fieldset id=\"spectra_options\" class=\"spectra_options\" style=\"position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;\"> \
         <input type=\"radio\" onchange=\"change_match_error();\" id=\"radio_ppm\" name=\"select_error\" value=\"ppm\" style=\"border: 0px; margin: 0px; top: 0px; padding: 0px;\" \ checked><label for=\"radio_ppm\">Relative</label> \
         <input type=\"radio\" onchange=\"change_match_error();\" id=\"radio_da\" name=\"select_error\" value=\"Da\" style=\"border: 0px; margin: 0px; top: 0px; padding: 0px;\"><label for=\"radio_da\">Absolute</label> \
@@ -202,7 +237,13 @@ function get_check_spectra_content(){
     </fieldset> \
     <div id=\"spectra_panel\" class=\"spectra_panel\"></div> \
     <div id=\"filter_panel_check_spectra\" class=\"filter_panel_check_spectra\">uia</div> \
-    <table width=\"100%\" height=\"100%\"><tr><td valign=\"bottom\"><font color=\"blue\" style=\"cursor: pointer;\" onclick=\"filter_settings_clicked();\" id=\"filter_label\">Show \ filter settings</font></td><td valign=\"bottom\" align=\"right\"><button onclick=\"hide_check_spectra(false);\" style=\"display: inline;\">Cancel</button> <button onclick=\"hide_check_spectra(); back_function();\">Back</button> <button onclick=\"hide_check_spectra(); download_assay();\">Go to Download</button></td></tr></table>";
+    <table width=\"100%\" height=\"100%\"><tr><td valign=\"bottom\"><font color=\"blue\" style=\"cursor: pointer;\" onclick=\"filter_settings_clicked();\" id=\"filter_label\">Show \ filter settings</font></td><td valign=\"bottom\" align=\"right\">";
+    if (typeof(qsdb_domain) === 'undefined' || qsdb_domain != true){
+        return_text += "<button onclick=\"hide_check_spectra(false);\" style=\"display: inline;\">Cancel</button>";
+    }
+    
+    return_text += "<button onclick=\"hide_check_spectra(); back_function();\">Back</button> <button onclick=\"hide_check_spectra(); download_assay();\">Go to Download</button></td></tr></table>";
+    return return_text;
 }
 
 
@@ -570,6 +611,23 @@ function Protein(data, ctx){
             this.peptides[i].filtering();
             this.filter_valid |= this.peptides[i].filter_valid;
         }
+        
+        if (this.filter_valid){
+            var tissue_set = new Set(Array.from(this.tissues));
+            if (!filter_parameters["tissue_brain"] && tissue_set.has(1)) tissue_set.delete(1);
+            if (!filter_parameters["tissue_liver"] && tissue_set.has(2)) tissue_set.delete(2);
+            if (!filter_parameters["tissue_kidney"] && tissue_set.has(3)) tissue_set.delete(3);
+            if (!filter_parameters["tissue_spleen"] && tissue_set.has(4)) tissue_set.delete(4);
+            if (!filter_parameters["tissue_heart"] && tissue_set.has(5)) tissue_set.delete(5);
+            if (!filter_parameters["tissue_blood"] && tissue_set.has(6)) tissue_set.delete(6);
+            if (!filter_parameters["tissue_fat"] && tissue_set.has(7)) tissue_set.delete(7);
+            if (!filter_parameters["tissue_lung"] && tissue_set.has(8)) tissue_set.delete(8);
+            if (!filter_parameters["tissue_eye"] && tissue_set.has(9)) tissue_set.delete(9);
+            if (!filter_parameters["tissue_gut"] && tissue_set.has(10)) tissue_set.delete(10);
+            
+            if (tissue_set.size == 0) this.filter_valid = false;
+        }
+        
         if (this.filter_valid){
             this.fillStyle_rect = "white";
             this.fillStyle_text = text_color;
@@ -2847,7 +2905,19 @@ function toggle_peptide_selection(pep_id){
     */
 }
 
+
+function filter_basket(){
+    filtered_basket = {};
+    for (key in basket){
+        if (basket[key].filter_valid) filtered_basket[key] = basket[key];
+    }
+}
+
+
 function check_spectra(){
+    
+    filter_basket();
+    
     document.getElementById("check_spectra").style.display = "inline";
     document.getElementById("waiting_background").style.display = "inline";
     if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
@@ -2865,8 +2935,8 @@ function check_spectra(){
     
     var inner_html = "<table id=\"review_proteins_table\" width=\"100%\" cellspacing=\"0\" border=\"0\">";
     var proteins_content = [];
-    for (key in basket){
-        if (basket[key].filter_valid) proteins_content.push([basket[key].name, key]);
+    for (key in filtered_basket){
+        proteins_content.push([filtered_basket[key].name, key]);
     }
     proteins_content.sort();
     for (var i = proteins_content.length - 1; i > 0; --i){
@@ -2880,7 +2950,7 @@ function check_spectra(){
     var sign_right = String.fromCharCode(9656);
     var sign_down = String.fromCharCode(9662);
     for (var i = 0; i < proteins_content.length; ++i){
-        var current_prot = basket[proteins_content[i][1]];
+        var current_prot = filtered_basket[proteins_content[i][1]];
         
         var bg_color = (line & 1) ? "#DDDDDD" : "white";
         ++line;
@@ -2894,8 +2964,7 @@ function check_spectra(){
         inner_html += "<tr id=\"" + current_prot.id + "\"><td width=\"70%\" bgcolor=\"" + bg_color + "\" onclick=\"document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: pointer;\">&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"protein_sign_" + i + "\">" + sign_right + "</div>&nbsp;" + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " Peptides</td><td width=\"25%\" bgcolor=\"" + bg_color + "\">";
         
         var curr_tissues = Array.from(current_prot.tissues).sort();
-        
-            console.log(curr_tissues.length);
+
         for (var t = 0; t < curr_tissues.length; ++t){
             if (curr_tissues[t] in tissues){
                 var orientation = "height";
@@ -2980,9 +3049,6 @@ function open_function_search (){
 
 function open_chromosome_search(){
     document.getElementById("chromosome_search").style.display = "inline";
-    document.getElementById("filter_panel_accession").innerHTML = "";
-    document.getElementById("filter_panel_function").innerHTML = "";
-    document.getElementById("filter_panel_locus").innerHTML = "";
     document.getElementById("waiting_background").style.display = "inline";
     chromosome_height = document.getElementById("chromosome_search").offsetHeight * 0.8;
     document.getElementById("chromosome_information_table_wrapper").style.height = chromosome_height.toString() + "px";
@@ -3001,38 +3067,32 @@ function hide_background(){
 
 function hide_accession_search (forward){
     document.getElementById("accession_search").style.display = "none";
-    //document.getElementById("accession_search_background").style.display = "none";
     if (!forward) document.getElementById("waiting_background").style.display = "none";
 }
 
 function hide_locus_search (forward){
     document.getElementById("locus_search").style.display = "none";
-    //document.getElementById("locus_search_background").style.display = "none";
     if (!forward) document.getElementById("waiting_background").style.display = "none";
 }
 
 function hide_function_search (forward){
     document.getElementById("function_search").style.display = "none";
-    //document.getElementById("function_search_background").style.display = "none";
     if (!forward) document.getElementById("waiting_background").style.display = "none";
 }
 
 function hide_chromosome_search (forward){
     document.getElementById("chromosome_search").style.display = "none";
-    //document.getElementById("chromosome_search_background").style.display = "none";
     if (!forward) document.getElementById("waiting_background").style.display = "none";
 }
 
 function hide_disclaimer (){
     document.getElementById("disclaimer").style.display = "none";
-    //document.getElementById("disclaimer_background").style.display = "none";
     document.getElementById("waiting_background").style.display = "none";
 }
 
 
 function hide_check_spectra (){
     document.getElementById("waiting_background").style.display = "none";
-    //document.getElementById("check_spectra_background").style.display = "none";
     document.getElementById("check_spectra").style.display = "none";
     if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
         document.getElementById("renderarea").style.filter = "none";
@@ -3220,7 +3280,6 @@ function open_filter_panel(){
         document.getElementById("filter_panel_check_spectra").innerHTML = "";
         document.getElementById("filter_panel_wrapper").innerHTML = filter_panel_data;
         document.getElementById("filter_panel_wrapper").style.display = "inline";
-        console.log(document.getElementById("filter_panel_wrapper").innerHTML);
         var rect = document.getElementById('filter_panel_nav').getBoundingClientRect();
         load_filter_parameters();
         document.getElementById("filter_panel_wrapper").style.top = (rect.top + document.getElementById('filter_panel_nav').offsetHeight).toString() + "px";
@@ -3249,6 +3308,16 @@ function adopt_filter_parameters(){
     filter_parameters["carba_c_off"] = document.getElementById("carba_c_off").checked;
     filter_parameters["carba_c_var"] = document.getElementById("carba_c_var").checked;
     filter_parameters["carba_c_fix"] = document.getElementById("carba_c_fix").checked;
+    filter_parameters["tissue_brain"] = document.getElementById("check_brain").checked;
+    filter_parameters["tissue_liver"] = document.getElementById("check_liver").checked;
+    filter_parameters["tissue_kidney"] = document.getElementById("check_kidney").checked;
+    filter_parameters["tissue_spleen"] = document.getElementById("check_spleen").checked;
+    filter_parameters["tissue_heart"] = document.getElementById("check_heart").checked;
+    filter_parameters["tissue_blood"] = document.getElementById("check_blood").checked;
+    filter_parameters["tissue_fat"] = document.getElementById("check_fat").checked;
+    filter_parameters["tissue_lung"] = document.getElementById("check_lung").checked;
+    filter_parameters["tissue_eye"] = document.getElementById("check_eye").checked;
+    filter_parameters["tissue_gut"] = document.getElementById("check_gut").checked;
 }
 
 
@@ -3263,6 +3332,16 @@ function load_filter_parameters(){
     document.getElementById("carba_c_off").checked = filter_parameters["carba_c_off"];
     document.getElementById("carba_c_var").checked = filter_parameters["carba_c_var"];
     document.getElementById("carba_c_fix").checked = filter_parameters["carba_c_fix"];
+    document.getElementById("check_brain").checked = filter_parameters["tissue_brain"];
+    document.getElementById("check_liver").checked = filter_parameters["tissue_liver"];
+    document.getElementById("check_kidney").checked = filter_parameters["tissue_kidney"];
+    document.getElementById("check_spleen").checked = filter_parameters["tissue_spleen"];
+    document.getElementById("check_heart").checked = filter_parameters["tissue_heart"];
+    document.getElementById("check_blood").checked = filter_parameters["tissue_blood"];
+    document.getElementById("check_fat").checked = filter_parameters["tissue_fat"];
+    document.getElementById("check_lung").checked = filter_parameters["tissue_lung"];
+    document.getElementById("check_eye").checked = filter_parameters["tissue_eye"];
+    document.getElementById("check_gut").checked = filter_parameters["tissue_gut"];
 }
 
 
@@ -3280,7 +3359,16 @@ function hide_filter_panel(){
         if (filter_parameters["carba_c_off"] != document.getElementById("carba_c_off").checked) filter_changed = true;
         if (filter_parameters["carba_c_var"] != document.getElementById("carba_c_var").checked) filter_changed = true;
         if (filter_parameters["carba_c_fix"] != document.getElementById("carba_c_fix").checked) filter_changed = true;
-        
+        if (filter_parameters["tissue_brain"] != document.getElementById("check_brain").checked) filter_changed = true;
+        if (filter_parameters["tissue_liver"] != document.getElementById("check_liver").checked) filter_changed = true;
+        if (filter_parameters["tissue_kidney"] != document.getElementById("check_kidney").checked) filter_changed = true;
+        if (filter_parameters["tissue_spleen"] != document.getElementById("check_spleen").checked) filter_changed = true;
+        if (filter_parameters["tissue_heart"] != document.getElementById("check_heart").checked) filter_changed = true;
+        if (filter_parameters["tissue_blood"] != document.getElementById("check_blood").checked) filter_changed = true;
+        if (filter_parameters["tissue_fat"] != document.getElementById("check_fat").checked) filter_changed = true;
+        if (filter_parameters["tissue_lung"] != document.getElementById("check_lung").checked) filter_changed = true;
+        if (filter_parameters["tissue_eye"] != document.getElementById("check_eye").checked) filter_changed = true;
+        if (filter_parameters["tissue_gut"] != document.getElementById("check_gut").checked) filter_changed = true;
         
         if (filter_changed){
             var proceed = true;
@@ -3822,7 +3910,6 @@ function filter_settings_clicked(){
         document.getElementById("filter_panel_check_spectra").style.display = "block";
         if (document.getElementById("filter_panel_check_spectra") != 'undefined') document.getElementById("filter_panel_check_spectra").innerHTML = "";
         document.getElementById("filter_panel_check_spectra").innerHTML = filter_panel_data_landscape;
-        console.log(filter_panel_data_landscape);
         document.getElementById("filter_panel").style.display = "block";
         load_filter_parameters();
         filter_parameters["filter_panel_visible"] = true;
@@ -3834,10 +3921,8 @@ function filter_settings_clicked(){
         document.getElementById("filter_panel_check_spectra").innerHTML = "";
         document.getElementById("filter_panel_check_spectra").style.display = "none";
         filter_parameters["filter_panel_visible"] = false;
-        basket = {};
         for (var key in protein_dictionary){
             protein_dictionary[key].filtering();
-            if (protein_dictionary[key].filter_valid) basket[key] = protein_dictionary[key];
         }
         check_spectra();
     }

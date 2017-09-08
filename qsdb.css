@@ -156,7 +156,7 @@ div.disclaimer {
 }
 
 
-div.accession_search {
+div.global_search {
     display: none;
     position: fixed;
     z-index: 120;
@@ -164,7 +164,7 @@ div.accession_search {
     height: 100%;
 }
     
-table.accession_search_content {
+table.global_search_content {
     background-color: white;
     border-color: black;
     border-width: 1px;
