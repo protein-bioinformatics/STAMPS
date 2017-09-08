@@ -159,6 +159,22 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
         <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
         <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
         <td></tr> \
+        <tr><td colspan=\"2\">Tissues:</td><td></tr> \
+                <tr><td><input type=\"checkbox\" id=\"check_brain\" /> Brain</td> \
+                    <td><input type=\"checkbox\" id=\"check_liver\" /> Liver</td> \
+                </tr> \
+                <tr><td><input type=\"checkbox\" id=\"check_kidney\" /> Kidney</td> \
+                    <td><input type=\"checkbox\" id=\"check_spleen\" /> Spleen</td> \
+                </tr> \
+                <tr><td><input type=\"checkbox\" id=\"check_heart\" /> Heart</td> \
+                    <td><input type=\"checkbox\" id=\"check_blood\" /> Blood</td> \
+                </tr> \
+                <tr><td><input type=\"checkbox\" id=\"check_fat\" /> Fat</td> \
+                    <td><input type=\"checkbox\" id=\"check_lung\" /> Lung</td> \
+                </tr> \
+                <tr><td><input type=\"checkbox\" id=\"check_eye\" /> Eye</td> \
+                    <td><input type=\"checkbox\" id=\"check_gut\" /> Gut</td> \
+                </tr> \
         <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
         document.getElementById('min_peptide_length').value = 8; \
         document.getElementById('max_peptide_length').value = 25; \
@@ -166,6 +182,16 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
         document.getElementById('max_precursor_charge').value = 3; \
         document.getElementById('oxy_m_off').checked = true; \
         document.getElementById('carba_c_off').checked = true; \
+        document.getElementById('check_brain').checked = true; \
+        document.getElementById('check_liver').checked = true; \
+        document.getElementById('check_kidney').checked = true; \
+        document.getElementById('check_spleen').checked = true; \
+        document.getElementById('check_heart').checked = true; \
+        document.getElementById('check_blood').checked = true; \ \
+        document.getElementById('check_fat').checked = true; \
+        document.getElementById('check_lung').checked = true; \
+        document.getElementById('check_eye').checked = true; \
+        document.getElementById('check_gut').checked = true; \
         ;\">default settings</td></tr> \
     </table> \
 </div>";
