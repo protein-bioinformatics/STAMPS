@@ -31,8 +31,6 @@ function init(){
     document.getElementById("search_background").addEventListener("click", hide_search, false);
     document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
     document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
-    document.getElementById("disclaimer_background").addEventListener("click", hide_disclaimer, false);
-    document.getElementById("check_spectra_background").addEventListener("click", hide_check_spectra, false);
     document.getElementById("filter_panel_background").addEventListener("click", hide_filter_panel, false);
     document.getElementById("menubackground").addEventListener("click", hide_custom_menu, false);
     document.getElementById("managementbackground").addEventListener("click", hide_management, false);
@@ -201,7 +199,7 @@ function mouse_move_listener(e){
     mouse_y = res.y;
     
     // shift all nodes
-    if (e.buttons & 1){
+    if (e.buttons & 2){
         if (!highlight_element || !highlight_element.mouse_down_move(res, e.which)){
             var shift_x = res.x - offsetX;
             var shift_y = res.y - offsetY;
@@ -333,7 +331,7 @@ edge.prototype.mouse_down = function(mouse, key){
     xmlhttp.open("GET", request, false);
     xmlhttp.send();
     
-    if (key == 1){
+    if (key == 3){
         if (nodes[this.reaction_id]['reagents'][this.reagent_id]['type'] == "educt"){
             nodes[this.reaction_id]['anchor_in'] = next_anchor[nodes[this.reaction_id]['anchor_in']];
         }

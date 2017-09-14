@@ -1258,7 +1258,8 @@ function node(data, c){
     this.y = parseInt(data['y']);
     this.type = data['type'];
     this.id = data['id'];
-    this.name = data['name'];
+    //this.name = data['name'];
+    this.name = data['name'] + " " + this.id;
     this.c_number = data['c_number'];
     this.formula = data['formula'];
     this.exact_mass = data['exact_mass'];
@@ -1325,6 +1326,7 @@ function node(data, c){
                 if (this.width < tokens[j].length) this.width = tokens[j].length;
             }
             this.width *= 12;
+            this.tipp = true;
             break;
         case "metabolite":
             this.width = metabolite_radius * 2;
@@ -2083,7 +2085,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             }
         }
         
-        if (this.head){
+        if (this.head && this.point_list.length >= 2){
             var p_len = this.point_list.length;
             var x_head = -1;
             var y_head = -1;
@@ -2288,7 +2290,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
         }
         this.ctx.stroke();
         
-        if (this.head){
+        if (this.head && this.point_list.length >= 2){
             var x_head = -1;
             var y_head = -1;
             var p2_x = this.point_list[p_len - 1].x;
