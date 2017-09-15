@@ -331,7 +331,7 @@ edge.prototype.mouse_down = function(mouse, key){
     xmlhttp.open("GET", request, false);
     xmlhttp.send();
     
-    if (key == 3){
+    if (key == 1){
         if (nodes[this.reaction_id]['reagents'][this.reagent_id]['type'] == "educt"){
             nodes[this.reaction_id]['anchor_in'] = next_anchor[nodes[this.reaction_id]['anchor_in']];
         }

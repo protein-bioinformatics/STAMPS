@@ -1259,7 +1259,7 @@ function node(data, c){
     this.type = data['type'];
     this.id = data['id'];
     //this.name = data['name'];
-    this.name = data['name'] + " " + this.id;
+    this.name = data['name'] + " " + this.id;  // TODO: delete this line
     this.c_number = data['c_number'];
     this.formula = data['formula'];
     this.exact_mass = data['exact_mass'];
@@ -1494,6 +1494,16 @@ function node(data, c){
                 this.ctx.closePath();
                 this.ctx.fill();
                 this.ctx.stroke();
+                
+                //////////// TODO: delete this lines
+                this.ctx.textAlign = "center";
+                this.ctx.textBaseline = 'middle';
+                this.ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
+                this.ctx.fillStyle = "black";
+                this.ctx.wrapText(this.name, this.x, this.y, this.width, 20 * factor);
+                
+                
+                
                 break;
         }
         
@@ -2262,7 +2272,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
             this.ctx.fillStyle = "#ff0000";
         }*/
         
-        this.ctx.lineWidth = line_width * factor;
+        this.ctx.lineWidth = (line_width - dashed_edge * 3) * factor;
         this.ctx.beginPath();
         this.ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
         var p_len = this.point_list.length;
