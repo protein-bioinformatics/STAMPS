@@ -1258,8 +1258,8 @@ function node(data, c){
     this.y = parseInt(data['y']);
     this.type = data['type'];
     this.id = data['id'];
-    //this.name = data['name'];
-    this.name = data['name'] + " " + this.id;  // TODO: delete this line
+    this.name = data['name'];
+    //this.name = data['name'] + " " + this.id;  // TODO: delete this line
     this.c_number = data['c_number'];
     this.formula = data['formula'];
     this.exact_mass = data['exact_mass'];
@@ -1496,12 +1496,13 @@ function node(data, c){
                 this.ctx.stroke();
                 
                 //////////// TODO: delete this lines
+                /*
                 this.ctx.textAlign = "center";
                 this.ctx.textBaseline = 'middle';
                 this.ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
                 this.ctx.fillStyle = "black";
                 this.ctx.wrapText(this.name, this.x, this.y, this.width, 20 * factor);
-                
+                */
                 
                 
                 break;
@@ -2886,7 +2887,7 @@ function download_assay(){
     xmlhttp_c.open("GET", "/qsdb/cgi-bin/set-counter.bin?counter=download", true);
     xmlhttp_c.send();
     
-    document.getElementById("downloadbackground").style.display = "inline";
+    document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("download").style.display = "inline";
     if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
         document.getElementById("renderarea").style.filter = "blur(5px)";
@@ -2896,6 +2897,7 @@ function download_assay(){
     html = "<table width=100% height=100%><tr><td align=\"center\">";
     html += "<img src=\"/qsdb/images/ajax-loader.gif\"></td></tr></table>"
     document.getElementById("download").innerHTML = html;
+    
     
     var xmlhttp = new XMLHttpRequest();
     var download_link = "";
@@ -2918,7 +2920,7 @@ function download_assay(){
 
 
 function hide_download (){
-    document.getElementById("downloadbackground").style.display = "none";
+    document.getElementById("waiting_background").style.display = "none";
     document.getElementById("download").style.display = "none";
     if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
         document.getElementById("renderarea").style.filter = "none";
