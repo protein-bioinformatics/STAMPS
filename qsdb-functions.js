@@ -1258,8 +1258,8 @@ function node(data, c){
     this.y = parseInt(data['y']);
     this.type = data['type'];
     this.id = data['id'];
-    this.name = data['name'];
-    //this.name = data['name'] + " " + this.id;  // TODO: delete this line
+    //this.name = data['name'];
+    this.name = data['name'] + " " + this.id;  // TODO: delete this line
     this.c_number = data['c_number'];
     this.formula = data['formula'];
     this.exact_mass = data['exact_mass'];
@@ -1496,13 +1496,13 @@ function node(data, c){
                 this.ctx.stroke();
                 
                 //////////// TODO: delete this lines
-                /*
+                
                 this.ctx.textAlign = "center";
                 this.ctx.textBaseline = 'middle';
                 this.ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
                 this.ctx.fillStyle = "black";
                 this.ctx.wrapText(this.name, this.x, this.y, this.width, 20 * factor);
-                */
+                
                 
                 
                 break;
