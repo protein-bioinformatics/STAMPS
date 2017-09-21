@@ -2260,8 +2260,8 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node);
     
     this.draw = function(){
-        var edge_enabled = data[data_ref[this.start_id]].proteins.length > 0;
         var dashed_edge = data[data_ref[this.start_id]].type == "pathway";
+        var edge_enabled = data[data_ref[this.start_id]].proteins.length > 0 || dashed_edge;
         
         this.ctx.strokeStyle = edge_enabled ? edge_color : edge_disabled_color;
         this.ctx.fillStyle = edge_enabled ? edge_color : edge_disabled_color;
@@ -2461,7 +2461,8 @@ function compute_edges(){
         for (var j = 0; j < nodes[i]['reagents'].length; ++j){
             
             var metabolite_id = data_ref[nodes[i]['reagents'][j]['node_id']];
-            var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y, nodes[i]['reagents'][j]['anchor']);
+            var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x,                     data[node_id].y, nodes[i]['reagents'][j]['anchor']);
+            
             
             if (nodes[i]['reagents'][j]['type'] == 'educt'){
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, nodes[i]['anchor_in']);
@@ -2638,6 +2639,13 @@ function compute_edges(){
         edges[i] = new edge(c, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id, edge_id);
     }
     
+    // sorting the edges, so that active edges will be drown as last, hence on top of inactive edges. Clever, eh?
+    edges.sort(function(a, b){
+        a_rank = data[data_ref[a.start_id]].type == 'pathway' || data[data_ref[a.start_id]].proteins.length > 0;
+        b_rank = data[data_ref[b.start_id]].type == 'pathway' || data[data_ref[b.start_id]].proteins.length > 0;
+        console.log(a_rank + ", " + b_rank);
+        return a_rank - b_rank;
+    });
 }
 
 
