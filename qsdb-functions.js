@@ -3920,6 +3920,8 @@ function function_search_request_data(){
         }
     }
     
+    console.log(IDs);
+    
     // request proteins
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
