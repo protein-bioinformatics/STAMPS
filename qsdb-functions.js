@@ -2643,7 +2643,6 @@ function compute_edges(){
     edges.sort(function(a, b){
         a_rank = data[data_ref[a.start_id]].type == 'pathway' || data[data_ref[a.start_id]].proteins.length > 0;
         b_rank = data[data_ref[b.start_id]].type == 'pathway' || data[data_ref[b.start_id]].proteins.length > 0;
-        console.log(a_rank + ", " + b_rank);
         return a_rank - b_rank;
     });
 }
@@ -3920,7 +3919,6 @@ function function_search_request_data(){
         }
     }
     
-    console.log(IDs);
     
     // request proteins
     var xmlhttp = new XMLHttpRequest();
