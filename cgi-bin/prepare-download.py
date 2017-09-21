@@ -16,6 +16,10 @@ with open("../admin/qsdb.conf", mode="rt") as fl:
         if len(token) < 2: continue
         conf[token[0].strip(" ")] = token[1].strip(" ")
 
+print("Content-Type: text/html")
+print()
+
+
 
 form = cgi.FieldStorage()
 proteins = form.getvalue('proteins')
@@ -29,10 +33,6 @@ proteins = proteins.replace(":", ",")
 spectra = spectra.replace("'", "")
 spectra = spectra.replace(" ", "")
 spectra = spectra.split(":")
-
-print("Content-Type: text/html")
-print()
-
 
 
 
@@ -52,7 +52,6 @@ my_cur.execute(sql_query)
 with open(fasta_file, mode="wt") as fl:
     for row in my_cur:
         fl.write(row[0] + "\n")
-
 
 
 
