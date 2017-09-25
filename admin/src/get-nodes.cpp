@@ -156,6 +156,7 @@ class protein {
         string ec_number;
         string fasta;
         vector<peptide*> peptides;
+        string validation;
         
         string to_string(){
             string str = "{";
@@ -165,6 +166,7 @@ class protein {
             str += "\"mass\": \"" + mass + "\", ";
             str += "\"accession\": \"" + accession + "\", ";
             str += "\"ec_number\": \"" + ec_number + "\", ";
+            str += "\"validation\": \"" + validation + "\", ";
             str += "\"peptides\": [";
             for (int i = 0; i < peptides.size(); ++i){
                 if (i) str += ", ";
@@ -482,6 +484,7 @@ main(int argc, char** argv) {
             last_protein->mass = row[column_names_proteins[string("mass")]];
             last_protein->accession = row[column_names_proteins[string("accession")]];
             last_protein->ec_number = row[column_names_proteins[string("ec_number")]];
+            last_protein->validation = row[column_names_proteins[string("validation")]];
             last_protein->fasta = cleanFasta(row[column_names_proteins[string("fasta")]]);
             len_text += last_protein->fasta.length() + 1;
             all_proteins->insert(pair<string, protein* >(pid, last_protein));

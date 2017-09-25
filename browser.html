@@ -79,7 +79,6 @@
     <font size="+2"><b>Statistics</b></font><p>
     <table width="95%" cellpadding="5" cellspacing="0" style="border-top: 2px solid black; border-bottom: 2px solid black;">
         <tr><td width="60%"><b>Pathway: </b></td><td id="stat_pathway"></td></td>
-        <tr><td id="stat_val_type"><b>Validation: </b></td><td id="stat_validation"></td></td>
         <tr><td><b>No. of total proteins: </b></td><td id="stat_num_prot"></td></td>
         <tr><td><b>No. of distinct proteins: </b></td><td id="stat_dist_prot"></td></td>
         <tr><td><b>No. of avbl. proteins: </b></td><td id="stat_filter_prot"></td></td>
@@ -90,9 +89,10 @@
         <tr><td><b>No. of spectra: </b></td><td id="stat_num_spec"></td></td>
         <tr><td><b>No. of filtered spectra: </b></td><td id="stat_filter_spec"></td></td>
         <tr><td><b>No. of selected spectra: </b></td><td id="stat_sel_spec"></td></td>
-    </table><p />&nbsp;<p />
+    </table><p />
     
-    <b>Validation types:</b>
+    <b>Validated proteins:</b><br>
+    <canvas id="piechart" width=120 height=120>Your browser does not support the HTML5 canvas tag.</canvas>
     <table>
         <tr><td bgcolor="#ffbebe" width="25">&nbsp;</td><td>Top-<i>n</i> experiment</td></tr>
         <tr><td bgcolor="#feff90" width="25">&nbsp;</td><td>PRM</td></tr>

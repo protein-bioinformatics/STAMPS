@@ -55,6 +55,7 @@ protein_dictionary = {};
 toggled_proteins = new Set();
 spectra_exclude = [];
 back_function = 0;
+num_validation = [0, 0, 0];
 
 scaling = 1.25;
 expanding_percentage = 0.25;
@@ -610,6 +611,7 @@ function Protein(data, ctx){
     this.accession = data['accession'];
     this.ec_number = data['ec_number'];
     this.mass = data['mass'];
+    this.validation = data['validation'];
     this.peptides = [];
     this.marked = false;
     this.filter_valid = false;
@@ -1258,8 +1260,8 @@ function node(data, c){
     this.y = parseInt(data['y']);
     this.type = data['type'];
     this.id = data['id'];
-    //this.name = data['name'];
-    this.name = data['name'] + " " + this.id;  // TODO: delete this line
+    this.name = data['name'];
+    //this.name = data['name'] + " " + this.id;  // TODO: delete this line
     this.c_number = data['c_number'];
     this.formula = data['formula'];
     this.exact_mass = data['exact_mass'];
@@ -1496,13 +1498,13 @@ function node(data, c){
                 this.ctx.stroke();
                 
                 //////////// TODO: delete this lines
-                
+                /*
                 this.ctx.textAlign = "center";
                 this.ctx.textBaseline = 'middle';
                 this.ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
                 this.ctx.fillStyle = "black";
                 this.ctx.wrapText(this.name, this.x, this.y, this.width, 20 * factor);
-                
+                */
                 
                 
                 break;
@@ -3486,22 +3488,6 @@ function compute_statistics(){
     if (typeof qsdb_domain === 'undefined' || qsdb_domain === null) return;
     document.getElementById("stat_pathway").innerHTML = pathways[current_pathway_list_index][1];
     var validation = pathways[current_pathway_list_index][2];
-    if (validation == "is"){
-        document.getElementById("stat_val_type").style.background = "#a0ff90";
-        document.getElementById("stat_validation").style.background = "#a0ff90";
-        document.getElementById("stat_validation").innerHTML = "PRM + internal standard";
-        
-    }
-    else if (validation == "prm"){
-        document.getElementById("stat_val_type").style.background = "#feff90";
-        document.getElementById("stat_validation").style.background = "#feff90";
-        document.getElementById("stat_validation").innerHTML = "PRM";
-    }
-    else if (validation == "topn"){
-        document.getElementById("stat_val_type").style.background = "#ffbebe";
-        document.getElementById("stat_validation").style.background = "#ffbebe";
-        document.getElementById("stat_validation").innerHTML = "Top-<i>n</i> experiment";
-    }
     
     
     var num_proteins = 0;
@@ -3532,6 +3518,7 @@ function compute_statistics(){
     var sel_proteins = 0;
     var sel_peptides = 0;
     var sel_spectra = 0;
+    num_validation = [0, 0, 0];
     for (var i = 0; i < proteins_content.length; ++i){
         var tmp = data[proteins_content[i][1]].proteins[proteins_content[i][2]].get_statistics();
         valid_proteins += data[proteins_content[i][1]].proteins[proteins_content[i][2]].filter_valid;
@@ -3539,12 +3526,16 @@ function compute_statistics(){
         valid_peptides += tmp[3];
         num_spectra += tmp[4];
         valid_spectra += tmp[5];
+        if (data[proteins_content[i][1]].proteins[proteins_content[i][2]].validation == "is") num_validation[2] += 1;
+        else if (data[proteins_content[i][1]].proteins[proteins_content[i][2]].validation == "prm") num_validation[1] += 1;
+        else if (data[proteins_content[i][1]].proteins[proteins_content[i][2]].validation == "topn") num_validation[0] += 1;
         if (proteins_content[i][3]){
             sel_proteins += 1;
             sel_peptides += tmp[3];
             sel_spectra += tmp[5];
         }
     }
+    
     document.getElementById("stat_num_prot").innerHTML = num_proteins;
     document.getElementById("stat_dist_prot").innerHTML = proteins_content.length;
     document.getElementById("stat_filter_prot").innerHTML = valid_proteins + " / " + round10(valid_proteins / proteins_content.length * 100, 1) + "%";
@@ -3572,6 +3563,41 @@ function expand_statistics(){
     expand_obj.visible = false;
     collapse_obj.visible = true;
     compute_statistics();
+    var canvas_pie = document.getElementById('piechart');
+    var context_pie = canvas_pie.getContext('2d');
+    var centerX = canvas_pie.width / 2;
+    var centerY = canvas_pie.height / 2;
+    var radius = centerX - 1;
+
+    context_pie.beginPath();
+    context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    context_pie.fillStyle = '#ffbebe';
+    context_pie.fill();
+    
+    var arc_prm = (num_validation[2] + num_validation[1]) / (num_validation[0] + num_validation[1] + num_validation[2]) * 2 * Math.PI;
+    console.log(arc_prm);
+    
+    context_pie.beginPath();
+    context_pie.moveTo(canvas_pie.width / 2, canvas_pie.height / 2);
+    context_pie.arc(centerX, centerY, radius, 0, arc_prm);
+    context_pie.moveTo(canvas_pie.width / 2, canvas_pie.height / 2);
+    context_pie.fillStyle = '#feff90';
+    context_pie.fill();
+    
+    var arc_is = (num_validation[2]) / (num_validation[0] + num_validation[1] + num_validation[2]) * 2 * Math.PI;
+    context_pie.beginPath();
+    context_pie.moveTo(canvas_pie.width / 2, canvas_pie.height / 2);
+    context_pie.arc(centerX, centerY, radius, 0, arc_is);
+    context_pie.moveTo(canvas_pie.width / 2, canvas_pie.height / 2);
+    context_pie.fillStyle = '#a0ff90';
+    context_pie.fill();
+    
+    context_pie.beginPath();
+    context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    context_pie.lineWidth = 1;
+    context_pie.strokeStyle = '#000000';
+    context_pie.stroke();
+    
     if (pathway_is_loaded) draw();
 }
 
