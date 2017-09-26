@@ -23,6 +23,15 @@ function init(){
     xmlhttp_pw.open("GET", "/qsdb/cgi-bin/get-pathways.bin", true);
     xmlhttp_pw.send();
     
+    var xmlhttp_search = new XMLHttpRequest();
+    xmlhttp_search.onreadystatechange = function() {
+        if (xmlhttp_search.readyState == 4 && xmlhttp_search.status == 200) {
+            search_data = JSON.parse(xmlhttp_search.responseText);
+        }
+    }
+    xmlhttp_search.open("GET", "/qsdb/cgi-bin/get-search-data.py", true);
+    xmlhttp_search.send();
+    
     
     document.documentElement.style.overflow = 'hidden';
     document.body.scroll = "no";

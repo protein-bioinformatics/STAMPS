@@ -238,6 +238,8 @@ div.search_results {
     position: fixed;
     border:1px solid #d3d3d3;
     z-index: 80;
+    height: 80%;
+    overflow-y: auto;
 }
 
 

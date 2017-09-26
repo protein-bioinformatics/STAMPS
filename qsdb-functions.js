@@ -58,6 +58,7 @@ toggled_proteins = new Set();
 spectra_exclude = [];
 back_function = 0;
 num_validation = [0, 0, 0];
+search_data = [];
 
 scaling = 1.25;
 expanding_percentage = 0.25;
@@ -3212,12 +3213,16 @@ function start_search(){
         
         var accept = 1 << (len_p - 1);
         var results = [];
-        for (var i = 0; i < data.length; ++i){
-            var r = data[i].search(len_p, accept, masks);
+        for (var i = 0; i < search_data.length; ++i){
+            var s_data = search_data[i];
+            var r = search_pattern(s_data[0], len_p, accept, masks, s_data[1], s_data[2]);
+            //var r = data[i].search(len_p, accept, masks);
             if (r.length){
                 results = results.concat(r);
             }
         }
+        
+        results.sort();
         
         if (results.length){
             document.getElementById("search_results").style.display = "inline";
@@ -3227,13 +3232,18 @@ function start_search(){
             document.getElementById("search_results").style.left = (rect.left).toString() + "px";
             var inner_html = "<table>";
             for (var i = 0; i < results.length; ++i){
+                
                 var t1 = "<font color=\"" + disabled_text_color + "\">" + results[i][0].substring(0, results[i][1]) + "</font>";
+                
                 var t2 = results[i][0].substring(results[i][1], results[i][1] + len_p);
-                var t3 = "<font color=\"" + disabled_text_color + "\">" + results[i][0].substring(results[i][1] + len_p, results[i][0].length) + "</font>";
-                inner_html += "<tr><td class=\"single_search_result\" onclick=\"highlight_protein(" + results[i][2] + ", " + results[i][3] + ");\">" + t1 + t2 + t3 + "</td></tr>";
+                
+                var t3 = "<font color=\"" + disabled_text_color + "\">" + results[i][0].substring(results[i][1] + len_p, results[i][0].length);
+                var foreign_pw = (results[i][3] != current_pathway && (results[i][3] in pathway_dict)) ? " (" + pathways[pathway_dict[results[i][3]]][1] + ")" : "";
+                inner_html += "<tr><td class=\"single_search_result\" onclick=\"highlight_node(" + results[i][2] + ", " + results[i][3] + ");\">" + t1 + t2 + t3 + foreign_pw + "<font></td></tr>";
             }
             inner_html += "</table>";
             document.getElementById("search_results").innerHTML = inner_html;
+            document.getElementById("search_results").style.width = (rect.top + document.getElementById('search_results').offsetWidth + 20).toString() + "px";
         }
         else {
             hide_search();
@@ -3245,12 +3255,26 @@ function start_search(){
 }
 
 
-
-
-
-function highlight_protein(node_id, prot_id){
-    
+function highlight_node(node_id, pathway_id){
     hide_search();
+    
+    if (pathway_id != current_pathway){
+        change_pathway(pathway_dict[pathway_id]);
+        var waiting_for_pathway = setInterval(function(){
+            if (pathway_is_loaded){
+                clearInterval (waiting_for_pathway);
+                highlight_node_inner(node_id);
+            }
+        }, 25);
+    }
+    else {
+        highlight_node_inner(node_id);
+    }
+}
+
+
+function highlight_node_inner(node_id){
+    
     var progress = 0;
     var steps = 30;
     var time = 3; // seconds
@@ -3654,6 +3678,7 @@ function close_navigation(nav){
             hide_filter_panel();
             break;
     }
+    hide_search();
 }
 
 
