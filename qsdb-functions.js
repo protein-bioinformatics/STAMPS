@@ -489,6 +489,8 @@ function search_pattern(text, len_p, accept, masks, id1, id2){
     text = text.replace(String.fromCharCode(13) + String.fromCharCode(10), " ");
     text = text.replace(String.fromCharCode(10), " ");
     text = text.replace(String.fromCharCode(13), " ");
+    text = text.replace("\n", "");
+    text = text.replace("\\n", "");
     for (var i = 0, states = 0; i < text.length; ++i){ // search name
         states = ((states << 1) | 1) & masks[text.charCodeAt(i)];
         if (accept & states) results.push([text, i - len_p + 1, id1, id2]);
@@ -3243,7 +3245,7 @@ function start_search(){
             }
             inner_html += "</table>";
             document.getElementById("search_results").innerHTML = inner_html;
-            document.getElementById("search_results").style.width = (rect.top + document.getElementById('search_results').offsetWidth + 20).toString() + "px";
+            document.getElementById("search_results").style.width = (rect.top + document.getElementById('search_results').width + 20).toString() + "px";
         }
         else {
             hide_search();
