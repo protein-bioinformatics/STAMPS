@@ -32,6 +32,8 @@ filter_parameters["tissue_fat"] = true;
 filter_parameters["tissue_lung"] = true;
 filter_parameters["tissue_eye"] = true;
 filter_parameters["tissue_gut"] = true;
+filter_parameters["protein_tissues_visible"] = true;
+filter_parameters["peptide_tissues_visible"] = false;
 data = [];
 data_ref = [];
 nodes = 0;
@@ -111,6 +113,7 @@ protein_disabled_fill_color = "#eeeeee";
 metabolite_stroke_color = "#f69301";
 metabolite_fill_color = "white";;
 pathway_stroke_color = "#f69301";
+pathway_disabled_stroke_color = "#cccccc";
 pathway_fill_color = "white";
 edge_color = "#f69301";
 edge_disabled_color = "#cccccc";
@@ -256,6 +259,8 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
 
 
 function get_check_spectra_content(){
+    var proteins_checked = filter_parameters["protein_tissues_visible"] ? "checked" : "";
+    var peptides_checked = filter_parameters["peptide_tissues_visible"] ? "checked" : "";
     var return_text = "<canvas id=\"msarea\" class=\"msarea\"></canvas> \
     <fieldset id=\"spectra_options\" class=\"spectra_options\" style=\"position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;\"> \
         <input type=\"radio\" onchange=\"change_match_error();\" id=\"radio_ppm\" name=\"select_error\" value=\"ppm\" style=\"border: 0px; margin: 0px; top: 0px; padding: 0px;\" \ checked><label for=\"radio_ppm\">Relative</label> \
@@ -263,8 +268,11 @@ function get_check_spectra_content(){
         <input type=\"text\" onchange=\"change_match_error_value();\" id=\"error_value\" value=\"-\" size=1 style=\"text-align: right;\"><label id=\"unit\">ppm</label> \
     </fieldset> \
     <div id=\"spectra_panel\" class=\"spectra_panel\"></div> \
-    <div id=\"filter_panel_check_spectra\" class=\"filter_panel_check_spectra\">uia</div> \
-    <table width=\"100%\" height=\"100%\"><tr><td valign=\"bottom\"><font color=\"blue\" style=\"cursor: pointer;\" onclick=\"filter_settings_clicked();\" id=\"filter_label\">Show \ filter settings</font></td><td valign=\"bottom\" align=\"right\">";
+    <div id=\"filter_panel_check_spectra\" class=\"filter_panel_check_spectra\"></div> \
+    <table width=\"100%\" height=\"100%\"><tr><td valign=\"bottom\"><font color=\"blue\" style=\"cursor: pointer;\" onclick=\"filter_settings_clicked();\" id=\"filter_label\">Show \ filter settings</font>&nbsp;&nbsp;&nbsp; \
+    <input type=\"checkbox\" onchange=\"filter_parameters['protein_tissues_visible'] = !filter_parameters['protein_tissues_visible']; check_spectra();\" " + proteins_checked + "> Show protein tissues \
+    &nbsp;&nbsp;&nbsp;<input type=\"checkbox\" onchange=\"filter_parameters['peptide_tissues_visible'] = !filter_parameters['peptide_tissues_visible']; check_spectra();\" " + peptides_checked + "> Show peptide tissues \
+    </td><td valign=\"bottom\" align=\"right\">";
     if (typeof(qsdb_domain) === 'undefined' || qsdb_domain != true){
         return_text += "<button onclick=\"hide_check_spectra(false);\" style=\"display: inline;\">Cancel</button>";
     }
@@ -1268,6 +1276,7 @@ function node(data, c){
     this.img = 0;
     this.highlight = false;
     this.pathway_ref = data['pathway_ref'];
+    this.pathway_enabled = this.type == 'pathway' && this.pathway_ref != 0 && (this.pathway_ref in pathway_dict);
     this.proteins = [];
     this.lines = -1;
     this.width = -1;
@@ -1477,8 +1486,8 @@ function node(data, c){
                 
             case "pathway":
                 this.ctx.fillStyle = pathway_fill_color;
-                this.ctx.strokeStyle = pathway_stroke_color;
-                this.ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
+                this.ctx.strokeStyle = this.pathway_enabled ? pathway_stroke_color : pathway_disabled_stroke_color;
+                this.ctx.lineWidth = (line_width + 2 * this.highlight * this.pathway_enabled) * factor;
                 this.ctx.roundRect(this.x - hw, this.y - hh, this.width, this.height, round_rect_radius * factor);
                 this.ctx.textAlign = "center";
                 this.ctx.textBaseline = 'middle';
@@ -1486,6 +1495,7 @@ function node(data, c){
                 this.ctx.fillStyle = "black";
                 this.ctx.wrapText(this.name, this.x, this.y, this.width, 20 * factor);
                 break;
+                
                 
             case "metabolite":
                 this.ctx.fillStyle = metabolite_fill_color;
@@ -1591,7 +1601,7 @@ function node(data, c){
             prepare_infobox(this.is_mouse_over(mouse) - 1);
         }
         else if (this.type == 'pathway'){
-            if (this.pathway_ref != 0 && (this.pathway_ref in pathway_dict)){
+            if (this.pathway_enabled){
                 change_pathway(pathway_dict[this.pathway_ref]);
             }
         }
@@ -2263,7 +2273,7 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     
     this.draw = function(){
         var dashed_edge = data[data_ref[this.start_id]].type == "pathway";
-        var edge_enabled = data[data_ref[this.start_id]].proteins.length > 0 || dashed_edge;
+        var edge_enabled = data[data_ref[this.start_id]].proteins.length > 0 || (dashed_edge && data[data_ref[this.start_id]].pathway_enabled);
         
         this.ctx.strokeStyle = edge_enabled ? edge_color : edge_disabled_color;
         this.ctx.fillStyle = edge_enabled ? edge_color : edge_disabled_color;
@@ -2952,17 +2962,6 @@ function delete_from_protein_table(prot_id){
 }
 
 
-
-function toggle_peptide_selection(pep_id){
-    /*
-    basket[prot_id].mark(false);
-    delete basket[prot_id];
-    if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null) draw();
-    check_spectra();
-    */
-}
-
-
 function filter_basket(){
     filtered_basket = {};
     for (key in basket){
@@ -2974,6 +2973,12 @@ function filter_basket(){
 function check_spectra(){
     
     filter_basket();
+    
+    document.getElementById("filter_label").innerHTML = "Show filter settings";
+    document.getElementById("filter_panel_check_spectra").innerHTML = "";
+    document.getElementById("filter_panel_check_spectra").style.display = "none";
+    filter_parameters["filter_panel_visible"] = false;
+    
     
     document.getElementById("check_spectra").style.display = "inline";
     document.getElementById("waiting_background").style.display = "inline";
@@ -3018,20 +3023,23 @@ function check_spectra(){
         }
         
         
-        inner_html += "<tr id=\"" + current_prot.id + "\"><td width=\"70%\" bgcolor=\"" + bg_color + "\" onclick=\"document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: pointer;\">&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"protein_sign_" + i + "\">" + sign_right + "</div>&nbsp;" + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " Peptides</td><td width=\"25%\" bgcolor=\"" + bg_color + "\">";
+        inner_html += "<tr id=\"" + current_prot.id + "\"><td width=\"95%\" bgcolor=\"" + bg_color + "\" onclick=\"document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: pointer;\">&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"protein_sign_" + i + "\">" + sign_right + "</div>&nbsp;" + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " Peptides";
         
-        var curr_tissues = Array.from(current_prot.tissues).sort();
-
-        for (var t = 0; t < curr_tissues.length; ++t){
-            if (curr_tissues[t] in tissues){
-                var orientation = "height";
-                if (tissues[curr_tissues[t]][2].width > tissues[curr_tissues[t]][2].height) orientation = "width";
-                inner_html += "<img src=\"" + tissues[curr_tissues[t]][0] + "\" style=\"margin-right: 2px;\" title=\"" + tissues[curr_tissues[t]][1] + "\" " + orientation + "=\"16\" />";
+        if (filter_parameters["protein_tissues_visible"]){
+            var curr_tissues = Array.from(current_prot.tissues).sort();
+            if (curr_tissues.length > 0) inner_html += "&nbsp;&nbsp;";
+            for (var t = 0; t < curr_tissues.length; ++t){
+                if (curr_tissues[t] in tissues){
+                    var orientation = "height";
+                    if (tissues[curr_tissues[t]][2].width > tissues[curr_tissues[t]][2].height) orientation = "width";
+                    inner_html += "<img src=\"" + tissues[curr_tissues[t]][0] + "\" style=\"margin-right: 2px;\" title=\"" + tissues[curr_tissues[t]][1] + "\" " + orientation + "=\"12\" />";
+                }
             }
         }
+        
         inner_html += "</td><td bgcolor=\"" + bg_color + "\" align=\"right\"><img src=\"images/delete.png\" width=\"16\" height=\"16\" onclick=\"delete_from_protein_table(" + current_prot.id + ");\" /></td></tr>";
         
-        inner_html += "<tr><td colspan=\"2\" width=\"100%\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" id='peptide_" + peps + "' style=\"display: none;\">";
+        inner_html += "<tr><td colspan=\"1\" width=\"100%\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" id='peptide_" + peps + "' style=\"display: none;\">";
         for (var j = 0; j < current_prot.peptides.length; ++j){
             if (!current_prot.peptides[j].filter_valid) continue;
             var current_pep = current_prot.peptides[j];
@@ -3053,8 +3061,22 @@ function check_spectra(){
                     document.getElementById('cb-" + current_prot.id + "-" + j + "-' + protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[k].id).checked = true; \
                 } \
             }";
-            inner_html += "<tr><td width=\"100%\" onclick=\"document.getElementById('peptide_sign_" + specs + "').innerHTML = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('spectrum_" + specs + "').style.display = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"border-bottom: 1px solid #d3d3d3; cursor: pointer; color: " + (n_specs ? "black" : disabled_text_color) + ";\">&nbsp;&nbsp;&nbsp;&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"peptide_sign_" + specs + "\">" + sign_right + "</div>&nbsp;" + current_pep.peptide_seq + "</td><td style=\"border-bottom: 1px solid #d3d3d3; padding-right: 10px;\" align=\"right\"><input style=\"display: inline;\" type=\"checkbox\" " + peptite_checked + " onclick=\"" + onclick_command + "\" id='cb-" + current_prot.id + "-" + j + "' /></td></tr>";
-            inner_html += "<tr><td colspan=\"2\" width=\"100%\"><table cellspacing=\"0\" cellpadding=\"0\" id='spectrum_" + specs + "' style=\"display: none;\">";
+            inner_html += "<tr><td width=\"100%\" onclick=\"document.getElementById('peptide_sign_" + specs + "').innerHTML = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('spectrum_" + specs + "').style.display = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"border-bottom: 1px solid #d3d3d3; cursor: pointer; color: " + (n_specs ? "black" : disabled_text_color) + ";\">&nbsp;&nbsp;&nbsp;&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"peptide_sign_" + specs + "\">" + sign_right + "</div>&nbsp;" + current_pep.peptide_seq;
+            
+            if (filter_parameters["peptide_tissues_visible"]){
+            var curr_pep_tissues = Array.from(current_pep.tissues).sort();
+            if (curr_pep_tissues.length > 0) inner_html += "&nbsp;&nbsp;";
+            for (var t = 0; t < curr_pep_tissues.length; ++t){
+                if (curr_pep_tissues[t] in tissues){
+                    var orientation = "height";
+                    if (tissues[curr_pep_tissues[t]][2].width > tissues[curr_pep_tissues[t]][2].height) orientation = "width";
+                    inner_html += "<img src=\"" + tissues[curr_pep_tissues[t]][0] + "\" style=\"margin-right: 2px;\" title=\"" + tissues[curr_pep_tissues[t]][1] + "\" " + orientation + "=\"12\" />";
+                }
+            }
+        }
+            
+            inner_html += "</td><td style=\"border-bottom: 1px solid #d3d3d3; padding-right: 10px;\" align=\"right\"><input style=\"display: inline;\" type=\"checkbox\" " + peptite_checked + " onclick=\"" + onclick_command + "\" id='cb-" + current_prot.id + "-" + j + "' /></td></tr>";
+            inner_html += "<tr><td colspan=\"1\" width=\"100%\"><table cellspacing=\"0\" cellpadding=\"0\" id='spectrum_" + specs + "' style=\"display: none;\">";
             for (var k = 0; k < n_specs; ++k){
                 if (!current_pep.spectra[k].filter_valid) continue;
                 var spectrum_checked = current_pep.spectra[k].user_selected ? "checked" : "";
@@ -3354,7 +3376,6 @@ function hide_select_species(){
 
 
 function adopt_filter_parameters(){
-    filter_parameters = [];
     filter_parameters["min_peptide_length"] = document.getElementById("min_peptide_length").value;
     filter_parameters["max_peptide_length"] = document.getElementById("max_peptide_length").value;
     filter_parameters["min_precursor_charge"] = document.getElementById("min_precursor_charge").value;
@@ -3575,7 +3596,6 @@ function expand_statistics(){
     context_pie.fill();
     
     var arc_prm = (num_validation[2] + num_validation[1]) / (num_validation[0] + num_validation[1] + num_validation[2]) * 2 * Math.PI;
-    console.log(arc_prm);
     
     context_pie.beginPath();
     context_pie.moveTo(canvas_pie.width / 2, canvas_pie.height / 2);

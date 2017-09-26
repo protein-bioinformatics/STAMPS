@@ -20,7 +20,6 @@ function init(){
             set_pathway_menu();
         }
     }
-    
     xmlhttp_pw.open("GET", "/qsdb/cgi-bin/get-pathways.bin", true);
     xmlhttp_pw.send();
     

@@ -15,6 +15,9 @@ function init(){
     xmlhttp_pw.onreadystatechange = function() {
         if (xmlhttp_pw.readyState == 4 && xmlhttp_pw.status == 200) {
             pathways = JSON.parse(xmlhttp_pw.responseText);
+            for (var i = 0; i < pathways.length; ++i){
+                pathway_dict[pathways[i][0]] = i;
+            }
             set_pathway_menu();
         }
     }
