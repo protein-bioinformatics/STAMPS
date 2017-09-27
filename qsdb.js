@@ -23,6 +23,8 @@ function init(){
     xmlhttp_pw.open("GET", "/qsdb/cgi-bin/get-pathways.bin", true);
     xmlhttp_pw.send();
     
+    
+    
     var xmlhttp_search = new XMLHttpRequest();
     xmlhttp_search.onreadystatechange = function() {
         if (xmlhttp_search.readyState == 4 && xmlhttp_search.status == 200) {
@@ -31,6 +33,7 @@ function init(){
     }
     xmlhttp_search.open("GET", "/qsdb/cgi-bin/get-search-data.py", true);
     xmlhttp_search.send();
+    
     
     
     document.documentElement.style.overflow = 'hidden';
@@ -42,6 +45,7 @@ function init(){
     document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
     document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
     document.getElementById("filter_panel_background").addEventListener("click", hide_filter_panel, false);
+    document.getElementById("infobox_html_background").addEventListener("click", hide_infobox, false);
     
     window.addEventListener('resize', resize_ms_view, false);
     document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);

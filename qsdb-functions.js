@@ -696,17 +696,9 @@ function Protein(data, ctx){
     
     this.search = function(len_p, accept, masks, node_id){
         var results = [];
-        var r = search_pattern(this.name, len_p, accept, masks, node_id, this.id);
-        if (r.length) results = results.concat(r);
-        r = search_pattern(this.accession, len_p, accept, masks, node_id, this.id);
-        if (r.length) results = results.concat(r);
-        r = search_pattern(this.definition, len_p, accept, masks, node_id, this.id);
-        if (r.length) results = results.concat(r);
-        r = search_pattern(this.ec_number, len_p, accept, masks, node_id, this.id);
-        if (r.length) results = results.concat(r);
         
         for (var i = 0; i < this.peptides.length; ++i){
-            var r = this.peptides[i].search(len_p, accept, masks, node_id, this.id);
+            var r = this.peptides[i].search(len_p, accept, masks, node_id, current_pathway);
             if (r.length) results = results.concat(r);
         }
         return results;
@@ -1166,8 +1158,6 @@ function Infobox(ctx){
     }
     
     this.mouse_click = function(mouse, key){
-        this.visible = false;
-        draw();
     }
 
     this.draw = function(){
@@ -1200,67 +1190,52 @@ function Infobox(ctx){
         this.ctx.fill();
         this.ctx.stroke();
         
+        
         if (data[this.node_id].type == "metabolite"){
-            this.ctx.textAlign = "left";
-            this.ctx.textBaseline = 'top';
-            this.ctx.font = "bold " + line_height.toString() + "px Arial";
-            this.ctx.fillStyle = "black";
-            this.ctx.fillText(data[this.node_id].name, this.x - offset_x + 20, this.y - offset_y + 20);
+            var html_content = "<div style=\"font-family: arial;\"><b>" + data[this.node_id].name + "</b>";
+            html_content += "<hr>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Formula:</b> " + data[this.node_id].formula + "</div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Exact mass / Da:</b> " + data[this.node_id].exact_mass + "</div><br>";
+            html_content += "<img src='/qsdb/images/metabolites/" + data[this.node_id].c_number + ".png'>";
             
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = disabled_fill_color;
-            this.ctx.moveTo(this.x - offset_x + 20, this.y - offset_y + line_height + 30);
-            this.ctx.lineTo(this.x - offset_x + this.width - 20, this.y - offset_y + line_height + 30);
-            this.ctx.stroke();
-            
-            this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
-            this.ctx.fillText("Formula:", this.x - offset_x + 20, this.y - offset_y + line_height + 40);
-            this.ctx.fillText("Exact mass / Da:", this.x - offset_x + 20, this.y - offset_y + 2 * line_height + 40);
-            var l_for = this.ctx.measureText("Formula: ").width;
-            var l_ems = this.ctx.measureText("Exact mass / Da: ").width;
+            html_content += "</div>";
             
             
+            document.getElementById("infobox_html_background").style.display = "inline";
             
-            this.ctx.font = (line_height - 5).toString() + "px Arial";
-            this.ctx.fillText(data[this.node_id].formula, this.x - offset_x + 20 + l_for, this.y - offset_y + line_height + 40);
-            this.ctx.fillText(data[this.node_id].exact_mass, this.x - offset_x + 20 + l_ems, this.y - offset_y + 2 * line_height + 40);
-            
-            if (data[this.node_id].img.width){
-                this.ctx.drawImage(data[this.node_id].img, this.x - offset_x + 20, this.y - offset_y + 40 + 3 * line_height);
-            }
+            var obj = document.getElementById("infobox_html");
+            obj.innerHTML = html_content;
+            obj.style.display = "inline";
+            obj.style.left = (this.x - offset_x).toString() + "px";
+            obj.style.top = (this.y - offset_y).toString() + "px";
         }
         else if (data[this.node_id].type == "protein"){
-            this.ctx.textAlign = "left";
-            this.ctx.textBaseline = 'top';
-            this.ctx.font = "bold " + line_height.toString() + "px Arial";
-            this.ctx.fillStyle = "black";
-            this.ctx.fillText(data[this.node_id].proteins[this.protein_id].name, this.x - offset_x + 20, this.y - offset_y + 20);
-        
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = disabled_fill_color;
-            this.ctx.moveTo(this.x - offset_x + 20, this.y - offset_y + line_height + 30);
-            this.ctx.lineTo(this.x - offset_x + this.width - 20, this.y - offset_y + line_height + 30);
-            this.ctx.stroke();
-            
-            this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
-            this.ctx.fillText("Definition: ", this.x - offset_x + 20, this.y - offset_y + line_height + 40);
-            this.ctx.fillText("Uniprot accession: ", this.x - offset_x + 20, this.y - offset_y + 2 * line_height + 40);
-            this.ctx.fillText("EC number: ", this.x - offset_x + 20, this.y - offset_y + 3 * line_height + 40);
-            this.ctx.fillText("Mass / Da: ", this.x - offset_x + 20, this.y - offset_y + 4 * line_height + 40);
-            var l_def = this.ctx.measureText("Definition: ").width;
-            var l_acc = this.ctx.measureText("Uniprot accession: ").width;
-            var l_ec = this.ctx.measureText("EC number: ").width;
-            var l_ms = this.ctx.measureText("Mass / Da: ").width;
+            var node_obj = data[this.node_id].proteins[this.protein_id];
+            var html_content = "<div style=\"font-family: arial;\"><b>" + node_obj.name + "</b>";
+            html_content += "<hr>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Definition:</b> " + node_obj.definition + "</div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Uniprot accession:</b> <a href=\"http://www.uniprot.org/uniprot/" + node_obj.accession + "\" target=\"blank\">" + node_obj.accession + "</a></div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>EC number:</b> <a href=\"http://www.genome.jp/dbget-bin/www_bget?ec:" + node_obj.ec_number + "\" target=\"blank\">" + node_obj.ec_number + "</a></div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Mass / Da:</b> " + node_obj.mass + "</div>";
             
             
+            document.getElementById("infobox_html_background").style.display = "inline";
             
-            this.ctx.font = (line_height - 5).toString() + "px Arial";
-            this.ctx.fillText(data[this.node_id].proteins[this.protein_id].definition, this.x - offset_x + 20 + l_def, this.y - offset_y + line_height + 40);
-            this.ctx.fillText(data[this.node_id].proteins[this.protein_id].accession, this.x - offset_x + 20 + l_acc, this.y - offset_y + 2 * line_height + 40);
-            this.ctx.fillText(data[this.node_id].proteins[this.protein_id].ec_number, this.x - offset_x + 20 + l_ec, this.y - offset_y + 3 * line_height + 40);
-            this.ctx.fillText(data[this.node_id].proteins[this.protein_id].mass, this.x - offset_x + 20 + l_ms, this.y - offset_y + 4 * line_height + 40);
+            var obj = document.getElementById("infobox_html");
+            obj.innerHTML = html_content;
+            obj.style.display = "inline";
+            obj.style.left = (this.x - offset_x).toString() + "px";
+            obj.style.top = (this.y - offset_y).toString() + "px";
         }
+        
     }
+}
+
+function hide_infobox(){
+    document.getElementById("infobox_html").style.display = "none";
+    document.getElementById("infobox_html_background").style.display = "none";
+    infobox.visible = false;
+    draw();
 }
 
 node.prototype = new visual_element();
@@ -1274,6 +1249,7 @@ function node(data, c){
     this.name = data['name'];
     //this.name = data['name'] + " " + this.id;  // TODO: delete this line
     this.c_number = data['c_number'];
+    this.smiles = data['smiles'];
     this.formula = data['formula'];
     this.exact_mass = data['exact_mass'];
     this.img = 0;
@@ -1347,12 +1323,45 @@ function node(data, c){
             this.height = metabolite_radius * 2;
             this.img = new Image();
             this.crossOrigin = 'anonymous';
-            //this.img.src = "http://www.genome.jp/Fig/compound/" + nd.c_number + ".gif";
+            
+            
+            
             var load_process = setInterval(function(nd){
-                //nd.img = new Image();
-                nd.img.src = "http://www.genome.jp/Fig/compound/" + nd.c_number + ".gif";
+                //nd.img.src = "http://www.genome.jp/Fig/compound/" + nd.c_number + ".gif";
+                nd.img.src = "/qsdb/images/metabolites/" + nd.c_number + ".png";
                 clearInterval(load_process);
             }, 1, this);
+            
+            /*
+            var img_url = "/qsdb/images/metabolites/" + this.id + ".png";
+            
+            var http_img = new XMLHttpRequest();
+            if (http_img.status == 404){
+                var xmlhttp_image = new XMLHttpRequest();
+                var xmlhttp_get_content = "molecule_id=" + this.id;
+                xmlhttp_get_content += "&smiles=" + btoa(unescape(encodeURIComponent(this.smiles)));
+                xmlhttp_image.onreadystatechange = function() {
+                    if (xmlhttp_image.readyState == 4 && xmlhttp_image.status == 200) {
+                        a = xmlhttp_image.responseText;
+                        this.load_process = setInterval(function(nd){
+                            nd.img = new Image();
+                            nd.img.src = "/qsdb/images/metabolites/" + nd.id + ".png";;
+                            clearInterval(nd.load_process);
+                        }, 1, this);
+                    }
+                }
+                xmlhttp_image.open("GET", "/qsdb/cgi-bin/draw-chem-structure.bin?" + xmlhttp_get_content, true);
+                xmlhttp_image.send();
+            }
+            else {
+                this.load_process = setInterval(function(nd, img_url_nd){
+                    nd.img.src = img_url_nd;
+                    clearInterval(nd.load_process);
+                }, 1, this, img_url);
+            }
+            http_img.open('HEAD', img_url, true);
+            http_img.send();
+            */
             this.tipp = true;
             break;
     }
@@ -1383,10 +1392,10 @@ function node(data, c){
                 var r = this.proteins[i].search(len_p, accept, masks, this.id);
                 if (r.length) results = results.concat(r);
             }
-        }
+        }/*
         else {
             results = search_pattern(this.name, len_p, accept, masks, this.id, -1);
-        }
+        }*/
         return results;
     }
     
@@ -3218,10 +3227,12 @@ function start_search(){
         for (var i = 0; i < search_data.length; ++i){
             var s_data = search_data[i];
             var r = search_pattern(s_data[0], len_p, accept, masks, s_data[1], s_data[2]);
-            //var r = data[i].search(len_p, accept, masks);
-            if (r.length){
-                results = results.concat(r);
-            }
+            if (r.length) results = results.concat(r);
+        }
+        
+        for (var i = 0; i < data.length; ++i){
+            var r = data[i].search(len_p, accept, masks);
+            if (r.length) results = results.concat(r);
         }
         
         results.sort();

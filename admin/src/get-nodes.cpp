@@ -188,6 +188,7 @@ class node {
         string x;
         string y;
         string c_number;
+        string smiles;
         string formula;
         string exact_mass;
         vector<protein*> proteins;
@@ -203,6 +204,7 @@ class node {
             str += "\"x\": " + x + ", ";
             str += "\"y\": " + y + ", ";
             str += "\"c_number\": \"" + c_number + "\", ";
+            str += "\"smiles\": \"" + smiles + "\", ";
             str += "\"formula\": \"" + formula + "\", ";
             str += "\"exact_mass\": \"" + exact_mass + "\", ";
             str += "\"proteins\": [";
@@ -619,10 +621,10 @@ main(int argc, char** argv) {
     sqlite3_close(db);
     
     
-    string sql_query_rest = "(select n.id, p.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, '' c_number, '' formula, '' exact_mass from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ";
+    string sql_query_rest = "(select n.id, p.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ";
     sql_query_rest += pathway_id; 
     sql_query_rest += ") union ";
-    sql_query_rest += "(select n.id, m.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, m.c_number, m.formula, m.exact_mass from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ";
+    sql_query_rest += "(select n.id, m.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, m.c_number, m.smiles, m.formula, m.exact_mass from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ";
     sql_query_rest += pathway_id;
     sql_query_rest += ");";
     
@@ -647,6 +649,7 @@ main(int argc, char** argv) {
         last_node->x = row[column_names_rest[string("x")]];
         last_node->y = row[column_names_rest[string("y")]];
         last_node->c_number = row[column_names_rest[string("c_number")]];
+        last_node->smiles = row[column_names_rest[string("smiles")]];
         last_node->formula = row[column_names_rest[string("formula")]];
         last_node->exact_mass = row[column_names_rest[string("exact_mass")]];
         nodes.push_back(last_node);
