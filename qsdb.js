@@ -110,18 +110,21 @@ function mouse_move_listener(e){
         offsetY = res.y;
     }
     else if (e.buttons & 1){
-        select_field_element.end_position = res;
-        var sx = Math.min(select_field_element.start_position.x, select_field_element.end_position.x);
-        var ex = Math.max(select_field_element.start_position.x, select_field_element.end_position.x);
-        var sy = Math.min(select_field_element.start_position.y, select_field_element.end_position.y);
-        var ey = Math.max(select_field_element.start_position.y, select_field_element.end_position.y);
-        
-        for (var i = 0; i < data.length; ++i){
-            if (data[i].type == "protein" && sx <= data[i].x && sy <= data[i].y && data[i].x <= ex && data[i].y <= ey){
-                data[i].highlight = true;
-            }
-            else {
-                data[i].highlight = false;
+        if (!highlight_element || !highlight_element.mouse_down_move(res, e.which)){
+            
+            select_field_element.end_position = res;
+            var sx = Math.min(select_field_element.start_position.x, select_field_element.end_position.x);
+            var ex = Math.max(select_field_element.start_position.x, select_field_element.end_position.x);
+            var sy = Math.min(select_field_element.start_position.y, select_field_element.end_position.y);
+            var ey = Math.max(select_field_element.start_position.y, select_field_element.end_position.y);
+            
+            for (var i = 0; i < data.length; ++i){
+                if (data[i].type == "protein" && sx <= data[i].x && sy <= data[i].y && data[i].x <= ex && data[i].y <= ey){
+                    data[i].highlight = true;
+                }
+                else {
+                    data[i].highlight = false;
+                }
             }
         }
         draw();

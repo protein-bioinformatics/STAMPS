@@ -1256,8 +1256,8 @@ function node(data, c){
     this.y = parseInt(data['y']);
     this.type = data['type'];
     this.id = data['id'];
-    this.name = data['name'];
-    //this.name = data['name'] + " " + this.id;  // TODO: delete this line
+    //this.name = data['name'];
+    this.name = data['name'] + " " + this.id;  // TODO: delete this line
     this.c_number = data['c_number'];
     this.smiles = data['smiles'];
     this.formula = data['formula'];
@@ -1500,13 +1500,13 @@ function node(data, c){
                 this.ctx.stroke();
                 
                 //////////// TODO: delete this lines
-                /*
+                
                 this.ctx.textAlign = "center";
                 this.ctx.textBaseline = 'middle';
                 this.ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
                 this.ctx.fillStyle = "black";
                 this.ctx.wrapText(this.name, this.x, this.y, this.width, 20 * factor);
-                */
+                
                 
                 
                 break;
@@ -3182,14 +3182,13 @@ function start_search(){
         
         
         var bit = 1;
-        for (var i = 0; i < len_p; ++i){
+        for (var i = 0; i < len_p; ++i, bit <<= 1){
             masks[lower.charCodeAt(i)] |= bit;
             masks[upper.charCodeAt(i)] |= bit;
             if (lower.charAt(i) == '-') masks[' '.charCodeAt(0)] |= bit;
             if (lower.charAt(i) == ' ') masks['-'.charCodeAt(0)] |= bit;
             if (lower.charAt(i) == '.') masks[','.charCodeAt(0)] |= bit;
             if (lower.charAt(i) == ',') masks['.'.charCodeAt(0)] |= bit;
-            bit <<= 1;
         }
         
         var accept = 1 << (len_p - 1);
@@ -3204,8 +3203,8 @@ function start_search(){
             var r = data[i].search(len_p, accept, masks);
             if (r.length) results = results.concat(r);
         }
-        
         results.sort();
+        
         
         if (results.length){
             document.getElementById("search_results").style.display = "inline";
@@ -3215,12 +3214,14 @@ function start_search(){
             document.getElementById("search_results").style.left = (rect.left).toString() + "px";
             var inner_html = "<table>";
             for (var i = 0; i < results.length; ++i){
+                console.log(results[i] + " " + current_pathway);
                 
                 var t1 = "<font color=\"" + disabled_text_color + "\">" + results[i][0].substring(0, results[i][1]) + "</font>";
                 
                 var t2 = results[i][0].substring(results[i][1], results[i][1] + len_p);
                 
                 var t3 = "<font color=\"" + disabled_text_color + "\">" + results[i][0].substring(results[i][1] + len_p, results[i][0].length);
+                
                 var foreign_pw = (results[i][3] != current_pathway && (results[i][3] in pathway_dict)) ? " (" + pathways[pathway_dict[results[i][3]]][1] + ")" : "";
                 inner_html += "<tr><td class=\"single_search_result\" onclick=\"highlight_node(" + results[i][2] + ", " + results[i][3] + ");\">" + t1 + t2 + t3 + foreign_pw + "<font></td></tr>";
             }
@@ -3240,7 +3241,7 @@ function start_search(){
 
 function highlight_node(node_id, pathway_id){
     hide_search();
-    
+    console.log(pathway_id + " " + current_pathway);
     if (pathway_id != current_pathway){
         change_pathway(pathway_dict[pathway_id]);
         var waiting_for_pathway = setInterval(function(){
