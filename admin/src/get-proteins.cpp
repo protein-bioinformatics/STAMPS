@@ -108,13 +108,13 @@ class spectrum {
         
         string to_string(bool complete = true){
             string str = "{";
-            str += "\"id\": " + id;
-            if (complete) str += ",\"mod_sequence\": \"" + mod_sequence + "\"";
-            if (complete) str += ",\"charge\": " + charge;
-            if (complete) str += ",\"mass\": \"" + mass + "\"";
+            str += "\"id\":" + id;
+            if (complete) str += ",\"mod_sequence\":\"" + mod_sequence + "\"";
+            if (complete) str += ",\"charge\":" + charge;
+            if (complete) str += ",\"mass\":\"" + mass + "\"";
             stringstream ss;
             ss << tissues.size();
-            str += ", \"num_tissues\": " + ss.str();
+            str += ",\"num_tissues\": " + ss.str();
             str += "}";
             return str;
         }
@@ -131,18 +131,18 @@ class peptide {
         
         string to_string(bool complete = true){
             string str = "{";
-            if (complete) str += "\"peptide_seq\": \"" + peptide_seq + "\", ";
-            str += "\"spectra\": [";
+            if (complete) str += "\"peptide_seq\":\"" + peptide_seq + "\",";
+            str += "\"spectra\":[";
             for (int i = 0; i < spectra.size(); ++i){
-                if (i) str += ", ";
+                if (i) str += ",";
                 str += spectra.at(i)->to_string(complete);
                 tissues.insert(spectra.at(i)->tissues.begin(), spectra.at(i)->tissues.end());
             }
             str += "]";
-            str += ", \"tissues\": [";
+            str += ",\"tissues\":[";
             set<string>::iterator it = tissues.begin();
             for (int i = 0; it != tissues.end(); ++it, ++i){
-                if (i) str += ", ";
+                if (i) str += ",";
                 str += *it;
             }
             str += "]}";
@@ -163,15 +163,15 @@ class protein {
         
         string to_string(bool complete = true){
             string str = "{";
-            str += "\"id\": " + id;
-            if (complete) str += ", \"name\": \"" + name + "\"";
-            if (complete) str += ", \"definition\": \"" + definition + "\"";
-            if (complete) str += ", \"mass\": \"" + mass + "\"";
-            if (complete) str += ", \"accession\": \"" + accession + "\"";
-            if (complete) str += ", \"ec_number\": \"" + ec_number + "\"";
-            str += ", \"peptides\": [";
+            str += "\"id\":" + id;
+            if (complete) str += ",\"name\":\"" + name + "\"";
+            if (complete) str += ",\"definition\":\"" + definition + "\"";
+            if (complete) str += ",\"mass\":\"" + mass + "\"";
+            if (complete) str += ",\"accession\":\"" + accession + "\"";
+            if (complete) str += ",\"ec_number\":\"" + ec_number + "\"";
+            str += ",\"peptides\": [";
             for (int i = 0; i < peptides.size(); ++i){
-                if (i) str += ", ";
+                if (i) str += ",";
                 str += peptides.at(i)->to_string(complete);
             }
             str += "]}";
@@ -314,7 +314,7 @@ main(int argc, char** argv) {
     char* get_string_chr = getenv("QUERY_STRING");
     
     // TODO: debugging
-    //get_string_chr = (char*)"statistics";
+    get_string_chr = (char*)"statistics";
     
     if (!get_string_chr){
         cout << -1;
@@ -478,6 +478,7 @@ main(int argc, char** argv) {
     mysql_free_result(res);
     mysql_close(conn);
     
+    
     // create FM index for fast pattern search    
     unsigned char* T = new unsigned char[len_text];
     unsigned char* bwt = new unsigned char[len_text];
@@ -512,6 +513,11 @@ main(int argc, char** argv) {
     
     occ = new wavelet((char*)bwt, len_text, abc);
     less_table = occ->create_less_table();
+    
+    /*
+    cout << less_table['E'] << endl;
+    exit(-1);
+    */
     
     
     sqlite3 *db;
@@ -600,8 +606,8 @@ main(int argc, char** argv) {
     }
     response += "]";
     if (compress){
-        //cout << response.length() << endl;
-        cout << compress_string(response);
+        cout << response.length() << endl;
+        //cout << compress_string(response);
         //cout << compress_string(response).length();
     }
     else {

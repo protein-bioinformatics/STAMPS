@@ -29,6 +29,7 @@ class wavelet {
             return result;
         }
         
+        /*
         inline int* get_rank(const int l, const int r, const int c) const{
             const int cell = c >> shift;
             const int pos = c & mask;
@@ -47,7 +48,7 @@ class wavelet {
                 return right_child->get_rank(result_left - one, result_right - one, c);
             }
             return new int[2]{result_left, result_right};
-        }
+        }*/
         
         int* create_less_table();
         

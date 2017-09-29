@@ -16,62 +16,45 @@ wavelet::wavelet(char* text, int length, ulong* _alphabet){
     for (int i = 0; cnt <= half; ++i){
         int cell = i >> 6;
         int pos = i & 63;
-        ulong bit = (alphabet[cell] >> pos) & 1ull;
+        ulong bit = (alphabet[cell] >> pos) & one;
         cnt += bit;
         alphabet_right[cell] &= ~(1ull << pos);
         alphabet_left[cell] |= bit << pos;
     }
     
-    
-    
     int len_alphabet_left = __builtin_popcountll(alphabet_left[0]) + __builtin_popcountll(alphabet_left[1]);
     int len_alphabet_right = __builtin_popcountll(alphabet_right[0]) + __builtin_popcountll(alphabet_right[1]);
     
-    if (len_alphabet_left > 1){
-        int len_text_left = 0;
-        for (int i = 0; i < length; ++i){
-            int cell = text[i] >> 6;
-            int pos = text[i] & 63;
-            len_text_left += (alphabet_left[cell] >> pos) & 1ull;
-        }
-        char *text_left = new char[len_text_left + 1];
-        text_left[len_text_left] = 0;
-        int j = 0;
-        for (int i = 0; i < length; ++i){
-            int cell = text[i] >> 6;
-            int pos = text[i] & 63;
-            ulong bit = (alphabet_left[cell] >> pos) & 1ull;
-            if (bit){
-                text_left[j] = text[i];
-                ++j;
-            }
-        }
-        left_child = new wavelet(text_left, len_text_left, alphabet_left);
-        delete []text_left;
+    int lj = 0, rj = 0;
+    int len_text_left = rkg->get_rank_left(length - 1);
+    char *text_left = new char[len_text_left + 1];
+    text_left[len_text_left] = 0;
+    
+    
+    int len_text_right = rkg->get_rank_right(length - 1);
+    char *text_right = new char[len_text_right + 1];
+    text_right[len_text_right] = 0;
+    char** texts = new char*[2]{text_left, text_right};
+    
+    int masks[2] = {0, ~0};
+    
+    
+    for (int i = 0; i < length; ++i){
+        const int cell = text[i] >> 6;
+        const int pos = text[i] & 63;
+        const ulong letter = alphabet_right[cell] >> pos;
+        const int bit = letter & one;
+        texts[bit][lj * !bit + rj * bit] = text[i];
+        lj += !bit;
+        rj += bit;
     }
     
-    if (len_alphabet_right > 1){
-        int len_text_right = 0;
-        for (int i = 0; i < length; ++i){
-            int cell = text[i] >> 6;
-            int pos = text[i] & 63;
-            len_text_right += (alphabet_right[cell] >> pos) & 1ull;
-        }
-        char *text_right = new char[len_text_right + 1];
-        text_right[len_text_right] = 0;
-        int j = 0;
-        for (int i = 0; i < length; ++i){
-            int cell = text[i] >> 6;
-            int pos = text[i] & 63;
-            ulong bit = (alphabet_right[cell] >> pos) & 1ull;
-            if (bit){
-                text_right[j] = text[i];
-                ++j;
-            }
-        }
-        right_child = new wavelet(text_right, len_text_right, alphabet_right);
-        delete []text_right;
-    }
+    if (len_alphabet_left > 1) left_child = new wavelet(text_left, len_text_left, alphabet_left);
+    if (len_alphabet_right > 1) right_child = new wavelet(text_right, len_text_right, alphabet_right);
+    
+    delete []text_left;
+    delete []text_right;
+    delete []texts;
 }
 
 
