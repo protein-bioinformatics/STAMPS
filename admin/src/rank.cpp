@@ -51,14 +51,4 @@ ranking::~ranking(){
 }
 
 
-
-
-
-
-void ranking::store(ulong &length_store, char** bitfield_store, char** sums_store){
-    length_store = length;
-    *(bitfield_store) = (char*)bitfield;
-    *(sums_store) = (char*)sums;
-}
-    
     

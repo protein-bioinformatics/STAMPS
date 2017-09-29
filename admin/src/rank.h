@@ -20,17 +20,15 @@ class ranking {
         ranking(char* text, ulong _length, ulong* alphabet);
         ~ranking();
         //ulong get_rank(ulong i, bool counter = false);
-        inline ulong get_rank(ulong i, const bool counter) const {
-            const ulong cell = i >> shift;
-            const ulong pos = i & mask;
+        inline int get_rank(const uint i, const bool counter) const {
+            const uint cell = i >> shift;
+            const uint pos = i & mask;
             const ulong masked = mask - pos;
             const ulong active_ones = bitfield[cell] << masked;
-            ulong count_ones = sums[cell];
-            i += one;
+            uint count_ones = sums[cell];
             count_ones += __builtin_popcountll(active_ones);
-            return counter ? i - count_ones : count_ones;
+            return counter ? i + one - count_ones : count_ones;
         }
-        void store(ulong &length_store, char** bitfield_store, char** sums_store);
         
         ulong length;
         ulong* bitfield;

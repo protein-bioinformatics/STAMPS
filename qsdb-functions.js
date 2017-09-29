@@ -517,6 +517,7 @@ function Spectrum(data){
     this.mod_sequence = data['mod_sequence'];
     this.filter_valid = false;
     this.user_selected = true;
+    this.num_tissues = data['num_tissues'];
     this.occ_M = 0;
     this.occ_m = 0;
     this.occ_C = 0;
@@ -525,6 +526,7 @@ function Spectrum(data){
     
     
     this.prepare_modification = function(){
+        if (typeof this.mod_sequence === 'undefined') return;
         while (this.mod_sequence.indexOf("M[+16.0]") != -1){
             this.mod_sequence = this.mod_sequence.replace("M[+16.0]", "m");
         }
@@ -541,6 +543,10 @@ function Spectrum(data){
     
     this.filtering = function(){
         this.filter_valid = true;
+        if (typeof this.mod_sequence === 'undefined'){
+            this.filter_valid = false;
+            return;
+        }
         
         if (this.mod_sequence.indexOf("[") == -1){
             // test for oxydation of M
@@ -577,21 +583,25 @@ function Peptide(data){
     this.filter_valid = false;
     this.user_selected = true;
     this.tissues = new Set();
-    if ("tissues" in data) this.tissues = new Set(data['tissues']);
+    if ("tissues" in data) this.tissues = new Set(data["tissues"]);
     
     for (var i = 0; i < data['spectra'].length; ++i){
         this.spectra.push(new Spectrum(data['spectra'][i]));
+        //this.tissues = new Set([...this.tissues, ...this.spectra[i].tissues]);
         
     }
     
     this.search = function(len_p, accept, masks, node_id, prot_id){
-        var results = search_pattern(this.peptide_seq, len_p, accept, masks, node_id, prot_id);
+        if (typeof this.peptide_seq === 'undefined') return [];
         
+        var results = search_pattern(this.peptide_seq, len_p, accept, masks, node_id, prot_id);
         return results;
     }
     
     this.filtering = function(){
         this.filter_valid = false;
+        if (typeof this.peptide_seq === 'undefined') return;
+        
         for (var i = 0; i < this.spectra.length; ++i){
             this.spectra[i].filtering();
             this.filter_valid |= this.spectra[i].filter_valid;
@@ -1332,36 +1342,6 @@ function node(data, c){
                 clearInterval(load_process);
             }, 1, this);
             
-            /*
-            var img_url = "/qsdb/images/metabolites/" + this.id + ".png";
-            
-            var http_img = new XMLHttpRequest();
-            if (http_img.status == 404){
-                var xmlhttp_image = new XMLHttpRequest();
-                var xmlhttp_get_content = "molecule_id=" + this.id;
-                xmlhttp_get_content += "&smiles=" + btoa(unescape(encodeURIComponent(this.smiles)));
-                xmlhttp_image.onreadystatechange = function() {
-                    if (xmlhttp_image.readyState == 4 && xmlhttp_image.status == 200) {
-                        a = xmlhttp_image.responseText;
-                        this.load_process = setInterval(function(nd){
-                            nd.img = new Image();
-                            nd.img.src = "/qsdb/images/metabolites/" + nd.id + ".png";;
-                            clearInterval(nd.load_process);
-                        }, 1, this);
-                    }
-                }
-                xmlhttp_image.open("GET", "/qsdb/cgi-bin/draw-chem-structure.bin?" + xmlhttp_get_content, true);
-                xmlhttp_image.send();
-            }
-            else {
-                this.load_process = setInterval(function(nd, img_url_nd){
-                    nd.img.src = img_url_nd;
-                    clearInterval(nd.load_process);
-                }, 1, this, img_url);
-            }
-            http_img.open('HEAD', img_url, true);
-            http_img.send();
-            */
             this.tipp = true;
             break;
     }
@@ -3113,11 +3093,6 @@ function check_spectra(){
 
 
 
-function open_disclaimer (){
-    document.getElementById("disclaimer").style.display = "inline";
-    document.getElementById("click_background").style.display = "inline";
-    background_hiding = hide_disclaimer;
-}
 
 function open_accession_search (){
     document.getElementById("accession_search").style.display = "inline";
@@ -3174,11 +3149,6 @@ function hide_function_search (forward){
 function hide_chromosome_search (forward){
     document.getElementById("chromosome_search").style.display = "none";
     if (!forward) document.getElementById("waiting_background").style.display = "none";
-}
-
-function hide_disclaimer (){
-    document.getElementById("disclaimer").style.display = "none";
-    document.getElementById("waiting_background").style.display = "none";
 }
 
 
@@ -3928,6 +3898,7 @@ function replaceAll(str, find, replace) {
 
 function accession_search_parse_accessions(){
     basket = {};
+    protein_dictionary = [];
     spectra_exclude = [];
     var accessions = document.getElementById("accessions").value;
     accessions = replaceAll(accessions, "\n", ":");
@@ -3938,7 +3909,7 @@ function accession_search_parse_accessions(){
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            request_load_proteins(JSON.parse(xmlhttp.responseText));
+            request_load_proteins(JSON.parse(xmlhttp.responseText), true);
         }
     }
     
@@ -3949,7 +3920,7 @@ function accession_search_parse_accessions(){
 
 
 
-function request_load_proteins(data){
+function request_load_proteins(data, check){
     for (var i = 0; i < data.length; ++i){
         var p_id = data[i]["id"];
         if (p_id in basket) continue;
@@ -3958,7 +3929,7 @@ function request_load_proteins(data){
         prot.filtering();
         if (prot.filter_valid) basket[prot.id] = prot;
     }
-    check_spectra();
+    if (check) check_spectra();
 }
 
 
@@ -3966,6 +3937,7 @@ function request_load_proteins(data){
 
 function locus_search_request_data(){
     basket = {};
+    protein_dictionary = [];
     spectra_exclude = [];
     var loci_select = document.getElementById("loci");
     var IDs = "";
@@ -3980,7 +3952,7 @@ function locus_search_request_data(){
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            request_load_proteins(JSON.parse(xmlhttp.responseText));
+            request_load_proteins(JSON.parse(xmlhttp.responseText), true);
         }
     }
     
@@ -3993,6 +3965,7 @@ function locus_search_request_data(){
 
 function function_search_request_data(){
     basket = {};
+    protein_dictionary = [];
     spectra_exclude = [];
     var function_select = document.getElementById("function_search_field").getElementsByTagName("li");
     var IDs = "";
@@ -4008,7 +3981,7 @@ function function_search_request_data(){
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            request_load_proteins(JSON.parse(xmlhttp.responseText));
+            request_load_proteins(JSON.parse(xmlhttp.responseText), true);
         }
     }
     
@@ -4020,6 +3993,7 @@ function function_search_request_data(){
 
 function chromosome_search_request_data(){
     basket = {};
+    protein_dictionary = [];
     spectra_exclude = [];
     var accessionIDs = "";
     for (var chromosome_key in chromosome_data){
@@ -4035,7 +4009,7 @@ function chromosome_search_request_data(){
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            request_load_proteins(JSON.parse(xmlhttp.responseText));
+            request_load_proteins(JSON.parse(xmlhttp.responseText), true);
         }
     }
     

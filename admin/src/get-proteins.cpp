@@ -16,6 +16,7 @@
 
 using namespace std;
 
+
 vector<string> split(string str, char delimiter) {
   vector<string> internal;
   stringstream ss(str); // Turn the string into a stream.
@@ -105,12 +106,15 @@ class spectrum {
         
         spectrum(string _id) : id(_id) {}
         
-        string to_string(){
+        string to_string(bool complete = true){
             string str = "{";
-            str += "\"id\": " + id + ", ";
-            str += "\"mod_sequence\": \"" + mod_sequence + "\", ";
-            str += "\"charge\": " + charge + ", ";
-            str += "\"mass\": \"" + mass + "\"";
+            str += "\"id\": " + id;
+            if (complete) str += ",\"mod_sequence\": \"" + mod_sequence + "\"";
+            if (complete) str += ",\"charge\": " + charge;
+            if (complete) str += ",\"mass\": \"" + mass + "\"";
+            stringstream ss;
+            ss << tissues.size();
+            str += ", \"num_tissues\": " + ss.str();
             str += "}";
             return str;
         }
@@ -125,17 +129,17 @@ class peptide {
         
         peptide(string ps) : peptide_seq(ps) {}
         
-        string to_string(){
+        string to_string(bool complete = true){
             string str = "{";
-            str += "\"peptide_seq\": \"" + peptide_seq + "\", ";
+            if (complete) str += "\"peptide_seq\": \"" + peptide_seq + "\", ";
             str += "\"spectra\": [";
             for (int i = 0; i < spectra.size(); ++i){
                 if (i) str += ", ";
-                str += spectra.at(i)->to_string();
+                str += spectra.at(i)->to_string(complete);
                 tissues.insert(spectra.at(i)->tissues.begin(), spectra.at(i)->tissues.end());
             }
-            str += "], ";
-            str += "\"tissues\": [";
+            str += "]";
+            str += ", \"tissues\": [";
             set<string>::iterator it = tissues.begin();
             for (int i = 0; it != tissues.end(); ++it, ++i){
                 if (i) str += ", ";
@@ -157,19 +161,18 @@ class protein {
         string fasta;
         vector<peptide*> peptides;
         
-        string to_string(){
+        string to_string(bool complete = true){
             string str = "{";
-            str += "\"id\": " + id + ", ";
-            str += "\"name\": \"" + name + "\", ";
-            str += "\"definition\": \"" + definition + "\", ";
-            str += "\"mass\": \"" + mass + "\", ";
-            str += "\"accession\": \"" + accession + "\", ";
-            str += "\"ec_number\": \"" + ec_number + "\", ";
-            //str += "\"fasta\": \"" + remove_newline(fasta) + "\", ";
-            str += "\"peptides\": [";
+            str += "\"id\": " + id;
+            if (complete) str += ", \"name\": \"" + name + "\"";
+            if (complete) str += ", \"definition\": \"" + definition + "\"";
+            if (complete) str += ", \"mass\": \"" + mass + "\"";
+            if (complete) str += ", \"accession\": \"" + accession + "\"";
+            if (complete) str += ", \"ec_number\": \"" + ec_number + "\"";
+            str += ", \"peptides\": [";
             for (int i = 0; i < peptides.size(); ++i){
                 if (i) str += ", ";
-                str += peptides.at(i)->to_string();
+                str += peptides.at(i)->to_string(complete);
             }
             str += "]}";
             return str;
@@ -182,7 +185,7 @@ map<string, protein* >* all_proteins = 0;
 vector < spectrum* >* spectra = 0;
 map< string, spectrum* >* all_spectra = 0;
 wavelet* occ = 0;
-ulong* less_table = 0;
+int* less_table = 0;
 string text_p = "p";
 string text_id = "i";
 int len_text = 0;
@@ -208,22 +211,26 @@ int binarySearch(int* array, int length, int key) {
     return mid;
 }
 
+
+
 static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
     peptide* current_pep = 0;
     string P = argv[1];
     if (all_peptides->find(P) == all_peptides->end()){
-        int L = 1, R = len_text - 1;
+        int L = 0, R = len_text - 1;
         int p_len = P.length();
         for (int i = 0; i < p_len; ++i){
             const char c = P[p_len - 1 - i];            
-            ulong lss = less_table[c];
+            int lss = less_table[c];
+            
             L = occ->get_rank(L - 1, c);
             R = occ->get_rank(R, c) - 1;
             
-            if (L > R) break;
             
+            if (L > R) break;
             L += lss;
             R += lss;
+            
         }
         if (L <= R){
             current_pep = new peptide(P);
@@ -267,6 +274,8 @@ string cleanFasta(string str){
     int start_pos = str.find("\n");
     string modified = str.substr(start_pos + 1);
     replaceAll(modified, "\n", "");
+    replaceAll(modified, {10}, "");
+    replaceAll(modified, {13}, "");
     return modified;
 }
 
@@ -299,13 +308,27 @@ main(int argc, char** argv) {
     string accessions = "";
     string loci_ids = "";
     string function_ids = "";
+    bool statistics = false;
     
     
-    string get_string = getenv("QUERY_STRING");
+    char* get_string_chr = getenv("QUERY_STRING");
+    
+    // TODO: debugging
+    //get_string_chr = (char*)"statistics";
+    
+    if (!get_string_chr){
+        cout << -1;
+        return -1;
+    }
+    
+    string get_string = string(get_string_chr);
     if (!get_string.length()){
         cout << -1;
         return -1;
     }
+    
+    
+    
     vector<string> get_entries = split(get_string, '&');  
     for (int i = 0; i < get_entries.size(); ++i){
         vector<string> get_values = split(get_entries.at(i), '=');
@@ -321,9 +344,12 @@ main(int argc, char** argv) {
             function_ids = get_values.at(1);
             via_functions = true;
         }
+        else if (get_values.size() && get_values.at(0) == "statistics"){
+            statistics = true;
+        }
     }
     
-    if (via_accessions + via_loci + via_functions != 1){
+    if (via_accessions + via_loci + via_functions + statistics != 1){
         cout << -5;
         return -5;
     }
@@ -410,6 +436,9 @@ main(int argc, char** argv) {
         sql_query_proteins += function_ids;
         sql_query_proteins += "');";
     }
+    else if (statistics) {
+        sql_query_proteins = "select * from proteins where unreviewed = false;";
+    }
     
     
     if (mysql_query(conn, sql_query_proteins.c_str())) {
@@ -445,6 +474,7 @@ main(int argc, char** argv) {
         }
     }
     
+    
     mysql_free_result(res);
     mysql_close(conn);
     
@@ -457,6 +487,7 @@ main(int argc, char** argv) {
     SA = new int[len_text];
     for (int i = 0; i < len_text; ++i) SA[i] = i;
     T[len_text - 1] = '$';
+    
     
     unsigned char* tt = T;
     for (int i = 0; i < proteins->size(); ++i){
@@ -486,7 +517,7 @@ main(int argc, char** argv) {
     sqlite3 *db;
     char *zErrMsg = 0;
     int rc;
-    
+        
     rc = sqlite3_open((char*)parameters["sqlite_file"].c_str(), &db);
     if( rc ){
         cout << -2 << endl;
@@ -503,7 +534,6 @@ main(int argc, char** argv) {
         sqlite3_free(zErrMsg);
         exit(-3);
     }
-    
     
     delete occ;
     delete indexes;
@@ -566,11 +596,13 @@ main(int argc, char** argv) {
     string response = "[";
     for (int i = 0; i < proteins->size(); ++i){
         if (i) response += ", ";
-        response += proteins->at(i)->to_string();
+        response += proteins->at(i)->to_string(!statistics);
     }
     response += "]";
     if (compress){
-        cout << compress_string(response);        
+        //cout << response.length() << endl;
+        cout << compress_string(response);
+        //cout << compress_string(response).length();
     }
     else {
         cout << response;

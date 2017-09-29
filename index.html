@@ -82,7 +82,7 @@
         Chromosome&nbsp;Search
     </td>
     
-    <td style="min-width: 150px;" id="statistics_nav" class="navigation_cell_click" align="center">
+    <td style="min-width: 150px;" id="statistics_nav" class="navigation_cell_click" align="center" onclick="open_statistics();">
         <img src="statistics.svg" height=80><br>
         Statistics
     </td>
@@ -241,6 +241,7 @@ The usage, selling or handing of the contact data written in this imprint is not
 <div id="check_spectra" class="check_spectra"></div>
 <div id="click_background" class="click_background"></div>
 <div id="waiting_background" class="waiting_background"></div>
+<div id="statistics" class="disclaimer">Still in construction!!!<p></div>
 
 
 <audio style="display: none;"><source src="kns.mp3"></source>
@@ -286,6 +287,121 @@ function change_chromosome_view_keydown(e){
     if(e.keyCode == 13) {
         change_chromosome_view();        
     }
+}
+
+
+function open_statistics (){
+    document.getElementById("statistics").style.display = "inline";
+    document.getElementById("click_background").style.display = "inline";
+    background_hiding = hide_statistics;
+    basket = {};
+    spectra_exclude = [];
+    
+    // request proteins
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            request_load_proteins(JSON.parse(xmlhttp.responseText), false);
+            
+            var sum_dSAF = 0;
+            for (var prot_id in protein_dictionary){
+                var protein = protein_dictionary[prot_id];
+                for (var i = 0; i < protein.peptides.length; ++i){
+                    sum_dSAF += protein.peptides[i].spectra.length;
+                }
+            }
+            var dNSAFs = [];
+            var max_dNSAF = 0;
+            var min_dNSAF = 1;
+            for (var prot_id in protein_dictionary){
+                var protein = protein_dictionary[prot_id];
+                var dSAF = 0;
+                for (var i = 0; i < protein.peptides.length; ++i){
+                    for (var j = 0; j < protein.peptides[i].spectra.length; ++j){
+                        dSAF += protein.peptides[i].spectra[j].num_tissues;
+                    }
+                }
+                dSAF /= sum_dSAF;
+                if (dSAF > 0){
+                    dNSAFs.push(dSAF);
+                    max_dNSAF = Math.max(max_dNSAF, dSAF);
+                    min_dNSAF = Math.min(min_dNSAF, dSAF);
+                }
+            }
+            
+            dNSAFs.sort().reverse();
+            
+            document.getElementById("statistics").innerHTML = 'Still in construction!!!<p><canvas id="nsaf_figure" width="400" height="250"></canvas>';
+            var nsaf_figure = document.getElementById("nsaf_figure");
+            var nsaf_ctx = nsaf_figure.getContext("2d");
+            
+            nsaf_ctx.beginPath();
+            nsaf_ctx.moveTo(0,0);
+            nsaf_ctx.lineTo(400,0);
+            nsaf_ctx.stroke();
+            
+            nsaf_ctx.beginPath();
+            nsaf_ctx.moveTo(400,0);
+            nsaf_ctx.lineTo(400,250);
+            nsaf_ctx.stroke();
+            
+            nsaf_ctx.beginPath();
+            nsaf_ctx.moveTo(400,250);
+            nsaf_ctx.lineTo(0,250);
+            nsaf_ctx.stroke();
+            
+            nsaf_ctx.beginPath();
+            nsaf_ctx.moveTo(0,250);
+            nsaf_ctx.lineTo(0,0);
+            nsaf_ctx.stroke();
+            
+            /*
+            nsaf_ctx.beginPath();
+            nsaf_ctx.moveTo(0,125);
+            nsaf_ctx.lineTo(400,125);
+            nsaf_ctx.stroke();
+            */
+            
+            nsaf_ctx.fillStyle = 'black';
+            max_dNSAF = Math.log2(max_dNSAF) + 0.2;
+            min_dNSAF = Math.log2(min_dNSAF) - 0.2;
+            
+            console.log(dNSAFs.length);
+            
+            for (var i = 0; i < dNSAFs.length; ++i){
+                var nsaf = Math.log2(dNSAFs[i]) - min_dNSAF;
+                //console.log(nsaf + " " + max_dNSAF + " " + min_dNSAF + " " + nsaf / (max_dNSAF - min_dNSAF));
+                nsaf *= 250 / (max_dNSAF - min_dNSAF);
+                nsaf = 250 - nsaf;
+                var pos = 2 + i / dNSAFs.length * 398;
+                
+                nsaf_ctx.beginPath();
+                nsaf_ctx.fillStyle = 'red';
+                nsaf_ctx.arc(pos, nsaf, 1, 0, 2 * Math.PI);
+                nsaf_ctx.fill();
+            }
+        }
+    }
+    
+    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?statistics", true);
+    xmlhttp.send();
+}
+
+function hide_statistics (){
+    document.getElementById("statistics").style.display = "none";
+    document.getElementById("waiting_background").style.display = "none";
+}
+
+
+function open_disclaimer (){
+    document.getElementById("disclaimer").style.display = "inline";
+    document.getElementById("click_background").style.display = "inline";
+    background_hiding = hide_disclaimer;
+}
+
+function hide_disclaimer (){
+    document.getElementById("disclaimer").style.display = "none";
+    document.getElementById("waiting_background").style.display = "none";
 }
 
 

@@ -223,7 +223,7 @@ map < string, protein* >* all_proteins = 0;
 vector < spectrum* >* spectra = 0;
 map< string, spectrum* >* all_spectra = 0;
 wavelet* occ = 0;
-ulong* less_table = 0;
+int* less_table = 0;
 string text_p = "p";
 string text_id = "i";
 int len_text = 0;
@@ -321,6 +321,8 @@ string cleanFasta(string str){
     int start_pos = str.find("\n");
     string modified = str.substr(start_pos + 1);
     replaceAll(modified, "\n", "");
+    replaceAll(modified, {10}, "");
+    replaceAll(modified, {13}, "");
     return modified;
 }
 
