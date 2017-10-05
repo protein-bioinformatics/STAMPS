@@ -97,20 +97,22 @@ string remove_newline(string str) {
 
 class spectrum {
     public:
-        string id;
+        int id;
+        const string str_id;
         string charge;
         string mass;
         string mod_sequence;
-        set<string> tissues;
+        string tissues;
         
-        spectrum(string _id) : id(_id) {}
+        spectrum(string _id) : str_id(_id) {id = atoi(str_id.c_str());}
         
         string to_string(){
             string str = "{";
-            str += "\"id\": " + id + ", ";
-            str += "\"mod_sequence\": \"" + mod_sequence + "\", ";
-            str += "\"charge\": " + charge + ", ";
-            str += "\"mass\": \"" + mass + "\"";
+            str += "\"i\":" + str_id + ",";
+            str += "\"s\":\"" + mod_sequence + "\",";
+            str += "\"c\":" + charge + ",";
+            str += "\"m\":\"" + mass + "\",";
+            str += "\"t\":[" + tissues + "]";
             str += "}";
             return str;
         }
@@ -127,19 +129,11 @@ class peptide {
         
         string to_string(){
             string str = "{";
-            str += "\"peptide_seq\": \"" + peptide_seq + "\", ";
-            str += "\"spectra\": [";
+            str += "\"p\":\"" + peptide_seq + "\",";
+            str += "\"s\":[";
             for (int i = 0; i < spectra.size(); ++i){
-                if (i) str += ", ";
+                if (i) str += ",";
                 str += spectra.at(i)->to_string();
-                tissues.insert(spectra.at(i)->tissues.begin(), spectra.at(i)->tissues.end());
-            }
-            str += "], ";
-            str += "\"tissues\": [";
-            set<string>::iterator it = tissues.begin();
-            for (int i = 0; it != tissues.end(); ++it, ++i){
-                if (i) str += ", ";
-                str += *it;
             }
             str += "]}";
             return str;
@@ -148,7 +142,8 @@ class peptide {
 
 class protein {
     public:
-        string id;
+        int id;
+        const string str_id;
         string name;
         string definition;
         string mass;
@@ -158,18 +153,20 @@ class protein {
         vector<peptide*> peptides;
         string validation;
         
+        protein(string _id) : str_id(_id) {id = atoi(str_id.c_str());}
+        
         string to_string(){
             string str = "{";
-            str += "\"id\": " + id + ", ";
-            str += "\"name\": \"" + name + "\", ";
-            str += "\"definition\": \"" + definition + "\", ";
-            str += "\"mass\": \"" + mass + "\", ";
-            str += "\"accession\": \"" + accession + "\", ";
-            str += "\"ec_number\": \"" + ec_number + "\", ";
-            str += "\"validation\": \"" + validation + "\", ";
-            str += "\"peptides\": [";
+            str += "\"i\":" + str_id + ",";
+            str += "\"n\":\"" + name + "\",";
+            str += "\"d\":\"" + definition + "\",";
+            str += "\"m\":\"" + mass + "\",";
+            str += "\"a\":\"" + accession + "\",";
+            str += "\"e\":\"" + ec_number + "\",";
+            str += "\"v\":\"" + validation + "\",";
+            str += "\"p\":[";
             for (int i = 0; i < peptides.size(); ++i){
-                if (i) str += ", ";
+                if (i) str += ",";
                 str += peptides.at(i)->to_string();
             }
             str += "]}";
@@ -196,20 +193,20 @@ class node {
         
         string to_string(){
             string str = "{";
-            str += "\"id\": " + id + ", ";
-            str += "\"name\": \"" + name + "\", ";
-            str += "\"pathway_id\": " + pathway_id + ", ";
-            str += "\"type\": \"" + type + "\", ";
-            str += "\"pathway_ref\": " + (pathway_ref.length() ? pathway_ref : "0") + ", ";
-            str += "\"x\": " + x + ", ";
-            str += "\"y\": " + y + ", ";
-            str += "\"c_number\": \"" + c_number + "\", ";
-            str += "\"smiles\": \"" + smiles + "\", ";
-            str += "\"formula\": \"" + formula + "\", ";
-            str += "\"exact_mass\": \"" + exact_mass + "\", ";
-            str += "\"proteins\": [";
+            str += "\"i\":" + id + ",";
+            str += "\"n\":\"" + name + "\",";
+            //str += "\"pathway_id\":" + pathway_id + ",";
+            str += "\"t\":\"" + type + "\",";
+            str += "\"r\":" + (pathway_ref.length() ? pathway_ref : "0") + ",";
+            str += "\"x\":" + x + ",";
+            str += "\"y\":" + y + ",";
+            str += "\"c\":\"" + c_number + "\",";
+            str += "\"s\":\"" + smiles + "\",";
+            str += "\"f\":\"" + formula + "\",";
+            str += "\"e\":\"" + exact_mass + "\",";
+            str += "\"p\":[";
             for (int i = 0; i < proteins.size(); ++i){
-                if (i) str += ", ";
+                if (i) str += ",";
                 str += proteins.at(i)->to_string();
             }
             str += "]}";
@@ -219,9 +216,9 @@ class node {
 
 map<string, peptide* >* all_peptides = 0;
 vector< protein* >* proteins = 0;
-map < string, protein* >* all_proteins = 0;
+map < int, protein* >* all_proteins = 0;
 vector < spectrum* >* spectra = 0;
-map< string, spectrum* >* all_spectra = 0;
+map< int, spectrum* >* all_spectra = 0;
 wavelet* occ = 0;
 int* less_table = 0;
 string text_p = "p";
@@ -252,35 +249,61 @@ int binarySearch(int* array, int length, int key) {
 static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
     peptide* current_pep = 0;
     string P = argv[1];
-    if (all_peptides->find(P) == all_peptides->end()){
+    map<string, peptide* >::iterator it = all_peptides->find(P);
+    if (it == all_peptides->end()){
         int L = 1, R = len_text - 1;
         int p_len = P.length();
         for (int i = 0; i < p_len; ++i){
             const char c = P[p_len - 1 - i];
-            ulong lss = less_table[c];
             
             L = occ->get_rank(L - 1, c);
             R = occ->get_rank(R, c) - 1;
             
             if (L > R) break;
-            
+            const int lss = less_table[c];
             L += lss;
             R += lss;
         }
-        if (L <= R){
+        if (L == R){
             current_pep = new peptide(P);
             proteins->at(binarySearch(indexes, index_size, SA[L]))->peptides.push_back(current_pep);
             all_peptides->insert(pair<string, peptide* >(P, current_pep));
         }
     }
     else {
-        current_pep = all_peptides->at(P);
+        current_pep = it->second;
     }
     if (current_pep){
         spectrum *s1 = new spectrum(argv[0]);
         current_pep->spectra.push_back(s1);
-        all_spectra->insert(pair<string, spectrum* >(s1->id, s1));
+        all_spectra->insert(pair<int, spectrum* >(s1->id, s1));
         spectra->push_back(s1);
+    }
+    return 0;
+}
+
+
+
+static int sqlite_callback_spectra(void *data, int argc, char **argv, char **azColName){
+    map<int, spectrum*>::iterator it = all_spectra->find(atoi(argv[0]));
+    if (it != all_spectra->end()){
+        spectrum* s1 = it->second;
+        s1->charge = argv[1];
+        string mass = argv[2];
+        s1->mod_sequence = argv[3];
+        if (mass.find(".") != string::npos){
+            mass = mass.substr(0, mass.find(".") + 5);
+        }
+        s1->mass = mass;
+    }
+    return 0;
+}
+
+static int sqlite_callback_tissues(void *data, int argc, char **argv, char **azColName){
+    map<int, spectrum*>::iterator it = all_spectra->find(atoi(argv[0]));
+    if (it != all_spectra->end()){
+        spectrum* s1 = it->second;
+        s1->tissues = argv[1];
     }
     return 0;
 }
@@ -353,7 +376,15 @@ main(int argc, char** argv) {
     string species = "";
     
     
-    string get_string = getenv("QUERY_STRING");
+    char* get_string_chr = getenv("QUERY_STRING");
+    
+    if (!get_string_chr){
+        cout << -1;
+        return -1;
+    }
+    
+    string get_string = get_string_chr;
+    
     if (!get_string.length()){
         response += "-1";
         print_out(response, compress);
@@ -411,12 +442,12 @@ main(int argc, char** argv) {
     map< string, int > column_names_peptides;
     map< string, int > column_names_spectra;
     map< string, int > column_names_rest;
-    vector<node*> nodes;
+    map< int, node*> node_dict;
     all_peptides = new map<string, peptide* >();
     proteins = new vector< protein* >();
-    all_proteins = new map < string, protein* >();
+    all_proteins = new map < int, protein* >();
     spectra = new vector < spectrum* >();
-    all_spectra = new map< string, spectrum* >();
+    all_spectra = new map< int, spectrum* >();
     
     /* Connect to database */
     if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
@@ -448,7 +479,7 @@ main(int argc, char** argv) {
         last_node->type = row[column_names_nodes[string("type")]];
         last_node->x = row[column_names_nodes[string("x")]];
         last_node->y = row[column_names_nodes[string("y")]];
-        nodes.push_back(last_node);
+        node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
     }
     
     
@@ -473,16 +504,13 @@ main(int argc, char** argv) {
     int pi = 0;
     len_text = 1; // plus sentinal
     while ((row = mysql_fetch_row(res)) != NULL){
-        int int_nid = atoi(row[column_names_proteins[string("nid")]]);
-        while (atoi(nodes.at(pi)->id.c_str()) < int_nid){
-            ++pi;
-        }
-        string pid = row[column_names_proteins[string("id")]];
+        int node_id = atoi(row[column_names_proteins[string("nid")]]);
+        string str_pid = row[column_names_proteins[string("id")]];
+        int pid = atoi(str_pid.c_str());
         protein* last_protein = 0;
         
         if (all_proteins->find(pid) == all_proteins->end()){
-            last_protein = new protein();
-            last_protein->id = pid;
+            last_protein = new protein(str_pid);
             last_protein->name = row[column_names_proteins[string("name")]];
             last_protein->definition = row[column_names_proteins[string("definition")]];
             last_protein->mass = row[column_names_proteins[string("mass")]];
@@ -491,14 +519,13 @@ main(int argc, char** argv) {
             last_protein->validation = row[column_names_proteins[string("validation")]];
             last_protein->fasta = cleanFasta(row[column_names_proteins[string("fasta")]]);
             len_text += last_protein->fasta.length() + 1;
-            all_proteins->insert(pair<string, protein* >(pid, last_protein));
+            all_proteins->insert(pair<int, protein* >(pid, last_protein));
             proteins->push_back(last_protein);
         }
         else {
             last_protein = all_proteins->at(pid);
         }
-        
-        nodes.at(pi)->proteins.push_back(last_protein);
+        node_dict[node_id]->proteins.push_back(last_protein);
     }
     
     
@@ -568,23 +595,19 @@ main(int argc, char** argv) {
     double t = 500;
     double l = spectra->size();
 
-    string text_pc = "c";
-    string text_mz = "m";
-    string text_mod = "s";
-    string text_tissue = "t";
-    for (int i = 0; i < ceil(l / t); ++i){
-        string sql_query_lite = "";
-        for (int j = i * t; j < min((i + 1) * t, l); ++j){
-            if (sql_query_lite.length()){
-                sql_query_lite += ", ";
-            }
-            sql_query_lite += spectra->at(j)->id;
+    vector<spectrum*>::iterator it = spectra->begin();
+    while (it != spectra->end()){
+            
+        string sql_query_lite = (*it)->str_id;
+        ++it;
+        for (int i = 1; i < t && it != spectra->end(); ++i, ++it){
+            sql_query_lite += ", " + (*it)->str_id;
         }
         
         // quering precursor charge, m/z and modified sequence
         string sql_query = "SELECT id i, precursorCharge c, precursorMZ m, peptideModSeq s FROM RefSpectra WHERE id IN (" + sql_query_lite + ");";
         vector< map< string, string > > spectra_data;
-        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback2, (void*)&spectra_data, &zErrMsg);
+        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_spectra, (void*)&spectra_data, &zErrMsg);
         if( rc != SQLITE_OK ){
             response += "-4\n";
             print_out(response, compress);
@@ -592,31 +615,15 @@ main(int argc, char** argv) {
             return -4;
         }
         
-        for(int i = 0; i < spectra_data.size(); ++i){
-            map< string, string > spd = spectra_data[i];
-            spectrum* s1 = all_spectra->at(spd[text_id]);
-            s1->charge = spd[text_pc];
-            s1->mod_sequence = spd[text_mod];
-            char buffer[20];
-            int n;
-            string mass = spd[text_mz];
-            if (mass.find(".") != string::npos){
-                mass = mass.substr(0, mass.find(".") + 5);
-            }
-            s1->mass = mass;
-        }
-        
         
         // quering possible tissue origins
-        sql_query = "SELECT RefSpectraId i, tissue t FROM Tissues WHERE RefSpectraId IN (" + sql_query_lite + ");";
+        sql_query = "SELECT RefSpectraId i, group_concat(tissue) t FROM Tissues WHERE i IN (" + sql_query_lite + ") group by i;";
         vector< map< string, string > > tissue_data;
-        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback2, (void*)&tissue_data, &zErrMsg);
-        if( rc == SQLITE_OK ){
-            for(int i = 0; i < tissue_data.size(); ++i){
-                map< string, string > spd = tissue_data[i];
-                spectrum* s1 = all_spectra->at(spd[text_id]);
-                s1->tissues.insert(spd[text_tissue]);
-            }
+        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_tissues, (void*)&tissue_data, &zErrMsg);
+        if( rc != SQLITE_OK ){
+            cout << -6 << endl;
+            sqlite3_free(zErrMsg);
+            exit(-6);
         }
     }
     
@@ -654,15 +661,19 @@ main(int argc, char** argv) {
         last_node->smiles = row[column_names_rest[string("smiles")]];
         last_node->formula = row[column_names_rest[string("formula")]];
         last_node->exact_mass = row[column_names_rest[string("exact_mass")]];
-        nodes.push_back(last_node);
+        node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
     }
     
     
 
     response += "[";
-    for (int i = 0; i < nodes.size(); ++i){
-        if (i) response += ", ";
-        response += nodes.at(i)->to_string();
+    map<int, node*>::iterator node_it = node_dict.begin();
+    if (node_dict.size()){
+        response += (node_it->second)->to_string();
+        ++node_it;
+    }
+    for (; node_it != node_dict.end(); ++node_it){
+        response += "," + (node_it->second)->to_string();
     }
     response += "]";
     print_out(response, compress);

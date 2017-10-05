@@ -511,13 +511,13 @@ function occurences(text, char){
 
 
 function Spectrum(data){
-    this.id = data['id'];
-    this.mass = data['mass'];
-    this.charge = data['charge'];
-    this.mod_sequence = data['mod_sequence'];
+    this.id = data['i'];
+    this.mass = data['m'];
+    this.charge = data['c'];
+    this.mod_sequence = data['s'];
     this.filter_valid = false;
     this.user_selected = true;
-    this.num_tissues = data['num_tissues'];
+    this.tissues = new Set(data["t"]);
     this.occ_M = 0;
     this.occ_m = 0;
     this.occ_C = 0;
@@ -578,16 +578,16 @@ function Spectrum(data){
 }
 
 function Peptide(data){
-    this.peptide_seq = data['peptide_seq'];
+    this.peptide_seq = data['p'];
     this.spectra = [];
     this.filter_valid = false;
     this.user_selected = true;
     this.tissues = new Set();
-    if ("tissues" in data) this.tissues = new Set(data["tissues"]);
+    //if ("t" in data) this.tissues = new Set(data["t"]);
     
-    for (var i = 0; i < data['spectra'].length; ++i){
-        this.spectra.push(new Spectrum(data['spectra'][i]));
-        //this.tissues = new Set([...this.tissues, ...this.spectra[i].tissues]);
+    for (var i = 0; i < data['s'].length; ++i){
+        this.spectra.push(new Spectrum(data['s'][i]));
+        this.tissues = new Set([...this.tissues, ...this.spectra[i].tissues]);
         
     }
     
@@ -625,14 +625,14 @@ function Peptide(data){
 
 
 function Protein(data, ctx){
-    this.id = data['id'];
-    this.name = data['name'];
-    this.definition = data['definition'];
-    this.kegg_link = data['kegg_link'];
-    this.accession = data['accession'];
-    this.ec_number = data['ec_number'];
-    this.mass = data['mass'];
-    this.validation = data['validation'];
+    this.id = data['i'];
+    this.name = data['n'];
+    this.definition = data['d'];
+    this.kegg_link = data['k'];
+    this.accession = data['a'];
+    this.ec_number = data['e'];
+    this.mass = data['m'];
+    this.validation = data['v'];
     this.peptides = [];
     this.marked = false;
     this.filter_valid = false;
@@ -643,8 +643,8 @@ function Protein(data, ctx){
     this.user_selected = true;
     this.tissues = new Set();
     
-    for (var i = 0; i < data['peptides'].length; ++i){
-        this.peptides.push(new Peptide(data['peptides'][i]));
+    for (var i = 0; i < data['p'].length; ++i){
+        this.peptides.push(new Peptide(data['p'][i]));
         this.containing_spectra += this.peptides[i].spectra.length;
         this.tissues = new Set([...this.tissues, ...this.peptides[i].tissues]);
     }
@@ -1254,17 +1254,17 @@ node.prototype.constructor = node;
 function node(data, c){
     this.x = parseInt(data['x']);
     this.y = parseInt(data['y']);
-    this.type = data['type'];
-    this.id = data['id'];
-    this.name = data['name'];
+    this.type = data['t'];
+    this.id = data['i'];
+    this.name = data['n'];
     //this.name = data['name'] + " " + this.id;  // TODO: delete this line
-    this.c_number = data['c_number'];
-    this.smiles = data['smiles'];
-    this.formula = data['formula'];
-    this.exact_mass = data['exact_mass'];
+    this.c_number = data['c'];
+    this.smiles = data['s'];
+    this.formula = data['f'];
+    this.exact_mass = data['e'];
     this.img = 0;
     this.highlight = false;
-    this.pathway_ref = data['pathway_ref'];
+    this.pathway_ref = data['r'];
     this.pathway_enabled = this.type == 'pathway' && this.pathway_ref != 0 && (this.pathway_ref in pathway_dict);
     this.proteins = [];
     this.lines = -1;
@@ -1283,18 +1283,18 @@ function node(data, c){
     switch (this.type){
         case "protein":
             var name = "";
-            this.height = 20 + 20 * Math.min(data['proteins'].length, max_protein_line_number);
-            this.orig_height = 20 + 20 * data['proteins'].length;
-            this.lines = data['proteins'].length;
-            this.slide = (data['proteins'].length > max_protein_line_number);
-            for (var j = 0; j < data['proteins'].length; ++j){
+            this.height = 20 + 20 * Math.min(data['p'].length, max_protein_line_number);
+            this.orig_height = 20 + 20 * data['p'].length;
+            this.lines = data['p'].length;
+            this.slide = (data['p'].length > max_protein_line_number);
+            for (var j = 0; j < data['p'].length; ++j){
                 var prot = 0;
-                if (!(data['proteins'][j]['id'] in protein_dictionary)){
-                    prot = new Protein(data['proteins'][j], this.ctx);
+                if (!(data['p'][j]['id'] in protein_dictionary)){
+                    prot = new Protein(data['p'][j], this.ctx);
                     protein_dictionary[prot.id] = prot;
                 }
                 else {
-                    prot = protein_dictionary[data['proteins'][j]['id']];
+                    prot = protein_dictionary[data['p'][j]['id']];
                 }
                 if (prot.id in basket){
                     basket[prot.id] = prot;
@@ -1319,7 +1319,7 @@ function node(data, c){
             this.tipp = (name.length || true);
             break;
         case "pathway":
-            var tokens = data['name'].split("\n");
+            var tokens = this.name.split("\n");
             this.height = 40 + 20 * tokens.length;
             
             for (var j = 0; j < tokens.length; ++j){
@@ -3979,6 +3979,7 @@ function locus_search_request_data(){
         }
     }
     
+    console.log(IDs);
     xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?loci=" + IDs, true);
     xmlhttp.send();
 }

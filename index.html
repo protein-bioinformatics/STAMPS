@@ -301,6 +301,7 @@ function open_statistics (){
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            console.log("got it");
             request_load_proteins(JSON.parse(xmlhttp.responseText), false);
             
             var sum_dSAF = 0;
@@ -318,7 +319,7 @@ function open_statistics (){
                 var dSAF = 0;
                 for (var i = 0; i < protein.peptides.length; ++i){
                     for (var j = 0; j < protein.peptides[i].spectra.length; ++j){
-                        dSAF += protein.peptides[i].spectra[j].num_tissues;
+                        dSAF += protein.peptides[i].spectra[j].tissues.size;
                     }
                 }
                 dSAF /= sum_dSAF;
