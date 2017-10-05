@@ -1289,12 +1289,12 @@ function node(data, c){
             this.slide = (data['p'].length > max_protein_line_number);
             for (var j = 0; j < data['p'].length; ++j){
                 var prot = 0;
-                if (!(data['p'][j]['id'] in protein_dictionary)){
+                if (!(data['p'][j]['i'] in protein_dictionary)){
                     prot = new Protein(data['p'][j], this.ctx);
                     protein_dictionary[prot.id] = prot;
                 }
                 else {
-                    prot = protein_dictionary[data['p'][j]['id']];
+                    prot = protein_dictionary[data['p'][j]['i']];
                 }
                 if (prot.id in basket){
                     basket[prot.id] = prot;
