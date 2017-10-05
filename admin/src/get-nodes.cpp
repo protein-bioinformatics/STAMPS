@@ -620,11 +620,6 @@ main(int argc, char** argv) {
         sql_query = "SELECT RefSpectraId i, group_concat(tissue) t FROM Tissues WHERE i IN (" + sql_query_lite + ") group by i;";
         vector< map< string, string > > tissue_data;
         rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_tissues, (void*)&tissue_data, &zErrMsg);
-        if( rc != SQLITE_OK ){
-            cout << -6 << endl;
-            sqlite3_free(zErrMsg);
-            exit(-6);
-        }
     }
     
     sqlite3_close(db);

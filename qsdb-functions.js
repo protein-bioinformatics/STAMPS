@@ -522,6 +522,7 @@ function Spectrum(data){
     this.occ_m = 0;
     this.occ_C = 0;
     this.occ_c = 0;
+    console.log(data);
     
     
     
@@ -662,19 +663,21 @@ function Protein(data, ctx){
         }
         
         if (this.filter_valid){
-            var tissue_set = new Set(Array.from(this.tissues));
-            if (!filter_parameters["tissue_brain"] && tissue_set.has(1)) tissue_set.delete(1);
-            if (!filter_parameters["tissue_liver"] && tissue_set.has(2)) tissue_set.delete(2);
-            if (!filter_parameters["tissue_kidney"] && tissue_set.has(3)) tissue_set.delete(3);
-            if (!filter_parameters["tissue_spleen"] && tissue_set.has(4)) tissue_set.delete(4);
-            if (!filter_parameters["tissue_heart"] && tissue_set.has(5)) tissue_set.delete(5);
-            if (!filter_parameters["tissue_blood"] && tissue_set.has(6)) tissue_set.delete(6);
-            if (!filter_parameters["tissue_fat"] && tissue_set.has(7)) tissue_set.delete(7);
-            if (!filter_parameters["tissue_lung"] && tissue_set.has(8)) tissue_set.delete(8);
-            if (!filter_parameters["tissue_eye"] && tissue_set.has(9)) tissue_set.delete(9);
-            if (!filter_parameters["tissue_gut"] && tissue_set.has(10)) tissue_set.delete(10);
-            
-            if (tissue_set.size == 0) this.filter_valid = false;
+			if (this.tissues.size > 0){
+				var tissue_set = new Set(Array.from(this.tissues));
+				if (!filter_parameters["tissue_brain"] && tissue_set.has(1)) tissue_set.delete(1);
+				if (!filter_parameters["tissue_liver"] && tissue_set.has(2)) tissue_set.delete(2);
+				if (!filter_parameters["tissue_kidney"] && tissue_set.has(3)) tissue_set.delete(3);
+				if (!filter_parameters["tissue_spleen"] && tissue_set.has(4)) tissue_set.delete(4);
+				if (!filter_parameters["tissue_heart"] && tissue_set.has(5)) tissue_set.delete(5);
+				if (!filter_parameters["tissue_blood"] && tissue_set.has(6)) tissue_set.delete(6);
+				if (!filter_parameters["tissue_fat"] && tissue_set.has(7)) tissue_set.delete(7);
+				if (!filter_parameters["tissue_lung"] && tissue_set.has(8)) tissue_set.delete(8);
+				if (!filter_parameters["tissue_eye"] && tissue_set.has(9)) tissue_set.delete(9);
+				if (!filter_parameters["tissue_gut"] && tissue_set.has(10)) tissue_set.delete(10);
+				
+				if (tissue_set.size == 0) this.filter_valid = false;
+			}
         }
         
         if (this.filter_valid){
