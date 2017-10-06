@@ -42,6 +42,7 @@ class wavelet {
         
         int* create_less_table();
         
+        int length;
         ranking* rkg;
         ulong alphabet[2];
         int len_alphabet;

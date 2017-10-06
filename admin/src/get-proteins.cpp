@@ -603,11 +603,6 @@ main(int argc, char** argv) {
             sql_query = "SELECT RefSpectraId i, group_concat(tissue) t FROM Tissues WHERE i IN (" + sql_query_lite + ") group by i;";
             vector< map< string, string > > tissue_data;
             rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_tissues, (void*)&tissue_data, &zErrMsg);
-            if( rc != SQLITE_OK ){
-                cout << -6 << endl;
-                sqlite3_free(zErrMsg);
-                exit(-6);
-            }
         }
     }
     else {
@@ -616,11 +611,6 @@ main(int argc, char** argv) {
         string sql_query = "SELECT RefSpectraId i, group_concat(tissue) t FROM Tissues group by i;";
         vector< map< string, string > > tissue_data;
         rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_tissues, (void*)&tissue_data, &zErrMsg);
-        if( rc != SQLITE_OK ){
-            cout << -6 << endl;
-            sqlite3_free(zErrMsg);
-            exit(-6);
-        }
     }
     
     sqlite3_close(db);
@@ -668,12 +658,12 @@ main(int argc, char** argv) {
     */
     
     if (compress){
-        cout << compress_string(response);
+        //cout << compress_string(response);
         
         //cout << response.length() << endl;
         //cout << (int)mtf[0] << endl;
         //cout << response << endl;
-        //cout << compress_string(response).length();
+        cout << compress_string(response).length();
     }
     else {
         cout << response;

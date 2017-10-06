@@ -16,8 +16,9 @@ typedef unsigned int uint;
 
 class ranking {
     public:
-        ranking(ulong, char* bitfield_stored, char* sums_stored);
+        ranking(ulong* _bitfield, int field_len);
         ranking(char* text, int _length, ulong* alphabet);
+        
         ~ranking();
         //ulong get_rank(ulong i, bool counter = false);
         inline int get_rank(const uint i, const bool counter) const {
@@ -51,7 +52,6 @@ class ranking {
             return count_ones;
         }
         
-        int length;
         ulong* bitfield;
         uint* sums;
 };

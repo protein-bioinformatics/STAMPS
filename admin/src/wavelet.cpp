@@ -1,6 +1,6 @@
 #include "wavelet.h"
 
-wavelet::wavelet(char* text, int length, ulong* _alphabet){
+wavelet::wavelet(char* text, int _length, ulong* _alphabet) : length(_length) {
     ulong alphabet_right[2];
     
     alphabet_right[0] = alphabet[0] = _alphabet[0];
@@ -69,7 +69,7 @@ int* wavelet::create_less_table(){
     for (int i = 0; i < 128; ++i){
         less[i] = cumulative;
         if ((alphabet[i >> shift] >> (i & mask)) & 1){
-            cumulative += get_rank(rkg->length - 1, i);
+            cumulative += get_rank(length - 1, i);
         }
     }
     return less;
