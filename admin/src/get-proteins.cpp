@@ -223,9 +223,14 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
         int p_len = P.length();
         for (int i = 0; i < p_len; ++i){
             const char c = P[p_len - 1 - i];  
-            
+            /*
             L = occ->get_rank(L - 1, c);
             R = occ->get_rank(R, c) - 1;
+            */         
+            
+            occ->get_rank(--L, R, c);
+            --R;
+            
             
             if (L > R) break;
             
@@ -515,11 +520,12 @@ main(int argc, char** argv) {
         tt += l + 1;
         indexes[i + 1] = indexes[i] + l + 1;
     }
-        
-    ulong abc[2] = {0, 0};
-    for (int i = 'A'; i <= 'Z'; ++i) abc[i >> 6] |= 1ull << (i & 63);
-    abc['/' >> 6] |= 1ull << ('/' & 63);
-    abc['$' >> 6] |= 1ull << ('$' & 63);
+    
+ 
+    ulong abc[2] = {zero, zero};
+    for (int i = 'A'; i <= 'Z'; ++i) abc[i >> shift] |= one << (i & mask);
+    abc['/' >> shift] |= one << ('/' & mask);
+    abc['$' >> shift] |= one << ('$' & mask);
     
     sais(T, SA, len_text);
     

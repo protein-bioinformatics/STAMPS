@@ -9,14 +9,15 @@ ranking::ranking(char* text, int _length, ulong* _alphabet){
     int half = (len_alphabet - 1) >> 1;
     int cnt = 0;
     
+    /*
     for (int i = 0; i < 128 && cnt <= half; ++i){
-        int cell = i >> 6;
-        int pos = i & 63;
-        cnt += (alphabet[cell] >> pos) & 1;
-        alphabet[cell] &= ~(1ull << pos);
-    }
+        int cell = i >> shift;
+        int pos = i & mask;
+        cnt += (alphabet[cell] >> pos) & one;
+        alphabet[cell] &= ~(one << pos);
+    }*/
         
-    int field_len = (length >> 6) + 1;
+    int field_len = (length >> shift) + 1;
     bitfield = new ulong[field_len];
     sums = new uint[field_len];
     sums[0] = 0ull;
@@ -24,12 +25,12 @@ ranking::ranking(char* text, int _length, ulong* _alphabet){
     for (int i = 0; i < field_len; ++i) bitfield[i] = 0;
     
     for (int i = 0; i < length; ++i){
-        int cell = i >> 6;
-        int pos = i & 63;
-        ulong bit = (alphabet[text[i] >> 6] >> (text[i] & 63)) & one;
+        int cell = i >> shift;
+        int pos = i & mask;
+        ulong bit = (alphabet[text[i] >> shift] >> (text[i] & mask)) & one;
         bitfield[cell] |= (bit << pos);
         
-        if (!pos  && i) {
+        if (!pos && i) {
             sums[cell] = sums[cell - 1] + __builtin_popcountll(bitfield[cell - 1]);
         }
     }

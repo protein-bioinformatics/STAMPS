@@ -6,8 +6,8 @@
 #include <string.h>
 using namespace std;
 
-const ulong shift = 6ull;
-const ulong mask = 63ull;
+const int shift = 6;
+const int mask = 63ull;
 const ulong one = 1ull;
 const ulong zero = 0ull;
 

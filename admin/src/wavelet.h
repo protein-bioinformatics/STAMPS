@@ -12,43 +12,33 @@ class wavelet {
         inline int get_rank(const int i, const ulong c) const{
             const int cell = c >> shift;
             const int pos = c & mask;
-            const ulong mask = one << pos;
-            const bool left = (alphabet_left[cell] & mask) > 0;
+            const ulong l_mask = one << pos;
+            const bool left = (alphabet_left[cell] & l_mask) > zero;
             
             
             int result = (i >= 0) ? rkg->get_rank(i, left) : 0;
-            if (!result) return zero;
-            
-            
-            if (left && left_child){
-                return left_child->get_rank(result - one, c);
-            }
-            else if (!left && right_child){
-                return right_child->get_rank(result - one, c);
+            if (result) {
+                if (left && left_child) return left_child->get_rank(result - one, c);
+                else if (!left && right_child) return right_child->get_rank(result - one, c);
             }
             return result;
         }
         
-        /*
-        inline int* get_rank(const int l, const int r, const int c) const{
+        
+        inline void get_rank(int &l, int &r, const int c) const{
             const int cell = c >> shift;
             const int pos = c & mask;
-            const ulong mask = one << pos;
-            const bool left = (alphabet_left[cell] & mask) > 0;
+            const ulong l_mask = one << pos;
+            const bool left = (alphabet_left[cell] & l_mask) > zero;
             
+            l = (l >= 0) ? rkg->get_rank(l, left) : 0;
+            r = (r >= 0) ? rkg->get_rank(r, left) : 0;
             
-            int result_left = (l >= 0) ? rkg->get_rank(l, left) : 0;
-            int result_right = (r >= 0) ? rkg->get_rank(r, left) : 0;
-            
-            
-            if (left && left_child){
-                return left_child->get_rank(result_left - one, result_right - one, c);
+            if (l + one <= r){
+                if (left && left_child) left_child->get_rank(--l, --r, c);
+                else if (!left && right_child) right_child->get_rank(--l, --r, c);
             }
-            else if (!left && right_child){
-                return right_child->get_rank(result_left - one, result_right - one, c);
-            }
-            return new int[2]{result_left, result_right};
-        }*/
+        }
         
         int* create_less_table();
         
