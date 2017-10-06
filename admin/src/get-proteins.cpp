@@ -189,10 +189,9 @@ vector < spectrum* > spectra;
 map< int, spectrum* > spectrum_dict;
 
 wavelet* occ = 0;
+ranking* index_rank = 0;
 int* less_table = 0;
 int len_text = 0;
-int index_size = 0;
-int* indexes = 0;
 int* SA = 0;
 
 int binarySearch(int* array, int length, int key) {
@@ -222,18 +221,12 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
         int L = 0, R = len_text - 1;
         int p_len = P.length();
         for (int i = 0; i < p_len; ++i){
-            const char c = P[p_len - 1 - i];  
-            /*
-            L = occ->get_rank(L - 1, c);
-            R = occ->get_rank(R, c) - 1;
-            */         
+            const char c = P[p_len - 1 - i];
             
             occ->get_rank(--L, R, c);
             --R;
             
-            
             if (L > R) break;
-            
             int lss = less_table[c];
             L += lss;
             R += lss;
@@ -241,7 +234,7 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
         }
         if (L == R){
             current_pep = new peptide(P);
-            proteins[binarySearch(indexes, index_size, SA[L])]->peptides.push_back(current_pep);
+            proteins[index_rank->get_rank_right(SA[L])]->peptides.push_back(current_pep);
             peptide_dict.insert(pair<string, peptide* >(P, current_pep));
         }
     }
@@ -504,22 +497,26 @@ main(int argc, char** argv) {
     // create FM index for fast pattern search    
     unsigned char* T = new unsigned char[len_text];
     unsigned char* bwt = new unsigned char[len_text];
-    index_size = proteins.size() + 1;
-    indexes = new int[index_size];
-    indexes[0] = 0;
     SA = new int[len_text];
     for (int i = 0; i < len_text; ++i) SA[i] = i;
     T[len_text - 1] = '$';
     
+    int len_field = (len_text >> shift) + 1;
+    ulong* index_bitfield = new ulong[len_field];
+    for (int i = 0; i < len_field; ++i) index_bitfield[i] = 0;
     
     unsigned char* tt = T;
+    int p = 0;
     for (int i = 0; i < proteins.size(); ++i){
         int l = proteins[i]->fasta.length();
-        memcpy(tt, proteins[i]->fasta.data(), l);
-        tt[l] = '/';
-        tt += l + 1;
-        indexes[i + 1] = indexes[i] + l + 1;
+        memcpy(tt + p, proteins[i]->fasta.data(), l);
+        p += l;
+        tt[p] = '/';
+        index_bitfield[p >> shift] |= one << (p & mask);
+        ++p;
     }
+    
+    index_rank = new ranking(index_bitfield, len_field);
     
  
     ulong abc[2] = {zero, zero};
@@ -572,7 +569,7 @@ main(int argc, char** argv) {
     }
     
     delete occ;
-    delete indexes;
+    delete index_rank;
     delete SA;
     
     double t = 500;
@@ -658,12 +655,12 @@ main(int argc, char** argv) {
     */
     
     if (compress){
-        //cout << compress_string(response);
+        cout << compress_string(response);
         
         //cout << response.length() << endl;
         //cout << (int)mtf[0] << endl;
         //cout << response << endl;
-        cout << compress_string(response).length();
+        //cout << compress_string(response).length();
     }
     else {
         cout << response;

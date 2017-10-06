@@ -28,7 +28,7 @@ ranking::ranking(char* text, int length, ulong* _alphabet){
 }
 
 
-ranking::ranking(ulong* _bitfield, int field_len){
+ranking::ranking(ulong* _bitfield, int field_len) : bitfield(_bitfield){
     sums = new uint[field_len];
     sums[0] = 0ull;
     for (int i = 1; i < field_len; ++i) sums[i] = sums[i - 1] + __builtin_popcountll(bitfield[i - 1]);
