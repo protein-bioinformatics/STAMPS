@@ -522,9 +522,6 @@ function Spectrum(data){
     this.occ_m = 0;
     this.occ_C = 0;
     this.occ_c = 0;
-    console.log(data);
-    
-    
     
     this.prepare_modification = function(){
         if (typeof this.mod_sequence === 'undefined') return;
@@ -2967,7 +2964,6 @@ function filter_basket(){
 
 function show_hide_peptide_tissues(){
     var peptide_tissues = document.getElementsByClassName("peptide_tissues");
-    console.log(peptide_tissues.length);
     for (var i = 0; i < peptide_tissues.length; ++i){
         peptide_tissues[i].style.display = filter_parameters['peptide_tissues_visible'] ? "inline" : "none";
     }
@@ -3239,8 +3235,6 @@ function start_search(){
             document.getElementById("search_results").style.left = (rect.left).toString() + "px";
             var inner_html = "<table>";
             for (var i = 0; i < results.length; ++i){
-                console.log(results[i] + " " + current_pathway);
-                
                 var t1 = "<font color=\"" + disabled_text_color + "\">" + results[i][0].substring(0, results[i][1]) + "</font>";
                 
                 var t2 = results[i][0].substring(results[i][1], results[i][1] + len_p);
@@ -3266,7 +3260,6 @@ function start_search(){
 
 function highlight_node(node_id, pathway_id){
     hide_search();
-    console.log(pathway_id + " " + current_pathway);
     if (pathway_id != current_pathway){
         change_pathway(pathway_dict[pathway_id]);
         var waiting_for_pathway = setInterval(function(){
@@ -3982,7 +3975,6 @@ function locus_search_request_data(){
         }
     }
     
-    console.log(IDs);
     xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?loci=" + IDs, true);
     xmlhttp.send();
 }

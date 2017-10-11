@@ -26,8 +26,8 @@ charge = 0;
 precursor_mass = 0;
 grid_color = "#DDDDDD";
 label_color = "black";
-var ion_type = {no_type: 0, a_type: 1, b_type: 2, c_type: 3, x_type: 4, y_type: 5, z_type: 6, precursor: 7};
-var ion_type_colors = ["#888888", "#888888", "#0056af", "#888888", "#888888", "#D40000", "#888888", "#c89200"];
+var ion_type = {no_type: 0, a_type: 1, b_type: 2, c_type: 3, x_type: 4, y_type: 5, z_type: 6, precursor: 7, immonium: 8};
+var ion_type_colors = ["#888888", "#888888", "#0056af", "#888888", "#888888", "#D40000", "#888888", "#c89200", "#ff9600"];
 
 
 
@@ -60,26 +60,21 @@ acids['V'] =  99.068410;
 
 function binary_search(key){
     var low = 0;
-    var mid = 0;
     var high = peaks.length - 1;
-    while (low <= high){
-        mid = (low + high) >> 1;
-        if (peaks[mid].mass == key) break;
-
-        else if (peaks[mid].mass < key) low = mid + 1;
-        else high = mid - 1;
+    best_index = low;
+    while (low <= high) {
+        var mid = (low + high) >> 1;
+        if (peaks[mid].mass < key) low = mid + 1;
+        else if (peaks[mid].mass > key) high = mid - 1;
+        else {
+            best_index = mid;
+            break;
+        }
+        if (Math.abs(peaks[mid].mass - key) < Math.abs(peaks[best_index].mass - key)) best_index = mid;
     }
-    var mn_index = mid;
-    var mn = Math.abs(peaks[mid].mass - key);
-    if (mid >= 1 && Math.abs(peaks[mid - 1].mass - key) < mn){
-        mn = Math.abs(peaks[mid - 1].mass - key);
-        mn_index = mid - 1;
-    }
-    if (mid + 1 < peaks.length && Math.abs(peaks[mid + 1].mass - key) < mn){
-        mn = Math.abs(peaks[mid + 1].mass - key);
-        mn_index = mid + 1;
-    }
-    return [document.getElementById("radio_ppm").checked ? mn / key * 1000000 : mn, mn_index];
+    
+    var mass_diff = Math.abs(peaks[best_index].mass - key);
+    return [document.getElementById("radio_ppm").checked ? mass_diff / key * 1000000 : mass_diff, best_index];
 }
 
 
@@ -120,6 +115,17 @@ function annotation(){
         peaks[i].highlight = false;
     }
     
+    // annotate immonium ions
+    for (var i = 0; i < peptide_mod.length; ++i){
+        mass = acids[peptide_mod[i]] - C12 - O + H;
+        var diff_mass = binary_search(mass);
+        if (diff_mass[0] < tolerance){
+            peaks[diff_mass[1]].highlight = true;
+            peaks[diff_mass[1]].type = ion_type.immonium;
+            peaks[diff_mass[1]].annotation = peptide_mod[i];
+        }
+    }
+    
     
     // annotate b-ions
     mass = H;
@@ -128,7 +134,7 @@ function annotation(){
         
         for (var crg = 1; crg <= charge; ++crg){
             if (mass >= 800 * (crg - 1)){
-            var diff_mass = binary_search((mass + (crg - 1)) / crg);
+                var diff_mass = binary_search((mass + (crg - 1)) / crg);
                 if (diff_mass[0] < tolerance){
                     peaks[diff_mass[1]].highlight = true;
                     peaks[diff_mass[1]].type = ion_type.b_type;
