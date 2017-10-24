@@ -105,6 +105,7 @@ class spectrum {
         string mass;
         string mod_sequence;
         string tissues;
+        string tissue_numbers;
         
         spectrum(string _id) : str_id(_id) {id = atoi(str_id.c_str());}
         
@@ -115,6 +116,7 @@ class spectrum {
             if (complete) str += ",\"c\":" + charge;
             if (complete) str += ",\"m\":\"" + mass + "\"";
             str += ",\"t\":[" + tissues + "]";
+            str += ",\"n\":[" + tissue_numbers + "]";
             str += "}";
             return str;
         }
@@ -166,6 +168,9 @@ class protein {
         protein(string _id) : str_id(_id) {id = atoi(str_id.c_str());}
         
         string to_string(bool complete = true){
+            stringstream ss;
+            ss << fasta.length();
+            
             string str = "{";
             str += "\"i\":" + str_id;
             if (complete) str += ",\"n\":\"" + name + "\"";
@@ -173,6 +178,7 @@ class protein {
             if (complete) str += ",\"m\":\"" + mass + "\"";
             if (complete) str += ",\"a\":\"" + accession + "\"";
             if (complete) str += ",\"e\":\"" + ec_number + "\"";
+            str += ",\"l\":" + ss.str();
             str += ",\"p\":[";
             for (int i = 0; i < peptides.size(); ++i){
                 if (i) str += ",";
@@ -271,6 +277,7 @@ static int sqlite_callback_tissues(void *data, int argc, char **argv, char **azC
     if (it != spectrum_dict.end()){
         spectrum* s1 = it->second;
         s1->tissues = argv[1];
+        s1->tissue_numbers = argv[2];
     }
     return 0;
 }
@@ -605,7 +612,7 @@ main(int argc, char** argv) {
     else {
         
         // quering possible tissue origins
-        string sql_query = "SELECT RefSpectraId i, group_concat(tissue) t FROM Tissues group by i;";
+        string sql_query = "SELECT RefSpectraId i, group_concat(tissue) t, group_concat(tissue) n FROM Tissues group by i;";
         vector< map< string, string > > tissue_data;
         rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_tissues, (void*)&tissue_data, &zErrMsg);
     }

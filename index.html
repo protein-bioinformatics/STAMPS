@@ -241,9 +241,24 @@ The usage, selling or handing of the contact data written in this imprint is not
 <div id="check_spectra" class="check_spectra"></div>
 <div id="click_background" class="click_background"></div>
 <div id="waiting_background" class="waiting_background"></div>
-<div id="statistics" class="disclaimer">Still in construction!!!<p></div>
-
-
+<div id="statistics" class="disclaimer">Still in construction!!!<p><canvas id="nsaf_figure" width="600" height="250"></canvas><table>
+                <tr><td colspan="2">Tissues:</td><td></tr>
+                <tr><td><input type="checkbox" id="statistics_check_brain" onchange="uptade_nsaf();" checked /> Brain</td>
+                    <td><input type="checkbox" id="statistics_check_liver" onchange="uptade_nsaf();" /> Liver</td>
+                </tr>
+                <tr><td><input type="checkbox" id="statistics_check_kidney" onchange="uptade_nsaf();" /> Kidney</td>
+                    <td><input type="checkbox" id="statistics_check_spleen" onchange="uptade_nsaf();" /> Spleen</td>
+                </tr>
+                <tr><td><input type="checkbox" id="statistics_check_heart" onchange="uptade_nsaf();" /> Heart</td>
+                    <td><input type="checkbox" id="statistics_check_blood" onchange="uptade_nsaf();" /> Blood</td>
+                </tr>
+                <tr><td><input type="checkbox" id="statistics_check_fat" onchange="uptade_nsaf();" /> Fat</td>
+                    <td><input type="checkbox" id="statistics_check_lung" onchange="uptade_nsaf();" /> Lung</td>
+                </tr>
+                <tr><td><input type="checkbox" id="statistics_check_eye" onchange="uptade_nsaf();" /> Eye</td>
+                    <td><input type="checkbox" id="statistics_check_gut" onchange="uptade_nsaf();" /> Gut</td>
+                </tr>
+            </table></div>
 <audio style="display: none;"><source src="kns.mp3"></source>
 </body>
 <script>
@@ -289,6 +304,78 @@ function change_chromosome_view_keydown(e){
     }
 }
 
+var statistics_loaded = false;
+var max_NSAF = -1000000;
+var min_NSAF = 0;
+var checkbox_infos = {1: ["statistics_check_brain", "#f4e500"], 2: ["statistics_check_liver", "#fdc60b"], 3: ["statistics_check_kidney", "#f18e1c"],
+                  4: ["statistics_check_spleen", "#ea621f"], 5: ["statistics_check_heart", "#e32322"], 6: ["statistics_check_blood", "#c4037d"],
+                  7: ["statistics_check_fat", "#6d398b"], 8: ["statistics_check_lung", "#444e99"], 9: ["statistics_check_eye", "#2a71b0"],
+                  10: ["statistics_check_gut", "#0696bb"]};
+var NSAFs = {1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: []};
+
+
+function uptade_nsaf(){
+    if (!statistics_loaded) return;
+    var nsaf_figure = document.getElementById("nsaf_figure");
+    var nsaf_ctx = nsaf_figure.getContext("2d");
+    nsaf_ctx.clearRect(0, 0, nsaf_figure.width, nsaf_figure.height);
+            
+    var w_box = 600;
+    var h_box = 250;
+
+    nsaf_ctx.beginPath();
+    nsaf_ctx.moveTo(0,0);
+    nsaf_ctx.lineTo(w_box,0);
+    nsaf_ctx.stroke();
+    
+    nsaf_ctx.beginPath();
+    nsaf_ctx.moveTo(w_box,0);
+    nsaf_ctx.lineTo(w_box,h_box);
+    nsaf_ctx.stroke();
+    
+    nsaf_ctx.beginPath();
+    nsaf_ctx.moveTo(w_box,h_box);
+    nsaf_ctx.lineTo(0,h_box);
+    nsaf_ctx.stroke();
+    
+    nsaf_ctx.beginPath();
+    nsaf_ctx.moveTo(0,h_box);
+    nsaf_ctx.lineTo(0,0);
+    nsaf_ctx.stroke();
+    
+    
+    var num_checked = 0;
+    for (var key in checkbox_infos){
+        if (document.getElementById(checkbox_infos[key][0]).checked) ++num_checked;
+    }
+    
+    var j = 0;
+    for (var key in checkbox_infos){
+        if (document.getElementById(checkbox_infos[key][0]).checked) add_nsaf(key, j++, num_checked);
+    }
+}
+
+function add_nsaf(t, curr, total){
+    
+    var w_box = 600;
+    var h_box = 250;
+    var nsaf_figure = document.getElementById("nsaf_figure");
+    var nsaf_ctx = nsaf_figure.getContext("2d");
+    var len = (w_box - 4) / total;
+    var len_nsaf = NSAFs[t].length;
+    for (var i = 0; i < len_nsaf; ++i){
+        var nsaf = NSAFs[t][i] - min_NSAF;
+        nsaf *= (h_box - 4) / (max_NSAF - min_NSAF);
+        nsaf = h_box - 2 - nsaf;
+        var pos = Math.floor(2 + curr * len + i * len / len_nsaf);
+        
+        nsaf_ctx.beginPath();
+        nsaf_ctx.fillStyle = checkbox_infos[t][1];
+        nsaf_ctx.arc(pos, nsaf, 1, 0, 2 * Math.PI);
+        nsaf_ctx.fill();
+    }
+}
+
 
 function open_statistics (){
     document.getElementById("statistics").style.display = "inline";
@@ -301,86 +388,37 @@ function open_statistics (){
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            console.log("got it");
             request_load_proteins(JSON.parse(xmlhttp.responseText), false);
             
-            var sum_dSAF = 0;
-            for (var prot_id in protein_dictionary){
-                var protein = protein_dictionary[prot_id];
-                for (var i = 0; i < protein.peptides.length; ++i){
-                    sum_dSAF += protein.peptides[i].spectra.length;
-                }
-            }
-            var dNSAFs = [];
-            var max_dNSAF = 0;
-            var min_dNSAF = 1;
-            for (var prot_id in protein_dictionary){
-                var protein = protein_dictionary[prot_id];
-                var dSAF = 0;
-                for (var i = 0; i < protein.peptides.length; ++i){
-                    for (var j = 0; j < protein.peptides[i].spectra.length; ++j){
-                        dSAF += protein.peptides[i].spectra[j].tissues.size;
+            for (var t = 1; t <= 10; ++t){
+                var sum_NSAF = 0;
+                for (var prot_id in protein_dictionary){
+                    var NSAF = 0;
+                    var protein = protein_dictionary[prot_id];
+                    for (var i = 0; i < protein.peptides.length; ++i){
+                        var peptide = protein.peptides[i];
+                        for (var j = 0; j < peptide.spectra.length; ++j){
+                            var spectrum = peptide.spectra[j];
+                            if (t in spectrum.tissues) NSAF += spectrum.tissues[t];
+                        }
+                    }
+                    NSAF /= protein.sequence_length;
+                    if (NSAF > 0){
+                        NSAFs[t].push(NSAF);
+                        sum_NSAF += NSAF;
                     }
                 }
-                dSAF /= sum_dSAF;
-                if (dSAF > 0){
-                    dNSAFs.push(dSAF);
-                    max_dNSAF = Math.max(max_dNSAF, dSAF);
-                    min_dNSAF = Math.min(min_dNSAF, dSAF);
+                for (var i = 0; i < NSAFs[t].length; ++i){
+                    var tmp = Math.log10(NSAFs[t][i] / sum_NSAF);
+                    max_NSAF = Math.max(max_NSAF, tmp);
+                    min_NSAF = Math.min(min_NSAF, tmp);
+                    NSAFs[t][i] = tmp;
                 }
+                NSAFs[t].sort();
             }
             
-            dNSAFs.sort().reverse();
-            
-            document.getElementById("statistics").innerHTML = 'Still in construction!!!<p><canvas id="nsaf_figure" width="400" height="250"></canvas>';
-            var nsaf_figure = document.getElementById("nsaf_figure");
-            var nsaf_ctx = nsaf_figure.getContext("2d");
-            
-            nsaf_ctx.beginPath();
-            nsaf_ctx.moveTo(0,0);
-            nsaf_ctx.lineTo(400,0);
-            nsaf_ctx.stroke();
-            
-            nsaf_ctx.beginPath();
-            nsaf_ctx.moveTo(400,0);
-            nsaf_ctx.lineTo(400,250);
-            nsaf_ctx.stroke();
-            
-            nsaf_ctx.beginPath();
-            nsaf_ctx.moveTo(400,250);
-            nsaf_ctx.lineTo(0,250);
-            nsaf_ctx.stroke();
-            
-            nsaf_ctx.beginPath();
-            nsaf_ctx.moveTo(0,250);
-            nsaf_ctx.lineTo(0,0);
-            nsaf_ctx.stroke();
-            
-            /*
-            nsaf_ctx.beginPath();
-            nsaf_ctx.moveTo(0,125);
-            nsaf_ctx.lineTo(400,125);
-            nsaf_ctx.stroke();
-            */
-            
-            nsaf_ctx.fillStyle = 'black';
-            max_dNSAF = Math.log2(max_dNSAF) + 0.2;
-            min_dNSAF = Math.log2(min_dNSAF) - 0.2;
-            
-            console.log(dNSAFs.length);
-            
-            for (var i = 0; i < dNSAFs.length; ++i){
-                var nsaf = Math.log2(dNSAFs[i]) - min_dNSAF;
-                //console.log(nsaf + " " + max_dNSAF + " " + min_dNSAF + " " + nsaf / (max_dNSAF - min_dNSAF));
-                nsaf *= 250 / (max_dNSAF - min_dNSAF);
-                nsaf = 250 - nsaf;
-                var pos = 2 + i / dNSAFs.length * 398;
-                
-                nsaf_ctx.beginPath();
-                nsaf_ctx.fillStyle = 'red';
-                nsaf_ctx.arc(pos, nsaf, 1, 0, 2 * Math.PI);
-                nsaf_ctx.fill();
-            }
+            statistics_loaded = true;
+            uptade_nsaf();
         }
     }
     
