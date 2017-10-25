@@ -339,6 +339,7 @@ main(int argc, char** argv) {
     string loci_ids = "";
     string function_ids = "";
     bool statistics = false;
+    bool statistics_pathways = false;
     
     
     char* get_string_chr = getenv("QUERY_STRING");
@@ -378,12 +379,21 @@ main(int argc, char** argv) {
         else if (get_values.size() && get_values.at(0) == "statistics"){
             statistics = true;
         }
+        else if (get_values.size() && get_values.at(0) == "statistics_pathways"){
+            statistics_pathways = true;
+        }
     }
     
-    if (via_accessions + via_loci + via_functions + statistics != 1){
+    if (via_accessions + via_loci + via_functions + statistics + statistics_pathways != 1){
         cout << -5;
         return -5;
     }
+    
+    
+    
+    
+    
+    
     
     
     string sql_query_proteins = "";
@@ -426,6 +436,51 @@ main(int argc, char** argv) {
         cout << "error: " << mysql_error(conn) << endl;
         return 1;
     }
+    
+    
+    
+    
+    
+    
+    if (statistics_pathways){
+        string sql_query = "SELECT distinct pw.id pathway_id, pw.name, npc.protein_id FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id where p.unreviewed = 0 order by pw.name;";
+        if (mysql_query(conn, sql_query.c_str())) {
+            cout << "error: " << mysql_error(conn) << endl;
+            return 1;
+        }
+        res = mysql_use_result(conn);
+        
+        int index_pw = 0;
+        int index_p = 0;
+        string last_id = "";
+        string response = "[";
+        while ((row = mysql_fetch_row(res)) != NULL){
+            if (last_id.compare(row[0])){
+                last_id = row[0];
+                index_p = 0;
+                
+                if (index_pw++) response += "]],";
+                response += "[" + last_id + ",\"" + string(row[1]) + "\",[";
+            }
+            
+            
+            if (index_p++) response += ",";
+            response += string(row[2]);
+        }
+        if (index_pw) response += "]]";
+        response += "]";
+        
+        if (compress){
+            cout << compress_string(response);
+        }
+        else {
+            cout << response;
+        }
+        exit(0);
+    }
+    
+    
+    
     
     if (via_accessions){
     

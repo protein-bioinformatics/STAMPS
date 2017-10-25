@@ -645,6 +645,7 @@ function Protein(data, ctx){
     this.ctx = ctx;
     this.user_selected = true;
     this.tissues = new Set();
+    this.nsaf = {};
     
     for (var i = 0; i < data['p'].length; ++i){
         this.peptides.push(new Peptide(data['p'][i]));

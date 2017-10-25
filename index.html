@@ -241,24 +241,26 @@ The usage, selling or handing of the contact data written in this imprint is not
 <div id="check_spectra" class="check_spectra"></div>
 <div id="click_background" class="click_background"></div>
 <div id="waiting_background" class="waiting_background"></div>
-<div id="statistics" class="disclaimer">Still in construction!!!<p><canvas id="nsaf_figure" width="600" height="250"></canvas><table>
-                <tr><td colspan="2">Tissues:</td><td></tr>
-                <tr><td><input type="checkbox" id="statistics_check_brain" onchange="uptade_nsaf();" checked /> Brain</td>
-                    <td><input type="checkbox" id="statistics_check_liver" onchange="uptade_nsaf();" /> Liver</td>
-                </tr>
-                <tr><td><input type="checkbox" id="statistics_check_kidney" onchange="uptade_nsaf();" /> Kidney</td>
-                    <td><input type="checkbox" id="statistics_check_spleen" onchange="uptade_nsaf();" /> Spleen</td>
-                </tr>
-                <tr><td><input type="checkbox" id="statistics_check_heart" onchange="uptade_nsaf();" /> Heart</td>
-                    <td><input type="checkbox" id="statistics_check_blood" onchange="uptade_nsaf();" /> Blood</td>
-                </tr>
-                <tr><td><input type="checkbox" id="statistics_check_fat" onchange="uptade_nsaf();" /> Fat</td>
-                    <td><input type="checkbox" id="statistics_check_lung" onchange="uptade_nsaf();" /> Lung</td>
-                </tr>
-                <tr><td><input type="checkbox" id="statistics_check_eye" onchange="uptade_nsaf();" /> Eye</td>
-                    <td><input type="checkbox" id="statistics_check_gut" onchange="uptade_nsaf();" /> Gut</td>
-                </tr>
-            </table></div>
+<div id="statistics" class="disclaimer">
+    Still in construction!!!<p><canvas id="nsaf_figure" width="600" height="250"></canvas>
+    <table>
+        <tr><td colspan="5">Tissues:</td><td></tr>
+        <tr><td><input type="checkbox" id="statistics_check_brain" onchange="uptade_nsaf();" checked /> Brain</td>
+            <td><input type="checkbox" id="statistics_check_liver" onchange="uptade_nsaf();" /> Liver</td>
+            <td><input type="checkbox" id="statistics_check_kidney" onchange="uptade_nsaf();" /> Kidney</td>
+            <td><input type="checkbox" id="statistics_check_spleen" onchange="uptade_nsaf();" /> Spleen</td>
+            <td><input type="checkbox" id="statistics_check_heart" onchange="uptade_nsaf();" /> Heart</td>
+        </tr>
+        <tr><td><input type="checkbox" id="statistics_check_blood" onchange="uptade_nsaf();" /> Blood</td>
+            <td><input type="checkbox" id="statistics_check_fat" onchange="uptade_nsaf();" /> Fat</td>
+            <td><input type="checkbox" id="statistics_check_lung" onchange="uptade_nsaf();" /> Lung</td>
+            <td><input type="checkbox" id="statistics_check_eye" onchange="uptade_nsaf();" /> Eye</td>
+            <td><input type="checkbox" id="statistics_check_gut" onchange="uptade_nsaf();" /> Gut</td>
+        </tr>
+    </table><p>
+    <select id="nsaf_pathway_figure_select" onchange="upadete_nsaf_pathway_figure();"></select><br>
+    <canvas id="nsaf_pathway_figure" width="600" height="250"></canvas>
+</div>
 <audio style="display: none;"><source src="kns.mp3"></source>
 </body>
 <script>
@@ -272,6 +274,7 @@ var chromosome_data_dict = {};
 var chromosome_selected = -1;
 var loaded_chromosomes = 0;
 var currently_visible_proteins = [];
+var pathways_to_proteins = {};
 
 
 function Band(data){
@@ -304,18 +307,17 @@ function change_chromosome_view_keydown(e){
     }
 }
 
-var statistics_loaded = false;
+var statistics_loaded = 0;
 var max_NSAF = -1000000;
 var min_NSAF = 0;
 var checkbox_infos = {1: ["statistics_check_brain", "#f4e500"], 2: ["statistics_check_liver", "#fdc60b"], 3: ["statistics_check_kidney", "#f18e1c"],
                   4: ["statistics_check_spleen", "#ea621f"], 5: ["statistics_check_heart", "#e32322"], 6: ["statistics_check_blood", "#c4037d"],
                   7: ["statistics_check_fat", "#6d398b"], 8: ["statistics_check_lung", "#444e99"], 9: ["statistics_check_eye", "#2a71b0"],
                   10: ["statistics_check_gut", "#0696bb"]};
-var NSAFs = {1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: []};
 
 
 function uptade_nsaf(){
-    if (!statistics_loaded) return;
+    if (statistics_loaded < 2) return;
     var nsaf_figure = document.getElementById("nsaf_figure");
     var nsaf_ctx = nsaf_figure.getContext("2d");
     nsaf_ctx.clearRect(0, 0, nsaf_figure.width, nsaf_figure.height);
@@ -361,16 +363,32 @@ function add_nsaf(t, curr, total){
     var h_box = 250;
     var nsaf_figure = document.getElementById("nsaf_figure");
     var nsaf_ctx = nsaf_figure.getContext("2d");
+    
+    
+    var nsaf_list = [];
+    for (var prot_id in protein_dictionary){
+        var protein = protein_dictionary[prot_id];
+        if (t in protein.nsaf){
+            nsaf_list.push(protein.nsaf[t]);
+        }
+    }
+    nsaf_list.sort();
+    
     var len = (w_box - 4) / total;
-    var len_nsaf = NSAFs[t].length;
-    for (var i = 0; i < len_nsaf; ++i){
-        var nsaf = NSAFs[t][i] - min_NSAF;
-        nsaf *= (h_box - 4) / (max_NSAF - min_NSAF);
+    var len_nsaf = nsaf_list.length;
+    var start = curr * len;
+    var curr_pos = len / len_nsaf;
+    nsaf_ctx.fillStyle = checkbox_infos[t][1];
+    
+    var nsaf_factor = (h_box - 4) / (max_NSAF - min_NSAF);
+            
+    for (var i = 0; i < nsaf_list.length; ++i){
+        var nsaf = nsaf_list[i] - min_NSAF;
+        nsaf *= nsaf_factor;
         nsaf = h_box - 2 - nsaf;
-        var pos = Math.floor(2 + curr * len + i * len / len_nsaf);
+        var pos = Math.floor(2 + start + i * curr_pos);
         
         nsaf_ctx.beginPath();
-        nsaf_ctx.fillStyle = checkbox_infos[t][1];
         nsaf_ctx.arc(pos, nsaf, 1, 0, 2 * Math.PI);
         nsaf_ctx.fill();
     }
@@ -404,26 +422,139 @@ function open_statistics (){
                     }
                     NSAF /= protein.sequence_length;
                     if (NSAF > 0){
-                        NSAFs[t].push(NSAF);
+                        protein.nsaf[t] = NSAF;
                         sum_NSAF += NSAF;
                     }
                 }
-                for (var i = 0; i < NSAFs[t].length; ++i){
-                    var tmp = Math.log10(NSAFs[t][i] / sum_NSAF);
-                    max_NSAF = Math.max(max_NSAF, tmp);
-                    min_NSAF = Math.min(min_NSAF, tmp);
-                    NSAFs[t][i] = tmp;
+                
+                for (var prot_id in protein_dictionary){
+                    var protein = protein_dictionary[prot_id];
+                    if (t in protein.nsaf){
+                        protein.nsaf[t] = Math.log10(protein.nsaf[t] / sum_NSAF);
+                        max_NSAF = Math.max(max_NSAF, protein.nsaf[t]);
+                        min_NSAF = Math.min(min_NSAF, protein.nsaf[t]);
+                    }
+                    
                 }
-                NSAFs[t].sort();
             }
             
-            statistics_loaded = true;
+            statistics_loaded++;
             uptade_nsaf();
+            upadete_nsaf_pathway_figure();
         }
     }
     
     xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?statistics", true);
     xmlhttp.send();
+    
+    var xmlhttp_search = new XMLHttpRequest();
+    xmlhttp_search.onreadystatechange = function() {
+        if (xmlhttp_search.readyState == 4 && xmlhttp_search.status == 200) {
+            var tmp_pw = JSON.parse(xmlhttp_search.responseText);
+            statistics_loaded++;
+            
+            for (var i = 0; i < tmp_pw.length; ++i){
+                var pw_select = document.getElementById("nsaf_pathway_figure_select");
+                var new_option = document.createElement("option");
+                new_option.text = tmp_pw[i][1];
+                new_option.id = tmp_pw[i][0];
+                pw_select.add(new_option);
+                pathways_to_proteins[tmp_pw[i][0]] = [tmp_pw[i][1], tmp_pw[i][2]];
+            }
+        }
+    }
+    xmlhttp_search.open("GET", "/qsdb/cgi-bin/get-proteins.bin?statistics_pathways", true);
+    xmlhttp_search.send();
+}
+
+function upadete_nsaf_pathway_figure(){
+    if (statistics_loaded < 2) return;
+    var pw_option = document.getElementById("nsaf_pathway_figure_select").options[document.getElementById("nsaf_pathway_figure_select").selectedIndex];
+    
+    var nsaf_figure = document.getElementById("nsaf_pathway_figure");
+    var nsaf_ctx = nsaf_figure.getContext("2d");
+    nsaf_ctx.clearRect(0, 0, nsaf_figure.width, nsaf_figure.height);
+            
+    var w_box = 600;
+    var w_offset = 30;
+    var w_bar = 30;
+    var h_box = 250;
+
+    nsaf_ctx.beginPath();
+    nsaf_ctx.moveTo(w_offset, 0);
+    nsaf_ctx.lineTo(w_box, 0);
+    nsaf_ctx.stroke();
+    
+    nsaf_ctx.beginPath();
+    nsaf_ctx.moveTo(w_box, 0);
+    nsaf_ctx.lineTo(w_box, h_box);
+    nsaf_ctx.stroke();
+    
+    nsaf_ctx.beginPath();
+    nsaf_ctx.moveTo(w_box, h_box);
+    nsaf_ctx.lineTo(w_offset, h_box);
+    nsaf_ctx.stroke();
+    
+    nsaf_ctx.beginPath();
+    nsaf_ctx.moveTo(w_offset, h_box);
+    nsaf_ctx.lineTo(w_offset, 0);
+    nsaf_ctx.stroke();
+    
+    var protein_ids = pathways_to_proteins[pw_option.id][1];
+    var tissue_nsafs = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0};
+    var max_val = 0;
+    for (var i = 0; i < protein_ids.length; ++i){
+        //if (!(protein_ids[i] in pathways_to_proteins)) console.log
+        var protein = protein_dictionary[protein_ids[i]];
+        for (key in protein.nsaf){
+            tissue_nsafs[key] += Math.pow(10, protein.nsaf[key]);
+        }
+    }
+    
+    var total = 0;
+    for (t in tissue_nsafs){
+        total += tissue_nsafs[t];
+        max_val = Math.max(max_val, tissue_nsafs[t]);
+    }
+    
+    
+    nsaf_ctx.lineWidth = 1;
+    nsaf_ctx.textAlign="right";
+    nsaf_ctx.textBaseline="middle";
+    var v_factor = 0.94;
+    
+    var step = (max_val / total > 0.3) ? 10 : 5;
+    for (var h = step; h < max_val / total * 100; h += step){
+        var y = h_box - (h / (max_val / total * 100) * h_box) * v_factor;
+        nsaf_ctx.strokeStyle = "#dddddd";
+        nsaf_ctx.beginPath();
+        nsaf_ctx.moveTo(w_offset, y);
+        nsaf_ctx.lineTo(w_box, y);
+        nsaf_ctx.stroke();
+        
+        nsaf_ctx.strokeStyle = "black";
+        nsaf_ctx.beginPath();
+        nsaf_ctx.moveTo(w_offset - 5, y);
+        nsaf_ctx.lineTo(w_offset + 5, y);
+        nsaf_ctx.stroke();
+        
+        
+        nsaf_ctx.fillStyle = "black";
+        nsaf_ctx.fillText(h + "%", w_offset - 8, y);
+    }
+    
+    var i = 0;
+    var w = (w_box - w_offset) / 10;
+    for (t in tissue_nsafs){
+        var x = Math.floor(w_offset + (i + 0.5) * w - w_bar * 0.5);
+        var h = Math.floor(tissue_nsafs[t] / max_val * h_box * v_factor);
+    
+        nsaf_ctx.fillStyle = checkbox_infos[t][1];
+        nsaf_ctx.fillRect(x, h_box - 1 - h, w_bar, h);
+        nsaf_ctx.fill();
+        nsaf_ctx.stroke();
+        ++i;
+    }
 }
 
 function hide_statistics (){
