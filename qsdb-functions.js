@@ -89,16 +89,17 @@ highlighting = 0;
 basket = {};
 filtered_basket = {};
 //tissues = {1: "images/brain.svg", 2: "images/liver.svg", 3: "images/kidney.svg", 4: spleen, 5: "images/heart.svg", 6: blood, 7: fat, 8: "images/lung.svg"}
-tissues = {1: ["images/brain.svg", "Brain", 0],
-           2: ["images/liver.svg", "Liver", 0],
-           3: ["images/kidney.svg", "Kidney", 0],
-           4: ["images/spleen.svg", "Spleen", 0],
-           5: ["images/heart.svg", "Heart", 0],
-           6: ["images/blood.svg", "Blood", 0],
-           7: ["images/fat.svg", "Fat", 0],
-           8: ["images/lung.svg", "Lung", 0],
-           9: ["images/eye.svg", "Eye", 0],
-           10: ["images/gut.svg", "Gut", 0]}
+tissues = {1: ["images/brain.svg", "Brain", 0, "statistics_check_brain", "#f4e500"],
+           2: ["images/liver.svg", "Liver", 0, "statistics_check_liver", "#fdc60b"],
+           3: ["images/kidney.svg", "Kidney", 0, "statistics_check_kidney", "#f18e1c"],
+           4: ["images/spleen.svg", "Spleen", 0, "statistics_check_spleen", "#ea621f"],
+           5: ["images/heart.svg", "Heart", 0, "statistics_check_heart", "#e32322"],
+           6: ["images/blood.svg", "Plasma", 0, "statistics_check_blood", "#c4037d"],
+           7: ["images/fat.svg", "Fat", 0, "statistics_check_fat", "#6d398b"],
+           8: ["images/lung.svg", "Lung", 0, "statistics_check_lung", "#444e99"],
+           9: ["images/eye.svg", "Eye", 0, "statistics_check_eye", "#2a71b0"],
+           10: ["images/gut.svg", "Gut", 0, "statistics_check_gut", "#0696bb"]}
+           
            
 
 
@@ -517,12 +518,14 @@ function Spectrum(data){
     this.mod_sequence = data['s'];
     this.filter_valid = false;
     this.user_selected = true;
-    this.tissues = {};
+    this.tissues = data["t"];
+    /*
     if (typeof data["t"] !== 'undefined' && typeof data["n"] !== 'undefined' && data["t"].length == data["n"].length){
         for (var i = 0; i < data["t"].length; ++i){
             this.tissues[data["t"][i]] = data["n"][i];
         }
     }
+    */
     this.occ_M = 0;
     this.occ_m = 0;
     this.occ_C = 0;
@@ -636,6 +639,7 @@ function Protein(data, ctx){
     this.mass = data['m'];
     this.validation = data['v'];
     this.sequence_length = data['l'];
+    this.pI = data['pI'];
     this.peptides = [];
     this.marked = false;
     this.filter_valid = false;
@@ -3789,11 +3793,6 @@ function load_data(reload){
     c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
     c.addEventListener('contextmenu', function(event){event.preventDefault(); return false;}, false);
     c.addEventListener("mouseout", mouse_up_listener, false);
-    for (var key in tissues){
-        tissue = tissues[key];
-        tissue[2] = new Image();
-        tissue[2].src = tissue[0];
-    }
     
     infobox = new Infobox(ctx);
     zoom_sign_in = new zoom_sign(ctx, 1);

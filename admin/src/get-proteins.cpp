@@ -113,10 +113,21 @@ class spectrum {
             string str = "{";
             str += "\"i\":" + str_id;
             if (complete) str += ",\"s\":\"" + mod_sequence + "\"";
-            if (complete) str += ",\"c\":" + charge;
-            if (complete) str += ",\"m\":\"" + mass + "\"";
-            str += ",\"t\":[" + tissues + "]";
-            str += ",\"n\":[" + tissue_numbers + "]";
+            str += ",\"c\":" + charge;
+            str += ",\"m\":" + mass;
+            
+            vector<string> tissues_split = split(tissues, ',');
+            vector<string> tissue_numbers_split = split(tissue_numbers, ',');
+            if (tissues_split.size() == tissue_numbers_split.size()){
+                str += ",\"t\":{";
+                for (int i = 0; i < tissues_split.size(); ++i){
+                    if (i) str += ",";
+                    str += "\"" + tissues_split[i] + "\":" + tissue_numbers_split[i];
+                }
+                str += "}";
+                //str += ",\"t\":[" + tissues + "]";
+                //str += ",\"n\":[" + tissue_numbers + "]";
+            }
             str += "}";
             return str;
         }
@@ -159,10 +170,11 @@ class protein {
         const string str_id;
         string name;
         string definition;
-        string mass;
+        float mass;
         string accession;
         string ec_number;
         string fasta;
+        float pI;
         vector<peptide*> peptides;
         
         protein(string _id) : str_id(_id) {id = atoi(str_id.c_str());}
@@ -173,12 +185,16 @@ class protein {
             
             string str = "{";
             str += "\"i\":" + str_id;
+            char buffer[20];
+            sprintf(buffer, "%0.3f", mass);
             if (complete) str += ",\"n\":\"" + name + "\"";
             if (complete) str += ",\"d\":\"" + definition + "\"";
-            if (complete) str += ",\"m\":\"" + mass + "\"";
+            str += ",\"m\":" + string(buffer);
             if (complete) str += ",\"a\":\"" + accession + "\"";
             if (complete) str += ",\"e\":\"" + ec_number + "\"";
             str += ",\"l\":" + ss.str();
+            sprintf(buffer, "%0.3f", pI);
+            str += ",\"pI\":" + string(buffer);
             str += ",\"p\":[";
             for (int i = 0; i < peptides.size(); ++i){
                 if (i) str += ",";
@@ -318,6 +334,120 @@ static int callback(void *count, int argc, char **argv, char **azColName) {
     int *c = (int*)count;
     *c = atoi(argv[0]);
     return 0;
+}
+
+
+
+float aa_coefficients[][3] = {
+{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+{}, {}, {}, 
+{8.00,  8.28,  9.00}, // C
+{3.57,  4.07,  4.57}, // D
+{4.15,  4.45,  4.75}, // E
+{}, {},
+{4.89,  6.08,  6.89}, // H
+{}, {}, 
+{10.00,  9.80, 10.30}, // K
+{}, {}, {}, {}, {}, {},
+{11.50, 12.50, 11.50}, // R
+{}, {}, 
+{5.20,  5.43,  5.60}, // U
+{}, {}, {},
+{9.34,  9.84, 10.34}, // Y
+{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}};
+
+long coeff_set[2] = {0, (1l << ('C' & 63)) | (1l << ('D' & 63)) | (1l << ('E' & 63)) | (1l << ('H' & 63)) | (1l << ('K' & 63)) | (1l << ('R' & 63)) | (1l << ('U' & 63)) | (1l << ('Y' & 63))};
+
+
+float aa_coefficients_middle[][2] = {
+{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+{},
+{7.58, 3.75}, // A
+{7.46, 3.57},
+{8.12, 3.10},
+{7.70, 3.50},
+{7.19, 3.50},
+{6.96, 3.98},
+{7.50, 3.70},
+{7.18, 3.17},
+{7.48, 3.72},
+{7.46, 3.73},
+{6.67, 3.40},
+{7.46, 3.73},
+{6.98, 3.68},
+{7.22, 3.64},
+{7.00, 3.50}, 
+{8.36, 3.40},
+{6.73, 3.57},
+{6.76, 3.41},
+{6.86, 3.61},
+{7.02, 3.57},
+{5.20, 5.60},   
+{7.44, 3.69},
+{7.11, 3.78},
+{7.26, 3.57},
+{6.83, 3.60},
+{6.96, 3.535}, // Z
+{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}};
+
+
+float predict_isoelectric_point(string protein_seq){
+    float NQ = 0.0;
+    float pH = 6.51;
+    float pHprev = 0.0;         
+    float pHnext = 14.0;        
+    float e = 0.01;
+    float counter[128];
+    for (int i = 0; i < 128; ++i) counter[i] = 0;
+    for (int i = 0; i < protein_seq.length(); ++i) ++counter[protein_seq[i]];
+    
+    while (true){
+        char first = protein_seq[0];
+        char last = protein_seq[protein_seq.length() - 1];
+        float QN_1 = -1. / (1. + pow(10., ((coeff_set[first >> 6] >> (first & 63) & 1l) ? aa_coefficients[first][2] : aa_coefficients_middle[first][1]) - pH));
+        float QP_2 = 1. / (1. + pow(10., pH - ((coeff_set[last >> 6] >> (last & 63) & 1l) ? aa_coefficients[last][0] : aa_coefficients_middle[last][0])));
+    
+        float QN_2 = -counter['D'] / (1 + pow(10, aa_coefficients['D'][1] - pH));
+        float QN_3 = -counter['E'] / (1 + pow(10, aa_coefficients['E'][1] - pH));
+        float QN_4 = -counter['C'] / (1 + pow(10, aa_coefficients['C'][1] - pH));
+        float QN_5 = -counter['Y'] / (1 + pow(10, aa_coefficients['Y'][1] - pH));
+        float QP_1 = counter['H'] / (1 + pow(10, pH - aa_coefficients['H'][1]));
+        float QP_3 = counter['K'] / (1 + pow(10, pH - aa_coefficients['K'][1]));
+        float QP_4 = counter['R'] / (1 + pow(10, pH - aa_coefficients['R'][1]));
+    
+        NQ = QN_1 + QN_2 + QN_3 + QN_4 + QN_5 + QP_1 + QP_2 + QP_3 + QP_4;
+        
+        if (NQ < 0.){
+            float tmp = pH;
+            pH = pH - ((pH - pHprev) / 2.0);
+            pHnext = tmp;
+        }
+        else {
+            float tmp = pH;
+            pH = pH + ((pHnext - pH) / 2.0);
+            pHprev = tmp;
+        }
+        if (fabs(pH-pHprev) < e){
+            return pH;
+        }
+    }
+}
+
+
+float acids[] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 71.037110, 0, 103.009190, 115.026940, 129.042590, 147.068410, 57.021460, 137.058910, 113.084060, 0,
+    128.094960, 113.084060, 131.040490, 114.042930, 0, 97.052760, 128.058580, 156.101110, 87.032030, 101.047680,
+    0, 99.068410, 186.079310, 0, 163.063330, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0};
+    
+float compute_mass(string protein_seq){
+    float mass = 20.024018;
+    for (int i = 0; i < protein_seq.length(); ++i) mass += acids[protein_seq[i]];        
+    return mass;
 }
 
 
@@ -543,10 +673,12 @@ main(int argc, char** argv) {
         protein* last_protein = new protein(pid);
         last_protein->name = row[column_names_proteins[string("name")]];
         last_protein->definition = row[column_names_proteins[string("definition")]];
-        last_protein->mass = row[column_names_proteins[string("mass")]];
+        //last_protein->mass = row[column_names_proteins[string("mass")]];
         last_protein->accession = row[column_names_proteins[string("accession")]];
         last_protein->ec_number = row[column_names_proteins[string("ec_number")]];
         last_protein->fasta = cleanFasta(row[column_names_proteins[string("fasta")]]);
+        last_protein->pI = predict_isoelectric_point(last_protein->fasta);
+        last_protein->mass = compute_mass(last_protein->fasta);
         len_text += last_protein->fasta.length() + 1;
         proteins[p_i++] = last_protein;
     }
@@ -639,7 +771,7 @@ main(int argc, char** argv) {
     
 
     
-    if (!statistics){
+    //if (!statistics){
         vector<spectrum*>::iterator it = spectra.begin();
         while (it != spectra.end()){
             
@@ -659,18 +791,18 @@ main(int argc, char** argv) {
             }
             
             // quering possible tissue origins
-            sql_query = "SELECT RefSpectraId i, group_concat(tissue) t FROM Tissues WHERE i IN (" + sql_query_lite + ") group by i;";
+            sql_query = "SELECT RefSpectraId i, group_concat(tissue) t, group_concat(number) n FROM Tissues WHERE i IN (" + sql_query_lite + ") group by i;";
             vector< map< string, string > > tissue_data;
             rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_tissues, (void*)&tissue_data, &zErrMsg);
         }
-    }
+    /*}
     else {
         
         // quering possible tissue origins
-        string sql_query = "SELECT RefSpectraId i, group_concat(tissue) t, group_concat(tissue) n FROM Tissues group by i;";
+        string sql_query = "SELECT RefSpectraId i, group_concat(tissue) t, group_concat(number) n FROM Tissues group by i;";
         vector< map< string, string > > tissue_data;
         rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_tissues, (void*)&tissue_data, &zErrMsg);
-    }
+    }*/
     
     sqlite3_close(db);
     

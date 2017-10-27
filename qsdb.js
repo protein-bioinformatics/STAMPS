@@ -34,6 +34,11 @@ function init(){
     xmlhttp_search.open("GET", "/qsdb/cgi-bin/get-search-data.py", true);
     xmlhttp_search.send();
     
+    for (var key in tissues){
+        tissue = tissues[key];
+        tissue[2] = new Image();
+        tissue[2].src = tissue[0];
+    }
     
     
     document.documentElement.style.overflow = 'hidden';
