@@ -2996,7 +2996,177 @@ function show_hide_protein_tissues(){
 }
 
 
+
+
+
+function check_spectra_expand_collapse_peptide(prot_id, pep_id){
+    var current_prot = protein_dictionary[prot_id];
+    var sign_right = String.fromCharCode(9656);
+    var sign_down = String.fromCharCode(9662);
+    var dom_pep = document.getElementById(pep_id);
+    var peptide_tissue_style = filter_parameters['peptide_tissues_visible'] ? "inline" : "none";
+    
+    if (dom_pep.style.display == "inline"){
+        dom_pep.innerHTML = "";
+        dom_pep.style.display = "none";
+    }
+    else {
+        dom_pep.style.display = "inline";
+        //inner_html.push("<tr><td colspan=\"1\" width=\"100%\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" id='peptide_" + peps + "' style=\"display: none;\">");
+        for (var j = 0; j < current_prot.peptides.length; ++j){
+            if (!current_prot.peptides[j].filter_valid) continue;
+            var current_pep = current_prot.peptides[j];
+            var specs = prot_id + "_" + current_pep.peptide_seq;
+            var n_specs = current_pep.spectra.length;
+            var peptite_checked = current_pep.user_selected ? "checked" : "";
+            var onclick_command = "\
+            protein_dictionary[" + current_prot.id + "].peptides[" + j + "].user_selected = !protein_dictionary[" + current_prot.id + "].peptides[" + j + "].user_selected; \
+            if (!protein_dictionary[" + current_prot.id + "].peptides[" + j + "].user_selected){ \
+                for (var k = 0; k < protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra.length; ++k){ \
+                    if (!protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[k].filter_valid) continue; \
+                    protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[k].user_selected = false; \
+                    document.getElementById('cb-" + current_prot.id + "-" + j + "-' + protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[k].id).checked = false; \
+                } \
+            } \
+            else { \
+                for (var k = 0; k < protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra.length; ++k){ \
+                    if (!protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[k].filter_valid) continue; \
+                    protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[k].user_selected = true; \
+                    document.getElementById('cb-" + current_prot.id + "-" + j + "-' + protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[k].id).checked = true; \
+                } \
+            }";
+    
+    
+            var dom_pep_tr = document.createElement("tr");
+            dom_pep.appendChild(dom_pep_tr);
+            
+            
+            var dom_pep_td = document.createElement("td");
+            dom_pep_tr.appendChild(dom_pep_td);
+            dom_pep_td.setAttribute("width", "100%");
+            dom_pep_td.setAttribute("onclick", "document.getElementById('peptide_sign_" + specs + "').innerHTML = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('spectrum_" + specs + "').style.display = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? 'none' : 'inline');");
+            dom_pep_td.setAttribute("style", "border-bottom: 1px solid #d3d3d3; cursor: pointer; color: " + (n_specs ? "black" : disabled_text_color) + ";");
+            
+            dom_pep_txt = document.createTextNode("\u00A0\u00A0\u00A0\u00A0");
+            dom_pep_td.appendChild(dom_pep_txt);
+            
+            
+            var dom_pep_div = document.createElement("div");
+            dom_pep_td.appendChild(dom_pep_div);
+            dom_pep_div.setAttribute("style", "display:inline; margin: 0px; padding: 0px;");
+            dom_pep_div.setAttribute("id", "peptide_sign_" + specs);
+            
+            
+            dom_pep_sign = document.createTextNode(sign_right);
+            dom_pep_div.appendChild(dom_pep_sign);
+            
+            dom_pep_seq = document.createTextNode(" " + current_pep.peptide_seq);
+            dom_pep_td.appendChild(dom_pep_seq);
+    
+            var curr_pep_tissues = Array.from(Object.keys(current_pep.tissues)).sort();
+            if (curr_pep_tissues.length > 0){
+                dom_pep_space = document.createTextNode("\u00A0\u00A0");
+                dom_pep_td.appendChild(dom_pep_space);
+                
+                
+                var dom_pep_div2 = document.createElement("div");
+                dom_pep_td.appendChild(dom_pep_div2);
+                dom_pep_div2.setAttribute("style", "display: " + peptide_tissue_style);
+                dom_pep_div2.setAttribute("class", "peptide_tissues");
+                
+                for (var t = 0; t < curr_pep_tissues.length; ++t){
+                    if (curr_pep_tissues[t] in tissues){
+                        var orientation = (tissues[curr_pep_tissues[t]][2].width > tissues[curr_pep_tissues[t]][2].height) ? "width" : "height";
+                        var dom_pep_img = document.createElement("img");
+                        dom_pep_div2.appendChild(dom_pep_img);
+                        dom_pep_img.setAttribute("src", tissues[curr_pep_tissues[t]][0]);
+                        dom_pep_img.setAttribute("style", "margin-right: 2px;");
+                        dom_pep_img.setAttribute("title", tissues[curr_pep_tissues[t]][1]);
+                        dom_pep_img.setAttribute(orientation, 12);
+                    }
+                }
+            }
+            
+            
+            
+            var dom_pep_td2 = document.createElement("td");
+            dom_pep_tr.appendChild(dom_pep_td2);
+            dom_pep_td2.setAttribute("style", "border-bottom: 1px solid #d3d3d3; padding-right: 10px;");
+            dom_pep_td2.setAttribute("align", "right");
+            
+            var dom_pep_td2_input = document.createElement("input");
+            dom_pep_td2.appendChild(dom_pep_td2_input);
+            dom_pep_td2_input.setAttribute("style", "display: inline;");
+            dom_pep_td2_input.setAttribute("type", "checkbox");
+            dom_pep_td2_input.setAttribute("onclick", onclick_command);
+            dom_pep_td2_input.setAttribute("id", "cb-" + current_prot.id + "-" + j);
+            dom_pep_td2_input.checked = peptite_checked;
+            
+            
+            var dom_pep_tr2 = document.createElement("tr");
+            dom_pep.appendChild(dom_pep_tr2);
+            
+            var dom_pep_tr2_td = document.createElement("td");
+            dom_pep_tr2.appendChild(dom_pep_tr2_td);
+            dom_pep_tr2_td.setAttribute("width", "100%");
+            
+            
+            var dom_spec_table = document.createElement("table");
+            dom_pep_tr2_td.appendChild(dom_spec_table);
+            dom_spec_table.setAttribute("cellspacing", 0);
+            dom_spec_table.setAttribute("cellpadding", 0);
+            dom_spec_table.setAttribute("id", "spectrum_" + specs);
+            dom_spec_table.setAttribute("style", "display: none;");
+            
+            for (var k = 0; k < n_specs; ++k){
+                if (!current_pep.spectra[k].filter_valid) continue;
+                var spectrum_checked = current_pep.spectra[k].user_selected ? "checked" : "";
+                var onclick_spec_command = "protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[" + k + "].user_selected = !protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[" + k + "].user_selected; \
+                if (protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[" + k + "].user_selected && !document.getElementById('cb-" + current_prot.id + "-" + j + "').checked) { \
+                    protein_dictionary[" + current_prot.id + "].peptides[" + j + "].user_selected = true; \
+                    document.getElementById('cb-" + current_prot.id + "-" + j + "').checked = true; \
+                }";
+            
+                
+                var dom_spec_tr = document.createElement("tr");
+                dom_spec_table.appendChild(dom_spec_tr);
+                
+                
+                var dom_spec_td1 = document.createElement("td");
+                dom_spec_tr.appendChild(dom_spec_td1);
+                dom_spec_td1.setAttribute("width", "100%");
+                dom_spec_td1.setAttribute("onclick", "load_spectrum(" + current_pep.spectra[k].id + ");");
+                dom_spec_td1.setAttribute("style", "border-bottom: 1px solid #d3d3d3; cursor: pointer;");
+                
+                var dom_spec_td1_txt = document.createTextNode("\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0" + current_pep.spectra[k]['mass'] + charge_plus(current_pep.spectra[k]['charge']));
+                dom_spec_td1.appendChild(dom_spec_td1_txt);
+                
+                
+                var dom_spec_td2 = document.createElement("td");
+                dom_spec_tr.appendChild(dom_spec_td2);
+                dom_spec_td2.setAttribute("style", "border-bottom: 1px solid #d3d3d3; padding-right: 20px;");
+                dom_spec_td2.setAttribute("align", "right");
+                
+                var dom_spec_td2_input = document.createElement("input");
+                dom_spec_td2.appendChild(dom_spec_td2_input);
+                dom_spec_td2_input.setAttribute("style", "display: inline;");
+                dom_spec_td2_input.setAttribute("type", "checkbox");
+                dom_spec_td2_input.setAttribute("onclick", onclick_spec_command);
+                dom_spec_td2_input.setAttribute("id", "cb-" + current_prot.id + "-" + j + "-" + current_pep.spectra[k].id);
+                dom_spec_td2_input.checked = spectrum_checked;
+                
+            }
+        }
+    }
+}
+
+
+
+
+
 function check_spectra(){
+    var t0 = performance.now();
+    
     filter_basket();
     
     document.getElementById("filter_label").innerHTML = "Show filter settings";
@@ -3020,7 +3190,11 @@ function check_spectra(){
     // triangle right: 9656
     // triangle down: 9662
     
-    var inner_html = ["<table id=\"review_proteins_table\" width=\"100%\" cellspacing=\"0\" border=\"0\">"];
+    var dom_table = document.createElement("table");
+    dom_table.setAttribute("id", "review_proteins_table");
+    dom_table.setAttribute("width", "100%"); 
+    dom_table.setAttribute("cellspacing", "0"); 
+    dom_table.setAttribute("border", "0"); 
     var proteins_content = [];
     for (key in filtered_basket){
         proteins_content.push([filtered_basket[key].name, key]);
@@ -3032,12 +3206,10 @@ function check_spectra(){
         }
     }
     var peps = 0;
-    var specs = 0;
     var line = 0;
     var sign_right = String.fromCharCode(9656);
     var sign_down = String.fromCharCode(9662);
     var protein_tissue_style = filter_parameters['protein_tissues_visible'] ? "inline" : "none";
-    var peptide_tissue_style = filter_parameters['peptide_tissues_visible'] ? "inline" : "none";
     for (var i = 0; i < proteins_content.length; ++i){
         var current_prot = filtered_basket[proteins_content[i][1]];
         
@@ -3049,84 +3221,95 @@ function check_spectra(){
             num_pep += 1;
         }
         
+        var dom_tr = document.createElement("tr");
+        dom_table.appendChild(dom_tr);
+        dom_tr.setAttribute("id", current_prot.id);
         
-        inner_html.push("<tr id=\"" + current_prot.id + "\"><td width=\"95%\" bgcolor=\"" + bg_color + "\" onclick=\"document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"cursor: pointer;\">&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"protein_sign_" + i + "\">" + sign_right + "</div>&nbsp;" + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " Peptides");
+        var dom_td1 = document.createElement("td");
+        dom_tr.appendChild(dom_td1);
+        var dom_td2 = document.createElement("td");
+        dom_tr.appendChild(dom_td2);
+        
+        
+        dom_td1.setAttribute("width", "95%");
+        dom_td1.setAttribute("bgcolor", bg_color);
+        //dom_td1.setAttribute("onclick", "document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('peptide_" + peps + "').style.display = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? 'none' : 'inline');");
+        dom_td1.setAttribute("onclick", "document.getElementById('protein_sign_" + i + "').innerHTML = (document.getElementById('peptide_" + peps + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); check_spectra_expand_collapse_peptide(" + current_prot.id + ", 'peptide_" + peps + "');");
+        dom_td1.setAttribute("style", "cursor: pointer;");
+        
+        var dom_t1 = document.createTextNode("  ");
+        dom_td1.appendChild(dom_t1);
+        
+        var dom_div1 = document.createElement("div");
+        dom_td1.appendChild(dom_div1);
+        dom_div1.setAttribute("style", "display:inline; margin: 0px; padding: 0px;");
+        dom_div1.setAttribute("id", "protein_sign_" + i);
+        
+        var dom_sign = document.createTextNode(sign_right);
+        dom_div1.appendChild(dom_sign);
+        
+        var dom_t_info = document.createTextNode(" " + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " Peptides");
+        dom_td1.appendChild(dom_t_info);
         
         
         var curr_tissues = Array.from(Object.keys(current_prot.tissues)).sort();
         if (curr_tissues.length > 0){
-            inner_html.push("&nbsp;&nbsp;<div style='display: " + protein_tissue_style + ";' class='protein_tissues'>");
+            var dom_t2 = document.createTextNode("\u00A0\u00A0");
+            dom_td1.appendChild(dom_t2);
+            
+            var dom_div2 = document.createElement("div");
+            dom_td1.appendChild(dom_div2);
+            dom_div2.setAttribute("style", "display: " + protein_tissue_style + ";");
+            dom_div2.setAttribute("class", "protein_tissues");
+            
             for (var t = 0; t < curr_tissues.length; ++t){
                 if (curr_tissues[t] in tissues){
                     var orientation = "height";
                     if (tissues[curr_tissues[t]][2].width > tissues[curr_tissues[t]][2].height) orientation = "width";
-                    inner_html.push("<img src=\"" + tissues[curr_tissues[t]][0] + "\" style=\"margin-right: 2px;\" title=\"" + tissues[curr_tissues[t]][1] + "\" " + orientation + "=\"12\" />");
+                    
+                    var dom_img = document.createElement("img");
+                    dom_div2.appendChild(dom_img);
+                    dom_img.setAttribute("src", tissues[curr_tissues[t]][0]);
+                    dom_img.setAttribute("style", "margin-right: 2px;");
+                    dom_img.setAttribute("title", tissues[curr_tissues[t]][1]);
+                    dom_img.setAttribute(orientation, 12);
                 }
             }
-            inner_html.push("</div>");
         }
+        dom_td2.setAttribute("bgcolor", bg_color);
+        dom_td2.setAttribute("align", "right");
         
-        inner_html.push("</td><td bgcolor=\"" + bg_color + "\" align=\"right\"><img src=\"images/delete.png\" width=\"16\" height=\"16\" onclick=\"delete_from_protein_table(" + current_prot.id + ");\" /></td></tr>");
+        var dom_img = document.createElement("img");
+        dom_td2.appendChild(dom_img);
+        dom_img.setAttribute("src", "images/delete.png");
+        dom_img.setAttribute("width", 16);
+        dom_img.setAttribute("height", 16);
+        dom_img.setAttribute("onclick", "delete_from_protein_table(" + current_prot.id + ");");
         
         
-        inner_html.push("<tr><td colspan=\"1\" width=\"100%\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" id='peptide_" + peps + "' style=\"display: none;\">");
-        for (var j = 0; j < current_prot.peptides.length; ++j){
-            if (!current_prot.peptides[j].filter_valid) continue;
-            var current_pep = current_prot.peptides[j];
-            var n_specs = current_pep.spectra.length;
-            var peptite_checked = current_pep.user_selected ? "checked" : "";
-            var onclick_command = "\
-            protein_dictionary[" + current_prot.id + "].peptides[" + j + "].user_selected = !protein_dictionary[" + current_prot.id + "].peptides[" + j + "].user_selected; \
-            if (!protein_dictionary[" + current_prot.id + "].peptides[" + j + "].user_selected){ \
-                for (var k = 0; k < protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra.length; ++k){ \
-                    if (!protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[k].filter_valid) continue; \
-                    protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[k].user_selected = false; \
-                    document.getElementById('cb-" + current_prot.id + "-" + j + "-' + protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[k].id).checked = false; \
-                } \
-            } \
-            else { \
-                for (var k = 0; k < protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra.length; ++k){ \
-                    if (!protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[k].filter_valid) continue; \
-                    protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[k].user_selected = true; \
-                    document.getElementById('cb-" + current_prot.id + "-" + j + "-' + protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[k].id).checked = true; \
-                } \
-            }";
-            inner_html.push("<tr><td width=\"100%\" onclick=\"document.getElementById('peptide_sign_" + specs + "').innerHTML = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? '" + sign_right + "' : '" + sign_down + "'); document.getElementById('spectrum_" + specs + "').style.display = (document.getElementById('spectrum_" + specs + "').style.display == 'inline' ? 'none' : 'inline');\" style=\"border-bottom: 1px solid #d3d3d3; cursor: pointer; color: " + (n_specs ? "black" : disabled_text_color) + ";\">&nbsp;&nbsp;&nbsp;&nbsp;<div style=\"display:inline; margin: 0px; padding: 0px;\" id=\"peptide_sign_" + specs + "\">" + sign_right + "</div>&nbsp;" + current_pep.peptide_seq);
-            
-            var curr_pep_tissues = Array.from(Object.keys(current_pep.tissues)).sort();
-            if (curr_pep_tissues.length > 0){
-                inner_html.push("&nbsp;&nbsp;<div style='display: " + peptide_tissue_style + ";' class='peptide_tissues'>");
-                for (var t = 0; t < curr_pep_tissues.length; ++t){
-                    if (curr_pep_tissues[t] in tissues){
-                        var orientation = "height";
-                        if (tissues[curr_pep_tissues[t]][2].width > tissues[curr_pep_tissues[t]][2].height) orientation = "width";
-                        inner_html.push("<img src=\"" + tissues[curr_pep_tissues[t]][0] + "\" style=\"margin-right: 2px;\" title=\"" + tissues[curr_pep_tissues[t]][1] + "\" " + orientation + "=\"12\" />");
-                    }
-                }
-                inner_html.push("</div>");
-            }
-            
-            inner_html.push("</td><td style=\"border-bottom: 1px solid #d3d3d3; padding-right: 10px;\" align=\"right\"><input style=\"display: inline;\" type=\"checkbox\" " + peptite_checked + " onclick=\"" + onclick_command + "\" id='cb-" + current_prot.id + "-" + j + "' /></td></tr>");
-            inner_html.push("<tr><td colspan=\"1\" width=\"100%\"><table cellspacing=\"0\" cellpadding=\"0\" id='spectrum_" + specs + "' style=\"display: none;\">");
-            for (var k = 0; k < n_specs; ++k){
-                if (!current_pep.spectra[k].filter_valid) continue;
-                var spectrum_checked = current_pep.spectra[k].user_selected ? "checked" : "";
-                var onclick_spec_command = "protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[" + k + "].user_selected = !protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[" + k + "].user_selected; \
-                if (protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[" + k + "].user_selected && !document.getElementById('cb-" + current_prot.id + "-" + j + "').checked) { \
-                    protein_dictionary[" + current_prot.id + "].peptides[" + j + "].user_selected = true; \
-                    document.getElementById('cb-" + current_prot.id + "-" + j + "').checked = true; \
-                }";
-                inner_html.push("<tr><td width=\"100%\" onclick=\"load_spectrum(" + current_pep.spectra[k].id + ");\" style=\"border-bottom: 1px solid #d3d3d3; cursor: pointer;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + current_pep.spectra[k]['mass'] + charge_plus(current_pep.spectra[k]['charge']) + "</td><td style=\"border-bottom: 1px solid #d3d3d3; padding-right: 20px;\" align=\"right\"><input style=\"display: inline;\" type=\"checkbox\" " + spectrum_checked + " onclick=\"" + onclick_spec_command + "\" id='cb-" + current_prot.id + "-" + j + "-" + current_pep.spectra[k].id + "' /></td></tr>");
-                
-            }
-            inner_html.push("</table></td></tr>");
-            ++specs;
-        }
-        inner_html.push("</table></td></tr>");
+        
+        
+        var dom_tr_pep = document.createElement("tr");
+        dom_table.appendChild(dom_tr_pep);
+        
+        var dom_td_pep = document.createElement("td");
+        dom_tr_pep.appendChild(dom_td_pep);
+        dom_td_pep.setAttribute("width", "100%");
+        var dom_table_pep = document.createElement("table");
+        dom_td_pep.appendChild(dom_table_pep);
+        dom_table_pep.setAttribute("border", 0);
+        dom_table_pep.setAttribute("cellspacing", 0);
+        dom_table_pep.setAttribute("cellpadding", 0);
+        dom_table_pep.setAttribute("id", "peptide_" + peps);
+        dom_table_pep.setAttribute("style", "display: none;");
+        
         ++peps;
     }
-    inner_html.push("</table>");    
-    document.getElementById("spectra_panel").innerHTML = inner_html.join("");
+    
+    document.getElementById("spectra_panel").innerHTML = "";
+    document.getElementById("spectra_panel").appendChild(dom_table);
+    var t1 = performance.now();
+    console.log("Call to check_spectra() took " + (t1 - t0) + " milliseconds.");
 }
 
 
