@@ -16,6 +16,7 @@
 
 using namespace std;
 
+
 vector<string> split(string str, char delimiter) {
   vector<string> internal;
   stringstream ss(str); // Turn the string into a stream.
@@ -99,10 +100,11 @@ class spectrum {
     public:
         int id;
         const string str_id;
-        string charge;
-        string mass;
-        string mod_sequence;
-        string tissues;
+        string charge = "0";
+        string mass = "0";
+        string mod_sequence = "A";
+        string tissues = "-";
+        string tissue_numbers = "1";
         
         spectrum(string _id) : str_id(_id) {id = atoi(str_id.c_str());}
         
@@ -111,8 +113,18 @@ class spectrum {
             str += "\"i\":" + str_id + ",";
             str += "\"s\":\"" + mod_sequence + "\",";
             str += "\"c\":" + charge + ",";
-            str += "\"m\":\"" + mass + "\",";
-            str += "\"t\":[" + tissues + "]";
+            str += "\"m\":\"" + mass + "\"";
+            
+            vector<string> tissues_split = split(tissues, ',');
+            vector<string> tissue_numbers_split = split(tissue_numbers, ',');
+            if (tissues_split.size() == tissue_numbers_split.size()){
+                str += ",\"t\":{";
+                for (int i = 0; i < tissues_split.size(); ++i){
+                    if (i) str += ",";
+                    str += "\"" + tissues_split[i] + "\":" + tissue_numbers_split[i];
+                }
+                str += "}";
+            }
             str += "}";
             return str;
         }
@@ -243,12 +255,14 @@ int binarySearch(int* array, int length, int key) {
     return mid;
 }
 
+string prev_pep_seq = "";
+peptide* prev_pep = 0;
+
 static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
     peptide* current_pep = 0;
-    string P = argv[1];
-    map<string, peptide* >::iterator it = all_peptides->find(P);
-    if (it == all_peptides->end()){
-        int L = 1, R = len_text - 1;
+    string P = argv[0];
+    if (P.compare(prev_pep_seq)){
+        int L = 0, R = len_text - 1;
         int p_len = P.length();
         for (int i = 0; i < p_len; ++i){
             const char c = P[p_len - 1 - i];
@@ -257,21 +271,36 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
             --R;
             
             if (L > R) break;
-            const int lss = less_table[c];
+            int lss = less_table[c];
             L += lss;
             R += lss;
+            
         }
         if (L == R){
             current_pep = new peptide(P);
             proteins->at(index_rank->get_rank_right(SA[L]))->peptides.push_back(current_pep);
             all_peptides->insert(pair<string, peptide* >(P, current_pep));
+            prev_pep_seq = P;
+            prev_pep = current_pep;
         }
     }
     else {
-        current_pep = it->second;
+        current_pep = prev_pep;
     }
+    
     if (current_pep){
-        spectrum *s1 = new spectrum(argv[0]);
+        spectrum *s1 = new spectrum(argv[1]);
+        /*
+        s1->charge = argv[2];
+        string mass = argv[3];
+        s1->mod_sequence = argv[4];
+        if (mass.find(".") != string::npos){
+            mass = mass.substr(0, mass.find(".") + 5);
+        }
+        s1->mass = mass;
+        s1->tissues = argv[5];
+        s1->tissue_numbers = argv[6];
+        */
         current_pep->spectra.push_back(s1);
         all_spectra->insert(pair<int, spectrum* >(s1->id, s1));
         spectra->push_back(s1);
@@ -292,15 +321,8 @@ static int sqlite_callback_spectra(void *data, int argc, char **argv, char **azC
             mass = mass.substr(0, mass.find(".") + 5);
         }
         s1->mass = mass;
-    }
-    return 0;
-}
-
-static int sqlite_callback_tissues(void *data, int argc, char **argv, char **azColName){
-    map<int, spectrum*>::iterator it = all_spectra->find(atoi(argv[0]));
-    if (it != all_spectra->end()){
-        spectrum* s1 = it->second;
-        s1->tissues = argv[1];
+        s1->tissues = argv[4];
+        s1->tissue_numbers = argv[5];
     }
     return 0;
 }
@@ -570,14 +592,15 @@ main(int argc, char** argv) {
     char *zErrMsg = 0;
     int rc;
     
-    rc = sqlite3_open((char*)parameters["sqlite_file"].c_str(), &db);
+    rc = sqlite3_open((char*)parameters["spectra_db_" + species].c_str(), &db);
     if( rc ){
         response += "-2\n";
         print_out(response, compress);
         return -2;
     }
     //, precursorCharge c, precursorMZ m, peptideModSeq s
-    string sql_query_lite2 = "SELECT id i, peptideSeq p FROM RefSpectra;";
+    //string sql_query_lite2 = "SELECT r.peptideSeq p, r.id i, r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n FROM RefSpectra r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY i order by p;";
+    string sql_query_lite2 = "SELECT r.peptideSeq p, r.id i FROM RefSpectra r order by p;";
         
     // Execute SQL statement
     char tmp_data;
@@ -593,6 +616,36 @@ main(int argc, char** argv) {
     delete index_rank;
     delete SA;
     
+    
+    sqlite3_stmt *stmt;
+    //string sql_prepare = "SELECT r.id i, r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n FROM RefSpectra r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY i HAVING i = 1;";
+    string sql_prepare = "SELECT r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n FROM (SELECT id, precursorCharge, precursorMZ, peptideModSeq FROM RefSpectra WHERE id = ?) r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY r.id;";
+    sqlite3_prepare_v2(db, sql_prepare.c_str(), -1, &stmt, 0);
+    
+    
+    
+    vector<spectrum*>::iterator it = spectra->begin();
+    char buffer[20];
+    while (it != spectra->end()){
+        spectrum* s = *it;
+        sqlite3_bind_int(stmt, 1, s->id);
+        int rc = sqlite3_step(stmt);
+        // encode charge
+        sprintf(buffer, "%i", sqlite3_column_int(stmt, 0));
+        s->charge = buffer;
+        // encode mass
+        sprintf(buffer, "%0.5f", sqlite3_column_double(stmt, 1));
+        s->mass = buffer;
+        s->mod_sequence = (char*)sqlite3_column_text(stmt, 2);
+        s->tissues = (char*)sqlite3_column_text(stmt, 3);
+        s->tissue_numbers = (char*)sqlite3_column_text(stmt, 4);
+        sqlite3_clear_bindings(stmt);
+        sqlite3_reset(stmt);
+        ++it;
+    }
+    
+    
+    /*
     double t = 500;
     double l = spectra->size();
 
@@ -622,7 +675,7 @@ main(int argc, char** argv) {
         vector< map< string, string > > tissue_data;
         rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_tissues, (void*)&tissue_data, &zErrMsg);
     }
-    
+    */
     sqlite3_close(db);
     
     

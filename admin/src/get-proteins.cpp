@@ -12,10 +12,24 @@
 #include <sqlite3.h> 
 #include <math.h>
 #include <zlib.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "sais.h"
 #include "wavelet.h"
 
 using namespace std;
+
+
+#ifdef _WIN32
+    string folder_delim = "\\";
+#elif defined __unix__
+    string folder_delim = "/";
+#elif defined __APPLE__
+    string folder_delim = "/";
+#endif
+
+
 
 
 vector<string> split(string str, char delimiter) {
@@ -125,8 +139,6 @@ class spectrum {
                     str += "\"" + tissues_split[i] + "\":" + tissue_numbers_split[i];
                 }
                 str += "}";
-                //str += ",\"t\":[" + tissues + "]";
-                //str += ",\"n\":[" + tissue_numbers + "]";
             }
             str += "}";
             return str;
@@ -209,6 +221,7 @@ map<string, peptide* > peptide_dict;
 vector< protein* > proteins;
 vector < spectrum* > spectra;
 map< int, spectrum* > spectrum_dict;
+map< string, string > parameters;
 
 wavelet* occ = 0;
 ranking* index_rank = 0;
@@ -234,12 +247,14 @@ int binarySearch(int* array, int length, int key) {
     return mid;
 }
 
+string prev_pep_seq = "";
+peptide* prev_pep = 0;
+string statistics_json_suffix = ".json";
 
 static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
     peptide* current_pep = 0;
-    string P = argv[1];
-    map<string, peptide* >::iterator it = peptide_dict.find(P);
-    if (it == peptide_dict.end()){
+    string P = argv[6];
+    if (P.compare(prev_pep_seq)){
         int L = 0, R = len_text - 1;
         int p_len = P.length();
         for (int i = 0; i < p_len; ++i){
@@ -258,25 +273,16 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
             current_pep = new peptide(P);
             proteins[index_rank->get_rank_right(SA[L])]->peptides.push_back(current_pep);
             peptide_dict.insert(pair<string, peptide* >(P, current_pep));
+            prev_pep_seq = P;
+            prev_pep = current_pep;
         }
     }
     else {
-        current_pep = it->second;
+        current_pep = prev_pep;
     }
+    
     if (current_pep){
         spectrum *s1 = new spectrum(argv[0]);
-        current_pep->spectra.push_back(s1);
-        spectrum_dict.insert(pair<int, spectrum* >(s1->id, s1));
-        spectra.push_back(s1);
-    }
-    return 0;
-}
-
-
-static int sqlite_callback_spectra(void *data, int argc, char **argv, char **azColName){
-    map<int, spectrum*>::iterator it = spectrum_dict.find(atoi(argv[0]));
-    if (it != spectrum_dict.end()){
-        spectrum* s1 = it->second;
         s1->charge = argv[1];
         string mass = argv[2];
         s1->mod_sequence = argv[3];
@@ -284,20 +290,14 @@ static int sqlite_callback_spectra(void *data, int argc, char **argv, char **azC
             mass = mass.substr(0, mass.find(".") + 5);
         }
         s1->mass = mass;
+        s1->tissues = argv[4];
+        s1->tissue_numbers = argv[5];
+        current_pep->spectra.push_back(s1);
+        spectrum_dict.insert(pair<int, spectrum* >(s1->id, s1));
+        spectra.push_back(s1);
     }
     return 0;
 }
-
-static int sqlite_callback_tissues(void *data, int argc, char **argv, char **azColName){
-    map<int, spectrum*>::iterator it = spectrum_dict.find(atoi(argv[0]));
-    if (it != spectrum_dict.end()){
-        spectrum* s1 = it->second;
-        s1->tissues = argv[1];
-        s1->tissue_numbers = argv[2];
-    }
-    return 0;
-}
-
 
 
 void replaceAll(std::string& str, const std::string& from, const std::string& to) {
@@ -451,215 +451,23 @@ float compute_mass(string protein_seq){
 }
 
 
-main(int argc, char** argv) {
-    bool compress = true;
-    bool via_accessions = false;
-    bool via_loci = false;
-    bool via_functions = false;
-    
-    if (compress){
-        cout << "Content-Type: text/html" << endl;
-        cout << "Content-Encoding: deflate" << endl << endl;
-    }
-    else {
-        cout << "Content-Type: text/html" << endl << endl;
-    }
-    
-    string accessions = "";
-    string loci_ids = "";
-    string function_ids = "";
-    bool statistics = false;
-    bool statistics_pathways = false;
+
+
+
+string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, bool statistics){
     
     
-    char* get_string_chr = getenv("QUERY_STRING");
-    
-    // TODO: debugging
-    //get_string_chr = (char*)"statistics";
-    //get_string_chr = (char*)"loci=12";
-    
-    if (!get_string_chr){
-        cout << -1;
-        return -1;
-    }
-    
-    string get_string = string(get_string_chr);
-    if (!get_string.length()){
-        cout << -1;
-        return -1;
-    }
-    
-    
-    
-    vector<string> get_entries = split(get_string, '&');  
-    for (int i = 0; i < get_entries.size(); ++i){
-        vector<string> get_values = split(get_entries.at(i), '=');
-        if (get_values.size() && get_values.at(0) == "accessions"){
-            accessions = get_values.at(1);
-            via_accessions = true;
-        }
-        else if (get_values.size() && get_values.at(0) == "loci"){
-            loci_ids = get_values.at(1);
-            via_loci = true;
-        }
-        else if (get_values.size() && get_values.at(0) == "functions"){
-            function_ids = get_values.at(1);
-            via_functions = true;
-        }
-        else if (get_values.size() && get_values.at(0) == "statistics"){
-            statistics = true;
-        }
-        else if (get_values.size() && get_values.at(0) == "statistics_pathways"){
-            statistics_pathways = true;
-        }
-    }
-    
-    if (via_accessions + via_loci + via_functions + statistics + statistics_pathways != 1){
-        cout << -5;
-        return -5;
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    string sql_query_proteins = "";
-    
-    
-    
-    string line;
-    map< string, string > parameters;
-    ifstream myfile ("../admin/qsdb.conf");
-    if (myfile.is_open()){
-        while ( getline (myfile,line) ){
-            strip(line);
-            if (line[0] == '#') continue;
-            vector< string > tokens = split(line, '=');
-            if (tokens.size() < 2) continue;
-            strip(tokens.at(0));
-            strip(tokens.at(1));
-            parameters.insert(pair< string, string >(tokens.at(0), tokens.at(1)));
-        }
-        myfile.close();
-    }
-    
-    
-    MYSQL *conn = mysql_init(NULL);
     MYSQL_RES *res;
-    MYSQL_RES *res_reagents;
     MYSQL_ROW row;
     MYSQL_FIELD *field;
-    char *server = (char*)parameters["mysql_host"].c_str();
-    char *user = (char*)parameters["mysql_user"].c_str();
-    char *password = (char*)parameters["mysql_passwd"].c_str();
-    char *database = (char*)parameters["mysql_db"].c_str();
-    map< string, int > column_names_proteins;
-    map< string, int > column_names_peptides;
-    map< string, int > column_names_spectra;
-    map< string, int > column_names_rest;
-    
-    /* Connect to database */
-    if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
-        cout << "error: " << mysql_error(conn) << endl;
-        return 1;
-    }
-    
-    
-    
-    
-    
-    
-    if (statistics_pathways){
-        string sql_query = "SELECT distinct pw.id pathway_id, pw.name, npc.protein_id FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id where p.unreviewed = 0 order by pw.name;";
-        if (mysql_query(conn, sql_query.c_str())) {
-            cout << "error: " << mysql_error(conn) << endl;
-            return 1;
-        }
-        res = mysql_use_result(conn);
-        
-        int index_pw = 0;
-        int index_p = 0;
-        string last_id = "";
-        string response = "[";
-        while ((row = mysql_fetch_row(res)) != NULL){
-            if (last_id.compare(row[0])){
-                last_id = row[0];
-                index_p = 0;
-                
-                if (index_pw++) response += "]],";
-                response += "[" + last_id + ",\"" + string(row[1]) + "\",[";
-            }
-            
-            
-            if (index_p++) response += ",";
-            response += string(row[2]);
-        }
-        if (index_pw) response += "]]";
-        response += "]";
-        
-        if (compress){
-            cout << compress_string(response);
-        }
-        else {
-            cout << response;
-        }
-        exit(0);
-    }
-    
-    
-    
-    
-    if (via_accessions){
-    
-        //accessions = "B2RQC6:Q9CZW5:Q9DCC8:Q9CPQ3:Q9DCC8:Q9QYA2";
-        if (accessions == "" || accessions.find("'") != string::npos){
-            cout << -1 << endl;
-            return -1;
-        }    
-        replaceAll(accessions, string(":"), string("','"));
-        
-        sql_query_proteins = "select distinct * from proteins where unreviewed = false and accession in ('";
-        sql_query_proteins += accessions;
-        sql_query_proteins += "');";
-    }
-    else if (via_loci) {
-        if (loci_ids == "" || loci_ids.find("'") != string::npos){
-            cout << -1 << endl;
-            return -1;
-        }    
-        replaceAll(loci_ids, string(":"), string("','"));
-        
-        sql_query_proteins = "select distinct p.* from proteins p inner join protein_loci pl on p.id = pl.protein_id where unreviewed = false and pl.locus_id in ('";
-        sql_query_proteins += loci_ids;
-        sql_query_proteins += "');";
-    }
-    else if (via_functions) {
-        if (function_ids == "" || function_ids.find("'") != string::npos){
-            cout << -1 << endl;
-            return -1;
-        }    
-        replaceAll(function_ids, string(":"), string("','"));
-        
-        sql_query_proteins = "select distinct p.* from proteins p inner join protein_functions pf on p.id = pf.protein_id where unreviewed = false and pf.function_id in ('";
-        sql_query_proteins += function_ids;
-        sql_query_proteins += "');";
-    }
-    else if (statistics) {
-        sql_query_proteins = "select * from proteins where unreviewed = false;";
-    }
-    
-    
-    
     
     if (mysql_query(conn, sql_query_proteins.c_str())) {
         cout << "error: " << mysql_error(conn) << endl;
-        return 1;
+        exit (-1);
     }
     res = mysql_store_result(conn);
     
+    map< string, int > column_names_proteins;
     for(unsigned int i = 0; (field = mysql_fetch_field(res)); i++) {
         column_names_proteins.insert(pair<string,int>(field->name, i));
     }
@@ -691,8 +499,6 @@ main(int argc, char** argv) {
     // create FM index for fast pattern search    
     unsigned char* T = new unsigned char[len_text];
     unsigned char* bwt = new unsigned char[len_text];
-    SA = new int[len_text];
-    for (int i = 0; i < len_text; ++i) SA[i] = i;
     T[len_text - 1] = '$';
     
     int len_field = (len_text >> shift) + 1;
@@ -718,12 +524,17 @@ main(int argc, char** argv) {
     abc['/' >> shift] |= one << ('/' & mask);
     abc['$' >> shift] |= one << ('$' & mask);
     
+    
+    SA = new int[len_text];
+    for (int i = 0; i < len_text; ++i) SA[i] = i;
     sais(T, SA, len_text);
     
     for (int i = 0; i < len_text; ++i){
         if (SA[i] > 0) bwt[i] = T[SA[i] - 1];
         else bwt[i] = T[len_text - 1];
     }
+    
+    
     
     occ = new wavelet((char*)bwt, len_text, abc);
     less_table = occ->create_less_table();
@@ -733,7 +544,7 @@ main(int argc, char** argv) {
     char *zErrMsg = 0;
     int rc;
         
-    rc = sqlite3_open((char*)parameters["sqlite_file"].c_str(), &db);
+    rc = sqlite3_open((char*)parameters["spectra_db_" + species].c_str(), &db);
     if( rc ){
         cout << -2 << endl;
         exit(-2);
@@ -751,7 +562,7 @@ main(int argc, char** argv) {
        
     
     //, precursorCharge c, precursorMZ m, peptideModSeq s
-    string sql_query_lite2 = "SELECT id i, peptideSeq p FROM RefSpectra;";
+    string sql_query_lite2 = "SELECT r.id i, r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n, r.peptideSeq p FROM RefSpectra r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY i order by p;";
         
     // Execute SQL statement
     char tmp_data;
@@ -765,46 +576,12 @@ main(int argc, char** argv) {
     delete occ;
     delete index_rank;
     delete SA;
-    
-    double t = 500;
-    double l = spectra.size();
-    
 
-    
-    //if (!statistics){
-        vector<spectrum*>::iterator it = spectra.begin();
-        while (it != spectra.end()){
-            
-            string sql_query_lite = (*it)->str_id;
-            ++it;
-            for (int i = 1; i < t && it != spectra.end(); ++i, ++it){
-                sql_query_lite += ", " + (*it)->str_id;
-            }
-            
-            string sql_query = "SELECT id i, precursorCharge c, precursorMZ m, peptideModSeq s FROM RefSpectra WHERE id IN (" + sql_query_lite + ");";
-            vector< map< string, string > > spectra_data;
-            rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_spectra, (void*)&spectra_data, &zErrMsg);
-            if( rc != SQLITE_OK ){
-                cout << -4 << endl;
-                sqlite3_free(zErrMsg);
-                exit(-4);
-            }
-            
-            // quering possible tissue origins
-            sql_query = "SELECT RefSpectraId i, group_concat(tissue) t, group_concat(number) n FROM Tissues WHERE i IN (" + sql_query_lite + ") group by i;";
-            vector< map< string, string > > tissue_data;
-            rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_tissues, (void*)&tissue_data, &zErrMsg);
-        }
-    /*}
-    else {
-        
-        // quering possible tissue origins
-        string sql_query = "SELECT RefSpectraId i, group_concat(tissue) t, group_concat(number) n FROM Tissues group by i;";
-        vector< map< string, string > > tissue_data;
-        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_tissues, (void*)&tissue_data, &zErrMsg);
-    }*/
-    
     sqlite3_close(db);
+    
+    
+    
+    
     
     string response = "[";
     for (int i = 0; i < proteins.size(); ++i){
@@ -848,15 +625,251 @@ main(int argc, char** argv) {
     }
     */
     
+    return response;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+main(int argc, char** argv) {
+    bool compress = true;
+    bool via_accessions = false;
+    bool via_loci = false;
+    bool via_functions = false;
+    
     if (compress){
-        cout << compress_string(response);
-        
-        //cout << response.length() << endl;
-        //cout << (int)mtf[0] << endl;
-        //cout << response << endl;
-        //cout << compress_string(response).length();
+        cout << "Content-Type: text/html" << endl;
+        cout << "Content-Encoding: deflate" << endl << endl;
     }
     else {
-        cout << response;
+        cout << "Content-Type: text/html" << endl << endl;
     }
+    
+    string accessions = "";
+    string loci_ids = "";
+    string function_ids = "";
+    bool statistics = false;
+    bool statistics_pathways = false;
+    
+    
+    char* get_string_chr = getenv("QUERY_STRING");
+    
+    // TODO: debugging
+    //get_string_chr = (char*)"statistics";
+    //get_string_chr = (char*)"loci=12";
+    
+    if (!get_string_chr){
+        cout << -1;
+        return -1;
+    }
+    
+    string get_string = string(get_string_chr);
+    if (!get_string.length()){
+        cout << -1;
+        return -1;
+    }
+    
+    
+    
+    string species = "";
+    vector<string> get_entries = split(get_string, '&');  
+    for (int i = 0; i < get_entries.size(); ++i){
+        vector<string> get_values = split(get_entries.at(i), '=');
+        if (get_values.size()){
+            if (get_values.at(0) == "accessions"){
+                accessions = get_values.at(1);
+                via_accessions = true;
+            }
+            else if (get_values.at(0) == "loci"){
+                loci_ids = get_values.at(1);
+                via_loci = true;
+            }
+            else if (get_values.at(0) == "functions"){
+                function_ids = get_values.at(1);
+                via_functions = true;
+            }
+            else if (get_values.at(0) == "statistics"){
+                statistics = true;
+            }
+            else if (get_values.at(0) == "statistics_pathways"){
+                statistics_pathways = true;
+            }
+            else if (get_values.at(0) == "species"){
+                species = get_values.at(1);
+            }
+        }
+    }
+    
+    if (via_accessions + via_loci + via_functions + statistics + statistics_pathways != 1){
+        cout << -5;
+        return -5;
+    }
+    
+    
+    
+    string sql_query_proteins = "";
+    string line;
+    ifstream myfile ("../admin/qsdb.conf");
+    if (myfile.is_open()){
+        while ( getline (myfile,line) ){
+            strip(line);
+            if (line[0] == '#') continue;
+            vector< string > tokens = split(line, '=');
+            if (tokens.size() < 2) continue;
+            strip(tokens.at(0));
+            strip(tokens.at(1));
+            parameters.insert(pair< string, string >(tokens.at(0), tokens.at(1)));
+        }
+        myfile.close();
+    }
+    
+    
+    
+    MYSQL *conn = mysql_init(NULL);
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+    MYSQL_FIELD *field;
+    char *server = (char*)parameters["mysql_host"].c_str();
+    char *user = (char*)parameters["mysql_user"].c_str();
+    char *password = (char*)parameters["mysql_passwd"].c_str();
+    char *database = (char*)parameters["mysql_db"].c_str();
+    
+    /* Connect to database */
+    if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
+        cout << "error: " << mysql_error(conn) << endl;
+        return 1;
+    }
+    
+    if (statistics_pathways){
+        string sql_query = "SELECT distinct pw.id pathway_id, pw.name, npc.protein_id FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id where p.unreviewed = 0 order by pw.name;";
+        if (mysql_query(conn, sql_query.c_str())) {
+            cout << "error: " << mysql_error(conn) << endl;
+            return 1;
+        }
+        res = mysql_use_result(conn);
+        
+        int index_pw = 0;
+        int index_p = 0;
+        string last_id = "";
+        string response = "[";
+        while ((row = mysql_fetch_row(res)) != NULL){
+            if (last_id.compare(row[0])){
+                last_id = row[0];
+                index_p = 0;
+                
+                if (index_pw++) response += "]],";
+                response += "[" + last_id + ",\"" + string(row[1]) + "\",[";
+            }
+            
+            
+            if (index_p++) response += ",";
+            response += string(row[2]);
+        }
+        if (index_pw) response += "]]";
+        response += "]";
+        
+        cout << (compress ? compress_string(response) : response);
+        exit(0);
+    }
+    
+    
+    if (!species.length()){
+        cout << -7;
+        return -7;
+    }
+    
+    if (parameters.find("spectra_db_" + species) == parameters.end()){
+        cout << -8;
+        return -8;
+    }
+    
+    if (via_accessions){
+    
+        //accessions = "B2RQC6:Q9CZW5:Q9DCC8:Q9CPQ3:Q9DCC8:Q9QYA2";
+        if (accessions == "" || accessions.find("'") != string::npos){
+            cout << -1 << endl;
+            return -1;
+        }    
+        replaceAll(accessions, string(":"), string("','"));
+        
+        sql_query_proteins = "select distinct * from proteins where unreviewed = false and accession in ('";
+        sql_query_proteins += accessions;
+        sql_query_proteins += "') and species = '" + species + "';";
+    }
+    else if (via_loci) {
+        if (loci_ids == "" || loci_ids.find("'") != string::npos){
+            cout << -1 << endl;
+            return -1;
+        }    
+        replaceAll(loci_ids, string(":"), string("','"));
+        
+        sql_query_proteins = "select distinct p.* from proteins p inner join protein_loci pl on p.id = pl.protein_id where unreviewed = false and pl.locus_id in ('";
+        sql_query_proteins += loci_ids;
+        sql_query_proteins += "') and species = '" + species + "';";
+    }
+    else if (via_functions) {
+        if (function_ids == "" || function_ids.find("'") != string::npos){
+            cout << -1 << endl;
+            return -1;
+        }    
+        replaceAll(function_ids, string(":"), string("','"));
+        
+        sql_query_proteins = "select distinct p.* from proteins p inner join protein_functions pf on p.id = pf.protein_id where unreviewed = false and pf.function_id in ('";
+        sql_query_proteins += function_ids;
+        sql_query_proteins += "') and species = '" + species + "';";
+    }
+    else if (statistics) {
+        sql_query_proteins = "select * from proteins where unreviewed = false and species = '" + species + "';";
+    }
+    
+    
+    string result = "";
+    if (statistics){
+        struct stat date_sqlite_db;
+        struct stat date_sqlite_json;
+        
+        vector<string> sqlite_path = split((parameters["spectra_db_" + species]), folder_delim[0]);
+        string statistics_json_filename = ".." + folder_delim + "data" + folder_delim + sqlite_path.back() + statistics_json_suffix;
+        
+        
+        // reading the protein data from a cached file only if cached file exists and sqlite_db last modification date is older than cached json file date
+        if (!stat((char*)parameters["spectra_db_" + species].c_str(), &date_sqlite_db) && !stat((char*)statistics_json_filename.c_str(), &date_sqlite_json) && date_sqlite_db.st_ctime < date_sqlite_json.st_ctime){
+            ifstream t;
+            int file_length = 0;
+            t.open(statistics_json_filename.c_str(), ios::binary);
+            t.seekg(0, ios::end);
+            file_length = t.tellg();
+            t.seekg(0, ios::beg);
+            result = string(file_length, 'a');
+            t.read((char*)result.data(), file_length);
+            t.close();
+            
+            cout << result << endl;
+            return 0;
+        }
+        // otherwise retrieve the protein data the normal way and store in 'data' folder
+        else {
+            result = get_protein_data(sql_query_proteins, species, conn, statistics);
+            if (compress) result = compress_string(result);
+            ofstream json_file(statistics_json_filename.c_str(), ios::binary);
+            json_file.write(result.c_str(), result.length());
+        }
+    }
+    else {
+        result = get_protein_data(sql_query_proteins, species, conn, statistics);
+        if (compress) result = compress_string(result);
+    }
+    
+    
+    cout << result << endl;
+    return 0;
 }

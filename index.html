@@ -478,7 +478,7 @@ function open_statistics (){
         }
     }
     
-    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?statistics", true);
+    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?statistics&species=mouse", true);
     xmlhttp.send();
     
     var xmlhttp_search = new XMLHttpRequest();
@@ -1315,7 +1315,7 @@ function load_all_data(){
             ideom_data = JSON.parse(xmlhttp_chr.responseText);
         }
     }
-    xmlhttp_chr.open("GET", "/qsdb/cgi-bin/get-chromosomes.py", true);
+    xmlhttp_chr.open("GET", "/qsdb/cgi-bin/get-chromosomes.py?species=mouse", true);
     xmlhttp_chr.send();
     
     // load tissue images
@@ -1411,7 +1411,7 @@ function draw_chromosome_ideograms(){
                 chromosomes[this.chromosome_key].draw();
             }
         }
-        chromosome_requests[key].open("GET", "/qsdb/cgi-bin/get-chromosome-data.py?chromosome=" + key, true);
+        chromosome_requests[key].open("GET", "/qsdb/cgi-bin/get-chromosome-data.py?chromosome=" + key + "&species=mouse", true);
         chromosome_requests[key].send();
     }
 }

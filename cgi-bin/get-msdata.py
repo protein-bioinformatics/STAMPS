@@ -26,8 +26,14 @@ def make_dict(cur):
 
 form = cgi.FieldStorage()
 spectrum_id = int(form.getvalue('spectrum_id'))
+species = form.getvalue('species')
+
+spectra_db = "spectra_db_" + species
+if spectra_db not in conf:
+    print(-1)
+    exit()
    
-db = sqlite3.connect(conf["sqlite_file"])
+db = sqlite3.connect(conf[spectra_db])
 cur = db.cursor()
 cur.execute('SELECT * FROM RefSpectra r INNER JOIN RefSpectraPeaks p ON r.id = p.RefSpectraID WHERE r.id = %i;' % spectrum_id)
 result = make_dict(cur)
