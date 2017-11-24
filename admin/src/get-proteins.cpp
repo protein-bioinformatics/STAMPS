@@ -29,7 +29,8 @@ using namespace std;
     string folder_delim = "/";
 #endif
 
-
+float compute_mass(string);
+void replaceAll(string&, const string&, const string&);
 
 
 vector<string> split(string str, char delimiter) {
@@ -124,11 +125,21 @@ class spectrum {
         spectrum(string _id) : str_id(_id) {id = atoi(str_id.c_str());}
         
         string to_string(bool complete = true){
+            string mod_mod_sequence = mod_sequence;
+            replaceAll(mod_sequence, "M[+16.0]", "m");
+            replaceAll(mod_mod_sequence, "C[+57.0]", "c");
+            float theo_mass = compute_mass(mod_mod_sequence);
+            float observ_mass = atof(mass.c_str()) * atoi(charge.c_str()) - (atoi(charge.c_str()) - 2) * 1.007276;
+            float ppm = (observ_mass - theo_mass) / theo_mass * 1000000.;
+            char buffer[50];
+            sprintf(buffer, "%0.5f", ppm);
+            
             string str = "{";
             str += "\"i\":" + str_id;
             if (complete) str += ",\"s\":\"" + mod_sequence + "\"";
             str += ",\"c\":" + charge;
             str += ",\"m\":" + mass;
+            str += ",\"p\":" + string(buffer);
             
             vector<string> tissues_split = split(tissues, ',');
             vector<string> tissue_numbers_split = split(tissue_numbers, ',');
@@ -254,6 +265,8 @@ string statistics_json_suffix = ".json";
 static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
     peptide* current_pep = 0;
     string P = argv[6];
+    
+    
     if (P.compare(prev_pep_seq)){
         int L = 0, R = len_text - 1;
         int p_len = P.length();
@@ -263,12 +276,16 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
             occ->get_rank(--L, R, c);
             --R;
             
+            
+            
             if (L > R) break;
             int lss = less_table[c];
             L += lss;
             R += lss;
             
         }
+        
+        
         if (L == R){
             current_pep = new peptide(P);
             proteins[index_rank->get_rank_right(SA[L])]->peptides.push_back(current_pep);
@@ -393,6 +410,45 @@ float aa_coefficients_middle[][2] = {
 {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}};
 
 
+float acids[] = {
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0,
+71.037110, // A
+0,
+103.009190,
+115.026940,
+129.042590,
+147.068410,
+57.021460,
+137.058910,
+113.084060,
+0,
+128.094960,
+113.084060,
+131.040490,
+114.042930,
+0,
+97.052760,
+128.058580,
+156.101110,
+87.032030,
+101.047680,
+0,
+99.068410, // Z
+186.079310,
+0,
+163.063330,
+0, // Z
+0, 0, 0, 0, 0, 0, 0, 0,
+160.030654, // c
+0, 0, 0, 0, 0, 0, 0, 0, 0,
+147.035404,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+
+
 float predict_isoelectric_point(string protein_seq){
     float NQ = 0.0;
     float pH = 6.51;
@@ -436,14 +492,15 @@ float predict_isoelectric_point(string protein_seq){
 }
 
 
-float acids[] = {
+/*float acids[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 71.037110, 0, 103.009190, 115.026940, 129.042590, 147.068410, 57.021460, 137.058910, 113.084060, 0,
     128.094960, 113.084060, 131.040490, 114.042930, 0, 97.052760, 128.058580, 156.101110, 87.032030, 101.047680,
     0, 99.068410, 186.079310, 0, 163.063330, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0};
-    
+*/
+
 float compute_mass(string protein_seq){
     float mass = 20.024018;
     for (int i = 0; i < protein_seq.length(); ++i) mass += acids[protein_seq[i]];        
@@ -642,6 +699,7 @@ string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, 
 
 main(int argc, char** argv) {
     bool compress = true;
+    bool caching = true;
     bool via_accessions = false;
     bool via_loci = false;
     bool via_functions = false;
@@ -842,7 +900,7 @@ main(int argc, char** argv) {
         
         
         // reading the protein data from a cached file only if cached file exists and sqlite_db last modification date is older than cached json file date
-        if (!stat((char*)parameters["spectra_db_" + species].c_str(), &date_sqlite_db) && !stat((char*)statistics_json_filename.c_str(), &date_sqlite_json) && date_sqlite_db.st_ctime < date_sqlite_json.st_ctime){
+        if (caching && !stat((char*)parameters["spectra_db_" + species].c_str(), &date_sqlite_db) && !stat((char*)statistics_json_filename.c_str(), &date_sqlite_json) && date_sqlite_db.st_ctime < date_sqlite_json.st_ctime){
             ifstream t;
             int file_length = 0;
             t.open(statistics_json_filename.c_str(), ios::binary);
@@ -869,6 +927,7 @@ main(int argc, char** argv) {
         if (compress) result = compress_string(result);
     }
     
+    //exit(0);
     
     cout << result << endl;
     return 0;

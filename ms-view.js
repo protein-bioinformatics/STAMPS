@@ -58,6 +58,15 @@ acids['V'] =  99.068410;
 
 
 
+function peptide_seq_mass(peptide_seq){
+    var mass = 0;
+    for (var i = 0; i < peptide_seq.length; ++i){
+        mass += acids[peptide_seq[i]];
+    }
+    return mass;
+}
+
+
 function binary_search(key){
     var low = 0;
     var high = peaks.length - 1;

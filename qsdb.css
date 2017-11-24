@@ -600,3 +600,112 @@ ul li:hover {
 table.scrollTable tbody {
     overflow-y: scroll;
 }
+
+img.Brain {
+    background-image: url('images/brain.png');
+    background-repeat: no-repeat;
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+    float: left;
+    display: inline;
+}
+
+img.Liver {
+    background-image: url('images/liver.png');
+    background-repeat: no-repeat;
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+    float: left;
+    display: inline;
+}
+
+img.Kidney {
+    background-image: url('images/kidney.png');
+    background-repeat: no-repeat;
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+    float: left;
+    display: inline;
+}
+
+img.Spleen {
+    background-image: url('images/spleen.png');
+    background-repeat: no-repeat;
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+    float: left;
+    display: inline;
+}
+
+img.Heart {
+    background-image: url('images/heart.png');
+    background-repeat: no-repeat;
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+    float: left;
+    display: inline;
+}
+
+img.Blood {
+    background-image: url('images/blood.png');
+    background-repeat: no-repeat;
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+    float: left;
+    display: inline;
+}
+
+img.Fat {
+    background-image: url('images/fat.png');
+    background-repeat: no-repeat;
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+    float: left;
+    display: inline;
+}
+
+img.Lung {
+    background-image: url('images/lung.png');
+    background-repeat: no-repeat;
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+    float: left;
+    display: inline;
+}
+
+img.Eye {
+    background-image: url('images/eye.png');
+    background-repeat: no-repeat;
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+    float: left;
+    display: inline;
+}
+
+img.Gut {
+    background-image: url('images/gut.png');
+    background-repeat: no-repeat;
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+    float: left;
+    display: inline;
+}
+
+div.Del {
+    background-image: url('images/delete-small.png');
+    background-repeat: no-repeat;
+    min-width: 16px;
+    float: left;
+    display: inline;
+    min-height: 16px;
+}

@@ -283,6 +283,11 @@ The usage, selling or handing of the contact data written in this imprint is not
         </tr>
     </table><br>
     <canvas id="pI_figure" width="600" height="300"></canvas>
+    <p><hr>
+    
+    <p>&nbsp;<p>
+    <select id="ppm_pw_figure_select" onchange="update_ppm();"></select><br>
+    <canvas id="ppm_histogram" width="600" height="300"></canvas>
 </div>
 <audio style="display: none;"><source src="kns.mp3"></source>
 </body>
@@ -451,6 +456,11 @@ function open_statistics (){
                         for (var j = 0; j < peptide.spectra.length; ++j){
                             var spectrum = peptide.spectra[j];
                             if (t in spectrum.tissues) NSAF += spectrum.tissues[t];
+                            /*
+                            if (min_ppm <= spectrum.ppm && spectrum.ppm < max_ppm){
+                                ppm_histogram[Math.floor((spectrum.ppm - min_ppm) / ppm_steps)]++;
+                            }
+                            */                            
                         }
                     }
                     NSAF /= protein.sequence_length;
@@ -475,6 +485,7 @@ function open_statistics (){
             update_nsaf();
             update_nsaf_pathway_figure();
             update_pI();
+            update_ppm();
         }
     }
     
@@ -489,16 +500,151 @@ function open_statistics (){
             
             for (var i = 0; i < tmp_pw.length; ++i){
                 var pw_select = document.getElementById("nsaf_pathway_figure_select");
-                var new_option = document.createElement("option");
-                new_option.text = tmp_pw[i][1];
-                new_option.id = tmp_pw[i][0];
-                pw_select.add(new_option);
+                var ppm_pw_select = document.getElementById("ppm_pw_figure_select");
+                var new_option_nsaf = document.createElement("option");
+                var new_option_ppm = document.createElement("option");
+                new_option_nsaf.text = tmp_pw[i][1];
+                new_option_ppm.text = tmp_pw[i][1];
+                new_option_nsaf.id = tmp_pw[i][0];
+                new_option_ppm.id = tmp_pw[i][0];
+                pw_select.add(new_option_nsaf);
+                ppm_pw_select.add(new_option_ppm);
                 pathways_to_proteins[tmp_pw[i][0]] = [tmp_pw[i][1], tmp_pw[i][2]];
             }
         }
     }
     xmlhttp_search.open("GET", "/qsdb/cgi-bin/get-proteins.bin?statistics_pathways", true);
     xmlhttp_search.send();
+}
+
+
+function update_ppm(){
+    if (statistics_loaded < 2) return;
+    
+    var pw_option = document.getElementById("ppm_pw_figure_select").options[document.getElementById("ppm_pw_figure_select").selectedIndex];
+    
+    
+    var ppm_steps = 0.5;
+    var min_ppm = -6 - ppm_steps / 2;
+    var max_ppm = 6 + ppm_steps / 2;
+    var num_bars = Math.floor((max_ppm - min_ppm) / ppm_steps);
+            
+    var ppm_histogram = new Array(num_bars).fill(0);
+    var ppm_max_val = 0;
+    
+    
+    var protein_ids = pathways_to_proteins[pw_option.id][1];
+    var aaa = 0;
+    var ttt = 0;
+    for (var i = 0; i < protein_ids.length; ++i){
+        var protein = protein_dictionary[protein_ids[i]];
+        console.log(protein.id + " " + protein.peptides.length);
+        for (var j = 0; j < protein.peptides.length; ++j){
+            var peptide = protein.peptides[j];
+            for (var k = 0; k < peptide.spectra.length; ++k){
+                ++aaa;
+                var spectrum = peptide.spectra[k];
+                if (min_ppm <= spectrum.ppm && spectrum.ppm < max_ppm){
+                    ppm_histogram[Math.floor((spectrum.ppm - min_ppm) / ppm_steps)]++;
+                }
+            }
+        }
+    }
+           
+    var sum_ppm = 0;
+    for (var i = 0; i < ppm_histogram.length; ++i){
+        ppm_max_val = Math.max(ppm_histogram[i], ppm_max_val);
+        sum_ppm += ppm_histogram[i];
+    }
+    
+    var ppm_histogram_canvas = document.getElementById("ppm_histogram");
+    var ppm_ctx = ppm_histogram_canvas.getContext("2d");
+    ppm_ctx.clearRect(0, 0, ppm_histogram_canvas.width, ppm_histogram_canvas.height);
+            
+    var w_box = 600;
+    var w_offset = 50;
+    var h_box = 250;
+    
+    
+    
+    //scales
+    // x-scale
+    ppm_ctx.font="14px Arial";
+    for (var i = Math.ceil(min_ppm); i < max_ppm; ++i){
+        var x = w_offset + (i - min_ppm) / num_bars / ppm_steps * (w_box - w_offset);
+        ppm_ctx.beginPath();
+        ppm_ctx.moveTo(x, h_box - 5);
+        ppm_ctx.lineTo(x, h_box + 5);
+        ppm_ctx.stroke();
+        ppm_ctx.fillStyle = "black";
+        ppm_ctx.textBaseline="top";
+        ppm_ctx.textAlign="center";
+        ppm_ctx.fillText(i, x, h_box + 10);
+    }
+    // y-scale
+    ppm_ctx.lineWidth = 1;
+    ppm_ctx.textAlign="right";
+    ppm_ctx.textBaseline="middle";
+    var v_factor = 0.94;            
+    var step = (ppm_max_val / sum_ppm) < 0.2 ? 2.5 : 10;
+    ppm_ctx.font="14px Arial";
+    console.log(ppm_max_val + " " + sum_ppm + " " + aaa);
+    var ppm_max_scale = ppm_max_val / sum_ppm * 100;
+    for (var h = step; h <= ppm_max_scale; h += step){
+        var y = h_box - (h / ppm_max_scale * h_box) * v_factor;
+        ppm_ctx.strokeStyle = "#dddddd";
+        ppm_ctx.beginPath();
+        ppm_ctx.moveTo(w_offset, y);
+        ppm_ctx.lineTo(w_box, y);
+        ppm_ctx.stroke();
+        
+        ppm_ctx.strokeStyle = "black";
+        ppm_ctx.beginPath();
+        ppm_ctx.moveTo(w_offset - 5, y);
+        ppm_ctx.lineTo(w_offset + 5, y);
+        ppm_ctx.stroke();
+        
+        
+        ppm_ctx.fillStyle = "black";
+        ppm_ctx.fillText(h + "%", w_offset - 8, y);
+    }
+
+    ppm_ctx.beginPath();
+    ppm_ctx.moveTo(w_offset, 0);
+    ppm_ctx.lineTo(w_box, 0);
+    ppm_ctx.stroke();
+    
+    ppm_ctx.beginPath();
+    ppm_ctx.moveTo(w_box, 0);
+    ppm_ctx.lineTo(w_box, h_box);
+    ppm_ctx.stroke();
+    
+    ppm_ctx.beginPath();
+    ppm_ctx.moveTo(w_box, h_box);
+    ppm_ctx.lineTo(w_offset, h_box);
+    ppm_ctx.stroke();
+    
+    ppm_ctx.beginPath();
+    ppm_ctx.moveTo(w_offset, h_box);
+    ppm_ctx.lineTo(w_offset, 0);
+    ppm_ctx.stroke();
+    
+    
+    ppm_ctx.fillStyle = "red";
+    var bar_width = (w_box - w_offset - 2) / num_bars;
+    for (var i = 0; i < ppm_histogram.length; ++i){
+        var bar_y = h_box - 1 - (ppm_histogram[i] / ppm_max_val) * h_box * v_factor;
+        var bar_height = h_box - bar_y;
+        ppm_ctx.fillRect(w_offset + 1 + bar_width * i, bar_y, bar_width, bar_height);
+    }
+    ppm_ctx.fill();
+    ppm_ctx.stroke();
+    
+    // axes labels
+    ppm_ctx.fillStyle = "black";
+    ppm_ctx.textAlign="center";
+    ppm_ctx.fillText("Mass accuracy difference / ppm", (w_box + w_offset) / 2, h_box + 40);
+    
 }
 
 
@@ -566,7 +712,7 @@ function update_pI(){
     }
     
     // scale
-    
+    // x-scale
     pI_ctx.font="14px Arial";
     for (var i = 2; i <= 14; i += 2){
         var x = w_offset + (i - 2) / 12. * (w_box - w_offset);
@@ -579,6 +725,7 @@ function update_pI(){
         pI_ctx.textAlign="center";
         pI_ctx.fillText(i, x, h_box + 10);
     }
+    // y-scale
     for (var i = Math.floor(min_mass); i < max_mass; ++i){
         var y = h_box - (i - min_mass) / (max_mass - min_mass) * h_box;
         pI_ctx.beginPath();
@@ -631,7 +778,6 @@ function update_nsaf_pathway_figure(){
     for (key in tissues) tissue_nsafs[key] = 0;
     var max_val = 0;
     for (var i = 0; i < protein_ids.length; ++i){
-        //if (!(protein_ids[i] in pathways_to_proteins)) console.log
         var protein = protein_dictionary[protein_ids[i]];
         for (key in protein.nsaf){
             tissue_nsafs[key] += Math.pow(10, protein.nsaf[key]);
@@ -652,6 +798,7 @@ function update_nsaf_pathway_figure(){
     
     var step = 20;
     
+    // y-scale
     nsaf_ctx.font="14px Arial";
     for (var h = step; h <= 100; h += step){
         var y = h_box - (h / 100 * h_box) * v_factor;
@@ -715,7 +862,6 @@ function hide_disclaimer (){
 function change_chromosome_view(){
     var start_base = document.getElementById("chromosome_selection_start").value;
     start_base = replaceAll(start_base, " ", "");
-    console.log(start_base);
     start_base = isNumber(start_base) ? parseInt(start_base) - 1 : 0;
     var end_base = document.getElementById("chromosome_selection_end").value;
     end_base = replaceAll(end_base, " ", "");
