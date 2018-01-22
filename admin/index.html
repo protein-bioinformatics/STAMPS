@@ -35,6 +35,8 @@
         <table><tr><td>Search: </td><td><input type="text" onkeyup="start_search();" onfocus="close_navigation(0); start_search();" class="search_field" id="search_field" size=24></td></tr></table>
     </td><td id="filter_panel_nav"  class="navigation_cell_click" onclick="close_navigation(3); open_filter_panel();" style="min-width: 100px; text-align: center;">
         Filter
+    </td><td class="navigation_cell_click" onclick="close_navigation(0); back_function = hide_check_spectra; manage_entries();">
+        Manage&nbsp;Entries
     </td><td class="navigation_cell_click" onclick="close_navigation(0); back_function = hide_check_spectra; check_spectra();">
         Check&nbsp;Spectra
     </td><td class="navigation_cell_click" onclick="close_navigation(0); download_assay();">
@@ -101,8 +103,19 @@
     </table>
 </div>
 
-<div id="check_spectra" class="check_spectra"></div>
+
 <div id="waiting_background" class="waiting_background"></div>
+
+<div id="check_spectra" class="check_spectra"></div>
+
+
+<div id="manage_entries" class="check_spectra">
+    <div id="manage_entries_select_pathways" onclick="manage_entries_show_pathways();" style="padding: 10px; display: inline-block; border: 1px solid black; cursor: pointer;">Pathways</div>
+    <div id="manage_entries_select_proteins" onclick="manage_entries_show_proteins();" style="padding: 10px; display: inline-block; border: 1px solid black; cursor: pointer;">Proteins</div>
+    <div id="manage_entries_select_metabolites" onclick="manage_entries_show_metabolites();" style="padding: 10px; display: inline-block; border: 1px solid black; cursor: pointer;">Metabolites</div>
+    <div id="manage_entries_list_field" style="padding: 10px; border: 1px solid black; width: 90%; height: 70%; overflow-y: scroll;"></div>
+    <button onclick="hide_manage_entries();">Close</button>
+</div>
 
 
 <img src="/qsdb/images/zoom_in.png" id="zoom_in" style="display: none;">

@@ -214,16 +214,8 @@ function mouse_move_listener(e){
             
             if (!event_key_down || !highlight_element){
                 
-                for (var i = 0; i < data.length; ++i){
-                    data[i].x += shift_x;
-                    data[i].y += shift_y;
-                }
-                for (var i = 0; i < edges.length; ++i){
-                    var edg = edges[i];
-                    for (var j = 0; j < edges[i].point_list.length; ++j){
-                        edg.point_list[j].x += shift_x;
-                        edg.point_list[j].y += shift_y;
-                    }
+                for (var i = 0; i < elements.length; ++i){
+                    elements[i].move(shift_x, shift_y);
                 }
                 infobox.x += shift_x;
                 infobox.y += shift_y;
@@ -351,5 +343,148 @@ edge.prototype.mouse_down = function(mouse, key){
     draw();
 }
 
+
+function manage_entries(){
+    document.getElementById("manage_entries").style.display = "inline";
+    document.getElementById("waiting_background").style.display = "inline";
+    if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
+        document.getElementById("renderarea").style.filter = "blur(5px)";
+        document.getElementById("navigation").style.filter = "blur(5px)";
+    }
+    
+    manage_entries_show_pathways();
+}
+
+
+function manage_entries_show_pathways(){
+    // get functions
+    var xmlhttp_pathways = new XMLHttpRequest();
+    xmlhttp_pathways.onreadystatechange = function() {
+        if (xmlhttp_pathways.readyState == 4 && xmlhttp_pathways.status == 200) {
+            var pathway_data = JSON.parse(xmlhttp_pathways.responseText);
+            document.getElementById("manage_entries_list_field").innerHTML = "";
+            
+            
+            pathway_data.sort(function(a, b) {
+                return a[1] > b[1];
+            });
+            
+            var dom_table = document.createElement("table");
+            document.getElementById("manage_entries_list_field").appendChild(dom_table);
+            dom_table.setAttribute("id", "manage_entries_table");
+            dom_table.setAttribute("width", "100%"); 
+            dom_table.setAttribute("cellspacing", "0"); 
+            dom_table.setAttribute("border", "0");
+            
+            for (var line = 0; line < pathway_data.length; ++line){
+                var bg_color = (line & 1) ? "#DDDDDD" : "white";
+                var dom_tr = document.createElement("tr");
+                dom_table.appendChild(dom_tr);
+                dom_tr.setAttribute("id", pathway_data[line][0]);
+                
+                var dom_td = document.createElement("td");
+                dom_tr.appendChild(dom_td);
+                dom_td.setAttribute("bgcolor", bg_color);
+                dom_td.setAttribute("width", "100%");
+                
+                var dom_text = document.createTextNode(pathway_data[line][1]);
+                dom_td.appendChild(dom_text);
+            }
+        }
+    }
+    xmlhttp_pathways.open("GET", "/qsdb/cgi-bin/manage-entries.py?action=get&type=pathways", true);
+    xmlhttp_pathways.send();
+}
+
+
+function manage_entries_show_proteins(){
+    // get functions
+    var xmlhttp_proteins = new XMLHttpRequest();
+    xmlhttp_proteins.onreadystatechange = function() {
+        if (xmlhttp_proteins.readyState == 4 && xmlhttp_proteins.status == 200) {
+            var protein_data = JSON.parse(xmlhttp_proteins.responseText);
+            document.getElementById("manage_entries_list_field").innerHTML = "";
+            
+            
+            protein_data.sort(function(a, b) {
+                return a[1] > b[1];
+            });
+            
+            var dom_table = document.createElement("table");
+            document.getElementById("manage_entries_list_field").appendChild(dom_table);
+            dom_table.setAttribute("id", "manage_entries_table");
+            dom_table.setAttribute("width", "100%"); 
+            dom_table.setAttribute("cellspacing", "0"); 
+            dom_table.setAttribute("border", "0");
+            
+            for (var line = 0; line < protein_data.length; ++line){
+                var bg_color = (line & 1) ? "#DDDDDD" : "white";
+                var dom_tr = document.createElement("tr");
+                dom_table.appendChild(dom_tr);
+                dom_tr.setAttribute("id", protein_data[line][0]);
+                
+                var dom_td = document.createElement("td");
+                dom_tr.appendChild(dom_td);
+                dom_td.setAttribute("bgcolor", bg_color);
+                dom_td.setAttribute("width", "100%");
+                
+                var dom_text = document.createTextNode(protein_data[line][1] + " | " + protein_data[line][2]);
+                dom_td.appendChild(dom_text);
+            }
+        }
+    }
+    xmlhttp_proteins.open("GET", "/qsdb/cgi-bin/manage-entries.py?action=get&type=proteins", true);
+    xmlhttp_proteins.send();
+}
+
+
+function manage_entries_show_metabolites(){
+    // get functions
+    var xmlhttp_metabolites = new XMLHttpRequest();
+    xmlhttp_metabolites.onreadystatechange = function() {
+        if (xmlhttp_metabolites.readyState == 4 && xmlhttp_metabolites.status == 200) {
+            var metabolite_data = JSON.parse(xmlhttp_metabolites.responseText);
+            document.getElementById("manage_entries_list_field").innerHTML = "";
+            
+            metabolite_data.sort(function(a, b) {
+                return a[1] > b[1];
+            });
+            
+            var dom_table = document.createElement("table");
+            document.getElementById("manage_entries_list_field").appendChild(dom_table);
+            dom_table.setAttribute("id", "manage_entries_table");
+            dom_table.setAttribute("width", "100%"); 
+            dom_table.setAttribute("cellspacing", "0"); 
+            dom_table.setAttribute("border", "0");
+            
+            for (var line = 0; line < metabolite_data.length; ++line){
+                var bg_color = (line & 1) ? "#DDDDDD" : "white";
+                var dom_tr = document.createElement("tr");
+                dom_table.appendChild(dom_tr);
+                dom_tr.setAttribute("id", metabolite_data[line][0]);
+                
+                var dom_td = document.createElement("td");
+                dom_tr.appendChild(dom_td);
+                dom_td.setAttribute("bgcolor", bg_color);
+                dom_td.setAttribute("width", "100%");
+                
+                var dom_text = document.createTextNode(metabolite_data[line][1]);
+                dom_td.appendChild(dom_text);
+            }
+        }
+    }
+    xmlhttp_metabolites.open("GET", "/qsdb/cgi-bin/manage-entries.py?action=get&type=metabolites", true);
+    xmlhttp_metabolites.send();
+}
+
+
+function hide_manage_entries (){
+    document.getElementById("waiting_background").style.display = "none";
+    document.getElementById("manage_entries").style.display = "none";
+    if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
+        document.getElementById("renderarea").style.filter = "none";
+        document.getElementById("navigation").style.filter = "none";
+    }
+}
 
 document.addEventListener('DOMContentLoaded', init, false);

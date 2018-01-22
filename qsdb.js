@@ -90,20 +90,9 @@ function mouse_move_listener(e){
             
             
             if (!event_key_down || !highlight_element){
-                
-                for (var i = 0; i < data.length; ++i){
-                    data[i].x += shift_x;
-                    data[i].y += shift_y;
+                for (var i = 0; i < elements.length; ++i){
+                    elements[i].move(shift_x, shift_y);
                 }
-                for (var i = 0; i < edges.length; ++i){
-                    var edg = edges[i];
-                    for (var j = 0; j < edges[i].point_list.length; ++j){
-                        edg.point_list[j].x += shift_x;
-                        edg.point_list[j].y += shift_y;
-                    }
-                }
-                infobox.x += shift_x;
-                infobox.y += shift_y;
                 null_x += shift_x;
                 null_y += shift_y;
                 boundaries[0] += shift_x;

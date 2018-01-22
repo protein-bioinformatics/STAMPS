@@ -477,6 +477,8 @@ function visual_element() {
     this.mouse_down_move = function(mouse, key){return false;};
     this.mouse_up = function(mouse){return false;};
     this.is_mouse_over = function(mouse){return false;};
+    this.move = function(x, y){return false;};
+    this.scale = function(x, y, s){return false;};
     this.draw = function(){};
     this.highlight = false;
     this.tipp = false;
@@ -917,6 +919,172 @@ function select_field(ctx){
 }
 
 
+membrane.prototype = new visual_element();
+membrane.prototype.constructor = membrane;
+
+function membrane(ctx){
+    this.ctx = ctx;
+    this.length = 100;
+    this.x = 500;
+    this.y = 500;
+    
+    this.is_mouse_over = function(mouse){
+        return false;
+        //return (this.x <= mouse.x && mouse.x <= this.x + this.width && this.y <= mouse.y && mouse.y <= this.y + this.height);
+    }
+    
+    this.mouse_down = function(mouse, key){
+        return false;
+        /*
+        this.on_active = true;
+        offsetX = mouse.x;
+        offsetY = mouse.y;
+        if (this.active_boundaries[0] <= mouse.x && mouse.x <= this.active_boundaries[0] + this.active_boundaries[2] && this.active_boundaries[1] <= mouse.y && mouse.y <= this.active_boundaries[1] + this.active_boundaries[3]){
+            this.on_move = true;
+            this.ctx.canvas.style.cursor = "all-scroll";
+        }
+        return this.on_active;
+        */
+    }
+    
+    this.move = function(shift_x, shift_y){
+        //this.x += shift_x;
+        //this.y += shift_y;
+    }
+    
+    this.scale = function(res_x, res_y, scale){
+        this.x = res_x + scale * (this.x - res_x);
+        this.y = res_y + scale * (this.y - res_y);
+    }
+    
+    this.mouse_down_move = function(mouse, key){
+        return false;
+        /*
+        if (this.on_move){
+            
+            var shift_x = (mouse.x - offsetX) * this.scale_x;
+            var shift_y = (mouse.y - offsetY) * this.scale_y;
+            
+            for (var i = 0; i < data.length; ++i){
+                data[i].x -= shift_x;
+                data[i].y -= shift_y;
+            }
+            for (var i = 0; i < edges.length; ++i){
+                for (var j = 0; j < edges[i].point_list.length; ++j){
+                    edges[i].point_list[j].x -= shift_x;
+                    edges[i].point_list[j].y -= shift_y;
+                }
+            }
+            infobox.x -= shift_x;
+            infobox.y -= shift_y;
+            null_x -= shift_x;
+            null_y -= shift_y;
+            boundaries[0] -= shift_x;
+            boundaries[1] -= shift_y;
+            this.compute_boundaries();
+            offsetX = mouse.x;
+            offsetY = mouse.y;
+        }
+        return this.on_active;
+        */
+    }
+    
+    this.mouse_up = function(mouse){
+        /*
+        this.on_active = false;
+        this.on_move = false;
+        this.ctx.canvas.style.cursor = "default";
+        */
+        return true;
+    }
+    
+    this.draw = function(){
+        
+        var r = 5;
+        var lw = 2;
+        var o_y = 36;
+        var len_s = 3;
+        
+        this.ctx.fillStyle = metabolite_fill_color;
+        this.ctx.strokeStyle = metabolite_stroke_color;
+        this.ctx.lineWidth = lw * factor;
+        
+        var tmp_x = this.x;
+        for (var i = 0; i < this.length; ++i){
+            this.ctx.beginPath();
+            this.ctx.arc(tmp_x, this.y, r * factor, 0, 2 * Math.PI);
+            this.ctx.closePath();
+            //this.ctx.fill();
+            this.ctx.stroke();
+            
+            
+            this.ctx.beginPath();
+            this.ctx.arc(tmp_x, this.y + o_y * factor, r * factor, 0, 2 * Math.PI);
+            this.ctx.closePath();
+            //this.ctx.fill();
+            this.ctx.stroke();
+            tmp_x += (2 * r + lw) * factor;
+        }
+        
+        tmp_x = this.x;
+        var tmp_y = this.y;
+        this.ctx.lineWidth = (lw - 1) * factor;
+        for (var i = 0; i < this.length; ++i){
+            var ttx = tmp_x + r * factor / 4;
+            var tty = this.y + r * factor;
+            for (var j = 0; j < 4; ++j){
+                this.ctx.beginPath();
+                this.ctx.moveTo(ttx, tty);
+                ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
+                tty += len_s * factor;
+                this.ctx.lineTo(ttx, tty);
+                this.ctx.closePath();
+                this.ctx.stroke();
+            }
+            
+            ttx = tmp_x - r * factor / 2;
+            tty = this.y + r * factor;
+            for (var j = 0; j < 4; ++j){
+                this.ctx.beginPath();
+                this.ctx.moveTo(ttx, tty);
+                ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
+                tty += len_s * factor;
+                this.ctx.lineTo(ttx, tty);
+                this.ctx.closePath();
+                this.ctx.stroke();
+            }
+            
+            ttx = tmp_x + r * factor / 4;
+            tty = this.y - (r - o_y) * factor;
+            for (var j = 0; j < 4; ++j){
+                this.ctx.beginPath();
+                this.ctx.moveTo(ttx, tty);
+                ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
+                tty -= len_s * factor;
+                this.ctx.lineTo(ttx, tty);
+                this.ctx.closePath();
+                this.ctx.stroke();
+            }
+            
+            ttx = tmp_x - r * factor / 2;
+            tty = this.y - (r - o_y) * factor;
+            for (var j = 0; j < 4; ++j){
+                this.ctx.beginPath();
+                this.ctx.moveTo(ttx, tty);
+                ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
+                tty -= len_s * factor;
+                this.ctx.lineTo(ttx, tty);
+                this.ctx.closePath();
+                this.ctx.stroke();
+            }
+            
+            tmp_x += (2 * r + lw) * factor;
+        }
+    }
+    
+}
+
+
 preview.prototype = new visual_element();
 preview.prototype.constructor = preview;
 
@@ -990,25 +1158,16 @@ function preview(ctx){
     this.mouse_down_move = function(mouse, key){
         if (this.on_move){
             
-            var shift_x = (mouse.x - offsetX) * this.scale_x;
-            var shift_y = (mouse.y - offsetY) * this.scale_y;
+            var shift_x = -(mouse.x - offsetX) * this.scale_x;
+            var shift_y = -(mouse.y - offsetY) * this.scale_y;
             
-            for (var i = 0; i < data.length; ++i){
-                data[i].x -= shift_x;
-                data[i].y -= shift_y;
+            for (var i = 0; i < elements.length; ++i){
+                elements[i].move(shift_x, shift_y);
             }
-            for (var i = 0; i < edges.length; ++i){
-                for (var j = 0; j < edges[i].point_list.length; ++j){
-                    edges[i].point_list[j].x -= shift_x;
-                    edges[i].point_list[j].y -= shift_y;
-                }
-            }
-            infobox.x -= shift_x;
-            infobox.y -= shift_y;
-            null_x -= shift_x;
-            null_y -= shift_y;
-            boundaries[0] -= shift_x;
-            boundaries[1] -= shift_y;
+            null_x += shift_x;
+            null_y += shift_y;
+            boundaries[0] += shift_x;
+            boundaries[1] += shift_y;
             this.compute_boundaries();
             offsetX = mouse.x;
             offsetY = mouse.y;
@@ -1187,6 +1346,13 @@ function Infobox(ctx){
     
     this.mouse_click = function(mouse, key){
     }
+    
+    
+    
+    this.scale = function(res_x, res_y, scale){
+        this.x = res_x + scale * (this.x - res_x);
+        this.y = res_y + scale * (this.y - res_y);
+    }
 
     this.draw = function(){
         if (!this.visible) return;
@@ -1269,6 +1435,7 @@ function hide_infobox(){
 node.prototype = new visual_element();
 node.prototype.constructor = node;
 
+
 function node(data, c){
     this.x = parseInt(data['x']);
     this.y = parseInt(data['y']);
@@ -1297,6 +1464,10 @@ function node(data, c){
     this.ctx.font = (text_size * factor).toString() + "px Arial";
     this.containing_spectra = 0;
     this.fill_style = protein_disabled_fill_color;
+    this.length = 100;  // number of lipid headgroups for membrane
+    this.lw = 2;    // line width for membrane
+    this.o_y = 18;  // distance for second layer of membrane
+    this.lipid_radius = 5;
     
     switch (this.type){
         case "protein":
@@ -1351,9 +1522,6 @@ function node(data, c){
             this.height = metabolite_radius * 2;
             this.img = new Image();
             this.crossOrigin = 'anonymous';
-            
-            
-            
             var load_process = setInterval(function(nd){
                 //nd.img.src = "http://www.genome.jp/Fig/compound/" + nd.c_number + ".gif";
                 nd.img.src = "/qsdb/images/metabolites/" + nd.c_number + ".png";
@@ -1361,6 +1529,11 @@ function node(data, c){
             }, 1, this);
             
             this.tipp = true;
+            break;
+            
+        case "membrane":
+            this.width = this.length * (2 * this.lipid_radius + this.lw) * factor;
+            this.height = (this.o_y + 2 * this.lipid_radius + this.lw) * factor;
             break;
     }
     
@@ -1395,6 +1568,19 @@ function node(data, c){
             results = search_pattern(this.name, len_p, accept, masks, this.id, -1);
         }*/
         return results;
+    }
+    
+    this.move = function(shift_x, shift_y){
+        this.x += shift_x;
+        this.y += shift_y;
+    }
+    
+    this.scale = function(res_x, res_y, scale){
+        this.width *= scale;
+        this.height *= scale;
+        this.orig_height *= scale;
+        this.x = res_x + scale * (this.x - res_x);
+        this.y = res_y + scale * (this.y - res_y);
     }
     
     this.mouse_down = function(mouse, key){
@@ -1527,6 +1713,86 @@ function node(data, c){
                 */
                 
                 
+                break;
+                
+            case "membrane":
+                var len_s = 3;
+                
+                this.ctx.fillStyle = metabolite_fill_color;
+                this.ctx.strokeStyle = metabolite_stroke_color;
+                this.ctx.lineWidth = this.lw * factor;
+                
+                var tmp_x = this.x;
+                for (var i = 0; i < this.length; ++i){
+                    this.ctx.beginPath();
+                    this.ctx.arc(tmp_x, this.y - this.o_y * factor, this.lipid_radius * factor, 0, 2 * Math.PI);
+                    this.ctx.closePath();
+                    //this.ctx.fill();
+                    this.ctx.stroke();
+                    
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(tmp_x, this.y + this.o_y * factor, this.lipid_radius * factor, 0, 2 * Math.PI);
+                    this.ctx.closePath();
+                    //this.ctx.fill();
+                    this.ctx.stroke();
+                    tmp_x += (2 * this.lipid_radius + this.lw) * factor;
+                }
+                
+                tmp_x = this.x;
+                var tmp_yt = this.y - (this.o_y - this.lipid_radius) * factor;
+                var tmp_yb = this.y + (this.o_y - this.lipid_radius) * factor;
+                this.ctx.lineWidth = (this.lw - 1) * factor;
+                for (var i = 0; i < this.length; ++i){
+                    var ttx = tmp_x + this.lipid_radius * factor / 4;
+                    var tty = tmp_yt;
+                    for (var j = 0; j < 4; ++j){
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(ttx, tty);
+                        ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
+                        tty += len_s * factor;
+                        this.ctx.lineTo(ttx, tty);
+                        this.ctx.closePath();
+                        this.ctx.stroke();
+                    }
+                    
+                    ttx = tmp_x - this.lipid_radius * factor / 2;
+                    tty = tmp_yt;
+                    for (var j = 0; j < 4; ++j){
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(ttx, tty);
+                        ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
+                        tty += len_s * factor;
+                        this.ctx.lineTo(ttx, tty);
+                        this.ctx.closePath();
+                        this.ctx.stroke();
+                    }
+                    
+                    ttx = tmp_x + this.lipid_radius * factor / 4;
+                    tty = tmp_yb;
+                    for (var j = 0; j < 4; ++j){
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(ttx, tty);
+                        ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
+                        tty -= len_s * factor;
+                        this.ctx.lineTo(ttx, tty);
+                        this.ctx.closePath();
+                        this.ctx.stroke();
+                    }
+                    
+                    ttx = tmp_x - this.lipid_radius * factor / 2;
+                    tty = tmp_yb;
+                    for (var j = 0; j < 4; ++j){
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(ttx, tty);
+                        ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
+                        tty -= len_s * factor;
+                        this.ctx.lineTo(ttx, tty);
+                        this.ctx.closePath();
+                        this.ctx.stroke();
+                    }
+                    tmp_x += (2 * this.lipid_radius + this.lw) * factor;
+                }
                 break;
         }
         
@@ -1828,6 +2094,20 @@ function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, he
     
     
     
+    
+    this.move = function(shift_x, shift_y){
+        for (var j = 0; j < this.point_list.length; ++j){
+            this.point_list[j].x += shift_x;
+            this.point_list[j].y += shift_y;
+        }
+    }
+    
+    this.scale = function(res_x, res_y, scale){
+        for (var j = 0; j < this.point_list.length; ++j){
+            this.point_list[j].x = res_x + scale * (this.point_list[j].x - res_x);
+            this.point_list[j].y = res_y + scale * (this.point_list[j].y - res_y);
+        }
+    }
     
     
     this.expand_node = function(matrix, current_node, open_list, W, H, t_x, t_y, t_a){
@@ -2720,21 +3000,9 @@ function zoom_in_out(dir, res){
         var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
         res.y = nav_height + (window.innerHeight - nav_height) * 0.5;
     }
-    for (var i = 0; i < data.length; ++i){
-        data[i].width *= scale;
-        data[i].height *= scale;
-        data[i].orig_height *= scale;
-        data[i].x = res.x + scale * (data[i].x - res.x);
-        data[i].y = res.y + scale * (data[i].y - res.y);
+    for (var i = 0; i < elements.length; ++i){
+        elements[i].scale(res.x, res.y, scale);
     }
-    for (var i = 0; i < edges.length; ++i){
-        for (var j = 0; j < edges[i].point_list.length; ++j){
-            edges[i].point_list[j].x = res.x + scale * (edges[i].point_list[j].x - res.x);
-            edges[i].point_list[j].y = res.y + scale * (edges[i].point_list[j].y - res.y);
-        }
-    }
-    infobox.x = res.x + scale * (infobox.x - res.x);
-    infobox.y = res.y + scale * (infobox.y - res.y);
     null_x = res.x + scale * (null_x - res.x);
     null_y = res.y + scale * (null_y - res.y);
     boundaries[0] = res.x + scale * (boundaries[0] - res.x);

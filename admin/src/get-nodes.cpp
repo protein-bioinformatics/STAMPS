@@ -684,6 +684,9 @@ main(int argc, char** argv) {
     sql_query_rest += ") union ";
     sql_query_rest += "(select n.id, m.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, m.c_number, m.smiles, m.formula, m.exact_mass from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ";
     sql_query_rest += pathway_id;
+    sql_query_rest += ") union ";
+    sql_query_rest += "(select id, '', pathway_id, type, 0, x, y, 0, '', '', '' from nodes n where n.type = 'membrane' and n.pathway_id = ";
+    sql_query_rest += pathway_id;
     sql_query_rest += ");";
     
     if (mysql_query(conn, sql_query_rest.c_str())) {
