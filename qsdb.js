@@ -149,7 +149,12 @@ function mouse_move_listener(e){
 
 
 
-function key_down(event){
+function key_down(event){// canvas to svg
+    if (event.which === 17){ // CTRL
+        //pathway_to_svg();
+        spectrum_to_svg();
+    }
+    
     // easter egg
     var k_code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
     last_keys.push(event.which);

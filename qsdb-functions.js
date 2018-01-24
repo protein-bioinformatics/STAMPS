@@ -88,16 +88,16 @@ last_keys = [];
 highlighting = 0;
 basket = {};
 filtered_basket = {};
-tissues = {1: ["images/brain.png", "Brain", 0, "statistics_check_brain", "#f4e500"],
-           2: ["images/liver.png", "Liver", 0, "statistics_check_liver", "#fdc60b"],
-           3: ["images/kidney.png", "Kidney", 0, "statistics_check_kidney", "#f18e1c"],
-           4: ["images/spleen.png", "Spleen", 0, "statistics_check_spleen", "#ea621f"],
-           5: ["images/heart.png", "Heart", 0, "statistics_check_heart", "#e32322"],
-           6: ["images/blood.png", "Plasma", 0, "statistics_check_blood", "#c4037d"],
-           7: ["images/fat.png", "Fat", 0, "statistics_check_fat", "#6d398b"],
-           8: ["images/lung.png", "Lung", 0, "statistics_check_lung", "#444e99"],
-           9: ["images/eye.png", "Eye", 0, "statistics_check_eye", "#2a71b0"],
-           10: ["images/gut.png", "Gut", 0, "statistics_check_gut", "#0696bb"]}
+tissues = {1: ["images/brain.svg", "Brain", 0, "statistics_check_brain", "#f4e500"],
+           2: ["images/liver.svg", "Liver", 0, "statistics_check_liver", "#fdc60b"],
+           3: ["images/kidney.svg", "Kidney", 0, "statistics_check_kidney", "#f18e1c"],
+           4: ["images/spleen.svg", "Spleen", 0, "statistics_check_spleen", "#ea621f"],
+           5: ["images/heart.svg", "Heart", 0, "statistics_check_heart", "#e32322"],
+           6: ["images/blood.svg", "Plasma", 0, "statistics_check_blood", "#c4037d"],
+           7: ["images/fat.svg", "Fat", 0, "statistics_check_fat", "#6d398b"],
+           8: ["images/lung.svg", "Lung", 0, "statistics_check_lung", "#444e99"],
+           9: ["images/eye.svg", "Eye", 0, "statistics_check_eye", "#2a71b0"],
+           10: ["images/gut.svg", "Gut", 0, "statistics_check_gut", "#0696bb"]}
            
            
 
@@ -315,20 +315,20 @@ function change_zoom(){
 }
 
 
-CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, rect_curve) {
-    this.beginPath();
-    this.moveTo(x + rect_curve, y);
-    this.lineTo(x + width - rect_curve, y);
-    this.quadraticCurveTo(x + width, y, x + width, y + rect_curve);
-    this.lineTo(x + width, y + height - rect_curve);
-    this.quadraticCurveTo(x + width, y + height, x + width - rect_curve, y + height);
-    this.lineTo(x + rect_curve, y + height);
-    this.quadraticCurveTo(x, y + height, x, y + height - rect_curve);
-    this.lineTo(x, y + rect_curve);
-    this.quadraticCurveTo(x, y, x + rect_curve, y);
-    this.closePath();
-    this.fill();
-    this.stroke();
+function roundRect(x, y, width, height, rect_curve, ctx) {
+    ctx.beginPath();
+    ctx.moveTo(x + rect_curve, y);
+    ctx.lineTo(x + width - rect_curve, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + rect_curve);
+    ctx.lineTo(x + width, y + height - rect_curve);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - rect_curve, y + height);
+    ctx.lineTo(x + rect_curve, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - rect_curve);
+    ctx.lineTo(x, y + rect_curve);
+    ctx.quadraticCurveTo(x, y, x + rect_curve, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
 }
 
 
@@ -448,6 +448,7 @@ function draw(sync){
             if (elements[i].visible) elements[i].draw();
         }
     }
+    
 }
 
 function set_pathway_menu(){
@@ -757,16 +758,16 @@ function Protein(data, ctx){
     this.draw = function(x, y) {
         var x_c = x + check_side_h;
         var y_c = y - check_side_h;
-        ctx.lineWidth = 1;
-        ctx.fillStyle = this.fillStyle_rect;
-        ctx.strokeStyle = "black";
-        ctx.beginPath();
-        ctx.rect(x_c, y_c, check_side, check_side);
-        ctx.fill();
-        ctx.stroke();
+        this.ctx.lineWidth = 1;
+        this.ctx.fillStyle = this.fillStyle_rect;
+        this.ctx.strokeStyle = "black";
+        this.ctx.beginPath();
+        this.ctx.rect(x_c, y_c, check_side, check_side);
+        this.ctx.fill();
+        this.ctx.stroke();
         
-        ctx.fillStyle = this.fillStyle_text;
-        ctx.fillText(this.name, x + check_side_d, y);
+        this.ctx.fillStyle = this.fillStyle_text;
+        this.ctx.fillText(this.name, x + check_side_d, y + line_height * factor_h * 0.5);
         
         
         // draw hooklet
@@ -779,12 +780,12 @@ function Protein(data, ctx){
             var y2 = y_check + check_side * 0.375;
             var x3 = x_check + check_side * 0.375;
             var y3 = y_check - check_side * 0.375;
-            ctx.lineWidth = factor * 3;
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.lineTo(x3, y3);
-            ctx.stroke();
+            this.ctx.lineWidth = factor * 3;
+            this.ctx.beginPath();
+            this.ctx.moveTo(x1, y1);
+            this.ctx.lineTo(x2, y2);
+            this.ctx.lineTo(x3, y3);
+            this.ctx.stroke();
         }
         
     };
@@ -827,18 +828,18 @@ function Protein(data, ctx){
 
 
 
-CanvasRenderingContext2D.prototype.wrapText = function (text, x, y, maxWidth, lineHeight) {
+function wrapText(text, x, y, maxWidth, lineHeight, ctx) {
     var lines = text.split("\n");
-    y -= (lines.length - 1) * lineHeight * 0.5;
+    y += (0.5 - (lines.length - 1)) * lineHeight * 0.5;
     for (var i = 0; i < lines.length; i++) {
         var words = lines[i].split(' ');
         var line = '';
         for (var n = 0; n < words.length; n++) {
             var testLine = line + words[n] + ' ';
-            var metrics = this.measureText(testLine);
+            var metrics = ctx.measureText(testLine);
             var testWidth = metrics.width;
             if (testWidth > maxWidth && n > 0) {
-                this.fillText(line, x, y);
+                ctx.fillText(line, x, y);
                 line = words[n] + ' ';
                 y += lineHeight;
             }
@@ -847,7 +848,7 @@ CanvasRenderingContext2D.prototype.wrapText = function (text, x, y, maxWidth, li
             }
         }
 
-        this.fillText(line, x, y);
+        ctx.fillText(line, x, y);
         y += lineHeight;
     }
 }
@@ -874,12 +875,12 @@ function pathway_title(ctx){
         var curr_title_text = "Current pathway: " + pathways[current_pathway_list_index][1];
         this.ctx.font = "bold 20px Arial";
         this.ctx.textAlign = "left";
-        this.ctx.textBaseline = 'top';
+        //this.ctx.textBaseline = 'top';
         var wdth = this.ctx.measureText(curr_title_text).width + 30;
         this.ctx.fillRect(-2, nav_height - 2, wdth, 40);
         this.ctx.strokeRect(-2, nav_height - 2, wdth, 40);
         this.ctx.fillStyle = "#aaaaaa";
-        this.ctx.fillText(curr_title_text, 10, 10 + nav_height);
+        this.ctx.fillText(curr_title_text, 10, nav_height - 2 + 20 + 5);
     }
 }
 
@@ -1436,13 +1437,13 @@ node.prototype = new visual_element();
 node.prototype.constructor = node;
 
 
-function node(data, c){
+function node(data, ctx){
     this.x = parseInt(data['x']);
     this.y = parseInt(data['y']);
     this.type = data['t'];
     this.id = data['i'];
     this.name = data['n'];
-    //this.name = data['name'] + " " + this.id;  // TODO: delete this line
+    //this.name = " " + this.id;  // TODO: delete this line
     this.c_number = data['c'];
     this.smiles = data['s'];
     this.formula = data['f'];
@@ -1456,8 +1457,7 @@ function node(data, c){
     this.width = -1;
     this.height = -1;
     this.orig_height = -1;
-    this.c = c;
-    this.ctx = c.getContext("2d");
+    this.ctx = ctx;
     this.slide = false;
     this.slide_percent = 0;
     this.on_slide = false;
@@ -1507,6 +1507,7 @@ function node(data, c){
             this.name = name;
             this.tipp = (name.length || true);
             break;
+            
         case "pathway":
             var tokens = this.name.split("\n");
             this.height = 40 + 20 * tokens.length;
@@ -1517,6 +1518,7 @@ function node(data, c){
             this.width *= 12;
             this.tipp = true;
             break;
+            
         case "metabolite":
             this.width = metabolite_radius * 2;
             this.height = metabolite_radius * 2;
@@ -1637,7 +1639,6 @@ function node(data, c){
                 
                 // draw content
                 this.ctx.textAlign = "left";
-                this.ctx.textBaseline = 'middle';
                 this.ctx.font = font_size.toString() + "px Arial";
                 this.ctx.fillStyle = "black";
                 var ty = this.y;
@@ -1684,12 +1685,12 @@ function node(data, c){
                 this.ctx.fillStyle = pathway_fill_color;
                 this.ctx.strokeStyle = this.pathway_enabled ? pathway_stroke_color : pathway_disabled_stroke_color;
                 this.ctx.lineWidth = (line_width + 2 * this.highlight * this.pathway_enabled) * factor;
-                this.ctx.roundRect(this.x - hw, this.y - hh, this.width, this.height, round_rect_radius * factor);
+                roundRect(this.x - hw, this.y - hh, this.width, this.height, round_rect_radius * factor, this.ctx);
                 this.ctx.textAlign = "center";
-                this.ctx.textBaseline = 'middle';
+                //this.ctx.textBaseline = 'middle';
                 this.ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
                 this.ctx.fillStyle = "black";
-                this.ctx.wrapText(this.name, this.x, this.y, this.width, 20 * factor);
+                wrapText(this.name, this.x, this.y, this.width, 20 * factor, this.ctx);
                 break;
                 
                 
@@ -1698,19 +1699,11 @@ function node(data, c){
                 this.ctx.strokeStyle = metabolite_stroke_color;
                 this.ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
                 this.ctx.beginPath();
-                this.ctx.arc(this.x, this.y, radius, 0, 2 * Math.PI);
+                this.ctx.arc(this.x, this.y, radius, 0, 1.999 * Math.PI);
                 this.ctx.closePath();
                 this.ctx.fill();
                 this.ctx.stroke();
                 
-                //////////// TODO: delete this lines
-                /*
-                this.ctx.textAlign = "center";
-                this.ctx.textBaseline = 'middle';
-                this.ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
-                this.ctx.fillStyle = "black";
-                this.ctx.wrapText(this.name, this.x, this.y, this.width, 20 * factor);
-                */
                 
                 
                 break;
@@ -1796,6 +1789,13 @@ function node(data, c){
                 break;
         }
         
+        //////////// TODO: delete this lines
+        /*
+        this.ctx.textAlign = "center";
+        this.ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
+        this.ctx.fillStyle = "black";
+        wrapText(" " + this.id, this.x, this.y, this.width, 20 * factor, this.ctx);
+        */
     };
     
     this.is_mouse_over = function (mouse){
@@ -2050,10 +2050,9 @@ function point(x, y, b){
 edge.prototype = new visual_element();
 edge.prototype.constructor = edge;
 
-function edge(c, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head, reaction_id, reagent_id, edge_id){
+function edge(ctx, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head, reaction_id, reagent_id, edge_id){
     
-    this.c = c;
-    this.ctx = this.c.getContext("2d");
+    this.ctx = ctx;
     this.head = head;
     this.head_start = 0;
     this.point_list = [];
@@ -2751,6 +2750,7 @@ function reset_view(){
 function compute_edges(){
     edges = [];
     var c = document.getElementById("renderarea");
+    var ctx = c.getContext("2d");
     var diameter = 2 * radius;
     var connections = [];
     var nodes_anchors = [];
@@ -2763,7 +2763,7 @@ function compute_edges(){
         for (var j = 0; j < nodes[i]['reagents'].length; ++j){
             
             var metabolite_id = data_ref[nodes[i]['reagents'][j]['node_id']];
-            var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x,                     data[node_id].y, nodes[i]['reagents'][j]['anchor']);
+            var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y, nodes[i]['reagents'][j]['anchor']);
             
             
             if (nodes[i]['reagents'][j]['type'] == 'educt'){
@@ -2938,7 +2938,7 @@ function compute_edges(){
                 start_x += node_width * 0.5;
             }
         }
-        edges[i] = new edge(c, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id, edge_id);
+        edges[i] = new edge(ctx, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id, edge_id);
     }
     
     // sorting the edges, so that active edges will be drown as last, hence on top of inactive edges. Clever, eh?
@@ -3432,9 +3432,6 @@ function check_spectra_expand_collapse_peptide(prot_id, pep_id){
 
 
 function check_spectra(){
-    console.log("start");
-    var t0 = performance.now();
-    
     filter_basket();
     document.getElementById("spectra_panel").innerHTML = "";
     
@@ -3576,10 +3573,6 @@ function check_spectra(){
         
         ++peps;
     }
-    console.log("end");
-    
-    var t1 = performance.now();
-    console.log("Call to check_spectra() took " + (t1 - t0) + " milliseconds.");
 }
 
 
@@ -4310,7 +4303,7 @@ function load_data(reload){
     var process_nodes = setInterval(function(){
         if (tmp_data){
             for (var i = 0; i < tmp_data.length; ++i){
-                data.push(new node(tmp_data[i], c));
+                data.push(new node(tmp_data[i], ctx));
                 x_min = Math.min(x_min, data[i].x - data[i].width * 0.5);
                 x_max = Math.max(x_max, data[i].x + data[i].width * 0.5);
                 y_min = Math.min(y_min, data[i].y - data[i].height * 0.5);
@@ -4319,8 +4312,7 @@ function load_data(reload){
             }
             if (reload){
                 for (var i = 0; i < data.length; ++i){
-                    data[i].x += null_x;
-                    data[i].y += null_y;
+                    data[i].move(null_x, null_y);
                     data[i].width *= factor;
                     data[i].height *= factor;
                     data[i].x = null_x + factor * (data[i].x - null_x);
@@ -4331,8 +4323,7 @@ function load_data(reload){
                 var shift_x = (ctx.canvas.width - x_min - x_max) * 0.5;
                 var shift_y = nav_height + (ctx.canvas.height - nav_height - y_min - y_max) * 0.5;
                 for (var i = 0; i < data.length; ++i){
-                    data[i].x += shift_x;
-                    data[i].y += shift_y;
+                    data[i].move(shift_x, shift_y);
                 }
                 null_x += shift_x;
                 null_y += shift_y;
@@ -4524,4 +4515,58 @@ function filter_settings_clicked(){
         }
         check_spectra();
     }
+}
+
+
+function pathway_to_svg(){
+    var svg_margin = 20;
+    assemble_elements(true);
+    
+    var min_x = 1e10, max_x = -1e10, min_y = 1e10, max_y = -1e10;
+    for (var i = 0; i < elements.length; ++i){
+        if(!(elements[i] instanceof node)) continue;
+        min_x = Math.min(min_x, elements[i].x - elements[i].width * 0.5);
+        max_x = Math.max(max_x, elements[i].x + elements[i].width * 0.5);
+        min_y = Math.min(min_y, elements[i].y - elements[i].height * 0.5);
+        max_y = Math.max(max_y, elements[i].y + elements[i].height * 0.5);
+    }
+    var shift_x = (svg_margin >> 1) - min_x;
+    var shift_y = (svg_margin >> 1) - min_y;
+    var svg_ctx = new C2S(svg_margin + max_x - min_x, svg_margin + max_y - min_y);
+    
+    
+    // change the ctx object in all elements for drawing
+    svg_ctx.clearRect(0, 0, svg_margin + max_x - min_x, svg_margin + max_y - min_y);
+    for (var i = 0; i < elements.length; ++i){
+        elements[i].move(shift_x, shift_y);
+        elements[i].ctx = svg_ctx;
+        if (elements[i].type == "protein"){
+            for(var j = 0; j < elements[i].proteins.length; ++j){
+                elements[i].proteins[j].ctx = svg_ctx;
+            }
+        }
+        if (elements[i].visible) elements[i].draw();
+    }
+    var svgCode = svg_ctx.getSerializedSvg(true);
+    
+    
+    
+    //revert the changing
+    var c = document.getElementById("renderarea");
+    var ctx = c.getContext("2d");
+    for (var i = 0; i < elements.length; ++i){
+        elements[i].move(-shift_x, -shift_y);
+        elements[i].ctx = ctx;
+        if (elements[i].type == "protein"){
+            for(var j = 0; j < elements[i].proteins.length; ++j){
+                elements[i].proteins[j].ctx = ctx;
+            }
+        }
+    }
+    assemble_elements();
+    
+    var parts = svgCode.split("/>");
+    svgCode = parts.join("/>\n");
+    
+    window.open("data:application/txt," + encodeURIComponent(svgCode), "_self");
 }

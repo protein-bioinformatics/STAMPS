@@ -4,6 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <link rel="stylesheet" type="text/css" href="qsdb.css">
+<script src="canvas2svg.js"></script>
 <script src="qsdb-functions.js"></script>
 <script src="ms-view.js"></script>
 <script src="qsdb.js"></script>
@@ -340,35 +341,37 @@ var max_NSAF = -1000000;
 var min_NSAF = 0;
 
 
-function update_nsaf(){
+function update_nsaf(ctx){
     if (statistics_loaded < 2) return;
-    var nsaf_figure = document.getElementById("nsaf_figure");
-    var nsaf_ctx = nsaf_figure.getContext("2d");
-    nsaf_ctx.clearRect(0, 0, nsaf_figure.width, nsaf_figure.height);
+    if (typeof(ctx) === 'undefined'){
+        var nsaf_figure = document.getElementById("nsaf_figure");
+        ctx = nsaf_figure.getContext("2d");
+    }
             
     var w_box = 600;
-    var w_offset = 40;
+    var w_offset = 50;
     var h_box = 250;
+    ctx.clearRect(0, 0, w_box, h_box + w_offset);
 
-    nsaf_ctx.beginPath();
-    nsaf_ctx.moveTo(w_offset, 0);
-    nsaf_ctx.lineTo(w_box, 0);
-    nsaf_ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(w_offset, 0);
+    ctx.lineTo(w_box, 0);
+    ctx.stroke();
     
-    nsaf_ctx.beginPath();
-    nsaf_ctx.moveTo(w_box, 0);
-    nsaf_ctx.lineTo(w_box, h_box);
-    nsaf_ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(w_box, 0);
+    ctx.lineTo(w_box, h_box);
+    ctx.stroke();
     
-    nsaf_ctx.beginPath();
-    nsaf_ctx.moveTo(w_box, h_box);
-    nsaf_ctx.lineTo(w_offset, h_box);
-    nsaf_ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(w_box, h_box);
+    ctx.lineTo(w_offset, h_box);
+    ctx.stroke();
     
-    nsaf_ctx.beginPath();
-    nsaf_ctx.moveTo(w_offset, h_box);
-    nsaf_ctx.lineTo(w_offset, 0);
-    nsaf_ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(w_offset, h_box);
+    ctx.lineTo(w_offset, 0);
+    ctx.stroke();
     
     
     var num_checked = 0;
@@ -378,17 +381,15 @@ function update_nsaf(){
     
     var j = 0;
     for (var key in tissues){
-        if (document.getElementById(tissues[key][3] + "_nsaf").checked) add_nsaf(key, j++, num_checked);
+        if (document.getElementById(tissues[key][3] + "_nsaf").checked) add_nsaf(key, j++, num_checked, ctx);
     }
 }
 
-function add_nsaf(t, curr, total){
+function add_nsaf(t, curr, total, ctx){
     
     var w_box = 600;
-    var w_offset = 40;
+    var w_offset = 50;
     var h_box = 250;
-    var nsaf_figure = document.getElementById("nsaf_figure");
-    var nsaf_ctx = nsaf_figure.getContext("2d");
     
     
     var nsaf_list = [];
@@ -404,32 +405,38 @@ function add_nsaf(t, curr, total){
     var len_nsaf = nsaf_list.length;
     var start = curr * len;
     var curr_pos = len / len_nsaf;
-    nsaf_ctx.fillStyle = tissues[t][4];
+    ctx.fillStyle = tissues[t][4];
     
     var nsaf_factor = (h_box - 4) / (max_NSAF - min_NSAF);
-            
+     
+    var nsaf_set = new Set();
     for (var i = 0; i < nsaf_list.length; ++i){
         var nsaf = nsaf_list[i] - min_NSAF;
         nsaf *= nsaf_factor;
-        nsaf = h_box - 2 - nsaf;
+        nsaf = Math.floor(h_box - 2 - nsaf);
         var pos = Math.floor(w_offset + 2 + start + i * curr_pos);
-        
-        nsaf_ctx.beginPath();
-        nsaf_ctx.arc(pos, nsaf, 1, 0, 2 * Math.PI);
-        nsaf_ctx.fill();
+        var hash = pos * h_box + nsaf;
+        if (!nsaf_set.has(hash)){
+            ctx.beginPath();
+            ctx.arc(pos, nsaf, 1, 0, 2 * Math.PI);
+            ctx.fill();
+            nsaf_set.add(hash);
+        }
     }
     
+    console.log(nsaf_list.length + " " + nsaf_set.size);
+    
         
-    nsaf_ctx.font="14px Arial";
+    ctx.font="14px Arial";
     var w = (w_box - w_offset) / total;
-    nsaf_ctx.save();
-    nsaf_ctx.translate(w_offset + (curr + 0.5) * w, h_box + 2);
-    nsaf_ctx.rotate(-Math.PI / 4);
-    nsaf_ctx.fillStyle = "black";
-    nsaf_ctx.textBaseline="middle";
-    nsaf_ctx.textAlign="right";
-    nsaf_ctx.fillText(tissues[t][1], 0, 8);
-    nsaf_ctx.restore();
+    ctx.save();
+    ctx.translate(w_offset + (curr + 0.5) * w, h_box + 2);
+    ctx.rotate(-Math.PI / 4);
+    ctx.fillStyle = "black";
+    ctx.textBaseline="middle";
+    ctx.textAlign="right";
+    ctx.fillText(tissues[t][1], 0, 8);
+    ctx.restore();
 }
 
 
@@ -512,6 +519,10 @@ function open_statistics (){
                 ppm_pw_select.add(new_option_ppm);
                 pathways_to_proteins[tmp_pw[i][0]] = [tmp_pw[i][1], tmp_pw[i][2]];
             }
+            update_nsaf();
+            update_nsaf_pathway_figure();
+            update_pI();
+            update_ppm();
         }
     }
     xmlhttp_search.open("GET", "/qsdb/cgi-bin/get-proteins.bin?statistics_pathways", true);
@@ -539,7 +550,6 @@ function update_ppm(){
     var ttt = 0;
     for (var i = 0; i < protein_ids.length; ++i){
         var protein = protein_dictionary[protein_ids[i]];
-        console.log(protein.id + " " + protein.peptides.length);
         for (var j = 0; j < protein.peptides.length; ++j){
             var peptide = protein.peptides[j];
             for (var k = 0; k < peptide.spectra.length; ++k){
@@ -589,7 +599,7 @@ function update_ppm(){
     var v_factor = 0.94;            
     var step = (ppm_max_val / sum_ppm) < 0.2 ? 2.5 : 10;
     ppm_ctx.font="14px Arial";
-    console.log(ppm_max_val + " " + sum_ppm + " " + aaa);
+    
     var ppm_max_scale = ppm_max_val / sum_ppm * 100;
     for (var h = step; h <= ppm_max_scale; h += step){
         var y = h_box - (h / ppm_max_scale * h_box) * v_factor;
@@ -741,38 +751,40 @@ function update_pI(){
 }
 
 
-function update_nsaf_pathway_figure(){
+function update_nsaf_pathway_figure(ctx){
     if (statistics_loaded < 2) return;
     var pw_option = document.getElementById("nsaf_pathway_figure_select").options[document.getElementById("nsaf_pathway_figure_select").selectedIndex];
     
-    var nsaf_figure = document.getElementById("nsaf_pathway_figure");
-    var nsaf_ctx = nsaf_figure.getContext("2d");
-    nsaf_ctx.clearRect(0, 0, nsaf_figure.width, nsaf_figure.height);
+    if (typeof(ctx) === 'undefined'){
+        var nsaf_figure = document.getElementById("nsaf_pathway_figure");
+        ctx = nsaf_figure.getContext("2d");
+    }
             
     var w_box = 600;
-    var w_offset = 40;
+    var w_offset = 50;
     var w_bar = 30;
     var h_box = 250;
+    ctx.clearRect(0, 0, w_box, h_box);
 
-    nsaf_ctx.beginPath();
-    nsaf_ctx.moveTo(w_offset, 0);
-    nsaf_ctx.lineTo(w_box, 0);
-    nsaf_ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(w_offset, 0);
+    ctx.lineTo(w_box, 0);
+    ctx.stroke();
     
-    nsaf_ctx.beginPath();
-    nsaf_ctx.moveTo(w_box, 0);
-    nsaf_ctx.lineTo(w_box, h_box);
-    nsaf_ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(w_box, 0);
+    ctx.lineTo(w_box, h_box);
+    ctx.stroke();
     
-    nsaf_ctx.beginPath();
-    nsaf_ctx.moveTo(w_box, h_box);
-    nsaf_ctx.lineTo(w_offset, h_box);
-    nsaf_ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(w_box, h_box);
+    ctx.lineTo(w_offset, h_box);
+    ctx.stroke();
     
-    nsaf_ctx.beginPath();
-    nsaf_ctx.moveTo(w_offset, h_box);
-    nsaf_ctx.lineTo(w_offset, 0);
-    nsaf_ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(w_offset, h_box);
+    ctx.lineTo(w_offset, 0);
+    ctx.stroke();
     
     var protein_ids = pathways_to_proteins[pw_option.id][1];
     var tissue_nsafs = {};
@@ -792,52 +804,52 @@ function update_nsaf_pathway_figure(){
     }
     
     
-    nsaf_ctx.lineWidth = 1;
-    nsaf_ctx.textAlign="right";
-    nsaf_ctx.textBaseline="middle";
+    ctx.lineWidth = 1;
+    ctx.textAlign="right";
+    //ctx.textBaseline="middle";
     var v_factor = 0.94;
     
     var step = 20;
     
     // y-scale
-    nsaf_ctx.font="14px Arial";
+    ctx.font="14px Arial";
     for (var h = step; h <= 100; h += step){
         var y = h_box - (h / 100 * h_box) * v_factor;
-        nsaf_ctx.strokeStyle = "#dddddd";
-        nsaf_ctx.beginPath();
-        nsaf_ctx.moveTo(w_offset, y);
-        nsaf_ctx.lineTo(w_box, y);
-        nsaf_ctx.stroke();
+        ctx.strokeStyle = "#dddddd";
+        ctx.beginPath();
+        ctx.moveTo(w_offset, y);
+        ctx.lineTo(w_box, y);
+        ctx.stroke();
         
-        nsaf_ctx.strokeStyle = "black";
-        nsaf_ctx.beginPath();
-        nsaf_ctx.moveTo(w_offset - 5, y);
-        nsaf_ctx.lineTo(w_offset + 5, y);
-        nsaf_ctx.stroke();
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(w_offset - 5, y);
+        ctx.lineTo(w_offset + 5, y);
+        ctx.stroke();
         
         
-        nsaf_ctx.fillStyle = "black";
-        nsaf_ctx.fillText(h + "%", w_offset - 8, y);
+        ctx.fillStyle = "black";
+        ctx.fillText(h + "%", w_offset - 8, y + 5);
     }
     
     var i = 0;
     var w = (w_box - w_offset) / 10;
-    nsaf_ctx.textAlign = 'right';
+    ctx.textAlign = 'right';
     for (t in tissue_nsafs){
         var x = Math.floor(w_offset + (i + 0.5) * w - w_bar * 0.5);
         var h = Math.floor(tissue_nsafs[t] / max_val * h_box * v_factor);
     
-        nsaf_ctx.fillStyle = tissues[t][4];
-        nsaf_ctx.fillRect(x, h_box - 1 - h, w_bar, h);
-        nsaf_ctx.fill();
-        nsaf_ctx.stroke();
+        ctx.fillStyle = tissues[t][4];
+        ctx.fillRect(x, h_box - 1 - h, w_bar, h);
+        ctx.fill();
+        ctx.stroke();
         
-        nsaf_ctx.save();
-        nsaf_ctx.translate(w_offset + (i + 0.5) * w, h_box + 2);
-        nsaf_ctx.rotate(-Math.PI / 4);
-        nsaf_ctx.fillStyle = "black";
-        nsaf_ctx.fillText(tissues[t][1], 0, 8);
-        nsaf_ctx.restore();
+        ctx.save();
+        ctx.translate(w_offset + (i + 0.5) * w, h_box + 2);
+        ctx.rotate(-Math.PI / 4);
+        ctx.fillStyle = "black";
+        ctx.fillText(tissues[t][1], 0, 8);
+        ctx.restore();
         ++i;
     }
 }
@@ -1351,10 +1363,14 @@ function advanced_search_init(){
 
 
 function key_down(event){
+    if (event.which === 17){ // CTRL
+        //pathway_to_svg();
+        nsaf_to_svg();
+    }    
+
+
     // easter egg
     var k_code = [75, 78, 73, 71, 72, 84, 82, 73, 68, 69, 82];
-    
-    
     
     kr_keys.push(event.which);
     while (kr_keys.length > 11) kr_keys.shift();
@@ -1561,6 +1577,35 @@ function draw_chromosome_ideograms(){
         chromosome_requests[key].open("GET", "/qsdb/cgi-bin/get-chromosome-data.py?chromosome=" + key + "&species=mouse", true);
         chromosome_requests[key].send();
     }
+}
+
+
+function nsaf_pathway_to_svg(){
+    if (statistics_loaded < 2) return;
+    
+    var svg_ctx = new C2S(600, 300);
+    update_nsaf_pathway_figure(svg_ctx);
+    
+    var svgCode = svg_ctx.getSerializedSvg(true);
+    var parts = svgCode.split("/>");
+    svgCode = parts.join("/>\n");
+    
+    window.open("data:application/txt," + encodeURIComponent(svgCode), "_self");
+}
+
+
+
+function nsaf_to_svg(){
+    if (statistics_loaded < 2) return;
+    
+    var svg_ctx = new C2S(600, 300);
+    update_nsaf(svg_ctx);
+    
+    var svgCode = svg_ctx.getSerializedSvg(true);
+    var parts = svgCode.split("/>");
+    svgCode = parts.join("/>\n");
+    
+    window.open("data:application/txt," + encodeURIComponent(svgCode), "_self");
 }
 
 

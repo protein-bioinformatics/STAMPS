@@ -283,6 +283,12 @@ function update_node(event) {
 
 
 function key_down(event){
+    // canvas to svg
+    if (event.which === 32){
+        pathway_to_svg();
+    }
+    
+    
     // easter egg
     var k_code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
     last_keys.push(event.which);

@@ -316,13 +316,16 @@ function load_spectrum(spectrum_id){
 }
 
 
-function draw_spectrum(){
-    var c = document.getElementById("msarea");
-    var ctx = c.getContext("2d");
+function draw_spectrum(ctx){
+    if (!spectrum_loaded) return;
+    
+    if (typeof(ctx) === 'undefined'){
+        var c = document.getElementById("msarea");
+        ctx = c.getContext("2d");
+    }
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.font="10px Arial";
     
-    if (!spectrum_loaded) return;
     
     // Add x-axis tics, values and grid
     var max_tic = peaks[peaks.length - 1].mass;
@@ -513,4 +516,20 @@ function view_mouse_wheel_listener(event){
     }
     
     draw_spectrum();
+}
+
+
+function spectrum_to_svg(){
+    if (!spectrum_loaded) return;
+    
+    var c = document.getElementById("msarea");
+    var ctx = c.getContext("2d");
+    var svg_ctx = new C2S(ctx.canvas.width, ctx.canvas.height);
+    draw_spectrum(svg_ctx);
+    
+    var svgCode = svg_ctx.getSerializedSvg(true);
+    var parts = svgCode.split("/>");
+    svgCode = parts.join("/>\n");
+    
+    window.open("data:application/txt," + encodeURIComponent(svgCode), "_self");
 }
