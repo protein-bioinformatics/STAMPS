@@ -3210,7 +3210,7 @@ function download_assay(){
             document.getElementById("download").innerHTML = html;
         }
     }
-    xmlhttp.open("GET", "cgi-bin/prepare-download.py?spectra=" + spectra_list + "&proteins=" + proteins_list, true);
+    xmlhttp.open("GET", "cgi-bin/prepare-download.py?spectra=" + spectra_list + "&proteins=" + proteins_list + "&species=" + species, true);
     xmlhttp.send();
 }
 
