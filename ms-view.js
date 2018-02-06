@@ -289,9 +289,9 @@ function load_spectrum(spectrum_id){
     }
     var canvas_width = ctx.canvas.width;
     
-    left_border = canvas_width * 0.05;
-    right_border = canvas_width * 0.95;
-    top_border = ctx.canvas.height * 0.05;
+    left_border = canvas_width * 0.065;
+    right_border = canvas_width * 0.96;
+    top_border = ctx.canvas.height * 0.06;
     bottom_border = ctx.canvas.height * 0.95;
     
     
