@@ -24,6 +24,7 @@ print()
 form = cgi.FieldStorage()
 proteins = form.getvalue('proteins')
 spectra = form.getvalue('spectra')
+species = form.getvalue('species')
 
 proteins = proteins.replace("'", "")
 proteins = proteins.replace(" ", "")
@@ -34,6 +35,10 @@ spectra = spectra.replace("'", "")
 spectra = spectra.replace(" ", "")
 spectra = spectra.split(":")
 
+
+species = species.replace("'", "")
+species = species.replace(" ", "")
+species = species.replace(":", ",")
 
 
 rnd = hashlib.md5(str(int(random() * 1000000000)).encode('utf-8')).hexdigest()
@@ -55,10 +60,10 @@ with open(fasta_file, mode="wt") as fl:
 
 
 
-
 # create blib file
 blib_file = "../tmp/%s/spectra.blib" % rnd
-db = sqlite3.connect(conf["sqlite_file"])
+#print(conf["sp"species])
+db = sqlite3.connect(conf["spectra_db_%s" % species])
 lite_cur = db.cursor()
 lite_cur.execute("ATTACH DATABASE '%s' As blib;" % blib_file)
 lite_cur.execute("CREATE TABLE blib.tmp (sid int)")
