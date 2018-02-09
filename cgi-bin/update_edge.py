@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from pymysql import connect, cursors
 from cgi import FieldStorage
