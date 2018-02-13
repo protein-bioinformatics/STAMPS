@@ -1409,11 +1409,11 @@ function Infobox(ctx){
             var node_obj = data[this.node_id].proteins[this.protein_id];
             var html_content = "<div style=\"font-family: arial;\"><b>" + node_obj.name + "</b>";
             html_content += "<hr>";
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Definition:</b> " + node_obj.definition + "</div>";
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Uniprot accession:</b> <a href=\"http://www.uniprot.org/uniprot/" + node_obj.accession + "\" target=\"blank\">" + node_obj.accession + "</a></div>";
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>EC number:</b> <a href=\"http://www.genome.jp/dbget-bin/www_bget?ec:" + node_obj.ec_number + "\" target=\"blank\">" + node_obj.ec_number + "</a></div>";
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Mass / Da:</b> " + node_obj.mass + "</div>";
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Coverage:</b></div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Definition:</b> " + node_obj.definition + "</div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Uniprot accession:</b> <a href=\"http://www.uniprot.org/uniprot/" + node_obj.accession + "\" target=\"blank\">" + node_obj.accession + "</a></div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>EC number:</b> <a href=\"http://www.genome.jp/dbget-bin/www_bget?ec:" + node_obj.ec_number + "\" target=\"blank\">" + node_obj.ec_number + "</a></div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Mass / Da:</b> " + node_obj.mass + "</div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Coverage:</b></div>";
             html_content += "<canvas id=\"infobox_renderarea\" height=\"" + line_height + "\" width=\"" + (this.width - 40) + "\"></canvas>";
             
             
