@@ -1414,7 +1414,7 @@ function Infobox(ctx){
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>EC number:</b> <a href=\"http://www.genome.jp/dbget-bin/www_bget?ec:" + node_obj.ec_number + "\" target=\"blank\">" + node_obj.ec_number + "</a></div>";
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Mass / Da:</b> " + node_obj.mass + "</div>";
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Coverage:</b></div>";
-            html_content += "<canvas id=\"infobox_renderarea\" height=\"" + line_height + "\" width=\"" + (this.width - 40) + "\"></canvas>";
+            html_content += "<canvas id=\"infobox_renderarea\" height=\"" + line_height + "\" width=\"" + (this.width - 45) + "\"></canvas>";
             
             
             document.getElementById("infobox_html_background").style.display = "inline";
@@ -1432,9 +1432,8 @@ function Infobox(ctx){
                 if (!node_obj.peptides[j].filter_valid) continue;
                 var st = node_obj.peptides[j].start_pos;
                 var en = node_obj.peptides[j].peptide_seq.length;
-                //console.log(st + " " + node_obj.sequence_length);
-                st *= (this.width - 40) / node_obj.sequence_length;
-                en *= (this.width - 40) / node_obj.sequence_length;
+                st *= (this.width - 45) / node_obj.sequence_length;
+                en *= (this.width - 45) / node_obj.sequence_length;
                 info_ctx.fillRect(st, 0, en, line_height);
             }
             

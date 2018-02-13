@@ -552,6 +552,8 @@ string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, 
     mysql_free_result(res);
     mysql_close(conn);
     
+    if (!p_i) return "[]";
+    
     
     // create FM index for fast pattern search    
     unsigned char* T = new unsigned char[len_text];
