@@ -588,6 +588,7 @@ function Spectrum(data){
 
 function Peptide(data){
     this.peptide_seq = data['p'];
+    this.start_pos = data['b'];
     this.spectra = [];
     this.filter_valid = false;
     this.user_selected = true;
@@ -1327,7 +1328,7 @@ function Infobox(ctx){
         else {
             this.width = 40;
             this.height = 40;
-            this.height += 5 * line_height + 20;
+            this.height += 7 * line_height + 20;
             this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
             this.width = Math.max(this.width, this.ctx.measureText("Definition: " + data[this.node_id].proteins[this.protein_id].definition).width + 40);
             this.width = Math.max(this.width, this.ctx.measureText("Uniprot accession: " + data[this.node_id].proteins[this.protein_id].accession).width + 40);
@@ -1408,10 +1409,12 @@ function Infobox(ctx){
             var node_obj = data[this.node_id].proteins[this.protein_id];
             var html_content = "<div style=\"font-family: arial;\"><b>" + node_obj.name + "</b>";
             html_content += "<hr>";
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Definition:</b> " + node_obj.definition + "</div>";
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Uniprot accession:</b> <a href=\"http://www.uniprot.org/uniprot/" + node_obj.accession + "\" target=\"blank\">" + node_obj.accession + "</a></div>";
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>EC number:</b> <a href=\"http://www.genome.jp/dbget-bin/www_bget?ec:" + node_obj.ec_number + "\" target=\"blank\">" + node_obj.ec_number + "</a></div>";
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Mass / Da:</b> " + node_obj.mass + "</div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Definition:</b> " + node_obj.definition + "</div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Uniprot accession:</b> <a href=\"http://www.uniprot.org/uniprot/" + node_obj.accession + "\" target=\"blank\">" + node_obj.accession + "</a></div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>EC number:</b> <a href=\"http://www.genome.jp/dbget-bin/www_bget?ec:" + node_obj.ec_number + "\" target=\"blank\">" + node_obj.ec_number + "</a></div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Mass / Da:</b> " + node_obj.mass + "</div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Coverage:</b></div>";
+            html_content += "<canvas id=\"infobox_renderarea\" height=\"" + line_height + "\" width=\"" + (this.width - 40) + "\"></canvas>";
             
             
             document.getElementById("infobox_html_background").style.display = "inline";
@@ -1421,6 +1424,25 @@ function Infobox(ctx){
             obj.style.display = "inline";
             obj.style.left = (this.x - offset_x).toString() + "px";
             obj.style.top = (this.y - offset_y).toString() + "px";
+            
+            // create coverage lane
+            var info_ctx = document.getElementById("infobox_renderarea").getContext("2d");
+            info_ctx.fillStyle = edge_color;
+            for(var j = 0; j < node_obj.peptides.length; ++j){
+                if (!node_obj.peptides[j].filter_valid) continue;
+                var st = node_obj.peptides[j].start_pos;
+                var en = node_obj.peptides[j].peptide_seq.length;
+                //console.log(st + " " + node_obj.sequence_length);
+                st *= (this.width - 40) / node_obj.sequence_length;
+                en *= (this.width - 40) / node_obj.sequence_length;
+                info_ctx.fillRect(st, 0, en, line_height);
+            }
+            
+            info_ctx.strokeStyle="#000000";
+            info_ctx.beginPath();
+            info_ctx.moveTo(0, (line_height >> 1));
+            info_ctx.lineTo((this.width - 40), (line_height >> 1));
+            info_ctx.stroke();
         }
         
     }
@@ -3327,7 +3349,7 @@ function check_spectra_expand_collapse_peptide(prot_id, pep_id){
             dom_pep_sign = document.createTextNode(sign_right);
             dom_pep_div.appendChild(dom_pep_sign);
             
-            dom_pep_seq = document.createTextNode(" " + current_pep.peptide_seq);
+            dom_pep_seq = document.createTextNode(" " + current_pep.peptide_seq + " " + current_pep.start_pos);
             dom_pep_td.appendChild(dom_pep_seq);
     
             var curr_pep_tissues = Array.from(Object.keys(current_pep.tissues)).sort();
@@ -3517,8 +3539,8 @@ function check_spectra(){
         dom_td1.appendChild(dom_div_prot_info);
         dom_div_prot_info.setAttribute("style", "display:inline; margin: 0px; padding: 0px; float: left;");
         var sing_plur = "Peptide" + (num_pep > 1 ? "s" : "");
-        var dom_t_info = document.createTextNode("\u00A0" + proteins_content[i][0] + " | " + current_prot.id + " | " + num_pep + " " + sing_plur + "\u00A0");
-        //var dom_t_info = document.createTextNode("\u00A0" + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " " + sing_plur + "\u00A0");
+        var dom_t_info = document.createTextNode("\u00A0" + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " " + sing_plur + "\u00A0");
+        //var dom_t_info = document.createTextNode("\u00A0" + proteins_content[i][0] + " | " + current_prot.id + " | " + num_pep + " " + sing_plur + "\u00A0");
         dom_div_prot_info.appendChild(dom_t_info);
         
         

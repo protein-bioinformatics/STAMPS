@@ -134,14 +134,18 @@ class spectrum {
 class peptide {
     public:
         string peptide_seq;
+        int start_pos;
         set<string> tissues;
         vector<spectrum*> spectra;
         
-        peptide(string ps) : peptide_seq(ps) {}
+        peptide(string ps, int pos) : peptide_seq(ps), start_pos(pos) {}
         
         string to_string(){
+            char buffer[50];
+            sprintf(buffer, "%i", start_pos);
             string str = "{";
             str += "\"p\":\"" + peptide_seq + "\",";
+            str += "\"b\":" + string(buffer) + ",";
             str += "\"s\":[";
             for (int i = 0; i < spectra.size(); ++i){
                 if (i) str += ",";
@@ -164,15 +168,20 @@ class protein {
         string fasta;
         vector<peptide*> peptides;
         string validation;
+        int proteome_start_pos;
         
         protein(string _id) : str_id(_id) {id = atoi(str_id.c_str());}
         
         string to_string(){
+            char buffer[50];
+            sprintf(buffer, "%i", (int)fasta.length());
+            
             string str = "{";
             str += "\"i\":" + str_id + ",";
             str += "\"n\":\"" + name + "\",";
             str += "\"d\":\"" + definition + "\",";
             str += "\"m\":\"" + mass + "\",";
+            str += "\"l\":" + string(buffer) + ",";
             str += "\"a\":\"" + accession + "\",";
             str += "\"e\":\"" + ec_number + "\",";
             str += "\"v\":\"" + validation + "\",";
@@ -277,8 +286,10 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
             
         }
         if (L == R){
-            current_pep = new peptide(P);
-            proteins->at(index_rank->get_rank_right(SA[L]))->peptides.push_back(current_pep);
+            int start_pos = SA[L];
+            int prot_index = index_rank->get_rank_right(start_pos);
+            current_pep = new peptide(P, start_pos - proteins->at(prot_index)->proteome_start_pos);
+            proteins->at(prot_index)->peptides.push_back(current_pep);
             all_peptides->insert(pair<string, peptide* >(P, current_pep));
             prev_pep_seq = P;
             prev_pep = current_pep;
@@ -537,6 +548,7 @@ main(int argc, char** argv) {
             last_protein->ec_number = row[column_names_proteins[string("ec_number")]];
             last_protein->validation = row[column_names_proteins[string("validation")]];
             last_protein->fasta = cleanFasta(row[column_names_proteins[string("fasta")]]);
+            last_protein->proteome_start_pos = len_text;
             len_text += last_protein->fasta.length() + 1;
             all_proteins->insert(pair<int, protein* >(pid, last_protein));
             proteins->push_back(last_protein);
