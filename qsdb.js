@@ -152,7 +152,7 @@ function mouse_move_listener(e){
 function key_down(event){// canvas to svg
     if (event.which === 17){ // CTRL
         //pathway_to_svg();
-        spectrum_to_svg();
+        nsaf_to_svg();
     }
     
     // easter egg

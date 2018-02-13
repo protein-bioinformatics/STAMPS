@@ -927,8 +927,6 @@ main(int argc, char** argv) {
         if (compress) result = compress_string(result);
     }
     
-    //exit(0);
-    
     cout << result << endl;
     return 0;
 }
