@@ -458,7 +458,10 @@ function set_pathway_menu(){
         pathway_menu += "<tr><td class=\"" + selected + "\" onclick=\"change_pathway(";
         pathway_menu += i;
         pathway_menu += ");\">";
-        pathway_menu += pathways[i][1]; 
+        var pathway_name = pathways[i][1];
+        pathway_name = replaceAll(pathway_name, "-\\n", "");
+        pathway_name = replaceAll(pathway_name, "\n", "");
+        pathway_menu += pathway_name; 
         pathway_menu += "</td></tr>";
     }
     pathway_menu += "</table>";
@@ -3326,9 +3329,11 @@ function show_hide_peptide_tissues(){
 
 
 function show_hide_protein_tissues(){
-    var protein_tissues = document.getElementsByClassName("protein_tissues");
-    for (var i = 0; i < protein_tissues.length; ++i){
-        protein_tissues[i].style.display = filter_parameters['protein_tissues_visible'] ? "inline" : "none";
+    for (var t in tissues){ 
+        var protein_tissues = document.getElementsByClassName(tissues[t][1]);
+        for (var i = 0; i < protein_tissues.length; ++i){
+            protein_tissues[i].style.display = filter_parameters['protein_tissues_visible'] ? "inline" : "none";
+        }
     }
 }
 
@@ -3584,7 +3589,7 @@ function check_spectra(){
         
         var dom_div_prot_info = document.createElement("div");
         dom_td1.appendChild(dom_div_prot_info);
-        dom_div_prot_info.setAttribute("style", "display:inline; margin: 0px; padding: 0px; float: left;");
+        dom_div_prot_info.setAttribute("style", "display: inline; margin: 0px; padding: 0px; float: left;");
         var sing_plur = "Peptide" + (num_pep > 1 ? "s" : "");
         var dom_t_info = document.createTextNode("\u00A0" + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " " + sing_plur + "\u00A0");
         //var dom_t_info = document.createTextNode("\u00A0" + proteins_content[i][0] + " | " + current_prot.id + " | " + num_pep + " " + sing_plur + "\u00A0");
@@ -3596,10 +3601,12 @@ function check_spectra(){
             var dom_t2 = document.createTextNode("\u00A0\u00A0");
             dom_td1.appendChild(dom_t2);
             
+            /*
             var dom_div2 = document.createElement("div");
             dom_td1.appendChild(dom_div2);
-            dom_div2.setAttribute("style", "display: " + protein_tissue_style + "; vertical-algin: middle;");
+            dom_div2.setAttribute("style", "display: " + protein_tissue_style + "; vertical-align: middle;");
             dom_div2.setAttribute("class", "protein_tissues");
+            */
             
             for (var t = 0; t < curr_tissues.length; ++t){
                 if (curr_tissues[t] in tissues){
