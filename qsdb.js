@@ -53,6 +53,7 @@ function init(){
     document.getElementById("infobox_html_background").addEventListener("click", hide_infobox, false);
     
     window.addEventListener('resize', resize_ms_view, false);
+    window.addEventListener('resize', resize_pathway_view, false);
     document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
     document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
     
@@ -145,6 +146,12 @@ function mouse_move_listener(e){
     }
     if(highlight_element && highlight_element.tipp) Tip(e, highlight_element.name);
     else unTip();
+    
+    var set_mouse_pointer = -1;
+    if(highlight_element instanceof node){
+        set_mouse_pointer = highlight_element.check_mouse_over_protein_name(res);
+    }
+    c.style.cursor = (set_mouse_pointer >= 0) ? "pointer" : "default";
 }
 
 
@@ -152,7 +159,8 @@ function mouse_move_listener(e){
 function key_down(event){// canvas to svg
     if (event.which === 17){ // CTRL
         //pathway_to_svg();
-        nsaf_to_svg();
+        //nsaf_to_svg();
+        return false;
     }
     
     // easter egg

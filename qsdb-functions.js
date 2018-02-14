@@ -1407,13 +1407,50 @@ function Infobox(ctx){
         }
         else if (data[this.node_id].type == "protein"){
             var node_obj = data[this.node_id].proteins[this.protein_id];
+            
+            var coverage_list = [];
+            for(var j = 0; j < node_obj.peptides.length; ++j){
+                if (!node_obj.peptides[j].filter_valid) continue;
+                var st = node_obj.peptides[j].start_pos;
+                var en = st + node_obj.peptides[j].peptide_seq.length;
+                
+                var insert = true;
+                for (var k = 0; k < coverage_list.length; ++k){
+                    var range = coverage_list[k];
+                    if ((range[0] <= st && st < range[1]) ||(range[0] <= en && en < range[1])){
+                        range[0] = Math.min(range[0], st);
+                        range[1] = Math.max(range[1], en);
+                        insert = false;
+                    }
+                }
+                if (insert) coverage_list.push([st, en]);
+                
+                coverage_list.sort();
+                for (var k = 0; k < coverage_list.length - 1; ++k){
+                    var r1 = coverage_list[k];
+                    var r2 = coverage_list[k + 1];
+                    if ((r1[0] <= r2[0] && r2[0] < r1[1]) ||(r1[0] <= r2[1] && r2[1] < r1[1])){
+                        r1[0] = Math.min(r1[0], r2[0]);
+                        r1[1] = Math.max(r1[1], r2[1]);
+                        coverage_list.splice(k + 1, 1);
+                        --k;
+                    }
+                }
+            }
+            
+            var coverage = 0;
+            for (var k = 0; k < coverage_list.length; ++k){
+                coverage += coverage_list[k][1] - coverage_list[k][0];
+            }
+            coverage *= 100 / node_obj.sequence_length;
+            
             var html_content = "<div style=\"font-family: arial;\"><b>" + node_obj.name + "</b>";
             html_content += "<hr>";
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Definition:</b> " + node_obj.definition + "</div>";
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Uniprot accession:</b> <a href=\"http://www.uniprot.org/uniprot/" + node_obj.accession + "\" target=\"blank\">" + node_obj.accession + "</a></div>";
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>EC number:</b> <a href=\"http://www.genome.jp/dbget-bin/www_bget?ec:" + node_obj.ec_number + "\" target=\"blank\">" + node_obj.ec_number + "</a></div>";
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Mass / Da:</b> " + node_obj.mass + "</div>";
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Coverage:</b></div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Coverage: " + coverage.toFixed(2) + "%</b></div>";
             html_content += "<canvas id=\"infobox_renderarea\" height=\"" + line_height + "\" width=\"" + (this.width - 45) + "\"></canvas>";
             
             
@@ -1526,7 +1563,8 @@ function node(data, ctx){
             }
             this.width += 50 + this.slide * 20;
             this.name = name;
-            this.tipp = (name.length || true);
+            //this.tipp = (name.length || true);
+            this.tipp = false;
             break;
             
         case "pathway":
@@ -1537,7 +1575,8 @@ function node(data, ctx){
                 if (this.width < tokens[j].length) this.width = tokens[j].length;
             }
             this.width *= 12;
-            this.tipp = true;
+            //this.tipp = true;
+            this.tipp = false;
             break;
             
         case "metabolite":
@@ -2779,6 +2818,10 @@ function compute_edges(){
         nodes_anchors.push({left: [], right: [], top: [], bottom: []});
     }
     for (var i = 0; i < nodes.length; ++i){
+        if (!(nodes[i]['node_id'] in data_ref)){
+            console.log(nodes[i]['node_id']);
+            return;
+        }
         var node_id = data_ref[nodes[i]['node_id']];
         var reversible = parseInt(nodes[i]['reversible']);
         for (var j = 0; j < nodes[i]['reagents'].length; ++j){
@@ -3000,6 +3043,11 @@ function get_mouse_pos(canvas, evt){
 
 function mouse_wheel_listener(e){
     if (!pathway_is_loaded) return;
+    if(e.ctrlKey){
+        e.preventDefault();  //prevent zoom
+    if(e.deltaY<0) return false;
+    if(e.deltaY>0) return false;
+  }
     var c = document.getElementById("renderarea");
     zoom_in_out(e.detail >= 0, get_mouse_pos(c, e));
     draw();
@@ -3864,6 +3912,7 @@ function select_species(){
 function open_filter_panel(){
     if (document.getElementById("filter_panel_wrapper").style.display == "inline"){
         hide_filter_panel();
+        document.getElementById("filter_panel_wrapper").innerHTML = "";
     }
     else {
         document.getElementById("filter_panel_check_spectra").innerHTML = "";
@@ -4228,6 +4277,18 @@ function prepare_infobox(prot){
     }, steps);
 }
 
+
+function resize_pathway_view(){
+    
+    var c = document.getElementById("renderarea");
+    var ctx = c.getContext("2d");
+    ctx.canvas.width  = window.innerWidth;
+    ctx.canvas.height = window.innerHeight;
+    preview_element.y = window.innerHeight - preview_element.height;
+    zoom_sign_in.y = window.innerHeight - zoom_sign_in.height * (1.3 + zoom_sign_in.dir);
+    zoom_sign_out.y = window.innerHeight - zoom_sign_out.height * (1.3 + zoom_sign_out.dir);
+    draw();
+}
 
 
 function load_data(reload){
