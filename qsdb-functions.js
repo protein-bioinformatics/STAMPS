@@ -60,6 +60,7 @@ spectra_exclude = [];
 back_function = 0;
 num_validation = [0, 0, 0];
 search_data = [];
+read_cookie_information = false;
 
 scaling = 1.25;
 expanding_percentage = 0.25;
@@ -4632,7 +4633,7 @@ function filter_settings_clicked(){
 
 
 function setCookie(){
-    var cookie_data = {"proteins_checked": Array.from(which_proteins_checked), "filter_parameters": filter_parameters};
+    var cookie_data = {"proteins_checked": Array.from(which_proteins_checked), "filter_parameters": filter_parameters, "read_cookie_information": read_cookie_information};
     document.cookie = encodeURI(JSON.stringify(cookie_data));
 }
 
