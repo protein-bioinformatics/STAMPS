@@ -71,6 +71,14 @@ function init(){
             console.log(e);
         }
     }
+    
+    /*
+    read_cookie_information = false;
+    which_proteins_checked = new Set();
+    document.cookie = "";
+    */
+    
+    console.log(read_cookie_information);
     if (!read_cookie_information) document.getElementById('cookie_information').style.display = "inline";
     
     change_pathway(0);
