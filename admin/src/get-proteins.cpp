@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include "sais.h"
 #include "wavelet.h"
+#include "bio-classes.h"
 
 using namespace std;
 
@@ -29,21 +30,6 @@ using namespace std;
     string folder_delim = "/";
 #endif
 
-float compute_mass(string);
-void replaceAll(string&, const string&, const string&);
-
-
-vector<string> split(string str, char delimiter) {
-  vector<string> internal;
-  stringstream ss(str); // Turn the string into a stream.
-  string tok;
-  
-  while(getline(ss, tok, delimiter)) {
-    internal.push_back(tok);
-  }
-  
-  return internal;
-}
 
 bool is_integer_number(const string& string){
   string::const_iterator it = string.begin();
@@ -56,46 +42,7 @@ bool is_integer_number(const string& string){
   return string.size()>minSize && it == string.end();
 }
 
-string compress_string(const string& str, int compressionlevel = Z_BEST_COMPRESSION){
-    z_stream zs;                        // z_stream is zlib's control structure
-    memset(&zs, 0, sizeof(zs));
- 
-    if (deflateInit(&zs, compressionlevel) != Z_OK)
-        throw(runtime_error("deflateInit failed while compressing."));
- 
-    zs.next_in = (Bytef*)str.data();
-    zs.avail_in = str.size();           // set the z_stream's input
- 
-    int ret;
-    char outbuffer[32768];
-    string outstring;
- 
-    // retrieve the compressed bytes blockwise
-    do {
-        zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
-        zs.avail_out = sizeof(outbuffer);
- 
-        ret = deflate(&zs, Z_FINISH);
- 
-        if (outstring.size() < zs.total_out) {
-            // append the block to the output string
-            outstring.append(outbuffer,
-                             zs.total_out - outstring.size());
-        }
-    } while (ret == Z_OK);
- 
-    deflateEnd(&zs);
- 
-    if (ret != Z_STREAM_END) {          // an error occurred that was not EOF
-        ostringstream oss;
-        oss << "Exception during zlib compression: (" << ret << ") " << zs.msg;
-        throw(runtime_error(oss.str()));
-    }
- 
-    return outstring;
-}
-
-
+/*
 string remove_newline(string str) {
     size_t start_pos = 0;
     while((start_pos = str.find("\n", start_pos)) != string::npos) {
@@ -110,7 +57,6 @@ string remove_newline(string str) {
     }
     return str;
 }
-
 
 class spectrum {
     public:
@@ -173,15 +119,6 @@ class peptide {
                 if (i) str += ",";
                 str += spectra.at(i)->to_string(complete);
             }
-            /*
-            str += "]";
-            str += ",\"t\":[";
-            set<string>::iterator it = tissues.begin();
-            for (int i = 0; it != tissues.end(); ++it, ++i){
-                if (i) str += ",";
-                str += *it;
-            }
-            */
             str += "]}";
             return str;
         }
@@ -227,6 +164,7 @@ class protein {
             return str;
         }
 };
+*/
 
 map<string, peptide* > peptide_dict;
 vector< protein* > proteins;
@@ -239,24 +177,6 @@ ranking* index_rank = 0;
 int* less_table = 0;
 int len_text = 0;
 int* SA = 0;
-
-int binarySearch(int* array, int length, int key) {
-    int low = 0;
-    int mid = 0;
-    int high = length - 1;
-    while (low <= high) {
-        mid = (low + high) >> 1;
-        if (array[mid] <= key) {
-            low = mid + 1;
-        } else {
-            high = mid - 1;
-        }
-    }
-    if (mid > 0 && key < array[mid]) {
-        mid -= 1;
-    }
-    return mid;
-}
 
 string prev_pep_seq = "";
 peptide* prev_pep = 0;
@@ -287,7 +207,9 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
         
         
         if (L == R){
-            current_pep = new peptide(P);
+            int start_pos = SA[L];
+            int prot_index = index_rank->get_rank_right(start_pos);
+            current_pep = new peptide(P, start_pos - proteins[prot_index]->proteome_start_pos);
             proteins[index_rank->get_rank_right(SA[L])]->peptides.push_back(current_pep);
             peptide_dict.insert(pair<string, peptide* >(P, current_pep));
             prev_pep_seq = P;
@@ -317,35 +239,6 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
 }
 
 
-void replaceAll(std::string& str, const std::string& from, const std::string& to) {
-    if(from.empty())
-        return;
-    size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
-    }
-}
-
-string cleanFasta(string str){
-    int start_pos = str.find("\n");
-    string modified = str.substr(start_pos + 1);
-    replaceAll(modified, "\n", "");
-    replaceAll(modified, {10}, "");
-    replaceAll(modified, {13}, "");
-    return modified;
-}
-
-void strip(string &str){
-    while (str.length() && (str[0] == ' ' || str[0] == 13 || str[0] == 10)){
-        str = str.substr(1);
-    }
-    int l = str.length();
-    while (l && (str[l - 1] == ' ' || str[l - 1] == 13 || str[l - 1] == 10)){
-        str = str.substr(0, l - 1);
-        --l;
-    }
-}
 
 static int callback(void *count, int argc, char **argv, char **azColName) {
     int *c = (int*)count;
@@ -355,165 +248,7 @@ static int callback(void *count, int argc, char **argv, char **azColName) {
 
 
 
-float aa_coefficients[][3] = {
-{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
-{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
-{}, {}, {}, 
-{8.00,  8.28,  9.00}, // C
-{3.57,  4.07,  4.57}, // D
-{4.15,  4.45,  4.75}, // E
-{}, {},
-{4.89,  6.08,  6.89}, // H
-{}, {}, 
-{10.00,  9.80, 10.30}, // K
-{}, {}, {}, {}, {}, {},
-{11.50, 12.50, 11.50}, // R
-{}, {}, 
-{5.20,  5.43,  5.60}, // U
-{}, {}, {},
-{9.34,  9.84, 10.34}, // Y
-{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}};
-
-long coeff_set[2] = {0, (1l << ('C' & 63)) | (1l << ('D' & 63)) | (1l << ('E' & 63)) | (1l << ('H' & 63)) | (1l << ('K' & 63)) | (1l << ('R' & 63)) | (1l << ('U' & 63)) | (1l << ('Y' & 63))};
-
-
-float aa_coefficients_middle[][2] = {
-{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
-{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
-{},
-{7.58, 3.75}, // A
-{7.46, 3.57},
-{8.12, 3.10},
-{7.70, 3.50},
-{7.19, 3.50},
-{6.96, 3.98},
-{7.50, 3.70},
-{7.18, 3.17},
-{7.48, 3.72},
-{7.46, 3.73},
-{6.67, 3.40},
-{7.46, 3.73},
-{6.98, 3.68},
-{7.22, 3.64},
-{7.00, 3.50}, 
-{8.36, 3.40},
-{6.73, 3.57},
-{6.76, 3.41},
-{6.86, 3.61},
-{7.02, 3.57},
-{5.20, 5.60},   
-{7.44, 3.69},
-{7.11, 3.78},
-{7.26, 3.57},
-{6.83, 3.60},
-{6.96, 3.535}, // Z
-{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}};
-
-
-float acids[] = {
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0,
-71.037110, // A
-0,
-103.009190,
-115.026940,
-129.042590,
-147.068410,
-57.021460,
-137.058910,
-113.084060,
-0,
-128.094960,
-113.084060,
-131.040490,
-114.042930,
-0,
-97.052760,
-128.058580,
-156.101110,
-87.032030,
-101.047680,
-0,
-99.068410, // Z
-186.079310,
-0,
-163.063330,
-0, // Z
-0, 0, 0, 0, 0, 0, 0, 0,
-160.030654, // c
-0, 0, 0, 0, 0, 0, 0, 0, 0,
-147.035404,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-
-
-float predict_isoelectric_point(string protein_seq){
-    float NQ = 0.0;
-    float pH = 6.51;
-    float pHprev = 0.0;         
-    float pHnext = 14.0;        
-    float e = 0.01;
-    float counter[128];
-    for (int i = 0; i < 128; ++i) counter[i] = 0;
-    for (int i = 0; i < protein_seq.length(); ++i) ++counter[protein_seq[i]];
-    
-    while (true){
-        char first = protein_seq[0];
-        char last = protein_seq[protein_seq.length() - 1];
-        float QN_1 = -1. / (1. + pow(10., ((coeff_set[first >> 6] >> (first & 63) & 1l) ? aa_coefficients[first][2] : aa_coefficients_middle[first][1]) - pH));
-        float QP_2 = 1. / (1. + pow(10., pH - ((coeff_set[last >> 6] >> (last & 63) & 1l) ? aa_coefficients[last][0] : aa_coefficients_middle[last][0])));
-    
-        float QN_2 = -counter['D'] / (1 + pow(10, aa_coefficients['D'][1] - pH));
-        float QN_3 = -counter['E'] / (1 + pow(10, aa_coefficients['E'][1] - pH));
-        float QN_4 = -counter['C'] / (1 + pow(10, aa_coefficients['C'][1] - pH));
-        float QN_5 = -counter['Y'] / (1 + pow(10, aa_coefficients['Y'][1] - pH));
-        float QP_1 = counter['H'] / (1 + pow(10, pH - aa_coefficients['H'][1]));
-        float QP_3 = counter['K'] / (1 + pow(10, pH - aa_coefficients['K'][1]));
-        float QP_4 = counter['R'] / (1 + pow(10, pH - aa_coefficients['R'][1]));
-    
-        NQ = QN_1 + QN_2 + QN_3 + QN_4 + QN_5 + QP_1 + QP_2 + QP_3 + QP_4;
-        
-        if (NQ < 0.){
-            float tmp = pH;
-            pH = pH - ((pH - pHprev) / 2.0);
-            pHnext = tmp;
-        }
-        else {
-            float tmp = pH;
-            pH = pH + ((pHnext - pH) / 2.0);
-            pHprev = tmp;
-        }
-        if (fabs(pH-pHprev) < e){
-            return pH;
-        }
-    }
-}
-
-
-/*float acids[] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 71.037110, 0, 103.009190, 115.026940, 129.042590, 147.068410, 57.021460, 137.058910, 113.084060, 0,
-    128.094960, 113.084060, 131.040490, 114.042930, 0, 97.052760, 128.058580, 156.101110, 87.032030, 101.047680,
-    0, 99.068410, 186.079310, 0, 163.063330, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0};
-*/
-
-float compute_mass(string protein_seq){
-    float mass = 20.024018;
-    for (int i = 0; i < protein_seq.length(); ++i) mass += acids[protein_seq[i]];        
-    return mass;
-}
-
-
-
-
-
 string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, bool statistics){
-    
-    
     MYSQL_RES *res;
     MYSQL_ROW row;
     MYSQL_FIELD *field;
@@ -544,6 +279,7 @@ string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, 
         last_protein->fasta = cleanFasta(row[column_names_proteins[string("fasta")]]);
         last_protein->pI = predict_isoelectric_point(last_protein->fasta);
         last_protein->mass = compute_mass(last_protein->fasta);
+        last_protein->proteome_start_pos = len_text;
         len_text += last_protein->fasta.length() + 1;
         proteins[p_i++] = last_protein;
     }
@@ -645,7 +381,7 @@ string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, 
     string response = "[";
     for (int i = 0; i < proteins.size(); ++i){
         if (i) response += ",";
-        response += proteins[i]->to_string(!statistics);
+        response += proteins[i]->to_string();
     }
     response += "]";
     
