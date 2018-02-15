@@ -107,6 +107,21 @@
 <div id="waiting_background" class="waiting_background"></div>
 
 
+<div id="cookie_information" class="cookie_information">
+    <table width="100%" cellpadding="10" cellspacing="10">
+        <tr>
+            <td><image src="images/cookie.svg" /></td>
+            <td algin="left">
+                <b>Dear User,<br> <br>To provide you an optimal usage, we are using cookies. By using our web service, you are confirming the utilization of cookies. For more information, please contact the administrators.<b>
+            </td>
+            <td>
+                <button onclick="read_cookie_information = true; setCookie(); document.getElementById('cookie_information').style.display = 'none';">Got&nbsp;it</button>
+            </td>
+        </tr>
+    </table>    
+</div>
+
+
 <img src="/qsdb/images/zoom_in.png" id="zoom_in" style="display: none;">
 <img src="/qsdb/images/zoom_out.png" id="zoom_out" style="display: none;">
 <img src="/qsdb/images/expand.png" id="expand" style="display: none;">
