@@ -10,7 +10,7 @@ null_x = 0;
 null_y = 0;
 mouse_x = 0;
 mouse_y = 0;
-filter_parameters = [];
+filter_parameters = {};
 filter_parameters["min_peptide_length"] = 8;
 filter_parameters["max_peptide_length"] = 25;
 filter_parameters["min_precursor_charge"] = 2;
@@ -54,6 +54,7 @@ edge_count = 0;
 draw_code = 0;
 process_edges_semaphore = false;
 protein_dictionary = {};
+which_proteins_checked = new Set();
 toggled_proteins = new Set();
 spectra_exclude = [];
 back_function = 0;
@@ -524,7 +525,7 @@ function Spectrum(data){
     this.ppm = data['p'];
     this.filter_valid = false;
     this.user_selected = true;
-    this.tissues = data["t"];
+    this.tissues = data['t'];
     /*
     if (typeof data["t"] !== 'undefined' && typeof data["n"] !== 'undefined' && data["t"].length == data["n"].length){
         for (var i = 0; i < data["t"].length; ++i){
@@ -582,6 +583,22 @@ function Spectrum(data){
         }
         
         this.filter_valid &= filter_parameters["min_precursor_charge"] <= this.charge && this.charge <= filter_parameters["max_precursor_charge"];
+        
+        if (this.filter_valid && Object.keys(this.tissues).length > 0){
+            var tissue_set = new Set(Object.keys(this.tissues).map(Number));
+            if (!filter_parameters["tissue_brain"] && tissue_set.has(1)) tissue_set.delete(1);
+            if (!filter_parameters["tissue_liver"] && tissue_set.has(2)) tissue_set.delete(2);
+            if (!filter_parameters["tissue_kidney"] && tissue_set.has(3)) tissue_set.delete(3);
+            if (!filter_parameters["tissue_spleen"] && tissue_set.has(4)) tissue_set.delete(4);
+            if (!filter_parameters["tissue_heart"] && tissue_set.has(5)) tissue_set.delete(5);
+            if (!filter_parameters["tissue_blood"] && tissue_set.has(6)) tissue_set.delete(6);
+            if (!filter_parameters["tissue_fat"] && tissue_set.has(7)) tissue_set.delete(7);
+            if (!filter_parameters["tissue_lung"] && tissue_set.has(8)) tissue_set.delete(8);
+            if (!filter_parameters["tissue_eye"] && tissue_set.has(9)) tissue_set.delete(9);
+            if (!filter_parameters["tissue_gut"] && tissue_set.has(10)) tissue_set.delete(10);
+            this.filter_valid = (tissue_set.size != 0);
+        }
+        
     }
     
     this.get_statistics = function(){
@@ -677,12 +694,15 @@ function Protein(data, ctx){
     }
     
     this.filtering = function(){
+        
         this.marked = false;
         this.filter_valid = false;
         for (var i = 0; i < this.peptides.length; ++i){
             this.peptides[i].filtering();
             this.filter_valid |= this.peptides[i].filter_valid;
         }
+        
+        /*
         
         if (this.filter_valid){
             if (this.tissues.size > 0){
@@ -698,9 +718,9 @@ function Protein(data, ctx){
                 if (!filter_parameters["tissue_eye"] && tissue_set.has(9)) tissue_set.delete(9);
                 if (!filter_parameters["tissue_gut"] && tissue_set.has(10)) tissue_set.delete(10);
                 
-                if (tissue_set.size == 0) this.filter_valid = false;
+                this.filter_valid = (tissue_set.size != 0);
             }
-        }
+        }*/
         
         if (this.filter_valid){
             this.fillStyle_rect = "white";
@@ -712,6 +732,7 @@ function Protein(data, ctx){
         }
     }
     this.filtering();
+    this.marked = which_proteins_checked.has(this.id) && this.filter_valid;
     
     this.get_statistics = function(){
         var num_spectra = 0;
@@ -805,10 +826,13 @@ function Protein(data, ctx){
         }
         if (this.marked){
             basket[this.id] = this;
+            which_proteins_checked.add(this.id);
         }
         else {
             if (this.id in basket) delete basket[this.id];
+            if (which_proteins_checked.has(this.id)) which_proteins_checked.delete(this.id);
         }
+        setCookie();
     }
     
     this.mouse_over_name = function(x, y, x_m, y_m, line_number, num){
@@ -4037,8 +4061,8 @@ function hide_filter_panel(){
                 }
                 draw();
                 compute_statistics();
-            }            
-            
+            }
+            setCookie();
         }
         
         
@@ -4604,6 +4628,12 @@ function filter_settings_clicked(){
         }
         check_spectra();
     }
+}
+
+
+function setCookie(){
+    var cookie_data = {"proteins_checked": Array.from(which_proteins_checked), "filter_parameters": filter_parameters};
+    document.cookie = encodeURI(JSON.stringify(cookie_data));
 }
 
 
