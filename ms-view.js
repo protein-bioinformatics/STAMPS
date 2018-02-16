@@ -187,7 +187,10 @@ function resize_ms_view(){
     document.getElementById("msarea").width = document.getElementById('check_spectra').offsetWidth * 0.695;
     document.getElementById("msarea").height = document.getElementById('check_spectra').offsetHeight * (0.9 - filter_height);
     document.getElementById("spectra_panel").style.width = (document.getElementById('check_spectra').offsetWidth * 0.29).toString() + "px";
-    document.getElementById("spectra_panel").style.height = (document.getElementById('check_spectra').offsetHeight * (0.9 - filter_height)).toString() + "px";
+    var sp_height = document.getElementById('check_spectra').offsetHeight * (0.87 - filter_height);
+    document.getElementById("spectra_panel").style.height = (sp_height).toString() + "px";
+    document.getElementById("check_spectra_functions").style.width = (document.getElementById('check_spectra').offsetWidth * 0.29).toString() + "px";
+    document.getElementById("check_spectra_functions").style.height = (document.getElementById('check_spectra').offsetHeight * (0.05)).toString() + "px";
     
     
     var rect = document.getElementById('check_spectra').getBoundingClientRect();
@@ -195,6 +198,8 @@ function resize_ms_view(){
     document.getElementById("msarea").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
     document.getElementById("spectra_panel").style.top = (rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
     document.getElementById("spectra_panel").style.left = (rect.left + (rect.right - rect.left) * 0.005).toString() + "px";
+    document.getElementById("check_spectra_functions").style.top = (sp_height + rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
+    document.getElementById("check_spectra_functions").style.left = (rect.left + (rect.right - rect.left) * 0.005).toString() + "px";
     document.getElementById("spectra_options").style.top = (rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
     document.getElementById("spectra_options").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
     
