@@ -733,7 +733,7 @@ function Protein(data, ctx){
         }
     }
     this.filtering();
-    this.marked = which_proteins_checked.has(this.id) && this.filter_valid;
+    this.marked = which_proteins_checked.has(this.accession) && this.filter_valid;
     
     this.get_statistics = function(){
         var num_spectra = 0;
@@ -827,11 +827,11 @@ function Protein(data, ctx){
         }
         if (this.marked){
             basket[this.id] = this;
-            which_proteins_checked.add(this.id);
+            which_proteins_checked.add(this.accession);
         }
         else {
             if (this.id in basket) delete basket[this.id];
-            if (which_proteins_checked.has(this.id)) which_proteins_checked.delete(this.id);
+            if (which_proteins_checked.has(this.accession)) which_proteins_checked.delete(this.accession);
         }
         setCookie();
     }
@@ -4485,11 +4485,15 @@ function replaceAll(str, find, replace) {
 }
 
 
-function accession_search_parse_accessions(){
+function accession_search_parse_accessions(accessions){
+    var show_check = false;
+    if (typeof accessions === "undefined"){
+        accessions = document.getElementById("accessions").value;
+        show_check = true;
+    }
     basket = {};
     protein_dictionary = [];
     spectra_exclude = [];
-    var accessions = document.getElementById("accessions").value;
     accessions = replaceAll(accessions, "\n", ":");
     accessions = replaceAll(accessions, " ", "");
     accessions = replaceAll(accessions, "\t", "");
@@ -4498,7 +4502,7 @@ function accession_search_parse_accessions(){
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            request_load_proteins(JSON.parse(xmlhttp.responseText), true);
+            request_load_proteins(JSON.parse(xmlhttp.responseText), show_check);
         }
     }
     
@@ -4512,9 +4516,14 @@ function accession_search_parse_accessions(){
 function request_load_proteins(data, check){
     for (var i = 0; i < data.length; ++i){
         var p_id = data[i]["id"];
-        if (p_id in basket) continue;
-        var prot = new Protein(data[i], 0);
-        protein_dictionary[prot.id] = prot;
+        var prot = 0;
+        if (!(p_id in protein_dictionary)){
+            var prot = new Protein(data[i], 0);
+            protein_dictionary[prot.id] = prot;
+        }
+        else {
+            prot = protein_dictionary[prot.id];
+        }
         prot.filtering();
         if (prot.filter_valid) basket[prot.id] = prot;
     }
