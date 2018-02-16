@@ -57,6 +57,7 @@ function init(){
     document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
     document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
     
+    // document.cookie = "";
     
     // cookie treatment
     var cookie_data = document.cookie;
@@ -66,19 +67,13 @@ function init(){
             which_proteins_checked = new Set(cookie_data["proteins_checked"]);
             filter_parameters = cookie_data["filter_parameters"];
             read_cookie_information = cookie_data["read_cookie_information"];
+            
+            accession_search_parse_accessions(cookie_data["proteins_checked"].join(":"));
         }
         catch (e) {
             console.log(e);
         }
     }
-    
-    /*
-    read_cookie_information = false;
-    which_proteins_checked = new Set();
-    document.cookie = "";
-    */
-    
-    console.log(read_cookie_information);
     if (!read_cookie_information) document.getElementById('cookie_information').style.display = "inline";
     
     change_pathway(0);

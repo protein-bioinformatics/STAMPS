@@ -5,29 +5,15 @@
 #include <fstream>
 #include <vector>
 #include <map>
-#include <set>
-#include <string>
 #include <sstream>
 #include <sqlite3.h> 
 #include <math.h>
-#include <zlib.h>
 #include "sais.h"
 #include "wavelet.h"
+#include "bio-classes.h"
 
 using namespace std;
 
-
-vector<string> split(string str, char delimiter) {
-  vector<string> internal;
-  stringstream ss(str); // Turn the string into a stream.
-  string tok;
-  
-  while(getline(ss, tok, delimiter)) {
-    internal.push_back(tok);
-  }
-  
-  return internal;
-}
 
 bool is_integer_number(const string& string){
   string::const_iterator it = string.begin();
@@ -40,160 +26,6 @@ bool is_integer_number(const string& string){
   return string.size()>minSize && it == string.end();
 }
 
-string compress_string(const string& str, int compressionlevel = Z_BEST_COMPRESSION){
-    z_stream zs;                        // z_stream is zlib's control structure
-    memset(&zs, 0, sizeof(zs));
- 
-    if (deflateInit(&zs, compressionlevel) != Z_OK)
-        throw(runtime_error("deflateInit failed while compressing."));
- 
-    zs.next_in = (Bytef*)str.data();
-    zs.avail_in = str.size();           // set the z_stream's input
- 
-    int ret;
-    char outbuffer[32768];
-    string outstring;
- 
-    // retrieve the compressed bytes blockwise
-    do {
-        zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
-        zs.avail_out = sizeof(outbuffer);
- 
-        ret = deflate(&zs, Z_FINISH);
- 
-        if (outstring.size() < zs.total_out) {
-            // append the block to the output string
-            outstring.append(outbuffer,
-                             zs.total_out - outstring.size());
-        }
-    } while (ret == Z_OK);
- 
-    deflateEnd(&zs);
- 
-    if (ret != Z_STREAM_END) {          // an error occurred that was not EOF
-        ostringstream oss;
-        oss << "Exception during zlib compression: (" << ret << ") " << zs.msg;
-        throw(runtime_error(oss.str()));
-    }
- 
-    return outstring;
-}
-
-
-string remove_newline(string str) {
-    size_t start_pos = 0;
-    while((start_pos = str.find("\n", start_pos)) != string::npos) {
-        str.replace(start_pos, 1, "\\n");
-        start_pos += 2; // In case 'to' contains 'from', like replacing 'x' with 'yx'
-    }
-    string cf = "1";
-    cf[0] = 13;
-    start_pos = 0;
-    while((start_pos = str.find(cf, start_pos)) != string::npos) {
-        str.replace(start_pos, 1, "");
-    }
-    return str;
-}
-
-
-class spectrum {
-    public:
-        int id;
-        const string str_id;
-        string charge = "0";
-        string mass = "0";
-        string mod_sequence = "A";
-        string tissues = "-";
-        string tissue_numbers = "1";
-        
-        spectrum(string _id) : str_id(_id) {id = atoi(str_id.c_str());}
-        
-        string to_string(){
-            string str = "{";
-            str += "\"i\":" + str_id + ",";
-            str += "\"s\":\"" + mod_sequence + "\",";
-            str += "\"c\":" + charge + ",";
-            str += "\"m\":\"" + mass + "\"";
-            
-            vector<string> tissues_split = split(tissues, ',');
-            vector<string> tissue_numbers_split = split(tissue_numbers, ',');
-            if (tissues_split.size() == tissue_numbers_split.size()){
-                str += ",\"t\":{";
-                for (int i = 0; i < tissues_split.size(); ++i){
-                    if (i) str += ",";
-                    str += "\"" + tissues_split[i] + "\":" + tissue_numbers_split[i];
-                }
-                str += "}";
-            }
-            str += "}";
-            return str;
-        }
-};
-
-
-class peptide {
-    public:
-        string peptide_seq;
-        int start_pos;
-        set<string> tissues;
-        vector<spectrum*> spectra;
-        
-        peptide(string ps, int pos) : peptide_seq(ps), start_pos(pos) {}
-        
-        string to_string(){
-            char buffer[50];
-            sprintf(buffer, "%i", start_pos);
-            string str = "{";
-            str += "\"p\":\"" + peptide_seq + "\",";
-            str += "\"b\":" + string(buffer) + ",";
-            str += "\"s\":[";
-            for (int i = 0; i < spectra.size(); ++i){
-                if (i) str += ",";
-                str += spectra.at(i)->to_string();
-            }
-            str += "]}";
-            return str;
-        }
-};
-
-class protein {
-    public:
-        int id;
-        const string str_id;
-        string name;
-        string definition;
-        string mass;
-        string accession;
-        string ec_number;
-        string fasta;
-        vector<peptide*> peptides;
-        string validation;
-        int proteome_start_pos;
-        
-        protein(string _id) : str_id(_id) {id = atoi(str_id.c_str());}
-        
-        string to_string(){
-            char buffer[50];
-            sprintf(buffer, "%i", (int)fasta.length());
-            
-            string str = "{";
-            str += "\"i\":" + str_id + ",";
-            str += "\"n\":\"" + name + "\",";
-            str += "\"d\":\"" + definition + "\",";
-            str += "\"m\":\"" + mass + "\",";
-            str += "\"l\":" + string(buffer) + ",";
-            str += "\"a\":\"" + accession + "\",";
-            str += "\"e\":\"" + ec_number + "\",";
-            str += "\"v\":\"" + validation + "\",";
-            str += "\"p\":[";
-            for (int i = 0; i < peptides.size(); ++i){
-                if (i) str += ",";
-                str += peptides.at(i)->to_string();
-            }
-            str += "]}";
-            return str;
-        }
-};
 
 
 class node {
@@ -246,23 +78,6 @@ int* less_table = 0;
 int len_text = 0;
 int* SA = 0;
 
-int binarySearch(int* array, int length, int key) {
-    int low = 0;
-    int mid = 0;
-    int high = length - 1;
-    while (low <= high) {
-        mid = (low + high) >> 1;
-        if (array[mid] <= key) {
-            low = mid + 1;
-        } else {
-            high = mid - 1;
-        }
-    }
-    if (mid > 0 && key < array[mid]) {
-        mid -= 1;
-    }
-    return mid;
-}
 
 string prev_pep_seq = "";
 peptide* prev_pep = 0;
@@ -348,36 +163,7 @@ static int sqlite_callback2(void *data, int argc, char **argv, char **azColName)
     return 0;
 }
 
-void replaceAll(std::string& str, const std::string& from, const std::string& to) {
-    if(from.empty())
-        return;
-    size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
-    }
-}
 
-
-void strip(string &str){
-    while (str.length() && (str[0] == ' ' || str[0] == 13 || str[0] == 10)){
-        str = str.substr(1);
-    }
-    int l = str.length();
-    while (l && (str[l - 1] == ' ' || str[l - 1] == 13 || str[l - 1] == 10)){
-        str = str.substr(0, l - 1);
-        --l;
-    }
-}
-
-string cleanFasta(string str){
-    int start_pos = str.find("\n");
-    string modified = str.substr(start_pos + 1);
-    replaceAll(modified, "\n", "");
-    replaceAll(modified, {10}, "");
-    replaceAll(modified, {13}, "");
-    return modified;
-}
 
 
 void print_out(string response, bool compress){
@@ -543,11 +329,12 @@ main(int argc, char** argv) {
             last_protein = new protein(str_pid);
             last_protein->name = row[column_names_proteins[string("name")]];
             last_protein->definition = row[column_names_proteins[string("definition")]];
-            last_protein->mass = row[column_names_proteins[string("mass")]];
             last_protein->accession = row[column_names_proteins[string("accession")]];
             last_protein->ec_number = row[column_names_proteins[string("ec_number")]];
             last_protein->validation = row[column_names_proteins[string("validation")]];
             last_protein->fasta = cleanFasta(row[column_names_proteins[string("fasta")]]);
+            last_protein->mass = compute_mass(last_protein->fasta);
+            last_protein->pI = predict_isoelectric_point(last_protein->fasta);
             last_protein->proteome_start_pos = len_text;
             len_text += last_protein->fasta.length() + 1;
             all_proteins->insert(pair<int, protein* >(pid, last_protein));
