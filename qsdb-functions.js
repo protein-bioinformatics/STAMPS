@@ -54,7 +54,6 @@ edge_count = 0;
 draw_code = 0;
 process_edges_semaphore = false;
 protein_dictionary = {};
-which_proteins_checked = new Set();
 toggled_proteins = new Set();
 spectra_exclude = [];
 back_function = 0;
@@ -271,6 +270,10 @@ function get_check_spectra_content(){
         <input type=\"text\" onchange=\"change_match_error_value();\" id=\"error_value\" value=\"-\" size=1 style=\"text-align: right;\"><label id=\"unit\">ppm</label> \
     </fieldset> \
     <div id=\"spectra_panel\" class=\"spectra_panel\"></div> \
+    <div id=\"check_spectra_functions\" style=\"margin: 0px; position: fixed;\"> \
+        <table width=\"100%\"><tr><td><font size=\"-1\">Expand / Collapse </font></td> \
+        <td align=\"right\"> <font size=\"-1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\"clean_basket();\">Delete all proteins</font></td></tr></table> \
+    </div> \
     <div id=\"filter_panel_check_spectra\" class=\"filter_panel_check_spectra\"></div> \
     <table width=\"100%\" height=\"100%\"><tr><td valign=\"bottom\"><font color=\"blue\" style=\"cursor: pointer;\" onclick=\"filter_settings_clicked();\" id=\"filter_label\">Show \ filter settings</font>&nbsp;&nbsp;&nbsp; \
     <input type=\"checkbox\" onchange=\"filter_parameters['protein_tissues_visible'] = !filter_parameters['protein_tissues_visible']; show_hide_protein_tissues();\" " + proteins_checked + "> Show protein tissues \
@@ -434,7 +437,7 @@ function draw(sync){
             
             //draw elements visual elements
             for (var i = 0; i < elements.length; ++i){
-                if (elements[i].visible) elements[i].draw();
+                if (elements[i].visible) elements[i].draw(ctx);
             }
          
             clearInterval(dr);
@@ -447,7 +450,7 @@ function draw(sync){
         
         //draw elements visual elements
         for (var i = 0; i < elements.length; ++i){
-            if (elements[i].visible) elements[i].draw();
+            if (elements[i].visible) elements[i].draw(ctx);
         }
     }
     
@@ -527,13 +530,6 @@ function Spectrum(data){
     this.filter_valid = false;
     this.user_selected = true;
     this.tissues = data['t'];
-    /*
-    if (typeof data["t"] !== 'undefined' && typeof data["n"] !== 'undefined' && data["t"].length == data["n"].length){
-        for (var i = 0; i < data["t"].length; ++i){
-            this.tissues[data["t"][i]] = data["n"][i];
-        }
-    }
-    */
     this.occ_M = 0;
     this.occ_m = 0;
     this.occ_C = 0;
@@ -669,12 +665,10 @@ function Protein(data, ctx){
     this.sequence_length = data['l'];
     this.pI = data['pI'];
     this.peptides = [];
-    this.marked = false;
     this.filter_valid = false;
     this.containing_spectra = 0;
     this.fillStyle_rect = disabled_fill_color;
     this.fillStyle_text = disabled_text_color;
-    this.ctx = ctx;
     this.user_selected = true;
     this.tissues = {};
     this.nsaf = {};
@@ -696,32 +690,11 @@ function Protein(data, ctx){
     
     this.filtering = function(){
         
-        this.marked = false;
         this.filter_valid = false;
         for (var i = 0; i < this.peptides.length; ++i){
             this.peptides[i].filtering();
             this.filter_valid |= this.peptides[i].filter_valid;
         }
-        
-        /*
-        
-        if (this.filter_valid){
-            if (this.tissues.size > 0){
-                var tissue_set = new Set(Array.from(this.tissues));
-                if (!filter_parameters["tissue_brain"] && tissue_set.has(1)) tissue_set.delete(1);
-                if (!filter_parameters["tissue_liver"] && tissue_set.has(2)) tissue_set.delete(2);
-                if (!filter_parameters["tissue_kidney"] && tissue_set.has(3)) tissue_set.delete(3);
-                if (!filter_parameters["tissue_spleen"] && tissue_set.has(4)) tissue_set.delete(4);
-                if (!filter_parameters["tissue_heart"] && tissue_set.has(5)) tissue_set.delete(5);
-                if (!filter_parameters["tissue_blood"] && tissue_set.has(6)) tissue_set.delete(6);
-                if (!filter_parameters["tissue_fat"] && tissue_set.has(7)) tissue_set.delete(7);
-                if (!filter_parameters["tissue_lung"] && tissue_set.has(8)) tissue_set.delete(8);
-                if (!filter_parameters["tissue_eye"] && tissue_set.has(9)) tissue_set.delete(9);
-                if (!filter_parameters["tissue_gut"] && tissue_set.has(10)) tissue_set.delete(10);
-                
-                this.filter_valid = (tissue_set.size != 0);
-            }
-        }*/
         
         if (this.filter_valid){
             this.fillStyle_rect = "white";
@@ -733,7 +706,6 @@ function Protein(data, ctx){
         }
     }
     this.filtering();
-    this.marked = which_proteins_checked.has(this.accession) && this.filter_valid;
     
     this.get_statistics = function(){
         var num_spectra = 0;
@@ -762,7 +734,8 @@ function Protein(data, ctx){
     }
     
     
-    this.check_mouse_over_protein_name = function(ctx, x, y, line_number, num, mouse){
+    this.check_mouse_over_protein_name = function(x, y, line_number, num, mouse){
+        var ctx = document.getElementById("renderarea").getContext("2d");
         ctx.font = (text_size * factor).toString() + "px Arial";
         y -= Math.floor((line_number - 1) * line_height * factor_h) - num * line_height * factor;
         var x_l = x + check_side_d;
@@ -781,23 +754,23 @@ function Protein(data, ctx){
     }
     
     
-    this.draw = function(x, y) {
+    this.draw = function(ctx, x, y) {
         var x_c = x + check_side_h;
         var y_c = y - check_side_h;
-        this.ctx.lineWidth = 1;
-        this.ctx.fillStyle = this.fillStyle_rect;
-        this.ctx.strokeStyle = "black";
-        this.ctx.beginPath();
-        this.ctx.rect(x_c, y_c, check_side, check_side);
-        this.ctx.fill();
-        this.ctx.stroke();
+        ctx.lineWidth = 1;
+        ctx.fillStyle = this.fillStyle_rect;
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.rect(x_c, y_c, check_side, check_side);
+        ctx.fill();
+        ctx.stroke();
         
-        this.ctx.fillStyle = this.fillStyle_text;
-        this.ctx.fillText(this.name, x + check_side_d, y + line_height * factor_h * 0.5);
+        ctx.fillStyle = this.fillStyle_text;
+        ctx.fillText(this.name, x + check_side_d, y + line_height * factor_h * 0.5);
         
         
         // draw hooklet
-        if (this.marked){
+        if (this.id in basket){
             var x_check = x + check_side;
             var y_check = y;
             var x1 = x_check - check_side * 0.375;
@@ -806,33 +779,28 @@ function Protein(data, ctx){
             var y2 = y_check + check_side * 0.375;
             var x3 = x_check + check_side * 0.375;
             var y3 = y_check - check_side * 0.375;
-            this.ctx.lineWidth = factor * 3;
-            this.ctx.beginPath();
-            this.ctx.moveTo(x1, y1);
-            this.ctx.lineTo(x2, y2);
-            this.ctx.lineTo(x3, y3);
-            this.ctx.stroke();
+            ctx.lineWidth = factor * 3;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.lineTo(x3, y3);
+            ctx.stroke();
         }
         
     };
     
     this.toggle_marked = function(){
-        this.mark(!this.marked);
+        this.mark(!(this.id in basket));
     }
     
     this.mark = function(m){
-        if (this.filter_valid){
-            this.marked = m;
-            compute_statistics();
-        }
-        if (this.marked){
+        if (m && this.filter_valid){
             basket[this.id] = this;
-            which_proteins_checked.add(this.accession);
         }
         else {
             if (this.id in basket) delete basket[this.id];
-            if (which_proteins_checked.has(this.accession)) which_proteins_checked.delete(this.accession);
         }
+        compute_statistics();
         setCookie();
     }
     
@@ -895,29 +863,27 @@ CanvasRenderingContext2D.prototype.draw_line = function (x1, y1, x2, y2) {
 pathway_title.prototype = new visual_element();
 pathway_title.prototype.constructor = pathway_title;
 
-function pathway_title(ctx){
-    this.ctx = ctx;
-    this.draw = function(){
+function pathway_title(){
+    this.draw = function(ctx){
         var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
-        this.ctx.fillStyle = "#f3f8ff";
-        this.ctx.strokeStyle = "#aaaaaa";
+        ctx.fillStyle = "#f3f8ff";
+        ctx.strokeStyle = "#aaaaaa";
         var curr_title_text = "Current pathway: " + pathways[current_pathway_list_index][1];
-        this.ctx.font = "bold 20px Arial";
-        this.ctx.textAlign = "left";
-        //this.ctx.textBaseline = 'top';
-        var wdth = this.ctx.measureText(curr_title_text).width + 30;
-        this.ctx.fillRect(-2, nav_height - 2, wdth, 40);
-        this.ctx.strokeRect(-2, nav_height - 2, wdth, 40);
-        this.ctx.fillStyle = "#aaaaaa";
-        this.ctx.fillText(curr_title_text, 10, nav_height - 2 + 20 + 5);
+        ctx.font = "bold 20px Arial";
+        ctx.textAlign = "left";
+        //ctx.textBaseline = 'top';
+        var wdth = ctx.measureText(curr_title_text).width + 30;
+        ctx.fillRect(-2, nav_height - 2, wdth, 40);
+        ctx.strokeRect(-2, nav_height - 2, wdth, 40);
+        ctx.fillStyle = "#aaaaaa";
+        ctx.fillText(curr_title_text, 10, nav_height - 2 + 20 + 5);
     }
 }
 
 select_field.prototype = new visual_element();
 select_field.prototype.constructor = select_field;
 
-function select_field(ctx){
-    this.ctx = ctx;
+function select_field(){
     this.start_position = false;
     this.end_position = false;
     
@@ -938,12 +904,12 @@ function select_field(ctx){
         return false;
     }
     
-    this.draw = function(){
+    this.draw = function(ctx){
         if (this.visible){
-            this.ctx.globalAlpha = .4;
-            this.ctx.fillStyle = "black";
-            this.ctx.fillRect(this.start_position.x, this.start_position.y, this.end_position.x - this.start_position.x, this.end_position.y - this.start_position.y);
-            this.ctx.globalAlpha = 1;
+            ctx.globalAlpha = .4;
+            ctx.fillStyle = "black";
+            ctx.fillRect(this.start_position.x, this.start_position.y, this.end_position.x - this.start_position.x, this.end_position.y - this.start_position.y);
+            ctx.globalAlpha = 1;
         }
     }
 }
@@ -952,8 +918,7 @@ function select_field(ctx){
 membrane.prototype = new visual_element();
 membrane.prototype.constructor = membrane;
 
-function membrane(ctx){
-    this.ctx = ctx;
+function membrane(){
     this.length = 100;
     this.x = 500;
     this.y = 500;
@@ -1028,84 +993,84 @@ function membrane(ctx){
         return true;
     }
     
-    this.draw = function(){
+    this.draw = function(ctx){
         
         var r = 5;
         var lw = 2;
         var o_y = 36;
         var len_s = 3;
         
-        this.ctx.fillStyle = metabolite_fill_color;
-        this.ctx.strokeStyle = metabolite_stroke_color;
-        this.ctx.lineWidth = lw * factor;
+        ctx.fillStyle = metabolite_fill_color;
+        ctx.strokeStyle = metabolite_stroke_color;
+        ctx.lineWidth = lw * factor;
         
         var tmp_x = this.x;
         for (var i = 0; i < this.length; ++i){
-            this.ctx.beginPath();
-            this.ctx.arc(tmp_x, this.y, r * factor, 0, 2 * Math.PI);
-            this.ctx.closePath();
+            ctx.beginPath();
+            ctx.arc(tmp_x, this.y, r * factor, 0, 2 * Math.PI);
+            ctx.closePath();
             //this.ctx.fill();
-            this.ctx.stroke();
+            ctx.stroke();
             
             
-            this.ctx.beginPath();
-            this.ctx.arc(tmp_x, this.y + o_y * factor, r * factor, 0, 2 * Math.PI);
-            this.ctx.closePath();
+            ctx.beginPath();
+            ctx.arc(tmp_x, this.y + o_y * factor, r * factor, 0, 2 * Math.PI);
+            ctx.closePath();
             //this.ctx.fill();
-            this.ctx.stroke();
+            ctx.stroke();
             tmp_x += (2 * r + lw) * factor;
         }
         
         tmp_x = this.x;
         var tmp_y = this.y;
-        this.ctx.lineWidth = (lw - 1) * factor;
+        ctx.lineWidth = (lw - 1) * factor;
         for (var i = 0; i < this.length; ++i){
             var ttx = tmp_x + r * factor / 4;
             var tty = this.y + r * factor;
             for (var j = 0; j < 4; ++j){
-                this.ctx.beginPath();
-                this.ctx.moveTo(ttx, tty);
+                ctx.beginPath();
+                ctx.moveTo(ttx, tty);
                 ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
                 tty += len_s * factor;
-                this.ctx.lineTo(ttx, tty);
-                this.ctx.closePath();
-                this.ctx.stroke();
+                ctx.lineTo(ttx, tty);
+                ctx.closePath();
+                ctx.stroke();
             }
             
             ttx = tmp_x - r * factor / 2;
             tty = this.y + r * factor;
             for (var j = 0; j < 4; ++j){
-                this.ctx.beginPath();
-                this.ctx.moveTo(ttx, tty);
+                ctx.beginPath();
+                ctx.moveTo(ttx, tty);
                 ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
                 tty += len_s * factor;
-                this.ctx.lineTo(ttx, tty);
-                this.ctx.closePath();
-                this.ctx.stroke();
+                ctx.lineTo(ttx, tty);
+                ctx.closePath();
+                ctx.stroke();
             }
             
             ttx = tmp_x + r * factor / 4;
             tty = this.y - (r - o_y) * factor;
             for (var j = 0; j < 4; ++j){
-                this.ctx.beginPath();
-                this.ctx.moveTo(ttx, tty);
+                ctx.beginPath();
+                ctx.moveTo(ttx, tty);
                 ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
                 tty -= len_s * factor;
-                this.ctx.lineTo(ttx, tty);
-                this.ctx.closePath();
-                this.ctx.stroke();
+                ctx.lineTo(ttx, tty);
+                ctx.closePath();
+                ctx.stroke();
             }
             
             ttx = tmp_x - r * factor / 2;
             tty = this.y - (r - o_y) * factor;
             for (var j = 0; j < 4; ++j){
-                this.ctx.beginPath();
-                this.ctx.moveTo(ttx, tty);
+                ctx.beginPath();
+                ctx.moveTo(ttx, tty);
                 ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
                 tty -= len_s * factor;
-                this.ctx.lineTo(ttx, tty);
-                this.ctx.closePath();
-                this.ctx.stroke();
+                ctx.lineTo(ttx, tty);
+                ctx.closePath();
+                ctx.stroke();
             }
             
             tmp_x += (2 * r + lw) * factor;
@@ -1118,10 +1083,9 @@ function membrane(ctx){
 preview.prototype = new visual_element();
 preview.prototype.constructor = preview;
 
-function preview(ctx){
+function preview(){
     this.preview_image = 0;
     this.preview_image_original = 0;
-    this.ctx = ctx;
     this.on_active = false;
     this.on_move = false;
     this.active_boundaries = [0, 0, 0, 0];
@@ -1129,6 +1093,7 @@ function preview(ctx){
     this.scale_y = 1;
     
     this.snapshot = function(){
+        var ctx = document.getElementById("renderarea").getContext("2d");
         var x_min = 1e100, x_max = -1e100;
         var y_min = 1e100, y_max = -1e100;
         for (var i = 0; i < data.length; ++i){
@@ -1149,7 +1114,7 @@ function preview(ctx){
         var image_data;
         
         try { 
-            image_data = this.ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
+            image_data = ctx.getImageData(x_min, y_min, (x_max - x_min), (y_max - y_min));
         } catch (e) {
             console.log(e);
             return;
@@ -1160,8 +1125,8 @@ function preview(ctx){
         this.x = 0;
         this.y = window.innerHeight - this.height;
         this.preview_image.crossOrigin = "anonymous";
-        this.preview_image = this.ctx.createImageData(this.width, this.height);
-        this.preview_image_original = this.ctx.createImageData(this.width, this.height);
+        this.preview_image = ctx.createImageData(this.width, this.height);
+        this.preview_image_original = ctx.createImageData(this.width, this.height);
         for (var i = 0; i < this.preview_image.data.length; i += 4){
             this.preview_image.data[i] = image_data.data[i];
             this.preview_image.data[i + 1] = image_data.data[i + 1];
@@ -1180,7 +1145,7 @@ function preview(ctx){
         offsetY = mouse.y;
         if (this.active_boundaries[0] <= mouse.x && mouse.x <= this.active_boundaries[0] + this.active_boundaries[2] && this.active_boundaries[1] <= mouse.y && mouse.y <= this.active_boundaries[1] + this.active_boundaries[3]){
             this.on_move = true;
-            this.ctx.canvas.style.cursor = "all-scroll";
+            document.getElementById("renderarea").getContext("2d").canvas.style.cursor = "all-scroll";
         }
         return this.on_active;
     }
@@ -1208,7 +1173,7 @@ function preview(ctx){
     this.mouse_up = function(mouse){
         this.on_active = false;
         this.on_move = false;
-        this.ctx.canvas.style.cursor = "default";
+        document.getElementById("renderarea").getContext("2d").canvas.style.cursor = "default";
         return true;
     }
     
@@ -1229,22 +1194,22 @@ function preview(ctx){
         this.active_boundaries[3] = Math.max(0, this.height * (active_y_max - active_y_min) / boundaries[3]);
     }
     
-    this.draw = function(){
+    this.draw = function(ctx){
         if (this.preview_image){
             
-            this.ctx.putImageData(this.preview_image, this.x, this.y);
-            this.ctx.strokeStyle = "#777777";
-            this.ctx.lineWidth = 1;
-            this.ctx.beginPath();
-            this.ctx.rect(this.x, this.y, this.width, this.height);
-            this.ctx.stroke();
+            ctx.putImageData(this.preview_image, this.x, this.y);
+            ctx.strokeStyle = "#777777";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.rect(this.x, this.y, this.width, this.height);
+            ctx.stroke();
             
             this.compute_boundaries();
             
-            this.ctx.globalAlpha = .4;
-            this.ctx.fillStyle = "black";
-            this.ctx.fillRect(this.active_boundaries[0], this.active_boundaries[1], this.active_boundaries[2], this.active_boundaries[3]);
-            this.ctx.globalAlpha = 1.;
+            ctx.globalAlpha = .4;
+            ctx.fillStyle = "black";
+            ctx.fillRect(this.active_boundaries[0], this.active_boundaries[1], this.active_boundaries[2], this.active_boundaries[3]);
+            ctx.globalAlpha = 1.;
             
         }
     }
@@ -1254,7 +1219,7 @@ function preview(ctx){
 expand_collapse.prototype = new visual_element();
 expand_collapse.prototype.constructor = expand_collapse;
 
-function expand_collapse(ctx, dir){
+function expand_collapse(dir){
     this.dir = dir;
     this.name = dir ? "expand" : "collapse";
     this.img = document.getElementById(this.name);
@@ -1264,7 +1229,6 @@ function expand_collapse(ctx, dir){
     this.x = window.innerWidth - this.width * 1.3;
     var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
     this.y = nav_height + this.height * 0.3;
-    this.ctx = ctx;
     
     this.mouse_click = function(mouse, key){
         if (this.dir){
@@ -1280,12 +1244,12 @@ function expand_collapse(ctx, dir){
         return (this.x <= mouse.x && mouse.x <= this.x + this.width && this.y <= mouse.y && mouse.y <= this.y + this.height);
     }
     
-    this.draw = function(){
-        this.x = this.ctx.canvas.width - this.width * 1.3;
+    this.draw = function(ctx){
+        this.x = ctx.canvas.width - this.width * 1.3;
         if (this.visible){
-            this.ctx.globalAlpha = 0.3 + 0.7 * this.highlight;
-            this.ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
-            this.ctx.globalAlpha = 1.;
+            ctx.globalAlpha = 0.3 + 0.7 * this.highlight;
+            ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+            ctx.globalAlpha = 1.;
         }
     }
 }
@@ -1295,7 +1259,7 @@ function expand_collapse(ctx, dir){
 zoom_sign.prototype = new visual_element();
 zoom_sign.prototype.constructor = zoom_sign;
 
-function zoom_sign(ctx, dir){
+function zoom_sign(dir){
     this.dir = dir;
     this.name = dir ? "zoom_in" : "zoom_out";
     this.img = document.getElementById(this.name);
@@ -1304,22 +1268,21 @@ function zoom_sign(ctx, dir){
     this.height = this.img.height * ratio;
     this.x = window.innerWidth - this.width * 1.3;
     this.y = window.innerHeight - this.height * (1.3 + dir);
-    this.ctx = ctx;
     
     this.mouse_click = function(mouse, key){
         zoom_in_out(1 - this.dir, 0);
-        draw();
+        draw(document.getElementById("renderarea").getContext("2d"));
     }
     
     this.is_mouse_over = function(mouse){
         return (this.x <= mouse.x && mouse.x <= this.x + this.width && this.y <= mouse.y && mouse.y <= this.y + this.height);
     }
     
-    this.draw = function(){
-        this.x = this.ctx.canvas.width - this.width * 1.3;
-        this.ctx.globalAlpha = 0.3 + 0.7 * this.highlight;
-        this.ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
-        this.ctx.globalAlpha = 1.;
+    this.draw = function(ctx){
+        this.x = ctx.canvas.width - this.width * 1.3;
+        ctx.globalAlpha = 0.3 + 0.7 * this.highlight;
+        ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+        ctx.globalAlpha = 1.;
     }
 }
 
@@ -1332,10 +1295,10 @@ function Infobox(ctx){
     this.node_id = -1;
     this.protein_id = -1;
     this.name = "infobox";
-    this.ctx = ctx;
     this.visible = false;    
     
     this.create = function(x, y, node_id, protein_id){
+        var ctx = document.getElementById("renderarea").getContext("2d");
         this.x = x;
         this.y = y;
         this.node_id = node_id;
@@ -1344,24 +1307,24 @@ function Infobox(ctx){
             this.width = data[this.node_id].img.width + 40;
             this.height = data[this.node_id].img.height + 40;
             
-            this.ctx.font = "bold " + line_height.toString() + "px Arial";
-            this.width = Math.max(this.width, this.ctx.measureText(data[this.node_id].name).width + 40);
+            ctx.font = "bold " + line_height.toString() + "px Arial";
+            this.width = Math.max(this.width, ctx.measureText(data[this.node_id].name).width + 40);
             this.height += 3 * line_height + 20;
             
-            this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
-            this.width = Math.max(this.width, this.ctx.measureText("Formula:  " + data[this.node_id].formula).width + 40);
-            this.width = Math.max(this.width, this.ctx.measureText("Exact Mass / Da: " + data[this.node_id].exact_mass).width + 40);
+            ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
+            this.width = Math.max(this.width, ctx.measureText("Formula:  " + data[this.node_id].formula).width + 40);
+            this.width = Math.max(this.width, ctx.measureText("Exact Mass / Da: " + data[this.node_id].exact_mass).width + 40);
             
         }
         else {
             this.width = 40;
             this.height = 40;
             this.height += 7 * line_height + 20;
-            this.ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
-            this.width = Math.max(this.width, this.ctx.measureText("Definition: " + data[this.node_id].proteins[this.protein_id].definition).width + 40);
-            this.width = Math.max(this.width, this.ctx.measureText("Uniprot accession: " + data[this.node_id].proteins[this.protein_id].accession).width + 40);
-            this.width = Math.max(this.width, this.ctx.measureText("EC number: " + data[this.node_id].proteins[this.protein_id].ec_number).width + 40);
-            this.width = Math.max(this.width, this.ctx.measureText("Mass / Da: " + data[this.node_id].proteins[this.protein_id].mass).width + 40);
+            ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
+            this.width = Math.max(this.width, ctx.measureText("Definition: " + data[this.node_id].proteins[this.protein_id].definition).width + 40);
+            this.width = Math.max(this.width, ctx.measureText("Uniprot accession: " + data[this.node_id].proteins[this.protein_id].accession).width + 40);
+            this.width = Math.max(this.width, ctx.measureText("EC number: " + data[this.node_id].proteins[this.protein_id].ec_number).width + 40);
+            this.width = Math.max(this.width, ctx.measureText("Mass / Da: " + data[this.node_id].proteins[this.protein_id].mass).width + 40);
         }
     }
 
@@ -1384,35 +1347,35 @@ function Infobox(ctx){
         this.y = res_y + scale * (this.y - res_y);
     }
 
-    this.draw = function(){
+    this.draw = function(ctx){
         if (!this.visible) return;
         var rect_curve = round_rect_radius;
         
-        this.ctx.fillStyle = infobox_fill_color;
-        this.ctx.strokeStyle = infobox_stroke_color;
-        this.ctx.lineWidth = infobox_stroke_width;
+        ctx.fillStyle = infobox_fill_color;
+        ctx.strokeStyle = infobox_stroke_color;
+        ctx.lineWidth = infobox_stroke_width;
         
         var offset_x = this.width + infobox_offset_x;
         var offset_y = this.height * 0.5;
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.x - offset_x + rect_curve, this.y - offset_y);
-        this.ctx.lineTo(this.x - offset_x + this.width - rect_curve, this.y - offset_y);
-        this.ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y, this.x - offset_x + this.width, this.y - offset_y + rect_curve);
+        ctx.beginPath();
+        ctx.moveTo(this.x - offset_x + rect_curve, this.y - offset_y);
+        ctx.lineTo(this.x - offset_x + this.width - rect_curve, this.y - offset_y);
+        ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y, this.x - offset_x + this.width, this.y - offset_y + rect_curve);
         
         
-        this.ctx.lineTo(this.x - offset_x + this.width, this.y - infobox_offset_x);
-        this.ctx.lineTo(this.x - offset_x + this.width + infobox_offset_x, this.y);
-        this.ctx.lineTo(this.x - offset_x + this.width, this.y + infobox_offset_x);
+        ctx.lineTo(this.x - offset_x + this.width, this.y - infobox_offset_x);
+        ctx.lineTo(this.x - offset_x + this.width + infobox_offset_x, this.y);
+        ctx.lineTo(this.x - offset_x + this.width, this.y + infobox_offset_x);
         
-        this.ctx.lineTo(this.x - offset_x + this.width, this.y - offset_y + this.height - rect_curve);
-        this.ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y + this.height, this.x - offset_x + this.width - rect_curve, this.y - offset_y + this.height);
-        this.ctx.lineTo(this.x - offset_x + rect_curve, this.y - offset_y + this.height);
-        this.ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y + this.height, this.x - offset_x, this.y - offset_y + this.height - rect_curve);
-        this.ctx.lineTo(this.x - offset_x, this.y - offset_y + rect_curve);
-        this.ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y, this.x - offset_x + rect_curve, this.y - offset_y);
-        this.ctx.closePath();
-        this.ctx.fill();
-        this.ctx.stroke();
+        ctx.lineTo(this.x - offset_x + this.width, this.y - offset_y + this.height - rect_curve);
+        ctx.quadraticCurveTo(this.x - offset_x + this.width, this.y - offset_y + this.height, this.x - offset_x + this.width - rect_curve, this.y - offset_y + this.height);
+        ctx.lineTo(this.x - offset_x + rect_curve, this.y - offset_y + this.height);
+        ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y + this.height, this.x - offset_x, this.y - offset_y + this.height - rect_curve);
+        ctx.lineTo(this.x - offset_x, this.y - offset_y + rect_curve);
+        ctx.quadraticCurveTo(this.x - offset_x, this.y - offset_y, this.x - offset_x + rect_curve, this.y - offset_y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
         
         
         if (data[this.node_id].type == "metabolite"){
@@ -1543,11 +1506,10 @@ function node(data, ctx){
     this.width = -1;
     this.height = -1;
     this.orig_height = -1;
-    this.ctx = ctx;
     this.slide = false;
     this.slide_percent = 0;
     this.on_slide = false;
-    this.ctx.font = (text_size * factor).toString() + "px Arial";
+    //this.ctx.font = (text_size * factor).toString() + "px Arial";
     this.containing_spectra = 0;
     this.fill_style = protein_disabled_fill_color;
     this.length = 100;  // number of lipid headgroups for membrane
@@ -1564,6 +1526,17 @@ function node(data, ctx){
             this.slide = (data['p'].length > max_protein_line_number);
             for (var j = 0; j < data['p'].length; ++j){
                 var prot = 0;
+                var prot_id = data['p'][j]['i'];
+                
+                if (prot_id in protein_dictionary){
+                    prot = protein_dictionary[prot_id];
+                }
+                else {
+                    prot = new Protein(data['p'][j]);
+                    protein_dictionary[prot_id] = prot;
+                }
+                
+                /*
                 if (!(data['p'][j]['i'] in protein_dictionary)){
                     prot = new Protein(data['p'][j], this.ctx);
                     protein_dictionary[prot.id] = prot;
@@ -1577,15 +1550,13 @@ function node(data, ctx){
                         prot.toggle_marked();
                         toggled_proteins.add(prot.id);
                     }
-                }
+                }*/
                 this.proteins.push(prot);
                 this.containing_spectra += prot.containing_spectra;
                 if (name.length) name += ", ";
                 var prot_name = prot.name;
-                var text_width = this.ctx.measureText(prot_name).width;
-                if (this.width < text_width){
-                    this.width = text_width;
-                }
+                var text_width = ctx.measureText(prot_name).width;
+                this.width = Math.max(this.width, text_width);
                 name += prot.name;
                 this.fill_style = protein_fill_color;
             }
@@ -1708,7 +1679,7 @@ function node(data, ctx){
         }
     }
     
-    this.draw = function() {
+    this.draw = function(ctx) {
         var hh = this.height * 0.5;
         var hw = this.width * 0.5;
     
@@ -1717,18 +1688,17 @@ function node(data, ctx){
             case "protein":
                 
                 // draw fill
-                this.ctx.fillStyle = this.fill_style;
-                this.ctx.fillRect(this.x - hw, this.y - hh, this.width, this.height);
+                ctx.fillStyle = this.fill_style;
+                ctx.fillRect(this.x - hw, this.y - hh, this.width, this.height);
        
-                this.ctx.save();
-                this.ctx.rect(this.x - hw, this.y - hh, this.width, this.height);
-                this.ctx.clip();
-                
+                ctx.save();
+                ctx.rect(this.x - hw, this.y - hh, this.width, this.height);
+                ctx.clip();
                 
                 // draw content
-                this.ctx.textAlign = "left";
-                this.ctx.font = font_size.toString() + "px Arial";
-                this.ctx.fillStyle = "black";
+                ctx.textAlign = "left";
+                ctx.font = font_size.toString() + "px Arial";
+                ctx.fillStyle = "black";
                 var ty = this.y;
                 var tx = this.x - hw;
                 if (this.lines > max_protein_line_number){
@@ -1740,57 +1710,58 @@ function node(data, ctx){
                     
                     var ctl_y = sl_y_s + this.slide_percent * (sl_y_e - sl_y_s);
                     
-                    this.ctx.fillStyle = slide_color;
-                    this.ctx.strokeStyle = slide_color;
-                    this.ctx.lineWidth = slide_width * factor;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(sl_x, sl_y_s);
-                    this.ctx.lineTo(sl_x, sl_y_e);
-                    this.ctx.stroke();
+                    ctx.fillStyle = slide_color;
+                    ctx.strokeStyle = slide_color;
+                    ctx.lineWidth = slide_width * factor;
+                    ctx.beginPath();
+                    ctx.moveTo(sl_x, sl_y_s);
+                    ctx.lineTo(sl_x, sl_y_e);
+                    ctx.stroke();
                     
-                    this.ctx.beginPath();
-                    this.ctx.arc(sl_x, ctl_y, slide_bullet * factor, 0, 2 * Math.PI);
-                    this.ctx.closePath();
-                    this.ctx.fill();
-                    this.ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(sl_x, ctl_y, slide_bullet * factor, 0, 2 * Math.PI);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
                 }
                 
                 var lhf = line_height * factor;
                 for (var i = 0, tty = ty - (this.proteins.length - 1) * lhf * 0.5; i < this.proteins.length; i += 1, tty += lhf){
-                    if (Math.abs(tty - this.y) <= hh + lhf) this.proteins[i].draw(tx, tty);
+                    if (Math.abs(tty - this.y) <= hh + lhf){
+                        this.proteins[i].draw(ctx, tx, tty);
+                    }
                 }
-                
-                this.ctx.restore();
+                ctx.restore();
                 
                 // draw stroke
-                this.ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
-                this.ctx.strokeStyle = this.proteins.length ? protein_stroke_color :  protein_disabled_stroke_color;
-                this.ctx.strokeRect(this.x - hw, this.y - hh, this.width, this.height);
+                ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
+                ctx.strokeStyle = this.proteins.length ? protein_stroke_color :  protein_disabled_stroke_color;
+                ctx.strokeRect(this.x - hw, this.y - hh, this.width, this.height);
                 break;
                 
                 
             case "pathway":
-                this.ctx.fillStyle = pathway_fill_color;
-                this.ctx.strokeStyle = this.pathway_enabled ? pathway_stroke_color : pathway_disabled_stroke_color;
-                this.ctx.lineWidth = (line_width + 2 * this.highlight * this.pathway_enabled) * factor;
-                roundRect(this.x - hw, this.y - hh, this.width, this.height, round_rect_radius * factor, this.ctx);
-                this.ctx.textAlign = "center";
-                //this.ctx.textBaseline = 'middle';
-                this.ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
-                this.ctx.fillStyle = "black";
-                wrapText(this.name, this.x, this.y, this.width, 20 * factor, this.ctx);
+                ctx.fillStyle = pathway_fill_color;
+                ctx.strokeStyle = this.pathway_enabled ? pathway_stroke_color : pathway_disabled_stroke_color;
+                ctx.lineWidth = (line_width + 2 * this.highlight * this.pathway_enabled) * factor;
+                roundRect(this.x - hw, this.y - hh, this.width, this.height, round_rect_radius * factor, ctx);
+                ctx.textAlign = "center";
+                //ctx.textBaseline = 'middle';
+                ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
+                ctx.fillStyle = "black";
+                wrapText(this.name, this.x, this.y, this.width, 20 * factor, ctx);
                 break;
                 
                 
             case "metabolite":
-                this.ctx.fillStyle = metabolite_fill_color;
-                this.ctx.strokeStyle = metabolite_stroke_color;
-                this.ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
-                this.ctx.beginPath();
-                this.ctx.arc(this.x, this.y, radius, 0, 1.999 * Math.PI);
-                this.ctx.closePath();
-                this.ctx.fill();
-                this.ctx.stroke();
+                ctx.fillStyle = metabolite_fill_color;
+                ctx.strokeStyle = metabolite_stroke_color;
+                ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, radius, 0, 1.999 * Math.PI);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
                 
                 
                 
@@ -1799,78 +1770,78 @@ function node(data, ctx){
             case "membrane":
                 var len_s = 3;
                 
-                this.ctx.fillStyle = metabolite_fill_color;
-                this.ctx.strokeStyle = metabolite_stroke_color;
-                this.ctx.lineWidth = this.lw * factor;
+                ctx.fillStyle = metabolite_fill_color;
+                ctx.strokeStyle = metabolite_stroke_color;
+                ctx.lineWidth = this.lw * factor;
                 
                 var tmp_x = this.x;
                 for (var i = 0; i < this.length; ++i){
-                    this.ctx.beginPath();
-                    this.ctx.arc(tmp_x, this.y - this.o_y * factor, this.lipid_radius * factor, 0, 2 * Math.PI);
-                    this.ctx.closePath();
-                    //this.ctx.fill();
-                    this.ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(tmp_x, this.y - this.o_y * factor, this.lipid_radius * factor, 0, 2 * Math.PI);
+                    ctx.closePath();
+                    //ctx.fill();
+                    ctx.stroke();
                     
                     
-                    this.ctx.beginPath();
-                    this.ctx.arc(tmp_x, this.y + this.o_y * factor, this.lipid_radius * factor, 0, 2 * Math.PI);
-                    this.ctx.closePath();
-                    //this.ctx.fill();
-                    this.ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(tmp_x, this.y + this.o_y * factor, this.lipid_radius * factor, 0, 2 * Math.PI);
+                    ctx.closePath();
+                    //ctx.fill();
+                    ctx.stroke();
                     tmp_x += (2 * this.lipid_radius + this.lw) * factor;
                 }
                 
                 tmp_x = this.x;
                 var tmp_yt = this.y - (this.o_y - this.lipid_radius) * factor;
                 var tmp_yb = this.y + (this.o_y - this.lipid_radius) * factor;
-                this.ctx.lineWidth = (this.lw - 1) * factor;
+                ctx.lineWidth = (this.lw - 1) * factor;
                 for (var i = 0; i < this.length; ++i){
                     var ttx = tmp_x + this.lipid_radius * factor / 4;
                     var tty = tmp_yt;
                     for (var j = 0; j < 4; ++j){
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(ttx, tty);
+                        ctx.beginPath();
+                        ctx.moveTo(ttx, tty);
                         ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
                         tty += len_s * factor;
-                        this.ctx.lineTo(ttx, tty);
-                        this.ctx.closePath();
-                        this.ctx.stroke();
+                        ctx.lineTo(ttx, tty);
+                        ctx.closePath();
+                        ctx.stroke();
                     }
                     
                     ttx = tmp_x - this.lipid_radius * factor / 2;
                     tty = tmp_yt;
                     for (var j = 0; j < 4; ++j){
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(ttx, tty);
+                        ctx.beginPath();
+                        ctx.moveTo(ttx, tty);
                         ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
                         tty += len_s * factor;
-                        this.ctx.lineTo(ttx, tty);
-                        this.ctx.closePath();
-                        this.ctx.stroke();
+                        ctx.lineTo(ttx, tty);
+                        ctx.closePath();
+                        ctx.stroke();
                     }
                     
                     ttx = tmp_x + this.lipid_radius * factor / 4;
                     tty = tmp_yb;
                     for (var j = 0; j < 4; ++j){
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(ttx, tty);
+                        ctx.beginPath();
+                        ctx.moveTo(ttx, tty);
                         ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
                         tty -= len_s * factor;
-                        this.ctx.lineTo(ttx, tty);
-                        this.ctx.closePath();
-                        this.ctx.stroke();
+                        ctx.lineTo(ttx, tty);
+                        ctx.closePath();
+                        ctx.stroke();
                     }
                     
                     ttx = tmp_x - this.lipid_radius * factor / 2;
                     tty = tmp_yb;
                     for (var j = 0; j < 4; ++j){
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(ttx, tty);
+                        ctx.beginPath();
+                        ctx.moveTo(ttx, tty);
                         ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
                         tty -= len_s * factor;
-                        this.ctx.lineTo(ttx, tty);
-                        this.ctx.closePath();
-                        this.ctx.stroke();
+                        ctx.lineTo(ttx, tty);
+                        ctx.closePath();
+                        ctx.stroke();
                     }
                     tmp_x += (2 * this.lipid_radius + this.lw) * factor;
                 }
@@ -1943,7 +1914,7 @@ function node(data, ctx){
             offset_y = (this.orig_height * 0.5 - this.height * 0.5) - this.slide_percent * (this.orig_height - this.height);
         }
         for (var i = 0; i < this.proteins.length; ++i){
-            if(this.proteins[i].check_mouse_over_protein_name(this.ctx, this.x - this.width / 2, this.y + offset_y, this.proteins.length, i, mouse)){
+            if(this.proteins[i].check_mouse_over_protein_name(this.x - this.width / 2, this.y + offset_y, this.proteins.length, i, mouse)){
                 return i;
             }
         }
@@ -1976,7 +1947,7 @@ function node(data, ctx){
         var cnt = 0;
         var cnt_avbl = 0;
         for (var i = 0; i < this.proteins.length; ++i){
-            cnt += this.proteins[i].marked;
+            cnt += (this.proteins[i].id in basket);
             cnt_avbl += (this.proteins[i].peptides.length > 0) && (this.proteins[i].containing_spectra > 0);
         }
         var marking = (cnt != cnt_avbl);
@@ -2138,9 +2109,8 @@ function point(x, y, b){
 edge.prototype = new visual_element();
 edge.prototype.constructor = edge;
 
-function edge(ctx, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head, reaction_id, reagent_id, edge_id){
+function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head, reaction_id, reagent_id, edge_id){
     
-    this.ctx = ctx;
     this.head = head;
     this.head_start = 0;
     this.point_list = [];
@@ -2153,6 +2123,8 @@ function edge(ctx, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, 
     this.reaction_id = reaction_id;
     this.reagent_id = reagent_id;
     this.edge_id = edge_id;
+    
+    
     this.bidirectional = data[data_ref[this.start_id]].type == "metabolite" && nodes[this.reaction_id]['reversible'];
     this.tail_start = 0;
     
@@ -2648,23 +2620,23 @@ function edge(ctx, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, 
     
     this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node);
     
-    this.draw = function(){
+    this.draw = function(ctx){
         var dashed_edge = data[data_ref[this.start_id]].type == "pathway";
         var edge_enabled = data[data_ref[this.start_id]].proteins.length > 0 || (dashed_edge && data[data_ref[this.start_id]].pathway_enabled);
         
-        this.ctx.strokeStyle = edge_enabled ? edge_color : edge_disabled_color;
-        this.ctx.fillStyle = edge_enabled ? edge_color : edge_disabled_color;
-        if (dashed_edge) this.ctx.setLineDash([10 * factor, 10 * factor]);
+        ctx.strokeStyle = edge_enabled ? edge_color : edge_disabled_color;
+        ctx.fillStyle = edge_enabled ? edge_color : edge_disabled_color;
+        if (dashed_edge) ctx.setLineDash([10 * factor, 10 * factor]);
         
         /*
         if (data[data_ref[this.start_id]].type == "metabolite"){
-            this.ctx.strokeStyle = "#ff0000";
-            this.ctx.fillStyle = "#ff0000";
+            ctx.strokeStyle = "#ff0000";
+            ctx.fillStyle = "#ff0000";
         }*/
         
-        this.ctx.lineWidth = (line_width - dashed_edge * 3) * factor;
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
+        ctx.lineWidth = (line_width - dashed_edge * 3) * factor;
+        ctx.beginPath();
+        ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
         var p_len = this.point_list.length;
         for (var i = 0; i < p_len - 1 - this.head; ++i){
             var control = new point(0, 0, 0);
@@ -2673,22 +2645,22 @@ function edge(ctx, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, 
                 case 0:
                     control.x = this.point_list[i + 1].x;
                     control.y = this.point_list[i].y;
-                    this.ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
                     break;
                     
                 case 1:
                     control.x = this.point_list[i].x;
                     control.y = this.point_list[i + 1].y;
-                    this.ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
                     break;
                     
                 default:
-                    this.ctx.lineTo(this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    ctx.lineTo(this.point_list[i + 1].x, this.point_list[i + 1].y);
                     break;
                     
             }
         }
-        this.ctx.stroke();
+        ctx.stroke();
         
         if (this.head && this.point_list.length >= 2){
             var x_head = -1;
@@ -2716,11 +2688,11 @@ function edge(ctx, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, 
                     x_head = p2_x + l * (p1_x - p2_x);
                     y_head = p2_y + l * (p1_y - p2_y);
                     
-                    this.ctx.lineWidth = line_width * factor;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(p1_x, p1_y);
-                    this.ctx.lineTo(x_head, y_head);
-                    this.ctx.stroke();
+                    ctx.lineWidth = line_width * factor;
+                    ctx.beginPath();
+                    ctx.moveTo(p1_x, p1_y);
+                    ctx.lineTo(x_head, y_head);
+                    ctx.stroke();
                     
                     break;
                 
@@ -2729,10 +2701,10 @@ function edge(ctx, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, 
                     x_head = (1 - t) * (1 - t) * p1_x + 2 * (1 - t) * t * ct_x + t * t * p2_x;
                     y_head = (1 - t) * (1 - t) * p1_y + 2 * (1 - t) * t * ct_y + t * t * p2_y;
                     
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(p1_x, p1_y);
-                    this.ctx.bezierCurveTo(ct_x, ct_y, x_head, y_head, x_head, y_head);
-                    this.ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(p1_x, p1_y);
+                    ctx.bezierCurveTo(ct_x, ct_y, x_head, y_head, x_head, y_head);
+                    ctx.stroke();
                     break;
                     
             }
@@ -2744,13 +2716,13 @@ function edge(ctx, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, 
             var x_r = x_head + l * 0.65 * (y_head - p2_y);
             var y_r = y_head - l * 0.65 * (x_head - p2_x);
             
-            this.ctx.lineWidth = 1;
-            this.ctx.beginPath();
-            this.ctx.moveTo(p2_x, p2_y);
-            this.ctx.lineTo(x_r, y_r);
-            this.ctx.lineTo(x_l, y_l);
-            this.ctx.closePath();
-            this.ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(p2_x, p2_y);
+            ctx.lineTo(x_r, y_r);
+            ctx.lineTo(x_l, y_l);
+            ctx.closePath();
+            ctx.fill();
             
             
         }
@@ -2781,11 +2753,11 @@ function edge(ctx, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, 
                     x_head = p2_x + l * (p1_x - p2_x);
                     y_head = p2_y + l * (p1_y - p2_y);
                     
-                    this.ctx.lineWidth = line_width * factor;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(p1_x, p1_y);
-                    this.ctx.lineTo(x_head, y_head);
-                    this.ctx.stroke();
+                    ctx.lineWidth = line_width * factor;
+                    ctx.beginPath();
+                    ctx.moveTo(p1_x, p1_y);
+                    ctx.lineTo(x_head, y_head);
+                    ctx.stroke();
                     
                     break;
                 
@@ -2794,10 +2766,10 @@ function edge(ctx, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, 
                     x_head = (1 - t) * (1 - t) * p1_x + 2 * (1 - t) * t * ct_x + t * t * p2_x;
                     y_head = (1 - t) * (1 - t) * p1_y + 2 * (1 - t) * t * ct_y + t * t * p2_y;
                     
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(p1_x, p1_y);
-                    this.ctx.bezierCurveTo(ct_x, ct_y, x_head, y_head, x_head, y_head);
-                    this.ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(p1_x, p1_y);
+                    ctx.bezierCurveTo(ct_x, ct_y, x_head, y_head, x_head, y_head);
+                    ctx.stroke();
                     break;
                     
             }
@@ -2809,17 +2781,17 @@ function edge(ctx, x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, 
             var x_r = x_head + l * 0.65 * (y_head - p2_y);
             var y_r = y_head - l * 0.65 * (x_head - p2_x);
             
-            this.ctx.lineWidth = 1;
-            this.ctx.beginPath();
-            this.ctx.moveTo(p2_x, p2_y);
-            this.ctx.lineTo(x_r, y_r);
-            this.ctx.lineTo(x_l, y_l);
-            this.ctx.closePath();
-            this.ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(p2_x, p2_y);
+            ctx.lineTo(x_r, y_r);
+            ctx.lineTo(x_l, y_l);
+            ctx.closePath();
+            ctx.fill();
             
             
         }
-        this.ctx.setLineDash([]);
+        ctx.setLineDash([]);
     }
 };
 
@@ -3030,7 +3002,7 @@ function compute_edges(){
                 start_x += node_width * 0.5;
             }
         }
-        edges[i] = new edge(ctx, start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id, edge_id);
+        edges[i] = new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id, edge_id);
     }
     
     // sorting the edges, so that active edges will be drown as last, hence on top of inactive edges. Clever, eh?
@@ -4044,7 +4016,7 @@ function hide_filter_panel(){
             var one_marked = false;
             for (var i = 0; i < data.length && !one_marked; ++i){
                 for (var j = 0; j < data[i].proteins.length && !one_marked; ++j){
-                    if (data[i].proteins[j].marked){
+                    if (data[i].proteins[j].id in basket){
                         one_marked = true;
                     }
                 }
@@ -4107,7 +4079,7 @@ function compute_statistics(){
     for (var i = 0; i < data.length; ++i){
         num_proteins += data[i].proteins.length;
         for (var j = 0; j < data[i].proteins.length; ++j){
-            proteins_content.push([data[i].proteins[j].name, i, j, data[i].proteins[j].marked]);
+            proteins_content.push([data[i].proteins[j].name, i, j, data[i].proteins[j].id in basket]);
         }
     }
     proteins_content.sort();
@@ -4380,6 +4352,9 @@ function load_data(reload){
     var tmp_data = 0;
     nodes = 0;
     protein_dictionary = {};
+    for (prot_id in basket) protein_dictionary[prot_id] = basket[prot_id];
+    
+    
     toggled_proteins = new Set();
     process_edges_semaphore = false;
     var xmlhttp = new XMLHttpRequest();
@@ -4452,9 +4427,8 @@ function load_data(reload){
                     preview_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height) * 5) / Math.log(scaling));
                 }
             }
-            process_edges_semaphore = true;
+            process_edges_semaphore = true;            
             clearInterval(process_nodes);
-            
         }
     }, 1);
         
@@ -4490,9 +4464,9 @@ function accession_search_parse_accessions(accessions){
     if (typeof accessions === "undefined"){
         accessions = document.getElementById("accessions").value;
         show_check = true;
+        protein_dictionary = [];
     }
     basket = {};
-    protein_dictionary = [];
     spectra_exclude = [];
     accessions = replaceAll(accessions, "\n", ":");
     accessions = replaceAll(accessions, " ", "");
@@ -4525,6 +4499,7 @@ function request_load_proteins(data, check){
             prot = protein_dictionary[prot.id];
         }
         prot.filtering();
+        prot.mark(true);
         if (prot.filter_valid) basket[prot.id] = prot;
     }
     if (check) check_spectra();
@@ -4641,8 +4616,25 @@ function filter_settings_clicked(){
 }
 
 
+function clean_basket(){
+    if (confirm('Do you want to delete all proteins from the basket?')) {
+        basket = {};
+        filtered_basket = {};
+        which_proteins_checked = new Set();
+        for (var key in protein_dictionary){
+            protein_dictionary[key].mark(false);
+        }
+        draw();
+        check_spectra();
+    }
+}
+
+
 function setCookie(){
-    var cookie_data = {"proteins_checked": Array.from(which_proteins_checked), "filter_parameters": filter_parameters, "read_cookie_information": read_cookie_information};
+    var set_proteins = [];
+    for (prot_id in basket) set_proteins.push(basket[prot_id].accession);
+    
+    var cookie_data = {"proteins_checked": set_proteins.join(":"), "filter_parameters": filter_parameters, "read_cookie_information": read_cookie_information};
     document.cookie = encodeURI(JSON.stringify(cookie_data));
 }
 
