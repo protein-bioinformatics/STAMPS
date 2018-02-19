@@ -40,4 +40,4 @@ for entry in my_cur:
     data += [[entry[2], entry[3], entry[4]]]
 
 
-print(json.dumps(data).replace(", ", ""))
+print(json.dumps(data).replace(", ", ","))
