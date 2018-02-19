@@ -1271,7 +1271,7 @@ function zoom_sign(dir){
     
     this.mouse_click = function(mouse, key){
         zoom_in_out(1 - this.dir, 0);
-        draw(document.getElementById("renderarea").getContext("2d"));
+        draw();
     }
     
     this.is_mouse_over = function(mouse){
@@ -1280,6 +1280,7 @@ function zoom_sign(dir){
     
     this.draw = function(ctx){
         this.x = ctx.canvas.width - this.width * 1.3;
+        this.y = window.innerHeight - this.height * (1.3 + this.dir);
         ctx.globalAlpha = 0.3 + 0.7 * this.highlight;
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
         ctx.globalAlpha = 1.;
@@ -4289,8 +4290,6 @@ function resize_pathway_view(){
     ctx.canvas.width  = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
     preview_element.y = window.innerHeight - preview_element.height;
-    zoom_sign_in.y = window.innerHeight - zoom_sign_in.height * (1.3 + zoom_sign_in.dir);
-    zoom_sign_out.y = window.innerHeight - zoom_sign_out.height * (1.3 + zoom_sign_out.dir);
     draw();
 }
 
@@ -4327,16 +4326,16 @@ function load_data(reload){
     c.addEventListener('contextmenu', function(event){event.preventDefault(); return false;}, false);
     c.addEventListener("mouseout", mouse_up_listener, false);
     
-    infobox = new Infobox(ctx);
-    zoom_sign_in = new zoom_sign(ctx, 1);
-    zoom_sign_out = new zoom_sign(ctx, 0);
-    expand_obj = new expand_collapse(ctx, 1);
-    collapse_obj = new expand_collapse(ctx, 0);
-    preview_element = new preview(ctx);
-    select_field_element = new select_field(ctx);
+    infobox = new Infobox();
+    zoom_sign_in = new zoom_sign(1);
+    zoom_sign_out = new zoom_sign(0);
+    expand_obj = new expand_collapse(1);
+    collapse_obj = new expand_collapse(0);
+    preview_element = new preview();
+    select_field_element = new select_field();
     select_field_element.visible = false;
     collapse_obj.visible = false;
-    current_pathway_title = new pathway_title(ctx);
+    current_pathway_title = new pathway_title();
     ctx.canvas.width  = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
     
