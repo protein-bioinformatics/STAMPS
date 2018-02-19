@@ -42,133 +42,8 @@ bool is_integer_number(const string& string){
   return string.size()>minSize && it == string.end();
 }
 
-/*
-string remove_newline(string str) {
-    size_t start_pos = 0;
-    while((start_pos = str.find("\n", start_pos)) != string::npos) {
-        str.replace(start_pos, 1, "\\n");
-        start_pos += 2; // In case 'to' contains 'from', like replacing 'x' with 'yx'
-    }
-    string cf = "1";
-    cf[0] = 13;
-    start_pos = 0;
-    while((start_pos = str.find(cf, start_pos)) != string::npos) {
-        str.replace(start_pos, 1, "");
-    }
-    return str;
-}
-
-class spectrum {
-    public:
-        int id;
-        const string str_id;
-        string charge;
-        string mass;
-        string mod_sequence;
-        string tissues;
-        string tissue_numbers;
-        
-        spectrum(string _id) : str_id(_id) {id = atoi(str_id.c_str());}
-        
-        string to_string(bool complete = true){
-            string mod_mod_sequence = mod_sequence;
-            replaceAll(mod_sequence, "M[+16.0]", "m");
-            replaceAll(mod_mod_sequence, "C[+57.0]", "c");
-            float theo_mass = compute_mass(mod_mod_sequence);
-            float observ_mass = atof(mass.c_str()) * atoi(charge.c_str()) - (atoi(charge.c_str()) - 2) * 1.007276;
-            float ppm = (observ_mass - theo_mass) / theo_mass * 1000000.;
-            char buffer[50];
-            sprintf(buffer, "%0.5f", ppm);
-            
-            string str = "{";
-            str += "\"i\":" + str_id;
-            if (complete) str += ",\"s\":\"" + mod_sequence + "\"";
-            str += ",\"c\":" + charge;
-            str += ",\"m\":" + mass;
-            str += ",\"p\":" + string(buffer);
-            
-            vector<string> tissues_split = split(tissues, ',');
-            vector<string> tissue_numbers_split = split(tissue_numbers, ',');
-            if (tissues_split.size() == tissue_numbers_split.size()){
-                str += ",\"t\":{";
-                for (int i = 0; i < tissues_split.size(); ++i){
-                    if (i) str += ",";
-                    str += "\"" + tissues_split[i] + "\":" + tissue_numbers_split[i];
-                }
-                str += "}";
-            }
-            str += "}";
-            return str;
-        }
-};
-
-
-class peptide {
-    public:
-        string peptide_seq;
-        set<string> tissues;
-        vector<spectrum*> spectra;
-        
-        peptide(string ps) : peptide_seq(ps) {}
-        
-        string to_string(bool complete = true){
-            string str = "{";
-            if (complete) str += "\"p\":\"" + peptide_seq + "\",";
-            str += "\"s\":[";
-            for (int i = 0; i < spectra.size(); ++i){
-                if (i) str += ",";
-                str += spectra.at(i)->to_string(complete);
-            }
-            str += "]}";
-            return str;
-        }
-};
-
-class protein {
-    public:
-        string id;
-        const string str_id;
-        string name;
-        string definition;
-        float mass;
-        string accession;
-        string ec_number;
-        string fasta;
-        float pI;
-        vector<peptide*> peptides;
-        
-        protein(string _id) : str_id(_id) {id = atoi(str_id.c_str());}
-        
-        string to_string(bool complete = true){
-            stringstream ss;
-            ss << fasta.length();
-            
-            string str = "{";
-            str += "\"i\":" + str_id;
-            char buffer[20];
-            sprintf(buffer, "%0.3f", mass);
-            if (complete) str += ",\"n\":\"" + name + "\"";
-            if (complete) str += ",\"d\":\"" + definition + "\"";
-            str += ",\"m\":" + string(buffer);
-            if (complete) str += ",\"a\":\"" + accession + "\"";
-            if (complete) str += ",\"e\":\"" + ec_number + "\"";
-            str += ",\"l\":" + ss.str();
-            sprintf(buffer, "%0.3f", pI);
-            str += ",\"pI\":" + string(buffer);
-            str += ",\"p\":[";
-            for (int i = 0; i < peptides.size(); ++i){
-                if (i) str += ",";
-                str += peptides.at(i)->to_string(complete);
-            }
-            str += "]}";
-            return str;
-        }
-};
-*/
-
-map<string, peptide* > peptide_dict;
 vector< protein* > proteins;
-vector < spectrum* > spectra;
+map<string, peptide* > peptide_dict;
 map< int, spectrum* > spectrum_dict;
 map< string, string > parameters;
 
@@ -184,27 +59,20 @@ string statistics_json_suffix = ".json";
 
 static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
     peptide* current_pep = 0;
-    string P = argv[6];
+    string P = argv[1];
     
     
     if (P.compare(prev_pep_seq)){
         int L = 0, R = len_text - 1;
-        int p_len = P.length();
-        for (int i = 0; i < p_len; ++i){
-            const char c = P[p_len - 1 - i];
-            
-            occ->get_rank(--L, R, c);
+        
+        for (string::reverse_iterator c = P.rbegin(); c != P.rend(); ++c){
+            occ->get_rank(--L, R, *c);
             --R;
-            
-            
-            
             if (L > R) break;
-            int lss = less_table[c];
+            int lss = less_table[*c];
             L += lss;
             R += lss;
-            
         }
-        
         
         if (L == R){
             int start_pos = SA[L];
@@ -222,19 +90,23 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
     
     if (current_pep){
         spectrum *s1 = new spectrum(argv[0]);
-        s1->charge = argv[1];
-        string mass = argv[2];
-        s1->mod_sequence = argv[3];
-        if (mass.find(".") != string::npos){
-            mass = mass.substr(0, mass.find(".") + 5);
-        }
-        s1->mass = mass;
-        s1->tissues = argv[4];
-        s1->tissue_numbers = argv[5];
         current_pep->spectra.push_back(s1);
         spectrum_dict.insert(pair<int, spectrum* >(s1->id, s1));
-        spectra.push_back(s1);
     }
+    return 0;
+}
+
+static int sqlite_mem_callback(void *data, int argc, char **argv, char **azColName){
+    spectrum* s1 = spectrum_dict[atoi(argv[0])];
+    s1->charge = argv[1];
+    string mass = argv[2];
+    s1->mod_sequence = argv[3];
+    if (mass.find(".") != string::npos){
+        mass = mass.substr(0, mass.find(".") + 5);
+    }
+    s1->mass = mass;
+    s1->tissues = argv[4];
+    s1->tissue_numbers = argv[5];
     return 0;
 }
 
@@ -273,7 +145,6 @@ string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, 
         protein* last_protein = new protein(pid);
         last_protein->name = row[column_names_proteins[string("name")]];
         last_protein->definition = row[column_names_proteins[string("definition")]];
-        //last_protein->mass = row[column_names_proteins[string("mass")]];
         last_protein->accession = row[column_names_proteins[string("accession")]];
         last_protein->ec_number = row[column_names_proteins[string("ec_number")]];
         last_protein->fasta = cleanFasta(row[column_names_proteins[string("fasta")]]);
@@ -289,7 +160,6 @@ string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, 
     mysql_close(conn);
     
     if (!p_i) return "[]";
-    
     
     // create FM index for fast pattern search    
     unsigned char* T = new unsigned char[len_text];
@@ -329,12 +199,12 @@ string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, 
         else bwt[i] = T[len_text - 1];
     }
     
-    
-    
     occ = new wavelet((char*)bwt, len_text, abc);
     less_table = occ->create_less_table();
     
     
+    
+    // retrieve id and peptide sequence from spectral library
     sqlite3 *db;
     char *zErrMsg = 0;
     int rc;
@@ -344,9 +214,6 @@ string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, 
         cout << -2 << endl;
         exit(-2);
     }
-    
-    
-    
     int num_spectra = 0;
     rc = sqlite3_exec(db, "select count(*) from RefSpectra;", callback, &num_spectra, &zErrMsg);
     if (rc != SQLITE_OK) {
@@ -354,12 +221,12 @@ string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, 
         sqlite3_free(zErrMsg);
         exit(-5);
     }
-       
     
-    //, precursorCharge c, precursorMZ m, peptideModSeq s
-    string sql_query_lite2 = "SELECT r.id i, r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n, r.peptideSeq p FROM RefSpectra r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY i order by p;";
-        
-    // Execute SQL statement
+    
+    
+    
+    // retrieve all additional information from spectral library
+    string sql_query_lite2 = "SELECT id i, peptideSeq p FROM RefSpectra ORDER BY p;";
     char tmp_data;
     rc = sqlite3_exec(db, sql_query_lite2.c_str(), sqlite_callback, (void*)&tmp_data, &zErrMsg);
     if( rc != SQLITE_OK ){
@@ -368,11 +235,41 @@ string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, 
         exit(-3);
     }
     
+    sqlite3_stmt *stmt;
+    sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &zErrMsg);
+    
+    string sql_prepare = "SELECT r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n FROM (SELECT id, precursorCharge, precursorMZ, peptideModSeq FROM RefSpectra WHERE id = ?) r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY r.id;";
+    sqlite3_prepare_v2(db, sql_prepare.c_str(), -1, &stmt, 0);
+    
+    char buffer[20];
+    for(const auto& sd_pair : spectrum_dict){
+        spectrum* s = sd_pair.second;
+        sqlite3_bind_int(stmt, 1, s->id);
+        int rc = sqlite3_step(stmt);
+        // encode charge
+        sprintf(buffer, "%i", sqlite3_column_int(stmt, 0));
+        s->charge = buffer;
+        // encode mass
+        sprintf(buffer, "%0.5f", sqlite3_column_double(stmt, 1));
+        s->mass = buffer;
+        s->mod_sequence = (char*)sqlite3_column_text(stmt, 2);
+        s->tissues = (char*)sqlite3_column_text(stmt, 3);
+        s->tissue_numbers = (char*)sqlite3_column_text(stmt, 4);
+        sqlite3_clear_bindings(stmt);
+        sqlite3_reset(stmt);
+    }
+    sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, &zErrMsg);
+    sqlite3_finalize(stmt);
+    
+    
+    
+    
+    
+    sqlite3_close(db);
     delete occ;
     delete index_rank;
     delete SA;
 
-    sqlite3_close(db);
     
     
     
@@ -385,49 +282,8 @@ string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, 
     }
     response += "]";
     
-    /*
-    len_text = response.length() + 1; // +1 because of sentinal
-    
-    T = (unsigned char*)response.c_str();
-    bwt = new unsigned char[len_text];
-    unsigned char* mtf = new unsigned char[len_text];
-    SA = new int[len_text];
-    for (int i = 0; i < len_text; ++i) SA[i] = i;
-    T[len_text - 1] = '!';
-    
-    sais(T, SA, len_text);
-    
-    set<char> alphabet;
-    list<char> alphabet_order;
-    
-    for (int i = 0; i < len_text; ++i){
-        if (SA[i] > 0) bwt[i] = T[SA[i] - 1];
-        else bwt[i] = T[len_text - 1];
-        alphabet.insert(T[i]);
-    }
-    
-    for(set<char>::iterator set_it = alphabet.begin(); set_it != alphabet.end(); ++set_it){
-        alphabet_order.push_back(*set_it);
-    }
-    
-    for (int i = 0; i < len_text; ++i){
-        char c = bwt[i];
-        int pos = 0;
-        list<char>::iterator list_it = alphabet_order.begin();
-        for(; c != *list_it; ++list_it, ++pos){}
-        mtf[i] = pos;
-        if ( list_it != alphabet_order.begin()) alphabet_order.splice( alphabet_order.begin(), alphabet_order, list_it, std::next( list_it ) );
-    }
-    */
-    
     return response;
 }
-
-
-
-
-
-
 
 
 
