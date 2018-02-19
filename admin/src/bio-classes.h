@@ -6,6 +6,7 @@
 #include <sstream>
 #include <cstring>
 #include <math.h>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -18,6 +19,15 @@ string remove_newline(string str);
 string compress_string(const string& str, int compressionlevel = Z_BEST_COMPRESSION);
 float compute_mass(string protein_seq);
 float predict_isoelectric_point(string protein_seq);
+static timeval start_timeval, end_timeval;
+
+static void start_time(){gettimeofday(&start_timeval, 0);}
+static void stop_time(){gettimeofday(&end_timeval, 0);}
+static long get_time(){
+    long stime = start_timeval.tv_sec * 1000000 + start_timeval.tv_usec;
+    long etime = end_timeval.tv_sec * 1000000 + end_timeval.tv_usec;
+    return etime - stime;
+}
 
 static float acids[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

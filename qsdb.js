@@ -31,7 +31,7 @@ function init(){
             search_data = JSON.parse(xmlhttp_search.responseText);
         }
     }
-    xmlhttp_search.open("GET", "/qsdb/cgi-bin/get-search-data.py", true);
+    xmlhttp_search.open("GET", "/qsdb/cgi-bin/get-search-data.bin", true);
     xmlhttp_search.send();
     
     for (var key in tissues){

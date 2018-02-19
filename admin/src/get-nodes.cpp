@@ -116,17 +116,6 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
     
     if (current_pep){
         spectrum *s1 = new spectrum(argv[1]);
-        /*
-        s1->charge = argv[2];
-        string mass = argv[3];
-        s1->mod_sequence = argv[4];
-        if (mass.find(".") != string::npos){
-            mass = mass.substr(0, mass.find(".") + 5);
-        }
-        s1->mass = mass;
-        s1->tissues = argv[5];
-        s1->tissue_numbers = argv[6];
-        */
         current_pep->spectra.push_back(s1);
         all_spectra->insert(pair<int, spectrum* >(s1->id, s1));
         spectra->push_back(s1);
@@ -346,6 +335,7 @@ main(int argc, char** argv) {
         node_dict[node_id]->proteins.push_back(last_protein);
     }
     
+    start_time();
     
     
     // create FM index for fast pattern search    
@@ -397,11 +387,10 @@ main(int argc, char** argv) {
         print_out(response, compress);
         return -2;
     }
-    //, precursorCharge c, precursorMZ m, peptideModSeq s
-    //string sql_query_lite2 = "SELECT r.peptideSeq p, r.id i, r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n FROM RefSpectra r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY i order by p;";
-    string sql_query_lite2 = "SELECT r.peptideSeq p, r.id i FROM RefSpectra r order by p;";
+    
         
     // Execute SQL statement
+    string sql_query_lite2 = "SELECT r.peptideSeq p, r.id i FROM RefSpectra r order by p;";
     char tmp_data;
     rc = sqlite3_exec(db, sql_query_lite2.c_str(), sqlite_callback, (void*)&tmp_data, &zErrMsg);
     if( rc != SQLITE_OK ){
@@ -417,7 +406,6 @@ main(int argc, char** argv) {
     
     
     sqlite3_stmt *stmt;
-    //string sql_prepare = "SELECT r.id i, r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n FROM RefSpectra r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY i HAVING i = 1;";
     string sql_prepare = "SELECT r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n FROM (SELECT id, precursorCharge, precursorMZ, peptideModSeq FROM RefSpectra WHERE id = ?) r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY r.id;";
     sqlite3_prepare_v2(db, sql_prepare.c_str(), -1, &stmt, 0);
     
@@ -442,40 +430,10 @@ main(int argc, char** argv) {
         sqlite3_reset(stmt);
         ++it;
     }
-    
-    
-    /*
-    double t = 500;
-    double l = spectra->size();
-
-    vector<spectrum*>::iterator it = spectra->begin();
-    while (it != spectra->end()){
-            
-        string sql_query_lite = (*it)->str_id;
-        ++it;
-        for (int i = 1; i < t && it != spectra->end(); ++i, ++it){
-            sql_query_lite += ", " + (*it)->str_id;
-        }
-        
-        // quering precursor charge, m/z and modified sequence
-        string sql_query = "SELECT id i, precursorCharge c, precursorMZ m, peptideModSeq s FROM RefSpectra WHERE id IN (" + sql_query_lite + ");";
-        vector< map< string, string > > spectra_data;
-        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_spectra, (void*)&spectra_data, &zErrMsg);
-        if( rc != SQLITE_OK ){
-            response += "-4\n";
-            print_out(response, compress);
-            sqlite3_free(zErrMsg);
-            return -4;
-        }
-        
-        
-        // quering possible tissue origins
-        sql_query = "SELECT RefSpectraId i, group_concat(tissue) t FROM Tissues WHERE i IN (" + sql_query_lite + ") group by i;";
-        vector< map< string, string > > tissue_data;
-        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_callback_tissues, (void*)&tissue_data, &zErrMsg);
-    }
-    */
     sqlite3_close(db);
+    
+    stop_time();
+    //cout << "time: " << get_time() << "us" << endl;
     
     
     string sql_query_rest = "(select n.id, p.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ";
