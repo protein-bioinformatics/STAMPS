@@ -271,7 +271,8 @@ function get_check_spectra_content(){
     </fieldset> \
     <div id=\"spectra_panel\" class=\"spectra_panel\"></div> \
     <div id=\"check_spectra_functions\" style=\"margin: 0px; position: fixed;\"> \
-        <table width=\"100%\"><tr><td><font size=\"-1\">Expand / Collapse </font></td> \
+        <table width=\"100%\"><tr><td><font size=\"-1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\"check_spectra_expand_collapse_all(false);\">Expand</font> / \
+        <font size=\"-1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\"check_spectra_expand_collapse_all(true);\">Collapse</font></td> \
         <td align=\"right\"> <font size=\"-1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\"clean_basket();\">Delete all proteins</font></td></tr></table> \
     </div> \
     <div id=\"filter_panel_check_spectra\" class=\"filter_panel_check_spectra\"></div> \
@@ -3334,30 +3335,44 @@ function show_hide_protein_tissues(){
     }
 }
 
-
-function check_spectra_expand_collapse_spectra(pep_id){
-    var sign_right = String.fromCharCode(9656);
-    var sign_down = String.fromCharCode(9662);
-    var specs_visible = document.getElementById("spectrum_" + pep_id).style.display == 'inline';
-    document.getElementById("peptide_sign_" + pep_id).innerHTML = specs_visible ? sign_right : sign_down;
-    document.getElementById("spectrum_" + pep_id).style.display = specs_visible ? 'none' : 'inline';
+function check_spectra_expand_collapse_all(do_collapse){
+    for (key in filtered_basket){
+        check_spectra_expand_collapse_peptide(key, do_collapse);
+        var prot = filtered_basket[key];
+        for (var i = 0; i < prot.peptides.length; ++i){
+            var pep_id = prot.id + "_" + prot.peptides[i].peptide_seq;
+            var spec_element = document.getElementById("spectrum_" + pep_id);
+            if (typeof(spec_element) != 'undefined' && spec_element != null) check_spectra_expand_collapse_spectra(pep_id, do_collapse);
+        }
+    }
 }
 
 
-function check_spectra_expand_collapse_peptide(prot_id){
+function check_spectra_expand_collapse_spectra(pep_id, do_collapse){
+    var sign_right = String.fromCharCode(9656);
+    var sign_down = String.fromCharCode(9662);
+    if (typeof do_collapse === "undefined") do_collapse = document.getElementById("spectrum_" + pep_id).style.display == 'inline';
+    document.getElementById("peptide_sign_" + pep_id).innerHTML = do_collapse ? sign_right : sign_down;
+    document.getElementById("spectrum_" + pep_id).style.display = do_collapse ? 'none' : 'inline';
+}
+
+
+function check_spectra_expand_collapse_peptide(prot_id, do_collapse){
     var current_prot = filtered_basket[prot_id];
     var sign_right = String.fromCharCode(9656);
     var sign_down = String.fromCharCode(9662);
     var pep_id = "peptides_" + prot_id;
     var dom_pep = document.getElementById(pep_id);
     var peptide_tissue_style = filter_parameters['peptide_tissues_visible'] ? "inline" : "none";
+    if (typeof do_collapse === "undefined") do_collapse = dom_pep.style.display == "inline";
     
-    if (dom_pep.style.display == "inline"){
+    if (do_collapse){
         dom_pep.innerHTML = "";
         dom_pep.style.display = "none";
         document.getElementById("protein_sign_" + current_prot.id).innerHTML = sign_right;
     }
     else {
+        if (dom_pep.style.display == "inline") return;
         document.getElementById("protein_sign_" + current_prot.id).innerHTML = sign_down;
         dom_pep.style.display = "inline";
         for (var j = 0; j < current_prot.peptides.length; ++j){
