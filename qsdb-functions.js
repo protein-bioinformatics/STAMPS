@@ -1567,7 +1567,7 @@ function node(data, ctx){
                 this.containing_spectra += prot.containing_spectra;
                 if (name.length) name += ", ";
                 var prot_name = prot.name;
-                var text_width = ctx.measureText(prot_name).width;
+                var text_width = ctx.measureText(prot_name).width + 10;
                 this.width = Math.max(this.width, text_width);
                 name += prot.name;
                 this.fill_style = protein_fill_color;
@@ -3055,15 +3055,18 @@ function get_mouse_pos(canvas, evt){
 
 
 
+function prevent_zooming(e){
+    if(e.ctrlKey) e.preventDefault();
+}
+
+
+
 function mouse_wheel_listener(e){
     if (!pathway_is_loaded) return;
-    if(e.ctrlKey){
-        e.preventDefault();  //prevent zoom
-    if(e.deltaY<0) return false;
-    if(e.deltaY>0) return false;
-  }
+    if(e.ctrlKey) e.preventDefault();
+    var delta = Math.max(-1, Math.min(1, -e.wheelDelta || e.detail));
     var c = document.getElementById("renderarea");
-    zoom_in_out(e.detail >= 0, get_mouse_pos(c, e));
+    zoom_in_out(delta >= 0, get_mouse_pos(c, e));
     draw();
 }
     
@@ -4370,6 +4373,7 @@ function load_data(reload){
     c.addEventListener("click", mouse_click_listener, false);
     c.addEventListener("dblclick", mouse_dblclick_listener, false);
     c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
+    c.addEventListener('mousewheel', mouse_wheel_listener, false);
     c.addEventListener('contextmenu', function(event){event.preventDefault(); return false;}, false);
     c.addEventListener("mouseout", mouse_up_listener, false);
     
