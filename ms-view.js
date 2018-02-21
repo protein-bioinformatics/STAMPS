@@ -485,18 +485,20 @@ function get_mouse_pos(canvas, evt){
 }
 
 
-function view_mouse_wheel_listener(event){
-    var direction = (1 - 2 *(event.detail >= 0));
+function view_mouse_wheel_listener(e){
+    if(e.ctrlKey) e.preventDefault();
+    var delta = Math.max(-1, Math.min(1, -e.wheelDelta || e.detail));
+    var direction = (1 - 2 *(delta >= 0));
     if (ms_zoom + direction < 0 || max_ms_zoom <= ms_zoom + direction)
         return;
     
     ms_zoom += direction;
     var scale = ms_scaling;
-    if (event.detail >= 0) scale = 1. / scale;
+    if (delta >= 0) scale = 1. / scale;
     var c = document.getElementById("msarea");
     var ctx = c.getContext("2d");
     
-    res = get_mouse_pos(c, event);
+    res = get_mouse_pos(c, e);
     origin_x = res.x + scale * (origin_x - res.x);
     last_x = res.x + scale * (last_x - res.x);
     for (var i = 0; i < peaks.length; ++i) {

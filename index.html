@@ -1150,13 +1150,13 @@ function Chromosome(name, data, ctx, chromosome_width, chromosome_height){
 
     this.mouse_wheel = function(e, mouse_pos, rect){
         var ft = 5000000;
-        
         if (chromosome_selected == this.name){
-            var diff = ft * (e.detail < 0 ? 1 : -1);
+            var delta = Math.max(-1, Math.min(1, -e.wheelDelta || e.detail));
+            var diff = ft * (delta < 0 ? 1 : -1);
             if (this.panel_height + diff >= 10000000){
-                this.panel_base_start -= Math.floor(ft / 2 * (e.detail < 0 ? 1 : -1));
+                this.panel_base_start -= Math.floor(ft / 2 * (delta < 0 ? 1 : -1));
             }
-            this.panel_height += Math.floor(ft * (e.detail < 0 ? 1 : -1));
+            this.panel_height += Math.floor(ft * (delta < 0 ? 1 : -1));
             this.panel_height = Math.max(10000000, this.panel_height);
             this.panel_height = Math.min(this.bases, this.panel_height);
             
@@ -1210,6 +1210,7 @@ function chromosome_mouseup(e){
 }
 
 function chromosome_mouse_wheel(e){
+    if(e.ctrlKey) e.preventDefault();
     for (var i = 0; i < chromosome_keys.length; ++i){
         var key = chromosome_keys[i];
         chromosomes[key].mouse_wheel(e);
@@ -1612,14 +1613,16 @@ function nsaf_to_svg(){
 }
 
 
-
 var kr_keys = [];
 var scanner_data = [1, 0, 0]; // scanner_up, scanner_index, scanner_count
 var nav_ids = ["how_to_nav", "pathway_browser_nav", "subcellular_search_nav", "functional_search_nav", "accession_search_nav", "chromosome_search_nav", "statistics_nav", "about_nav"];
 document.addEventListener('keydown', key_down, false);
 document.addEventListener("mousemove", chromosome_mousemove, false);
 document.addEventListener("mouseup", chromosome_mouseup, false);
+document.getElementById("function_chromosome_field").addEventListener('mousewheel', chromosome_mouse_wheel, false);
 document.getElementById("function_chromosome_field").addEventListener('DOMMouseScroll', chromosome_mouse_wheel, false);
+document.addEventListener('mousewheel', prevent_zooming, false);
+document.addEventListener('DOMMouseScroll', prevent_zooming, false);
 document.getElementById("click_background").addEventListener("click", hide_background, false);
 document.getElementById("check_spectra").innerHTML = get_check_spectra_content();
 document.getElementById("waiting_background").innerHTML = get_waiting_background_content();

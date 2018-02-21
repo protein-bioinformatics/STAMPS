@@ -54,8 +54,10 @@ function init(){
     
     window.addEventListener('resize', resize_ms_view, false);
     window.addEventListener('resize', resize_pathway_view, false);
-    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
     document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
+    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
+    document.addEventListener('DOMMouseScroll', prevent_zooming, false);
+    document.addEventListener("mousewheel", prevent_zooming, false);
     
     //document.cookie = "";
     
@@ -83,7 +85,6 @@ function right_mouse_down_listener(e){
     if (e.button != 2) return;
     right_mouse_down_start = get_mouse_pos(document.getElementById("renderarea"), e);
 }
-
 
 
 function mouse_move_listener(e){
