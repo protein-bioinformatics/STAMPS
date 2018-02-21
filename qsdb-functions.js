@@ -271,7 +271,8 @@ function get_check_spectra_content(){
     </fieldset> \
     <div id=\"spectra_panel\" class=\"spectra_panel\"></div> \
     <div id=\"check_spectra_functions\" style=\"margin: 0px; position: fixed;\"> \
-        <table width=\"100%\"><tr><td><font size=\"-1\">Expand / Collapse </font></td> \
+        <table width=\"100%\"><tr><td><font size=\"-1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\"check_spectra_expand_collapse_all(false);\">Expand</font> / \
+        <font size=\"-1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\"check_spectra_expand_collapse_all(true);\">Collapse</font></td> \
         <td align=\"right\"> <font size=\"-1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\"clean_basket();\">Delete all proteins</font></td></tr></table> \
     </div> \
     <div id=\"filter_panel_check_spectra\" class=\"filter_panel_check_spectra\"></div> \
@@ -1322,10 +1323,11 @@ function Infobox(ctx){
             this.height = 40;
             this.height += 7 * line_height + 20;
             ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
-            this.width = Math.max(this.width, ctx.measureText("Definition: " + data[this.node_id].proteins[this.protein_id].definition).width + 40);
-            this.width = Math.max(this.width, ctx.measureText("Uniprot accession: " + data[this.node_id].proteins[this.protein_id].accession).width + 40);
-            this.width = Math.max(this.width, ctx.measureText("EC number: " + data[this.node_id].proteins[this.protein_id].ec_number).width + 40);
-            this.width = Math.max(this.width, ctx.measureText("Mass / Da: " + data[this.node_id].proteins[this.protein_id].mass).width + 40);
+            var prot = protein_dictionary[data[this.node_id].proteins[this.protein_id]];
+            this.width = Math.max(this.width, ctx.measureText("Definition: " + prot.definition).width + 40);
+            this.width = Math.max(this.width, ctx.measureText("Uniprot accession: " + prot.accession).width + 40);
+            this.width = Math.max(this.width, ctx.measureText("EC number: " + prot.ec_number).width + 40);
+            this.width = Math.max(this.width, ctx.measureText("Mass / Da: " + prot.mass).width + 40);
         }
     }
 
@@ -1398,7 +1400,7 @@ function Infobox(ctx){
             obj.style.top = (this.y - offset_y).toString() + "px";
         }
         else if (data[this.node_id].type == "protein"){
-            var node_obj = data[this.node_id].proteins[this.protein_id];
+            var node_obj = protein_dictionary[data[this.node_id].proteins[this.protein_id]];
             
             var coverage_list = [];
             for(var j = 0; j < node_obj.peptides.length; ++j){
@@ -1552,7 +1554,7 @@ function node(data, ctx){
                         toggled_proteins.add(prot.id);
                     }
                 }*/
-                this.proteins.push(prot);
+                this.proteins.push(prot_id);
                 this.containing_spectra += prot.containing_spectra;
                 if (name.length) name += ", ";
                 var prot_name = prot.name;
@@ -1607,7 +1609,7 @@ function node(data, ctx){
         var num_proteins = 0;
         var valid_proteins = 0;
         for (var i = 0; i < this.proteins.length; ++i){
-            var tmp = this.proteins[i].get_statistics();
+            var tmp = protein_dictionary[this.proteins[i]].get_statistics();
             num_proteins += tmp[0];
             valid_proteins += tmp[1];
             num_peptides += tmp[2];
@@ -1622,7 +1624,7 @@ function node(data, ctx){
         var results = [];
         if (this.type == "protein"){
             for (var i = 0; i < this.proteins.length; ++i){
-                var r = this.proteins[i].search(len_p, accept, masks, this.id);
+                var r = protein_dictionary[this.proteins[i]].search(len_p, accept, masks, this.id);
                 if (r.length) results = results.concat(r);
             }
         }/*
@@ -1675,7 +1677,7 @@ function node(data, ctx){
     this.filtering = function(){
         if (this.type == "protein"){
             for (var i = 0; i < this.proteins.length; ++i){
-                this.proteins[i].filtering();
+                protein_dictionary[this.proteins[i]].filtering();
             }
         }
     }
@@ -1729,7 +1731,7 @@ function node(data, ctx){
                 var lhf = line_height * factor;
                 for (var i = 0, tty = ty - (this.proteins.length - 1) * lhf * 0.5; i < this.proteins.length; i += 1, tty += lhf){
                     if (Math.abs(tty - this.y) <= hh + lhf){
-                        this.proteins[i].draw(ctx, tx, tty);
+                        protein_dictionary[this.proteins[i]].draw(ctx, tx, tty);
                     }
                 }
                 ctx.restore();
@@ -1882,8 +1884,9 @@ function node(data, ctx){
             offset_y = (this.orig_height * 0.5 - this.height * 0.5) - this.slide_percent * (this.orig_height - this.height);
         }
         for (var i = 0; i < this.proteins.length; ++i){
-            if (this.proteins[i].mouse_over_checkbox(this.x - this.width / 2, this.y + offset_y, res.x, res.y, this.proteins.length, i)){
-                this.proteins[i].toggle_marked();
+            var prot = protein_dictionary[this.proteins[i]];
+            if (prot.mouse_over_checkbox(this.x - this.width / 2, this.y + offset_y, res.x, res.y, this.proteins.length, i)){
+                prot.toggle_marked();
                 break;
             }
         }
@@ -1903,7 +1906,7 @@ function node(data, ctx){
             offset_y = (this.orig_height * 0.5 - this.height * 0.5) - this.slide_percent * (this.orig_height - this.height);
         }
         
-        return this.proteins[i].get_position(this.x - this.width / 2, this.y + offset_y, this.proteins.length, i);
+        return protein_dictionary[this.proteins[i]].get_position(this.x - this.width / 2, this.y + offset_y, this.proteins.length, i);
     }
     
     
@@ -1915,7 +1918,7 @@ function node(data, ctx){
             offset_y = (this.orig_height * 0.5 - this.height * 0.5) - this.slide_percent * (this.orig_height - this.height);
         }
         for (var i = 0; i < this.proteins.length; ++i){
-            if(this.proteins[i].check_mouse_over_protein_name(this.x - this.width / 2, this.y + offset_y, this.proteins.length, i, mouse)){
+            if(protein_dictionary[this.proteins[i]].check_mouse_over_protein_name(this.x - this.width / 2, this.y + offset_y, this.proteins.length, i, mouse)){
                 return i;
             }
         }
@@ -1948,12 +1951,13 @@ function node(data, ctx){
         var cnt = 0;
         var cnt_avbl = 0;
         for (var i = 0; i < this.proteins.length; ++i){
-            cnt += (this.proteins[i].id in basket);
-            cnt_avbl += (this.proteins[i].peptides.length > 0) && (this.proteins[i].containing_spectra > 0);
+            var prot = protein_dictionary[this.proteins[i]];
+            cnt += (prot.id in basket);
+            cnt_avbl += (prot.peptides.length > 0) && (prot.containing_spectra > 0);
         }
         var marking = (cnt != cnt_avbl);
         for (var i = 0; i < this.proteins.length; ++i){
-            this.proteins[i].mark(marking);
+            protein_dictionary[this.proteins[i]].mark(marking);
         }
         draw();
         return true;
@@ -3334,30 +3338,44 @@ function show_hide_protein_tissues(){
     }
 }
 
-
-function check_spectra_expand_collapse_spectra(pep_id){
-    var sign_right = String.fromCharCode(9656);
-    var sign_down = String.fromCharCode(9662);
-    var specs_visible = document.getElementById("spectrum_" + pep_id).style.display == 'inline';
-    document.getElementById("peptide_sign_" + pep_id).innerHTML = specs_visible ? sign_right : sign_down;
-    document.getElementById("spectrum_" + pep_id).style.display = specs_visible ? 'none' : 'inline';
+function check_spectra_expand_collapse_all(do_collapse){
+    for (key in filtered_basket){
+        check_spectra_expand_collapse_peptide(key, do_collapse);
+        var prot = filtered_basket[key];
+        for (var i = 0; i < prot.peptides.length; ++i){
+            var pep_id = prot.id + "_" + prot.peptides[i].peptide_seq;
+            var spec_element = document.getElementById("spectrum_" + pep_id);
+            if (typeof(spec_element) != 'undefined' && spec_element != null) check_spectra_expand_collapse_spectra(pep_id, do_collapse);
+        }
+    }
 }
 
 
-function check_spectra_expand_collapse_peptide(prot_id){
+function check_spectra_expand_collapse_spectra(pep_id, do_collapse){
+    var sign_right = String.fromCharCode(9656);
+    var sign_down = String.fromCharCode(9662);
+    if (typeof do_collapse === "undefined") do_collapse = document.getElementById("spectrum_" + pep_id).style.display == 'inline';
+    document.getElementById("peptide_sign_" + pep_id).innerHTML = do_collapse ? sign_right : sign_down;
+    document.getElementById("spectrum_" + pep_id).style.display = do_collapse ? 'none' : 'inline';
+}
+
+
+function check_spectra_expand_collapse_peptide(prot_id, do_collapse){
     var current_prot = filtered_basket[prot_id];
     var sign_right = String.fromCharCode(9656);
     var sign_down = String.fromCharCode(9662);
     var pep_id = "peptides_" + prot_id;
     var dom_pep = document.getElementById(pep_id);
     var peptide_tissue_style = filter_parameters['peptide_tissues_visible'] ? "inline" : "none";
+    if (typeof do_collapse === "undefined") do_collapse = dom_pep.style.display == "inline";
     
-    if (dom_pep.style.display == "inline"){
+    if (do_collapse){
         dom_pep.innerHTML = "";
         dom_pep.style.display = "none";
         document.getElementById("protein_sign_" + current_prot.id).innerHTML = sign_right;
     }
     else {
+        if (dom_pep.style.display == "inline") return;
         document.getElementById("protein_sign_" + current_prot.id).innerHTML = sign_down;
         dom_pep.style.display = "inline";
         for (var j = 0; j < current_prot.peptides.length; ++j){
@@ -4122,15 +4140,16 @@ function compute_statistics(){
     var sel_spectra = 0;
     num_validation = [0, 0, 0];
     for (var i = 0; i < proteins_content.length; ++i){
-        var tmp = data[proteins_content[i][1]].proteins[proteins_content[i][2]].get_statistics();
-        valid_proteins += data[proteins_content[i][1]].proteins[proteins_content[i][2]].filter_valid;
+        var prot = protein_dictionary[data[proteins_content[i][1]].proteins[proteins_content[i][2]]];
+        var tmp = prot.get_statistics();
+        valid_proteins += prot.filter_valid;
         num_peptides += tmp[2];
         valid_peptides += tmp[3];
         num_spectra += tmp[4];
         valid_spectra += tmp[5];
-        if (data[proteins_content[i][1]].proteins[proteins_content[i][2]].validation == "is") num_validation[2] += 1;
-        else if (data[proteins_content[i][1]].proteins[proteins_content[i][2]].validation == "prm") num_validation[1] += 1;
-        else if (data[proteins_content[i][1]].proteins[proteins_content[i][2]].validation == "topn") num_validation[0] += 1;
+        if (prot.validation == "is") num_validation[2] += 1;
+        else if (prot.validation == "prm") num_validation[1] += 1;
+        else if (prot.validation == "topn") num_validation[0] += 1;
         if (proteins_content[i][3]){
             sel_proteins += 1;
             sel_peptides += tmp[3];

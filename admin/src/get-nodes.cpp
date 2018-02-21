@@ -335,7 +335,7 @@ main(int argc, char** argv) {
         node_dict[node_id]->proteins.push_back(last_protein);
     }
     
-    start_time();
+    //start_time();
     
     
     // create FM index for fast pattern search    
@@ -377,6 +377,8 @@ main(int argc, char** argv) {
     less_table = occ->create_less_table();
     
     
+    
+    /*
     sqlite3 *db;
     char *zErrMsg = 0;
     int rc;
@@ -431,8 +433,10 @@ main(int argc, char** argv) {
         ++it;
     }
     sqlite3_close(db);
+    */
     
-    stop_time();
+    
+    //stop_time();
     //cout << "time: " << get_time() << "us" << endl;
     
     
