@@ -108,6 +108,8 @@ disabled_text_color = "#bbbbbb";
 disabled_fill_color = "#cccccc";
 text_color = "black";
 
+
+
 protein_stroke_color = "#f69301";
 protein_fill_color = "#fff6d5";
 protein_disabled_stroke_color = "#cccccc";
@@ -120,17 +122,21 @@ pathway_fill_color = "white";
 edge_color = "#f69301";
 edge_disabled_color = "#cccccc";
 slide_color = "#5792da";
-background_hiding = 0;
+
 
 /*
 // corporate design
 protein_stroke_color = "black";
 protein_fill_color = "white";
+protein_disabled_stroke_color = "#cccccc";
+protein_disabled_fill_color = "#eeeeee";
 metabolite_stroke_color = "black";
 metabolite_fill_color = "white";
 pathway_stroke_color = "black";
+pathway_disabled_stroke_color = "#cccccc";
 pathway_fill_color = "white";
 edge_color = "black";
+edge_disabled_color = "#cccccc";
 slide_color = "black";
 */
 
@@ -142,6 +148,7 @@ infobox_stroke_width = 1;
 infobox_offset_x = 20;
 preview_element = 0;
 select_field_element = 0;
+background_hiding = 0;
 
 pathway_dict = {};
 pathways = [[15, "Alanine, aspartate and glutamate metabolism"]];
@@ -428,6 +435,8 @@ function compute_angle(x_1, y_1, x_2, y_2, anchor){
 
 
 function draw(sync){
+    if (typeof(qsdb_domain) === 'undefined' || qsdb_domain != true) return;
+    
     if (typeof(sync) == "undefined"){
         var dc = Math.random();
         draw_code = dc;
@@ -3208,9 +3217,10 @@ function mouse_up_listener(event){
             data[i].highlight = false;
             if (data[i].type == "protein" && sx <= data[i].x && sy <= data[i].y && data[i].x <= ex && data[i].y <= ey){
                 for (var j = 0; j < data[i].proteins.length; ++j){
-                    if (!toggled.has(data[i].proteins[j].id)){
-                        data[i].proteins[j].toggle_marked();
-                        toggled.add(data[i].proteins[j].id);
+                    var prot = protein_dictionary[data[i].proteins[j]];
+                    if (!toggled.has(prot.id)){
+                        prot.toggle_marked();
+                        toggled.add(prot.id);
                     }
                 }
             }
@@ -3308,8 +3318,9 @@ function charge_plus(x){
 
 function delete_from_protein_table(prot_id){
     delete basket[prot_id];
-    if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null) draw();
+    draw();
     check_spectra();
+    setCookie();
 }
 
 
@@ -4668,13 +4679,16 @@ function clean_basket(){
         basket = {};
         filtered_basket = {};
         which_proteins_checked = new Set();
+        setCookie();
         draw();
         check_spectra();
+        setCookie();
     }
 }
 
 
 function setCookie(){
+    if (typeof(qsdb_domain) === 'undefined' || qsdb_domain != true) return;
     var set_proteins = [];
     for (prot_id in basket) set_proteins.push(basket[prot_id].accession);
     
