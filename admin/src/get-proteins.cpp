@@ -297,6 +297,7 @@ main(int argc, char** argv) {
     bool via_accessions = false;
     bool via_loci = false;
     bool via_functions = false;
+    bool via_pathway = false;
     
     if (compress){
         cout << "Content-Type: text/html" << endl;
@@ -309,6 +310,7 @@ main(int argc, char** argv) {
     string accessions = "";
     string loci_ids = "";
     string function_ids = "";
+    string pathway_id = "";
     bool statistics = false;
     bool statistics_pathways = false;
     
@@ -349,6 +351,10 @@ main(int argc, char** argv) {
                 function_ids = get_values.at(1);
                 via_functions = true;
             }
+            else if (get_values.at(0) == "pathway"){
+                pathway_id = get_values.at(1);
+                via_pathway = true;
+            }
             else if (get_values.at(0) == "statistics"){
                 statistics = true;
             }
@@ -361,7 +367,7 @@ main(int argc, char** argv) {
         }
     }
     
-    if (via_accessions + via_loci + via_functions + statistics + statistics_pathways != 1){
+    if (via_accessions + via_loci + via_functions + statistics + statistics_pathways + via_pathway != 1){
         cout << -5;
         return -5;
     }
@@ -481,6 +487,13 @@ main(int argc, char** argv) {
     }
     else if (statistics) {
         sql_query_proteins = "select * from proteins where unreviewed = false and species = '" + species + "';";
+    }
+    else if (via_pathway){
+        sql_query_proteins = "select distinct p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where p.unreviewed = false and n.pathway_id = ";
+        sql_query_proteins += pathway_id;
+        sql_query_proteins += " and n.type = 'protein' and p.species = '";
+        sql_query_proteins += species;
+        sql_query_proteins += "';";
     }
     
     

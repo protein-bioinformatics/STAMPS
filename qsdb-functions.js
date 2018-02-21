@@ -4462,8 +4462,19 @@ function load_data(reload){
                     preview_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height) * 5) / Math.log(scaling));
                 }
             }
-            process_edges_semaphore = true;            
+            process_edges_semaphore = true;
             clearInterval(process_nodes);
+            
+            // get nodes information
+            var xmlhttp_prot = new XMLHttpRequest();
+            xmlhttp_prot.onreadystatechange = function() {
+                if (xmlhttp_prot.readyState == 4 && xmlhttp_prot.status == 200) {
+                    request_load_proteins(JSON.parse(xmlhttp_prot.responseText), false, true);
+                }
+            }
+            
+            xmlhttp_prot.open("GET", "/qsdb/cgi-bin/get-proteins.bin?pathway=" + current_pathway + "&species=mouse", true);
+            xmlhttp_prot.send();
         }
     }, 1);
         
@@ -4522,7 +4533,8 @@ function accession_search_parse_accessions(accessions){
 
 
 
-function request_load_proteins(data, check){
+function request_load_proteins(data, check, post_load){
+    if (typeof post_load === "undefined") post_load = false;
     for (var i = 0; i < data.length; ++i){
         var p_id = data[i]["id"];
         var prot = 0;
@@ -4534,9 +4546,10 @@ function request_load_proteins(data, check){
             prot = protein_dictionary[prot.id];
         }
         prot.filtering();
-        if (prot.filter_valid) basket[prot.id] = prot;
+        if (prot.filter_valid && !post_load) basket[prot.id] = prot;
     }
     if (check) check_spectra();
+    if (post_load) draw();
 }
 
 
@@ -4662,7 +4675,6 @@ function clean_basket(){
 
 
 function setCookie(){
-console.log("cookie");
     var set_proteins = [];
     for (prot_id in basket) set_proteins.push(basket[prot_id].accession);
     
