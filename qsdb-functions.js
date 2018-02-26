@@ -113,6 +113,7 @@ text_color = "black";
 protein_stroke_color = "#f69301";
 protein_fill_color = "#fff6d5";
 protein_disabled_stroke_color = "#cccccc";
+label_color = "#777777";
 protein_disabled_fill_color = "#eeeeee";
 metabolite_stroke_color = "#f69301";
 metabolite_fill_color = "white";;
@@ -663,7 +664,7 @@ function Peptide(data){
 
 
 
-function Protein(data, ctx){
+function Protein(data){
     this.id = data['i'];
     this.name = data['n'];
     this.definition = data['d'];
@@ -1548,21 +1549,6 @@ function node(data, ctx){
                     protein_dictionary[prot_id] = prot;
                 }
                 
-                /*
-                if (!(data['p'][j]['i'] in protein_dictionary)){
-                    prot = new Protein(data['p'][j], this.ctx);
-                    protein_dictionary[prot.id] = prot;
-                }
-                else {
-                    prot = protein_dictionary[data['p'][j]['i']];
-                }
-                if (prot.id in basket){
-                    basket[prot.id] = prot;
-                    if (!toggled_proteins.has(prot.id)){
-                        prot.toggle_marked();
-                        toggled_proteins.add(prot.id);
-                    }
-                }*/
                 this.proteins.push(prot_id);
                 this.containing_spectra += prot.containing_spectra;
                 if (name.length) name += ", ";
@@ -1607,6 +1593,11 @@ function node(data, ctx){
         case "membrane":
             this.width = this.length * (2 * this.lipid_radius + this.lw) * factor;
             this.height = (this.o_y + 2 * this.lipid_radius + this.lw) * factor;
+            break;
+            
+        case "label":
+            this.width = ctx.measureText(this.name).width;
+            this.height = (text_size + 6) * factor;
             break;
     }
     
@@ -1774,9 +1765,13 @@ function node(data, ctx){
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
+                break;
                 
-                
-                
+            case "label":
+                ctx.textAlign = "center";
+                ctx.font = ((text_size + 2) * factor).toString() + "px Arial";
+                ctx.fillStyle = label_color;
+                ctx.fillText(this.name, this.x, this.y + (this.height >> 2));
                 break;
                 
             case "membrane":
@@ -1791,14 +1786,12 @@ function node(data, ctx){
                     ctx.beginPath();
                     ctx.arc(tmp_x, this.y - this.o_y * factor, this.lipid_radius * factor, 0, 2 * Math.PI);
                     ctx.closePath();
-                    //ctx.fill();
                     ctx.stroke();
                     
                     
                     ctx.beginPath();
                     ctx.arc(tmp_x, this.y + this.o_y * factor, this.lipid_radius * factor, 0, 2 * Math.PI);
                     ctx.closePath();
-                    //ctx.fill();
                     ctx.stroke();
                     tmp_x += (2 * this.lipid_radius + this.lw) * factor;
                 }
@@ -1813,7 +1806,7 @@ function node(data, ctx){
                     for (var j = 0; j < 4; ++j){
                         ctx.beginPath();
                         ctx.moveTo(ttx, tty);
-                        ttx += ((j % 2 == 0) ? len_s : -len_s) * factor;
+                        ttx += (((j & 1) == 0) ? len_s : -len_s) * factor;
                         tty += len_s * factor;
                         ctx.lineTo(ttx, tty);
                         ctx.closePath();
@@ -1878,8 +1871,8 @@ function node(data, ctx){
                 break;
                 
             default:
-                if (this.x - this.width * 0.5 <= mouse.x && mouse.x <= this.x + this.width * 0.5){
-                    if (this.y - this.height * 0.5 <= mouse.y && mouse.y <= this.y + this.height * 0.5){
+                if (this.x - (this.width >> 1) <= mouse.x && mouse.x <= this.x + (this.width >> 1)){
+                    if (this.y - (this.height >> 1) <= mouse.y && mouse.y <= this.y + (this.height >> 1)){
                         return true;
                     }
                 }
@@ -1894,7 +1887,7 @@ function node(data, ctx){
         }
         for (var i = 0; i < this.proteins.length; ++i){
             var prot = protein_dictionary[this.proteins[i]];
-            if (prot.mouse_over_checkbox(this.x - this.width / 2, this.y + offset_y, res.x, res.y, this.proteins.length, i)){
+            if (prot.mouse_over_checkbox(this.x - (this.width >> 1), this.y + offset_y, res.x, res.y, this.proteins.length, i)){
                 prot.toggle_marked();
                 break;
             }

@@ -37,6 +37,7 @@ function init(){
     document.getElementById("filter_panel_background").addEventListener("click", hide_filter_panel, false);
     document.getElementById("menubackground").addEventListener("click", hide_custom_menu, false);
     document.getElementById("managementbackground").addEventListener("click", hide_management, false);
+    document.getElementById("infobox_html_background").addEventListener("click", hide_infobox, false);
     
     window.addEventListener('resize', resize_ms_view, false);
     document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
@@ -58,8 +59,7 @@ function init(){
     c.onmousemove = mouse_move_listener;
     c.addEventListener("click", mouse_click_listener, false);
     c.addEventListener("dblclick", mouse_dblclick_listener, false);
-    //c.addEventListener("wheel", mouse_wheel_listener, false);
-    //c.addEventListener("mousewheel", mouse_wheel_listener, false);
+    c.addEventListener("mousewheel", mouse_wheel_listener, false);
     c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
     
     
