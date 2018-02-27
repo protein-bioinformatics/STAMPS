@@ -1,6 +1,21 @@
+toolbox_states = {
+    CREATE_PATHWAY: 0,
+    CREATE_PROTEIN: 1,
+    CREATE_METABOLITE: 2,
+    CREATE_LABEL: 3,
+    CREATE_MEMBRANE: 4,
+    MOVE_ENTITY: 5,
+    ROTATE_PATHWAY: 6,
+    ROTATE_PROTEIN: 7,
+    ROTATE_METABOLITE: 8,
+    DRAW_EDGE: 9,
+    DELETE_ENTRY: 10    
+};
+toolbox_buttons = ["toolbox_button_create_pathway", "toolbox_button_create_protein", "toolbox_button_create_metabolite", "toolbox_button_create_label", "toolbox_button_create_membrane", "toolbox_button_move_entity", "toolbox_button_rotate_pathway_anchor", "toolbox_button_rotate_protein_anchor", "toolbox_button_rotate_metabolite_anchor", "toolbox_button_draw_edge", "toolbox_button_delete_entity"];
+toolbox_button_selected = -1;
+entity_moving = -1;
+
 function init(){
-    
-    
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -30,13 +45,13 @@ function init(){
     document.body.scroll = "no";
     
     document.addEventListener('keydown', key_down, false);
-    document.addEventListener('keyup', key_up, false);
+    //document.addEventListener('keyup', key_up, false);
     document.getElementById("search_background").addEventListener("click", hide_search, false);
     document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
     document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
     document.getElementById("filter_panel_background").addEventListener("click", hide_filter_panel, false);
-    document.getElementById("menubackground").addEventListener("click", hide_custom_menu, false);
-    document.getElementById("managementbackground").addEventListener("click", hide_management, false);
+    //document.getElementById("menubackground").addEventListener("click", hide_custom_menu, false);
+    //document.getElementById("managementbackground").addEventListener("click", hide_management, false);
     document.getElementById("infobox_html_background").addEventListener("click", hide_infobox, false);
     
     window.addEventListener('resize', resize_ms_view, false);
@@ -65,7 +80,6 @@ function init(){
     
     
     c.oncontextmenu = function (event){
-        show_custom_menu(event);
         return false;
     }
     document.getElementById("menubackground").oncontextmenu = function(event){
@@ -76,11 +90,172 @@ function init(){
         return false;        
     };
     
+    document.getElementById("toolbox").style.top = (document.getElementById("navigation").offsetHeight).toString() + "px";
+    document.getElementById("renderarea").style.left = (document.getElementById("toolbox").offsetWidth).toString() + "px";
 }
 
 
 
+function mouse_click_listener(e){
+    
+    if (!pathway_is_loaded) return;
+    if (highlight_element){
+        var c = document.getElementById("renderarea");
+        var res = get_mouse_pos(c, e);
+        highlight_element.edit();
+    }
+}
 
+
+
+function mouse_down_listener(e){
+    if (!pathway_is_loaded) return;
+    var c = document.getElementById("renderarea");
+    res = get_mouse_pos(c, e);
+    if (e.buttons & 2){
+        if (highlight_element){
+            highlight_element.mouse_down(res, e.which);
+            node_move_x = highlight_element.x;
+            node_move_y = highlight_element.y;        
+        }
+        offsetX = res.x;
+        offsetY = res.y;
+    }
+    else if (e.buttons & 1){
+        if (highlight_element){
+            highlight_element.mouse_down(res, e.which);
+            if (toolbox_button_selected == toolbox_states.MOVE_ENTITY){
+                entity_moving = highlight_element;
+                node_move_x = highlight_element.x;
+                node_move_y = highlight_element.y;
+            }
+            offsetX = res.x;
+            offsetY = res.y;
+        }
+    }
+}
+
+
+function mouse_move_listener(e){
+    if (!pathway_is_loaded) return;
+    
+    var c = document.getElementById("renderarea");
+    var ctx = c.getContext("2d");
+    res = get_mouse_pos(c, e);
+    var grid = Math.floor(base_grid * factor * 1000);
+    mouse_x = res.x;
+    mouse_y = res.y;
+    
+    // shift all nodes
+    if (e.buttons & 2){
+        if (!highlight_element || !highlight_element.mouse_down_move(res, e.which)){
+            var shift_x = res.x - offsetX;
+            var shift_y = res.y - offsetY;
+            if (shift_x != 0 || shift_y != 0){
+                moved = true;
+                c.style.cursor = "all-scroll";
+            }
+            
+            
+            if (!highlight_element){
+                
+                for (var i = 0; i < elements.length; ++i){
+                    elements[i].move(shift_x, shift_y);
+                }
+                infobox.x += shift_x;
+                infobox.y += shift_y;
+                null_x += shift_x;
+                null_y += shift_y;
+                boundaries[0] += shift_x;
+                boundaries[1] += shift_y;
+            }
+        }
+        draw();
+        offsetX = res.x;
+        offsetY = res.y;
+    }
+    else if (e.buttons & 1){
+        if (entity_moving != -1){
+            var shift_x = res.x - offsetX;
+            var shift_y = res.y - offsetY;
+            if (shift_x != 0 || shift_y != 0){
+                moved = true;
+                c.style.cursor = "all-scroll";
+            }
+            node_move_x += shift_x;
+            node_move_y += shift_y;
+            entity_moving.x = Math.floor(node_move_x - (1000 * (node_move_x - null_x) % grid) / 1000.);
+            entity_moving.y = Math.floor(node_move_y - (1000 * (node_move_y - null_y) % grid) / 1000.);
+            compute_edges();
+            assemble_elements();
+            draw();
+            offsetX = res.x;
+            offsetY = res.y;
+        }
+    }
+    else {
+        // find active node
+        var newhighlight = 0;
+        for (var i = elements.length - 1; i >= 0; --i){
+            if (elements[i].is_mouse_over(res)){
+                newhighlight = elements[i];
+                break; 
+            }
+        }
+        if (highlight_element != newhighlight && entity_moving == -1){
+            for (var i = 0; i < elements.length; ++i){
+                elements[i].highlight = (elements[i] == newhighlight);
+            }
+            highlight_element = newhighlight;
+            draw();
+        }
+        
+    }
+    if(highlight_element && highlight_element.tipp && entity_moving == -1) Tip(e, highlight_element.id + " " + highlight_element.name);
+    else unTip();
+}
+
+
+
+function mouse_up_listener(event){
+    if (!pathway_is_loaded) return;
+    
+    var c = document.getElementById("renderarea");
+    res = get_mouse_pos(c, event);
+    c.style.cursor = "auto";
+    if (highlight_element) highlight_element.mouse_up(res);
+    if (entity_moving != -1) update_node(event);
+}
+
+
+
+function toolbox_button_clicked(button){
+    for (var i = 0; i < toolbox_buttons.length; ++i){
+        if (i == button){
+            if (i == toolbox_button_selected){
+                document.getElementById(toolbox_buttons[i]).style.backgroundColor = "#eeeeee";
+                toolbox_button_selected = -1;
+            }
+            else {
+                document.getElementById(toolbox_buttons[i]).style.backgroundColor = "#dadada";
+                toolbox_button_selected = i;
+            }
+        }
+        else {
+            document.getElementById(toolbox_buttons[i]).style.backgroundColor = "#eeeeee";
+        }
+    }
+}
+
+function toolbox_button_mouseover(button){
+    if (button != toolbox_button_selected) document.getElementById(toolbox_buttons[button]).style.backgroundColor = "#e4e4e4";
+}
+
+function toolbox_button_mouseout(button){
+    if (button != toolbox_button_selected) document.getElementById(toolbox_buttons[button]).style.backgroundColor = "#eeeeee";
+}
+
+/*
 function show_management(){
     document.getElementById("managementbackground").style.display = "inline";
     document.getElementById("renderarea").style.filter = "blur(5px)";
@@ -187,98 +362,28 @@ function hide_custom_menu(event){
     document.getElementById("menubackground").style.display = "none";
     document.getElementById("custommenu").style.display = "none";
 }
+*/
 
 
-
-
-function mouse_move_listener(e){
-    if (!pathway_is_loaded) return;
-    
-    var c = document.getElementById("renderarea");
-    var ctx = c.getContext("2d");
-    res = get_mouse_pos(c, e);
-    var grid = Math.floor(base_grid * factor * 1000);
-    mouse_x = res.x;
-    mouse_y = res.y;
-    
-    // shift all nodes
-    if (e.buttons & 2){
-        if (!highlight_element || !highlight_element.mouse_down_move(res, e.which)){
-            var shift_x = res.x - offsetX;
-            var shift_y = res.y - offsetY;
-            if (shift_x != 0 || shift_y != 0){
-                moved = true;
-                c.style.cursor = "all-scroll";
-            }
-            
-            
-            if (!event_key_down || !highlight_element){
-                
-                for (var i = 0; i < elements.length; ++i){
-                    elements[i].move(shift_x, shift_y);
-                }
-                infobox.x += shift_x;
-                infobox.y += shift_y;
-                null_x += shift_x;
-                null_y += shift_y;
-                boundaries[0] += shift_x;
-                boundaries[1] += shift_y;
-            }
-            else {
-                event_moving_node = true;
-                node_move_x += shift_x;
-                node_move_y += shift_y;
-                highlight_element.x = Math.floor(node_move_x - (1000 * (node_move_x - null_x) % grid) / 1000.);
-                highlight_element.y = Math.floor(node_move_y - (1000 * (node_move_y - null_y) % grid) / 1000.);
-                compute_edges();
-                assemble_elements();
-            }
-        }
-        draw();
-        offsetX = res.x;
-        offsetY = res.y;
-    }
-    else {
-        // find active node
-        var newhighlight = 0;
-        for (var i = elements.length - 1; i >= 0; --i){
-            if (elements[i].is_mouse_over(res)){
-                newhighlight = elements[i];
-                break; 
-            }
-        }
-        if (highlight_element != newhighlight && !event_moving_node){
-            for (var i = 0; i < elements.length; ++i){
-                elements[i].highlight = (elements[i] == newhighlight);
-            }
-            highlight_element = newhighlight;
-            draw();
-        }
-        
-    }
-    if(highlight_element && highlight_element.tipp && !event_key_down) Tip(e, highlight_element.id + " " + highlight_element.name);
-    else unTip();
-    
-}
 
 
 function update_node(event) {
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, event);
-    var x = Math.round(Math.floor((highlight_element.x - null_x) / factor) / base_grid) * base_grid;
-    var y = Math.round(Math.floor((highlight_element.y - null_y) / factor) / base_grid) * base_grid;
+    var x = Math.round(Math.floor((entity_moving.x - null_x) / factor) / base_grid) * base_grid;
+    var y = Math.round(Math.floor((entity_moving.y - null_y) / factor) / base_grid) * base_grid;
     
     
     var xmlhttp = new XMLHttpRequest();
     var request = "/qsdb/cgi-bin/update_node.py?id=";
-    request += highlight_element.id;
+    request += entity_moving.id;
     request += "&x=";
     request += x;
     request += "&y=";
     request += y;
-    xmlhttp.open("GET", request, false);
+    xmlhttp.open("GET", request, true);
     xmlhttp.send();
-    event_moving_node = false;
+    entity_moving = -1;
 }
 
 
@@ -315,35 +420,45 @@ function key_down(event){
         zoom_in_out(0, 0);
         draw();
     }
-    event_key_down = (event.which == 17);
+}
+
+
+
+
+
+
+node.prototype.edit = function() {
     
 }
 
 
 
-edge.prototype.mouse_down = function(mouse, key){
-    if ((key != 1 && key != 3)) return false;
-    
-    var xmlhttp = new XMLHttpRequest();
-    var request = "/qsdb/cgi-bin/update_edge.py?id=";
-    request += this.edge_id;
-    request += "&element=";
-    request += (key == 1) ? "protein" : "metabolite";
-    xmlhttp.open("GET", request, false);
-    xmlhttp.send();
-    
-    if (key == 1){
+edge.prototype.edit = function(){
+    var element = "";
+    if (toolbox_button_selected == toolbox_states.ROTATE_METABOLITE){
+        var anchor = nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'];
+        nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'] = next_anchor[anchor];
+        element = "metabolite";
+    }
+    else if (toolbox_button_selected == toolbox_states.ROTATE_PROTEIN){
         if (nodes[this.reaction_id]['reagents'][this.reagent_id]['type'] == "educt"){
             nodes[this.reaction_id]['anchor_in'] = next_anchor[nodes[this.reaction_id]['anchor_in']];
         }
         else {
             nodes[this.reaction_id]['anchor_out'] = next_anchor[nodes[this.reaction_id]['anchor_out']];
         }
+        element = "protein";
     }
-    else {
-        var anchor = nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'];
-        nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'] = next_anchor[anchor];
-    }
+    else return;
+    
+    var xmlhttp = new XMLHttpRequest();
+    var request = "/qsdb/cgi-bin/update_edge.py?id=";
+    request += this.edge_id;
+    request += "&element=";
+    request += element;
+    xmlhttp.open("GET", request, true);
+    xmlhttp.send();
+    
     compute_edges();
     assemble_elements();
     draw();

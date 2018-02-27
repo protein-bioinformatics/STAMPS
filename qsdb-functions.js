@@ -37,8 +37,6 @@ filter_parameters["peptide_tissues_visible"] = false;
 data = [];
 data_ref = [];
 nodes = 0;
-event_moving_node = false;
-event_key_down = false;
 node_move_x = 0;
 node_move_y = 0;
 edges = [];
@@ -3111,18 +3109,6 @@ function mouse_dblclick_listener(e){
 
 
 
-function mouse_click_listener(e){
-    
-    if (!pathway_is_loaded) return;
-    if (!moved){
-        if (highlight_element){
-            var c = document.getElementById("renderarea");
-            var res = get_mouse_pos(c, e);
-            highlight_element.mouse_click(res, e.which);
-        }
-    }
-    moved = false;
-}
 
 
 
@@ -3135,34 +3121,6 @@ function change_pathway(p){
     reset_view();
     document.title = "QSDB Home - " + pathways[p][1];
     load_data();
-}
-
-
-function mouse_down_listener(e){
-    if (!pathway_is_loaded) return;
-    var c = document.getElementById("renderarea");
-    res = get_mouse_pos(c, e);
-    if (e.buttons & 2){
-        
-        
-        if (highlight_element){
-            highlight_element.mouse_down(res, e.which);
-            node_move_x = highlight_element.x;
-            node_move_y = highlight_element.y;        
-        }
-        offsetX = res.x;
-        offsetY = res.y;
-    }
-    else if (e.buttons & 1){
-        if (highlight_element){
-            highlight_element.mouse_down(res, e.which);
-        }
-        else {
-            select_field_element.visible = true;
-            select_field_element.start_position = res;
-            select_field_element.end_position = res;
-        }
-    }
 }
 
 
@@ -3180,55 +3138,6 @@ function Tip(e, name) {
 
 function unTip() {
     document.getElementById('tooltip').style.display = "none";
-}
-
-
-
-function key_up(event){    
-    if (!pathway_is_loaded) return;
-    
-    if (event_moving_node) update_node(event);
-    event_key_down = false;
-    if (event.buttons == 2 && !moved){
-        show_custom_menu();
-    }
-}
-
-
-
-
-function mouse_up_listener(event){
-    if (!pathway_is_loaded) return;
-    
-    if (select_field_element.visible) {
-        select_field_element.visible = false;
-        
-        var sx = Math.min(select_field_element.start_position.x, select_field_element.end_position.x);
-        var ex = Math.max(select_field_element.start_position.x, select_field_element.end_position.x);
-        var sy = Math.min(select_field_element.start_position.y, select_field_element.end_position.y);
-        var ey = Math.max(select_field_element.start_position.y, select_field_element.end_position.y);
-        
-        var toggled = new Set();
-        for (var i = 0; i < data.length; ++i){
-            data[i].highlight = false;
-            if (data[i].type == "protein" && sx <= data[i].x && sy <= data[i].y && data[i].x <= ex && data[i].y <= ey){
-                for (var j = 0; j < data[i].proteins.length; ++j){
-                    var prot = protein_dictionary[data[i].proteins[j]];
-                    if (!toggled.has(prot.id)){
-                        prot.toggle_marked();
-                        toggled.add(prot.id);
-                    }
-                }
-            }
-        }
-        
-        draw();
-    }
-    var c = document.getElementById("renderarea");
-    res = get_mouse_pos(c, event);
-    c.style.cursor = "auto";
-    if (highlight_element) highlight_element.mouse_up(res);
-    if (event_moving_node) update_node(event);
 }
 
 
