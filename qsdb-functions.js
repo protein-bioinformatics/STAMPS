@@ -1520,7 +1520,6 @@ function node(data, ctx){
     this.slide = false;
     this.slide_percent = 0;
     this.on_slide = false;
-    //this.ctx.font = (text_size * factor).toString() + "px Arial";
     this.containing_spectra = 0;
     this.fill_style = protein_disabled_fill_color;
     this.length = 100;  // number of lipid headgroups for membrane
@@ -1779,7 +1778,7 @@ function node(data, ctx){
                 ctx.strokeStyle = metabolite_stroke_color;
                 ctx.lineWidth = this.lw * factor;
                 
-                var tmp_x = this.x;
+                var tmp_x = this.x - (this.width >> 1);
                 for (var i = 0; i < this.length; ++i){
                     ctx.beginPath();
                     ctx.arc(tmp_x, this.y - this.o_y * factor, this.lipid_radius * factor, 0, 2 * Math.PI);
@@ -1794,7 +1793,7 @@ function node(data, ctx){
                     tmp_x += (2 * this.lipid_radius + this.lw) * factor;
                 }
                 
-                tmp_x = this.x;
+                tmp_x = this.x - (this.width >> 1);
                 var tmp_yt = this.y - (this.o_y - this.lipid_radius) * factor;
                 var tmp_yb = this.y + (this.o_y - this.lipid_radius) * factor;
                 ctx.lineWidth = (this.lw - 1) * factor;
@@ -2116,6 +2115,7 @@ edge.prototype.constructor = edge;
 
 function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head, reaction_id, reagent_id, edge_id){
     
+    //this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node);
     this.head = head;
     this.head_start = 0;
     this.point_list = [];
@@ -2811,9 +2811,9 @@ function reset_view(){
 
 
 
-
 function compute_edges(){
     edges = [];
+    
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     var diameter = 2 * radius;
@@ -2822,6 +2822,7 @@ function compute_edges(){
     for (var i = 0; i < data.length; ++i){
         nodes_anchors.push({left: [], right: [], top: [], bottom: []});
     }
+    
     for (var i = 0; i < nodes.length; ++i){
         if (!(nodes[i]['node_id'] in data_ref)){
             console.log(nodes[i]['node_id']);
@@ -2874,9 +2875,6 @@ function compute_edges(){
         }
     }
     
-    for (var i = 0; i < connections.length; ++i){
-        edges.push(0);
-    }
     
     for (var i = 0; i < connections.length; ++i){
         var node_id = connections[i][0];
@@ -3007,7 +3005,7 @@ function compute_edges(){
                 start_x += node_width * 0.5;
             }
         }
-        edges[i] = new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id, edge_id);
+        edges.push(new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id, edge_id));
     }
     
     // sorting the edges, so that active edges will be drown as last, hence on top of inactive edges. Clever, eh?

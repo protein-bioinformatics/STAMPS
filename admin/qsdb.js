@@ -9,11 +9,13 @@ toolbox_states = {
     ROTATE_PROTEIN: 7,
     ROTATE_METABOLITE: 8,
     DRAW_EDGE: 9,
-    DELETE_ENTRY: 10    
+    CHANGE_EDGE: 10,
+    DELETE_ENTRY: 11
 };
-toolbox_buttons = ["toolbox_button_create_pathway", "toolbox_button_create_protein", "toolbox_button_create_metabolite", "toolbox_button_create_label", "toolbox_button_create_membrane", "toolbox_button_move_entity", "toolbox_button_rotate_pathway_anchor", "toolbox_button_rotate_protein_anchor", "toolbox_button_rotate_metabolite_anchor", "toolbox_button_draw_edge", "toolbox_button_delete_entity"];
+toolbox_buttons = ["toolbox_button_create_pathway", "toolbox_button_create_protein", "toolbox_button_create_metabolite", "toolbox_button_create_label", "toolbox_button_create_membrane", "toolbox_button_move_entity", "toolbox_button_rotate_pathway_anchor", "toolbox_button_rotate_protein_anchor", "toolbox_button_rotate_metabolite_anchor", "toolbox_button_draw_edge", "toolbox_button_change_edge", "toolbox_button_delete_entity"];
 toolbox_button_selected = -1;
 entity_moving = -1;
+tmp_element = -1;
 
 function init(){
     var xmlhttp = new XMLHttpRequest();
@@ -97,13 +99,68 @@ function init(){
 
 
 function mouse_click_listener(e){
-    
     if (!pathway_is_loaded) return;
-    if (highlight_element){
+    
+    if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY){
+    }
+    else if (toolbox_button_selected == toolbox_states.CREATE_PROTEIN) {
+        
+    }
+    else if (toolbox_button_selected == toolbox_states.CREATE_METABOLITE) {
+        
+    }
+    else if (toolbox_button_selected == toolbox_states.CREATE_LABEL) {
+        var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
+        var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
+        var request = "type=label&pathway=" + current_pathway + "&x=" + x + "&y=" + y;
+        var result = create_node(request);
+        if (result){
+            var ctx = document.getElementById("renderarea").getContext("2d");
+            tmp_element = new node({"x": "0", "y": "0", "t": "label", "i": -1, "n": "undefined"}, ctx);
+            tmp_element.scale(0, 0, factor);
+            elements.push(tmp_element);
+        };
+    }
+    else if (toolbox_button_selected == toolbox_states.CREATE_MEMBRANE){
+        var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
+        var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
+        var request = "type=membrane&pathway=" + current_pathway + "&x=" + x + "&y=" + y;
+        var result = create_node(request);
+        if (result){
+            var ctx = document.getElementById("renderarea").getContext("2d");
+            tmp_element = new node({"x": "0", "y": "0", "t": "membrane", "i": -1, "n": "-"}, ctx);
+            tmp_element.scale(0, 0, factor);
+            elements.push(tmp_element);
+        };
+    }
+    
+    else if (highlight_element){
         var c = document.getElementById("renderarea");
         var res = get_mouse_pos(c, e);
         highlight_element.edit();
     }
+}
+
+
+function create_node(request){
+    var xmlhttp = new XMLHttpRequest();
+    request = "/qsdb/cgi-bin/create_node.py?" + request;
+    var successful_creation = false;
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            new_id = xmlhttp.responseText;
+            if (0 <= new_id){
+                tmp_element.id = new_id;
+                successful_creation = true;
+            }
+            else {
+                alert("An error has occured, the entity could not be added into the database. Please contact the administrator.");
+            }
+        }
+    }
+    xmlhttp.open("GET", request, false);
+    xmlhttp.send();
+    return successful_creation;
 }
 
 
@@ -180,7 +237,6 @@ function mouse_move_listener(e){
             var shift_y = res.y - offsetY;
             if (shift_x != 0 || shift_y != 0){
                 moved = true;
-                c.style.cursor = "all-scroll";
             }
             node_move_x += shift_x;
             node_move_y += shift_y;
@@ -194,21 +250,35 @@ function mouse_move_listener(e){
         }
     }
     else {
-        // find active node
-        var newhighlight = 0;
-        for (var i = elements.length - 1; i >= 0; --i){
-            if (elements[i].is_mouse_over(res)){
-                newhighlight = elements[i];
-                break; 
-            }
-        }
-        if (highlight_element != newhighlight && entity_moving == -1){
-            for (var i = 0; i < elements.length; ++i){
-                elements[i].highlight = (elements[i] == newhighlight);
-            }
-            highlight_element = newhighlight;
+        if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY || toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_METABOLITE || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE){
+            
+            var offset_move_x = -null_x % (base_grid * factor);
+            var offset_move_y = -null_y % (base_grid * factor);
+            
+            tmp_element.x = Math.floor(res.x - (res.x % (base_grid * factor)) - offset_move_x + (base_grid * factor));
+            tmp_element.y = Math.floor(res.y - (res.y % (base_grid * factor)) - offset_move_y + (base_grid * factor));
             draw();
         }
+        else { // find active node
+            if (entity_moving == -1){
+                var newhighlight = 0;
+                for (var i = elements.length - 1; i >= 0; --i){
+                    if (elements[i].is_mouse_over(res)){
+                        newhighlight = elements[i];
+                        break; 
+                    }
+                }
+                if (highlight_element != newhighlight){
+                    if (highlight_element) highlight_element.highlight = false;
+                    newhighlight.highlight = true;
+                    highlight_element = newhighlight;
+                    draw();
+                }
+            }
+        }
+        if (toolbox_button_selected == toolbox_states.MOVE_ENTITY && highlight_element && highlight_element.constructor.name == "node") c.style.cursor = "all-scroll";
+        else if ((toolbox_button_selected == toolbox_states.ROTATE_PATHWAY || toolbox_button_selected == toolbox_states.ROTATE_PROTEIN || toolbox_button_selected == toolbox_states.ROTATE_METABOLITE) && highlight_element && highlight_element.constructor.name == "edge") c.style.cursor = "pointer";
+        else c.style.cursor = "default";
         
     }
     if(highlight_element && highlight_element.tipp && entity_moving == -1) Tip(e, highlight_element.id + " " + highlight_element.name);
@@ -220,11 +290,16 @@ function mouse_move_listener(e){
 function mouse_up_listener(event){
     if (!pathway_is_loaded) return;
     
-    var c = document.getElementById("renderarea");
-    res = get_mouse_pos(c, event);
-    c.style.cursor = "auto";
-    if (highlight_element) highlight_element.mouse_up(res);
-    if (entity_moving != -1) update_node(event);
+    if (highlight_element){
+        var c = document.getElementById("renderarea");
+        res = get_mouse_pos(c, event);
+        highlight_element.mouse_up(res);
+    }
+    if (entity_moving != -1) {
+        entity_moving = -1;
+        update_node(event);
+    }
+    mouse_move_listener(event);
 }
 
 
@@ -245,6 +320,54 @@ function toolbox_button_clicked(button){
             document.getElementById(toolbox_buttons[i]).style.backgroundColor = "#eeeeee";
         }
     }
+    if (tmp_element != -1){
+        for (var i = elements.length - 1; i >= 0; --i){
+            if (elements[i].id == -1){ // tmp id == -1
+                elements.slice(i, 1);
+                assemble_elements();
+                draw();
+                break;
+            }
+        }
+        tmp_element = -1;
+    }
+    
+    var ctx = document.getElementById("renderarea").getContext("2d");
+    switch (toolbox_button_selected){
+        case toolbox_states.CREATE_PATHWAY:
+            tmp_element = new node({"x": "0", "y": "0", "t": "pathway", "i": -1, "n": "undefined"}, ctx);
+            tmp_element.scale(0, 0, factor);
+            elements.push(tmp_element);
+            break;
+            
+        case toolbox_states.CREATE_PROTEIN:
+            tmp_element = new node({"x": "0", "y": "0", "t": "protein", "i": -1, "n": "-", "p": []}, ctx);
+            tmp_element.scale(0, 0, factor);
+            elements.push(tmp_element);
+            break;
+            
+        case toolbox_states.CREATE_METABOLITE:
+            tmp_element = new node({"x": "0", "y": "0", "t": "metabolite", "i": -1, "n": "-"}, ctx);
+            tmp_element.scale(0, 0, factor);
+            elements.push(tmp_element);
+            break;
+            
+        case toolbox_states.CREATE_LABEL:
+            tmp_element = new node({"x": "0", "y": "0", "t": "label", "i": -1, "n": "undefined"}, ctx);
+            tmp_element.scale(0, 0, factor);
+            elements.push(tmp_element);
+            break;
+            
+        case toolbox_states.CREATE_MEMBRANE:
+            tmp_element = new node({"x": "0", "y": "0", "t": "membrane", "i": -1, "n": "-"}, ctx);
+            tmp_element.scale(0, 0, factor);
+            elements.push(tmp_element);
+            break;
+            
+        default:
+            break;
+    }
+    
 }
 
 function toolbox_button_mouseover(button){
@@ -368,8 +491,6 @@ function hide_custom_menu(event){
 
 
 function update_node(event) {
-    var c = document.getElementById("renderarea");
-    res = get_mouse_pos(c, event);
     var x = Math.round(Math.floor((entity_moving.x - null_x) / factor) / base_grid) * base_grid;
     var y = Math.round(Math.floor((entity_moving.y - null_y) / factor) / base_grid) * base_grid;
     
@@ -383,7 +504,6 @@ function update_node(event) {
     request += y;
     xmlhttp.open("GET", request, true);
     xmlhttp.send();
-    entity_moving = -1;
 }
 
 
@@ -440,14 +560,15 @@ edge.prototype.edit = function(){
         nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'] = next_anchor[anchor];
         element = "metabolite";
     }
-    else if (toolbox_button_selected == toolbox_states.ROTATE_PROTEIN){
+    else if (toolbox_button_selected == toolbox_states.ROTATE_PROTEIN || toolbox_button_selected == toolbox_states.ROTATE_PATHWAY){
         if (nodes[this.reaction_id]['reagents'][this.reagent_id]['type'] == "educt"){
             nodes[this.reaction_id]['anchor_in'] = next_anchor[nodes[this.reaction_id]['anchor_in']];
         }
         else {
             nodes[this.reaction_id]['anchor_out'] = next_anchor[nodes[this.reaction_id]['anchor_out']];
         }
-        element = "protein";
+        
+        element = (toolbox_button_selected == toolbox_states.ROTATE_PROTEIN) ? "protein" : "pathway";
     }
     else return;
     

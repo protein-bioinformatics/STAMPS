@@ -40,7 +40,7 @@ if element == "metabolite":
     my_cur.execute(sql_query, (new_dir[direction], idx))
     conn.commit()
     
-elif element == "protein":
+elif element in ["protein", "pathway"]:
     sql_query = "select rc.*, rg.type from reagents rg inner join reactions rc on rg.reaction_id = rc.id where rg.id = %s;"
     my_cur.execute(sql_query, idx)
     row = my_cur.fetchone()
