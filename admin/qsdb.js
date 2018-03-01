@@ -34,6 +34,11 @@ function init(){
             pathways = JSON.parse(xmlhttp_pw.responseText);
             for (var i = 0; i < pathways.length; ++i){
                 pathway_dict[pathways[i][0]] = i;
+                var option = document.createElement("option");
+                if (i == 0) option.selected = true;
+                option.id = pathways[i][0];
+                option.text = pathways[i][1];
+                document.getElementById("editor_select_pathway_field").add(option);
             }
             set_pathway_menu();
         }
@@ -101,44 +106,84 @@ function init(){
 function mouse_click_listener(e){
     if (!pathway_is_loaded) return;
     
-    if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY){
-    }
-    else if (toolbox_button_selected == toolbox_states.CREATE_PROTEIN) {
-        
-    }
-    else if (toolbox_button_selected == toolbox_states.CREATE_METABOLITE) {
-        
-    }
-    else if (toolbox_button_selected == toolbox_states.CREATE_LABEL) {
+    if (toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE){
         var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
         var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
-        var request = "type=label&pathway=" + current_pathway + "&x=" + x + "&y=" + y;
+        var request = "";
+        switch (toolbox_button_selected){
+            case toolbox_states.CREATE_PROTEIN:
+                request = "type=protein&pathway=" + current_pathway + "&x=" + x + "&y=" + y;
+                break;
+                
+            case toolbox_states.CREATE_LABEL:
+                request = "type=label&pathway=" + current_pathway + "&x=" + x + "&y=" + y;
+                break;
+                
+            case toolbox_states.CREATE_MEMBRANE:
+                request = "type=membrane&pathway=" + current_pathway + "&x=" + x + "&y=" + y;
+                break;
+        }
         var result = create_node(request);
         if (result){
             var ctx = document.getElementById("renderarea").getContext("2d");
-            tmp_element = new node({"x": "0", "y": "0", "t": "label", "i": -1, "n": "undefined"}, ctx);
+            switch (toolbox_button_selected){
+                    
+                case toolbox_states.CREATE_PROTEIN:
+                    tmp_element = new node({"x": "0", "y": "0", "t": "protein", "i": -1, "n": "-", "p": []}, ctx);
+                    break;
+                    
+                case toolbox_states.CREATE_LABEL:
+                    tmp_element = new node({"x": "0", "y": "0", "t": "label", "i": -1, "n": "undefined"}, ctx);
+                    break;
+                    
+                case toolbox_states.CREATE_MEMBRANE:
+                    tmp_element = new node({"x": "0", "y": "0", "t": "membrane", "i": -1, "n": "-"}, ctx);
+                    break;
+            }
             tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
         };
     }
-    else if (toolbox_button_selected == toolbox_states.CREATE_MEMBRANE){
-        var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
-        var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
-        var request = "type=membrane&pathway=" + current_pathway + "&x=" + x + "&y=" + y;
-        var result = create_node(request);
-        if (result){
-            var ctx = document.getElementById("renderarea").getContext("2d");
-            tmp_element = new node({"x": "0", "y": "0", "t": "membrane", "i": -1, "n": "-"}, ctx);
-            tmp_element.scale(0, 0, factor);
-            elements.push(tmp_element);
-        };
+    else if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY){
+        document.getElementById("editor_select_pathway").style.display = "inline";
+        document.getElementById("waiting_background").style.display = "inline";
+        document.getElementById("renderarea").style.filter = "blur(5px)";
+        document.getElementById("toolbox").style.filter = "blur(5px)";
     }
-    
     else if (highlight_element){
         var c = document.getElementById("renderarea");
         var res = get_mouse_pos(c, e);
         highlight_element.edit();
     }
+}
+
+
+function close_editor_select_pathway(){
+    document.getElementById("editor_select_pathway").style.display = "none";
+    document.getElementById("waiting_background").style.display = "none";
+    document.getElementById("renderarea").style.filter = "";
+    document.getElementById("toolbox").style.filter = "";
+}
+
+function editor_create_pathway_node(){
+    var obj = document.getElementById("editor_select_pathway_field");
+    var pathway_ref = obj.options[obj.selectedIndex].id;
+    
+    
+    var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
+    var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
+    var request = "type=pathway&pathway=" + current_pathway + "&pathway_ref=" + pathway_ref + "&x=" + x + "&y=" + y;
+    var result = create_node(request);
+    if (result){
+        tmp_element.name = obj.options[obj.selectedIndex].text;
+        tmp_element.pathway_ref = pathway_ref;
+        tmp_element.setup_pathway_meta();
+        draw();
+        var ctx = document.getElementById("renderarea").getContext("2d");
+        tmp_element = new node({"x": "0", "y": "0", "t": "pathway", "i": -1, "n": "undefined"}, ctx);
+        tmp_element.scale(0, 0, factor);
+        elements.push(tmp_element);
+    };
 }
 
 
@@ -252,11 +297,15 @@ function mouse_move_listener(e){
     else {
         if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY || toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_METABOLITE || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE){
             
-            var offset_move_x = -null_x % (base_grid * factor);
-            var offset_move_y = -null_y % (base_grid * factor);
             
-            tmp_element.x = Math.floor(res.x - (res.x % (base_grid * factor)) - offset_move_x + (base_grid * factor));
-            tmp_element.y = Math.floor(res.y - (res.y % (base_grid * factor)) - offset_move_y + (base_grid * factor));
+            var offset_move_x = null_x % (base_grid * factor);
+            var offset_move_y = null_y % (base_grid * factor);
+            
+            if (offset_move_x < 0) offset_move_x += base_grid * factor;
+            if (offset_move_y < 0) offset_move_y += base_grid * factor;
+            
+            tmp_element.x = Math.floor(res.x - (res.x % (base_grid * factor)) + offset_move_x);
+            tmp_element.y = Math.floor(res.y - (res.y % (base_grid * factor)) + offset_move_y);
             draw();
         }
         else { // find active node

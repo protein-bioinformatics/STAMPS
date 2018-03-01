@@ -1511,7 +1511,7 @@ function node(data, ctx){
     this.img = 0;
     this.highlight = false;
     this.pathway_ref = data['r'];
-    this.pathway_enabled = this.type == 'pathway' && this.pathway_ref != 0 && (this.pathway_ref in pathway_dict);
+    this.pathway_enabled = false;
     this.proteins = [];
     this.lines = -1;
     this.width = -1;
@@ -1526,6 +1526,18 @@ function node(data, ctx){
     this.lw = 2;    // line width for membrane
     this.o_y = 18;  // distance for second layer of membrane
     this.lipid_radius = 5;
+    
+    
+    this.setup_pathway_meta = function(){
+        var tokens = this.name.split("\n");
+        this.height = 40 + 20 * tokens.length;
+        for (var j = 0; j < tokens.length; ++j){
+            if (this.width < tokens[j].length) this.width = tokens[j].length;
+        }
+        this.width *= 12;
+        this.tipp = false;
+        this.pathway_enabled = this.type == 'pathway' && this.pathway_ref != 0 && (this.pathway_ref in pathway_dict);
+    }
     
     switch (this.type){
         case "protein":
@@ -1562,15 +1574,7 @@ function node(data, ctx){
             break;
             
         case "pathway":
-            var tokens = this.name.split("\n");
-            this.height = 40 + 20 * tokens.length;
-            
-            for (var j = 0; j < tokens.length; ++j){
-                if (this.width < tokens[j].length) this.width = tokens[j].length;
-            }
-            this.width *= 12;
-            //this.tipp = true;
-            this.tipp = false;
+            this.setup_pathway_meta();
             break;
             
         case "metabolite":
