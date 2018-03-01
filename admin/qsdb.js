@@ -178,6 +178,7 @@ function editor_create_pathway_node(){
         tmp_element.name = obj.options[obj.selectedIndex].text;
         tmp_element.pathway_ref = pathway_ref;
         tmp_element.setup_pathway_meta();
+        tmp_element.scale(0, 0, factor);
         draw();
         var ctx = document.getElementById("renderarea").getContext("2d");
         tmp_element = new node({"x": "0", "y": "0", "t": "pathway", "i": -1, "n": "undefined"}, ctx);
