@@ -54,6 +54,14 @@ if node_type == "pathway":
 elif node_type == "protein":
     sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, pathway_ref, x, y) VALUES (%s, %s, 0, 0, %s, %s);"
     my_cur.execute(sql_query, (pathway, node_type, x, y))
+    conn.commit()
+    
+    my_cur.execute("SELECT max(id) mid FROM nodes;")
+    max_node_id = [row for row in my_cur][0]["mid"]
+    
+    
+    sql_query = "INSERT INTO reactions (node_id, anchor_in, anchor_out, reversible) VALUES (%s, left, right, 0);"
+    my_cur.execute(sql_query, (max_node_id))
     
     
 elif node_type == "metabolite":

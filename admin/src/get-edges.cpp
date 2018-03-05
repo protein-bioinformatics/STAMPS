@@ -121,24 +121,24 @@ main() {
         if (last_id != id){
             index_r = 0;
             if (last_id != -1){
-                cout << "]}, ";
+                cout << "]},";
             }
-            cout << "{\"id\": " << row[column_names[string("id")]] << ", ";
-            cout << "\"node_id\": " << row[column_names[string("node_id")]] << ", ";
-            cout << "\"anchor_in\": \"" << row[column_names[string("anchor_in")]] << "\", ";
-            cout << "\"anchor_out\": \"" << row[column_names[string("anchor_out")]] << "\", ";
-            cout << "\"reversible\": " << row[column_names[string("reversible")]] << ", ";
-            cout << "\"reagents\": [";
+            cout << "{\"i\":" << row[column_names[string("id")]] << ",";
+            cout << "\"n\":" << row[column_names[string("node_id")]] << ",";
+            cout << "\"in\":\"" << row[column_names[string("anchor_in")]] << "\",";
+            cout << "\"out\":\"" << row[column_names[string("anchor_out")]] << "\",";
+            cout << "\"v\":" << row[column_names[string("reversible")]] << ",";
+            cout << "\"r\":[";
             
             last_id = id;
         }
         
         if (index_r) cout << ", ";
-        cout << "{\"id\": " << row[column_names[string("rg_id")]] << ", ";
-        cout << "\"reaction_id\": " << row[column_names[string("reaction_id")]] << ", ";
-        cout << "\"node_id\": " << row[column_names[string("rg_node_id")]] << ", ";
-        cout << "\"type\": \"" << row[column_names[string("type")]] << "\", ";
-        cout << "\"anchor\": \"" << row[column_names[string("anchor")]] << "\"}";
+        cout << "{\"i\":" << row[column_names[string("rg_id")]] << ",";
+        cout << "\"r\":" << row[column_names[string("reaction_id")]] << ",";
+        cout << "\"n\":" << row[column_names[string("rg_node_id")]] << ",";
+        cout << "\"t\":\"" << row[column_names[string("type")]] << "\",";
+        cout << "\"a\":\"" << row[column_names[string("anchor")]] << "\"}";
         
         ++index_r;
         ++index;

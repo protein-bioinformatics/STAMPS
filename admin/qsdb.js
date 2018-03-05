@@ -161,6 +161,43 @@ function mouse_click_listener(e){
         document.getElementById("renderarea").style.filter = "blur(5px)";
         document.getElementById("toolbox").style.filter = "blur(5px)";
     }
+    else if (toolbox_button_selected == toolbox_states.DELETE_ENTRY){
+        if (highlight_element){
+            if (highlight_element instanceof node){
+                var node_id = highlight_element.id;
+                for (var i = edge_data.length - 1; i >= 0; --i){
+                    var edv = edge_data[i]['r'];
+                    for (var j = edv.length - 1; j >= 0; --j){
+                        if (edv[j]['n'] == node_id){
+                            edv.splice(j, 1);
+                            break;
+                        }
+                    }
+                    if (edge_data[i]['n'] == node_id){
+                        edge_data.splice(i, 1);
+                    }
+                }
+                delete data[node_id];
+            }
+            else if (highlight_element instanceof edge){
+                var edge_id = highlight_element.edge_id;
+                for (var i = 0; i < edge_data.length; ++i){
+                    var edv = edge_data[i]['r'];
+                    for (var j = edv.length - 1; j >= 0; --j){
+                        console.log(i + " " + j);
+                        if (edv[j]['i'] == edge_id){
+                            edv.splice(j, 1);
+                            break;
+                        }
+                    }
+                }
+            }
+                
+            compute_edges();
+            assemble_elements();
+            draw();
+        }
+    }
     else if (highlight_element){
         var c = document.getElementById("renderarea");
         var res = get_mouse_pos(c, e);
@@ -200,10 +237,27 @@ function editor_create_pathway_node(){
 }
 
 
-
+/*
 delete_entity(){
-    
+    var xmlhttp = new XMLHttpRequest();
+    request = "/qsdb/admin/cgi-bin/delete_entity.py?" + request;
+    var successful_creation = false;
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            new_id = xmlhttp.responseText;
+            if (0 <= new_id){
+                tmp_element.id = new_id;
+                successful_creation = true;
+            }
+            else {
+                alert("An error has occured, the entity could not be added into the database. Please contact the administrator.");
+            }
+        }
+    }
+    xmlhttp.open("GET", request, false);
+    xmlhttp.send();
 }
+*/
 
 
 function create_node(request){

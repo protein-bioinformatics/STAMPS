@@ -34,9 +34,8 @@ filter_parameters["tissue_eye"] = true;
 filter_parameters["tissue_gut"] = true;
 filter_parameters["protein_tissues_visible"] = true;
 filter_parameters["peptide_tissues_visible"] = false;
-data = [];
-data_ref = [];
-nodes = 0;
+data = {};
+edge_data = 0;
 node_move_x = 0;
 node_move_y = 0;
 edges = [];
@@ -1105,11 +1104,11 @@ function preview(){
         var ctx = document.getElementById("renderarea").getContext("2d");
         var x_min = 1e100, x_max = -1e100;
         var y_min = 1e100, y_max = -1e100;
-        for (var i = 0; i < data.length; ++i){
-            x_min = Math.min(x_min, data[i].x - data[i].width * 0.5);
-            x_max = Math.max(x_max, data[i].x + data[i].width * 0.5);
-            y_min = Math.min(y_min, data[i].y - data[i].height * 0.5);
-            y_max = Math.max(y_max, data[i].y + data[i].height * 0.5);
+        for (var node_id in data){
+            x_min = Math.min(x_min, data[node_id].x - data[node_id].width * 0.5);
+            x_max = Math.max(x_max, data[node_id].x + data[node_id].width * 0.5);
+            y_min = Math.min(y_min, data[node_id].y - data[node_id].height * 0.5);
+            y_max = Math.max(y_max, data[node_id].y + data[node_id].height * 0.5);
         }
         x_min -= 5;
         x_max += 5;
@@ -2135,7 +2134,7 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head,
     this.edge_id = edge_id;
     
     
-    this.bidirectional = data[data_ref[this.start_id]].type == "metabolite" && nodes[this.reaction_id]['reversible'];
+    this.bidirectional = data[this.start_id].type == "metabolite" && edge_data[this.reaction_id]['v'];
     this.tail_start = 0;
     
     
@@ -2631,8 +2630,8 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head,
     this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node);
     
     this.draw = function(ctx){
-        var dashed_edge = data[data_ref[this.start_id]].type == "pathway";
-        var edge_enabled = data[data_ref[this.start_id]].proteins.length > 0 || (dashed_edge && data[data_ref[this.start_id]].pathway_enabled);
+        var dashed_edge = data[this.start_id].type == "pathway";
+        var edge_enabled = data[this.start_id].proteins.length > 0 || (dashed_edge && data[this.start_id].pathway_enabled);
         
         ctx.strokeStyle = edge_enabled ? edge_color : edge_disabled_color;
         ctx.fillStyle = edge_enabled ? edge_color : edge_disabled_color;
@@ -2823,43 +2822,39 @@ function compute_edges(){
     var ctx = c.getContext("2d");
     var diameter = 2 * radius;
     var connections = [];
-    var nodes_anchors = [];
-    for (var i = 0; i < data.length; ++i){
-        nodes_anchors.push({left: [], right: [], top: [], bottom: []});
+    var nodes_anchors = {};
+    for (var node_id in data){
+        nodes_anchors[node_id] = {left: [], right: [], top: [], bottom: []};
     }
     
-    for (var i = 0; i < nodes.length; ++i){
-        if (!(nodes[i]['node_id'] in data_ref)){
-            console.log(nodes[i]['node_id']);
-            return;
-        }
-        var node_id = data_ref[nodes[i]['node_id']];
-        var reversible = parseInt(nodes[i]['reversible']);
-        for (var j = 0; j < nodes[i]['reagents'].length; ++j){
+    for (var i = 0; i < edge_data.length; ++i){
+        var node_id = edge_data[i]['n'];
+        var reversible = parseInt(edge_data[i]['v']);
+        for (var j = 0; j < edge_data[i]['r'].length; ++j){
             
-            var metabolite_id = data_ref[nodes[i]['reagents'][j]['node_id']];
-            var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y, nodes[i]['reagents'][j]['anchor']);
+            var metabolite_id = edge_data[i]['r'][j]['n'];
+            var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y, edge_data[i]['r'][j]['a']);
             
             
-            if (nodes[i]['reagents'][j]['type'] == 'educt'){
-                var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, nodes[i]['anchor_in']);
-                connections.push([node_id, nodes[i]['anchor_in'], metabolite_id, nodes[i]['reagents'][j]['anchor'], reversible, i, j, nodes[i]['reagents'][j]['id']]);
-                nodes_anchors[node_id][nodes[i]['anchor_in']].push([metabolite_id, connections.length - 1, angle_node]);
+            if (edge_data[i]['r'][j]['t'] == 'educt'){
+                var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, edge_data[i]['in']);
+                connections.push([node_id, edge_data[i]['in'], metabolite_id, edge_data[i]['r'][j]['a'], reversible, i, j, edge_data[i]['r'][j]['i']]);
+                nodes_anchors[node_id][edge_data[i]['in']].push([metabolite_id, connections.length - 1, angle_node]);
             }
             else{
-                var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, nodes[i]['anchor_out']);
-                connections.push([node_id, nodes[i]['anchor_out'], metabolite_id, nodes[i]['reagents'][j]['anchor'], true, i, j, nodes[i]['reagents'][j]['id']]);
-                nodes_anchors[node_id][nodes[i]['anchor_out']].push([metabolite_id, connections.length - 1, angle_node]);
+                var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, edge_data[i]['out']);
+                connections.push([node_id, edge_data[i]['out'], metabolite_id, edge_data[i]['r'][j]['a'], true, i, j, edge_data[i]['r'][j]['i']]);
+                nodes_anchors[node_id][edge_data[i]['out']].push([metabolite_id, connections.length - 1, angle_node]);
                 
             }
-            nodes_anchors[metabolite_id][nodes[i]['reagents'][j]['anchor']].push([node_id, connections.length - 1, angle_metabolite]);
+            nodes_anchors[metabolite_id][edge_data[i]['r'][j]['a']].push([node_id, connections.length - 1, angle_metabolite]);
         }
     }
     
     
-    for (var i = 0; i < nodes_anchors.length; ++i){
+    for (var node_id in nodes_anchors){
         for (var a in anchors){
-            var node_p = nodes_anchors[i][anchors[a]];
+            var node_p = nodes_anchors[node_id][anchors[a]];
             var len = node_p.length;
             if (node_p.length > 1){
                 
@@ -3015,8 +3010,8 @@ function compute_edges(){
     
     // sorting the edges, so that active edges will be drown as last, hence on top of inactive edges. Clever, eh?
     edges.sort(function(a, b){
-        a_rank = data[data_ref[a.start_id]].type == 'pathway' || data[data_ref[a.start_id]].proteins.length > 0;
-        b_rank = data[data_ref[b.start_id]].type == 'pathway' || data[data_ref[b.start_id]].proteins.length > 0;
+        a_rank = data[a.start_id].type == 'pathway' || data[a.start_id].proteins.length > 0;
+        b_rank = data[b.start_id].type == 'pathway' || data[b.start_id].proteins.length > 0;
         return a_rank - b_rank;
     });
 }
@@ -3025,7 +3020,7 @@ function compute_edges(){
 function assemble_elements(skip_rest){
     elements = [];
     for (var i = 0; i < edges.length; ++i) elements.push(edges[i]);    
-    for (var i = 0; i < data.length; ++i) elements.push(data[i]);
+    for (var node_id in data) elements.push(data[node_id]);
     if (typeof skip_rest == 'undefined') {
         elements.push(infobox);
         elements.push(zoom_sign_in);
@@ -3718,8 +3713,8 @@ function start_search(){
             if (r.length) results = results.concat(r);
         }
         
-        for (var i = 0; i < data.length; ++i){
-            var r = data[i].search(len_p, accept, masks);
+        for (var node_id in data){
+            var r = data[node_id].search(len_p, accept, masks);
             if (r.length) results = results.concat(r);
         }
         results.sort();
@@ -3781,8 +3776,8 @@ function highlight_node_inner(node_id){
     var std_dev = time / 6.;
     var c = document.getElementById("renderarea");
     document.getElementById("animation_background").style.display = "inline";
-    var x = data[data_ref[node_id]].x;
-    var y = data[data_ref[node_id]].y;
+    var x = data[node_id].x;
+    var y = data[node_id].y;
     var width  = window.innerWidth * 0.5;
     var height = window.innerHeight * 0.5;
     var scale = Math.pow(Math.pow(scaling, highlight_zoom - zoom), 1 / (time * steps));
@@ -3797,7 +3792,7 @@ function highlight_node_inner(node_id){
                     clearInterval (highlighting);
                 }
                 else {
-                    data[data_ref[node_id]].highlight = (l < 25);
+                    data[node_id].highlight = (l < 25);
                     draw();
                     l += 1;
                     if (l >= 50){
@@ -3814,12 +3809,12 @@ function highlight_node_inner(node_id){
         }
         else {
             var split = Math.exp(-0.5 * sq((progress - time * 0.5) / std_dev)) / (Math.sqrt(2 * Math.PI) * std_dev) / steps;
-            for (var i = 0; i < data.length; ++i){
-                data[i].width *= scale;
-                data[i].height *= scale;
-                data[i].orig_height *= scale;
-                data[i].x = width + scale * (data[i].x + split * (width - x) - width);
-                data[i].y = height + scale * (data[i].y + split * (height - y) - height);
+            for (var node_id in data){
+                data[node_id].width *= scale;
+                data[node_id].height *= scale;
+                data[node_id].orig_height *= scale;
+                data[node_id].x = width + scale * (data[node_id].x + split * (width - x) - width);
+                data[node_id].y = height + scale * (data[node_id].y + split * (height - y) - height);
             }
             for (var i = 0; i < edges.length; ++i){
                 for (var j = 0; j < edges[i].point_list.length; ++j){
@@ -3976,17 +3971,18 @@ function hide_filter_panel(){
         if (filter_changed){
             var proceed = true;
             var one_marked = false;
-            for (var i = 0; i < data.length && !one_marked; ++i){
-                for (var j = 0; j < data[i].proteins.length && !one_marked; ++j){
-                    if (data[i].proteins[j].id in basket){
+            for (var node_id in data){
+                for (var j = 0; j < data[node_id].proteins.length && !one_marked; ++j){
+                    if (data[node_id].proteins[j].id in basket){
                         one_marked = true;
                     }
                 }
+                if (one_marked) break;
             }
             
             adopt_filter_parameters();
-            for (var i = 0; i < data.length; ++i){
-                data[i].filtering();
+            for (var node_id in data){
+                data[node_id].filtering();
             }
             compute_statistics();
             draw();
@@ -4031,10 +4027,10 @@ function compute_statistics(){
     
     var num_proteins = 0;
     var proteins_content = [];
-    for (var i = 0; i < data.length; ++i){
-        num_proteins += data[i].proteins.length;
-        for (var j = 0; j < data[i].proteins.length; ++j){
-            proteins_content.push([data[i].proteins[j].name, i, j, data[i].proteins[j].id in basket]);
+    for (var node_id in data){
+        num_proteins += data[node_id].proteins.length;
+        for (var j = 0; j < data[node_id].proteins.length; ++j){
+            proteins_content.push([data[node_id].proteins[j].name, node_id, j, data[node_id].proteins[j].id in basket]);
         }
     }
     proteins_content.sort();
@@ -4202,16 +4198,16 @@ function prepare_infobox(prot){
             document.getElementById("animation_background").style.display = "none";
             infobox.visible = true;
             var xy = he.get_position(prot);
-            infobox.create(xy[0], xy[1], data_ref[he.id], prot);
+            infobox.create(xy[0], xy[1], he.id, prot);
             he.highlight = false;
             he = 0;
             draw();
         }
         else {
             var split = Math.exp(-0.5 * sq((progress - time * 0.5) / std_dev)) / (Math.sqrt(2 * Math.PI) * std_dev) * inv_steps;
-            for (var i = 0; i < data.length; ++i){
-                data[i].x += split * (width - x);
-                data[i].y += split * (height - y);
+            for (var node_id in data){
+                data[node_id].x += split * (width - x);
+                data[node_id].y += split * (height - y);
             }
             for (var i = 0; i < edges.length; ++i){
                 for (var j = 0; j < edges[i].point_list.length; ++j){
@@ -4280,10 +4276,9 @@ function load_data(reload){
     var species_string = species.join(":");
     
     // get data information
-    data = [];
-    data_ref = [];
+    data = {};
     var tmp_data = 0;
-    nodes = 0;
+    edge_data = 0;
     protein_dictionary = {};
     for (prot_id in basket) protein_dictionary[prot_id] = basket[prot_id];
     
@@ -4298,10 +4293,10 @@ function load_data(reload){
     }
     
     // get nodes information
-    var xmlhttp2 = new XMLHttpRequest();
-    xmlhttp2.onreadystatechange = function() {
-        if (xmlhttp2.readyState == 4 && xmlhttp2.status == 200) {
-            nodes = JSON.parse(xmlhttp2.responseText);
+    var xmlhttp_edge = new XMLHttpRequest();
+    xmlhttp_edge.onreadystatechange = function() {
+        if (xmlhttp_edge.readyState == 4 && xmlhttp_edge.status == 200) {
+            edge_data = JSON.parse(xmlhttp_edge.responseText);
         }
     }
     
@@ -4310,8 +4305,8 @@ function load_data(reload){
     xmlhttp.send();
     
     
-    xmlhttp2.open("GET", "/qsdb/cgi-bin/get-edges.bin?pathway=" + current_pathway, true);
-    xmlhttp2.send();
+    xmlhttp_edge.open("GET", "/qsdb/cgi-bin/get-edges.bin?pathway=" + current_pathway, true);
+    xmlhttp_edge.send();
     
     
     
@@ -4325,27 +4320,27 @@ function load_data(reload){
     var process_nodes = setInterval(function(){
         if (tmp_data){
             for (var i = 0; i < tmp_data.length; ++i){
-                data.push(new node(tmp_data[i], ctx));
-                x_min = Math.min(x_min, data[i].x - data[i].width * 0.5);
-                x_max = Math.max(x_max, data[i].x + data[i].width * 0.5);
-                y_min = Math.min(y_min, data[i].y - data[i].height * 0.5);
-                y_max = Math.max(y_max, data[i].y + data[i].height * 0.5);
-                data_ref[data[i].id] = i;
+                var new_node = new node(tmp_data[i], ctx);
+                data[new_node.id] = new_node;
+                x_min = Math.min(x_min, new_node.x - new_node.width * 0.5);
+                x_max = Math.max(x_max, new_node.x + new_node.width * 0.5);
+                y_min = Math.min(y_min, new_node.y - new_node.height * 0.5);
+                y_max = Math.max(y_max, new_node.y + new_node.height * 0.5);
             }
             if (reload){
-                for (var i = 0; i < data.length; ++i){
-                    data[i].move(null_x, null_y);
-                    data[i].width *= factor;
-                    data[i].height *= factor;
-                    data[i].x = null_x + factor * (data[i].x - null_x);
-                    data[i].y = null_y + factor * (data[i].y - null_y);
+                for (var node_id in data){
+                    data[node_id].move(null_x, null_y);
+                    data[node_id].width *= factor;
+                    data[node_id].height *= factor;
+                    data[node_id].x = null_x + factor * (data[node_id].x - null_x);
+                    data[node_id].y = null_y + factor * (data[node_id].y - null_y);
                 }
             }
             if (!reload){
                 var shift_x = (ctx.canvas.width - x_min - x_max) * 0.5;
                 var shift_y = nav_height + (ctx.canvas.height - nav_height - y_min - y_max) * 0.5;
-                for (var i = 0; i < data.length; ++i){
-                    data[i].move(shift_x, shift_y);
+                for (var node_id in data){
+                    data[node_id].move(shift_x, shift_y);
                 }
                 null_x += shift_x;
                 null_y += shift_y;
@@ -4378,7 +4373,7 @@ function load_data(reload){
         
     
     var process_edges = setInterval(function(){
-        if (tmp_data && nodes && process_edges_semaphore){
+        if (tmp_data && edge_data && process_edges_semaphore){
             compute_edges();
             assemble_elements(1);
             min_zoom = preview_zoom;
@@ -4433,11 +4428,11 @@ function accession_search_parse_accessions(accessions){
 
 function request_load_proteins(data, check, post_load){
     if (typeof post_load === "undefined") post_load = false;
-    for (var i = 0; i < data.length; ++i){
-        var p_id = data[i]["id"];
+    for (var node_id in data){
+        var p_id = data[node_id]["id"];
         var prot = 0;
         if (!(p_id in protein_dictionary)){
-            var prot = new Protein(data[i], 0);
+            var prot = new Protein(data[node_id], 0);
             protein_dictionary[prot.id] = prot;
         }
         else {
