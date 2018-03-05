@@ -1529,6 +1529,7 @@ function node(data, ctx){
     
     
     this.setup_pathway_meta = function(){
+        this.width = 0;
         var tokens = this.name.split("\n");
         this.height = 40 + 20 * tokens.length;
         for (var j = 0; j < tokens.length; ++j){
@@ -4237,15 +4238,7 @@ function prepare_infobox(prot){
 }
 
 
-function resize_pathway_view(){
-    
-    var c = document.getElementById("renderarea");
-    var ctx = c.getContext("2d");
-    ctx.canvas.width  = window.innerWidth;
-    ctx.canvas.height = window.innerHeight;
-    preview_element.y = window.innerHeight - preview_element.height;
-    draw();
-}
+
 
 
 function load_data(reload){
@@ -4264,22 +4257,10 @@ function load_data(reload){
     collapse_statistics();
     
     
-    document.getElementById("renderarea_wrapper").innerHTML = "<canvas id=\"renderarea\" class=\"renderarea\">Your browser does not support the HTML5 canvas tag.</canvas>";
-    
-    
     
     var c = document.getElementById("renderarea");
-    c.style.display = "none";
+    //c.style.display = "none";
     var ctx = c.getContext("2d");
-    c.onmousedown = mouse_down_listener;
-    c.onmouseup = mouse_up_listener;
-    c.onmousemove = mouse_move_listener;
-    c.addEventListener("click", mouse_click_listener, false);
-    c.addEventListener("dblclick", mouse_dblclick_listener, false);
-    c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
-    c.addEventListener('mousewheel', mouse_wheel_listener, false);
-    c.addEventListener('contextmenu', function(event){event.preventDefault(); return false;}, false);
-    c.addEventListener("mouseout", mouse_up_listener, false);
     
     infobox = new Infobox();
     zoom_sign_in = new zoom_sign(1);
@@ -4291,8 +4272,6 @@ function load_data(reload){
     select_field_element.visible = false;
     collapse_obj.visible = false;
     current_pathway_title = new pathway_title();
-    ctx.canvas.width  = window.innerWidth;
-    ctx.canvas.height = window.innerHeight;
     
     
     var species = [];

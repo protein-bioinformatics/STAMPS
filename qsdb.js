@@ -59,6 +59,19 @@ function init(){
     document.addEventListener('DOMMouseScroll', prevent_zooming, false);
     document.addEventListener("mousewheel", prevent_zooming, false);
     
+    var c = document.getElementById("renderarea");
+    //c.style.display = "none";
+    var ctx = c.getContext("2d");
+    c.onmousedown = mouse_down_listener;
+    c.onmouseup = mouse_up_listener;
+    c.onmousemove = mouse_move_listener;
+    c.addEventListener("click", mouse_click_listener, false);
+    c.addEventListener("dblclick", mouse_dblclick_listener, false);
+    c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
+    c.addEventListener('mousewheel', mouse_wheel_listener, false);
+    c.addEventListener('contextmenu', function(event){event.preventDefault(); return false;}, false);
+    c.addEventListener("mouseout", mouse_up_listener, false);
+    
     //document.cookie = "";
     
     // cookie treatment
@@ -78,8 +91,18 @@ function init(){
     if (!read_cookie_information) document.getElementById('cookie_information').style.display = "inline";
     
     change_pathway(0);
+    resize_pathway_view();
 }
 
+function resize_pathway_view(){
+    
+    var c = document.getElementById("renderarea");
+    var ctx = c.getContext("2d");
+    ctx.canvas.width  = window.innerWidth;
+    ctx.canvas.height = window.innerHeight;
+    preview_element.y = window.innerHeight - preview_element.height;
+    draw();
+}
 
 
 function mouse_click_listener(e){

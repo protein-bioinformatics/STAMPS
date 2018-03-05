@@ -1,3 +1,4 @@
+toolbox_width = 300;
 toolbox_states = {
     CREATE_PATHWAY: 0,
     CREATE_PROTEIN: 1,
@@ -60,22 +61,18 @@ function init(){
     //document.getElementById("menubackground").addEventListener("click", hide_custom_menu, false);
     //document.getElementById("managementbackground").addEventListener("click", hide_management, false);
     document.getElementById("infobox_html_background").addEventListener("click", hide_infobox, false);
+    window.addEventListener('resize', resize_pathway_view, false);
     
     window.addEventListener('resize', resize_ms_view, false);
     document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
     document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
     
+    
     change_pathway(0);
-    
-    
     
     
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
-    
-    
-    ctx.canvas.width  = window.innerWidth;
-    ctx.canvas.height = window.innerHeight;
     c.onmousedown = mouse_down_listener;
     c.onmouseup = mouse_up_listener;
     c.onmousemove = mouse_move_listener;
@@ -83,7 +80,6 @@ function init(){
     c.addEventListener("dblclick", mouse_dblclick_listener, false);
     c.addEventListener("mousewheel", mouse_wheel_listener, false);
     c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
-    
     
     
     c.oncontextmenu = function (event){
@@ -99,8 +95,23 @@ function init(){
     
     document.getElementById("toolbox").style.top = (document.getElementById("navigation").offsetHeight).toString() + "px";
     document.getElementById("renderarea").style.left = (document.getElementById("toolbox").offsetWidth).toString() + "px";
+    resize_pathway_view();
 }
 
+
+function resize_pathway_view(){
+    
+    var c = document.getElementById("renderarea");
+    var ctx = c.getContext("2d");
+    document.getElementById("toolbox").style.width = (toolbox_width).toString() + "px";
+    document.getElementById("toolbox").style.top = (document.getElementById("navigation").offsetHeight).toString() + "px";
+    document.getElementById("toolbox").style.height = (window.innerHeight - document.getElementById("navigation").offsetHeight).toString() + "px";
+    c.style.left  = (toolbox_width).toString() + "px";
+    ctx.canvas.width  = window.innerWidth - toolbox_width;
+    ctx.canvas.height = window.innerHeight;
+    preview_element.y = window.innerHeight - preview_element.height;
+    draw();
+}
 
 
 function mouse_click_listener(e){
@@ -175,10 +186,11 @@ function editor_create_pathway_node(){
     var request = "type=pathway&pathway=" + current_pathway + "&pathway_ref=" + pathway_ref + "&x=" + x + "&y=" + y;
     var result = create_node(request);
     if (result){
-        tmp_element.name = obj.options[obj.selectedIndex].text;
+        tmp_element.name = pathways[pathway_dict[pathway_ref]][1];
         tmp_element.pathway_ref = pathway_ref;
+        tmp_element.scale(tmp_element.x, tmp_element.y, 1. / factor);
         tmp_element.setup_pathway_meta();
-        tmp_element.scale(0, 0, factor);
+        tmp_element.scale(tmp_element.x, tmp_element.y, factor);
         draw();
         var ctx = document.getElementById("renderarea").getContext("2d");
         tmp_element = new node({"x": "0", "y": "0", "t": "pathway", "i": -1, "n": "undefined"}, ctx);

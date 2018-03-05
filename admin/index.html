@@ -14,6 +14,7 @@
 <body>
 
 <div id="toolbox" class="toolbox">
+    <table cellspacing="10px"><tr><td>
     <b>Toolbox:</b><p><hr><p>
     <i>Creaty entity:</i><br>
     <div id="toolbox_button_create_pathway" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_PATHWAY);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_PATHWAY);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_PATHWAY);"><span>Create pathway node</span></div>
@@ -30,10 +31,10 @@
     <div id="toolbox_button_draw_edge" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.DRAW_EDGE);" onmouseover="toolbox_button_mouseover(toolbox_states.DRAW_EDGE);" onmouseout="toolbox_button_mouseout(toolbox_states.DRAW_EDGE);"><span>Draw edge</span></div>
     <div id="toolbox_button_change_edge" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CHANGE_EDGE);" onmouseover="toolbox_button_mouseover(toolbox_states.CHANGE_EDGE);" onmouseout="toolbox_button_mouseout(toolbox_states.CHANGE_EDGE);"><span>Change edge type</span></div>
     <div id="toolbox_button_delete_entity" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.DELETE_ENTRY);" onmouseover="toolbox_button_mouseover(toolbox_states.DELETE_ENTRY);" onmouseout="toolbox_button_mouseout(toolbox_states.DELETE_ENTRY);"><span>Delete entity</span></div>
+    </td></tr></table>
 </div>
 
-<div id="renderarea_wrapper" class="renderarea_wrapper"></div>
-<canvas id="refarea" class="refarea" style="display: none;">Your browser does not support the HTML5 canvas tag.</canvas>
+<div id="renderarea_wrapper" class="renderarea_wrapper"><canvas id="renderarea" class="renderarea">Your browser does not support the HTML5 canvas tag.</canvas></div>
 
 <div id="hint" style="position: fixed; top: 10px; left: 10px;">--</div>
 <div id="tooltip" class="tooltip"></div>
