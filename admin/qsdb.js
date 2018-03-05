@@ -200,9 +200,15 @@ function editor_create_pathway_node(){
 }
 
 
+
+delete_entity(){
+    
+}
+
+
 function create_node(request){
     var xmlhttp = new XMLHttpRequest();
-    request = "/qsdb/cgi-bin/create_node.py?" + request;
+    request = "/qsdb/admin/cgi-bin/create_node.py?" + request;
     var successful_creation = false;
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -558,7 +564,7 @@ function update_node(event) {
     
     
     var xmlhttp = new XMLHttpRequest();
-    var request = "/qsdb/cgi-bin/update_node.py?id=";
+    var request = "/qsdb/admin/cgi-bin/update_node.py?id=";
     request += entity_moving.id;
     request += "&x=";
     request += x;
@@ -635,7 +641,7 @@ edge.prototype.edit = function(){
     else return;
     
     var xmlhttp = new XMLHttpRequest();
-    var request = "/qsdb/cgi-bin/update_edge.py?id=";
+    var request = "/qsdb/admin/cgi-bin/update_edge.py?id=";
     request += this.edge_id;
     request += "&element=";
     request += element;
@@ -696,7 +702,7 @@ function manage_entries_show_pathways(){
             }
         }
     }
-    xmlhttp_pathways.open("GET", "/qsdb/cgi-bin/manage-entries.py?action=get&type=pathways", true);
+    xmlhttp_pathways.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=pathways", true);
     xmlhttp_pathways.send();
 }
 
@@ -737,7 +743,7 @@ function manage_entries_show_proteins(){
             }
         }
     }
-    xmlhttp_proteins.open("GET", "/qsdb/cgi-bin/manage-entries.py?action=get&type=proteins", true);
+    xmlhttp_proteins.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=proteins", true);
     xmlhttp_proteins.send();
 }
 
@@ -777,7 +783,7 @@ function manage_entries_show_metabolites(){
             }
         }
     }
-    xmlhttp_metabolites.open("GET", "/qsdb/cgi-bin/manage-entries.py?action=get&type=metabolites", true);
+    xmlhttp_metabolites.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=metabolites", true);
     xmlhttp_metabolites.send();
 }
 
