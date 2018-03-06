@@ -111,7 +111,7 @@ main() {
         column_names.insert(pair<string,int>(field->name, i));
     }
     
-    cout << "[";
+    cout << "{";
     int last_id = -1;
     int index = 0;
     int index_r = 0;
@@ -123,7 +123,7 @@ main() {
             if (last_id != -1){
                 cout << "]},";
             }
-            cout << "{\"i\":" << row[column_names[string("id")]] << ",";
+            cout << "\"" << row[column_names[string("id")]] << "\": {\"i\":" << row[column_names[string("id")]] << ",";
             cout << "\"n\":" << row[column_names[string("node_id")]] << ",";
             cout << "\"in\":\"" << row[column_names[string("anchor_in")]] << "\",";
             cout << "\"out\":\"" << row[column_names[string("anchor_out")]] << "\",";
@@ -145,7 +145,7 @@ main() {
     }
     if (index_r) cout << "]";
     if (index) cout << "}";
-    cout << "]" << endl;
+    cout << "}" << endl;
     
     mysql_free_result(res);
     mysql_close(conn);

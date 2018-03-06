@@ -2117,24 +2117,22 @@ function point(x, y, b){
 edge.prototype = new visual_element();
 edge.prototype.constructor = edge;
 
-function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head, reaction_id, reagent_id, edge_id){
+function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction_id, reagent_id){
     
-    //this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node);
     this.head = head;
     this.head_start = 0;
     this.point_list = [];
     this.start_point = (x_s, y_s, "");
-    this.start_id = protein_node.id;
+    this.start_id = start_node.id;
     this.start_anchor = a_s;
     this.end_point = (x_e, y_e, "");
-    this.end_id = metabolite_node.id;
+    this.end_id = end_node.id;
     this.end_anchor = a_e;
     this.reaction_id = reaction_id;
     this.reagent_id = reagent_id;
-    this.edge_id = edge_id;
     
     
-    this.bidirectional = data[this.start_id].type == "metabolite" && edge_data[this.reaction_id]['v'];
+    this.bidirectional = start_node.type == "metabolite" && edge_data[this.reaction_id]['v'];
     this.tail_start = 0;
     
     
@@ -2627,7 +2625,7 @@ function edge(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node, head,
     }
     
     
-    this.routing(x_s, y_s, a_s, protein_node, x_e, y_e, a_e, metabolite_node);
+    this.routing(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node);
     
     this.draw = function(ctx){
         var dashed_edge = data[this.start_id].type == "pathway";
@@ -2827,27 +2825,27 @@ function compute_edges(){
         nodes_anchors[node_id] = {left: [], right: [], top: [], bottom: []};
     }
     
-    for (var i = 0; i < edge_data.length; ++i){
-        var node_id = edge_data[i]['n'];
-        var reversible = parseInt(edge_data[i]['v']);
-        for (var j = 0; j < edge_data[i]['r'].length; ++j){
+    for (var reaction_id in edge_data){
+        var node_id = edge_data[reaction_id]['n'];
+        var reversible = parseInt(edge_data[reaction_id]['v']);
+        for (var j = 0; j < edge_data[reaction_id]['r'].length; ++j){
             
-            var metabolite_id = edge_data[i]['r'][j]['n'];
-            var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y, edge_data[i]['r'][j]['a']);
+            var metabolite_id = edge_data[reaction_id]['r'][j]['n'];
+            var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y, edge_data[reaction_id]['r'][j]['a']);
             
             
-            if (edge_data[i]['r'][j]['t'] == 'educt'){
-                var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, edge_data[i]['in']);
-                connections.push([node_id, edge_data[i]['in'], metabolite_id, edge_data[i]['r'][j]['a'], reversible, i, j, edge_data[i]['r'][j]['i']]);
-                nodes_anchors[node_id][edge_data[i]['in']].push([metabolite_id, connections.length - 1, angle_node]);
+            if (edge_data[reaction_id]['r'][j]['t'] == 'educt'){
+                var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, edge_data[reaction_id]['in']);
+                connections.push([node_id, edge_data[reaction_id]['in'], metabolite_id, edge_data[reaction_id]['r'][j]['a'], reversible, reaction_id, edge_data[reaction_id]['r'][j]['i']]);
+                nodes_anchors[node_id][edge_data[reaction_id]['in']].push([metabolite_id, connections.length - 1, angle_node]);
             }
             else{
-                var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, edge_data[i]['out']);
-                connections.push([node_id, edge_data[i]['out'], metabolite_id, edge_data[i]['r'][j]['a'], true, i, j, edge_data[i]['r'][j]['i']]);
-                nodes_anchors[node_id][edge_data[i]['out']].push([metabolite_id, connections.length - 1, angle_node]);
+                var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, edge_data[reaction_id]['out']);
+                connections.push([node_id, edge_data[reaction_id]['out'], metabolite_id, edge_data[reaction_id]['r'][j]['a'], true, reaction_id, edge_data[reaction_id]['r'][j]['i']]);
+                nodes_anchors[node_id][edge_data[reaction_id]['out']].push([metabolite_id, connections.length - 1, angle_node]);
                 
             }
-            nodes_anchors[metabolite_id][edge_data[i]['r'][j]['a']].push([node_id, connections.length - 1, angle_metabolite]);
+            nodes_anchors[metabolite_id][edge_data[reaction_id]['r'][j]['a']].push([node_id, connections.length - 1, angle_metabolite]);
         }
     }
     
@@ -2886,7 +2884,6 @@ function compute_edges(){
         var has_head = connections[i][4];
         var reaction_id = connections[i][5];
         var reagent_id = connections[i][6];
-        var edge_id = connections[i][7];
         var start_x = 0, start_y = 0;
         var end_x = 0, end_y = 0;
         var node_pos = 0, metabolite_pos = 0;
@@ -3005,7 +3002,9 @@ function compute_edges(){
                 start_x += node_width * 0.5;
             }
         }
-        edges.push(new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id, edge_id));
+        if (Math.abs(start_x - end_x) > 25 * factor || Math.abs(start_y - end_y) > 25 * factor) {
+            edges.push(new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id));
+        }
     }
     
     // sorting the edges, so that active edges will be drown as last, hence on top of inactive edges. Clever, eh?
