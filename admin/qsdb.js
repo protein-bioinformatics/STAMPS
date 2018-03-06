@@ -19,6 +19,12 @@ entity_moving = -1;
 tmp_element = -1;
 tmp_edge = -1;
 
+
+global_pathway_data = -1;
+global_protein_data = -1;
+global_metabolite_data = -1;
+
+
 function init(){
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -95,6 +101,27 @@ function init(){
     document.getElementById("toolbox").style.top = (document.getElementById("navigation").offsetHeight).toString() + "px";
     document.getElementById("renderarea").style.left = (document.getElementById("toolbox").offsetWidth).toString() + "px";
     resize_pathway_view();
+    
+    // get metabolites
+    var xmlhttp_metabolites = new XMLHttpRequest();
+    xmlhttp_metabolites.onreadystatechange = function() {
+        if (xmlhttp_metabolites.readyState == 4 && xmlhttp_metabolites.status == 200) {
+            global_metabolite_data = JSON.parse(xmlhttp_metabolites.responseText);
+        }
+    }
+    xmlhttp_metabolites.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=metabolites", true);
+    xmlhttp_metabolites.send();
+    
+    
+    // get pathways
+    var xmlhttp_pathways = new XMLHttpRequest();
+    xmlhttp_pathways.onreadystatechange = function() {
+        if (xmlhttp_pathways.readyState == 4 && xmlhttp_pathways.status == 200) {
+            global_pathway_data = JSON.parse(xmlhttp_pathways.responseText);
+        }
+    }
+    xmlhttp_pathways.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=pathways", true);
+    xmlhttp_pathways.send();
 }
 
 
@@ -161,6 +188,12 @@ function mouse_click_listener(e){
         document.getElementById("renderarea").style.filter = "blur(5px)";
         document.getElementById("toolbox").style.filter = "blur(5px)";
     }
+    else if (toolbox_button_selected == toolbox_states.CREATE_METABOLITE){
+        document.getElementById("editor_select_metabolite").style.display = "inline";
+        document.getElementById("waiting_background").style.display = "inline";
+        document.getElementById("renderarea").style.filter = "blur(5px)";
+        document.getElementById("toolbox").style.filter = "blur(5px)";
+    }
     else if (toolbox_button_selected == toolbox_states.DELETE_ENTRY){
         if (highlight_element){
             if (highlight_element instanceof node){
@@ -212,6 +245,15 @@ function close_editor_select_pathway(){
     document.getElementById("toolbox").style.filter = "";
 }
 
+
+function close_editor_select_metabolite(){
+    document.getElementById("editor_select_metabolite").style.display = "none";
+    document.getElementById("waiting_background").style.display = "none";
+    document.getElementById("renderarea").style.filter = "";
+    document.getElementById("toolbox").style.filter = "";
+}
+
+
 function editor_create_pathway_node(){
     var obj = document.getElementById("editor_select_pathway_field");
     var pathway_ref = obj.options[obj.selectedIndex].id;
@@ -233,6 +275,36 @@ function editor_create_pathway_node(){
         tmp_element.scale(0, 0, factor);
         elements.push(tmp_element);
     };
+}
+
+
+
+
+
+function editor_create_metabolite_node(){
+    
+    /*
+    var obj = document.getElementById("editor_select_metabolite");
+    var pathway_ref = obj.options[obj.selectedIndex].id;
+    
+    
+    var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
+    var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
+    var request = "type=metabolite&pathway=" + current_pathway + "&foreign_id=" + pathway_ref + "&x=" + x + "&y=" + y;
+    var result = create_node(request);
+    if (result){
+        tmp_element.name = pathways[pathway_dict[pathway_ref]][1];
+        tmp_element.pathway_ref = pathway_ref;
+        tmp_element.scale(tmp_element.x, tmp_element.y, 1. / factor);
+        tmp_element.setup_pathway_meta();
+        tmp_element.scale(tmp_element.x, tmp_element.y, factor);
+        draw();
+        var ctx = document.getElementById("renderarea").getContext("2d");
+        tmp_element = new node({"x": "0", "y": "0", "t": "pathway", "i": -1, "n": "undefined"}, ctx);
+        tmp_element.scale(0, 0, factor);
+        elements.push(tmp_element);
+    };
+    */
 }
 
 

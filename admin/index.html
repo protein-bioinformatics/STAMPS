@@ -52,7 +52,7 @@
                 <td>
                     <div style="display: inline;">
                         Select a pathway:<br>
-                        <select id="editor_select_pathway_field" id="loci" size=20 style="width:400px; height:480px;"></select>
+                        <select id="editor_select_pathway_field" size=20 style="width:400px; height:480px;"></select>
                     </div>
                 </td>
             </tr>
@@ -63,6 +63,29 @@
         </table>
     </td></tr></table>
 </div>
+
+
+
+
+<div id="editor_select_metabolite" class="global_search">
+    <table width="100%" height="100%"><tr><td align="center" valign="middle">
+        <table cellspacing=20 width="500" class="global_search_content">
+            <tr>
+                <td>
+                    <div style="display: inline;">
+                        Select a metabolite:<br>
+                        <table id="editor_select_metabolite_table" size=20 style="width:400px; height:480px;"></table>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align=right><button onclick="close_editor_select_metabolite();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_create_metabolite_node(); close_editor_select_metabolite();">Create</button>
+                </td>
+            </tr>
+        </table>
+    </td></tr></table>
+</div>
+
 
 <div id="navigation" class="navigation">
     <table>

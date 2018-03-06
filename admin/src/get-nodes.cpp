@@ -172,6 +172,7 @@ main(int argc, char** argv) {
     if (compress){
         cout << "Content-Type: text/html" << endl;
         cout << "Content-Encoding: deflate" << endl << endl;
+        
     }
     else {
         cout << "Content-Type: text/html" << endl << endl;
