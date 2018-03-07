@@ -33,20 +33,47 @@ except:
 conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
 my_cur = conn.cursor(cursors.DictCursor)
 
-
-
 if entity_type == "node":
-    sql_query = "DELETE FROM reagents WHERE reaction_id IN (SELECT id FROM reactions WHERE node_id = %s);"
+
+    sql_query = "SELECT type FROM nodes WHERE id = %s;"
     my_cur.execute(sql_query, (entity_id))
-    conn.commit()
-    
-    sql_query = "DELETE FROM reactions WHERE node_id = %s;"
-    my_cur.execute(sql_query, (entity_id))
-    conn.commit()
-    
-    sql_query = "DELETE FROM nodes WHERE id = %s;"
-    my_cur.execute(sql_query, (entity_id))
-    conn.commit()
+    entity_type = [row for row in my_cur][0]["type"]    
+
+    if entity_type in ["pathway", "protein"]:
+        sql_query = "DELETE FROM reagents WHERE reaction_id IN (SELECT id FROM reactions WHERE node_id = %s);"
+        my_cur.execute(sql_query, (entity_id))
+        conn.commit()
+        
+        sql_query = "DELETE FROM reactions WHERE node_id = %s;"
+        my_cur.execute(sql_query, (entity_id))
+        conn.commit()
+        
+        sql_query = "DELETE FROM nodes WHERE id = %s;"
+        my_cur.execute(sql_query, (entity_id))
+        conn.commit()
+        
+        
+    elif entity_type == "metabolite":
+        sql_query = "SELECT rc.id FROM reactions rc INNER JOIN reagents r ON rc.id = r.reaction_id INNER JOIN nodes n ON rc.node_id = n.id WHERE r.node_id = %s AND n.type = 'pathway';" # reactions for pathways
+        del_reaction = ", ".join(row for row in my_cur)
+        
+        sql_query = "DELETE FROM reactions WHERE id IN (%s);" # reactions for pathways
+        my_cur.execute(sql_query, (del_reaction))
+        conn.commit()
+        
+        sql_query = "DELETE FROM reagents WHERE node_id = %s;"
+        my_cur.execute(sql_query, (entity_id))
+        conn.commit()
+        
+        sql_query = "DELETE FROM nodes WHERE id = %s;"
+        my_cur.execute(sql_query, (entity_id))
+        conn.commit()
+        
+        
+    elif entity_type in ["label", "membrane"]:
+        sql_query = "DELETE FROM nodes WHERE id = %s;"
+        my_cur.execute(sql_query, (entity_id))
+        conn.commit()
     
     
 elif entity_type == "edge":

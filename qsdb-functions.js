@@ -2230,8 +2230,8 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
         var yd_e = ya_e + offset_y[a_e];
         
         // initialize grid
-        var W = 8 + Math.ceil(Math.abs(xd_s - xd_e) / grid);
-        var H = 8 + Math.ceil(Math.abs(yd_s - yd_e) / grid);
+        var W = 14 + Math.ceil(Math.abs(xd_s - xd_e) / grid);
+        var H = 14 + Math.ceil(Math.abs(yd_s - yd_e) / grid);
         var open_list = new priority_queue();
         var matrix = [];
         for (var h = 0; h < H; ++h){
@@ -3002,7 +3002,8 @@ function compute_edges(){
                 start_x += node_width * 0.5;
             }
         }
-        if (Math.abs(start_x - end_x) > 25 * factor || Math.abs(start_y - end_y) > 25 * factor) {
+        var l2_norm = Math.sqrt(Math.pow(start_x - end_x, 2) + Math.pow(start_y - end_y, 2));
+        if (l2_norm > base_grid * factor) {
             edges.push(new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id));
         }
     }

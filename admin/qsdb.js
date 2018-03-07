@@ -199,25 +199,52 @@ function mouse_click_listener(e){
     }
     else if (toolbox_button_selected == toolbox_states.DELETE_ENTRY){
         if (highlight_element){
+            var request = "";
             if (highlight_element instanceof node){
                 var node_id = highlight_element.id;
-                for (var reaction_id in edge_data){
-                    for (var reagent_id in edge_data[reaction_id]['r']){
-                        if (edge_data[reaction_id]['r'][reagent_id]['n'] == node_id){
-                            delete edge_data[reaction_id]['r'][reagent_id];
-                            break;
+                
+                switch (highlight_element.type){
+                    case "pathway":
+                    case "protein":
+                        var del_reactions = []
+                        for (var reaction_id in edge_data){
+                            if (edge_data[reaction_id]['n'] == node_id) del_reactions.push(reaction_id);
                         }
-                    }
-                    if (edge_data[reaction_id]['n'] == node_id){
-                        delete edge_data[reaction_id];
-                    }
+                        for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
+                        break;
+                        
+                    case "metabolite":
+                        var del_reactions = []
+                        for (var reaction_id in edge_data){
+                            for (var reagent_id in edge_data[reaction_id]['r']){
+                                if (edge_data[reaction_id]['r'][reagent_id]['n'] == node_id && data[edge_data[reaction_id]['n']].type == "pathway") del_reactions.push(reaction_id);
+                            }
+                        }
+                        for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
+                        
+                        
+                        for (var reaction_id in edge_data){
+                            var del_reagents = [];
+                            for (var reagent_id in edge_data[reaction_id]['r']){
+                                if (edge_data[reaction_id]['r'][reagent_id]['n'] == node_id) del_reagents.push(reaction_id);
+                            }
+                            for (var i = 0; i < del_reagents.length; ++i) delete edge_data[reaction_id]['r'][del_reagents[i]];
+                        }
+                        break;
+                    
+                    default:
+                        break;
                 }
+                
                 delete data[node_id];
+                request = "type=node&id=" + node_id;
+                
             }
             else if (highlight_element instanceof edge){
+                request = "type=edge&id=" + highlight_element.reagent_id;
                 delete edge_data[highlight_element.reaction_id]['r'][highlight_element.reagent_id];
             }
-                
+            delete_entity(request);
             compute_edges();
             assemble_elements();
             draw();
@@ -292,27 +319,21 @@ function editor_create_metabolite_node(){
 }
 
 
-/*
-delete_entity(){
+
+function delete_entity(request){
     var xmlhttp = new XMLHttpRequest();
     request = "/qsdb/admin/cgi-bin/delete_entity.py?" + request;
-    var successful_creation = false;
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            new_id = xmlhttp.responseText;
-            if (0 <= new_id){
-                tmp_element.id = new_id;
-                successful_creation = true;
-            }
-            else {
-                alert("An error has occured, the entity could not be added into the database. Please contact the administrator.");
+            response = xmlhttp.responseText;
+            if (response < 0){
+                alert("An error has occured, the entity could not be deleted from the database. Please contact the administrator.");
             }
         }
     }
     xmlhttp.open("GET", request, false);
     xmlhttp.send();
 }
-*/
 
 
 function create_node(request){
@@ -787,7 +808,7 @@ edge.prototype.edit = function(){
     
     var xmlhttp = new XMLHttpRequest();
     var request = "/qsdb/admin/cgi-bin/update_edge.py?id=";
-    request += this.edge_id;
+    request += this.reagent_id;
     request += "&element=";
     request += element;
     xmlhttp.open("GET", request, true);
