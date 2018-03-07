@@ -4,7 +4,7 @@ from pymysql import connect, cursors
 from cgi import FieldStorage
 
 conf = {}
-with open("../admin/qsdb.conf", mode="rt") as fl:
+with open("../qsdb.conf", mode="rt") as fl:
     for line in fl:
         line = line.strip().strip(" ")
         if len(line) < 1 or line[0] == "#": continue

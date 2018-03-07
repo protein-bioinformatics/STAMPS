@@ -23,6 +23,7 @@ tmp_edge = -1;
 global_pathway_data = -1;
 global_protein_data = -1;
 global_metabolite_data = -1;
+selected_metabolite = -1;
 
 
 function init(){
@@ -107,6 +108,7 @@ function init(){
     xmlhttp_metabolites.onreadystatechange = function() {
         if (xmlhttp_metabolites.readyState == 4 && xmlhttp_metabolites.status == 200) {
             global_metabolite_data = JSON.parse(xmlhttp_metabolites.responseText);
+            prepare_metabolite_forms();
         }
     }
     xmlhttp_metabolites.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=metabolites", true);
@@ -161,12 +163,13 @@ function mouse_click_listener(e){
                 break;
         }
         var result = create_node(request);
-        if (result){
+        if (result[0]){
             var ctx = document.getElementById("renderarea").getContext("2d");
+            data[tmp_element.id] = tmp_element;
             switch (toolbox_button_selected){
                     
                 case toolbox_states.CREATE_PROTEIN:
-                    edge_data.push({'i': 0, 'n': tmp_element.id, 'in': 'left', 'out': 'right', 'v': 0, 'r': []});
+                    edge_data[result[1]] = {'i': result[1], 'n': tmp_element.id, 'in': 'left', 'out': 'right', 'v': 0, 'r': []};
                     tmp_element = new node({"x": "0", "y": "0", "t": "protein", "i": -1, "n": "-", "p": []}, ctx);
                     break;
                     
@@ -198,31 +201,21 @@ function mouse_click_listener(e){
         if (highlight_element){
             if (highlight_element instanceof node){
                 var node_id = highlight_element.id;
-                for (var i = edge_data.length - 1; i >= 0; --i){
-                    var edv = edge_data[i]['r'];
-                    for (var j = edv.length - 1; j >= 0; --j){
-                        if (edv[j]['n'] == node_id){
-                            edv.splice(j, 1);
+                for (var reaction_id in edge_data){
+                    for (var reagent_id in edge_data[reaction_id]['r']){
+                        if (edge_data[reaction_id]['r'][reagent_id]['n'] == node_id){
+                            delete edge_data[reaction_id]['r'][reagent_id];
                             break;
                         }
                     }
-                    if (edge_data[i]['n'] == node_id){
-                        edge_data.splice(i, 1);
+                    if (edge_data[reaction_id]['n'] == node_id){
+                        delete edge_data[reaction_id];
                     }
                 }
                 delete data[node_id];
             }
             else if (highlight_element instanceof edge){
-                var edge_id = highlight_element.edge_id;
-                for (var i = 0; i < edge_data.length; ++i){
-                    var edv = edge_data[i]['r'];
-                    for (var j = edv.length - 1; j >= 0; --j){
-                        if (edv[j]['i'] == edge_id){
-                            edv.splice(j, 1);
-                            break;
-                        }
-                    }
-                }
+                delete edge_data[highlight_element.reaction_id]['r'][highlight_element.reagent_id];
             }
                 
             compute_edges();
@@ -263,7 +256,7 @@ function editor_create_pathway_node(){
     var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
     var request = "type=pathway&pathway=" + current_pathway + "&pathway_ref=" + pathway_ref + "&x=" + x + "&y=" + y;
     var result = create_node(request);
-    if (result){
+    if (result[0]){
         tmp_element.name = pathways[pathway_dict[pathway_ref]][1];
         tmp_element.pathway_ref = pathway_ref;
         tmp_element.scale(tmp_element.x, tmp_element.y, 1. / factor);
@@ -282,29 +275,20 @@ function editor_create_pathway_node(){
 
 
 function editor_create_metabolite_node(){
-    
-    /*
-    var obj = document.getElementById("editor_select_metabolite");
-    var pathway_ref = obj.options[obj.selectedIndex].id;
-    
-    
     var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
     var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
-    var request = "type=metabolite&pathway=" + current_pathway + "&foreign_id=" + pathway_ref + "&x=" + x + "&y=" + y;
+    var request = "type=metabolite&pathway=" + current_pathway + "&foreign_id=" + selected_metabolite + "&x=" + x + "&y=" + y;
     var result = create_node(request);
-    if (result){
-        tmp_element.name = pathways[pathway_dict[pathway_ref]][1];
-        tmp_element.pathway_ref = pathway_ref;
-        tmp_element.scale(tmp_element.x, tmp_element.y, 1. / factor);
-        tmp_element.setup_pathway_meta();
-        tmp_element.scale(tmp_element.x, tmp_element.y, factor);
+    if (result[0]){
+        tmp_element.name = global_metabolite_data[selected_metabolite][1];
+        data[tmp_element.id] = tmp_element;
+        assemble_elements();
         draw();
         var ctx = document.getElementById("renderarea").getContext("2d");
-        tmp_element = new node({"x": "0", "y": "0", "t": "pathway", "i": -1, "n": "undefined"}, ctx);
+        tmp_element = new node({"x": "0", "y": "0", "t": "metabolite", "i": -1, "n": "-"}, ctx);
         tmp_element.scale(0, 0, factor);
         elements.push(tmp_element);
     };
-    */
 }
 
 
@@ -334,13 +318,14 @@ delete_entity(){
 function create_node(request){
     var xmlhttp = new XMLHttpRequest();
     request = "/qsdb/admin/cgi-bin/create_node.py?" + request;
-    var successful_creation = false;
+    var successful_creation = [false, -1];
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            new_id = xmlhttp.responseText;
-            if (0 <= new_id){
-                tmp_element.id = new_id;
-                successful_creation = true;
+            var request_data = JSON.parse(xmlhttp.responseText);
+            if (0 <= request_data[0]){
+                tmp_element.id = request_data[0];
+                successful_creation[0] = true;
+                successful_creation[1] = request_data[1];
             }
             else {
                 alert("An error has occured, the entity could not be added into the database. Please contact the administrator.");
@@ -527,8 +512,8 @@ function mouse_up_listener(event){
         highlight_element.mouse_up(res);
     }
     if (toolbox_button_selected == toolbox_states.MOVE_ENTITY) {
-        entity_moving = -1;
         update_node(event);
+        entity_moving = -1;
     }
     else if (toolbox_button_selected == toolbox_states.DRAW_EDGE){
         
@@ -559,6 +544,7 @@ function mouse_up_listener(event){
             
             
             if (num_metabolites == 1 && num_labels == 0 && num_membranes == 0){
+                var results = add_edge(data[-1].id, target.id);
                 if (num_proteins == 1){
                     var prot_id = -1;
                     var meta_id = -1;
@@ -580,7 +566,7 @@ function mouse_up_listener(event){
                             break;
                         }
                     }
-                    edge_data[reaction]['r'].push({"i": "0", "r": reaction, "n": meta_id, "t": fooduct, "a": "left"});
+                    edge_data[reaction]['r'][results[0]] = {"i": results[0], "r": reaction, "n": meta_id, "t": fooduct, "a": "left"};
                 }
                 else {
                     var pathway_id = -1;
@@ -593,14 +579,10 @@ function mouse_up_listener(event){
                         pathway_id = target.id;
                         meta_id = data[-1].id;
                     }
-                    var reaction = -1;
-                    for (var reaction_id in edge_data){
-                        reaction = Math.max(reaction, reaction_id);
-                    }
-                    reaction += 1;
-                    edge_data[reaction] = {"i": reaction, "n": pathway_id, "in": "left", "out": "right", "v": 0, "r": [{"i": "0", "r": reaction, "n": meta_id, "t": "educt", "a": "left"}]};
+                    
+                    edge_data[results[1]] = {"i": results[1], "n": pathway_id, "in": "left", "out": "right", "v": 0, "r": {}};
+                    edge_data[results[1]]['r'][results[0]] = {"i": results[0], "r": results[1], "n": meta_id, "t": "educt", "a": "left"};
                 }
-                add_edge(data[-1].id, target.id);
                 compute_edges();
             }
         }
@@ -617,17 +599,23 @@ function mouse_up_listener(event){
 function add_edge(start_id, end_id){
     var xmlhttp = new XMLHttpRequest();
     var request = "/qsdb/admin/cgi-bin/add_edge.py?start_id=" + start_id + "&end_id=" + end_id;
-    var successful_creation = false;
+    var successful_creation = [-1, -1];
+    console.log(request);
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            response = xmlhttp.responseText;
-            if (response < 0){
+            response = JSON.parse(xmlhttp.responseText);
+            if (response[0] < 0){
                 alert("An error has occured, the edge could not be added into the database. Please contact the administrator.");
+            }
+            else {
+                successful_creation[0] = response[1];
+                successful_creation[1] = response[2];
             }
         }
     }
     xmlhttp.open("GET", request, false);
     xmlhttp.send();
+    return successful_creation;
 }
 
 
@@ -781,16 +769,16 @@ node.prototype.edit = function() {
 edge.prototype.edit = function(){
     var element = "";
     if (toolbox_button_selected == toolbox_states.ROTATE_METABOLITE){
-        var anchor = nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'];
-        nodes[this.reaction_id]['reagents'][this.reagent_id]['anchor'] = next_anchor[anchor];
+        var anchor = edge_data[this.reaction_id]['r'][this.reagent_id]['a'];
+        edge_data[this.reaction_id]['r'][this.reagent_id]['a'] = next_anchor[anchor];
         element = "metabolite";
     }
     else if (toolbox_button_selected == toolbox_states.ROTATE_PROTEIN || toolbox_button_selected == toolbox_states.ROTATE_PATHWAY){
-        if (nodes[this.reaction_id]['reagents'][this.reagent_id]['type'] == "educt"){
-            nodes[this.reaction_id]['anchor_in'] = next_anchor[nodes[this.reaction_id]['anchor_in']];
+        if (edge_data[this.reaction_id]['r'][this.reagent_id]['t'] == "educt"){
+            edge_data[this.reaction_id]['in'] = next_anchor[edge_data[this.reaction_id]['in']];
         }
         else {
-            nodes[this.reaction_id]['anchor_out'] = next_anchor[nodes[this.reaction_id]['anchor_out']];
+            edge_data[this.reaction_id]['out'] = next_anchor[edge_data[this.reaction_id]['out']];
         }
         
         element = (toolbox_button_selected == toolbox_states.ROTATE_PROTEIN) ? "protein" : "pathway";
@@ -943,6 +931,68 @@ function manage_entries_show_metabolites(){
     xmlhttp_metabolites.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=metabolites", true);
     xmlhttp_metabolites.send();
 }
+
+
+function prepare_metabolite_forms(){
+    var global_metabolite_data_sorted = [];
+    for (var metabolite_id in global_metabolite_data) global_metabolite_data_sorted.push(global_metabolite_data[metabolite_id]);
+    
+    global_metabolite_data_sorted = global_metabolite_data_sorted.sort(function(a, b) {
+        return a[1] > b[1];
+    });
+    
+    var dom_table = document.getElementById("editor_select_metabolite_table");
+    
+    for (var i = 0; i < global_metabolite_data_sorted.length; ++i){
+        var bg_color = (i & 1) ? "#DDDDDD" : "white";
+        var row = global_metabolite_data_sorted[i];
+        
+        var dom_tr = document.createElement("tr");
+        dom_table.appendChild(dom_tr);
+        var dom_td1 = document.createElement("td");
+        dom_tr.appendChild(dom_td1);
+        dom_td1.innerHTML = row[1];
+        dom_td1.setAttribute("bgcolor", bg_color);
+        
+        var dom_td2 = document.createElement("td");
+        dom_tr.appendChild(dom_td2);
+        dom_td2.innerHTML = row[2];
+        dom_td2.setAttribute("bgcolor", bg_color);
+        dom_td2.setAttribute("style", "min-width: 100px;");
+        
+        var dom_td3 = document.createElement("td");
+        dom_tr.appendChild(dom_td3);
+        dom_td3.innerHTML = row[3];
+        dom_td3.setAttribute("bgcolor", bg_color);
+        
+        var dom_td4 = document.createElement("td");
+        dom_tr.appendChild(dom_td4);
+        var dom_input = document.createElement("input");
+        dom_td4.appendChild(dom_input);
+        dom_td4.setAttribute("bgcolor", bg_color);
+        dom_input.setAttribute("id", row[0]);
+        dom_input.setAttribute("type", "radio");
+        dom_input.setAttribute("name", "foo");
+        dom_input.setAttribute("onclick", "selected_metabolite = this.id;");
+        
+        if (i == 0){
+            selected_metabolite = row[0];
+            dom_input.setAttribute("checked", "true");
+        }
+    }
+    document.getElementById("editor_select_metabolite").style.display = "inline";
+    var table_titles = document.getElementById("editor_select_metabolite_table_header");
+    table_titles.rows[0].cells[0].width = dom_table.rows[0].cells[0].offsetWidth;
+    table_titles.rows[1].cells[0].children[0].size = dom_table.rows[0].cells[0].offsetWidth / 9;
+    
+    table_titles.rows[0].cells[1].width = dom_table.rows[0].cells[1].offsetWidth;
+    table_titles.rows[1].cells[1].children[0].size = 8;
+    
+    table_titles.rows[0].cells[2].width = dom_table.rows[0].cells[2].offsetWidth;
+    table_titles.rows[1].cells[2].children[0].size = dom_table.rows[0].cells[2].offsetWidth / 9;
+    document.getElementById("editor_select_metabolite").style.display = "none";
+}
+
 
 
 function hide_manage_entries (){

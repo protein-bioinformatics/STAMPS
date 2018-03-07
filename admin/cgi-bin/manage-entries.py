@@ -49,6 +49,6 @@ elif action == "get":
 
     # add metabolite data
     my_cur.execute("SELECT * from %s;" % action_type)
-    data = json.dumps([entry for entry in my_cur])
+    data = json.dumps({entry[0]: entry for entry in my_cur})
     sys.stdout.buffer.write( zlib.compress( bytes(data, "utf-8") ) )
     

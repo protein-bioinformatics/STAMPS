@@ -2828,24 +2828,24 @@ function compute_edges(){
     for (var reaction_id in edge_data){
         var node_id = edge_data[reaction_id]['n'];
         var reversible = parseInt(edge_data[reaction_id]['v']);
-        for (var j = 0; j < edge_data[reaction_id]['r'].length; ++j){
+        for (var reagent_id in edge_data[reaction_id]['r']){
             
-            var metabolite_id = edge_data[reaction_id]['r'][j]['n'];
-            var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y, edge_data[reaction_id]['r'][j]['a']);
+            var metabolite_id = edge_data[reaction_id]['r'][reagent_id]['n'];
+            var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y, edge_data[reaction_id]['r'][reagent_id]['a']);
             
             
-            if (edge_data[reaction_id]['r'][j]['t'] == 'educt'){
+            if (edge_data[reaction_id]['r'][reagent_id]['t'] == 'educt'){
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, edge_data[reaction_id]['in']);
-                connections.push([node_id, edge_data[reaction_id]['in'], metabolite_id, edge_data[reaction_id]['r'][j]['a'], reversible, reaction_id, edge_data[reaction_id]['r'][j]['i']]);
+                connections.push([node_id, edge_data[reaction_id]['in'], metabolite_id, edge_data[reaction_id]['r'][reagent_id]['a'], reversible, reaction_id, reagent_id]);
                 nodes_anchors[node_id][edge_data[reaction_id]['in']].push([metabolite_id, connections.length - 1, angle_node]);
             }
             else{
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, edge_data[reaction_id]['out']);
-                connections.push([node_id, edge_data[reaction_id]['out'], metabolite_id, edge_data[reaction_id]['r'][j]['a'], true, reaction_id, edge_data[reaction_id]['r'][j]['i']]);
+                connections.push([node_id, edge_data[reaction_id]['out'], metabolite_id, edge_data[reaction_id]['r'][reagent_id]['a'], true, reaction_id, reagent_id]);
                 nodes_anchors[node_id][edge_data[reaction_id]['out']].push([metabolite_id, connections.length - 1, angle_node]);
                 
             }
-            nodes_anchors[metabolite_id][edge_data[reaction_id]['r'][j]['a']].push([node_id, connections.length - 1, angle_metabolite]);
+            nodes_anchors[metabolite_id][edge_data[reaction_id]['r'][reagent_id]['a']].push([node_id, connections.length - 1, angle_metabolite]);
         }
     }
     
