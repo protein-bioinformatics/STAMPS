@@ -34,7 +34,7 @@ class node {
         string name;
         string pathway_id;
         string type;
-        string pathway_ref;
+        string foreign_id;
         string x;
         string y;
         string c_number;
@@ -50,7 +50,7 @@ class node {
             str += "\"n\":\"" + name + "\",";
             //str += "\"pathway_id\":" + pathway_id + ",";
             str += "\"t\":\"" + type + "\",";
-            str += "\"r\":" + (pathway_ref.length() ? pathway_ref : "0") + ",";
+            str += "\"r\":" + (foreign_id.length() ? foreign_id : "0") + ",";
             str += "\"x\":" + x + ",";
             str += "\"y\":" + y + ",";
             str += "\"c\":\"" + c_number + "\",";
@@ -444,10 +444,10 @@ main(int argc, char** argv) {
     
     
     
-    string sql_query_rest = "(select n.id, p.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ";
+    string sql_query_rest = "(select n.id, p.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ";
     sql_query_rest += pathway_id; 
     sql_query_rest += ") union ";
-    sql_query_rest += "(select n.id, m.name, n.pathway_id, n.type, n.pathway_ref, n.x, n.y, m.c_number, m.smiles, m.formula, m.exact_mass from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ";
+    sql_query_rest += "(select n.id, m.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, m.c_number, m.smiles, m.formula, m.exact_mass from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ";
     sql_query_rest += pathway_id;
     sql_query_rest += ") union ";
     sql_query_rest += "(select id, '', pathway_id, type, 0, x, y, 0, '', '', '' from nodes n where n.type = 'membrane' and n.pathway_id = ";
@@ -474,7 +474,7 @@ main(int argc, char** argv) {
         last_node->pathway_id = row[column_names_rest[string("pathway_id")]];
         last_node->name = row[column_names_rest[string("name")]];
         last_node->type = row[column_names_rest[string("type")]];
-        last_node->pathway_ref = row[column_names_rest[string("pathway_ref")]]; 
+        last_node->foreign_id = row[column_names_rest[string("foreign_id")]]; 
         last_node->x = row[column_names_rest[string("x")]];
         last_node->y = row[column_names_rest[string("y")]];
         last_node->c_number = row[column_names_rest[string("c_number")]];

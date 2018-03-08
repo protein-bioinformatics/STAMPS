@@ -24,6 +24,8 @@ global_pathway_data = -1;
 global_protein_data = -1;
 global_metabolite_data = -1;
 selected_metabolite = -1;
+selected_metabolite_node = -1;
+selected_pathway_node = -1;
 
 
 function init(){
@@ -190,12 +192,18 @@ function mouse_click_listener(e){
         document.getElementById("waiting_background").style.display = "inline";
         document.getElementById("renderarea").style.filter = "blur(5px)";
         document.getElementById("toolbox").style.filter = "blur(5px)";
+        document.getElementById("editor_select_pathway_ok_button").setAttribute("onclick", "editor_create_pathway_node(); close_editor_select_pathway();");
+        document.getElementById("editor_select_pathway_ok_button").innerHTML = "Create";
     }
     else if (toolbox_button_selected == toolbox_states.CREATE_METABOLITE){
         document.getElementById("editor_select_metabolite").style.display = "inline";
         document.getElementById("waiting_background").style.display = "inline";
         document.getElementById("renderarea").style.filter = "blur(5px)";
         document.getElementById("toolbox").style.filter = "blur(5px)";
+        document.getElementById("editor_select_metabolite_ok_button").setAttribute("onclick", "editor_create_metabolite_node(); close_editor_select_metabolite();");
+        document.getElementById("editor_select_metabolite_ok_button").innerHTML = "Create";
+        
+        
     }
     else if (toolbox_button_selected == toolbox_states.DELETE_ENTRY){
         if (highlight_element){
@@ -251,9 +259,49 @@ function mouse_click_listener(e){
         }
     }
     else if (highlight_element){
-        var c = document.getElementById("renderarea");
-        var res = get_mouse_pos(c, e);
-        highlight_element.edit();
+        if (highlight_element instanceof node){
+            switch (highlight_element.type){
+                case "pathway":
+                    var obj = document.getElementById("editor_select_pathway_field");
+                    for (var i = 0; i < obj.options.length; ++i){
+                        //console.log();
+                        if (obj.options[i].id == highlight_element.foreign_id){
+                            obj.selectedIndex = i;
+                            break;
+                        }
+                    }
+                    document.getElementById("editor_select_pathway").style.display = "inline";
+                    document.getElementById("waiting_background").style.display = "inline";
+                    document.getElementById("renderarea").style.filter = "blur(5px)";
+                    document.getElementById("toolbox").style.filter = "blur(5px)";
+                    document.getElementById("editor_select_pathway_ok_button").setAttribute("onclick", "editor_update_pathway_node(); close_editor_select_pathway();");
+                    document.getElementById("editor_select_pathway_ok_button").innerHTML = "Update";
+                    selected_pathway_node = highlight_element.id;
+                        
+                    
+                    break;
+                
+                case "metabolite":
+                    var dom_table = document.getElementById("editor_select_metabolite_table");
+                    for (var i = 0; i < dom_table.rows.length; ++i){
+                        if (dom_table.rows[i].cells[3].children[0].id == highlight_element.foreign_id){
+                            dom_table.rows[i].cells[3].children[0].checked = true;
+                            break;
+                        }
+                    }
+                    document.getElementById("editor_select_metabolite").style.display = "inline";
+                    document.getElementById("waiting_background").style.display = "inline";
+                    document.getElementById("renderarea").style.filter = "blur(5px)";
+                    document.getElementById("toolbox").style.filter = "blur(5px)";
+                    document.getElementById("editor_select_metabolite_ok_button").setAttribute("onclick", "editor_update_metabolite_node(); close_editor_select_metabolite();");
+                    document.getElementById("editor_select_metabolite_ok_button").innerHTML = "Update";
+                    selected_metabolite_node = highlight_element.id;
+                    break;
+                
+                default:
+                    break;
+            }
+        }
     }
 }
 
@@ -276,16 +324,16 @@ function close_editor_select_metabolite(){
 
 function editor_create_pathway_node(){
     var obj = document.getElementById("editor_select_pathway_field");
-    var pathway_ref = obj.options[obj.selectedIndex].id;
+    var foreign_id = obj.options[obj.selectedIndex].id;
     
     
     var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
     var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
-    var request = "type=pathway&pathway=" + current_pathway + "&pathway_ref=" + pathway_ref + "&x=" + x + "&y=" + y;
+    var request = "type=pathway&pathway=" + current_pathway + "&pathway_ref=" + foreign_id + "&x=" + x + "&y=" + y;
     var result = create_node(request);
     if (result[0]){
-        tmp_element.name = pathways[pathway_dict[pathway_ref]][1];
-        tmp_element.pathway_ref = pathway_ref;
+        tmp_element.name = pathways[pathway_dict[foreign_id]][1];
+        tmp_element.foreign_id = foreign_id;
         tmp_element.scale(tmp_element.x, tmp_element.y, 1. / factor);
         tmp_element.setup_pathway_meta();
         tmp_element.scale(tmp_element.x, tmp_element.y, factor);
@@ -308,6 +356,7 @@ function editor_create_metabolite_node(){
     var result = create_node(request);
     if (result[0]){
         tmp_element.name = global_metabolite_data[selected_metabolite][1];
+        tmp_element.foreign_id = selected_metabolite;
         data[tmp_element.id] = tmp_element;
         assemble_elements();
         draw();
@@ -318,6 +367,37 @@ function editor_create_metabolite_node(){
     };
 }
 
+
+function editor_update_metabolite_node(){
+    var request = "action=set&table=nodes&id=" + selected_metabolite_node + "&column=foreign_id&value=" + selected_metabolite;
+    var result = update_entry(request);
+    if (result){
+        data[selected_metabolite_node].name = global_metabolite_data[selected_metabolite][1];
+        data[selected_metabolite_node].foreign_id = selected_metabolite;
+        draw();
+    };
+}
+
+
+
+
+
+function editor_update_pathway_node(){
+    var obj = document.getElementById("editor_select_pathway_field");
+    var foreign_id = obj.options[obj.selectedIndex].id;
+    var request = "action=set&table=nodes&id=" + selected_pathway_node + "&column=foreign_id&value=" + foreign_id;
+    
+    var result = update_entry(request);
+    if (result){
+        var pw_node = data[selected_pathway_node];
+        pw_node.name = pathways[pathway_dict[foreign_id]][1];
+        pw_node.foreign_id = foreign_id;
+        pw_node.scale(pw_node.x, pw_node.y, 1. / factor);
+        pw_node.setup_pathway_meta();
+        pw_node.scale(pw_node.x, pw_node.y, factor);
+        draw();
+    };
+}
 
 
 function delete_entity(request){
@@ -333,6 +413,27 @@ function delete_entity(request){
     }
     xmlhttp.open("GET", request, false);
     xmlhttp.send();
+}
+
+
+function update_entry(request){
+    var xmlhttp = new XMLHttpRequest();
+    request = "/qsdb/admin/cgi-bin/manage-entries.py?" + request;
+    var successful_creation = false;
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            var response = xmlhttp.responseText;
+            if (response < 0){
+                alert("An error has occured, the entity could not be updated in the database. Please contact the administrator.");
+            }
+            else {
+                successful_creation = true;
+            }
+        }
+    }
+    xmlhttp.open("GET", request, false);
+    xmlhttp.send();
+    return successful_creation;
 }
 
 
@@ -515,6 +616,7 @@ function mouse_move_listener(e){
         }
         if (toolbox_button_selected == toolbox_states.MOVE_ENTITY && highlight_element && highlight_element.constructor.name == "node") c.style.cursor = "all-scroll";
         else if ((toolbox_button_selected == toolbox_states.ROTATE_PATHWAY || toolbox_button_selected == toolbox_states.ROTATE_PROTEIN || toolbox_button_selected == toolbox_states.ROTATE_METABOLITE) && highlight_element && highlight_element.constructor.name == "edge") c.style.cursor = "pointer";
+        else if (toolbox_button_selected == toolbox_states.DELETE_ENTRY && highlight_element) c.style.cursor = "no-drop";
         else c.style.cursor = "default";
         
     }
@@ -621,7 +723,6 @@ function add_edge(start_id, end_id){
     var xmlhttp = new XMLHttpRequest();
     var request = "/qsdb/admin/cgi-bin/add_edge.py?start_id=" + start_id + "&end_id=" + end_id;
     var successful_creation = [-1, -1];
-    console.log(request);
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             response = JSON.parse(xmlhttp.responseText);

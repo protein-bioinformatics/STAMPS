@@ -1509,7 +1509,7 @@ function node(data, ctx){
     this.exact_mass = data['e'];
     this.img = 0;
     this.highlight = false;
-    this.pathway_ref = data['r'];
+    this.foreign_id = data['r'];
     this.pathway_enabled = false;
     this.proteins = [];
     this.lines = -1;
@@ -1536,7 +1536,7 @@ function node(data, ctx){
         }
         this.width *= 12;
         this.tipp = false;
-        this.pathway_enabled = this.type == 'pathway' && this.pathway_ref != 0 && (this.pathway_ref in pathway_dict);
+        this.pathway_enabled = this.type == 'pathway' && this.foreign_id != 0 && (this.foreign_id in pathway_dict);
     }
     
     switch (this.type){
@@ -1944,7 +1944,7 @@ function node(data, ctx){
         }
         else if (this.type == 'pathway'){
             if (this.pathway_enabled){
-                change_pathway(pathway_dict[this.pathway_ref]);
+                change_pathway(pathway_dict[this.foreign_id]);
             }
         }
     }

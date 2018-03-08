@@ -23,29 +23,59 @@ with open("../qsdb.conf", mode="rt") as fl:
         if len(token) < 2: continue
         conf[token[0].strip(" ")] = token[1].strip(" ")
 
-form = cgi.FieldStorage()
-action = form.getvalue('action')
-action_type = form.getvalue('type')
+try:
+    form = cgi.FieldStorage()
+    action = form.getvalue('action')
+except:
+    sys.stdout.buffer.write( zlib.compress( bytes("-1", "utf-8") ) )
+    exit()
+    
+    
+
+conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
+my_cur = conn.cursor()
+    
 
 if action not in ["get", "set"]:
-    sys.stdout.buffer.write( zlib.compress( bytes("-1", "utf-8") ) )
+    sys.stdout.buffer.write( zlib.compress( bytes("-2", "utf-8") ) )
     exit()
 
 if action == "set":
-    set_id = form.getvalue('id')
-    set_value = form.getvalue('value')
+    try:
+        set_table = form.getvalue('table')
+        set_id = form.getvalue('id')
+        set_col = form.getvalue('column')
+        set_value = form.getvalue('value')
+    except:
+        sys.stdout.buffer.write( zlib.compress( bytes("-3", "utf-8") ) )
+        exit()
+    
+    set_table = set_table.replace("\"", "").replace("'", "")
+    set_col = set_col.replace("\"", "").replace("'", "")
     
     ## TODO: write set
-
+    try:
+        sql_query = "UPDATE " + set_table + " SET " + set_col + " = %s WHERE id = %s;"
+        my_cur.execute(sql_query, (set_value, set_id))
+        conn.commit()
+    except:
+        sys.stdout.buffer.write( zlib.compress( bytes("-4", "utf-8") ) )
+        exit()
+    
+    sys.stdout.buffer.write( zlib.compress( bytes("0", "utf-8") ) )
 
 
 elif action == "get":
-    if action_type not in ["pathways", "proteins", "metabolites"]:
-        sys.stdout.buffer.write( zlib.compress( bytes("-2", "utf-8") ) )
+    try:
+        action_type = form.getvalue('type')
+    except:
+        sys.stdout.buffer.write( zlib.compress( bytes("-4", "utf-8") ) )
         exit()
     
-    conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
-    my_cur = conn.cursor()
+    if action_type not in ["pathways", "proteins", "metabolites"]:
+        sys.stdout.buffer.write( zlib.compress( bytes("-5", "utf-8") ) )
+        exit()
+    
 
     # add metabolite data
     my_cur.execute("SELECT * from %s;" % action_type)
