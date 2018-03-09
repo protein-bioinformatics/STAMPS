@@ -100,7 +100,7 @@ main() {
     /* send SQL query */
     string sql_query = "SELECT r.*, rg.id rg_id, rg.reaction_id, rg.node_id rg_node_id, rg.type, rg.anchor FROM reactions r INNER JOIN nodes n ON r.node_id = n.id LEFT JOIN reagents rg on r.id = rg.reaction_id WHERE n.pathway_id = ";
     sql_query += pathway_id;
-    sql_query += ";";
+    sql_query += " ORDER BY r.id;";
     if (mysql_query(conn, sql_query.c_str())) {
         cout << "error: " << mysql_error(conn) << endl;
         return 1;

@@ -295,6 +295,7 @@ main(int argc, char** argv) {
     bool compress = true;
     bool caching = true;
     bool via_accessions = false;
+    bool via_ids = false;
     bool via_loci = false;
     bool via_functions = false;
     bool via_pathway = false;
@@ -308,6 +309,7 @@ main(int argc, char** argv) {
     }
     
     string accessions = "";
+    string ids = "";
     string loci_ids = "";
     string function_ids = "";
     string pathway_id = "";
@@ -343,6 +345,10 @@ main(int argc, char** argv) {
                 accessions = get_values.at(1);
                 via_accessions = true;
             }
+            else if (get_values.at(0) == "ids"){
+                ids = get_values.at(1);
+                via_ids = true;
+            }
             else if (get_values.at(0) == "loci"){
                 loci_ids = get_values.at(1);
                 via_loci = true;
@@ -367,7 +373,7 @@ main(int argc, char** argv) {
         }
     }
     
-    if (via_accessions + via_loci + via_functions + statistics + statistics_pathways + via_pathway != 1){
+    if (via_accessions + via_ids + via_loci + via_functions + statistics + statistics_pathways + via_pathway != 1){
         cout << -5;
         return -5;
     }
@@ -462,6 +468,19 @@ main(int argc, char** argv) {
         sql_query_proteins = "select distinct * from proteins where unreviewed = false and accession in ('";
         sql_query_proteins += accessions;
         sql_query_proteins += "') and species = '" + species + "';";
+    }
+    
+    else if (via_ids){
+    
+        if (ids == "" || ids.find("'") != string::npos){
+            cout << -1 << endl;
+            return -1;
+        }    
+        replaceAll(ids, string(":"), string("','"));
+        
+        sql_query_proteins = "select distinct * from proteins where unreviewed = false and id in ('";
+        sql_query_proteins += ids;
+        sql_query_proteins += "');";
     }
     else if (via_loci) {
         if (loci_ids == "" || loci_ids.find("'") != string::npos){

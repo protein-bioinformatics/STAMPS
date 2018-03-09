@@ -148,9 +148,7 @@ preview_element = 0;
 select_field_element = 0;
 background_hiding = 0;
 
-pathway_dict = {};
-pathways = [[15, "Alanine, aspartate and glutamate metabolism"]];
-//pathways = [[28, "Alanine, aspartate and glutamate metabolism"]];
+pathways = {15: "Alanine, aspartate and glutamate metabolism"};
 
 
 var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
@@ -466,12 +464,19 @@ function draw(sync){
 
 function set_pathway_menu(){
     var pathway_menu = "<table>";
-    for (var i = 0; i < pathways.length; ++i){
-        var selected = (pathways[i][0] == current_pathway) ? "selected_pathway_cell" : "select_pathway_cell";
+    var sorted_pathways = [];
+    for (var pathway_id in pathways) sorted_pathways.push([pathway_id, pathways[pathway_id]]);
+    sorted_pathways.sort(function(a, b) {
+        return a[1] > b[1];
+    });
+    
+    
+    for (var i = 0; i < sorted_pathways.length; ++i){
+        var selected = (sorted_pathways[i][0] == current_pathway) ? "selected_pathway_cell" : "select_pathway_cell";
         pathway_menu += "<tr><td class=\"" + selected + "\" onclick=\"change_pathway(";
-        pathway_menu += i;
+        pathway_menu += sorted_pathways[i][0];
         pathway_menu += ");\">";
-        var pathway_name = pathways[i][1];
+        var pathway_name = sorted_pathways[i][1];
         pathway_name = replaceAll(pathway_name, "-\\n", "");
         pathway_name = replaceAll(pathway_name, "\n", "");
         pathway_menu += pathway_name; 
@@ -876,7 +881,7 @@ function pathway_title(){
         var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
         ctx.fillStyle = "#f3f8ff";
         ctx.strokeStyle = "#aaaaaa";
-        var curr_title_text = "Current pathway: " + pathways[current_pathway_list_index][1];
+        var curr_title_text = "Current pathway: " + pathways[current_pathway];
         ctx.font = "bold 20px Arial";
         ctx.textAlign = "left";
         //ctx.textBaseline = 'top';
@@ -1536,16 +1541,36 @@ function node(data, ctx){
         }
         this.width *= 12;
         this.tipp = false;
-        this.pathway_enabled = this.type == 'pathway' && this.foreign_id != 0 && (this.foreign_id in pathway_dict);
+        this.pathway_enabled = this.type == 'pathway' && this.foreign_id != 0 && (this.foreign_id in pathways);
+    }
+    
+    this.setup_protein_meta = function(ctx){
+        var name = "";
+        this.height = 20 + 20 * Math.min(this.proteins.length, max_protein_line_number);
+        this.orig_height = 20 + 20 * this.proteins.length;
+        this.lines = this.proteins.length;
+        this.slide = (this.proteins.length > max_protein_line_number);
+        this.fill_style = protein_disabled_fill_color;
+        this.width = 0;
+        
+        for (var i = 0; i < this.proteins.length; ++i){
+            if (name.length) name += ", ";
+            var prot_name = protein_dictionary[this.proteins[i]].name;
+            ctx.font = (font_size / factor).toString() + "px Arial";
+            var text_width = ctx.measureText(prot_name).width + 10;
+            this.width = Math.max(this.width, text_width);
+            this.fill_style = protein_fill_color;
+            name += prot_name;
+        }
+        
+        this.width += 50 + this.slide * 20;
+        this.name = name;
+        //this.tipp = (name.length || true);
+        this.tipp = false;
     }
     
     switch (this.type){
         case "protein":
-            var name = "";
-            this.height = 20 + 20 * Math.min(data['p'].length, max_protein_line_number);
-            this.orig_height = 20 + 20 * data['p'].length;
-            this.lines = data['p'].length;
-            this.slide = (data['p'].length > max_protein_line_number);
             for (var j = 0; j < data['p'].length; ++j){
                 var prot = 0;
                 var prot_id = data['p'][j]['i'];
@@ -1560,17 +1585,9 @@ function node(data, ctx){
                 
                 this.proteins.push(prot_id);
                 this.containing_spectra += prot.containing_spectra;
-                if (name.length) name += ", ";
-                var prot_name = prot.name;
-                var text_width = ctx.measureText(prot_name).width + 10;
-                this.width = Math.max(this.width, text_width);
-                name += prot.name;
                 this.fill_style = protein_fill_color;
             }
-            this.width += 50 + this.slide * 20;
-            this.name = name;
-            //this.tipp = (name.length || true);
-            this.tipp = false;
+            this.setup_protein_meta(ctx);
             break;
             
         case "pathway":
@@ -1944,7 +1961,7 @@ function node(data, ctx){
         }
         else if (this.type == 'pathway'){
             if (this.pathway_enabled){
-                change_pathway(pathway_dict[this.foreign_id]);
+                change_pathway(this.foreign_id);
             }
         }
     }
@@ -2825,27 +2842,29 @@ function compute_edges(){
         nodes_anchors[node_id] = {left: [], right: [], top: [], bottom: []};
     }
     
+    
     for (var reaction_id in edge_data){
         var node_id = edge_data[reaction_id]['n'];
         var reversible = parseInt(edge_data[reaction_id]['v']);
-        for (var reagent_id in edge_data[reaction_id]['r']){
+        var reagents = edge_data[reaction_id]['r'];
+        
+        for (var reagent_id in reagents){
+            var metabolite_id = reagents[reagent_id]['n'];
+            var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y, reagents[reagent_id]['a']);
             
-            var metabolite_id = edge_data[reaction_id]['r'][reagent_id]['n'];
-            var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y, edge_data[reaction_id]['r'][reagent_id]['a']);
             
-            
-            if (edge_data[reaction_id]['r'][reagent_id]['t'] == 'educt'){
+            if (reagents[reagent_id]['t'] == 'educt'){
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, edge_data[reaction_id]['in']);
-                connections.push([node_id, edge_data[reaction_id]['in'], metabolite_id, edge_data[reaction_id]['r'][reagent_id]['a'], reversible, reaction_id, reagent_id]);
+                connections.push([node_id, edge_data[reaction_id]['in'], metabolite_id, reagents[reagent_id]['a'], reversible, reaction_id, reagent_id]);
                 nodes_anchors[node_id][edge_data[reaction_id]['in']].push([metabolite_id, connections.length - 1, angle_node]);
             }
             else{
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, edge_data[reaction_id]['out']);
-                connections.push([node_id, edge_data[reaction_id]['out'], metabolite_id, edge_data[reaction_id]['r'][reagent_id]['a'], true, reaction_id, reagent_id]);
+                connections.push([node_id, edge_data[reaction_id]['out'], metabolite_id, reagents[reagent_id]['a'], true, reaction_id, reagent_id]);
                 nodes_anchors[node_id][edge_data[reaction_id]['out']].push([metabolite_id, connections.length - 1, angle_node]);
                 
             }
-            nodes_anchors[metabolite_id][edge_data[reaction_id]['r'][reagent_id]['a']].push([node_id, connections.length - 1, angle_metabolite]);
+            nodes_anchors[metabolite_id][reagents[reagent_id]['a']].push([node_id, connections.length - 1, angle_metabolite]);
         }
     }
     
@@ -3111,13 +3130,20 @@ function mouse_dblclick_listener(e){
 
 
 function change_pathway(p){
+    if (typeof p === "undefined"){
+        var sorted_pathways = [];
+        for (var pathway_id in pathways) sorted_pathways.push([pathway_id, pathways[pathway_id]]);
+        sorted_pathways.sort(function(a, b) {
+            return a[1] > b[1];
+        });
+        p = sorted_pathways[0][0];
+    }
     hide_select_pathway();
     collapse_statistics();
-    current_pathway = pathways[p][0];
-    current_pathway_list_index = p;
+    current_pathway = p;
     set_pathway_menu();
     reset_view();
-    document.title = "QSDB Home - " + pathways[p][1];
+    document.title = "QSDB Home - " + pathways[p];
     load_data();
 }
 
@@ -3734,7 +3760,7 @@ function start_search(){
                 
                 var t3 = "<font color=\"" + disabled_text_color + "\">" + results[i][0].substring(results[i][1] + len_p, results[i][0].length);
                 
-                var foreign_pw = (results[i][3] != current_pathway && (results[i][3] in pathway_dict)) ? " (" + pathways[pathway_dict[results[i][3]]][1] + ")" : "";
+                var foreign_pw = (results[i][3] != current_pathway && (results[i][3] in pathways)) ? " (" + pathways[results[i][3]] + ")" : "";
                 inner_html += "<tr><td class=\"single_search_result\" onclick=\"highlight_node(" + results[i][2] + ", " + results[i][3] + ");\">" + t1 + t2 + t3 + foreign_pw + "<font></td></tr>";
             }
             inner_html += "</table>";
@@ -3754,7 +3780,7 @@ function start_search(){
 function highlight_node(node_id, pathway_id){
     hide_search();
     if (pathway_id != current_pathway){
-        change_pathway(pathway_dict[pathway_id]);
+        change_pathway(pathway_id);
         var waiting_for_pathway = setInterval(function(){
             if (pathway_is_loaded){
                 clearInterval (waiting_for_pathway);
@@ -4021,8 +4047,7 @@ function round10(value, decimals) {
 
 function compute_statistics(){
     if (typeof qsdb_domain === 'undefined' || qsdb_domain === null) return;
-    document.getElementById("stat_pathway").innerHTML = pathways[current_pathway_list_index][1];
-    var validation = pathways[current_pathway_list_index][2];
+    document.getElementById("stat_pathway").innerHTML = pathways[current_pathway];
     
     
     var num_proteins = 0;
@@ -4398,13 +4423,14 @@ function replaceAll(str, find, replace) {
 }
 
 
-function accession_search_parse_accessions(accessions){
+function accession_search_parse_accessions(accessions, synchronous){
     var show_check = false;
     if (typeof accessions === "undefined"){
         accessions = document.getElementById("accessions").value;
         show_check = true;
         protein_dictionary = [];
     }
+    if (typeof synchronous === "undefined") synchronous = true;
     basket = {};
     spectra_exclude = [];
     accessions = replaceAll(accessions, "\n", ":");
@@ -4416,10 +4442,11 @@ function accession_search_parse_accessions(accessions){
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             request_load_proteins(JSON.parse(xmlhttp.responseText), show_check);
+            console.log("huhu");
         }
     }
     
-    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?accessions=" + accessions + "&species=mouse", true);
+    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?accessions=" + accessions + "&species=mouse", synchronous);
     xmlhttp.send();
 }
 

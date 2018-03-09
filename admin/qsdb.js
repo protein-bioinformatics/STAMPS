@@ -26,6 +26,7 @@ global_metabolite_data = -1;
 selected_metabolite = -1;
 selected_metabolite_node = -1;
 selected_pathway_node = -1;
+selected_protein_node = -1;
 
 
 function init(){
@@ -42,14 +43,9 @@ function init(){
     var xmlhttp_pw = new XMLHttpRequest();
     xmlhttp_pw.onreadystatechange = function() {
         if (xmlhttp_pw.readyState == 4 && xmlhttp_pw.status == 200) {
-            pathways = JSON.parse(xmlhttp_pw.responseText);
-            for (var i = 0; i < pathways.length; ++i){
-                pathway_dict[pathways[i][0]] = i;
-                var option = document.createElement("option");
-                if (i == 0) option.selected = true;
-                option.id = pathways[i][0];
-                option.text = pathways[i][1];
-                document.getElementById("editor_select_pathway_field").add(option);
+            var pathway_dat = JSON.parse(xmlhttp_pw.responseText);
+            for (var i = 0; i < pathway_dat.length; ++i){
+                pathways[pathway_dat[i][0]] = pathway_dat[i][1];
             }
             set_pathway_menu();
         }
@@ -76,7 +72,7 @@ function init(){
     document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
     
     
-    change_pathway(0);
+    change_pathway();
     
     
     var c = document.getElementById("renderarea");
@@ -122,10 +118,35 @@ function init(){
     xmlhttp_pathways.onreadystatechange = function() {
         if (xmlhttp_pathways.readyState == 4 && xmlhttp_pathways.status == 200) {
             global_pathway_data = JSON.parse(xmlhttp_pathways.responseText);
+            
+            var sorted_pathways = [];
+            for (var pathway_id in global_pathway_data) sorted_pathways.push(global_pathway_data[pathway_id]);
+            sorted_pathways.sort(function(a, b) {
+                return a[1] > b[1];
+            });
+            
+            for (var i = 0; i < sorted_pathways.length; ++i){
+                var option = document.createElement("option");
+                option.id = sorted_pathways[i][0];
+                option.text = replaceAll(replaceAll(sorted_pathways[i][1], "\\\\n", ""), "-\\\\n", "");
+                document.getElementById("editor_select_pathway_field").add(option);
+            }
         }
     }
     xmlhttp_pathways.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=pathways", true);
     xmlhttp_pathways.send();
+    
+    
+    // get proteins
+    var xmlhttp_proteins = new XMLHttpRequest();
+    xmlhttp_proteins.onreadystatechange = function() {
+        if (xmlhttp_proteins.readyState == 4 && xmlhttp_proteins.status == 200) {
+            global_protein_data = JSON.parse(xmlhttp_proteins.responseText);
+            prepare_protein_forms();
+        }
+    }
+    xmlhttp_proteins.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=proteins", true);
+    xmlhttp_proteins.send();
 }
 
 
@@ -168,6 +189,8 @@ function mouse_click_listener(e){
         if (result[0]){
             var ctx = document.getElementById("renderarea").getContext("2d");
             data[tmp_element.id] = tmp_element;
+            assemble_elements();
+            draw();
             switch (toolbox_button_selected){
                     
                 case toolbox_states.CREATE_PROTEIN:
@@ -258,13 +281,15 @@ function mouse_click_listener(e){
             draw();
         }
     }
-    else if (highlight_element){
+    else if (toolbox_button_selected == toolbox_states.ROTATE_PATHWAY || toolbox_button_selected == toolbox_states.ROTATE_METABOLITE || toolbox_button_selected == toolbox_states.ROTATE_PROTEIN){
+        if (highlight_element && highlight_element instanceof edge) highlight_element.edit();
+    }
+    else if (highlight_element && toolbox_button_selected == -1){
         if (highlight_element instanceof node){
             switch (highlight_element.type){
                 case "pathway":
                     var obj = document.getElementById("editor_select_pathway_field");
                     for (var i = 0; i < obj.options.length; ++i){
-                        //console.log();
                         if (obj.options[i].id == highlight_element.foreign_id){
                             obj.selectedIndex = i;
                             break;
@@ -277,8 +302,21 @@ function mouse_click_listener(e){
                     document.getElementById("editor_select_pathway_ok_button").setAttribute("onclick", "editor_update_pathway_node(); close_editor_select_pathway();");
                     document.getElementById("editor_select_pathway_ok_button").innerHTML = "Update";
                     selected_pathway_node = highlight_element.id;
-                        
+                    break;
                     
+                case "protein":
+                    var protein_set = new Set();
+                    for (var i = 0; i < highlight_element.proteins.length; ++i) protein_set.add(highlight_element.proteins[i].toString());
+                    var dom_table = document.getElementById("editor_select_protein_table");
+                    for (var i = 0; i < dom_table.rows.length; ++i){
+                        dom_table.rows[i].cells[3].children[0].checked = protein_set.has(dom_table.rows[i].cells[3].children[0].id);
+                    }
+                    
+                    document.getElementById("editor_select_protein").style.display = "inline";
+                    document.getElementById("waiting_background").style.display = "inline";
+                    document.getElementById("renderarea").style.filter = "blur(5px)";
+                    document.getElementById("toolbox").style.filter = "blur(5px)";
+                    selected_protein_node = highlight_element.id;
                     break;
                 
                 case "metabolite":
@@ -314,6 +352,14 @@ function close_editor_select_pathway(){
 }
 
 
+function close_editor_select_protein(){
+    document.getElementById("editor_select_protein").style.display = "none";
+    document.getElementById("waiting_background").style.display = "none";
+    document.getElementById("renderarea").style.filter = "";
+    document.getElementById("toolbox").style.filter = "";
+}
+
+
 function close_editor_select_metabolite(){
     document.getElementById("editor_select_metabolite").style.display = "none";
     document.getElementById("waiting_background").style.display = "none";
@@ -332,11 +378,13 @@ function editor_create_pathway_node(){
     var request = "type=pathway&pathway=" + current_pathway + "&pathway_ref=" + foreign_id + "&x=" + x + "&y=" + y;
     var result = create_node(request);
     if (result[0]){
-        tmp_element.name = pathways[pathway_dict[foreign_id]][1];
+        tmp_element.name = pathways[foreign_id];
         tmp_element.foreign_id = foreign_id;
         tmp_element.scale(tmp_element.x, tmp_element.y, 1. / factor);
         tmp_element.setup_pathway_meta();
         tmp_element.scale(tmp_element.x, tmp_element.y, factor);
+        data[tmp_element.id] = tmp_element;
+        assemble_elements();
         draw();
         var ctx = document.getElementById("renderarea").getContext("2d");
         tmp_element = new node({"x": "0", "y": "0", "t": "pathway", "i": -1, "n": "undefined"}, ctx);
@@ -379,7 +427,59 @@ function editor_update_metabolite_node(){
 }
 
 
-
+function editor_update_protein_node(){
+    var obj = document.getElementById("editor_select_protein_table");
+    var dom_table = document.getElementById("editor_select_protein_table");
+    var prot = data[selected_protein_node];
+    prot.proteins = [];
+    
+    for (var i = 0; i < dom_table.rows.length; ++i){
+        if (dom_table.rows[i].cells[3].children[0].checked){
+            prot.proteins.push(parseInt(dom_table.rows[i].cells[3].children[0].id));
+        }
+    }
+    var ctx = document.getElementById("renderarea").getContext("2d");
+    
+    var continuing = true;
+    
+    // get proteins
+    var request = "/qsdb/admin/cgi-bin/manage-entries.py?action=set&table=nodeproteincorrelations&column=none&id=" + selected_protein_node + "&value=" + prot.proteins.join(":");
+    var xmlhttp_set = new XMLHttpRequest();
+    xmlhttp_set.onreadystatechange = function() {
+        if (xmlhttp_set.readyState == 4 && xmlhttp_set.status == 200) {
+            response = xmlhttp_set.responseText;
+            if (response < 0){
+                continuing = false;
+                alert("An error has occured, the entity could not be deleted from the database. Please contact the administrator.");
+            }
+        }
+    }
+    
+    xmlhttp_set.open("GET", request, false);
+    xmlhttp_set.send();
+    
+    if (continuing){
+    
+        // get proteins
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                request_load_proteins(JSON.parse(xmlhttp.responseText), false);
+            }
+        }
+        
+        xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?ids=" + prot.proteins.join(":") + "&species=mouse", false);
+        xmlhttp.send();
+    
+    }
+    else {
+        prot.proteins = [];
+    }
+    
+    prot.setup_protein_meta(ctx);
+    prot.scale(prot.x, prot.y, factor);
+    draw();
+}
 
 
 function editor_update_pathway_node(){
@@ -390,11 +490,13 @@ function editor_update_pathway_node(){
     var result = update_entry(request);
     if (result){
         var pw_node = data[selected_pathway_node];
-        pw_node.name = pathways[pathway_dict[foreign_id]][1];
+        pw_node.name = replaceAll(global_pathway_data[foreign_id][1], "\\\\n", "\n");
         pw_node.foreign_id = foreign_id;
         pw_node.scale(pw_node.x, pw_node.y, 1. / factor);
         pw_node.setup_pathway_meta();
         pw_node.scale(pw_node.x, pw_node.y, factor);
+        compute_edges();
+        assemble_elements();
         draw();
     };
 }
@@ -1113,6 +1215,62 @@ function prepare_metabolite_forms(){
     table_titles.rows[0].cells[2].width = dom_table.rows[0].cells[2].offsetWidth;
     table_titles.rows[1].cells[2].children[0].size = dom_table.rows[0].cells[2].offsetWidth / 9;
     document.getElementById("editor_select_metabolite").style.display = "none";
+}
+
+
+
+
+function prepare_protein_forms(){
+    var global_protein_data_sorted = [];
+    for (var protein_id in global_protein_data) global_protein_data_sorted.push(global_protein_data[protein_id]);
+    
+    global_protein_data_sorted = global_protein_data_sorted.sort(function(a, b) {
+        return a[1] > b[1];
+    });
+    
+    var dom_table = document.getElementById("editor_select_protein_table");
+    
+    for (var i = 0; i < global_protein_data_sorted.length; ++i){
+        var bg_color = (i & 1) ? "#DDDDDD" : "white";
+        var row = global_protein_data_sorted[i];
+        
+        var dom_tr = document.createElement("tr");
+        dom_table.appendChild(dom_tr);
+        var dom_td1 = document.createElement("td");
+        dom_tr.appendChild(dom_td1);
+        dom_td1.innerHTML = row[1];
+        dom_td1.setAttribute("bgcolor", bg_color);
+        
+        var dom_td2 = document.createElement("td");
+        dom_tr.appendChild(dom_td2);
+        dom_td2.innerHTML = row[6];
+        dom_td2.setAttribute("bgcolor", bg_color);
+        dom_td2.setAttribute("style", "min-width: 100px;");
+        
+        var dom_td3 = document.createElement("td");
+        dom_tr.appendChild(dom_td3);
+        dom_td3.innerHTML = row[2];
+        dom_td3.setAttribute("bgcolor", bg_color);
+        
+        var dom_td4 = document.createElement("td");
+        dom_tr.appendChild(dom_td4);
+        var dom_input = document.createElement("input");
+        dom_td4.appendChild(dom_input);
+        dom_td4.setAttribute("bgcolor", bg_color);
+        dom_input.setAttribute("id", row[0]);
+        dom_input.setAttribute("type", "checkbox");
+    }
+    document.getElementById("editor_select_protein").style.display = "inline";
+    var table_titles = document.getElementById("editor_select_protein_table_header");
+    table_titles.rows[0].cells[0].width = dom_table.rows[0].cells[0].offsetWidth;
+    table_titles.rows[1].cells[0].children[0].size = dom_table.rows[0].cells[0].offsetWidth / 9;
+    
+    table_titles.rows[0].cells[1].width = dom_table.rows[0].cells[1].offsetWidth;
+    table_titles.rows[1].cells[1].children[0].size = 8;
+    
+    table_titles.rows[0].cells[2].width = dom_table.rows[0].cells[2].offsetWidth;
+    table_titles.rows[1].cells[2].children[0].size = dom_table.rows[0].cells[2].offsetWidth / 9;
+    document.getElementById("editor_select_protein").style.display = "none";
 }
 
 

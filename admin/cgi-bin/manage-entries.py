@@ -46,21 +46,42 @@ if action == "set":
         set_id = form.getvalue('id')
         set_col = form.getvalue('column')
         set_value = form.getvalue('value')
+        
+        a = int(set_id)
     except:
         sys.stdout.buffer.write( zlib.compress( bytes("-3", "utf-8") ) )
         exit()
     
     set_table = set_table.replace("\"", "").replace("'", "")
     set_col = set_col.replace("\"", "").replace("'", "")
+    set_value = set_value.replace("\"", "").replace("'", "")
     
-    ## TODO: write set
-    try:
-        sql_query = "UPDATE " + set_table + " SET " + set_col + " = %s WHERE id = %s;"
-        my_cur.execute(sql_query, (set_value, set_id))
-        conn.commit()
-    except:
-        sys.stdout.buffer.write( zlib.compress( bytes("-4", "utf-8") ) )
-        exit()
+    
+    
+    if set_table == "nodeproteincorrelations":
+        try:
+            sql_query = "DELETE FROM " + set_table + " WHERE node_id = %s;"
+            my_cur.execute(sql_query, (set_id))
+            conn.commit()
+            
+            for protein_id in set_value.split(":"):
+                sql_query = "INSERT INTO " + set_table + "(node_id, protein_id) VALUES(%s, %s);"
+                my_cur.execute(sql_query, (set_id, int(protein_id)))
+                conn.commit()
+            
+        except:
+            sys.stdout.buffer.write( zlib.compress( bytes("-6", "utf-8") ) )
+            exit()
+        
+        
+    else:
+        try:
+            sql_query = "UPDATE " + set_table + " SET " + set_col + " = %s WHERE id = %s;"
+            my_cur.execute(sql_query, (set_value, set_id))
+            conn.commit()
+        except:
+            sys.stdout.buffer.write( zlib.compress( bytes("-4", "utf-8") ) )
+            exit()
     
     sys.stdout.buffer.write( zlib.compress( bytes("0", "utf-8") ) )
 

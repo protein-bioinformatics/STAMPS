@@ -13,9 +13,9 @@ function init(){
     var xmlhttp_pw = new XMLHttpRequest();
     xmlhttp_pw.onreadystatechange = function() {
         if (xmlhttp_pw.readyState == 4 && xmlhttp_pw.status == 200) {
-            pathways = JSON.parse(xmlhttp_pw.responseText);
-            for (var i = 0; i < pathways.length; ++i){
-                pathway_dict[pathways[i][0]] = i;
+            var pathway_dat = JSON.parse(xmlhttp_pw.responseText);
+            for (var i = 0; i < pathway_dat.length; ++i){
+                pathways[pathway_dat[i][0]] = pathway_dat[i][1];
             }
             set_pathway_menu();
         }
@@ -90,7 +90,7 @@ function init(){
     }
     if (!read_cookie_information) document.getElementById('cookie_information').style.display = "inline";
     
-    change_pathway(0);
+    change_pathway();
     resize_pathway_view();
 }
 
