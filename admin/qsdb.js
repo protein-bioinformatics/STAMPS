@@ -32,9 +32,12 @@ protein_sort_column = 1;
 protein_max_pages = -1;
 protein_current_page = 0;
 
+metabolite_sort_columns = {'-3': "formula:DESC", '-2': "c_number:DESC", '-1': "name:DESC", 1: "name:ASC", 2: "c_number:ASC", 3: "formula:ASC"};
 metabolite_sort_column = 1;
 metabolite_max_pages = -1;
 metabolite_current_page = 0;
+
+max_per_page = 30;
 
 
 
@@ -114,7 +117,8 @@ function init(){
     var xmlhttp_metabolites = new XMLHttpRequest();
     xmlhttp_metabolites.onreadystatechange = function() {
         if (xmlhttp_metabolites.readyState == 4 && xmlhttp_metabolites.status == 200) {
-            metabolite_max_pages = parseInt(xmlhttp_metabolites.responseText);
+            metabolite_max_pages = Math.floor(parseInt(xmlhttp_metabolites.responseText) / max_per_page) + 1;
+            console.log(xmlhttp_metabolites.responseText + " " + metabolite_max_pages);
         }
     }
     xmlhttp_metabolites.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=metabolites_num", true);
@@ -235,8 +239,7 @@ function mouse_click_listener(e){
         document.getElementById("toolbox").style.filter = "blur(5px)";
         document.getElementById("editor_select_metabolite_ok_button").setAttribute("onclick", "editor_create_metabolite_node(); close_editor_select_metabolite();");
         document.getElementById("editor_select_metabolite_ok_button").innerHTML = "Create";
-        
-        
+        editor_fill_metabolite_table();
     }
     else if (toolbox_button_selected == toolbox_states.DELETE_ENTRY){
         if (highlight_element){
@@ -1280,6 +1283,145 @@ function prepare_protein_forms(){
     table_titles.rows[0].cells[2].width = dom_table.rows[0].cells[2].offsetWidth;
     table_titles.rows[1].cells[2].children[0].size = dom_table.rows[0].cells[2].offsetWidth / 9;
     document.getElementById("editor_select_protein").style.display = "none";
+}
+
+
+function editor_fill_metabolite_table(){
+    var request = "action=get&type=metabolites";
+    request += "&column=" + metabolite_sort_columns[metabolite_sort_column];
+    request += "&limit=" + (metabolite_current_page * max_per_page + 1).toString() + ":" + max_per_page.toString();
+    request = "/qsdb/admin/cgi-bin/manage-entries.py?" + request;
+    
+    
+    var sign_up = String.fromCharCode(9652);
+    var sign_down = String.fromCharCode(9662);
+    
+    var dom_table_header = document.getElementById("editor_select_metabolite_table_header");
+    dom_table_header.innerHTML = ""
+    var dom_th_name = document.createElement("th");
+    dom_table_header.appendChild(dom_th_name);
+    dom_th_name.setAttribute("onclick", "metabolite_sort_column = " + ((metabolite_sort_column == 1) ? " -1;" : "1;") + "; editor_fill_metabolite_table();");
+    dom_th_name.setAttribute("style", "cursor: pointer;");
+    dom_th_name.innerHTML = "Name" + ((metabolite_sort_column == 1) ? " " + sign_up : ((metabolite_sort_column == -1) ? " " + sign_down : ""));
+    
+    
+    var dom_th_cnumber = document.createElement("th");
+    dom_table_header.appendChild(dom_th_cnumber);
+    dom_th_cnumber.setAttribute("onclick", "metabolite_sort_column = " + ((metabolite_sort_column == 2) ? " -2;" : "2;") + "; editor_fill_metabolite_table();");
+    dom_th_cnumber.setAttribute("style", "cursor: pointer;");
+    dom_th_cnumber.innerHTML = "C&nbsp;number" + ((metabolite_sort_column == 2) ? " " + sign_up : ((metabolite_sort_column == -2) ? " " + sign_down : ""));
+    
+    
+    var dom_th_formula = document.createElement("th");
+    dom_table_header.appendChild(dom_th_formula);
+    dom_th_formula.setAttribute("onclick", "metabolite_sort_column = " + ((metabolite_sort_column == 3) ? " -3;" : "3;") + "; editor_fill_metabolite_table();");
+    dom_th_formula.setAttribute("style", "cursor: pointer;");
+    dom_th_formula.innerHTML = "Chemical formula" + ((metabolite_sort_column == 3) ? " " + sign_up : ((metabolite_sort_column == -3) ? " " + sign_down : ""));
+    
+    
+    
+    var dom_nav_cell = document.getElementById("editor_metabolite_page_navigation");
+    dom_nav_cell.innerHTML = "";
+    if (metabolite_current_page > 0){
+        var dom_b = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b);
+        dom_b.setAttribute("onclick", "metabolite_current_page = 0; editor_fill_metabolite_table();");
+        dom_b.setAttribute("style", "cursor: pointer;");
+        dom_b.innerHTML = "« ";
+        
+        var dom_b2 = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b2);
+        dom_b2.setAttribute("onclick", "metabolite_current_page -= 1; editor_fill_metabolite_table();");
+        dom_b2.setAttribute("style", "cursor: pointer;");
+        dom_b2.innerHTML = "‹ ";
+    }
+    
+        
+    var dom_page = document.createElement("select");
+    dom_nav_cell.appendChild(dom_page);
+    dom_page.setAttribute("style", "display: inline;");
+    dom_page.setAttribute("onchange", "metabolite_current_page = this.selectedIndex; editor_fill_metabolite_table();");
+    for (var i = 0; i < metabolite_max_pages; ++i){
+        var dom_option = document.createElement("option");
+        dom_page.appendChild(dom_option);
+        dom_option.innerHTML = (i + 1).toString();
+    }
+    dom_page.selectedIndex = metabolite_current_page;
+    
+    if (metabolite_current_page + 1 < metabolite_max_pages){
+        
+        var dom_b2 = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b2);
+        dom_b2.setAttribute("onclick", "metabolite_current_page += 1; editor_fill_metabolite_table();");
+        dom_b2.setAttribute("style", "cursor: pointer;");
+        dom_b2.innerHTML = " ›";
+        
+        var dom_b = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b);
+        dom_b.setAttribute("onclick", "metabolite_current_page = metabolite_max_pages - 1; editor_fill_metabolite_table();");
+        dom_b.setAttribute("style", "cursor: pointer;");
+        dom_b.innerHTML = " »";
+    }
+    
+    
+    var xmlhttp_metabolites = new XMLHttpRequest();
+    xmlhttp_metabolites.onreadystatechange = function() {
+        if (xmlhttp_metabolites.readyState == 4 && xmlhttp_metabolites.status == 200) {
+            global_metabolite_data = JSON.parse(xmlhttp_metabolites.responseText);
+            var global_metabolite_data_sorted = [];
+            for (var metabolite_id in global_metabolite_data) global_metabolite_data_sorted.push(global_metabolite_data[metabolite_id]);
+            
+            global_metabolite_data_sorted = global_metabolite_data_sorted.sort(function(a, b) {
+                return a[1] > b[1];
+            });
+            
+            
+            var dom_table = document.getElementById("editor_select_metabolite_table");
+            dom_table.innerHTML = "";
+    
+            for (var i = 0; i < global_metabolite_data_sorted.length; ++i){
+                var bg_color = (i & 1) ? "#DDDDDD" : "white";
+                var row = global_metabolite_data_sorted[i];
+                
+                var dom_tr = document.createElement("tr");
+                dom_table.appendChild(dom_tr);
+                var dom_td1 = document.createElement("td");
+                dom_tr.appendChild(dom_td1);
+                dom_td1.innerHTML = row[1];
+                dom_td1.setAttribute("bgcolor", bg_color);
+                
+                var dom_td2 = document.createElement("td");
+                dom_tr.appendChild(dom_td2);
+                dom_td2.innerHTML = row[2];
+                dom_td2.setAttribute("bgcolor", bg_color);
+                dom_td2.setAttribute("style", "min-width: 100px;");
+                
+                var dom_td3 = document.createElement("td");
+                dom_tr.appendChild(dom_td3);
+                dom_td3.innerHTML = row[3];
+                dom_td3.setAttribute("bgcolor", bg_color);
+                
+                var dom_td4 = document.createElement("td");
+                dom_tr.appendChild(dom_td4);
+                var dom_input = document.createElement("input");
+                dom_td4.appendChild(dom_input);
+                dom_td4.setAttribute("bgcolor", bg_color);
+                dom_input.setAttribute("id", row[0]);
+                dom_input.setAttribute("type", "radio");
+                dom_input.setAttribute("name", "foo");
+                dom_input.setAttribute("onclick", "selected_metabolite = this.id;");
+                
+                if (i == 0){
+                    selected_metabolite = row[0];
+                    dom_input.setAttribute("checked", "true");
+                }
+            }
+            
+            
+        }
+    }
+    xmlhttp_metabolites.open("GET", request, true);
+    xmlhttp_metabolites.send();
 }
 
 
