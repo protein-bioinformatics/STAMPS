@@ -93,13 +93,18 @@ elif action == "get":
         sys.stdout.buffer.write( zlib.compress( bytes("-4", "utf-8") ) )
         exit()
     
-    if action_type not in ["pathways", "proteins", "metabolites"]:
+    if action_type in ["pathways", "proteins", "metabolites"]:
+        # add metabolite data
+        my_cur.execute("SELECT * from %s;" % action_type)
+        data = json.dumps({entry[0]: entry for entry in my_cur})
+        sys.stdout.buffer.write( zlib.compress( bytes(data, "utf-8") ) )
+        
+    elif action_type in ["proteins_num", "metabolites_num"]:
+        # add metabolite data
+        my_cur.execute("SELECT count(*) from %s;" % action_type.replace("_num", ""))
+        data = json.dumps(my_cur.fetchone()[0])
+        sys.stdout.buffer.write( zlib.compress( bytes(data, "utf-8") ) )
+    
+    else:
         sys.stdout.buffer.write( zlib.compress( bytes("-5", "utf-8") ) )
         exit()
-    
-
-    # add metabolite data
-    my_cur.execute("SELECT * from %s;" % action_type)
-    data = json.dumps({entry[0]: entry for entry in my_cur})
-    sys.stdout.buffer.write( zlib.compress( bytes(data, "utf-8") ) )
-    

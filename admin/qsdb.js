@@ -28,6 +28,15 @@ selected_metabolite_node = -1;
 selected_pathway_node = -1;
 selected_protein_node = -1;
 
+protein_sort_column = 1;
+protein_max_pages = -1;
+protein_current_page = 0;
+
+metabolite_sort_column = 1;
+metabolite_max_pages = -1;
+metabolite_current_page = 0;
+
+
 
 function init(){
     var xmlhttp = new XMLHttpRequest();
@@ -105,11 +114,10 @@ function init(){
     var xmlhttp_metabolites = new XMLHttpRequest();
     xmlhttp_metabolites.onreadystatechange = function() {
         if (xmlhttp_metabolites.readyState == 4 && xmlhttp_metabolites.status == 200) {
-            global_metabolite_data = JSON.parse(xmlhttp_metabolites.responseText);
-            prepare_metabolite_forms();
+            metabolite_max_pages = parseInt(xmlhttp_metabolites.responseText);
         }
     }
-    xmlhttp_metabolites.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=metabolites", true);
+    xmlhttp_metabolites.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=metabolites_num", true);
     xmlhttp_metabolites.send();
     
     
@@ -138,6 +146,7 @@ function init(){
     
     
     // get proteins
+    /*
     var xmlhttp_proteins = new XMLHttpRequest();
     xmlhttp_proteins.onreadystatechange = function() {
         if (xmlhttp_proteins.readyState == 4 && xmlhttp_proteins.status == 200) {
@@ -147,6 +156,7 @@ function init(){
     }
     xmlhttp_proteins.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=proteins", true);
     xmlhttp_proteins.send();
+    */
 }
 
 
@@ -378,9 +388,8 @@ function editor_create_pathway_node(){
     var request = "type=pathway&pathway=" + current_pathway + "&pathway_ref=" + foreign_id + "&x=" + x + "&y=" + y;
     var result = create_node(request);
     if (result[0]){
-        tmp_element.name = pathways[foreign_id];
+        tmp_element.name = global_pathway_data[foreign_id][1];
         tmp_element.foreign_id = foreign_id;
-        tmp_element.scale(tmp_element.x, tmp_element.y, 1. / factor);
         tmp_element.setup_pathway_meta();
         tmp_element.scale(tmp_element.x, tmp_element.y, factor);
         data[tmp_element.id] = tmp_element;
