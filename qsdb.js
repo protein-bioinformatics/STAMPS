@@ -161,11 +161,12 @@ function mouse_up_listener(event){
         var ey = Math.max(select_field_element.start_position.y, select_field_element.end_position.y);
         
         var toggled = new Set();
-        for (var i = 0; i < data.length; ++i){
-            data[i].highlight = false;
-            if (data[i].type == "protein" && sx <= data[i].x && sy <= data[i].y && data[i].x <= ex && data[i].y <= ey){
-                for (var j = 0; j < data[i].proteins.length; ++j){
-                    var prot = protein_dictionary[data[i].proteins[j]];
+        for (var node_id in data){
+            var current_node = data[node_id];
+            current_node.highlight = false;
+            if (current_node.type == "protein" && sx <= current_node.x && sy <= current_node.y && current_node.x <= ex && current_node.y <= ey){
+                for (var j = 0; j < current_node.proteins.length; ++j){
+                    var prot = protein_dictionary[current_node.proteins[j]];
                     if (!toggled.has(prot.id)){
                         prot.toggle_marked();
                         toggled.add(prot.id);
@@ -234,12 +235,13 @@ function mouse_move_listener(e){
             var sy = Math.min(select_field_element.start_position.y, select_field_element.end_position.y);
             var ey = Math.max(select_field_element.start_position.y, select_field_element.end_position.y);
             
-            for (var i = 0; i < data.length; ++i){
-                if (data[i].type == "protein" && sx <= data[i].x && sy <= data[i].y && data[i].x <= ex && data[i].y <= ey){
-                    data[i].highlight = true;
+            for (var node_id in data){
+                var current_node = data[node_id];
+                if (current_node.type == "protein" && sx <= current_node.x && sy <= current_node.y && current_node.x <= ex && current_node.y <= ey){
+                    current_node.highlight = true;
                 }
                 else {
-                    data[i].highlight = false;
+                    current_node.highlight = false;
                 }
             }
         }
