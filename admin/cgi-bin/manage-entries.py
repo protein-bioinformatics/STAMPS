@@ -94,6 +94,7 @@ elif action == "get":
         exit()
     
     if action_type in ["pathways", "proteins", "metabolites"]:
+        order_col = form.getvalue('column') if "column" in form else ""
         limit = form.getvalue('limit') if "limit" in form else ""
         filters = form.getvalue('filters') if "filters" in form else ""
         
@@ -111,6 +112,13 @@ elif action == "get":
             elif action_type == 'metabolites':
                 sql_query += " WHERE LOWER(name) LIKE '%%%s%%' AND LOWER(c_number) LIKE '%%%s%%' AND LOWER(formula) LIKE '%%%s%%'" % (tokens[0].lower(), tokens[1].lower(), tokens[2].lower())
                 
+            
+        if len(order_col) > 0:
+            order_col = order_col.replace("\"", "").replace("'", "")
+            tokens = order_col.split(":")
+            sql_query += " ORDER BY %s" % tokens[0]
+            if len(tokens) > 1: sql_query += " %s" % tokens[1]
+            
             
         if  len(limit) > 0:
             limit = limit.replace("\"", "").replace("'", "")

@@ -76,9 +76,9 @@
                     <table cellpadding="0" cellspacing="0" size=20 style="width:900px;">
                         <tr id="editor_select_metabolite_table_header" cellpadding="0" cellspacing="0" size=20 style="width:900px;"></tr>                        
                         <tr id="editor_select_metabolite_table_filters">
-                            <td><input type='text' id="editor_select_metabolite_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_metabolite_table();"></td>
-                            <td><input type='text' id="editor_select_metabolite_table_filter_cnumber" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_metabolite_table();"></td>
-                            <td><input type='text' id="editor_select_metabolite_table_filter_formula" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_metabolite_table();"></td>
+                            <td><input type='text' id="editor_select_metabolite_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
+                            <td><input type='text' id="editor_select_metabolite_table_filter_cnumber" style="width: 100%; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
+                            <td><input type='text' id="editor_select_metabolite_table_filter_formula" style="width: 100%; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
                             <td>&nbsp;&nbsp;&nbsp;&nbsp;<td>
                         </tr>
                     </table>
@@ -107,10 +107,10 @@
                     <table cellpadding="0" cellspacing="0" size=20 style="width:900px;">
                         <tr id="editor_select_protein_table_header"></tr>
                         <tr id="editor_select_protein_table_filters">
-                            <td><input type='text' id="editor_select_protein_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_protein_table();"></td>
-                            <td><input type='text' id="editor_select_protein_table_filter_accession" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_protein_table();"></td>
-                            <td><input type='text' id="editor_select_protein_table_filter_description" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_protein_table();"></td>
-                            <td width="1"><input type="checkbox" style="display: inline; margin-right: 25px;" onchange="editor_fill_protein_table();" id="editor_select_protein_table_filter_node"><td>
+                            <td><input type='text' id="editor_select_protein_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
+                            <td><input type='text' id="editor_select_protein_table_filter_accession" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
+                            <td><input type='text' id="editor_select_protein_table_filter_description" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
+                            <td width="1"><input type="checkbox" style="display: inline; margin-right: 25px;" onchange="protein_current_page = 0; editor_fill_protein_table();" id="editor_select_protein_table_filter_node"><td>
                         </tr>
                     </table>
                     <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:470px;">
