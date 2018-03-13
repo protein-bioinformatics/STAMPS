@@ -73,11 +73,16 @@
             <tr>
                 <td valign="top" colspan="2">
                     Select a metabolite:<br>
-                    <table cellpadding="0" cellspacing="0" size=20 style="width:900px; border-width: 1px; border-style: solid;">
-                        <tr id="editor_select_metabolite_table_header" cellpadding="0" cellspacing="0" size=20 style="width:900px; border-width: 1px; border-style: solid;"><th>Name</th><th>C&nbsp;number</th><th>Chemical formula</th><th>&nbsp;</th></tr>
-                        <tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td></td></tr>
+                    <table cellpadding="0" cellspacing="0" size=20 style="width:900px;">
+                        <tr id="editor_select_metabolite_table_header" cellpadding="0" cellspacing="0" size=20 style="width:900px;"></tr>                        
+                        <tr id="editor_select_metabolite_table_filters">
+                            <td><input type='text' id="editor_select_metabolite_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_metabolite_table();"></td>
+                            <td><input type='text' id="editor_select_metabolite_table_filter_cnumber" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_metabolite_table();"></td>
+                            <td><input type='text' id="editor_select_metabolite_table_filter_formula" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_metabolite_table();"></td>
+                            <td>&nbsp;&nbsp;&nbsp;&nbsp;<td>
+                        </tr>
                     </table>
-                    <div style="position: fixed; display: inline; overflow-y: auto; width:900px; height:480px;">
+                    <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:480px;">
                         <table id="editor_select_metabolite_table" cellspacing="0" size=20 style="border-width: 1px; border-style: solid;"></table>
                     </div>
                 </td>
@@ -93,24 +98,28 @@
 
 
 
-
 <div id="editor_select_protein" class="global_search">
     <table width="100%" height="100%"><tr><td align="center" valign="middle">
         <table cellspacing=20 class="global_search_content" width="1000" height="700">
             <tr>
                 <td valign="top" colspan="2">
-                    Select proteins:<br>
-                    <table cellpadding="0" cellspacing="0" size=20 style="width:900px; border-width: 1px; border-style: solid;">
-                        <tr id="editor_select_protein_table_header" ><th>Name</th><th>Uniprot</th><th>Description</th><th>&nbsp;</th></tr>
-                        <tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td></td></tr>
+                    Select proteins:<p>
+                    <table cellpadding="0" cellspacing="0" size=20 style="width:900px;">
+                        <tr id="editor_select_protein_table_header"></tr>
+                        <tr id="editor_select_protein_table_filters">
+                            <td><input type='text' id="editor_select_protein_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_protein_table();"></td>
+                            <td><input type='text' id="editor_select_protein_table_filter_accession" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_protein_table();"></td>
+                            <td><input type='text' id="editor_select_protein_table_filter_description" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_protein_table();"></td>
+                            <td width="1"><input type="checkbox" style="display: inline; margin-right: 25px;" onchange="editor_fill_protein_table();" id="editor_select_protein_table_filter_node"><td>
+                        </tr>
                     </table>
-                    <div style="position: fixed; display: inline; overflow-y: auto; width:900px; height:480px;">
+                    <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:470px;">
                         <table id="editor_select_protein_table" cellspacing="0" size=20 style="border-width: 1px; border-style: solid;"></table>
                     </div>
                 </td>
             </tr>
             <tr>
-                <td align="left" width="50%" valign="bottom" id="editor_protein_page_navigation"><b style="cursor: pointer;">«</b>&nbsp;<b>‹</b> 1 2 3 4 <b>›</b>&nbsp;<b>»</b></td>
+                <td align="left" width="50%" valign="bottom" id="editor_protein_page_navigation"></td>
                 <td align="right" valign="bottom"><button onclick="close_editor_select_protein();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_update_protein_node(); close_editor_select_protein();">Update</button>
                 </td>
             </tr>

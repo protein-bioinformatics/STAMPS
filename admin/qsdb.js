@@ -160,6 +160,7 @@ function init(){
     }
     xmlhttp_proteins.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=proteins_num", true);
     xmlhttp_proteins.send();
+    
 }
 
 
@@ -316,23 +317,26 @@ function mouse_click_listener(e){
                     break;
                     
                 case "protein":
-                    var protein_set = new Set();
-                    for (var i = 0; i < highlight_element.proteins.length; ++i) protein_set.add(highlight_element.proteins[i].toString());
-                    var dom_table = document.getElementById("editor_select_protein_table");
-                    for (var i = 0; i < dom_table.rows.length; ++i){
-                        dom_table.rows[i].cells[3].children[0].checked = protein_set.has(dom_table.rows[i].cells[3].children[0].id);
-                    }
                     
+    
+                    document.getElementById("editor_select_protein_table_filter_name").value = "";
+                    document.getElementById("editor_select_protein_table_filter_accession").value = "";
+                    document.getElementById("editor_select_protein_table_filter_description").value = "";
+                    document.getElementById("editor_select_protein_table_filter_node").checked = false;
+                    
+                    selected_protein_node = highlight_element.id;
                     editor_fill_protein_table();
                     document.getElementById("editor_select_protein").style.display = "inline";
                     document.getElementById("waiting_background").style.display = "inline";
                     document.getElementById("renderarea").style.filter = "blur(5px)";
                     document.getElementById("toolbox").style.filter = "blur(5px)";
-                    selected_protein_node = highlight_element.id;
                     break;
                 
                 case "metabolite":
                     
+                    document.getElementById("editor_select_metabolite_table_filter_name").value = "";
+                    document.getElementById("editor_select_metabolite_table_filter_cnumber").value = "";
+                    document.getElementById("editor_select_metabolite_table_filter_formula").value = "";
                     metabolite_create_action = false;
                     selected_metabolite_node = highlight_element.id;
                     editor_fill_metabolite_table();
@@ -954,9 +958,11 @@ function update_node(event) {
 
 function key_down(event){
     // canvas to svg
+    /*
     if (event.which === 32){
         pathway_to_svg();
     }
+    */
     
     
     // easter egg
@@ -1165,132 +1171,25 @@ function manage_entries_show_metabolites(){
 }
 
 
-function prepare_metabolite_forms(){
-    var global_metabolite_data_sorted = [];
-    for (var metabolite_id in global_metabolite_data) global_metabolite_data_sorted.push(global_metabolite_data[metabolite_id]);
-    
-    global_metabolite_data_sorted = global_metabolite_data_sorted.sort(function(a, b) {
-        return a[1] > b[1];
-    });
-    
-    var dom_table = document.getElementById("editor_select_metabolite_table");
-    
-    for (var i = 0; i < global_metabolite_data_sorted.length; ++i){
-        var bg_color = (i & 1) ? "#DDDDDD" : "white";
-        var row = global_metabolite_data_sorted[i];
-        
-        var dom_tr = document.createElement("tr");
-        dom_table.appendChild(dom_tr);
-        var dom_td1 = document.createElement("td");
-        dom_tr.appendChild(dom_td1);
-        dom_td1.innerHTML = row[1];
-        dom_td1.setAttribute("bgcolor", bg_color);
-        
-        var dom_td2 = document.createElement("td");
-        dom_tr.appendChild(dom_td2);
-        dom_td2.innerHTML = row[2];
-        dom_td2.setAttribute("bgcolor", bg_color);
-        dom_td2.setAttribute("style", "min-width: 100px;");
-        
-        var dom_td3 = document.createElement("td");
-        dom_tr.appendChild(dom_td3);
-        dom_td3.innerHTML = row[3];
-        dom_td3.setAttribute("bgcolor", bg_color);
-        
-        var dom_td4 = document.createElement("td");
-        dom_tr.appendChild(dom_td4);
-        var dom_input = document.createElement("input");
-        dom_td4.appendChild(dom_input);
-        dom_td4.setAttribute("bgcolor", bg_color);
-        dom_input.setAttribute("id", row[0]);
-        dom_input.setAttribute("type", "radio");
-        dom_input.setAttribute("name", "foo");
-        dom_input.setAttribute("onclick", "selected_metabolite = this.id;");
-        
-        if (i == 0){
-            selected_metabolite = row[0];
-            dom_input.setAttribute("checked", "true");
-        }
-    }
-    document.getElementById("editor_select_metabolite").style.display = "inline";
-    var table_titles = document.getElementById("editor_select_metabolite_table_header");
-    table_titles.rows[0].cells[0].width = dom_table.rows[0].cells[0].offsetWidth;
-    table_titles.rows[1].cells[0].children[0].size = dom_table.rows[0].cells[0].offsetWidth / 9;
-    
-    table_titles.rows[0].cells[1].width = dom_table.rows[0].cells[1].offsetWidth;
-    table_titles.rows[1].cells[1].children[0].size = 8;
-    
-    table_titles.rows[0].cells[2].width = dom_table.rows[0].cells[2].offsetWidth;
-    table_titles.rows[1].cells[2].children[0].size = dom_table.rows[0].cells[2].offsetWidth / 9;
-    document.getElementById("editor_select_metabolite").style.display = "none";
-}
-
-
-
-
-function prepare_protein_forms(){
-    var global_protein_data_sorted = [];
-    for (var protein_id in global_protein_data) global_protein_data_sorted.push(global_protein_data[protein_id]);
-    
-    global_protein_data_sorted = global_protein_data_sorted.sort(function(a, b) {
-        return a[1] > b[1];
-    });
-    
-    var dom_table = document.getElementById("editor_select_protein_table");
-    
-    for (var i = 0; i < global_protein_data_sorted.length; ++i){
-        var bg_color = (i & 1) ? "#DDDDDD" : "white";
-        var row = global_protein_data_sorted[i];
-        
-        var dom_tr = document.createElement("tr");
-        dom_table.appendChild(dom_tr);
-        var dom_td1 = document.createElement("td");
-        dom_tr.appendChild(dom_td1);
-        dom_td1.innerHTML = row[1];
-        dom_td1.setAttribute("bgcolor", bg_color);
-        
-        var dom_td2 = document.createElement("td");
-        dom_tr.appendChild(dom_td2);
-        dom_td2.innerHTML = row[6];
-        dom_td2.setAttribute("bgcolor", bg_color);
-        dom_td2.setAttribute("style", "min-width: 100px;");
-        
-        var dom_td3 = document.createElement("td");
-        dom_tr.appendChild(dom_td3);
-        dom_td3.innerHTML = row[2];
-        dom_td3.setAttribute("bgcolor", bg_color);
-        
-        var dom_td4 = document.createElement("td");
-        dom_tr.appendChild(dom_td4);
-        var dom_input = document.createElement("input");
-        dom_td4.appendChild(dom_input);
-        dom_td4.setAttribute("bgcolor", bg_color);
-        dom_input.setAttribute("id", row[0]);
-        dom_input.setAttribute("type", "checkbox");
-    }
-    document.getElementById("editor_select_protein").style.display = "inline";
-    var table_titles = document.getElementById("editor_select_protein_table_header");
-    table_titles.rows[0].cells[0].width = dom_table.rows[0].cells[0].offsetWidth;
-    table_titles.rows[1].cells[0].children[0].size = dom_table.rows[0].cells[0].offsetWidth / 9;
-    
-    table_titles.rows[0].cells[1].width = dom_table.rows[0].cells[1].offsetWidth;
-    table_titles.rows[1].cells[1].children[0].size = 8;
-    
-    table_titles.rows[0].cells[2].width = dom_table.rows[0].cells[2].offsetWidth;
-    table_titles.rows[1].cells[2].children[0].size = dom_table.rows[0].cells[2].offsetWidth / 9;
-    document.getElementById("editor_select_protein").style.display = "none";
-}
 
 
 function editor_fill_metabolite_table(){
+    var filter_name = document.getElementById("editor_select_metabolite_table_filter_name").value;
+    var filter_cnumber = document.getElementById("editor_select_metabolite_table_filter_cnumber").value;
+    var filter_formula = document.getElementById("editor_select_metabolite_table_filter_formula").value;
+    
     var request = "action=get&type=metabolites";
-    request += "&column=" + metabolite_sort_columns[metabolite_sort_column];
-    request += "&limit=" + (metabolite_current_page * max_per_page + 1).toString() + ":" + max_per_page.toString();
+    request += "&limit=" + (metabolite_current_page * max_per_page).toString() + ":" + max_per_page.toString();
+    if (filter_name != "" || filter_cnumber != "" || filter_formula != ""){
+        request += "&filters=" + filter_name + ":" + filter_cnumber + ":" + filter_formula;
+    }
     request = "/qsdb/admin/cgi-bin/manage-entries.py?" + request;
     
     
     var sign_up = String.fromCharCode(9652);
     var sign_down = String.fromCharCode(9662);
+    
+    
     
     var dom_table_header = document.getElementById("editor_select_metabolite_table_header");
     dom_table_header.innerHTML = ""
@@ -1304,8 +1203,9 @@ function editor_fill_metabolite_table(){
     var dom_th_cnumber = document.createElement("th");
     dom_table_header.appendChild(dom_th_cnumber);
     dom_th_cnumber.setAttribute("onclick", "metabolite_sort_column = " + ((metabolite_sort_column == 2) ? " -2;" : "2;") + "; editor_fill_metabolite_table();");
-    dom_th_cnumber.setAttribute("style", "cursor: pointer;");
     dom_th_cnumber.innerHTML = "C&nbsp;number" + ((metabolite_sort_column == 2) ? " " + sign_up : ((metabolite_sort_column == -2) ? " " + sign_down : ""));
+    dom_th_cnumber.setAttribute("width", "150px");
+    dom_th_cnumber.setAttribute("style", "cursor: pointer; min-width: 150px; max-width: 150px;");
     
     
     var dom_th_formula = document.createElement("th");
@@ -1313,6 +1213,11 @@ function editor_fill_metabolite_table(){
     dom_th_formula.setAttribute("onclick", "metabolite_sort_column = " + ((metabolite_sort_column == 3) ? " -3;" : "3;") + "; editor_fill_metabolite_table();");
     dom_th_formula.setAttribute("style", "cursor: pointer;");
     dom_th_formula.innerHTML = "Chemical formula" + ((metabolite_sort_column == 3) ? " " + sign_up : ((metabolite_sort_column == -3) ? " " + sign_down : ""));
+    dom_th_formula.setAttribute("width", "250px");
+    dom_th_formula.setAttribute("style", "cursor: pointer; min-width: 250px; max-width: 250px;");
+    
+    
+    
     
     if (metabolite_create_action){
         document.getElementById("editor_select_metabolite_ok_button").setAttribute("onclick", "editor_create_metabolite_node(); close_editor_select_metabolite();");
@@ -1375,7 +1280,20 @@ function editor_fill_metabolite_table(){
             for (var metabolite_id in global_metabolite_data) global_metabolite_data_sorted.push(global_metabolite_data[metabolite_id]);
             
             global_metabolite_data_sorted = global_metabolite_data_sorted.sort(function(a, b) {
-                return a[1] > b[1];
+                switch (metabolite_sort_column){
+                    case 1:
+                        return a[1] > b[1];
+                    case -1:
+                        return a[1] < b[1];
+                    case 2:
+                        return a[2] > b[2];
+                    case -2:
+                        return a[2] < b[2];
+                    case 3:
+                        return a[3] > b[3];
+                    case -3:
+                        return a[3] < b[3];
+                }
             });
             
             
@@ -1392,17 +1310,21 @@ function editor_fill_metabolite_table(){
                 dom_tr.appendChild(dom_td1);
                 dom_td1.innerHTML = row[1];
                 dom_td1.setAttribute("bgcolor", bg_color);
+                dom_td1.setAttribute("width", "100%");
                 
                 var dom_td2 = document.createElement("td");
                 dom_tr.appendChild(dom_td2);
                 dom_td2.innerHTML = row[2];
                 dom_td2.setAttribute("bgcolor", bg_color);
-                dom_td2.setAttribute("style", "min-width: 100px;");
+                dom_td2.setAttribute("width", "150px");
+                dom_td2.setAttribute("style", "min-width: 150px; max-width: 150px;");
                 
                 var dom_td3 = document.createElement("td");
                 dom_tr.appendChild(dom_td3);
                 dom_td3.innerHTML = row[3];
                 dom_td3.setAttribute("bgcolor", bg_color);
+                dom_td3.setAttribute("width", "250px");
+                dom_td3.setAttribute("style", "min-width: 250px; max-width: 250px;");
                 
                 var dom_td4 = document.createElement("td");
                 dom_tr.appendChild(dom_td4);
@@ -1429,9 +1351,16 @@ function editor_fill_metabolite_table(){
 
 
 function editor_fill_protein_table(){
+    var filter_name = document.getElementById("editor_select_protein_table_filter_name").value;
+    var filter_accession = document.getElementById("editor_select_protein_table_filter_accession").value;
+    var filter_description = document.getElementById("editor_select_protein_table_filter_description").value;
+    var filter_node = document.getElementById("editor_select_protein_table_filter_node").checked;
+    
     var request = "action=get&type=proteins";
-    request += "&column=" + protein_sort_columns[protein_sort_column];
-    request += "&limit=" + (protein_current_page * max_per_page + 1).toString() + ":" + max_per_page.toString();
+    request += "&limit=" + (protein_current_page * max_per_page).toString() + ":" + max_per_page.toString();
+    if (filter_name != "" || filter_accession != "" || filter_description != "" || filter_node){
+        request += "&filters=" + filter_name + ":" + filter_accession + ":" + filter_description + (filter_node ? ":" + selected_protein_node : "");
+    }
     request = "/qsdb/admin/cgi-bin/manage-entries.py?" + request;
     
     
@@ -1443,15 +1372,17 @@ function editor_fill_protein_table(){
     var dom_th_name = document.createElement("th");
     dom_table_header.appendChild(dom_th_name);
     dom_th_name.setAttribute("onclick", "protein_sort_column = " + ((protein_sort_column == 1) ? " -1;" : "1;") + "; editor_fill_protein_table();");
-    dom_th_name.setAttribute("style", "cursor: pointer;");
     dom_th_name.innerHTML = "Name" + ((protein_sort_column == 1) ? " " + sign_up : ((protein_sort_column == -1) ? " " + sign_down : ""));
+    dom_th_name.setAttribute("width", "150px");
+    dom_th_name.setAttribute("style", "cursor: pointer; min-width: 150px; max-width: 150px;");
     
     
     var dom_th_uniprot = document.createElement("th");
     dom_table_header.appendChild(dom_th_uniprot);
     dom_th_uniprot.setAttribute("onclick", "protein_sort_column = " + ((protein_sort_column == 2) ? " -2;" : "2;") + "; editor_fill_protein_table();");
-    dom_th_uniprot.setAttribute("style", "cursor: pointer;");
     dom_th_uniprot.innerHTML = "Uniprot" + ((protein_sort_column == 2) ? " " + sign_up : ((protein_sort_column == -2) ? " " + sign_down : ""));
+    dom_th_uniprot.setAttribute("width", "120px");
+    dom_th_uniprot.setAttribute("style", "cursor: pointer; min-width: 120px; max-width: 120px;");
     
     
     var dom_th_description = document.createElement("th");
@@ -1459,6 +1390,10 @@ function editor_fill_protein_table(){
     dom_th_description.setAttribute("onclick", "protein_sort_column = " + ((protein_sort_column == 3) ? " -3;" : "3;") + "; editor_fill_protein_table();");
     dom_th_description.setAttribute("style", "cursor: pointer;");
     dom_th_description.innerHTML = "Description" + ((protein_sort_column == 3) ? " " + sign_up : ((protein_sort_column == -3) ? " " + sign_down : ""));
+    
+    
+    
+    
     
     
     
@@ -1513,9 +1448,21 @@ function editor_fill_protein_table(){
             global_protein_data = JSON.parse(xmlhttp_protein.responseText);
             var global_protein_data_sorted = [];
             for (var protein_id in global_protein_data) global_protein_data_sorted.push(global_protein_data[protein_id]);
-            
             global_protein_data_sorted = global_protein_data_sorted.sort(function(a, b) {
-                return a[1] > b[1];
+                switch (protein_sort_column){
+                    case 1:
+                        return a[1] > b[1];
+                    case -1:
+                        return a[1] < b[1];
+                    case 2:
+                        return a[6] > b[6];
+                    case -2:
+                        return a[6] < b[6];
+                    case 3:
+                        return a[2] > b[2];
+                    case -3:
+                        return a[2] < b[2];
+                }
             });
             
             
@@ -1532,17 +1479,21 @@ function editor_fill_protein_table(){
                 dom_tr.appendChild(dom_td1);
                 dom_td1.innerHTML = row[1];
                 dom_td1.setAttribute("bgcolor", bg_color);
+                dom_td1.setAttribute("width", "150px");
+                dom_td1.setAttribute("style", "min-width: 150px; max-width: 150px;");
                 
                 var dom_td2 = document.createElement("td");
                 dom_tr.appendChild(dom_td2);
                 dom_td2.innerHTML = row[6];
                 dom_td2.setAttribute("bgcolor", bg_color);
-                dom_td2.setAttribute("style", "min-width: 100px;");
+                dom_td2.setAttribute("width", "120px");
+                dom_td2.setAttribute("style", "min-width: 120px; max-width: 120px;");
                 
                 var dom_td3 = document.createElement("td");
                 dom_tr.appendChild(dom_td3);
                 dom_td3.innerHTML = row[2];
                 dom_td3.setAttribute("bgcolor", bg_color);
+                dom_td3.setAttribute("width", "100%");
                 
                 var dom_td4 = document.createElement("td");
                 dom_tr.appendChild(dom_td4);
@@ -1558,7 +1509,7 @@ function editor_fill_protein_table(){
             
         }
     }
-    xmlhttp_protein.open("GET", request, true);
+    xmlhttp_protein.open("GET", encodeURI(request), false);
     xmlhttp_protein.send();
 }
 

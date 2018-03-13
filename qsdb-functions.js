@@ -1319,7 +1319,7 @@ function Infobox(ctx){
         this.protein_id = protein_id;
         if (data[node_id].type == "metabolite"){
             this.width = data[this.node_id].img.width + 40;
-            this.height = data[this.node_id].img.height + 40;
+            this.height = data[this.node_id].img.height + 60;
             
             ctx.font = "bold " + line_height.toString() + "px Arial";
             this.width = Math.max(this.width, ctx.measureText(data[this.node_id].name).width + 40);
@@ -1328,6 +1328,7 @@ function Infobox(ctx){
             ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
             this.width = Math.max(this.width, ctx.measureText("Formula:  " + data[this.node_id].formula).width + 40);
             this.width = Math.max(this.width, ctx.measureText("Exact Mass / Da: " + data[this.node_id].exact_mass).width + 40);
+            this.width = Math.max(this.width, ctx.measureText("C number: " + data[this.node_id].c_number).width + 40);
             
         }
         else {
@@ -1397,8 +1398,10 @@ function Infobox(ctx){
             var html_content = "<div style=\"font-family: arial;\"><b>" + data[this.node_id].name + "</b>";
             html_content += "<hr>";
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Formula:</b> " + data[this.node_id].formula + "</div>";
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Exact mass / Da:</b> " + data[this.node_id].exact_mass + "</div><br>";
-            html_content += "<img src='/qsdb/images/metabolites/" + data[this.node_id].c_number + ".png'>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Exact mass / Da:</b> " + data[this.node_id].exact_mass + "</div>";
+            var c_number = data[this.node_id].c_number;
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>C number:</b> <a href='http://www.genome.jp/dbget-bin/www_bget?" + c_number + "' target=\"blank\">" + data[this.node_id].c_number + "</div><br>";
+            html_content += "<img src='/qsdb/images/metabolites/" + c_number + ".png'>";
             
             html_content += "</div>";
             
@@ -1745,6 +1748,10 @@ function node(data, ctx){
                     ctx.fill();
                     ctx.stroke();
                 }
+                
+                this.proteins.sort(function(a, b) {
+                    return protein_dictionary[a].name > protein_dictionary[b].name;
+                });
                 
                 var lhf = line_height * factor;
                 for (var i = 0, tty = ty - (this.proteins.length - 1) * lhf * 0.5; i < this.proteins.length; i += 1, tty += lhf){
@@ -4442,7 +4449,6 @@ function accession_search_parse_accessions(accessions, synchronous){
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             request_load_proteins(JSON.parse(xmlhttp.responseText), show_check);
-            console.log("huhu");
         }
     }
     
