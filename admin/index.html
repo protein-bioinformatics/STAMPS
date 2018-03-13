@@ -136,13 +136,19 @@
         Select&nbsp;Pathway
     </td><td id="select_species_nav" class="navigation_cell_click" onclick="close_navigation(2); select_species();">
         Select&nbsp;Species
-    </td><td id="search_field_nav" class="navigation_cell" title="Search for name, definition, UniProt accession number, EC number or peptide amino sequence.">
+    </td>
+    <!--
+    <td id="search_field_nav" class="navigation_cell" title="Search for name, definition, UniProt accession number, EC number or peptide amino sequence.">
         <table><tr><td>Search: </td><td><input type="text" onkeyup="start_search();" onfocus="close_navigation(0); start_search();" class="search_field" id="search_field" size=24></td></tr></table>
     </td><td id="filter_panel_nav"  class="navigation_cell_click" onclick="close_navigation(3); open_filter_panel();" style="min-width: 100px; text-align: center;">
         Filter
-    </td><td class="navigation_cell_click" onclick="close_navigation(0); back_function = hide_check_spectra; manage_entries();">
+    </td>
+    -->
+    <td class="navigation_cell_click" onclick="close_navigation(0); back_function = hide_check_spectra; manage_entries();" style="min-width: 100px; text-align: center;">
         Manage&nbsp;Entries
-    </td><td class="navigation_cell_click" onclick="close_navigation(0); back_function = hide_check_spectra; check_spectra();">
+    </td>
+    <!--
+    <td class="navigation_cell_click" onclick="close_navigation(0); back_function = hide_check_spectra; check_spectra();">
         Check&nbsp;Spectra
     </td><td class="navigation_cell_click" onclick="close_navigation(0); download_assay();">
         Download&nbsp;Assay
@@ -150,7 +156,7 @@
         Back
     </td>
     <td width="50%"></td>
-    <!--</td><td class="navigation_cell_click" onclick="close_navigation(0); open_disclaimer();">
+    </td><td class="navigation_cell_click" onclick="close_navigation(0); open_disclaimer();">
         About QSDB
     </td>-->
     </tr>
@@ -236,5 +242,14 @@
     document.getElementById("check_spectra").innerHTML = get_check_spectra_content();
     document.getElementById("waiting_background").innerHTML = get_waiting_background_content();
     document.addEventListener('DOMContentLoaded', init, false);
+    
+    var xmlhttp_matomo = new XMLHttpRequest();
+    xmlhttp_matomo.onreadystatechange = function() {
+        if (xmlhttp_matomo.readyState == 4 && xmlhttp_matomo.status == 200) {
+            var matomo = JSON.parse(xmlhttp_matomo.responseText);
+        }
+    }
+    xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=BMBF Metrics&e_a=request&e_n=stamp-editor", true);
+    xmlhttp_matomo.send();
 </script>
 </html> 

@@ -72,6 +72,7 @@ function init(){
     c.addEventListener('contextmenu', function(event){event.preventDefault(); return false;}, false);
     c.addEventListener("mouseout", mouse_up_listener, false);
     
+    //document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
     //document.cookie = "";
     
     // cookie treatment

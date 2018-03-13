@@ -62,7 +62,6 @@ with open(fasta_file, mode="wt") as fl:
 
 # create blib file
 blib_file = "../tmp/%s/spectra.blib" % rnd
-#print(conf["sp"species])
 db = sqlite3.connect(conf["spectra_db_%s" % species])
 lite_cur = db.cursor()
 lite_cur.execute("ATTACH DATABASE '%s' As blib;" % blib_file)
