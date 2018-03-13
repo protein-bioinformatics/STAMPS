@@ -161,6 +161,14 @@ function init(){
     xmlhttp_proteins.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=proteins_num", true);
     xmlhttp_proteins.send();
     
+    var xmlhttp_ga = new XMLHttpRequest();
+    xmlhttp_ga.onreadystatechange = function() {
+        if (xmlhttp_ga.readyState == 4 && xmlhttp_ga.status == 200) {
+            var request = xmlhttp_ga.responseText;
+        }
+    }
+    xmlhttp_ga.open("GET", "/qsdb/cgi-bin/analytics.py?action=request&label=stamp-editor", true);
+    xmlhttp_ga.send();
 }
 
 
