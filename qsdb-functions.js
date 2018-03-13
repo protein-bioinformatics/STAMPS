@@ -3218,6 +3218,7 @@ function download_assay(){
     
     var xmlhttp = new XMLHttpRequest();
     var download_link = "";
+    var request = "cgi-bin/prepare-download.py?spectra=" + spectra_list + "&proteins=" + proteins_list + "&species=mouse";
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             download_link = xmlhttp.responseText;
@@ -3229,18 +3230,18 @@ function download_assay(){
             html += "<button onclick=\"hide_download();\">Close Window</button></td></tr></table>"
             document.getElementById("download").innerHTML = html;
             
-            
-            var xmlhttp_ga = new XMLHttpRequest();
-            xmlhttp_ga.onreadystatechange = function() {
-                if (xmlhttp_ga.readyState == 4 && xmlhttp_ga.status == 200) {
-                    var request = xmlhttp_ga.responseText;
+            var xmlhttp_matomo = new XMLHttpRequest();
+            xmlhttp_matomo.onreadystatechange = function() {
+                if (xmlhttp_matomo.readyState == 4 && xmlhttp_matomo.status == 200) {
+                    var matomo = JSON.parse(xmlhttp_matomo.responseText);
                 }
             }
-            xmlhttp_ga.open("GET", "/qsdb/cgi-bin/analytics.py?action=request&download=stamp", true);
-            xmlhttp_ga.send();
+            xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=BMBF Metrics&e_a=download&e_n=stamp", true);
+            xmlhttp_matomo.send();
         }
     }
-    xmlhttp.open("GET", "cgi-bin/prepare-download.py?spectra=" + spectra_list + "&proteins=" + proteins_list + "&species=mouse", true);
+    console.log(request);
+    xmlhttp.open("GET", request, true);
     xmlhttp.send();
 }
 
@@ -4283,7 +4284,8 @@ function load_data(reload){
     pathway_is_loaded = false;
     if (!reload){
         reset_view();
-        document.getElementById("search_field").value = "";
+        var search_field = document.getElementById("search_field");
+        if (search_field) search_field.value = "";
         hide_search();
     }
     
