@@ -12,8 +12,29 @@
 </head>
 
 <body>
-<div id="renderarea_wrapper" class="renderarea_wrapper"></div>
-<canvas id="refarea" class="refarea" style="display: none;">Your browser does not support the HTML5 canvas tag.</canvas>
+
+<div id="toolbox" class="toolbox">
+    <table cellspacing="10px"><tr><td>
+    <b>Toolbox:</b><p><hr><p>
+    <i>Creaty entity:</i><br>
+    <div id="toolbox_button_create_pathway" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_PATHWAY);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_PATHWAY);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_PATHWAY);"><span>Create pathway node</span></div>
+    <div id="toolbox_button_create_protein" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_PROTEIN);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_PROTEIN);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_PROTEIN);"><span>Create protein node</span></div>
+    <div id="toolbox_button_create_metabolite" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_METABOLITE);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_METABOLITE);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_METABOLITE);"><span>Create metabolite node</span></div>
+    <div id="toolbox_button_create_label" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_LABEL);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_LABEL);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_LABEL);"><span>Create label node</span></div>
+    <div id="toolbox_button_create_membrane" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_MEMBRANE);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_MEMBRANE);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_MEMBRANE);"><span>Create membrane node</span></div><p><hr><p>
+    
+    <i>Alter entity:</i><br>
+    <div id="toolbox_button_move_entity" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.MOVE_ENTITY);" onmouseover="toolbox_button_mouseover(toolbox_states.MOVE_ENTITY);" onmouseout="toolbox_button_mouseout(toolbox_states.MOVE_ENTITY);"><span>Move entity</span></div>
+    <div id="toolbox_button_rotate_pathway_anchor" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.ROTATE_PATHWAY);" onmouseover="toolbox_button_mouseover(toolbox_states.ROTATE_PATHWAY);" onmouseout="toolbox_button_mouseout(toolbox_states.ROTATE_PATHWAY);"><span>Rotate pathway anchor</span></div>
+    <div id="toolbox_button_rotate_protein_anchor" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.ROTATE_PROTEIN);" onmouseover="toolbox_button_mouseover(toolbox_states.ROTATE_PROTEIN);" onmouseout="toolbox_button_mouseout(toolbox_states.ROTATE_PROTEIN);"><span>Rotate protein anchor</span></div>
+    <div id="toolbox_button_rotate_metabolite_anchor" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.ROTATE_METABOLITE);" onmouseover="toolbox_button_mouseover(toolbox_states.ROTATE_METABOLITE);" onmouseout="toolbox_button_mouseout(toolbox_states.ROTATE_METABOLITE);"><span>Rotate metabolite anchor</span></div>
+    <div id="toolbox_button_draw_edge" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.DRAW_EDGE);" onmouseover="toolbox_button_mouseover(toolbox_states.DRAW_EDGE);" onmouseout="toolbox_button_mouseout(toolbox_states.DRAW_EDGE);"><span>Draw edge</span></div>
+    <div id="toolbox_button_change_edge" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CHANGE_EDGE);" onmouseover="toolbox_button_mouseover(toolbox_states.CHANGE_EDGE);" onmouseout="toolbox_button_mouseout(toolbox_states.CHANGE_EDGE);"><span>Change edge type</span></div>
+    <div id="toolbox_button_delete_entity" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.DELETE_ENTRY);" onmouseover="toolbox_button_mouseover(toolbox_states.DELETE_ENTRY);" onmouseout="toolbox_button_mouseout(toolbox_states.DELETE_ENTRY);"><span>Delete entity</span></div>
+    </td></tr></table>
+</div>
+
+<div id="renderarea_wrapper" class="renderarea_wrapper"><canvas id="renderarea" class="renderarea">Your browser does not support the HTML5 canvas tag.</canvas></div>
 
 <div id="hint" style="position: fixed; top: 10px; left: 10px;">--</div>
 <div id="tooltip" class="tooltip"></div>
@@ -23,6 +44,89 @@
 
 <div id="managementbackground" class="managementbackground"></div>
 <div id="management" class="management"></div>
+
+<div id="editor_select_pathway" class="global_search">
+    <table width="100%" height="100%"><tr><td align="center" valign="middle">
+        <table cellspacing=20 width="500" class="global_search_content">
+            <tr>
+                <td>
+                    <div style="display: inline;">
+                        Select a pathway:<br>
+                        <select id="editor_select_pathway_field" size=20 style="width:400px; height:480px;"></select>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align=right><button onclick="close_editor_select_pathway();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_create_pathway_node(); close_editor_select_pathway();" id="editor_select_pathway_ok_button">Create</button>
+                </td>
+            </tr>
+        </table>
+    </td></tr></table>
+</div>
+
+
+
+
+<div id="editor_select_metabolite" class="global_search">
+    <table width="100%" height="100%"><tr><td align="center" valign="middle">
+        <table cellspacing=20 class="global_search_content" width="1000" height="700">
+            <tr>
+                <td valign="top" colspan="2">
+                    Select a metabolite:<br>
+                    <table cellpadding="0" cellspacing="0" size=20 style="width:900px;">
+                        <tr id="editor_select_metabolite_table_header" cellpadding="0" cellspacing="0" size=20 style="width:900px;"></tr>                        
+                        <tr id="editor_select_metabolite_table_filters">
+                            <td><input type='text' id="editor_select_metabolite_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_metabolite_table();"></td>
+                            <td><input type='text' id="editor_select_metabolite_table_filter_cnumber" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_metabolite_table();"></td>
+                            <td><input type='text' id="editor_select_metabolite_table_filter_formula" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_metabolite_table();"></td>
+                            <td>&nbsp;&nbsp;&nbsp;&nbsp;<td>
+                        </tr>
+                    </table>
+                    <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:480px;">
+                        <table id="editor_select_metabolite_table" cellspacing="0" size=20 style="border-width: 1px; border-style: solid;"></table>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="left" width="50%" valign="bottom" id="editor_metabolite_page_navigation"><b style="cursor: pointer;">«</b>&nbsp;<b>‹</b> 1 2 3 4 <b>›</b>&nbsp;<b>»</b></td>
+                <td align="right" valign="bottom"><button onclick="close_editor_select_metabolite();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_create_metabolite_node(); close_editor_select_metabolite();" id="editor_select_metabolite_ok_button">Create</button>
+                </td>
+            </tr>
+        </table>
+    </td></tr></table>
+</div>
+
+
+
+<div id="editor_select_protein" class="global_search">
+    <table width="100%" height="100%"><tr><td align="center" valign="middle">
+        <table cellspacing=20 class="global_search_content" width="1000" height="700">
+            <tr>
+                <td valign="top" colspan="2">
+                    Select proteins:<p>
+                    <table cellpadding="0" cellspacing="0" size=20 style="width:900px;">
+                        <tr id="editor_select_protein_table_header"></tr>
+                        <tr id="editor_select_protein_table_filters">
+                            <td><input type='text' id="editor_select_protein_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_protein_table();"></td>
+                            <td><input type='text' id="editor_select_protein_table_filter_accession" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_protein_table();"></td>
+                            <td><input type='text' id="editor_select_protein_table_filter_description" style="width: 100%; box-sizing: border-box;" onkeyup="editor_fill_protein_table();"></td>
+                            <td width="1"><input type="checkbox" style="display: inline; margin-right: 25px;" onchange="editor_fill_protein_table();" id="editor_select_protein_table_filter_node"><td>
+                        </tr>
+                    </table>
+                    <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:470px;">
+                        <table id="editor_select_protein_table" cellspacing="0" size=20 style="border-width: 1px; border-style: solid;"></table>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="left" width="50%" valign="bottom" id="editor_protein_page_navigation"></td>
+                <td align="right" valign="bottom"><button onclick="close_editor_select_protein();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_update_protein_node(); close_editor_select_protein();">Update</button>
+                </td>
+            </tr>
+        </table>
+    </td></tr></table>
+</div>
+
 
 <div id="navigation" class="navigation">
     <table>
@@ -72,6 +176,8 @@
 </div>
 <div id="select_pathway_background" class="select_pathway_background"></div>
 <div id="animation_background" class="animation_background"></div>
+<div id="infobox_html" style="display: none; z-index: 120; position: fixed; padding: 25px;"></div>
+<div id="infobox_html_background" class="infobox_html_background"></div>
 
 
 <div id="search_results" class="search_results"></div>

@@ -98,9 +98,9 @@ main() {
         return 1;
     }
     /* send SQL query */
-    string sql_query = "SELECT r.*, rg.id rg_id, rg.reaction_id, rg.node_id rg_node_id, rg.type, rg.anchor FROM reactions r INNER JOIN nodes n ON r.node_id = n.id inner join reagents rg on r.id = rg.reaction_id WHERE n.pathway_id = ";
+    string sql_query = "SELECT r.*, rg.id rg_id, rg.reaction_id, rg.node_id rg_node_id, rg.type, rg.anchor FROM reactions r INNER JOIN nodes n ON r.node_id = n.id LEFT JOIN reagents rg on r.id = rg.reaction_id WHERE n.pathway_id = ";
     sql_query += pathway_id;
-    sql_query += ";";
+    sql_query += " ORDER BY r.id;";
     if (mysql_query(conn, sql_query.c_str())) {
         cout << "error: " << mysql_error(conn) << endl;
         return 1;
@@ -111,7 +111,7 @@ main() {
         column_names.insert(pair<string,int>(field->name, i));
     }
     
-    cout << "[";
+    cout << "{";
     int last_id = -1;
     int index = 0;
     int index_r = 0;
@@ -121,31 +121,33 @@ main() {
         if (last_id != id){
             index_r = 0;
             if (last_id != -1){
-                cout << "]}, ";
+                cout << "}},";
             }
-            cout << "{\"id\": " << row[column_names[string("id")]] << ", ";
-            cout << "\"node_id\": " << row[column_names[string("node_id")]] << ", ";
-            cout << "\"anchor_in\": \"" << row[column_names[string("anchor_in")]] << "\", ";
-            cout << "\"anchor_out\": \"" << row[column_names[string("anchor_out")]] << "\", ";
-            cout << "\"reversible\": " << row[column_names[string("reversible")]] << ", ";
-            cout << "\"reagents\": [";
+            cout << "\"" << row[column_names[string("id")]] << "\": {\"i\":" << row[column_names[string("id")]] << ",";
+            cout << "\"n\":" << row[column_names[string("node_id")]] << ",";
+            cout << "\"in\":\"" << row[column_names[string("anchor_in")]] << "\",";
+            cout << "\"out\":\"" << row[column_names[string("anchor_out")]] << "\",";
+            cout << "\"v\":" << row[column_names[string("reversible")]] << ",";
+            cout << "\"r\":{";
             
             last_id = id;
         }
         
-        if (index_r) cout << ", ";
-        cout << "{\"id\": " << row[column_names[string("rg_id")]] << ", ";
-        cout << "\"reaction_id\": " << row[column_names[string("reaction_id")]] << ", ";
-        cout << "\"node_id\": " << row[column_names[string("rg_node_id")]] << ", ";
-        cout << "\"type\": \"" << row[column_names[string("type")]] << "\", ";
-        cout << "\"anchor\": \"" << row[column_names[string("anchor")]] << "\"}";
+        if (row[column_names[string("rg_id")]] != 0){
+            if (index_r) cout << ", ";
+            cout << "\"" << row[column_names[string("rg_id")]] << "\":{\"i\":" << row[column_names[string("rg_id")]] << ",";
+            cout << "\"r\":" << row[column_names[string("reaction_id")]] << ",";
+            cout << "\"n\":" << row[column_names[string("rg_node_id")]] << ",";
+            cout << "\"t\":\"" << row[column_names[string("type")]] << "\",";
+            cout << "\"a\":\"" << row[column_names[string("anchor")]] << "\"}";
+        }
         
         ++index_r;
         ++index;
     }
-    if (index_r) cout << "]";
+    if (index_r) cout << "}";
     if (index) cout << "}";
-    cout << "]" << endl;
+    cout << "}" << endl;
     
     mysql_free_result(res);
     mysql_close(conn);
