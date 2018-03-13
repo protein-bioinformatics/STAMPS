@@ -1179,6 +1179,7 @@ function editor_fill_metabolite_table(){
     var filter_formula = document.getElementById("editor_select_metabolite_table_filter_formula").value;
     
     var request = "action=get&type=metabolites";
+    request += "&column=" + metabolite_sort_columns[metabolite_sort_column];
     request += "&limit=" + (metabolite_current_page * max_per_page).toString() + ":" + max_per_page.toString();
     if (filter_name != "" || filter_cnumber != "" || filter_formula != ""){
         request += "&filters=" + filter_name + ":" + filter_cnumber + ":" + filter_formula;
@@ -1357,6 +1358,7 @@ function editor_fill_protein_table(){
     var filter_node = document.getElementById("editor_select_protein_table_filter_node").checked;
     
     var request = "action=get&type=proteins";
+    request += "&column=" + protein_sort_columns[protein_sort_column];
     request += "&limit=" + (protein_current_page * max_per_page).toString() + ":" + max_per_page.toString();
     if (filter_name != "" || filter_accession != "" || filter_description != "" || filter_node){
         request += "&filters=" + filter_name + ":" + filter_accession + ":" + filter_description + (filter_node ? ":" + selected_protein_node : "");
