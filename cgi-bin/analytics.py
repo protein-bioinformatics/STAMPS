@@ -16,7 +16,7 @@ if len(action) == 0 or len(label) == 0:
     exit()
    
 try:
-    response = urlopen("https://www.google-analytics.com/collect?v=1&tid=UA-115650880-1&uid=asuueffeqqss&t=event&ec=usage&ea=%s&el=%s" % (action, label))
+    response = urlopen("www.google-analytics.com/collect?v=1&tid=UA-115650880-1&uid=asuueffeqqss&t=event&ec=usage&ea=%s&el=%s" % (action, label), {}, 2)
 except:
     print(-2)
     exit()
