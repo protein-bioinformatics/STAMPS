@@ -92,6 +92,9 @@ function init(){
     
     change_pathway();
     resize_pathway_view();
+    
+    
+    
 }
 
 function resize_pathway_view(){

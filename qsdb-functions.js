@@ -3228,6 +3228,16 @@ function download_assay(){
             html += "<p>&nbsp;<p>";
             html += "<button onclick=\"hide_download();\">Close Window</button></td></tr></table>"
             document.getElementById("download").innerHTML = html;
+            
+            
+            var xmlhttp_ga = new XMLHttpRequest();
+            xmlhttp_ga.onreadystatechange = function() {
+                if (xmlhttp_ga.readyState == 4 && xmlhttp_ga.status == 200) {
+                    var request = xmlhttp_ga.responseText;
+                }
+            }
+            xmlhttp_ga.open("GET", "/qsdb/cgi-bin/analytics.py?action=request&download=stamp", true);
+            xmlhttp_ga.send();
         }
     }
     xmlhttp.open("GET", "cgi-bin/prepare-download.py?spectra=" + spectra_list + "&proteins=" + proteins_list + "&species=mouse", true);
