@@ -27,6 +27,7 @@ selected_metabolite = -1;
 selected_metabolite_node = -1;
 selected_pathway_node = -1;
 selected_protein_node = -1;
+selected_label_node = -1;
 
 protein_sort_columns = {'-3': "definition:DESC", '-2': "accession:DESC", '-1': "name:DESC", 1: "name:ASC", 2: "accession:ASC", 3: "definition:ASC"};
 protein_sort_column = 1;
@@ -75,11 +76,11 @@ function init(){
     
     document.addEventListener('keydown', key_down, false);
     //document.addEventListener('keyup', key_up, false);
-    document.getElementById("search_background").addEventListener("click", hide_search, false);
+    //document.getElementById("search_background").addEventListener("click", hide_search, false);
     document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
     document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
-    document.getElementById("filter_panel_background").addEventListener("click", hide_filter_panel, false);
-    document.getElementById("infobox_html_background").addEventListener("click", hide_infobox, false);
+    //document.getElementById("filter_panel_background").addEventListener("click", hide_filter_panel, false);
+    //document.getElementById("infobox_html_background").addEventListener("click", hide_infobox, false);
     window.addEventListener('resize', resize_pathway_view, false);
     
     window.addEventListener('resize', resize_ms_view, false);
@@ -100,10 +101,10 @@ function init(){
     c.addEventListener("mousewheel", mouse_wheel_listener, false);
     c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
     
-    
     c.oncontextmenu = function (event){
         return false;
     }
+    /*
     document.getElementById("menubackground").oncontextmenu = function(event){
         hide_custom_menu(event);
         return false;        
@@ -111,6 +112,7 @@ function init(){
     document.getElementById("custommenu").oncontextmenu = function(event){
         return false;        
     };
+    */
     
     document.getElementById("toolbox").style.top = (document.getElementById("navigation").offsetHeight).toString() + "px";
     document.getElementById("renderarea").style.left = (document.getElementById("toolbox").offsetWidth).toString() + "px";
@@ -221,6 +223,7 @@ function mouse_click_listener(e){
                     break;
                     
                 case toolbox_states.CREATE_LABEL:
+                    data[tmp_element.id].foreign_id = result[1];
                     tmp_element = new node({"x": "0", "y": "0", "t": "label", "i": -1, "n": "undefined"}, ctx);
                     break;
                     
@@ -353,12 +356,55 @@ function mouse_click_listener(e){
                     document.getElementById("renderarea").style.filter = "blur(5px)";
                     document.getElementById("toolbox").style.filter = "blur(5px)";
                     break;
-                
+                    
+                case "label":
+                    selected_label_node = highlight_element.id;
+                    document.getElementById("label_text_field").style.display = "inline";
+                    document.getElementById("label_text_field_background").style.display = "inline";
+                    
+                    var label_width = document.getElementById("label_text_field").offsetWidth;
+                    var label_height = document.getElementById("label_text_field").offsetHeight;
+                    
+                    
+                    document.getElementById("label_text_field").value = highlight_element.name;
+                    var text_len = highlight_element.name.length;
+                    document.getElementById("label_text_field").setSelectionRange(text_len, text_len);
+                    document.getElementById("label_text_field").style.left = (toolbox_width + highlight_element.x - (label_width >> 1)).toString() + "px";
+                    document.getElementById("label_text_field").style.top = (highlight_element.y - (label_height >> 1)).toString() + "px";
+                    document.getElementById("label_text_field").focus();
+                    
                 default:
                     break;
             }
         }
     }
+}
+
+
+function label_text_field_listener(evt){
+    evt = evt || window.event;
+    var charCode = evt.keyCode || evt.which;
+    if (charCode == 10 || charCode == 13){
+        update_label();
+    }
+}
+
+
+function update_label(){
+    document.getElementById("label_text_field").style.display = "none";
+    document.getElementById("label_text_field_background").style.display = "none";
+    
+    var label = document.getElementById("label_text_field").value;
+    if (label == "") label = "undefined";
+    
+    var request = "action=set&table=labels&id=" + data[selected_label_node].foreign_id + "&column=label&value=" + label;
+    var result = update_entry(request);
+    if (result){
+        var ctx = document.getElementById("renderarea").getContext("2d");
+        data[selected_label_node].name = label;
+        data[selected_label_node].setup_label_meta(ctx);
+        draw();
+    };
 }
 
 
@@ -449,13 +495,6 @@ function editor_update_protein_node(){
     var dom_table = document.getElementById("editor_select_protein_table");
     var prot = data[selected_protein_node];
     prot.proteins = Array.from(current_protein_set);
-    
-    /*
-    for (var i = 0; i < dom_table.rows.length; ++i){
-        if (dom_table.rows[i].cells[3].children[0].checked){
-            prot.proteins.push(parseInt(dom_table.rows[i].cells[3].children[0].id));
-        }
-    }*/
     var ctx = document.getElementById("renderarea").getContext("2d");
     
     var continuing = true;

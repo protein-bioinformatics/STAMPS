@@ -1572,6 +1572,13 @@ function node(data, ctx){
         this.tipp = false;
     }
     
+    
+    this.setup_label_meta = function(ctx){
+        ctx.font = (font_size / factor).toString() + "px Arial";
+        this.width = ctx.measureText(this.name).width;
+        this.height = (text_size + 2) * factor;
+    }
+    
     switch (this.type){
         case "protein":
             for (var j = 0; j < data['p'].length; ++j){
@@ -1617,8 +1624,7 @@ function node(data, ctx){
             break;
             
         case "label":
-            this.width = ctx.measureText(this.name).width;
-            this.height = (text_size + 6) * factor;
+            this.setup_label_meta(ctx);
             break;
     }
     
@@ -1890,19 +1896,11 @@ function node(data, ctx){
     this.is_mouse_over = function (mouse){
         switch (this.type){
             case "metabolite":
-                if (Math.sqrt(Math.pow(this.x - mouse.x, 2) + Math.pow(this.y - mouse.y, 2)) < radius){
-                        return true;                    
-                }
-                break;
+                return (Math.sqrt(Math.pow(this.x - mouse.x, 2) + Math.pow(this.y - mouse.y, 2)) < radius);
                 
             default:
-                if (this.x - (this.width >> 1) <= mouse.x && mouse.x <= this.x + (this.width >> 1)){
-                    if (this.y - (this.height >> 1) <= mouse.y && mouse.y <= this.y + (this.height >> 1)){
-                        return true;
-                    }
-                }
+                return (this.x - (this.width >> 1) <= mouse.x && mouse.x <= this.x + (this.width >> 1) && this.y - (this.height >> 1) <= mouse.y && mouse.y <= this.y + (this.height >> 1));
         }
-        return false;
     };
     
     this.mark_protein_checkbox = function(res){
@@ -3233,7 +3231,7 @@ function download_assay(){
             var xmlhttp_matomo = new XMLHttpRequest();
             xmlhttp_matomo.onreadystatechange = function() {
                 if (xmlhttp_matomo.readyState == 4 && xmlhttp_matomo.status == 200) {
-                    var matomo = JSON.parse(xmlhttp_matomo.responseText);
+                    var matomo = xmlhttp_matomo.responseText;
                 }
             }
             xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=BMBF Metrics&e_a=download&e_n=stamp", true);
@@ -3895,8 +3893,10 @@ function highlight_node_inner(node_id){
 
 
 function hide_search(){
-    document.getElementById("search_results").style.display = "none";
-    document.getElementById("search_background").style.display = "none";
+    var search_results = document.getElementById("search_results");
+    if (search_results) search_results.style.display = "none";
+    var search_background = document.getElementById("search_background");
+    if (search_background) search_background.style.display = "none";
 }
 
 
@@ -4069,13 +4069,14 @@ function compute_statistics(){
     
     
     var num_proteins = 0;
-    var proteins_content = [];
+    var proteins_content = new Set();
     for (var node_id in data){
         num_proteins += data[node_id].proteins.length;
         for (var j = 0; j < data[node_id].proteins.length; ++j){
-            proteins_content.push([data[node_id].proteins[j].name, node_id, j, data[node_id].proteins[j].id in basket]);
+            proteins_content.add(data[node_id].proteins[j]);
         }
     }
+    /*
     proteins_content.sort();
     for (var i = proteins_content.length - 1; i > 0; --i){
         if (proteins_content[i][0] == proteins_content[i - 1][0]){
@@ -4087,6 +4088,7 @@ function compute_statistics(){
             proteins_content.splice(i, 1);
         }
     }
+    */
     
     var num_spectra = 0;
     var valid_spectra = 0;
@@ -4097,8 +4099,8 @@ function compute_statistics(){
     var sel_peptides = 0;
     var sel_spectra = 0;
     num_validation = [0, 0, 0];
-    for (var i = 0; i < proteins_content.length; ++i){
-        var prot = protein_dictionary[data[proteins_content[i][1]].proteins[proteins_content[i][2]]];
+    proteins_content.forEach (prot_id => {
+        var prot = protein_dictionary[prot_id];
         var tmp = prot.get_statistics();
         valid_proteins += prot.filter_valid;
         num_peptides += tmp[2];
@@ -4108,12 +4110,12 @@ function compute_statistics(){
         if (prot.validation == "is") num_validation[2] += 1;
         else if (prot.validation == "prm") num_validation[1] += 1;
         else if (prot.validation == "topn") num_validation[0] += 1;
-        if (proteins_content[i][3]){
+        if (prot_id in basket){
             sel_proteins += 1;
             sel_peptides += tmp[3];
             sel_spectra += tmp[5];
         }
-    }
+    });
     
     document.getElementById("stat_num_prot").innerHTML = num_proteins;
     document.getElementById("stat_dist_prot").innerHTML = proteins_content.length;

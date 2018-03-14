@@ -453,7 +453,7 @@ main(int argc, char** argv) {
     sql_query_rest += "(select id, '', pathway_id, type, 0, x, y, 0, '', '', '' from nodes n where n.type = 'membrane' and n.pathway_id = ";
     sql_query_rest += pathway_id;
     sql_query_rest += ") union ";
-    sql_query_rest += "(select n.id, l.label, n.pathway_id, n.type, 0, n.x, n.y, 0, '', '', '' from nodes n inner join labels l on n.foreign_id = l.id where n.type = 'label' and n.pathway_id = ";
+    sql_query_rest += "(select n.id, l.label, n.pathway_id, n.type, n.foreign_id, n.x, n.y, 0, '', '', '' from nodes n inner join labels l on n.foreign_id = l.id where n.type = 'label' and n.pathway_id = ";
     sql_query_rest += pathway_id;
     sql_query_rest += ");";
     

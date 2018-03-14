@@ -86,7 +86,7 @@ function init(){
             if (cookie_data["proteins_checked"].length > 0) accession_search_parse_accessions(cookie_data["proteins_checked"]);
         }
         catch (e) {
-            console.log(e);
+            document.getElementById('cookie_information').style.display = "none";
         }
     }
     if (!read_cookie_information) document.getElementById('cookie_information').style.display = "inline";

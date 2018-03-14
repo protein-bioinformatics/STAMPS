@@ -95,6 +95,7 @@ elif node_type == "label":
     conn.commit()
     my_cur.execute("SELECT max(id) mid FROM labels;")
     max_label_id = [row for row in my_cur][0]["mid"]
+    reaction_id = max_label_id;
     
     sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, pathway_ref, x, y) VALUES (%s, %s, %s, 0, %s, %s);"
     my_cur.execute(sql_query, (pathway, node_type, max_label_id, x, y))
