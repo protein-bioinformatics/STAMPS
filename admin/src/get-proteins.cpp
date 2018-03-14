@@ -147,6 +147,7 @@ string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, 
         last_protein->definition = row[column_names_proteins[string("definition")]];
         last_protein->accession = row[column_names_proteins[string("accession")]];
         last_protein->ec_number = row[column_names_proteins[string("ec_number")]];
+        last_protein->kegg = row[column_names_proteins[string("kegg_link")]];
         last_protein->fasta = cleanFasta(row[column_names_proteins[string("fasta")]]);
         last_protein->validation = row[column_names_proteins[string("validation")]];
         last_protein->pI = predict_isoelectric_point(last_protein->fasta);

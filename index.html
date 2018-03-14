@@ -225,7 +225,7 @@ The usage, selling or handing of the contact data written in this imprint is not
         </tr><tr>
             <td width="50%" height="80%" id="function_chromosome_field" style="overflow: hidden;"></td>
             <td>
-                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0px;"><tr><th width="40%">Accession</th><th>Gene name</th><th align="right"><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(true);">select all</font><font size="-2"> / </font><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(false);">deselect all</font></th></tr></table>
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0px;"><tr><th width="20%">Accession</th><th width="20%">Gene name</th><th width="20%">Gene start</th><th width="20%">Gene end</th><th align="right"><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(true);">select all</font><font size="-2"> /<br></font><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(false);">deselect all</font></th></tr></table>
                 <div style="height: 500px; overflow-y: auto;" id="chromosome_information_table_wrapper"><div id="chromosome_information_table"></div></div>
             </td>
         </tr>
@@ -966,7 +966,7 @@ function chromosome_selection_changed(content){
                 // filtern
                 if (chr_strt >= chrom_start){
                     var checked = chrm_dat[i][9] ? "checked" : "";
-                    chr_content += "<tr><td width=\"40%\" bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][5] + "</td><td width=\"50%\" bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][1] + "</td><td bgcolor=\"" + chr_tab_colors[j & 1] + "\" align=\"right\"><input type=\"checkbox\" " + checked + " onclick=\"toggle_chromosome_protein(" + chrm_dat[i][0] + ");\"></td></tr>";
+                    chr_content += "<tr><td width=\"20%\" bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][4] + "</td><td width=\"20%\" bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][1] + "</td><td width=\"20%\" align=\"right\" bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][6] + "</td><td align=\"right\" width=\"20%\" bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][7] + "</td><td bgcolor=\"" + chr_tab_colors[j & 1] + "\" align=\"right\"><input type=\"checkbox\" " + checked + " onclick=\"toggle_chromosome_protein(" + chrm_dat[i][0] + ");\"></td></tr>";
                     currently_visible_proteins.push(chrm_dat[i]);
                     j += 1;
                 }

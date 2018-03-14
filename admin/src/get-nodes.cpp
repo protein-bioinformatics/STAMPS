@@ -321,6 +321,7 @@ main(int argc, char** argv) {
             last_protein->definition = row[column_names_proteins[string("definition")]];
             last_protein->accession = row[column_names_proteins[string("accession")]];
             last_protein->ec_number = row[column_names_proteins[string("ec_number")]];
+            last_protein->kegg = row[column_names_proteins[string("kegg_link")]];
             last_protein->validation = row[column_names_proteins[string("validation")]];
             last_protein->fasta = cleanFasta(row[column_names_proteins[string("fasta")]]);
             last_protein->mass = compute_mass(last_protein->fasta);

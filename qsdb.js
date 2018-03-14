@@ -1,14 +1,6 @@
 
 
 function init(){
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            var receive = xmlhttp.responseText;
-        }
-    }
-    xmlhttp.open("GET", "/qsdb/cgi-bin/set-counter.bin?counter=request", true);
-    xmlhttp.send();
     
     var xmlhttp_pw = new XMLHttpRequest();
     xmlhttp_pw.onreadystatechange = function() {

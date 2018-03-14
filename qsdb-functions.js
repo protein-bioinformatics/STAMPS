@@ -1334,7 +1334,7 @@ function Infobox(ctx){
         else {
             this.width = 40;
             this.height = 40;
-            this.height += 7 * line_height + 20;
+            this.height += 8 * line_height + 20;
             ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
             var prot = protein_dictionary[data[this.node_id].proteins[this.protein_id]];
             this.width = Math.max(this.width, ctx.measureText("Definition: " + prot.definition).width + 40);
@@ -1457,6 +1457,9 @@ function Infobox(ctx){
             html_content += "<hr>";
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Definition:</b> " + node_obj.definition + "</div>";
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Uniprot accession:</b> <a href=\"http://www.uniprot.org/uniprot/" + node_obj.accession + "\" target=\"blank\">" + node_obj.accession + "</a></div>";
+            
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Kegg:</b> <a href=\"http://www.genome.jp/dbget-bin/www_bget?" + node_obj.kegg_link + "\" target=\"blank\">" + node_obj.kegg_link + "</a></div>";
+            
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>EC number:</b> <a href=\"http://www.genome.jp/dbget-bin/www_bget?ec:" + node_obj.ec_number + "\" target=\"blank\">" + node_obj.ec_number + "</a></div>";
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Mass / Da:</b> " + node_obj.mass + "</div>";
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px; margin: 2px;\"><b>Coverage: " + coverage.toFixed(2) + "%</b></div>";
@@ -3193,15 +3196,6 @@ function download_assay(){
         return;
     }
     
-    var xmlhttp_c = new XMLHttpRequest();
-    xmlhttp_c.onreadystatechange = function() {
-        if (xmlhttp_c.readyState == 4 && xmlhttp_c.status == 200) {
-            var receive = xmlhttp_c.responseText;
-        }
-    }
-    xmlhttp_c.open("GET", "/qsdb/cgi-bin/set-counter.bin?counter=download", true);
-    xmlhttp_c.send();
-    
     document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("download").style.display = "inline";
     if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
@@ -4118,8 +4112,7 @@ function compute_statistics(){
     });
     
     document.getElementById("stat_num_prot").innerHTML = num_proteins;
-    document.getElementById("stat_dist_prot").innerHTML = proteins_content.length;
-    document.getElementById("stat_filter_prot").innerHTML = valid_proteins + " / " + round10(valid_proteins / proteins_content.length * 100, 1) + "%";
+    document.getElementById("stat_filter_prot").innerHTML = valid_proteins + " / " + round10(valid_proteins / proteins_content.size * 100, 1) + "%";
     document.getElementById("stat_sel_prot").innerHTML = sel_proteins;
     
     document.getElementById("stat_num_pep").innerHTML = num_peptides;

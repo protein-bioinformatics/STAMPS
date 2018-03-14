@@ -238,7 +238,7 @@ string protein::to_string(){
     sprintf(fasta_length, "%i", (int)fasta.length());
     
     char mass_str[20];
-    sprintf(mass_str, "%0.3f", mass);
+    sprintf(mass_str, "%0.4f", mass);
     
     char pI_str[20];
     sprintf(pI_str, "%0.3f", pI);
@@ -251,6 +251,7 @@ string protein::to_string(){
     str += "\"l\":" + string(fasta_length) + ",";
     str += "\"a\":\"" + accession + "\",";
     str += "\"e\":\"" + ec_number + "\",";
+    str += "\"k\":\"" + kegg + "\",";
     str += "\"v\":\"" + validation + "\",";
     str += "\"pI\":" + string(pI_str) + ",";
     str += "\"p\":[";

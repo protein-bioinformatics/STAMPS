@@ -157,6 +157,7 @@ class protein {
         float mass;
         string accession;
         string ec_number;
+        string kegg;
         string fasta;
         float pI;
         vector<peptide*> peptides;
