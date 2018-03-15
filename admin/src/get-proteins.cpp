@@ -138,6 +138,7 @@ string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, 
     
     proteins = vector< protein* >(mysql_num_rows(res), 0);
     
+    
     len_text = 1; // plus sentinal
     int p_i = 0;
     while ((row = mysql_fetch_row(res)) != NULL){
@@ -467,7 +468,7 @@ main(int argc, char** argv) {
         }    
         replaceAll(accessions, string(":"), string("','"));
         
-        sql_query_proteins = "select distinct * from proteins where unreviewed = false and accession in ('";
+        sql_query_proteins = "select distinct * from proteins where accession in ('";
         sql_query_proteins += accessions;
         sql_query_proteins += "') and species = '" + species + "';";
     }
@@ -480,7 +481,7 @@ main(int argc, char** argv) {
         }    
         replaceAll(ids, string(":"), string("','"));
         
-        sql_query_proteins = "select distinct * from proteins where unreviewed = false and id in ('";
+        sql_query_proteins = "select distinct * from proteins where id in ('";
         sql_query_proteins += ids;
         sql_query_proteins += "');";
     }

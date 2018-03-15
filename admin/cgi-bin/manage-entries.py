@@ -25,12 +25,15 @@ with open("../qsdb.conf", mode="rt") as fl:
 
 try:
     form = cgi.FieldStorage()
-    action = form.getvalue('action')
 except:
     sys.stdout.buffer.write( zlib.compress( bytes("-1", "utf-8") ) )
     exit()
     
     
+action = form.getvalue('action') if "action" in form else ""
+if len(action) == 0:
+    sys.stdout.buffer.write( zlib.compress( bytes("-8", "utf-8") ) )
+    exit()
 
 conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
 my_cur = conn.cursor()
@@ -97,20 +100,25 @@ elif action == "get":
         order_col = form.getvalue('column') if "column" in form else ""
         limit = form.getvalue('limit') if "limit" in form else ""
         filters = form.getvalue('filters') if "filters" in form else ""
+        checked = form.getvalue('checked') if "checked" in form else ""
         
         sql_query = "SELECT * from %s" % action_type
         
+        if checked != "":
+            sql_query += " INNER JOIN nodeproteincorrelations ON id = protein_id WHERE node_id = %i" % int(checked)
+        
         if len(filters) > 0:
             filters = filters.replace("\"", "").replace("'", "")
-            tokens = filters.split(":")
-            if action_type == 'proteins':
-                if len(tokens) > 3:
-                    sql_query += " INNER JOIN nodeproteincorrelations ON id = protein_id WHERE node_id = %i AND LOWER(name) LIKE '%%%s%%' AND LOWER(accession) LIKE '%%%s%%' AND LOWER(definition) LIKE '%%%s%%'" % (int(tokens[3]), tokens[0].lower(), tokens[1].lower(), tokens[2].lower())
+            tokens = filters.split(",")
                     
+            for i, token in enumerate(tokens):
+                if i == 0 and not checked:
+                    sql_query += " WHERE"
                 else:
-                    sql_query += " WHERE LOWER(name) LIKE '%%%s%%' AND LOWER(accession) LIKE '%%%s%%' AND LOWER(definition) LIKE '%%%s%%'" % (tokens[0].lower(), tokens[1].lower(), tokens[2].lower())
-            elif action_type == 'metabolites':
-                sql_query += " WHERE LOWER(name) LIKE '%%%s%%' AND LOWER(c_number) LIKE '%%%s%%' AND LOWER(formula) LIKE '%%%s%%'" % (tokens[0].lower(), tokens[1].lower(), tokens[2].lower())
+                    sql_query += " AND"
+                    
+                tt = token.split(":")
+                sql_query += " LOWER(%s) LIKE '%%%s%%'" % (tt[0], tt[1])
                 
             
         if len(order_col) > 0:
@@ -139,6 +147,13 @@ elif action == "get":
         my_cur.execute("SELECT count(*) from %s;" % action_type.replace("_num", ""))
         data = json.dumps(my_cur.fetchone()[0])
         sys.stdout.buffer.write( zlib.compress( bytes(data, "utf-8") ) )
+        
+        
+    elif action_type[-4:] == "_col":
+        my_cur.execute("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = %s AND `TABLE_NAME` = %s", (conf["mysql_db"], action_type[:-4]))
+        data = json.dumps([entry[0] for entry in my_cur])
+        sys.stdout.buffer.write( zlib.compress( bytes(data, "utf-8") ) )
+        
     
     else:
         sys.stdout.buffer.write( zlib.compress( bytes("-5", "utf-8") ) )

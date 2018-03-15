@@ -231,12 +231,30 @@
 <div id="check_spectra" class="check_spectra"></div>
 
 
-<div id="manage_entries" class="check_spectra">
-    <div id="manage_entries_select_pathways" onclick="manage_entries_show_pathways();" style="padding: 10px; display: inline-block; border: 1px solid black; cursor: pointer;">Pathways</div>
-    <div id="manage_entries_select_proteins" onclick="manage_entries_show_proteins();" style="padding: 10px; display: inline-block; border: 1px solid black; cursor: pointer;">Proteins</div>
-    <div id="manage_entries_select_metabolites" onclick="manage_entries_show_metabolites();" style="padding: 10px; display: inline-block; border: 1px solid black; cursor: pointer;">Metabolites</div>
-    <div id="manage_entries_list_field" style="padding: 10px; border: 1px solid black; width: 90%; height: 70%; overflow-y: scroll;"></div>
-    <button onclick="hide_manage_entries();">Close</button>
+<div id="manage_entries" class="global_search">
+    <table width="100%" height="100%"><tr><td align="center" valign="middle">
+        <table cellspacing=20 id="editor_select_manage" class="global_search_content" width="1000" height="700">
+            <tr>
+                <td valign="top" colspan="2">
+                    <button>Pathways</button> <button>Proteins</button> <button>Metabolites</button><p>
+                    <div id="editor_select_manage_table_wrapper" style="position: fixed; overflow-x: scroll; overflow-y: hidden; width:910px; height: 470px;">
+                        <table cellpadding="0" cellspacing="0" size=20>
+                            <tr id="editor_select_manage_table_header"></tr>
+                            <tr id="editor_select_manage_table_filters"></tr>
+                        </table>
+                        <div id="editor_select_manage_content_wrapper" style="position: relative; overflow-x: hidden; overflow-y: scroll; width: 1200px; height:470px;">
+                            <table id="editor_select_manage_table" cellspacing="0" size=20 style="border-width: 1px; border-style: solid;"></table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="left" width="50%" valign="bottom" id="editor_manage_page_navigation"></td>
+                <td align="right" valign="bottom"><button onclick="close_manage_entries();">Close</button>
+                </td>
+            </tr>
+        </table>
+    </td></tr></table>
 </div>
 
 

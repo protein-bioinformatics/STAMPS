@@ -20,6 +20,7 @@ tmp_element = -1;
 tmp_edge = -1;
 
 
+global_manage_data = -1;
 global_pathway_data = -1;
 global_protein_data = -1;
 global_metabolite_data = -1;
@@ -41,20 +42,20 @@ metabolite_max_pages = -1;
 metabolite_current_page = 0;
 metabolite_create_action = true;
 
+
+manage_sort_columns = {"proteins": {}, "pathways": {}, "metabolites": {}};
+manage_columns = {"proteins": [], "pathways": [], "metabolites": []};
+manage_current_entry = "proteins";
+manage_sort_column = 1;
+manage_max_pages = -1;
+manage_current_page = 0;
+
 max_per_page = 30;
+chromosomes = {"mouse": []};
 
 
 
 function init(){
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            var receive = xmlhttp.responseText;
-        }
-    }
-    //xmlhttp.open("GET", "set-counter.py?counter=request", true);
-    xmlhttp.open("GET", "/qsdb/cgi-bin/set-counter.bin?counter=request", true);
-    xmlhttp.send();
     
     var xmlhttp_pw = new XMLHttpRequest();
     xmlhttp_pw.onreadystatechange = function() {
@@ -75,13 +76,10 @@ function init(){
     document.body.scroll = "no";
     
     document.addEventListener('keydown', key_down, false);
-    //document.addEventListener('keyup', key_up, false);
-    //document.getElementById("search_background").addEventListener("click", hide_search, false);
     document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
     document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
-    //document.getElementById("filter_panel_background").addEventListener("click", hide_filter_panel, false);
-    //document.getElementById("infobox_html_background").addEventListener("click", hide_infobox, false);
     window.addEventListener('resize', resize_pathway_view, false);
+    window.addEventListener('resize', resize_manage_view, false);
     
     window.addEventListener('resize', resize_ms_view, false);
     document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
@@ -89,6 +87,28 @@ function init(){
     
     
     change_pathway();
+    
+    // get chromosomes
+    var xmlhttp_chr = new XMLHttpRequest();
+    xmlhttp_chr.onreadystatechange = function() {
+        if (xmlhttp_chr.readyState == 4 && xmlhttp_chr.status == 200) {
+            var ideom_data = JSON.parse(xmlhttp_chr.responseText);
+            for (var chr in ideom_data) chromosomes["mouse"].push(chr);
+            chromosomes["mouse"].sort(function(a, b) {
+                var int_a = 0;
+                var int_b = 0;
+                try{
+                    int_a = parseInt(a);
+                    int_b = parseInt(b);
+                    return int_a > int_b;
+                } catch (e) {
+                    return a > b;
+                }
+            });
+        }
+    }
+    xmlhttp_chr.open("GET", "/qsdb/cgi-bin/get-chromosomes.py?species=mouse", true);
+    xmlhttp_chr.send();
     
     
     var c = document.getElementById("renderarea");
@@ -104,15 +124,6 @@ function init(){
     c.oncontextmenu = function (event){
         return false;
     }
-    /*
-    document.getElementById("menubackground").oncontextmenu = function(event){
-        hide_custom_menu(event);
-        return false;        
-    };
-    document.getElementById("custommenu").oncontextmenu = function(event){
-        return false;        
-    };
-    */
     
     document.getElementById("toolbox").style.top = (document.getElementById("navigation").offsetHeight).toString() + "px";
     document.getElementById("renderarea").style.left = (document.getElementById("toolbox").offsetWidth).toString() + "px";
@@ -171,6 +182,55 @@ function init(){
     }
     xmlhttp_ga.open("GET", "/qsdb/cgi-bin/analytics.py?action=request&label=stamp-editor", true);
     xmlhttp_ga.send();
+    
+    
+    var xmlhttp_prot_col = new XMLHttpRequest();
+    xmlhttp_prot_col.onreadystatechange = function() {
+        if (xmlhttp_prot_col.readyState == 4 && xmlhttp_prot_col.status == 200) {
+            var request = JSON.parse(xmlhttp_prot_col.responseText);
+            for (var i = 1; i < request.length; ++i){
+                manage_sort_columns["proteins"][i.toString()] = request[i] + ":ASC";
+                manage_sort_columns["proteins"][(-i).toString()] = request[i] + ":DESC";
+                manage_columns["proteins"].push(request[i]);
+            }
+        }
+    }
+    xmlhttp_prot_col.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=proteins_col", false);
+    xmlhttp_prot_col.send();
+    
+    
+    var xmlhttp_meta_col = new XMLHttpRequest();
+    xmlhttp_meta_col.onreadystatechange = function() {
+        if (xmlhttp_meta_col.readyState == 4 && xmlhttp_meta_col.status == 200) {
+            var request = JSON.parse(xmlhttp_meta_col.responseText);
+            for (var i = 1; i < request.length; ++i){
+                manage_sort_columns["metabolites"][i.toString()] = request[i] + ":ASC";
+                manage_sort_columns["metabolites"][(-i).toString()] = request[i] + ":DESC";
+                manage_columns["metabolites"].push(request[i]);
+            }
+        }
+    }
+    xmlhttp_meta_col.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=metabolites_col", false);
+    xmlhttp_meta_col.send();
+    
+    
+    var xmlhttp_pw_col = new XMLHttpRequest();
+    xmlhttp_pw_col.onreadystatechange = function() {
+        if (xmlhttp_pw_col.readyState == 4 && xmlhttp_pw_col.status == 200) {
+            var request = JSON.parse(xmlhttp_pw_col.responseText);
+            for (var i = 1; i < request.length; ++i){
+                manage_sort_columns["pathways"][i.toString()] = request[i] + ":ASC";
+                manage_sort_columns["pathways"][(-i).toString()] = request[i] + ":DESC";
+                manage_columns["pathways"].push(request[i]);
+            }
+        }
+    }
+    xmlhttp_pw_col.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=pathways_col", false);
+    xmlhttp_pw_col.send();
+    
+    
+    manage_change_entity("proteins");
+    resize_manage_view();
 }
 
 
@@ -336,6 +396,7 @@ function mouse_click_listener(e){
                     document.getElementById("editor_select_protein_table_filter_node").checked = false;
                     
                     selected_protein_node = highlight_element.id;
+                    current_protein_set = new Set(highlight_element.proteins);
                     editor_fill_protein_table();
                     document.getElementById("editor_select_protein").style.display = "inline";
                     document.getElementById("waiting_background").style.display = "inline";
@@ -516,7 +577,7 @@ function editor_update_protein_node(){
     xmlhttp_set.send();
     
     if (continuing){
-    
+        var request_prot = "/qsdb/cgi-bin/get-proteins.bin?ids=" + prot.proteins.join(":") + "&species=mouse";
         // get proteins
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function() {
@@ -525,7 +586,7 @@ function editor_update_protein_node(){
             }
         }
         
-        xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?ids=" + prot.proteins.join(":") + "&species=mouse", false);
+        xmlhttp.open("GET", request_prot, false);
         xmlhttp.send();
     
     }
@@ -1091,132 +1152,15 @@ function manage_entries(){
         document.getElementById("renderarea").style.filter = "blur(5px)";
         document.getElementById("navigation").style.filter = "blur(5px)";
     }
-    
-    manage_entries_show_pathways();
+    manage_fill_protein_table();
 }
 
-
-function manage_entries_show_pathways(){
-    // get functions
-    var xmlhttp_pathways = new XMLHttpRequest();
-    xmlhttp_pathways.onreadystatechange = function() {
-        if (xmlhttp_pathways.readyState == 4 && xmlhttp_pathways.status == 200) {
-            var pathway_data = JSON.parse(xmlhttp_pathways.responseText);
-            document.getElementById("manage_entries_list_field").innerHTML = "";
-            
-            
-            pathway_data.sort(function(a, b) {
-                return a[1] > b[1];
-            });
-            
-            var dom_table = document.createElement("table");
-            document.getElementById("manage_entries_list_field").appendChild(dom_table);
-            dom_table.setAttribute("id", "manage_entries_table");
-            dom_table.setAttribute("width", "100%"); 
-            dom_table.setAttribute("cellspacing", "0"); 
-            dom_table.setAttribute("border", "0");
-            
-            for (var line = 0; line < pathway_data.length; ++line){
-                var bg_color = (line & 1) ? "#DDDDDD" : "white";
-                var dom_tr = document.createElement("tr");
-                dom_table.appendChild(dom_tr);
-                dom_tr.setAttribute("id", pathway_data[line][0]);
-                
-                var dom_td = document.createElement("td");
-                dom_tr.appendChild(dom_td);
-                dom_td.setAttribute("bgcolor", bg_color);
-                dom_td.setAttribute("width", "100%");
-                
-                var dom_text = document.createTextNode(pathway_data[line][1]);
-                dom_td.appendChild(dom_text);
-            }
-        }
-    }
-    xmlhttp_pathways.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=pathways", true);
-    xmlhttp_pathways.send();
+function close_manage_entries(){
+    document.getElementById("manage_entries").style.display = "none";
+    document.getElementById("waiting_background").style.display = "none";
+    document.getElementById("renderarea").style.filter = "";
+    document.getElementById("navigation").style.filter = "";
 }
-
-
-function manage_entries_show_proteins(){
-    // get functions
-    var xmlhttp_proteins = new XMLHttpRequest();
-    xmlhttp_proteins.onreadystatechange = function() {
-        if (xmlhttp_proteins.readyState == 4 && xmlhttp_proteins.status == 200) {
-            var protein_data = JSON.parse(xmlhttp_proteins.responseText);
-            document.getElementById("manage_entries_list_field").innerHTML = "";
-            
-            
-            protein_data.sort(function(a, b) {
-                return a[1] > b[1];
-            });
-            
-            var dom_table = document.createElement("table");
-            document.getElementById("manage_entries_list_field").appendChild(dom_table);
-            dom_table.setAttribute("id", "manage_entries_table");
-            dom_table.setAttribute("width", "100%"); 
-            dom_table.setAttribute("cellspacing", "0"); 
-            dom_table.setAttribute("border", "0");
-            
-            for (var line = 0; line < protein_data.length; ++line){
-                var bg_color = (line & 1) ? "#DDDDDD" : "white";
-                var dom_tr = document.createElement("tr");
-                dom_table.appendChild(dom_tr);
-                dom_tr.setAttribute("id", protein_data[line][0]);
-                
-                var dom_td = document.createElement("td");
-                dom_tr.appendChild(dom_td);
-                dom_td.setAttribute("bgcolor", bg_color);
-                dom_td.setAttribute("width", "100%");
-                
-                var dom_text = document.createTextNode(protein_data[line][1] + " | " + protein_data[line][2]);
-                dom_td.appendChild(dom_text);
-            }
-        }
-    }
-    xmlhttp_proteins.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=proteins", true);
-    xmlhttp_proteins.send();
-}
-
-
-function manage_entries_show_metabolites(){
-    // get functions
-    var xmlhttp_metabolites = new XMLHttpRequest();
-    xmlhttp_metabolites.onreadystatechange = function() {
-        if (xmlhttp_metabolites.readyState == 4 && xmlhttp_metabolites.status == 200) {
-            var metabolite_data = JSON.parse(xmlhttp_metabolites.responseText);
-            document.getElementById("manage_entries_list_field").innerHTML = "";
-            
-            metabolite_data.sort(function(a, b) {
-                return a[1] > b[1];
-            });
-            
-            var dom_table = document.createElement("table");
-            document.getElementById("manage_entries_list_field").appendChild(dom_table);
-            dom_table.setAttribute("id", "manage_entries_table");
-            dom_table.setAttribute("width", "100%"); 
-            dom_table.setAttribute("cellspacing", "0"); 
-            dom_table.setAttribute("border", "0");
-            
-            for (var line = 0; line < metabolite_data.length; ++line){
-                var bg_color = (line & 1) ? "#DDDDDD" : "white";
-                var dom_tr = document.createElement("tr");
-                dom_table.appendChild(dom_tr);
-                dom_tr.setAttribute("id", metabolite_data[line][0]);
-                
-                var dom_td = document.createElement("td");
-                dom_tr.appendChild(dom_td);
-                dom_td.setAttribute("bgcolor", bg_color);
-                dom_td.setAttribute("width", "100%");
-                
-                var dom_text = document.createTextNode(metabolite_data[line][1]);
-                dom_td.appendChild(dom_text);
-            }
-        }
-    }
-    xmlhttp_metabolites.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=metabolites", true);
-    xmlhttp_metabolites.send();
-}
-
 
 
 
@@ -1229,7 +1173,7 @@ function editor_fill_metabolite_table(){
     request += "&column=" + metabolite_sort_columns[metabolite_sort_column];
     request += "&limit=" + (metabolite_current_page * max_per_page).toString() + ":" + max_per_page.toString();
     if (filter_name != "" || filter_cnumber != "" || filter_formula != ""){
-        request += "&filters=" + filter_name + ":" + filter_cnumber + ":" + filter_formula;
+        request += "&filters=name:" + filter_name + ",c_number:" + filter_cnumber + ",formula:" + filter_formula;
     }
     request = "/qsdb/admin/cgi-bin/manage-entries.py?" + request;
     
@@ -1407,11 +1351,11 @@ function editor_fill_protein_table(){
     var request = "action=get&type=proteins";
     request += "&column=" + protein_sort_columns[protein_sort_column];
     request += "&limit=" + (protein_current_page * max_per_page).toString() + ":" + max_per_page.toString();
-    if (filter_name != "" || filter_accession != "" || filter_description != "" || filter_node){
-        request += "&filters=" + filter_name + ":" + filter_accession + ":" + filter_description + (filter_node ? ":" + selected_protein_node : "");
+    if (filter_name != "" || filter_accession != "" || filter_description != ""){
+        request += "&filters=name:" + filter_name + ",accession:" + filter_accession + ",definition:" + filter_description;
     }
+    if (filter_node) request += "&checked=" + selected_protein_node;
     request = "/qsdb/admin/cgi-bin/manage-entries.py?" + request;
-    
     
     var sign_up = String.fromCharCode(9652);
     var sign_down = String.fromCharCode(9662);
@@ -1489,7 +1433,6 @@ function editor_fill_protein_table(){
         dom_b.innerHTML = "&nbsp;»&nbsp;";
     }
     
-    current_protein_set = new Set(highlight_element.proteins);
     
     var xmlhttp_protein = new XMLHttpRequest();
     xmlhttp_protein.onreadystatechange = function() {
@@ -1504,9 +1447,9 @@ function editor_fill_protein_table(){
                     case -1:
                         return a[1] < b[1];
                     case 2:
-                        return a[6] > b[6];
+                        return a[5] > b[5];
                     case -2:
-                        return a[6] < b[6];
+                        return a[5] < b[5];
                     case 3:
                         return a[2] > b[2];
                     case -3:
@@ -1533,7 +1476,7 @@ function editor_fill_protein_table(){
                 
                 var dom_td2 = document.createElement("td");
                 dom_tr.appendChild(dom_td2);
-                dom_td2.innerHTML = row[6];
+                dom_td2.innerHTML = row[5];
                 dom_td2.setAttribute("bgcolor", bg_color);
                 dom_td2.setAttribute("width", "120px");
                 dom_td2.setAttribute("style", "min-width: 120px; max-width: 120px;");
@@ -1560,6 +1503,319 @@ function editor_fill_protein_table(){
     }
     xmlhttp_protein.open("GET", encodeURI(request), false);
     xmlhttp_protein.send();
+}
+
+
+
+function manage_change_entity(entity){
+    manage_change_entity = entity;
+    var xmlhttp_entity = new XMLHttpRequest();
+    xmlhttp_entity.onreadystatechange = function() {
+        if (xmlhttp_entity.readyState == 4 && xmlhttp_entity.status == 200) {
+            manage_max_pages = Math.floor(parseInt(xmlhttp_entity.responseText) / max_per_page) + 1;
+        }
+    }
+    xmlhttp_entity.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=" + entity + "_num", true);
+    xmlhttp_entity.send();
+    manage_current_page = 0;
+    
+    var dom_tr = document.getElementById("editor_select_manage_table_filters");
+    for (var i = 0; i < manage_columns[entity].length; ++i){
+        var dom_td = document.createElement("td");
+        dom_tr.appendChild(dom_td);
+        var dom_input = document.createElement("input");
+        dom_td.appendChild(dom_input);
+        dom_input.setAttribute("type", "text");
+        dom_input.setAttribute("style", "width: 100%; box-sizing: border-box;");
+        dom_input.setAttribute("id", "editor_select_manage_table_filter_" + i.toString());
+        dom_input.setAttribute("onkeyup", "protein_current_page = 0; manage_fill_protein_table();");
+    }
+}
+
+
+
+function manage_fill_protein_table(){
+    
+    var filters = "";
+    for (var i = 0; i < manage_columns[manage_change_entity].length; ++i){
+        var filter_field = document.getElementById("editor_select_manage_table_filter_" + i.toString());
+        if (filter_field.value.length > 0){
+            if (filters.length > 0) filters += ",";
+            filters += manage_columns[manage_change_entity][i] + ":" + filter_field.value;
+        }
+    }
+    
+    var request = "action=get&type=" + manage_change_entity;
+    request += "&column=" + manage_sort_columns[manage_current_entry][manage_sort_column];
+    request += "&limit=" + (manage_current_page * max_per_page).toString() + ":" + max_per_page.toString();
+    if (filters.length > 0) request += "&filters=" + filters;
+    request = "/qsdb/admin/cgi-bin/manage-entries.py?" + request;
+    
+    
+    
+    var sign_up = String.fromCharCode(9652);
+    var sign_down = String.fromCharCode(9662);
+    
+    
+    /*
+    <td><input type='text' id="editor_select_protein_table_filter_namee" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
+    <td><input type='text' id="editor_select_protein_table_filter_accessione" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
+    <td><input type='text' id="editor_select_protein_table_filter_descriptione" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
+    <td width="1"><input type="checkbox" style="display: inline; margin-right: 25px;" onchange="protein_current_page = 0; editor_fill_protein_table();" id="editor_select_protein_table_filter_node"><td>
+    */
+    
+    
+    
+    var dom_table_header = document.getElementById("editor_select_manage_table_header");
+    dom_table_header.innerHTML = ""
+    for (var i = 1; i <= 12; ++i){
+        var dom_th_name = document.createElement("th");
+        dom_table_header.appendChild(dom_th_name);
+        dom_th_name.setAttribute("onclick", "manage_sort_column = " + ((manage_sort_column == i) ? "-" + i.toString() + ";" : i.toString() + ";") + "; manage_fill_protein_table();");
+        var col_name = manage_sort_columns[manage_current_entry][i].split(":")[0];
+        dom_th_name.innerHTML = col_name + ((manage_sort_column == i) ? " " + sign_up : ((manage_sort_column == -i) ? " " + sign_down : ""));
+        if (i != 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 200px; max-width: 200px;");
+        else dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
+    }
+    
+    
+    
+    /*
+    var dom_th_uniprot = document.createElement("th");
+    dom_table_header.appendChild(dom_th_uniprot);
+    dom_th_uniprot.setAttribute("onclick", "manage_sort_column = " + ((manage_sort_column == 2) ? " -2;" : "2;") + "; manage_fill_protein_table();");
+    dom_th_uniprot.innerHTML = "Uniprot" + ((manage_sort_column == 2) ? " " + sign_up : ((manage_sort_column == -2) ? " " + sign_down : ""));
+    dom_th_uniprot.setAttribute("width", "120px");
+    dom_th_uniprot.setAttribute("style", "cursor: pointer; min-width: 120px; max-width: 120px;");
+    
+    
+    var dom_th_description = document.createElement("th");
+    dom_table_header.appendChild(dom_th_description);
+    dom_th_description.setAttribute("onclick", "manage_sort_column = " + ((manage_sort_column == 3) ? " -3;" : "3;") + "; manage_fill_protein_table();");
+    dom_th_description.setAttribute("style", "cursor: pointer;");
+    dom_th_description.innerHTML = "Description" + ((manage_sort_column == 3) ? " " + sign_up : ((manage_sort_column == -3) ? " " + sign_down : ""));
+    */
+    
+    
+    
+    
+    
+    
+    var dom_nav_cell = document.getElementById("editor_manage_page_navigation");
+    dom_nav_cell.innerHTML = "";
+    if (manage_current_page > 0){
+        var dom_b = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b);
+        dom_b.setAttribute("onclick", "manage_current_page = 0; manage_fill_protein_table();");
+        dom_b.setAttribute("style", "cursor: pointer;");
+        dom_b.innerHTML = "&nbsp;«&nbsp;";
+        
+        var dom_b2 = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b2);
+        dom_b2.setAttribute("onclick", "manage_current_page -= 1; manage_fill_protein_table();");
+        dom_b2.setAttribute("style", "cursor: pointer;");
+        dom_b2.innerHTML = "&nbsp;‹&nbsp;&nbsp;";
+    }
+    
+        
+    var dom_page = document.createElement("select");
+    dom_nav_cell.appendChild(dom_page);
+    dom_page.setAttribute("style", "display: inline;");
+    dom_page.setAttribute("onchange", "manage_current_page = this.selectedIndex; manage_fill_protein_table();");
+    for (var i = 0; i < manage_max_pages; ++i){
+        var dom_option = document.createElement("option");
+        dom_page.appendChild(dom_option);
+        dom_option.innerHTML = (i + 1).toString();
+    }
+    dom_page.selectedIndex = manage_current_page;
+    
+    if (manage_current_page + 1 < manage_max_pages){
+        
+        var dom_b2 = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b2);
+        dom_b2.setAttribute("onclick", "manage_current_page += 1; manage_fill_protein_table();");
+        dom_b2.setAttribute("style", "cursor: pointer;");
+        dom_b2.innerHTML = "&nbsp;&nbsp;›&nbsp;";
+        
+        var dom_b = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b);
+        dom_b.setAttribute("onclick", "manage_current_page = manage_max_pages - 1; manage_fill_protein_table();");
+        dom_b.setAttribute("style", "cursor: pointer;");
+        dom_b.innerHTML = "&nbsp;»&nbsp;";
+    }
+    
+    var xmlhttp_manage = new XMLHttpRequest();
+    xmlhttp_manage.onreadystatechange = function() {
+        if (xmlhttp_manage.readyState == 4 && xmlhttp_manage.status == 200) {
+            global_manage_data = JSON.parse(xmlhttp_manage.responseText);
+            var global_manage_data_sorted = [];
+            for (var manage_id in global_manage_data) global_manage_data_sorted.push(global_manage_data[manage_id]);
+            global_manage_data_sorted = global_manage_data_sorted.sort(function(a, b) {
+                if (manage_sort_column > 0) return a[manage_sort_column] > b[manage_sort_column];
+                return a[manage_sort_column] < b[manage_sort_column];
+            });
+            
+            
+            var dom_table = document.getElementById("editor_select_manage_table");
+            dom_table.innerHTML = "";
+    
+            for (var i = 0; i < global_manage_data_sorted.length; ++i){
+                var bg_color = (i & 1) ? "#DDDDDD" : "white";
+                var row = global_manage_data_sorted[i];
+                
+                var dom_tr = document.createElement("tr");
+                dom_table.appendChild(dom_tr);
+                
+                for (var j = 1; j < row.length; ++j){
+                    var dom_td = document.createElement("td");
+                    dom_tr.appendChild(dom_td);
+                    dom_td.setAttribute("bgcolor", bg_color);
+                    
+                    if (j == 12){
+                        dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                        var dom_select = document.createElement("select");
+                        dom_td.appendChild(dom_select);
+                        
+                        var selected_option = 0;
+                        var dom_option1 = document.createElement("option");
+                        dom_select.appendChild(dom_option1);
+                        dom_option1.innerHTML = "is";
+                        if (row[j] == "is") selected_option = 0;
+                        
+                        var dom_option2 = document.createElement("option");
+                        dom_select.appendChild(dom_option2);
+                        dom_option2.innerHTML = "prm";
+                        if (row[j] == "prm") selected_option = 1;
+                        
+                        var dom_option3 = document.createElement("option");
+                        dom_select.appendChild(dom_option3);
+                        dom_option3.innerHTML = "topn";
+                        if (row[j] == "topn") selected_option = 2;
+                        
+                        dom_select.selectedIndex = selected_option;
+                    }
+                    else if (j == 9){
+                        dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                        var dom_select = document.createElement("select");
+                        dom_td.appendChild(dom_select);
+                        var selected_option = 0;
+                        for (var k = 0; k < chromosomes["mouse"].length; ++k){
+                            var dom_option = document.createElement("option");
+                            dom_select.appendChild(dom_option);
+                            dom_option.innerHTML = chromosomes["mouse"][k];
+                            if (row[j] == chromosomes["mouse"][k]) selected_option = k;
+                        }
+                        dom_select.selectedIndex = selected_option;
+                    }
+                    else if (j == 8){
+                        var dom_input = document.createElement("input");
+                        dom_td.appendChild(dom_input);
+                        dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                        dom_input.setAttribute("type", "checkbox");
+                        if (row[j] == "1") dom_input.setAttribute("checked", "true");
+                    }
+                    else if (j == 7){
+                        dom_td.setAttribute("style", "float:left; word-wrap:break-word; display: block; min-width: 1000px; max-width: 1000px;");
+                        var dom_div = document.createElement("div");
+                        dom_td.appendChild(dom_div);
+                        dom_div.setAttribute("onclick", "change_textarea_type(this, true);");
+                        dom_div.setAttribute("style", "padding: 5px;");
+                        dom_div.innerHTML = row[j];
+                    
+                    }
+                    else if (j == 3){
+                        dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                        var dom_select = document.createElement("select");
+                        dom_td.appendChild(dom_select);
+                        var dom_option = document.createElement("option");
+                        dom_select.appendChild(dom_option);
+                        dom_option.innerHTML = "mouse";
+                    }
+                    else {
+                        dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                        var dom_div = document.createElement("div");
+                        dom_td.appendChild(dom_div);
+                        dom_div.setAttribute("onclick", "change_textfield_type(this, true);");
+                        dom_div.setAttribute("style", "padding: 5px;");
+                        dom_div.innerHTML = row[j];
+                    }                    
+                    
+                }
+            }
+            
+            
+        }
+    }
+    xmlhttp_manage.open("GET", encodeURI(request), false);
+    xmlhttp_manage.send();
+    document.getElementById("editor_select_manage_content_wrapper").style.width = (document.getElementById("editor_select_manage_table_header").offsetWidth).toString() + "px";
+}
+
+
+function change_textfield_type(dom_obj, to_text){
+    if (to_text){
+        var parent = dom_obj.parentNode;
+        var content = dom_obj.innerHTML;
+        parent.innerHTML = "";
+        dom_obj = document.createElement("input");
+        parent.appendChild(dom_obj);
+        dom_obj.setAttribute("type", "text");
+        dom_obj.setAttribute("value", content);
+        dom_obj.setAttribute("onkeyup", "if (event.which == '13') change_textfield_type(this, false);");
+        dom_obj.setAttribute("onblur", "change_textfield_type(this, false);");
+        dom_obj.focus();
+        dom_obj.setSelectionRange(content.length, content.length);
+    }
+    else {
+        var parent = dom_obj.parentNode;
+        var content = dom_obj.value;
+        parent.innerHTML = "";
+        dom_obj = document.createElement("div");
+        parent.appendChild(dom_obj);
+        dom_obj.setAttribute("onclick", "change_textfield_type(this, true);");
+        dom_obj.setAttribute("style", "padding: 5px;");
+        dom_obj.innerHTML = content;
+    }
+}
+
+
+function change_textarea_type(dom_obj, to_text){
+    if (to_text){
+        var parent = dom_obj.parentNode;
+        var content = dom_obj.innerHTML;
+        parent.innerHTML = "";
+        dom_obj = document.createElement("textarea");
+        parent.appendChild(dom_obj);
+        dom_obj.innerHTML = content;
+        dom_obj.setAttribute("onkeyup", "if (event.which == '13') change_textarea_type(this, false);");
+        dom_obj.setAttribute("onblur", "change_textarea_type(this, false);");
+        dom_obj.setAttribute("style", "height: 200px; min-width: 980px; max-width: 980px;");
+        dom_obj.focus();
+        dom_obj.setSelectionRange(content.length, content.length);
+    }
+    else {
+        var parent = dom_obj.parentNode;
+        var content = dom_obj.innerHTML;
+        parent.innerHTML = "";
+        dom_obj = document.createElement("div");
+        parent.appendChild(dom_obj);
+        dom_obj.setAttribute("onclick", "change_textarea_type(this, true);");
+        dom_obj.setAttribute("style", "padding: 5px;");
+        dom_obj.innerHTML = content;
+    }
+}
+
+
+
+function resize_manage_view(){
+    var w_width = window.innerWidth * 0.9;
+    var w_height = window.innerHeight * 0.9;
+    document.getElementById("editor_select_manage").style.width = w_width.toString() + "px";
+    document.getElementById("editor_select_manage").style.height = w_height.toString() + "px";
+    document.getElementById("editor_select_manage_table_wrapper").style.width = (w_width - 90).toString() + "px";
+    document.getElementById("editor_select_manage_table_wrapper").style.height = (w_height - 200).toString() + "px";
+    document.getElementById("editor_select_manage_content_wrapper").style.width = (document.getElementById("editor_select_manage_table_header").offsetWidth).toString() + "px";
+    document.getElementById("editor_select_manage_content_wrapper").style.height = (w_height - 230).toString() + "px";
 }
 
 

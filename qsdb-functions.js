@@ -4471,12 +4471,12 @@ function request_load_proteins(data, check, post_load){
     for (var node_id in data){
         var p_id = data[node_id]["id"];
         var prot = 0;
-        if (!(p_id in protein_dictionary)){
-            var prot = new Protein(data[node_id], 0);
-            protein_dictionary[prot.id] = prot;
+        if (p_id in protein_dictionary){
+            prot = protein_dictionary[prot.id];
         }
         else {
-            prot = protein_dictionary[prot.id];
+            prot = new Protein(data[node_id], 0);
+            protein_dictionary[prot.id] = prot;
         }
         prot.filtering();
         if (prot.filter_valid && !post_load) basket[prot.id] = prot;

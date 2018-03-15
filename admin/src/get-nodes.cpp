@@ -289,7 +289,7 @@ main(int argc, char** argv) {
     }
     
     
-    string sql_query_proteins = "select n.id nid, p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where p.unreviewed = false and n.pathway_id = ";
+    string sql_query_proteins = "select n.id nid, p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ";
     sql_query_proteins += pathway_id;
     sql_query_proteins += " and n.type = 'protein' and p.species = '";
     sql_query_proteins += species;
