@@ -112,11 +112,7 @@ elif action == "get":
             tokens = filters.split(",")
                     
             for i, token in enumerate(tokens):
-                if i == 0 and not checked:
-                    sql_query += " WHERE"
-                else:
-                    sql_query += " AND"
-                    
+                sql_query += " WHERE" if i == 0 and not checked else " AND"
                 tt = token.split(":")
                 sql_query += " LOWER(%s) LIKE '%%%s%%'" % (tt[0], tt[1])
                 

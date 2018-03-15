@@ -1552,17 +1552,9 @@ function manage_fill_protein_table(){
     request = "/qsdb/admin/cgi-bin/manage-entries.py?" + request;
     
     
-    
     var sign_up = String.fromCharCode(9652);
     var sign_down = String.fromCharCode(9662);
     
-    
-    /*
-    <td><input type='text' id="editor_select_protein_table_filter_namee" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
-    <td><input type='text' id="editor_select_protein_table_filter_accessione" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
-    <td><input type='text' id="editor_select_protein_table_filter_descriptione" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
-    <td width="1"><input type="checkbox" style="display: inline; margin-right: 25px;" onchange="protein_current_page = 0; editor_fill_protein_table();" id="editor_select_protein_table_filter_node"><td>
-    */
     
     
     
@@ -1577,27 +1569,6 @@ function manage_fill_protein_table(){
         if (i != 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 200px; max-width: 200px;");
         else dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
     }
-    
-    
-    
-    /*
-    var dom_th_uniprot = document.createElement("th");
-    dom_table_header.appendChild(dom_th_uniprot);
-    dom_th_uniprot.setAttribute("onclick", "manage_sort_column = " + ((manage_sort_column == 2) ? " -2;" : "2;") + "; manage_fill_protein_table();");
-    dom_th_uniprot.innerHTML = "Uniprot" + ((manage_sort_column == 2) ? " " + sign_up : ((manage_sort_column == -2) ? " " + sign_down : ""));
-    dom_th_uniprot.setAttribute("width", "120px");
-    dom_th_uniprot.setAttribute("style", "cursor: pointer; min-width: 120px; max-width: 120px;");
-    
-    
-    var dom_th_description = document.createElement("th");
-    dom_table_header.appendChild(dom_th_description);
-    dom_th_description.setAttribute("onclick", "manage_sort_column = " + ((manage_sort_column == 3) ? " -3;" : "3;") + "; manage_fill_protein_table();");
-    dom_th_description.setAttribute("style", "cursor: pointer;");
-    dom_th_description.innerHTML = "Description" + ((manage_sort_column == 3) ? " " + sign_up : ((manage_sort_column == -3) ? " " + sign_down : ""));
-    */
-    
-    
-    
     
     
     
@@ -1652,7 +1623,7 @@ function manage_fill_protein_table(){
             for (var manage_id in global_manage_data) global_manage_data_sorted.push(global_manage_data[manage_id]);
             global_manage_data_sorted = global_manage_data_sorted.sort(function(a, b) {
                 if (manage_sort_column > 0) return a[manage_sort_column] > b[manage_sort_column];
-                return a[manage_sort_column] < b[manage_sort_column];
+                return a[-manage_sort_column] < b[-manage_sort_column];
             });
             
             
@@ -1693,6 +1664,9 @@ function manage_fill_protein_table(){
                         if (row[j] == "topn") selected_option = 2;
                         
                         dom_select.selectedIndex = selected_option;
+                        dom_select.setAttribute("onchange", "change_select_type(this);");
+                        dom_select.prot_id = row[0];
+                        dom_select.col_id = j;
                     }
                     else if (j == 9){
                         dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
@@ -1706,6 +1680,9 @@ function manage_fill_protein_table(){
                             if (row[j] == chromosomes["mouse"][k]) selected_option = k;
                         }
                         dom_select.selectedIndex = selected_option;
+                        dom_select.setAttribute("onchange", "change_select_type(this);");
+                        dom_select.prot_id = row[0];
+                        dom_select.col_id = j;
                     }
                     else if (j == 8){
                         var dom_input = document.createElement("input");
@@ -1713,6 +1690,9 @@ function manage_fill_protein_table(){
                         dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
                         dom_input.setAttribute("type", "checkbox");
                         if (row[j] == "1") dom_input.setAttribute("checked", "true");
+                        dom_input.setAttribute("onchange", "change_checkbox_type(this);");
+                        dom_input.prot_id = row[0];
+                        dom_input.col_id = j;
                     }
                     else if (j == 7){
                         dom_td.setAttribute("style", "float:left; word-wrap:break-word; display: block; min-width: 1000px; max-width: 1000px;");
@@ -1721,12 +1701,17 @@ function manage_fill_protein_table(){
                         dom_div.setAttribute("onclick", "change_textarea_type(this, true);");
                         dom_div.setAttribute("style", "padding: 5px;");
                         dom_div.innerHTML = row[j];
+                        dom_div.prot_id = row[0];
+                        dom_div.col_id = j;
                     
                     }
                     else if (j == 3){
                         dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
                         var dom_select = document.createElement("select");
                         dom_td.appendChild(dom_select);
+                        dom_select.setAttribute("onchange", "change_select_type(this);");
+                        dom_select.prot_id = row[0];
+                        dom_select.col_id = j;
                         var dom_option = document.createElement("option");
                         dom_select.appendChild(dom_option);
                         dom_option.innerHTML = "mouse";
@@ -1738,6 +1723,8 @@ function manage_fill_protein_table(){
                         dom_div.setAttribute("onclick", "change_textfield_type(this, true);");
                         dom_div.setAttribute("style", "padding: 5px;");
                         dom_div.innerHTML = row[j];
+                        dom_div.prot_id = row[0];
+                        dom_div.col_id = j;
                     }                    
                     
                 }
@@ -1752,10 +1739,45 @@ function manage_fill_protein_table(){
 }
 
 
+function change_checkbox_type(dom_obj){
+    var prot_id = dom_obj.prot_id;
+    var col_id = dom_obj.col_id;
+    var content = dom_obj.checked;
+    var request = "action=set&table=" + manage_current_entry + "&id=" + prot_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + (content ? "1" : "0");
+       
+    var result = update_entry(request);
+    if (!result){
+        alert("Error: database could not be updated.");
+    }
+    else {
+        manage_fill_protein_table();
+    }
+}
+
+
+function change_select_type(dom_obj){
+    var prot_id = dom_obj.prot_id;
+    var col_id = dom_obj.col_id;
+    var content = dom_obj[dom_obj.selectedIndex].value;
+    var request = "action=set&table=" + manage_current_entry + "&id=" + prot_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
+       
+    var result = update_entry(request);
+    if (!result){
+        alert("Error: database could not be updated.");
+    }
+    else {
+        manage_fill_protein_table();
+    }
+}
+
+
 function change_textfield_type(dom_obj, to_text){
     if (to_text){
         var parent = dom_obj.parentNode;
         var content = dom_obj.innerHTML;
+        var prot_id = dom_obj.prot_id;
+        var col_id = dom_obj.col_id;
+        
         parent.innerHTML = "";
         dom_obj = document.createElement("input");
         parent.appendChild(dom_obj);
@@ -1763,17 +1785,34 @@ function change_textfield_type(dom_obj, to_text){
         dom_obj.setAttribute("value", content);
         dom_obj.setAttribute("onkeyup", "if (event.which == '13') change_textfield_type(this, false);");
         dom_obj.setAttribute("onblur", "change_textfield_type(this, false);");
+        dom_obj.prot_id = prot_id;
+        dom_obj.col_id = col_id;
         dom_obj.focus();
         dom_obj.setSelectionRange(content.length, content.length);
     }
     else {
         var parent = dom_obj.parentNode;
         var content = dom_obj.value;
+        var prot_id = dom_obj.prot_id;
+        var col_id = dom_obj.col_id;
+        
+        var request = "action=set&table=" + manage_current_entry + "&id=" + prot_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
+        
+        var result = update_entry(request);
+        if (!result){
+            alert("Error: database could not be updated.");
+        }
+        else {
+            manage_fill_protein_table();
+        }
+        
         parent.innerHTML = "";
         dom_obj = document.createElement("div");
         parent.appendChild(dom_obj);
         dom_obj.setAttribute("onclick", "change_textfield_type(this, true);");
         dom_obj.setAttribute("style", "padding: 5px;");
+        dom_obj.prot_id = prot_id;
+        dom_obj.col_id = col_id;
         dom_obj.innerHTML = content;
     }
 }
@@ -1783,6 +1822,9 @@ function change_textarea_type(dom_obj, to_text){
     if (to_text){
         var parent = dom_obj.parentNode;
         var content = dom_obj.innerHTML;
+        var prot_id = dom_obj.prot_id;
+        var col_id = dom_obj.col_id;
+        
         parent.innerHTML = "";
         dom_obj = document.createElement("textarea");
         parent.appendChild(dom_obj);
@@ -1790,17 +1832,33 @@ function change_textarea_type(dom_obj, to_text){
         dom_obj.setAttribute("onkeyup", "if (event.which == '13') change_textarea_type(this, false);");
         dom_obj.setAttribute("onblur", "change_textarea_type(this, false);");
         dom_obj.setAttribute("style", "height: 200px; min-width: 980px; max-width: 980px;");
+        dom_obj.prot_id = prot_id;
+        dom_obj.col_id = col_id;
         dom_obj.focus();
         dom_obj.setSelectionRange(content.length, content.length);
     }
     else {
         var parent = dom_obj.parentNode;
-        var content = dom_obj.innerHTML;
+        var content = dom_obj.value;
+        var prot_id = dom_obj.prot_id;
+        var col_id = dom_obj.col_id;
+        
+        var request = "action=set&table=" + manage_current_entry + "&id=" + prot_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
+        
+        var result = update_entry(request);
+        if (!result){
+            alert("Error: database could not be updated.");
+        }
+        else {
+            manage_fill_protein_table();
+        }
         parent.innerHTML = "";
         dom_obj = document.createElement("div");
         parent.appendChild(dom_obj);
         dom_obj.setAttribute("onclick", "change_textarea_type(this, true);");
         dom_obj.setAttribute("style", "padding: 5px;");
+        dom_obj.prot_id = prot_id;
+        dom_obj.col_id = col_id;
         dom_obj.innerHTML = content;
     }
 }
