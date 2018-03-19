@@ -39,21 +39,26 @@ conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user =
 my_cur = conn.cursor()
     
 
-if action not in ["get", "set"]:
+if action not in ["get", "set", "insert"]:
     sys.stdout.buffer.write( zlib.compress( bytes("-2", "utf-8") ) )
     exit()
 
 if action == "set":
-    try:
-        set_table = form.getvalue('table')
-        set_id = form.getvalue('id')
-        set_col = form.getvalue('column')
-        set_value = form.getvalue('value')
+    set_table = form.getvalue('table') if 'table' in form else ""
+    set_id = form.getvalue('id') if 'id' in form else ""
+    set_col = form.getvalue('column') if 'column' in form else ""
+    set_value = form.getvalue('value') if 'value' in form else ""
         
+    try:
         a = int(set_id)
     except:
         sys.stdout.buffer.write( zlib.compress( bytes("-3", "utf-8") ) )
         exit()
+        
+    if set_table == "" or set_id == "" or set_col == "":
+        sys.stdout.buffer.write( zlib.compress( bytes("-9", "utf-8") ) )
+        exit()
+        
     
     set_table = set_table.replace("\"", "").replace("'", "")
     set_col = set_col.replace("\"", "").replace("'", "")
@@ -154,3 +159,40 @@ elif action == "get":
     else:
         sys.stdout.buffer.write( zlib.compress( bytes("-5", "utf-8") ) )
         exit()
+        
+        
+elif action == "insert":
+    try:
+        action_type = form.getvalue('type')
+    except:
+        sys.stdout.buffer.write( zlib.compress( bytes("-4", "utf-8") ) )
+        exit()
+    
+    if action_type not in ["pathways", "proteins", "metabolites"]:
+        sys.stdout.buffer.write( zlib.compress( bytes("-9", "utf-8") ) )
+        exit()
+        
+    
+    data = form.getvalue('data') if "data" in form else ""
+    if data == "": 
+        sys.stdout.buffer.write( zlib.compress( bytes("-10", "utf-8") ) )
+        exit()
+        
+    data = data.split(",")
+    for i, row in enumerate(data):
+        row = row.split(":")
+        row[0] = row[0].replace("\"", "").replace("'", "")
+        if (len(row) == 2):
+            row[1] = row[1].replace("\"", "").replace("'", "")
+        else:
+            row.append("")
+        data[i] = row
+        
+    sql_query = "INSERT INTO %s ('%s'); VALUES ('%s');" % (action_type, "','".join(row[0] for row in data), "','".join(row[1] for row in data))
+    my_cur.execute(sql_query)
+    conn.commit()
+    
+    sys.stdout.buffer.write( zlib.compress( bytes("0", "utf-8") ) )
+    exit()
+    
+    

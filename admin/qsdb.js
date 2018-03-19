@@ -18,6 +18,8 @@ toolbox_button_selected = -1;
 entity_moving = -1;
 tmp_element = -1;
 tmp_edge = -1;
+letter_sizes = [];
+point_suffix_length = 0;
 
 
 global_manage_data = -1;
@@ -71,6 +73,13 @@ function init(){
     xmlhttp_pw.open("GET", "/qsdb/cgi-bin/get-pathways.bin", true);
     xmlhttp_pw.send();
     
+    var ctx = document.getElementById("renderarea").getContext("2d");
+    ctx.font = "17px serif";
+    for (var i = 0; i < 128; ++i){
+        letter_sizes.push(ctx.measureText(String.fromCharCode(i)).width);
+    }
+    point_suffix_length = 3 * letter_sizes['.'.charCodeAt(0)];
+    
     
     document.documentElement.style.overflow = 'hidden';
     document.body.scroll = "no";
@@ -105,6 +114,7 @@ function init(){
                     return a > b;
                 }
             });
+            change_add_manage_proteins_chromosome();
         }
     }
     xmlhttp_chr.open("GET", "/qsdb/cgi-bin/get-chromosomes.py?species=mouse", true);
@@ -1528,7 +1538,7 @@ function manage_change_entity(entity){
         dom_input.setAttribute("type", "text");
         dom_input.setAttribute("style", "width: 100%; box-sizing: border-box;");
         dom_input.setAttribute("id", "editor_select_manage_table_filter_" + i.toString());
-        dom_input.setAttribute("onkeyup", "protein_current_page = 0; manage_fill_protein_table();");
+        dom_input.setAttribute("onkeyup", "manage_current_page = 0; manage_fill_protein_table();");
     }
 }
 
@@ -1615,6 +1625,17 @@ function manage_fill_protein_table(){
         dom_b.innerHTML = "&nbsp;»&nbsp;";
     }
     
+    var dom_space = document.createElement("div");
+    dom_nav_cell.appendChild(dom_space);
+    dom_space.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    dom_space.style = "display: inline;"
+    
+    var dom_new_protein = document.createElement("button");
+    dom_nav_cell.appendChild(dom_new_protein);
+    dom_new_protein.innerHTML = "New protein";
+    dom_new_protein.setAttribute("onclick", "document.getElementById('add_manage_proteins').style.display = 'inline';");
+    
+    
     var xmlhttp_manage = new XMLHttpRequest();
     xmlhttp_manage.onreadystatechange = function() {
         if (xmlhttp_manage.readyState == 4 && xmlhttp_manage.status == 200) {
@@ -1695,12 +1716,12 @@ function manage_fill_protein_table(){
                         dom_input.col_id = j;
                     }
                     else if (j == 7){
-                        dom_td.setAttribute("style", "float:left; word-wrap:break-word; display: block; min-width: 1000px; max-width: 1000px;");
+                        dom_td.setAttribute("style", "min-width: 1000px; max-width: 1000px;");
                         var dom_div = document.createElement("div");
                         dom_td.appendChild(dom_div);
                         dom_div.setAttribute("onclick", "change_textarea_type(this, true);");
                         dom_div.setAttribute("style", "padding: 5px;");
-                        dom_div.innerHTML = row[j];
+                        dom_div.innerHTML = trim_text(row[j], 980);
                         dom_div.prot_id = row[0];
                         dom_div.col_id = j;
                     
@@ -1717,12 +1738,12 @@ function manage_fill_protein_table(){
                         dom_option.innerHTML = "mouse";
                     }
                     else {
-                        dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
                         var dom_div = document.createElement("div");
                         dom_td.appendChild(dom_div);
+                        dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
                         dom_div.setAttribute("onclick", "change_textfield_type(this, true);");
                         dom_div.setAttribute("style", "padding: 5px;");
-                        dom_div.innerHTML = row[j];
+                        dom_div.innerHTML = trim_text(row[j], 180);
                         dom_div.prot_id = row[0];
                         dom_div.col_id = j;
                     }                    
@@ -1736,6 +1757,20 @@ function manage_fill_protein_table(){
     xmlhttp_manage.open("GET", encodeURI(request), false);
     xmlhttp_manage.send();
     document.getElementById("editor_select_manage_content_wrapper").style.width = (document.getElementById("editor_select_manage_table_header").offsetWidth).toString() + "px";
+}
+
+
+function trim_text(text, len){
+    if (text.length == 0) return "";
+    
+    var tmp_len = 0;
+    var i = 0;
+    while (i < text.length && tmp_len + letter_sizes[text.charCodeAt(i)] + point_suffix_length < len){
+        tmp_len += letter_sizes[text.charCodeAt(i)];
+        i++;
+    }
+    if (i < text.length) text = text.substring(0, i) + "...";
+    return text;
 }
 
 
@@ -1774,9 +1809,9 @@ function change_select_type(dom_obj){
 function change_textfield_type(dom_obj, to_text){
     if (to_text){
         var parent = dom_obj.parentNode;
-        var content = dom_obj.innerHTML;
         var prot_id = dom_obj.prot_id;
         var col_id = dom_obj.col_id;
+        var content = global_manage_data[prot_id][col_id];
         
         parent.innerHTML = "";
         dom_obj = document.createElement("input");
@@ -1798,6 +1833,7 @@ function change_textfield_type(dom_obj, to_text){
         
         var request = "action=set&table=" + manage_current_entry + "&id=" + prot_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
         
+        
         var result = update_entry(request);
         if (!result){
             alert("Error: database could not be updated.");
@@ -1813,7 +1849,8 @@ function change_textfield_type(dom_obj, to_text){
         dom_obj.setAttribute("style", "padding: 5px;");
         dom_obj.prot_id = prot_id;
         dom_obj.col_id = col_id;
-        dom_obj.innerHTML = content;
+        dom_obj.innerHTML = trim_text(content);
+        global_manage_data[prot_id][col_id] = content;
     }
 }
 
@@ -1821,15 +1858,14 @@ function change_textfield_type(dom_obj, to_text){
 function change_textarea_type(dom_obj, to_text){
     if (to_text){
         var parent = dom_obj.parentNode;
-        var content = dom_obj.innerHTML;
         var prot_id = dom_obj.prot_id;
         var col_id = dom_obj.col_id;
+        var content = global_manage_data[prot_id][col_id];
         
         parent.innerHTML = "";
         dom_obj = document.createElement("textarea");
         parent.appendChild(dom_obj);
         dom_obj.innerHTML = content;
-        dom_obj.setAttribute("onkeyup", "if (event.which == '13') change_textarea_type(this, false);");
         dom_obj.setAttribute("onblur", "change_textarea_type(this, false);");
         dom_obj.setAttribute("style", "height: 200px; min-width: 980px; max-width: 980px;");
         dom_obj.prot_id = prot_id;
@@ -1859,7 +1895,8 @@ function change_textarea_type(dom_obj, to_text){
         dom_obj.setAttribute("style", "padding: 5px;");
         dom_obj.prot_id = prot_id;
         dom_obj.col_id = col_id;
-        dom_obj.innerHTML = content;
+        global_manage_data[prot_id][col_id] = content;
+        dom_obj.innerHTML = trim_text(content);
     }
 }
 
@@ -1886,5 +1923,70 @@ function hide_manage_entries (){
         document.getElementById("navigation").style.filter = "none";
     }
 }
+
+
+function change_add_manage_proteins_chromosome(){
+    var species = document.getElementById("add_manage_proteins_species")[document.getElementById("add_manage_proteins_species").selectedIndex].value;
+    
+    if (species in chromosomes){
+        var dom_chromosome_select = document.getElementById("add_manage_proteins_chromosome");
+        dom_chromosome_select.innerHTML = "";
+        for (var i = 0; i < chromosomes[species].length; ++i){
+            var dom_option = document.createElement("option");
+            dom_chromosome_select.appendChild(dom_option);
+            dom_option.innerHTML = chromosomes[species][i];
+        }
+    }
+}
+
+
+
+function request_protein_data(){
+    var accession = document.getElementById("add_manage_proteins_accession").value;
+    if (accession.length < 1) return;
+    
+    var xmlhttp_protein_data = new XMLHttpRequest();
+    xmlhttp_protein_data.onreadystatechange = function() {
+        if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
+            var request = JSON.parse(xmlhttp_protein_data.responseText);
+            if ("name" in request) document.getElementById("add_manage_proteins_name").value = request["name"];
+            if ("definition" in request) document.getElementById("add_manage_proteins_definition").value = request["definition"];
+            if ("fasta" in request) document.getElementById("add_manage_proteins_fasta").innerHTML = request["fasta"];
+            if ("ec_number" in request) document.getElementById("add_manage_proteins_ec_number").value = request["ec_number"];
+            if ("kegg_id" in request) document.getElementById("add_manage_proteins_kegg").value = request["kegg_id"];
+            if ("chr_start" in request) document.getElementById("add_manage_proteins_chr_start").value = request["chr_start"];
+            if ("chr_end" in request) document.getElementById("add_manage_proteins_chr_end").value = request["chr_end"];
+            if ("unreviewed" in request) document.getElementById("add_manage_proteins_unreviewed").checked = request["unreviewed"];
+            else document.getElementById("add_manage_proteins_unreviewed").checked = false;
+            if ("chromosome" in request){
+                var dom_chromosome_select = document.getElementById("add_manage_proteins_chromosome");
+                var selected_index = 0;
+                for (var i = 1; i < dom_chromosome_select.length; ++i){
+                    if (dom_chromosome_select[i].innerHTML == request["chromosome"]){
+                        selected_index = i;
+                        break;
+                    }
+                }
+                dom_chromosome_select.selectedIndex = selected_index;
+            }
+            if ("species" in request){
+                var dom_species_select = document.getElementById("add_manage_proteins_species");
+                var selected_index = -1;
+                for (var i = 0; i < dom_species_select.length; ++i){
+                    if (dom_species_select[i].innerHTML == request["species"]){
+                        selected_index = i;
+                        break;
+                    }
+                }
+                if (selected_index >= 0) dom_species_select.selectedIndex = selected_index;
+                else alert("Warning: species '" + request["species"] + "' not registered in database!");
+            }
+        }
+    }
+    xmlhttp_protein_data.open("GET", "/qsdb/admin/cgi-bin/request_protein_data.py?accession=" + accession, false);
+    xmlhttp_protein_data.send();
+}
+
+
 
 document.addEventListener('DOMContentLoaded', init, false);

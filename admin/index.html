@@ -13,27 +13,6 @@
 
 <body>
 
-
-<!-- not needed
-
-
-<div id="menubackground" class="menubackground"></div>
-<div id="custommenu" class="custommenu"></div>
-
-<div id="managementbackground" class="managementbackground"></div>
-<div id="management" class="management"></div>
-<div id="animation_background" class="animation_background"></div>
-<div id="infobox_html" style="display: none; z-index: 120; position: fixed; padding: 25px;"></div>
-<div id="infobox_html_background" class="infobox_html_background"></div>
-
-
-<div id="search_results" class="search_results"></div>
-<div id="search_background" class="search_background"></div>
-<div id="download" class="download"></div>
-<div id="downloadbackground" class="downloadbackground"></div>
-
--->
-
 <div id="toolbox" class="toolbox">
     <table cellspacing="10px"><tr><td>
     <b>Toolbox:</b><p><hr><p>
@@ -251,6 +230,37 @@
             <tr>
                 <td align="left" width="50%" valign="bottom" id="editor_manage_page_navigation"></td>
                 <td align="right" valign="bottom"><button onclick="close_manage_entries();">Close</button>
+                </td>
+            </tr>
+        </table>
+    </td></tr></table>
+</div>
+
+
+<div id="add_manage_proteins" class="global_search">
+    <table width="100%" height="100%"><tr><td align="center" valign="middle">
+        <table cellspacing=20 class="global_search_content" width="1000" height="700">
+            <tr>
+                <td valign="top">
+                    <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:530px;">
+                        <table id="add_manage_proteins_table" cellspacing="0" size=20 style="border-width: 1px; width: 100%; border-style: solid;">
+                            <tr><th width="30%">Accession</th><td><input id="add_manage_proteins_accession" type="text" style="min-width: 90%; max-width: 90%;" onkeyup="if (event.which == '13') request_protein_data();" onblur="request_protein_data"></td></tr>
+                            <tr><th>Name</th><td><input type="text" id="add_manage_proteins_name" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>Definition</th><td><input id="add_manage_proteins_definition" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>Species</th><td><select id="add_manage_proteins_species" onchange="change_add_manage_proteins_chromosome();"><option checked>mouse</option></select></td></tr>
+                            <tr><th>KEGG ID</th><td><input id="add_manage_proteins_kegg" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>EC number</th><td><input id="add_manage_proteins_ec_number" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>Unreviewed</th><td><input id="add_manage_proteins_unreviewed" type="checkbox"></td></tr>
+                            <tr><th>Chromosome</th><td><select id="add_manage_proteins_chromosome"></td></tr>
+                            <tr><th>Chromosome start</th><td><input id="add_manage_proteins_chr_start" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>Chromosome end</th><td><input id="add_manage_proteins_chr_end" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>Fasta</th><td><textarea id="add_manage_proteins_fasta" style="min-width: 90%; max-width: 90%;" rows="20"></textarea></td></tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right" valign="bottom"><button onclick="document.getElementById('add_manage_proteins').style.display = 'none';" style="display: inline;">Cancel</button>&nbsp;<button onclick="">Add protein</button>
                 </td>
             </tr>
         </table>
