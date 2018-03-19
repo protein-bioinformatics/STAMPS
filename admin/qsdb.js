@@ -111,7 +111,7 @@ function init(){
                     int_b = parseInt(b);
                     return int_a > int_b;
                 } catch (e) {
-                    return a > b;
+                    return a < b;
                 }
             });
             change_add_manage_proteins_chromosome();
@@ -634,7 +634,7 @@ function editor_update_pathway_node(){
 
 function delete_entity(request){
     var xmlhttp = new XMLHttpRequest();
-    request = "/qsdb/admin/cgi-bin/delete_entity.py?" + request;
+    request = "/qsdb/admin/cgi-bin/delete-entity.py?" + request;
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             response = xmlhttp.responseText;
@@ -671,7 +671,7 @@ function update_entry(request){
 
 function create_node(request){
     var xmlhttp = new XMLHttpRequest();
-    request = "/qsdb/admin/cgi-bin/create_node.py?" + request;
+    request = "/qsdb/admin/cgi-bin/create-node.py?" + request;
     var successful_creation = [false, -1];
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -953,7 +953,7 @@ function mouse_up_listener(event){
 
 function add_edge(start_id, end_id){
     var xmlhttp = new XMLHttpRequest();
-    var request = "/qsdb/admin/cgi-bin/add_edge.py?start_id=" + start_id + "&end_id=" + end_id;
+    var request = "/qsdb/admin/cgi-bin/add-edge.py?start_id=" + start_id + "&end_id=" + end_id;
     var successful_creation = [-1, -1];
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -1063,7 +1063,7 @@ function update_node(event) {
     
     
     var xmlhttp = new XMLHttpRequest();
-    var request = "/qsdb/admin/cgi-bin/update_node.py?id=";
+    var request = "/qsdb/admin/cgi-bin/update-node.py?id=";
     request += entity_moving.id;
     request += "&x=";
     request += x;
@@ -1983,10 +1983,37 @@ function request_protein_data(){
             }
         }
     }
-    xmlhttp_protein_data.open("GET", "/qsdb/admin/cgi-bin/request_protein_data.py?accession=" + accession, false);
+    xmlhttp_protein_data.open("GET", "/qsdb/admin/cgi-bin/request-protein-data.py?accession=" + accession, false);
     xmlhttp_protein_data.send();
 }
 
+
+function add_manage_proteins_add(){
+    var request = "name:" + document.getElementById("add_manage_proteins_name").value;
+    request += ",definition:" + document.getElementById("add_manage_proteins_definition").value;
+    request += ",fasta:" + document.getElementById("add_manage_proteins_fasta").value;
+    request += ",ec_number:" + document.getElementById("add_manage_proteins_ec_number").value;
+    request += ",kegg_id:" + document.getElementById("add_manage_proteins_kegg").value;
+    request += ",chr_start:" + document.getElementById("add_manage_proteins_chr_start").value;
+    request += ",chr_end:" + document.getElementById("add_manage_proteins_chr_end").value;
+    request += ",unreviewed:" + document.getElementById("add_manage_proteins_unreviewed").checked;
+    request += ",chromosome:" + document.getElementById("add_manage_proteins_chromosome")[document.getElementById("add_manage_proteins_chromosome").selectedIndex].value;
+    request += ",species:" + document.getElementById("add_manage_proteins_species")[document.getElementById("add_manage_proteins_species").selectedIndex].value;
+    
+    request = "/qsdb/admin/cgi-bin/manage-entries.py?action=insert&type=proteins&data=" + request;
+    
+    console.log(request);
+    
+    var xmlhttp_add_protein = new XMLHttpRequest();
+    xmlhttp_add_protein.onreadystatechange = function() {
+        if (xmlhttp_add_protein.readyState == 4 && xmlhttp_add_protein.status == 200) {
+            var request = xmlhttp_add_protein.responseText;
+            document.getElementById('add_manage_proteins').style.display = 'none';
+        }
+    }
+    xmlhttp_add_protein.open("GET", request, false);
+    xmlhttp_add_protein.send();
+}
 
 
 document.addEventListener('DOMContentLoaded', init, false);

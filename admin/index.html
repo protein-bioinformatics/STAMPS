@@ -244,7 +244,7 @@
                 <td valign="top">
                     <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:530px;">
                         <table id="add_manage_proteins_table" cellspacing="0" size=20 style="border-width: 1px; width: 100%; border-style: solid;">
-                            <tr><th width="30%">Accession</th><td><input id="add_manage_proteins_accession" type="text" style="min-width: 90%; max-width: 90%;" onkeyup="if (event.which == '13') request_protein_data();" onblur="request_protein_data"></td></tr>
+                            <tr><th width="30%">Accession</th><td><input id="add_manage_proteins_accession" type="text" style="min-width: 90%; max-width: 90%;" onkeyup="if (event.which == '13') request_protein_data();" onblur="request_protein_data();"></td></tr>
                             <tr><th>Name</th><td><input type="text" id="add_manage_proteins_name" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>Definition</th><td><input id="add_manage_proteins_definition" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>Species</th><td><select id="add_manage_proteins_species" onchange="change_add_manage_proteins_chromosome();"><option checked>mouse</option></select></td></tr>
@@ -260,7 +260,7 @@
                 </td>
             </tr>
             <tr>
-                <td align="right" valign="bottom"><button onclick="document.getElementById('add_manage_proteins').style.display = 'none';" style="display: inline;">Cancel</button>&nbsp;<button onclick="">Add protein</button>
+                <td align="right" valign="bottom"><button onclick="document.getElementById('add_manage_proteins').style.display = 'none';" style="display: inline;">Cancel</button>&nbsp;<button onclick="add_manage_proteins_add();">Add protein</button>
                 </td>
             </tr>
         </table>
