@@ -1530,6 +1530,9 @@ function manage_change_entity(entity){
     manage_current_page = 0;
     
     var dom_tr = document.getElementById("editor_select_manage_table_filters");
+    var dom_th_nav_del = document.createElement("td");
+    dom_tr.appendChild(dom_th_nav_del);
+    dom_th_nav_del.innerHTML = "&nbsp;";
     for (var i = 0; i < manage_columns[entity].length; ++i){
         var dom_td = document.createElement("td");
         dom_tr.appendChild(dom_td);
@@ -1570,6 +1573,9 @@ function manage_fill_protein_table(){
     
     var dom_table_header = document.getElementById("editor_select_manage_table_header");
     dom_table_header.innerHTML = ""
+    var dom_th_del = document.createElement("th");
+    dom_table_header.appendChild(dom_th_del);
+    dom_th_del.innerHTML = "Del";
     for (var i = 1; i <= 12; ++i){
         var dom_th_name = document.createElement("th");
         dom_table_header.appendChild(dom_th_name);
@@ -1657,6 +1663,15 @@ function manage_fill_protein_table(){
                 
                 var dom_tr = document.createElement("tr");
                 dom_table.appendChild(dom_tr);
+                var dom_td_del = document.createElement("td");
+                dom_tr.appendChild(dom_td_del);
+                dom_td_del.setAttribute("bgcolor", bg_color);
+                dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                var dom_image = document.createElement("img");
+                dom_td_del.appendChild(dom_image);
+                dom_image.setAttribute("src", "../images/delete-small.png");
+                dom_image.setAttribute("onclick", "manage_delete_protein(" + row[0] + ");");
                 
                 for (var j = 1; j < row.length; ++j){
                     var dom_td = document.createElement("td");
@@ -1757,6 +1772,29 @@ function manage_fill_protein_table(){
     xmlhttp_manage.open("GET", encodeURI(request), false);
     xmlhttp_manage.send();
     document.getElementById("editor_select_manage_content_wrapper").style.width = (document.getElementById("editor_select_manage_table_header").offsetWidth).toString() + "px";
+}
+
+
+function manage_delete_protein(prot_id){
+    var request = "type=protein&id=" + prot_id;
+    request = "/qsdb/admin/cgi-bin/delete-entity.py?" + request
+    
+    console.log(request);
+    
+    if (confirm('Do you want to delete this protein?')) {
+        var xmlhttp_protein_data = new XMLHttpRequest();
+        xmlhttp_protein_data.onreadystatechange = function() {
+            if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
+                var request = xmlhttp_protein_data.responseText;
+                if (request < 0){
+                    alert("Error: protein could not be deleted from database.");
+                }
+                manage_fill_protein_table();
+            }
+        }
+        xmlhttp_protein_data.open("GET", request, false);
+        xmlhttp_protein_data.send();
+    }
 }
 
 
@@ -1989,26 +2027,44 @@ function request_protein_data(){
 
 
 function add_manage_proteins_add(){
+    
+    var a = parseInt(document.getElementById("add_manage_proteins_chr_start").value);
+    if (isNaN(a) && document.getElementById("add_manage_proteins_chr_start").value.length > 0){
+        alert("Warning: 'Chromosome start' must be an integer.");
+        return;
+    }
+    
+    a = parseInt(document.getElementById("add_manage_proteins_chr_end").value);
+    if (isNaN(a) && document.getElementById("add_manage_proteins_chr_end").value.length > 0){
+        alert("Warning: 'Chromosome end' must be an integer.");
+        return;
+    }
+    
     var request = "name:" + document.getElementById("add_manage_proteins_name").value;
+    request += ",accession:" + document.getElementById("add_manage_proteins_accession").value;
     request += ",definition:" + document.getElementById("add_manage_proteins_definition").value;
     request += ",fasta:" + document.getElementById("add_manage_proteins_fasta").value;
     request += ",ec_number:" + document.getElementById("add_manage_proteins_ec_number").value;
-    request += ",kegg_id:" + document.getElementById("add_manage_proteins_kegg").value;
-    request += ",chr_start:" + document.getElementById("add_manage_proteins_chr_start").value;
-    request += ",chr_end:" + document.getElementById("add_manage_proteins_chr_end").value;
-    request += ",unreviewed:" + document.getElementById("add_manage_proteins_unreviewed").checked;
+    request += ",kegg_link:" + document.getElementById("add_manage_proteins_kegg").value;
+    var val = document.getElementById("add_manage_proteins_chr_start").value;
+    request += ",chr_start:" + (val.length > 0 ? val : "-1");
+    val = document.getElementById("add_manage_proteins_chr_end").value;
+    request += ",chr_end:" + (val.length > 0 ? val : "-1");
+    request += ",unreviewed:" + (document.getElementById("add_manage_proteins_unreviewed").checked ? "1" : "0");
     request += ",chromosome:" + document.getElementById("add_manage_proteins_chromosome")[document.getElementById("add_manage_proteins_chromosome").selectedIndex].value;
     request += ",species:" + document.getElementById("add_manage_proteins_species")[document.getElementById("add_manage_proteins_species").selectedIndex].value;
     
     request = "/qsdb/admin/cgi-bin/manage-entries.py?action=insert&type=proteins&data=" + request;
     
-    console.log(request);
-    
     var xmlhttp_add_protein = new XMLHttpRequest();
     xmlhttp_add_protein.onreadystatechange = function() {
         if (xmlhttp_add_protein.readyState == 4 && xmlhttp_add_protein.status == 200) {
             var request = xmlhttp_add_protein.responseText;
+            if (request < 0){
+                alert("An error has occured while adding the protein to the database. Please contact the administrator.");
+            }
             document.getElementById('add_manage_proteins').style.display = 'none';
+            manage_fill_protein_table();
         }
     }
     xmlhttp_add_protein.open("GET", request, false);

@@ -188,11 +188,16 @@ elif action == "insert":
             row.append("")
         data[i] = row
         
-    sql_query = "INSERT INTO %s ('%s'); VALUES ('%s');" % (action_type, "','".join(row[0] for row in data), "','".join(row[1] for row in data))
-    my_cur.execute(sql_query)
-    conn.commit()
+    sql_query = "INSERT INTO %s (%s) VALUES ('%s');" % (action_type, ", ".join(row[0] for row in data), "','".join(row[1] for row in data))
+    
+    try:
+        my_cur.execute(sql_query)
+        conn.commit()
+    except:
+        sys.stdout.buffer.write( zlib.compress( bytes("-11", "utf-8") ) )
+        exit()
+        
     
     sys.stdout.buffer.write( zlib.compress( bytes("0", "utf-8") ) )
-    exit()
     
     
