@@ -6,10 +6,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
-#include <sqlite3.h> 
 #include <math.h>
-#include "sais.h"
-#include "wavelet.h"
 #include "bio-classes.h"
 
 using namespace std;
@@ -17,7 +14,7 @@ using namespace std;
 
 bool is_integer_number(const string& string){
   string::const_iterator it = string.begin();
-  int minSize = 0;
+  uint minSize = 0;
   if(string.size()>0 && (string[0] == '-' || string[0] == '+')){
     it++;
     minSize++;
@@ -48,7 +45,6 @@ class node {
             string str = "{";
             str += "\"i\":" + id + ",";
             str += "\"n\":\"" + name + "\",";
-            //str += "\"pathway_id\":" + pathway_id + ",";
             str += "\"t\":\"" + type + "\",";
             str += "\"r\":" + (foreign_id.length() ? foreign_id : "0") + ",";
             str += "\"x\":" + x + ",";
@@ -58,7 +54,7 @@ class node {
             str += "\"f\":\"" + formula + "\",";
             str += "\"e\":\"" + exact_mass + "\",";
             str += "\"p\":[";
-            for (int i = 0; i < proteins.size(); ++i){
+            for (uint i = 0; i < proteins.size(); ++i){
                 if (i) str += ",";
                 str += proteins.at(i)->to_string();
             }
@@ -70,87 +66,6 @@ class node {
 map<string, peptide* >* all_peptides = 0;
 vector< protein* >* proteins = 0;
 map < int, protein* >* all_proteins = 0;
-vector < spectrum* >* spectra = 0;
-map< int, spectrum* >* all_spectra = 0;
-wavelet* occ = 0;
-ranking* index_rank = 0;
-int* less_table = 0;
-int len_text = 0;
-int* SA = 0;
-
-
-string prev_pep_seq = "";
-peptide* prev_pep = 0;
-
-static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
-    peptide* current_pep = 0;
-    string P = argv[0];
-    if (P.compare(prev_pep_seq)){
-        int L = 0, R = len_text - 1;
-        int p_len = P.length();
-        for (int i = 0; i < p_len; ++i){
-            const char c = P[p_len - 1 - i];
-            
-            occ->get_rank(--L, R, c);
-            --R;
-            
-            if (L > R) break;
-            int lss = less_table[c];
-            L += lss;
-            R += lss;
-            
-        }
-        if (L == R){
-            int start_pos = SA[L];
-            int prot_index = index_rank->get_rank_right(start_pos);
-            current_pep = new peptide(P, start_pos - proteins->at(prot_index)->proteome_start_pos);
-            proteins->at(prot_index)->peptides.push_back(current_pep);
-            all_peptides->insert(pair<string, peptide* >(P, current_pep));
-            prev_pep_seq = P;
-            prev_pep = current_pep;
-        }
-    }
-    else {
-        current_pep = prev_pep;
-    }
-    
-    if (current_pep){
-        spectrum *s1 = new spectrum(argv[1]);
-        current_pep->spectra.push_back(s1);
-        all_spectra->insert(pair<int, spectrum* >(s1->id, s1));
-        spectra->push_back(s1);
-    }
-    return 0;
-}
-
-
-
-static int sqlite_callback_spectra(void *data, int argc, char **argv, char **azColName){
-    map<int, spectrum*>::iterator it = all_spectra->find(atoi(argv[0]));
-    if (it != all_spectra->end()){
-        spectrum* s1 = it->second;
-        s1->charge = argv[1];
-        string mass = argv[2];
-        s1->mod_sequence = argv[3];
-        if (mass.find(".") != string::npos){
-            mass = mass.substr(0, mass.find(".") + 5);
-        }
-        s1->mass = mass;
-        s1->tissues = argv[4];
-        s1->tissue_numbers = argv[5];
-    }
-    return 0;
-}
-
-static int sqlite_callback2(void *data, int argc, char **argv, char **azColName){
-    vector< map< string, string > > *spectra_d = (vector< map< string, string > >*)data;
-    map< string, string > *dataset = new map< string, string >;
-    for(int i = 0; i < argc; ++i){
-        dataset->insert(pair< string, string>(azColName[i], argv[i] ? argv[i] : "NULL"));
-    }
-    spectra_d->push_back(*dataset);
-    return 0;
-}
 
 
 
@@ -165,7 +80,7 @@ void print_out(string response, bool compress){
 }
 
 
-main(int argc, char** argv) {
+int main(int argc, char** argv) {
     bool compress = true;
     string response = "";
     
@@ -197,7 +112,7 @@ main(int argc, char** argv) {
         return -1;
     }
     vector<string> get_entries = split(get_string, '&');  
-    for (int i = 0; i < get_entries.size(); ++i){
+    for (uint i = 0; i < get_entries.size(); ++i){
         vector<string> get_values = split(get_entries.at(i), '=');
         if (get_values.size() && get_values.at(0) == "pathway"){
             pathway_id = get_values.at(1);
@@ -216,6 +131,7 @@ main(int argc, char** argv) {
     pathway_id = "15";
     species = "mouse";
     */
+    
     
     string line;
     map< string, string > parameters;
@@ -236,7 +152,6 @@ main(int argc, char** argv) {
     
     MYSQL *conn = mysql_init(NULL);
     MYSQL_RES *res;
-    MYSQL_RES *res_reagents;
     MYSQL_ROW row;
     MYSQL_FIELD *field;
     char *server = (char*)parameters["mysql_host"].c_str();
@@ -249,11 +164,11 @@ main(int argc, char** argv) {
     map< string, int > column_names_spectra;
     map< string, int > column_names_rest;
     map< int, node*> node_dict;
-    all_peptides = new map<string, peptide* >();
+    //all_peptides = new map<string, peptide* >();
     proteins = new vector< protein* >();
     all_proteins = new map < int, protein* >();
-    spectra = new vector < spectrum* >();
-    all_spectra = new map< int, spectrum* >();
+    //spectra = new vector < spectrum* >();
+    //all_spectra = new map< int, spectrum* >();
     
     /* Connect to database */
     if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
@@ -307,8 +222,6 @@ main(int argc, char** argv) {
     }
     
     
-    int pi = 0;
-    len_text = 1; // plus sentinal
     while ((row = mysql_fetch_row(res)) != NULL){
         int node_id = atoi(row[column_names_proteins[string("nid")]]);
         string str_pid = row[column_names_proteins[string("id")]];
@@ -326,8 +239,6 @@ main(int argc, char** argv) {
             last_protein->fasta = cleanFasta(row[column_names_proteins[string("fasta")]]);
             last_protein->mass = compute_mass(last_protein->fasta);
             last_protein->pI = predict_isoelectric_point(last_protein->fasta);
-            last_protein->proteome_start_pos = len_text;
-            len_text += last_protein->fasta.length() + 1;
             all_proteins->insert(pair<int, protein* >(pid, last_protein));
             proteins->push_back(last_protein);
         }
@@ -336,112 +247,6 @@ main(int argc, char** argv) {
         }
         node_dict[node_id]->proteins.push_back(last_protein);
     }
-    
-    //start_time();
-    
-    
-    // create FM index for fast pattern search    
-    unsigned char* T = new unsigned char[len_text];
-    unsigned char* bwt = new unsigned char[len_text];
-    SA = new int[len_text];
-    for (int i = 0; i < len_text; ++i) SA[i] = i;
-    T[len_text - 1] = '$';
-    
-    int len_field = (len_text >> shift) + 1;
-    ulong* index_bitfield = new ulong[len_field];
-    for (int i = 0; i < len_field; ++i) index_bitfield[i] = 0;
-    
-    unsigned char* tt = T;
-    int p = 0;
-    for (int i = 0; i < proteins->size(); ++i){
-        int l = proteins->at(i)->fasta.length();
-        memcpy(tt + p, proteins->at(i)->fasta.data(), l);
-        p += l;
-        tt[p] = '/';
-        index_bitfield[p >> shift] |= one << (p & mask);
-        ++p;
-    }
-    index_rank = new ranking(index_bitfield, len_field);
-        
-    ulong abc[2] = {0, 0};
-    for (int i = 'A'; i <= 'Z'; ++i) abc[i >> 6] |= 1ull << (i & 63);
-    abc['/' >> 6] |= 1ull << ('/' & 63);
-    abc['$' >> 6] |= 1ull << ('$' & 63);
-    
-    sais(T, SA, len_text);
-    
-    for (int i = 0; i < len_text; ++i){
-        if (SA[i] > 0) bwt[i] = T[SA[i] - 1];
-        else bwt[i] = T[len_text - 1];
-    }
-    
-    occ = new wavelet((char*)bwt, len_text, abc);
-    less_table = occ->create_less_table();
-    
-    
-    
-    /*
-    sqlite3 *db;
-    char *zErrMsg = 0;
-    int rc;
-    
-    rc = sqlite3_open((char*)parameters["spectra_db_" + species].c_str(), &db);
-    if( rc ){
-        response += "-2\n";
-        print_out(response, compress);
-        return -2;
-    }
-    
-        
-    // Execute SQL statement
-    string sql_query_lite2 = "SELECT r.peptideSeq p, r.id i FROM RefSpectra r order by p;";
-    char tmp_data;
-    rc = sqlite3_exec(db, sql_query_lite2.c_str(), sqlite_callback, (void*)&tmp_data, &zErrMsg);
-    if( rc != SQLITE_OK ){
-        response += "-3\n";
-        print_out(response, compress);
-        sqlite3_free(zErrMsg);
-        return -3;
-    }
-    
-    delete occ;
-    delete index_rank;
-    delete SA;
-    
-    
-    sqlite3_stmt *stmt;
-    string sql_prepare = "SELECT r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n FROM (SELECT id, precursorCharge, precursorMZ, peptideModSeq FROM RefSpectra WHERE id = ?) r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY r.id;";
-    sqlite3_prepare_v2(db, sql_prepare.c_str(), -1, &stmt, 0);
-    
-    
-    
-    vector<spectrum*>::iterator it = spectra->begin();
-    char buffer[20];
-    while (it != spectra->end()){
-        spectrum* s = *it;
-        sqlite3_bind_int(stmt, 1, s->id);
-        int rc = sqlite3_step(stmt);
-        // encode charge
-        sprintf(buffer, "%i", sqlite3_column_int(stmt, 0));
-        s->charge = buffer;
-        // encode mass
-        sprintf(buffer, "%0.5f", sqlite3_column_double(stmt, 1));
-        s->mass = buffer;
-        s->mod_sequence = (char*)sqlite3_column_text(stmt, 2);
-        s->tissues = (char*)sqlite3_column_text(stmt, 3);
-        s->tissue_numbers = (char*)sqlite3_column_text(stmt, 4);
-        sqlite3_clear_bindings(stmt);
-        sqlite3_reset(stmt);
-        ++it;
-    }
-    sqlite3_close(db);
-    */
-    
-    
-    //stop_time();
-    //cout << "time: " << get_time() << "us" << endl;
-    
-    
     
     
     
@@ -500,12 +305,11 @@ main(int argc, char** argv) {
     print_out(response, compress);
     
     
-    delete all_peptides;
     delete proteins;
     delete all_proteins;
-    delete spectra;
-    delete all_spectra;
     
     mysql_free_result(res);
     mysql_close(conn);
+    
+    return 0;
 }

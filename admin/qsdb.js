@@ -58,7 +58,7 @@ chromosomes = {"mouse": []};
 
 
 function init(){
-    
+    /*
     var xmlhttp_pw = new XMLHttpRequest();
     xmlhttp_pw.onreadystatechange = function() {
         if (xmlhttp_pw.readyState == 4 && xmlhttp_pw.status == 200) {
@@ -72,6 +72,37 @@ function init(){
     
     xmlhttp_pw.open("GET", "/qsdb/cgi-bin/get-pathways.bin", true);
     xmlhttp_pw.send();
+    */
+    
+    
+    
+    // get pathways
+    var xmlhttp_pathways = new XMLHttpRequest();
+    xmlhttp_pathways.onreadystatechange = function() {
+        if (xmlhttp_pathways.readyState == 4 && xmlhttp_pathways.status == 200) {
+            global_pathway_data = JSON.parse(xmlhttp_pathways.responseText);
+            
+            var sorted_pathways = [];
+            for (var pathway_id in global_pathway_data){
+                pathways[pathway_id] = replaceAll(replaceAll(global_pathway_data[pathway_id][1], "\\\\n", ""), "-\\\\n", "");
+                sorted_pathways.push(global_pathway_data[pathway_id]);
+            }
+            sorted_pathways.sort(function(a, b) {
+                return a[1] > b[1];
+            });
+            set_pathway_menu();
+            
+            for (var i = 0; i < sorted_pathways.length; ++i){
+                var option = document.createElement("option");
+                option.id = sorted_pathways[i][0];
+                option.text = replaceAll(replaceAll(sorted_pathways[i][1], "\\\\n", ""), "-\\\\n", "");
+                document.getElementById("editor_select_pathway_field").add(option);
+            }
+        }
+    }
+    xmlhttp_pathways.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=pathways", true);
+    xmlhttp_pathways.send();
+    
     
     var ctx = document.getElementById("renderarea").getContext("2d");
     ctx.font = "17px serif";
@@ -150,28 +181,6 @@ function init(){
     xmlhttp_metabolites.send();
     
     
-    // get pathways
-    var xmlhttp_pathways = new XMLHttpRequest();
-    xmlhttp_pathways.onreadystatechange = function() {
-        if (xmlhttp_pathways.readyState == 4 && xmlhttp_pathways.status == 200) {
-            global_pathway_data = JSON.parse(xmlhttp_pathways.responseText);
-            
-            var sorted_pathways = [];
-            for (var pathway_id in global_pathway_data) sorted_pathways.push(global_pathway_data[pathway_id]);
-            sorted_pathways.sort(function(a, b) {
-                return a[1] > b[1];
-            });
-            
-            for (var i = 0; i < sorted_pathways.length; ++i){
-                var option = document.createElement("option");
-                option.id = sorted_pathways[i][0];
-                option.text = replaceAll(replaceAll(sorted_pathways[i][1], "\\\\n", ""), "-\\\\n", "");
-                document.getElementById("editor_select_pathway_field").add(option);
-            }
-        }
-    }
-    xmlhttp_pathways.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=pathways", true);
-    xmlhttp_pathways.send();
     
     
     // get proteins
