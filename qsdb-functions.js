@@ -432,6 +432,9 @@ function compute_angle(x_1, y_1, x_2, y_2, anchor){
 
 function draw(sync){
     if (typeof(qsdb_domain) === 'undefined' || qsdb_domain != true) return;
+    elements.sort(function(a, b){
+        return a.sort_order > b.sort_order;
+    });
     
     if (typeof(sync) == "undefined"){
         var dc = Math.random();
@@ -505,6 +508,7 @@ function visual_element() {
     this.highlight = false;
     this.tipp = false;
     this.visible = true;
+    this.sort_order = 0;
 }
 
 
@@ -1507,7 +1511,7 @@ node.prototype = new visual_element();
 node.prototype.constructor = node;
 
 
-function node(data, ctx){
+function node(data){
     this.x = parseInt(data['x']);
     this.y = parseInt(data['y']);
     this.type = data['t'];
@@ -1550,7 +1554,8 @@ function node(data, ctx){
         this.pathway_enabled = this.type == 'pathway' && this.foreign_id != 0 && (this.foreign_id in pathways);
     }
     
-    this.setup_protein_meta = function(ctx){
+    this.setup_protein_meta = function(){
+        var ctx = document.createElement("canvas").getContext("2d");
         var name = "";
         this.height = 20 + 20 * Math.min(this.proteins.length, max_protein_line_number);
         this.orig_height = 20 + 20 * this.proteins.length;
@@ -1576,7 +1581,8 @@ function node(data, ctx){
     }
     
     
-    this.setup_label_meta = function(ctx){
+    this.setup_label_meta = function(){
+        var ctx = document.createElement("canvas").getContext("2d");
         ctx.font = (font_size / factor).toString() + "px Arial";
         this.width = ctx.measureText(this.name).width;
         this.height = (text_size + 2) * factor;
@@ -1584,6 +1590,7 @@ function node(data, ctx){
     
     switch (this.type){
         case "protein":
+            this.sort_order = 100;
             for (var j = 0; j < data['p'].length; ++j){
                 var prot = 0;
                 var prot_id = data['p'][j]['i'];
@@ -1600,14 +1607,16 @@ function node(data, ctx){
                 this.containing_spectra += prot.containing_spectra;
                 this.fill_style = protein_fill_color;
             }
-            this.setup_protein_meta(ctx);
+            this.setup_protein_meta();
             break;
             
         case "pathway":
+            this.sort_order = 80;
             this.setup_pathway_meta();
             break;
             
         case "metabolite":
+            this.sort_order = 60;
             this.width = metabolite_radius * 2;
             this.height = metabolite_radius * 2;
             this.img = new Image();
@@ -1622,12 +1631,14 @@ function node(data, ctx){
             break;
             
         case "membrane":
+            this.sort_order = 0;
             this.width = this.length * (2 * this.lipid_radius + this.lw) * factor;
             this.height = (this.o_y + 2 * this.lipid_radius + this.lw) * factor;
             break;
             
         case "label":
-            this.setup_label_meta(ctx);
+            this.sort_order = 120;
+            this.setup_label_meta();
             break;
     }
     
@@ -2161,6 +2172,11 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
     this.tail_start = 0;
     
     
+    this.dashed_edge = data[this.start_id].type == "pathway";
+    this.edge_enabled = data[this.start_id].proteins.length > 0 || (this.dashed_edge && data[this.start_id].pathway_enabled);
+    this.sort_order = this.edge_enabled ? 20 : 10;
+    
+    
     this.is_mouse_over = function(mouse){
         for (var i = 0; i < this.point_list.length - 1; ++i){
             var p1 = this.point_list[i];
@@ -2653,12 +2669,10 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
     this.routing(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node);
     
     this.draw = function(ctx){
-        var dashed_edge = data[this.start_id].type == "pathway";
-        var edge_enabled = data[this.start_id].proteins.length > 0 || (dashed_edge && data[this.start_id].pathway_enabled);
         
-        ctx.strokeStyle = edge_enabled ? edge_color : edge_disabled_color;
-        ctx.fillStyle = edge_enabled ? edge_color : edge_disabled_color;
-        if (dashed_edge) ctx.setLineDash([10 * factor, 10 * factor]);
+        ctx.strokeStyle = this.edge_enabled ? edge_color : edge_disabled_color;
+        ctx.fillStyle = this.edge_enabled ? edge_color : edge_disabled_color;
+        if (this.dashed_edge) ctx.setLineDash([10 * factor, 10 * factor]);
         
         /*
         if (data[data_ref[this.start_id]].type == "metabolite"){
@@ -2666,7 +2680,7 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
             ctx.fillStyle = "#ff0000";
         }*/
         
-        ctx.lineWidth = (line_width - dashed_edge * 3) * factor;
+        ctx.lineWidth = (line_width - this.dashed_edge * 3) * factor;
         ctx.beginPath();
         ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
         var p_len = this.point_list.length;
@@ -4359,7 +4373,7 @@ function load_data(reload){
     var process_nodes = setInterval(function(){
         if (tmp_data){
             for (var i = 0; i < tmp_data.length; ++i){
-                var new_node = new node(tmp_data[i], ctx);
+                var new_node = new node(tmp_data[i]);
                 data[new_node.id] = new_node;
                 x_min = Math.min(x_min, new_node.x - new_node.width * 0.5);
                 x_max = Math.max(x_max, new_node.x + new_node.width * 0.5);

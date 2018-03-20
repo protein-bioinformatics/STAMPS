@@ -281,7 +281,6 @@ function mouse_click_listener(e){
         }
         var result = create_node(request);
         if (result[0]){
-            var ctx = document.getElementById("renderarea").getContext("2d");
             data[tmp_element.id] = tmp_element;
             assemble_elements();
             draw();
@@ -289,16 +288,16 @@ function mouse_click_listener(e){
                     
                 case toolbox_states.CREATE_PROTEIN:
                     edge_data[result[1]] = {'i': result[1], 'n': tmp_element.id, 'in': 'left', 'out': 'right', 'v': 0, 'r': []};
-                    tmp_element = new node({"x": "0", "y": "0", "t": "protein", "i": -1, "n": "-", "p": []}, ctx);
+                    tmp_element = new node({"x": "0", "y": "0", "t": "protein", "i": -1, "n": "-", "p": []});
                     break;
                     
                 case toolbox_states.CREATE_LABEL:
                     data[tmp_element.id].foreign_id = result[1];
-                    tmp_element = new node({"x": "0", "y": "0", "t": "label", "i": -1, "n": "undefined"}, ctx);
+                    tmp_element = new node({"x": "0", "y": "0", "t": "label", "i": -1, "n": "undefined"});
                     break;
                     
                 case toolbox_states.CREATE_MEMBRANE:
-                    tmp_element = new node({"x": "0", "y": "0", "t": "membrane", "i": -1, "n": "-"}, ctx);
+                    tmp_element = new node({"x": "0", "y": "0", "t": "membrane", "i": -1, "n": "-"});
                     break;
             }
             tmp_element.scale(0, 0, factor);
@@ -473,7 +472,7 @@ function update_label(){
     if (result){
         var ctx = document.getElementById("renderarea").getContext("2d");
         data[selected_label_node].name = label;
-        data[selected_label_node].setup_label_meta(ctx);
+        data[selected_label_node].setup_label_meta();
         draw();
     };
 }
@@ -521,7 +520,7 @@ function editor_create_pathway_node(){
         assemble_elements();
         draw();
         var ctx = document.getElementById("renderarea").getContext("2d");
-        tmp_element = new node({"x": "0", "y": "0", "t": "pathway", "i": -1, "n": "undefined"}, ctx);
+        tmp_element = new node({"x": "0", "y": "0", "t": "pathway", "i": -1, "n": "undefined"});
         tmp_element.scale(0, 0, factor);
         elements.push(tmp_element);
     };
@@ -543,7 +542,7 @@ function editor_create_metabolite_node(){
         assemble_elements();
         draw();
         var ctx = document.getElementById("renderarea").getContext("2d");
-        tmp_element = new node({"x": "0", "y": "0", "t": "metabolite", "i": -1, "n": "-"}, ctx);
+        tmp_element = new node({"x": "0", "y": "0", "t": "metabolite", "i": -1, "n": "-"});
         tmp_element.scale(0, 0, factor);
         elements.push(tmp_element);
     };
@@ -604,7 +603,7 @@ function editor_update_protein_node(){
         prot.proteins = [];
     }
     
-    prot.setup_protein_meta(ctx);
+    prot.setup_protein_meta();
     prot.scale(prot.x, prot.y, factor);
     compute_edges();
     assemble_elements();
@@ -716,7 +715,7 @@ function mouse_down_listener(e){
             }
             else if (toolbox_button_selected == toolbox_states.DRAW_EDGE){
                 var ctx = document.getElementById("renderarea").getContext("2d");
-                data[-1] = new node({"x": highlight_element.x, "y": highlight_element.y, "t": "point", "i": highlight_element.id, "n": "undefined"}, ctx);
+                data[-1] = new node({"x": highlight_element.x, "y": highlight_element.y, "t": "point", "i": highlight_element.id, "n": "undefined"});
                 
             }
             offsetX = res.x;
@@ -789,7 +788,7 @@ function mouse_move_listener(e){
             if (offset_move_y < 0) offset_move_y += base_grid * factor;
             
             var ctx = document.getElementById("renderarea").getContext("2d");
-            data[-2] = new node({"x": Math.floor(res.x - (res.x % (base_grid * factor)) + offset_move_x), "y": Math.floor(res.y - (res.y % (base_grid * factor)) + offset_move_y), "t": "point", "i": -2, "n": "undefined"}, ctx);
+            data[-2] = new node({"x": Math.floor(res.x - (res.x % (base_grid * factor)) + offset_move_x), "y": Math.floor(res.y - (res.y % (base_grid * factor)) + offset_move_y), "t": "point", "i": -2, "n": "undefined"});
             
             
             
@@ -1004,31 +1003,31 @@ function toolbox_button_clicked(button){
     var ctx = document.getElementById("renderarea").getContext("2d");
     switch (toolbox_button_selected){
         case toolbox_states.CREATE_PATHWAY:
-            tmp_element = new node({"x": "0", "y": "0", "t": "pathway", "i": -1, "n": "undefined"}, ctx);
+            tmp_element = new node({"x": "0", "y": "0", "t": "pathway", "i": -1, "n": "undefined"});
             tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
             break;
             
         case toolbox_states.CREATE_PROTEIN:
-            tmp_element = new node({"x": "0", "y": "0", "t": "protein", "i": -1, "n": "-", "p": []}, ctx);
+            tmp_element = new node({"x": "0", "y": "0", "t": "protein", "i": -1, "n": "-", "p": []});
             tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
             break;
             
         case toolbox_states.CREATE_METABOLITE:
-            tmp_element = new node({"x": "0", "y": "0", "t": "metabolite", "i": -1, "n": "-"}, ctx);
+            tmp_element = new node({"x": "0", "y": "0", "t": "metabolite", "i": -1, "n": "-"});
             tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
             break;
             
         case toolbox_states.CREATE_LABEL:
-            tmp_element = new node({"x": "0", "y": "0", "t": "label", "i": -1, "n": "undefined"}, ctx);
+            tmp_element = new node({"x": "0", "y": "0", "t": "label", "i": -1, "n": "undefined"});
             tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
             break;
             
         case toolbox_states.CREATE_MEMBRANE:
-            tmp_element = new node({"x": "0", "y": "0", "t": "membrane", "i": -1, "n": "-"}, ctx);
+            tmp_element = new node({"x": "0", "y": "0", "t": "membrane", "i": -1, "n": "-"});
             tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
             break;
@@ -1130,6 +1129,10 @@ edge.prototype.edit = function(){
         element = "metabolite";
     }
     else if (toolbox_button_selected == toolbox_states.ROTATE_PROTEIN || toolbox_button_selected == toolbox_states.ROTATE_PATHWAY){
+        if (toolbox_button_selected == toolbox_states.ROTATE_PATHWAY && (data[this.start_id].type == 'protein' || data[this.end_id].type == 'protein')) return;
+        if (toolbox_button_selected == toolbox_states.ROTATE_PROTEIN && (data[this.start_id].type == 'pathway' || data[this.end_id].type == 'pathway')) return;
+        
+        
         if (edge_data[this.reaction_id]['r'][this.reagent_id]['t'] == "educt"){
             edge_data[this.reaction_id]['in'] = next_anchor[edge_data[this.reaction_id]['in']];
         }
@@ -1142,10 +1145,11 @@ edge.prototype.edit = function(){
     else return;
     
     var xmlhttp = new XMLHttpRequest();
-    var request = "/qsdb/admin/cgi-bin/update_edge.py?id=";
+    var request = "/qsdb/admin/cgi-bin/update-edge.py?id=";
     request += this.reagent_id;
     request += "&element=";
     request += element;
+    
     xmlhttp.open("GET", request, true);
     xmlhttp.send();
     
@@ -1779,7 +1783,6 @@ function manage_delete_protein(prot_id){
     var request = "type=protein&id=" + prot_id;
     request = "/qsdb/admin/cgi-bin/delete-entity.py?" + request
     
-    console.log(request);
     
     if (confirm('Do you want to delete this protein?')) {
         var xmlhttp_protein_data = new XMLHttpRequest();
@@ -1790,6 +1793,20 @@ function manage_delete_protein(prot_id){
                     alert("Error: protein could not be deleted from database.");
                 }
                 manage_fill_protein_table();
+                if (prot_id in protein_dictionary){
+                    delete protein_dictionary[prot_id];
+                    for (node_id in data){
+                        var data_node = data[node_id];
+                        if (data_node.type == "protein"){
+                            for(var i = data_node.proteins.length - 1; i >= 0; --i){
+                                if (data_node.proteins[i] == prot_id){
+                                    data_node.proteins.splice(i, 1);
+                                }
+                            }
+                        }
+                    }
+                    draw();
+                }
             }
         }
         xmlhttp_protein_data.open("GET", request, false);
@@ -1983,13 +2000,15 @@ function request_protein_data(){
     var accession = document.getElementById("add_manage_proteins_accession").value;
     if (accession.length < 1) return;
     
+    var request = "/qsdb/admin/cgi-bin/request-protein-data.py?accession=" + accession;
+    
     var xmlhttp_protein_data = new XMLHttpRequest();
     xmlhttp_protein_data.onreadystatechange = function() {
         if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
             var request = JSON.parse(xmlhttp_protein_data.responseText);
             if ("name" in request) document.getElementById("add_manage_proteins_name").value = request["name"];
             if ("definition" in request) document.getElementById("add_manage_proteins_definition").value = request["definition"];
-            if ("fasta" in request) document.getElementById("add_manage_proteins_fasta").innerHTML = request["fasta"];
+            if ("fasta" in request) document.getElementById("add_manage_proteins_fasta").value = request["fasta"];
             if ("ec_number" in request) document.getElementById("add_manage_proteins_ec_number").value = request["ec_number"];
             if ("kegg_id" in request) document.getElementById("add_manage_proteins_kegg").value = request["kegg_id"];
             if ("chr_start" in request) document.getElementById("add_manage_proteins_chr_start").value = request["chr_start"];
@@ -2021,7 +2040,7 @@ function request_protein_data(){
             }
         }
     }
-    xmlhttp_protein_data.open("GET", "/qsdb/admin/cgi-bin/request-protein-data.py?accession=" + accession, false);
+    xmlhttp_protein_data.open("GET", request, false);
     xmlhttp_protein_data.send();
 }
 
