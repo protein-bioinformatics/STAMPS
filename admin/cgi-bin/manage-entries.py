@@ -10,6 +10,7 @@ import sys
 import os
 import binascii
 
+
 a = "Content-Type: text/html\nContent-Encoding: deflate\n\n"
 
 sys.stdout.buffer.write( bytes(a, "utf-8"))
@@ -81,6 +82,8 @@ if action == "set":
             sys.stdout.buffer.write( zlib.compress( bytes("-6", "utf-8") ) )
             exit()
         
+    elif set_table == "metabolites" and set_col == "smiles":
+            os.system("java -cp cdk-2.0.jar:. DrawChem '%s' '%s'" % (set_id, set_value))
         
     else:
         try:
@@ -179,14 +182,18 @@ elif action == "insert":
         exit()
         
     data = data.split(",")
+    smiles_data = ""
     for i, row in enumerate(data):
         row = row.split(":")
         row[0] = row[0].replace("\"", "").replace("'", "")
-        if (len(row) == 2):
-            row[1] = row[1].replace("\"", "").replace("'", "")
+        if (len(row) >= 2):
+            row[1] = (":".join(row[1:])).replace("\"", "").replace("'", "")
         else:
             row.append("")
         data[i] = row
+        
+        if action_type == "metabolite" and row[0] == "smiles" and len(row[1]) > 0:
+            smiles_data = row[1]
         
     sql_query = "INSERT INTO %s (%s) VALUES ('%s');" % (action_type, ", ".join(row[0] for row in data), "','".join(row[1] for row in data))
     
@@ -197,7 +204,15 @@ elif action == "insert":
         sys.stdout.buffer.write( zlib.compress( bytes("-11", "utf-8") ) )
         exit()
         
+        
+    if action_type == "metabolite":
+        sql_query = "SELECT max(id) max_id FROM metabolites"
+        metabolite_id = my_cur.execute(sql_query).fetchone()[0]
+        os.system("java -cp cdk-2.0.jar:. DrawChem '%s' '%s'" % (metabolite_id, smiles_data))
+        
     
     sys.stdout.buffer.write( zlib.compress( bytes("0", "utf-8") ) )
     
+    
+
     

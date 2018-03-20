@@ -1784,7 +1784,7 @@ function manage_delete_protein(prot_id){
     request = "/qsdb/admin/cgi-bin/delete-entity.py?" + request
     
     
-    if (confirm('Do you want to delete this protein?')) {
+    if (confirm("Do you want to delete the protein '" + global_manage_data[prot_id][1] + "'?")) {
         var xmlhttp_protein_data = new XMLHttpRequest();
         xmlhttp_protein_data.onreadystatechange = function() {
             if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
@@ -2000,7 +2000,7 @@ function request_protein_data(){
     var accession = document.getElementById("add_manage_proteins_accession").value;
     if (accession.length < 1) return;
     
-    var request = "/qsdb/admin/cgi-bin/request-protein-data.py?accession=" + accession;
+    var request = "/qsdb/admin/cgi-bin/request-entity-data.py?type=protein&accession=" + accession;
     
     var xmlhttp_protein_data = new XMLHttpRequest();
     xmlhttp_protein_data.onreadystatechange = function() {

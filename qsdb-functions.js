@@ -1313,7 +1313,8 @@ function Infobox(ctx){
     this.node_id = -1;
     this.protein_id = -1;
     this.name = "infobox";
-    this.visible = false;    
+    this.visible = false;
+    this.sort_order = 120;
     
     this.create = function(x, y, node_id, protein_id){
         var ctx = document.getElementById("renderarea").getContext("2d");
@@ -1405,7 +1406,7 @@ function Infobox(ctx){
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Exact mass / Da:</b> " + data[this.node_id].exact_mass + "</div>";
             var c_number = data[this.node_id].c_number;
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>C number:</b> <a href='http://www.genome.jp/dbget-bin/www_bget?" + c_number + "' target=\"blank\">" + data[this.node_id].c_number + "</div><br>";
-            html_content += "<img src='/qsdb/images/metabolites/" + c_number + ".png'>";
+            html_content += "<img src='/qsdb/images/metabolites/C" + data[this.node_id].foreign_id + ".png'>";
             
             html_content += "</div>";
             
@@ -1622,8 +1623,7 @@ function node(data){
             this.img = new Image();
             this.crossOrigin = 'anonymous';
             var load_process = setInterval(function(nd){
-                //nd.img.src = "http://www.genome.jp/Fig/compound/" + nd.c_number + ".gif";
-                nd.img.src = "/qsdb/images/metabolites/" + nd.c_number + ".png";
+                nd.img.src = "/qsdb/images/metabolites/C" + nd.foreign_id + ".png";
                 clearInterval(load_process);
             }, 1, this);
             

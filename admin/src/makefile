@@ -1,7 +1,7 @@
 BIN_PATH = ../../cgi-bin
 
 main: nodes proteins search edges pathways counter
-	#javac -cp ../../cgi-bin/cdk-2.0.jar:. DrawChem.java && mv DrawChem.class ../../cgi-bin/.
+	javac -cp ../cgi-bin/cdk-2.0.jar:. DrawChem.java && mv DrawChem.class ../cgi-bin/.
 
 nodes:
 	g++ -mpopcnt -std=c++11 -O3 -I/usr/include/mysql -o $(BIN_PATH)/get-nodes.bin get-nodes.cpp sais.cpp wavelet.cpp rank.cpp bio-classes.cpp -L/usr/lib/x86_64-linux-gnu -lmysqlclient -lsqlite3 -lz
