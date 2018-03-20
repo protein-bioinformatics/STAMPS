@@ -82,10 +82,12 @@ if action == "set":
             sys.stdout.buffer.write( zlib.compress( bytes("-6", "utf-8") ) )
             exit()
         
-    elif set_table == "metabolites" and set_col == "smiles":
-            os.system("java -cp cdk-2.0.jar:. DrawChem '%s' '%s'" % (set_id, set_value))
-        
     else:
+        if set_table == "metabolites" and set_col == "smiles":
+            filepath = os.path.dirname(os.path.abspath(__file__))
+            command = "java -cp %s/cdk-2.0.jar:%s DrawChem '%s' '%s' '%s'" % (filepath, filepath, filepath, set_id, set_value)
+            os.system(command)
+            
         try:
             sql_query = "UPDATE " + set_table + " SET " + set_col + " = %s WHERE id = %s;"
             my_cur.execute(sql_query, (set_value, set_id))
@@ -192,7 +194,7 @@ elif action == "insert":
             row.append("")
         data[i] = row
         
-        if action_type == "metabolite" and row[0] == "smiles" and len(row[1]) > 0:
+        if action_type == "metabolites" and row[0] == "smiles" and len(row[1]) > 0:
             smiles_data = row[1]
         
     sql_query = "INSERT INTO %s (%s) VALUES ('%s');" % (action_type, ", ".join(row[0] for row in data), "','".join(row[1] for row in data))
@@ -205,10 +207,14 @@ elif action == "insert":
         exit()
         
         
-    if action_type == "metabolite":
-        sql_query = "SELECT max(id) max_id FROM metabolites"
-        metabolite_id = my_cur.execute(sql_query).fetchone()[0]
-        os.system("java -cp cdk-2.0.jar:. DrawChem '%s' '%s'" % (metabolite_id, smiles_data))
+    if action_type == "metabolites":
+    
+        sql_query = "SELECT max(id) max_id FROM metabolites;"
+        my_cur.execute(sql_query)
+        metabolite_id = my_cur.fetchone()[0]
+        filepath = os.path.dirname(os.path.abspath(__file__))
+        command = "java -cp %s/cdk-2.0.jar:%s DrawChem '%s' '%s' '%s'" % (filepath, filepath, filepath, metabolite_id, smiles_data)
+        os.system(command)
         
     
     sys.stdout.buffer.write( zlib.compress( bytes("0", "utf-8") ) )

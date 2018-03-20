@@ -215,7 +215,7 @@
         <table cellspacing=20 id="editor_select_manage" class="global_search_content" width="1000" height="700">
             <tr>
                 <td valign="top" colspan="2">
-                    <button>Pathways</button> <button>Proteins</button> <button>Metabolites</button><p>
+                    <button>Pathways</button> <button onclick="manage_change_entity('proteins'); manage_fill_table();">Proteins</button> <button onclick="manage_change_entity('metabolites'); manage_fill_table();">Metabolites</button><p>
                     <div id="editor_select_manage_table_wrapper" style="position: fixed; overflow-x: scroll; overflow-y: hidden; width:910px; height: 470px;">
                         <table cellpadding="0" cellspacing="0" size=20>
                             <tr id="editor_select_manage_table_header"></tr>
@@ -261,6 +261,31 @@
             </tr>
             <tr>
                 <td align="right" valign="bottom"><button onclick="document.getElementById('add_manage_proteins').style.display = 'none';" style="display: inline;">Cancel</button>&nbsp;<button onclick="add_manage_proteins_add();">Add protein</button>
+                </td>
+            </tr>
+        </table>
+    </td></tr></table>
+</div>
+
+
+<div id="add_manage_metabolites" class="global_search">
+    <table width="100%" height="100%"><tr><td align="center" valign="middle">
+        <table cellspacing=20 class="global_search_content" width="1000" height="400">
+            <tr>
+                <td valign="top">
+                    <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:230px;">
+                        <table id="add_manage_proteins_table" cellspacing="0" size=20 style="border-width: 1px; width: 100%; border-style: solid;">
+                            <tr><th width="30%">KEGG C-number</th><td><input id="add_manage_metabolites_c_number" type="text" style="min-width: 90%; max-width: 90%;" onkeyup="if (event.which == '13') this.blur();" onblur="request_metabolites_data();"></td></tr>
+                            <tr><th>Name</th><td><input type="text" id="add_manage_metabolites_name" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>Formula</th><td><input id="add_manage_metabolites_formula" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>Exact Mass</th><td><input id="add_manage_metabolites_exact_mass" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>Smiles</th><td><input id="add_manage_metabolites_smiles" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right" valign="bottom"><button onclick="document.getElementById('add_manage_metabolites').style.display = 'none';" style="display: inline;">Cancel</button>&nbsp;<button onclick="add_manage_metabolites_add();">Add metabolite</button>
                 </td>
             </tr>
         </table>

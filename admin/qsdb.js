@@ -349,7 +349,7 @@ function mouse_click_listener(e){
                         for (var reaction_id in edge_data){
                             var del_reagents = [];
                             for (var reagent_id in edge_data[reaction_id]['r']){
-                                if (edge_data[reaction_id]['r'][reagent_id]['n'] == node_id) del_reagents.push(reaction_id);
+                                if (edge_data[reaction_id]['r'][reagent_id]['n'] == node_id) del_reagents.push(reagent_id);
                             }
                             for (var i = 0; i < del_reagents.length; ++i) delete edge_data[reaction_id]['r'][del_reagents[i]];
                         }
@@ -1166,7 +1166,7 @@ function manage_entries(){
         document.getElementById("renderarea").style.filter = "blur(5px)";
         document.getElementById("navigation").style.filter = "blur(5px)";
     }
-    manage_fill_protein_table();
+    manage_fill_table();
 }
 
 function close_manage_entries(){
@@ -1522,7 +1522,7 @@ function editor_fill_protein_table(){
 
 
 function manage_change_entity(entity){
-    manage_change_entity = entity;
+    manage_current_entry = entity;
     var xmlhttp_entity = new XMLHttpRequest();
     xmlhttp_entity.onreadystatechange = function() {
         if (xmlhttp_entity.readyState == 4 && xmlhttp_entity.status == 200) {
@@ -1534,6 +1534,7 @@ function manage_change_entity(entity){
     manage_current_page = 0;
     
     var dom_tr = document.getElementById("editor_select_manage_table_filters");
+    dom_tr.innerHTML = "";
     var dom_th_nav_del = document.createElement("td");
     dom_tr.appendChild(dom_th_nav_del);
     dom_th_nav_del.innerHTML = "&nbsp;";
@@ -1545,24 +1546,24 @@ function manage_change_entity(entity){
         dom_input.setAttribute("type", "text");
         dom_input.setAttribute("style", "width: 100%; box-sizing: border-box;");
         dom_input.setAttribute("id", "editor_select_manage_table_filter_" + i.toString());
-        dom_input.setAttribute("onkeyup", "manage_current_page = 0; manage_fill_protein_table();");
+        dom_input.setAttribute("onkeyup", "manage_current_page = 0; manage_fill_table();");
     }
 }
 
 
 
-function manage_fill_protein_table(){
+function manage_fill_table(){
     
     var filters = "";
-    for (var i = 0; i < manage_columns[manage_change_entity].length; ++i){
+    for (var i = 0; i < manage_columns[manage_current_entry].length; ++i){
         var filter_field = document.getElementById("editor_select_manage_table_filter_" + i.toString());
         if (filter_field.value.length > 0){
             if (filters.length > 0) filters += ",";
-            filters += manage_columns[manage_change_entity][i] + ":" + filter_field.value;
+            filters += manage_columns[manage_current_entry][i] + ":" + filter_field.value;
         }
     }
     
-    var request = "action=get&type=" + manage_change_entity;
+    var request = "action=get&type=" + manage_current_entry;
     request += "&column=" + manage_sort_columns[manage_current_entry][manage_sort_column];
     request += "&limit=" + (manage_current_page * max_per_page).toString() + ":" + max_per_page.toString();
     if (filters.length > 0) request += "&filters=" + filters;
@@ -1580,14 +1581,15 @@ function manage_fill_protein_table(){
     var dom_th_del = document.createElement("th");
     dom_table_header.appendChild(dom_th_del);
     dom_th_del.innerHTML = "Del";
-    for (var i = 1; i <= 12; ++i){
+    for (var i = 1; i <= manage_columns[manage_current_entry].length; ++i){
         var dom_th_name = document.createElement("th");
         dom_table_header.appendChild(dom_th_name);
-        dom_th_name.setAttribute("onclick", "manage_sort_column = " + ((manage_sort_column == i) ? "-" + i.toString() + ";" : i.toString() + ";") + "; manage_fill_protein_table();");
+        dom_th_name.setAttribute("onclick", "manage_sort_column = " + ((manage_sort_column == i) ? "-" + i.toString() + ";" : i.toString() + ";") + "; manage_fill_table();");
         var col_name = manage_sort_columns[manage_current_entry][i].split(":")[0];
         dom_th_name.innerHTML = col_name + ((manage_sort_column == i) ? " " + sign_up : ((manage_sort_column == -i) ? " " + sign_down : ""));
-        if (i != 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 200px; max-width: 200px;");
-        else dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
+        if (manage_current_entry == "proteins" && i == 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
+        else if (manage_current_entry == "metabolites" && i == 5) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
+        else dom_th_name.setAttribute("style", "cursor: pointer; min-width: 200px; max-width: 200px;");
     }
     
     
@@ -1597,13 +1599,13 @@ function manage_fill_protein_table(){
     if (manage_current_page > 0){
         var dom_b = document.createElement("b");
         dom_nav_cell.appendChild(dom_b);
-        dom_b.setAttribute("onclick", "manage_current_page = 0; manage_fill_protein_table();");
+        dom_b.setAttribute("onclick", "manage_current_page = 0; manage_fill_table();");
         dom_b.setAttribute("style", "cursor: pointer;");
         dom_b.innerHTML = "&nbsp;«&nbsp;";
         
         var dom_b2 = document.createElement("b");
         dom_nav_cell.appendChild(dom_b2);
-        dom_b2.setAttribute("onclick", "manage_current_page -= 1; manage_fill_protein_table();");
+        dom_b2.setAttribute("onclick", "manage_current_page -= 1; manage_fill_table();");
         dom_b2.setAttribute("style", "cursor: pointer;");
         dom_b2.innerHTML = "&nbsp;‹&nbsp;&nbsp;";
     }
@@ -1612,7 +1614,7 @@ function manage_fill_protein_table(){
     var dom_page = document.createElement("select");
     dom_nav_cell.appendChild(dom_page);
     dom_page.setAttribute("style", "display: inline;");
-    dom_page.setAttribute("onchange", "manage_current_page = this.selectedIndex; manage_fill_protein_table();");
+    dom_page.setAttribute("onchange", "manage_current_page = this.selectedIndex; manage_fill_table();");
     for (var i = 0; i < manage_max_pages; ++i){
         var dom_option = document.createElement("option");
         dom_page.appendChild(dom_option);
@@ -1624,13 +1626,13 @@ function manage_fill_protein_table(){
         
         var dom_b2 = document.createElement("b");
         dom_nav_cell.appendChild(dom_b2);
-        dom_b2.setAttribute("onclick", "manage_current_page += 1; manage_fill_protein_table();");
+        dom_b2.setAttribute("onclick", "manage_current_page += 1; manage_fill_table();");
         dom_b2.setAttribute("style", "cursor: pointer;");
         dom_b2.innerHTML = "&nbsp;&nbsp;›&nbsp;";
         
         var dom_b = document.createElement("b");
         dom_nav_cell.appendChild(dom_b);
-        dom_b.setAttribute("onclick", "manage_current_page = manage_max_pages - 1; manage_fill_protein_table();");
+        dom_b.setAttribute("onclick", "manage_current_page = manage_max_pages - 1; manage_fill_table();");
         dom_b.setAttribute("style", "cursor: pointer;");
         dom_b.innerHTML = "&nbsp;»&nbsp;";
     }
@@ -1640,10 +1642,18 @@ function manage_fill_protein_table(){
     dom_space.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
     dom_space.style = "display: inline;"
     
-    var dom_new_protein = document.createElement("button");
-    dom_nav_cell.appendChild(dom_new_protein);
-    dom_new_protein.innerHTML = "New protein";
-    dom_new_protein.setAttribute("onclick", "document.getElementById('add_manage_proteins').style.display = 'inline';");
+    if (manage_current_entry == "proteins"){
+        var dom_new_protein = document.createElement("button");
+        dom_nav_cell.appendChild(dom_new_protein);
+        dom_new_protein.innerHTML = "New protein";
+        dom_new_protein.setAttribute("onclick", "document.getElementById('add_manage_proteins').style.display = 'inline';");
+    }
+    else if (manage_current_entry == "metabolites"){
+        var dom_new_metabolite = document.createElement("button");
+        dom_nav_cell.appendChild(dom_new_metabolite);
+        dom_new_metabolite.innerHTML = "New metabolite";
+        dom_new_metabolite.setAttribute("onclick", "document.getElementById('add_manage_metabolites').style.display = 'inline';");
+    }
     
     
     var xmlhttp_manage = new XMLHttpRequest();
@@ -1660,116 +1670,165 @@ function manage_fill_protein_table(){
             
             var dom_table = document.getElementById("editor_select_manage_table");
             dom_table.innerHTML = "";
+            
+            
+            if (manage_current_entry == "proteins"){
     
-            for (var i = 0; i < global_manage_data_sorted.length; ++i){
-                var bg_color = (i & 1) ? "#DDDDDD" : "white";
-                var row = global_manage_data_sorted[i];
-                
-                var dom_tr = document.createElement("tr");
-                dom_table.appendChild(dom_tr);
-                var dom_td_del = document.createElement("td");
-                dom_tr.appendChild(dom_td_del);
-                dom_td_del.setAttribute("bgcolor", bg_color);
-                dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
-                dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
-                var dom_image = document.createElement("img");
-                dom_td_del.appendChild(dom_image);
-                dom_image.setAttribute("src", "../images/delete-small.png");
-                dom_image.setAttribute("onclick", "manage_delete_protein(" + row[0] + ");");
-                
-                for (var j = 1; j < row.length; ++j){
-                    var dom_td = document.createElement("td");
-                    dom_tr.appendChild(dom_td);
-                    dom_td.setAttribute("bgcolor", bg_color);
+                for (var i = 0; i < global_manage_data_sorted.length; ++i){
+                    var bg_color = (i & 1) ? "#DDDDDD" : "white";
+                    var row = global_manage_data_sorted[i];
                     
-                    if (j == 12){
-                        dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
-                        var dom_select = document.createElement("select");
-                        dom_td.appendChild(dom_select);
+                    var dom_tr = document.createElement("tr");
+                    dom_table.appendChild(dom_tr);
+                    var dom_td_del = document.createElement("td");
+                    dom_tr.appendChild(dom_td_del);
+                    dom_td_del.setAttribute("bgcolor", bg_color);
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                    var dom_image = document.createElement("img");
+                    dom_td_del.appendChild(dom_image);
+                    dom_image.setAttribute("src", "../images/delete-small.png");
+                    dom_image.setAttribute("onclick", "manage_delete_protein(" + row[0] + ");");
+                    
+                    for (var j = 1; j < row.length; ++j){
+                        var dom_td = document.createElement("td");
+                        dom_tr.appendChild(dom_td);
+                        dom_td.setAttribute("bgcolor", bg_color);
                         
-                        var selected_option = 0;
-                        var dom_option1 = document.createElement("option");
-                        dom_select.appendChild(dom_option1);
-                        dom_option1.innerHTML = "is";
-                        if (row[j] == "is") selected_option = 0;
+                        if (j == 12){
+                            dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                            var dom_select = document.createElement("select");
+                            dom_td.appendChild(dom_select);
+                            
+                            var selected_option = 0;
+                            var dom_option1 = document.createElement("option");
+                            dom_select.appendChild(dom_option1);
+                            dom_option1.innerHTML = "is";
+                            if (row[j] == "is") selected_option = 0;
+                            
+                            var dom_option2 = document.createElement("option");
+                            dom_select.appendChild(dom_option2);
+                            dom_option2.innerHTML = "prm";
+                            if (row[j] == "prm") selected_option = 1;
+                            
+                            var dom_option3 = document.createElement("option");
+                            dom_select.appendChild(dom_option3);
+                            dom_option3.innerHTML = "topn";
+                            if (row[j] == "topn") selected_option = 2;
+                            
+                            dom_select.selectedIndex = selected_option;
+                            dom_select.setAttribute("onchange", "change_select_type(this);");
+                            dom_select.entity_id = row[0];
+                            dom_select.col_id = j;
+                            dom_select.field_len = 200;
+                        }
+                        else if (j == 9){
+                            dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                            var dom_select = document.createElement("select");
+                            dom_td.appendChild(dom_select);
+                            var selected_option = 0;
+                            for (var k = 0; k < chromosomes["mouse"].length; ++k){
+                                var dom_option = document.createElement("option");
+                                dom_select.appendChild(dom_option);
+                                dom_option.innerHTML = chromosomes["mouse"][k];
+                                if (row[j] == chromosomes["mouse"][k]) selected_option = k;
+                            }
+                            dom_select.selectedIndex = selected_option;
+                            dom_select.setAttribute("onchange", "change_select_type(this);");
+                            dom_select.entity_id = row[0];
+                            dom_select.col_id = j;
+                            dom_select.field_len = 200;
+                        }
+                        else if (j == 8){
+                            var dom_input = document.createElement("input");
+                            dom_td.appendChild(dom_input);
+                            dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                            dom_input.setAttribute("type", "checkbox");
+                            if (row[j] == "1") dom_input.setAttribute("checked", "true");
+                            dom_input.setAttribute("onchange", "change_checkbox_type(this);");
+                            dom_input.entity_id = row[0];
+                            dom_input.col_id = j;
+                            dom_input.field_len = 200;
+                        }
+                        else if (j == 7){
+                            dom_td.setAttribute("style", "min-width: 1000px; max-width: 1000px;");
+                            var dom_div = document.createElement("div");
+                            dom_td.appendChild(dom_div);
+                            dom_div.setAttribute("onclick", "change_textarea_type(this, true);");
+                            dom_div.setAttribute("style", "padding: 5px;");
+                            dom_div.innerHTML = trim_text(row[j], 980);
+                            dom_div.entity_id = row[0];
+                            dom_div.col_id = j;
+                            dom_div.field_len = 1000;
                         
-                        var dom_option2 = document.createElement("option");
-                        dom_select.appendChild(dom_option2);
-                        dom_option2.innerHTML = "prm";
-                        if (row[j] == "prm") selected_option = 1;
-                        
-                        var dom_option3 = document.createElement("option");
-                        dom_select.appendChild(dom_option3);
-                        dom_option3.innerHTML = "topn";
-                        if (row[j] == "topn") selected_option = 2;
-                        
-                        dom_select.selectedIndex = selected_option;
-                        dom_select.setAttribute("onchange", "change_select_type(this);");
-                        dom_select.prot_id = row[0];
-                        dom_select.col_id = j;
-                    }
-                    else if (j == 9){
-                        dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
-                        var dom_select = document.createElement("select");
-                        dom_td.appendChild(dom_select);
-                        var selected_option = 0;
-                        for (var k = 0; k < chromosomes["mouse"].length; ++k){
+                        }
+                        else if (j == 3){
+                            dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                            var dom_select = document.createElement("select");
+                            dom_td.appendChild(dom_select);
+                            dom_select.setAttribute("onchange", "change_select_type(this);");
+                            dom_select.entity_id = row[0];
+                            dom_select.col_id = j;
                             var dom_option = document.createElement("option");
                             dom_select.appendChild(dom_option);
-                            dom_option.innerHTML = chromosomes["mouse"][k];
-                            if (row[j] == chromosomes["mouse"][k]) selected_option = k;
+                            dom_option.innerHTML = "mouse";
+                            dom_select.field_len = 200;
                         }
-                        dom_select.selectedIndex = selected_option;
-                        dom_select.setAttribute("onchange", "change_select_type(this);");
-                        dom_select.prot_id = row[0];
-                        dom_select.col_id = j;
+                        else {
+                            var dom_div = document.createElement("div");
+                            dom_td.appendChild(dom_div);
+                            dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                            dom_div.setAttribute("onclick", "change_textfield_type(this, true);");
+                            dom_div.setAttribute("style", "padding: 5px;");
+                            dom_div.innerHTML = trim_text(row[j], 180);
+                            dom_div.entity_id = row[0];
+                            dom_div.col_id = j;
+                            dom_div.field_len = 200;
+                        }                    
+                        
                     }
-                    else if (j == 8){
-                        var dom_input = document.createElement("input");
-                        dom_td.appendChild(dom_input);
-                        dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
-                        dom_input.setAttribute("type", "checkbox");
-                        if (row[j] == "1") dom_input.setAttribute("checked", "true");
-                        dom_input.setAttribute("onchange", "change_checkbox_type(this);");
-                        dom_input.prot_id = row[0];
-                        dom_input.col_id = j;
-                    }
-                    else if (j == 7){
-                        dom_td.setAttribute("style", "min-width: 1000px; max-width: 1000px;");
-                        var dom_div = document.createElement("div");
-                        dom_td.appendChild(dom_div);
-                        dom_div.setAttribute("onclick", "change_textarea_type(this, true);");
-                        dom_div.setAttribute("style", "padding: 5px;");
-                        dom_div.innerHTML = trim_text(row[j], 980);
-                        dom_div.prot_id = row[0];
-                        dom_div.col_id = j;
-                    
-                    }
-                    else if (j == 3){
-                        dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
-                        var dom_select = document.createElement("select");
-                        dom_td.appendChild(dom_select);
-                        dom_select.setAttribute("onchange", "change_select_type(this);");
-                        dom_select.prot_id = row[0];
-                        dom_select.col_id = j;
-                        var dom_option = document.createElement("option");
-                        dom_select.appendChild(dom_option);
-                        dom_option.innerHTML = "mouse";
-                    }
-                    else {
-                        var dom_div = document.createElement("div");
-                        dom_td.appendChild(dom_div);
-                        dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
-                        dom_div.setAttribute("onclick", "change_textfield_type(this, true);");
-                        dom_div.setAttribute("style", "padding: 5px;");
-                        dom_div.innerHTML = trim_text(row[j], 180);
-                        dom_div.prot_id = row[0];
-                        dom_div.col_id = j;
-                    }                    
-                    
                 }
             }
             
+            else if (manage_current_entry == "metabolites"){
+                
+                for (var i = 0; i < global_manage_data_sorted.length; ++i){
+                    var bg_color = (i & 1) ? "#DDDDDD" : "white";
+                    var row = global_manage_data_sorted[i];
+                    
+                    var dom_tr = document.createElement("tr");
+                    dom_table.appendChild(dom_tr);
+                    var dom_td_del = document.createElement("td");
+                    dom_tr.appendChild(dom_td_del);
+                    dom_td_del.setAttribute("bgcolor", bg_color);
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                    var dom_image = document.createElement("img");
+                    dom_td_del.appendChild(dom_image);
+                    dom_image.setAttribute("src", "../images/delete-small.png");
+                    dom_image.setAttribute("onclick", "manage_delete_metabolite(" + row[0] + ");");
+                    
+                    for (var j = 1; j < row.length; ++j){
+                        var dom_td = document.createElement("td");
+                        dom_tr.appendChild(dom_td);
+                        dom_td.setAttribute("bgcolor", bg_color);
+                        
+                            
+                        var dom_div = document.createElement("div");
+                        dom_td.appendChild(dom_div);
+                        if (j != 5) dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                        else dom_td.setAttribute("style", "min-width: 1000px; max-width: 1000px;");
+                        dom_div.setAttribute("onclick", "change_textfield_type(this, true);");
+                        dom_div.setAttribute("style", "padding: 5px;");
+                        if (j != 5) dom_div.innerHTML = trim_text(row[j], 180);
+                        else dom_div.innerHTML = trim_text(row[j], 980);
+                        dom_div.entity_id = row[0];
+                        dom_div.col_id = j;
+                        dom_div.field_len = (j != 5) ? 200 : 1000;
+                    }
+                }
+                
+            }
             
         }
     }
@@ -1792,7 +1851,7 @@ function manage_delete_protein(prot_id){
                 if (request < 0){
                     alert("Error: protein could not be deleted from database.");
                 }
-                manage_fill_protein_table();
+                manage_fill_table();
                 if (prot_id in protein_dictionary){
                     delete protein_dictionary[prot_id];
                     for (node_id in data){
@@ -1830,33 +1889,33 @@ function trim_text(text, len){
 
 
 function change_checkbox_type(dom_obj){
-    var prot_id = dom_obj.prot_id;
+    var entity_id = dom_obj.entity_id;
     var col_id = dom_obj.col_id;
     var content = dom_obj.checked;
-    var request = "action=set&table=" + manage_current_entry + "&id=" + prot_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + (content ? "1" : "0");
+    var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + (content ? "1" : "0");
        
     var result = update_entry(request);
     if (!result){
         alert("Error: database could not be updated.");
     }
     else {
-        manage_fill_protein_table();
+        manage_fill_table();
     }
 }
 
 
 function change_select_type(dom_obj){
-    var prot_id = dom_obj.prot_id;
+    var entity_id = dom_obj.entity_id;
     var col_id = dom_obj.col_id;
     var content = dom_obj[dom_obj.selectedIndex].value;
-    var request = "action=set&table=" + manage_current_entry + "&id=" + prot_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
+    var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
        
     var result = update_entry(request);
     if (!result){
         alert("Error: database could not be updated.");
     }
     else {
-        manage_fill_protein_table();
+        manage_fill_table();
     }
 }
 
@@ -1864,9 +1923,10 @@ function change_select_type(dom_obj){
 function change_textfield_type(dom_obj, to_text){
     if (to_text){
         var parent = dom_obj.parentNode;
-        var prot_id = dom_obj.prot_id;
+        var entity_id = dom_obj.entity_id;
         var col_id = dom_obj.col_id;
-        var content = global_manage_data[prot_id][col_id];
+        var field_len = dom_obj.field_len;
+        var content = global_manage_data[entity_id][col_id];
         
         parent.innerHTML = "";
         dom_obj = document.createElement("input");
@@ -1875,37 +1935,42 @@ function change_textfield_type(dom_obj, to_text){
         dom_obj.setAttribute("value", content);
         dom_obj.setAttribute("onkeyup", "if (event.which == '13') change_textfield_type(this, false);");
         dom_obj.setAttribute("onblur", "change_textfield_type(this, false);");
-        dom_obj.prot_id = prot_id;
+        dom_obj.entity_id = entity_id;
         dom_obj.col_id = col_id;
+        dom_obj.field_len = field_len;
         dom_obj.focus();
         dom_obj.setSelectionRange(content.length, content.length);
     }
     else {
         var parent = dom_obj.parentNode;
         var content = dom_obj.value;
-        var prot_id = dom_obj.prot_id;
+        var entity_id = dom_obj.entity_id;
         var col_id = dom_obj.col_id;
+        var field_len = dom_obj.field_len;
         
-        var request = "action=set&table=" + manage_current_entry + "&id=" + prot_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
+        var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
         
+        console.log(request);
         
         var result = update_entry(request);
         if (!result){
             alert("Error: database could not be updated.");
         }
         else {
-            manage_fill_protein_table();
+            manage_fill_table();
         }
         
         parent.innerHTML = "";
         dom_obj = document.createElement("div");
         parent.appendChild(dom_obj);
         dom_obj.setAttribute("onclick", "change_textfield_type(this, true);");
+        dom_obj.setAttribute("style", "min-width: " + field_len + "px; max-width: " + field_len + "px;");
         dom_obj.setAttribute("style", "padding: 5px;");
-        dom_obj.prot_id = prot_id;
+        dom_obj.entity_id = entity_id;
         dom_obj.col_id = col_id;
-        dom_obj.innerHTML = trim_text(content);
-        global_manage_data[prot_id][col_id] = content;
+        dom_obj.field_len = field_len;
+        dom_obj.innerHTML = trim_text(content, field_len - 20);
+        global_manage_data[entity_id][col_id] = content;
     }
 }
 
@@ -1913,45 +1978,50 @@ function change_textfield_type(dom_obj, to_text){
 function change_textarea_type(dom_obj, to_text){
     if (to_text){
         var parent = dom_obj.parentNode;
-        var prot_id = dom_obj.prot_id;
+        var entity_id = dom_obj.entity_id;
         var col_id = dom_obj.col_id;
-        var content = global_manage_data[prot_id][col_id];
+        var content = global_manage_data[entity_id][col_id];
+        var field_len = dom_obj.field_len;
         
         parent.innerHTML = "";
         dom_obj = document.createElement("textarea");
         parent.appendChild(dom_obj);
         dom_obj.innerHTML = content;
         dom_obj.setAttribute("onblur", "change_textarea_type(this, false);");
-        dom_obj.setAttribute("style", "height: 200px; min-width: 980px; max-width: 980px;");
-        dom_obj.prot_id = prot_id;
+        dom_obj.setAttribute("style", "height: 200px; min-width: " + field_len + "px; max-width: " + field_len + "px;");
+        dom_obj.entity_id = entity_id;
         dom_obj.col_id = col_id;
         dom_obj.focus();
+        dom_obj.field_len = field_len;
         dom_obj.setSelectionRange(content.length, content.length);
     }
     else {
         var parent = dom_obj.parentNode;
         var content = dom_obj.value;
-        var prot_id = dom_obj.prot_id;
+        var entity_id = dom_obj.entity_id;
         var col_id = dom_obj.col_id;
+        var field_len = dom_obj.field_len;
         
-        var request = "action=set&table=" + manage_current_entry + "&id=" + prot_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
+        var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
         
         var result = update_entry(request);
         if (!result){
             alert("Error: database could not be updated.");
         }
         else {
-            manage_fill_protein_table();
+            manage_fill_table();
         }
         parent.innerHTML = "";
         dom_obj = document.createElement("div");
         parent.appendChild(dom_obj);
         dom_obj.setAttribute("onclick", "change_textarea_type(this, true);");
+        dom_obj.setAttribute("style", "min-width: " + field_len + "px; max-width: " + field_len + "px;");
         dom_obj.setAttribute("style", "padding: 5px;");
-        dom_obj.prot_id = prot_id;
+        dom_obj.entity_id = entity_id;
         dom_obj.col_id = col_id;
-        global_manage_data[prot_id][col_id] = content;
-        dom_obj.innerHTML = trim_text(content);
+        dom_obj.field_len = field_len;
+        global_manage_data[entity_id][col_id] = content;
+        dom_obj.innerHTML = trim_text(content, field_len - 20);
     }
 }
 
@@ -1992,6 +2062,27 @@ function change_add_manage_proteins_chromosome(){
             dom_option.innerHTML = chromosomes[species][i];
         }
     }
+}
+
+
+function request_metabolites_data(){
+    var c_number = document.getElementById("add_manage_metabolites_c_number").value;
+    if (c_number.length < 1) return;
+    
+    var request = "/qsdb/admin/cgi-bin/request-entity-data.py?type=metabolite&c_number=" + c_number;
+    
+    var xmlhttp_metabolite_data = new XMLHttpRequest();
+    xmlhttp_metabolite_data.onreadystatechange = function() {
+        if (xmlhttp_metabolite_data.readyState == 4 && xmlhttp_metabolite_data.status == 200) {
+            var request = JSON.parse(xmlhttp_metabolite_data.responseText);
+            if ("name" in request) document.getElementById("add_manage_metabolites_name").value = request["name"];
+            if ("formula" in request) document.getElementById("add_manage_metabolites_formula").value = request["formula"];
+            if ("exact_mass" in request) document.getElementById("add_manage_metabolites_exact_mass").value = request["exact_mass"];
+            if ("smiles" in request) document.getElementById("add_manage_metabolites_smiles").value = request["smiles"];
+        }
+    }
+    xmlhttp_metabolite_data.open("GET", request, false);
+    xmlhttp_metabolite_data.send();
 }
 
 
@@ -2083,11 +2174,94 @@ function add_manage_proteins_add(){
                 alert("An error has occured while adding the protein to the database. Please contact the administrator.");
             }
             document.getElementById('add_manage_proteins').style.display = 'none';
-            manage_fill_protein_table();
+            manage_fill_table();
         }
     }
     xmlhttp_add_protein.open("GET", request, false);
     xmlhttp_add_protein.send();
+}
+
+
+
+function add_manage_metabolites_add(){
+    
+    
+    var request = "name:" + document.getElementById("add_manage_metabolites_name").value;
+    request += ",c_number:" + document.getElementById("add_manage_metabolites_c_number").value;
+    request += ",formula:" + document.getElementById("add_manage_metabolites_formula").value;
+    request += ",exact_mass:" + document.getElementById("add_manage_metabolites_exact_mass").value;
+    request += ",smiles:" + document.getElementById("add_manage_metabolites_smiles").value;
+    
+    request = "/qsdb/admin/cgi-bin/manage-entries.py?action=insert&type=metabolites&data=" + request;
+    console.log(request);
+    
+    var xmlhttp_add_metabolite = new XMLHttpRequest();
+    xmlhttp_add_metabolite.onreadystatechange = function() {
+        if (xmlhttp_add_metabolite.readyState == 4 && xmlhttp_add_metabolite.status == 200) {
+            var request = xmlhttp_add_metabolite.responseText;
+            if (request < 0){
+                alert("An error has occured while adding the metabolite to the database. Please contact the administrator.");
+            }
+            document.getElementById('add_manage_metabolites').style.display = 'none';
+            manage_fill_table();
+        }
+    }
+    xmlhttp_add_metabolite.open("GET", request, false);
+    xmlhttp_add_metabolite.send();
+}
+
+
+function manage_delete_metabolite(metabolite_id){
+    var request = "type=metabolite&id=" + metabolite_id;
+    request = "/qsdb/admin/cgi-bin/delete-entity.py?" + request
+    
+    
+    if (confirm("Do you want to delete the metabolite '" + global_manage_data[metabolite_id][1] + "'?")) {
+        
+        var xmlhttp_metabolite_data = new XMLHttpRequest();
+        xmlhttp_metabolite_data.onreadystatechange = function() {
+            if (xmlhttp_metabolite_data.readyState == 4 && xmlhttp_metabolite_data.status == 200) {
+                var request = xmlhttp_metabolite_data.responseText;
+                if (request < 0){
+                    alert("Error: protein could not be deleted from database.");
+                }
+                manage_fill_table();
+                
+                var node_ids = new Set();
+                for (var node_id in data){
+                    if (data[node_id].type == 'metabolite' && data[node_id].foreign_id == metabolite_id) node_ids.add(parseInt(node_id));
+                }
+                console.log(node_ids);
+                
+                var del_reactions = []
+                for (var reaction_id in edge_data){
+                    var curr_edge = edge_data[reaction_id];
+                    for (var reagent_id in curr_edge['r']){
+                        if (node_ids.has(curr_edge['r'][reagent_id]['n']) && data[curr_edge['n']].type == "pathway") del_reactions.push(reaction_id);
+                    }
+                }
+                
+                for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
+                
+                
+                for (var reaction_id in edge_data){
+                    var del_reagents = [];
+                    for (var reagent_id in edge_data[reaction_id]['r']){
+                        if (node_ids.has(edge_data[reaction_id]['r'][reagent_id]['n'])) del_reagents.push(reagent_id);
+                    }
+                    for (var i = 0; i < del_reagents.length; ++i) delete edge_data[reaction_id]['r'][del_reagents[i]];
+                }
+                
+                for (var node_id of node_ids) delete data[node_id];
+                compute_edges();
+                assemble_elements();
+                draw();
+                
+            }
+        }
+        xmlhttp_metabolite_data.open("GET", request, false);
+        xmlhttp_metabolite_data.send();
+    }
 }
 
 
