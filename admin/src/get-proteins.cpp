@@ -31,16 +31,6 @@ using namespace std;
 #endif
 
 
-bool is_integer_number(const string& string){
-  string::const_iterator it = string.begin();
-  int minSize = 0;
-  if(string.size()>0 && (string[0] == '-' || string[0] == '+')){
-    it++;
-    minSize++;
-  }
-  while (it != string.end() && isdigit(*it)) ++it;
-  return string.size()>minSize && it == string.end();
-}
 
 vector< protein* > proteins;
 map<string, peptide* > peptide_dict;

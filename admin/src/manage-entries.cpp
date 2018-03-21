@@ -13,17 +13,6 @@
 using namespace std;
 
 
-bool is_integer_number(const string& string){
-    string::const_iterator it = string.begin();
-    uint minSize = 0;
-    if(string.size()>0 && (string[0] == '-' || string[0] == '+')){
-        it++;
-        minSize++;
-    }
-    while (it != string.end() && isdigit(*it)) ++it;
-    return string.size()>minSize && it == string.end();
-}
-
 
 string urlDecode(string &SRC) {
     string ret;
