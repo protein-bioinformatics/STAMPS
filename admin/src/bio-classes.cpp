@@ -45,6 +45,16 @@ string cleanFasta(string str){
     return modified;
 }
 
+bool is_integer_number(const string& string){
+  string::const_iterator it = string.begin();
+  int minSize = 0;
+  if(string.size()>0 && (string[0] == '-' || string[0] == '+')){
+    it++;
+    minSize++;
+  }
+  while (it != string.end() && isdigit(*it)) ++it;
+  return string.size()>minSize && it == string.end();
+}
 
 
 int binarySearch(int* array, int length, int key) {

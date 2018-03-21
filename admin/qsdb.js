@@ -131,7 +131,7 @@ function init(){
             change_add_manage_proteins_chromosome();
         }
     }
-    xmlhttp_chr.open("GET", "/qsdb/cgi-bin/get-chromosomes.py?species=mouse", true);
+    xmlhttp_chr.open("GET", "/qsdb/cgi-bin/get-chromosomes.bin?species=mouse", true);
     xmlhttp_chr.send();
     
     
@@ -223,6 +223,16 @@ function init(){
     
     manage_change_entity("proteins");
     resize_manage_view();
+    
+    
+    var xmlhttp_matomo = new XMLHttpRequest();
+    xmlhttp_matomo.onreadystatechange = function() {
+        if (xmlhttp_matomo.readyState == 4 && xmlhttp_matomo.status == 200) {
+            var matomo = xmlhttp_matomo.responseText;
+        }
+    }
+    xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=BMBF Metrics&e_a=request&e_n=stamp-editor", true);
+    xmlhttp_matomo.send();
 }
 
 
@@ -449,7 +459,7 @@ function update_label(){
     var label = document.getElementById("label_text_field").value;
     if (label == "") label = "undefined";
     
-    var request = "action=set&table=labels&id=" + data[selected_label_node].foreign_id + "&column=label&value=" + label;
+    var request = "action=set&table=labels&id=" + data[selected_label_node].foreign_id + "&column=label&value=" + encodeURL(label);
     var result = update_entry(request);
     if (result){
         var ctx = document.getElementById("renderarea").getContext("2d");
@@ -690,7 +700,7 @@ function mouse_down_listener(e){
     else if (e.buttons & 1){
         if (highlight_element){
             highlight_element.mouse_down(res, e.which);
-            if (toolbox_button_selected == toolbox_states.MOVE_ENTITY){
+            if (toolbox_button_selected == toolbox_states.MOVE_ENTITY && highlight_element.constructor.name != "preview"){
                 entity_moving = highlight_element;
                 node_move_x = entity_moving.x;
                 node_move_y = entity_moving.y;
@@ -1930,7 +1940,7 @@ function change_textfield_type(dom_obj, to_text){
         var col_id = dom_obj.col_id;
         var field_len = dom_obj.field_len;
         
-        var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
+        var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + encodeURL(content);
         
         
         var result = update_entry(request);
@@ -1983,7 +1993,7 @@ function change_textarea_type(dom_obj, to_text){
         var col_id = dom_obj.col_id;
         var field_len = dom_obj.field_len;
         
-        var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
+        var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + encodeURL(content);
         
         var result = update_entry(request);
         if (!result){
@@ -2148,7 +2158,6 @@ function add_manage_proteins_add(){
     
     request = "/qsdb/admin/cgi-bin/manage-entries.bin?action=insert&type=proteins&data=" + encodeURL(request);
     
-    console.log(request);
     
     var xmlhttp_add_protein = new XMLHttpRequest();
     xmlhttp_add_protein.onreadystatechange = function() {

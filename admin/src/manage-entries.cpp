@@ -55,7 +55,7 @@ void print_out(string response, bool compress){
 
 
 int main(int argc, char** argv) {
-    bool compress = false;
+    bool compress = true;
     string response = "";
     
     

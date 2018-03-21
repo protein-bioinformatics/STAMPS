@@ -13,6 +13,7 @@ using namespace std;
 vector<string> split(string str, char delimiter);
 void replaceAll(std::string& str, const std::string& from, const std::string& to);
 void strip(string &str);
+bool is_integer_number(const string& string);
 string cleanFasta(string str);
 int binarySearch(int* array, int length, int key);
 string remove_newline(string str);

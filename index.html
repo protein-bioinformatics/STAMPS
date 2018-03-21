@@ -1484,7 +1484,7 @@ function load_all_data(){
             ideom_data = JSON.parse(xmlhttp_chr.responseText);
         }
     }
-    xmlhttp_chr.open("GET", "/qsdb/cgi-bin/get-chromosomes.py?species=mouse", true);
+    xmlhttp_chr.open("GET", "/qsdb/cgi-bin/get-chromosomes.bin?species=mouse", true);
     xmlhttp_chr.send();
     
     // load tissue images

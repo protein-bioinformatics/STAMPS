@@ -7,62 +7,116 @@
 #include <map>
 #include <string>
 #include <sstream>
+#include "bio-classes.h"
+
+#include "mysql_connection.h"
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
+
 
 using namespace std;
 
-vector<string> split(string str, char delimiter) {
-  vector<string> internal;
-  stringstream ss(str); // Turn the string into a stream.
-  string tok;
-  
-  while(getline(ss, tok, delimiter)) {
-    internal.push_back(tok);
-  }
-  
-  return internal;
-}
 
-
-void strip(string &str){
-    while (str.length() && (str[0] == ' ' || str[0] == 13 || str[0] == 10)){
-        str = str.substr(1);
+void print_out(string response, bool compress){
+    if (compress){
+        cout << compress_string(response);        
     }
-    int l = str.length();
-    while (l && (str[l - 1] == ' ' || str[l - 1] == 13 || str[l - 1] == 10)){
-        str = str.substr(0, l - 1);
-        --l;
+    else {
+        cout << response;
     }
 }
 
+class reagent {
+    public:
+        string id;
+        string reaction_id;
+        string node_id;
+        string type;
+        string anchor;
+        
+        string to_string(){
+            string data = "{\"i\":" + id;
+            data += ",\"r\":" + reaction_id;
+            data += ",\"n\":" + node_id;
+            data += ",\"t\":\"" + type + "\"";
+            data += ",\"a\":\"" + anchor + "\"}";
+            return data;
+        }
+};
 
-bool is_integer_number(const string& string){
-  string::const_iterator it = string.begin();
-  int minSize = 0;
-  if(string.size()>0 && (string[0] == '-' || string[0] == '+')){
-    it++;
-    minSize++;
-  }
-  while (it != string.end() && isdigit(*it)) ++it;
-  return string.size()>minSize && it == string.end();
-}
+class reaction {
+    public:
+        string id;
+        string node_id;
+        string anchor_in;
+        string anchor_out;
+        string reversible;
+        vector<reagent*> reagents;
+        
+        string to_string(){
+            
+            string data = "{\"i\":" + id;
+            data += ",\"n\":" + node_id;
+            data += ",\"in\":\"" + anchor_in + "\"";
+            data += ",\"out\":\"" + anchor_out + "\"";
+            data += ",\"v\":" + reversible;
+            data += ",\"r\":{";
+            for (int i = 0; i < reagents.size(); ++i){
+                if (i) data += ",";
+                data += "\"" + reagents[i]->id + "\":" + reagents[i]->to_string();
+            }
+            
+            data += "}}";
+            return data;
+        }
+};
+
+
 
 main() {
-    cout << "Content-Type: text/html" << endl << endl;
+    bool compress = false;
+    string response = "";
     
     
-    vector<string> get_entries = split(getenv("QUERY_STRING"), ';');    
-    string pathway_id = "";
-    for (int i = 0; i < get_entries.size(); ++i){
-        vector<string> get_values = split(get_entries.at(i), '=');
-        if (get_values.size() && get_values.at(0) == "pathway"){
-            pathway_id = get_values.at(1);
-        }
+    if (compress){
+        cout << "Content-Type: text/html" << endl;
+        cout << "Content-Encoding: deflate" << endl << endl;
+        
     }
-    if (pathway_id == "" || !is_integer_number(pathway_id)){
-        cout << -1 << endl;
+    else {
+        cout << "Content-Type: text/html" << endl << endl;
+    }
+    
+    
+    
+    // load get values
+    char* get_string_chr = getenv("QUERY_STRING");
+    
+    if (!get_string_chr){
+        response += "-1";
+        print_out(response, compress);
         return -1;
     }
+    string get_string = get_string_chr;
     
+    if (!get_string.length()){
+        response += "-2";
+        print_out(response, compress);
+        return -2;
+    }
+    
+    
+    vector<string> get_entries = split(get_string, '&');
+    map< string, string > form;
+    for (uint i = 0; i < get_entries.size(); ++i){
+        vector<string> get_value = split(get_entries.at(i), '=');
+        string value = (get_value.size() > 1) ? get_value.at(1) : "";
+        form.insert(pair< string, string >(get_value.at(0), value));
+    }
+    
+    // load parameters from config file
     string line;
     map< string, string > parameters;
     ifstream myfile ("../admin/qsdb.conf");
@@ -80,75 +134,79 @@ main() {
     }
     
     
-    MYSQL *conn = mysql_init(NULL);
-    MYSQL_RES *res;
-    MYSQL_RES *res_reagents;
-    MYSQL_ROW row;
-    MYSQL_FIELD *field;
-    char *server = (char*)parameters["mysql_host"].c_str();
-    char *user = (char*)parameters["mysql_user"].c_str();
-    char *password = (char*)parameters["mysql_passwd"].c_str();
-    char *database = (char*)parameters["mysql_db"].c_str();
-    map< string, int > column_names;
-    map< string, int > column_names_reagents;
+    // Create a connection and connect to database
+    sql::Driver *driver;
+    sql::Connection *con;
+    sql::Statement *stmt;
+    sql::ResultSet *res;
+    driver = get_driver_instance();
+    con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
+    con->setSchema(parameters["mysql_db"]);
     
-    /* Connect to database */
-    if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
-        cout << "error: " << mysql_error(conn) << endl;
-        return 1;
+    
+    string pathway_id = (form.find("pathway") != form.end()) ? form["pathway"] : "";
+    if (!pathway_id.length() || !is_integer_number(pathway_id)){
+        response += "-3";
+        print_out(response, compress);
+        return -3;
     }
-    /* send SQL query */
-    string sql_query = "SELECT r.*, rg.id rg_id, rg.reaction_id, rg.node_id rg_node_id, rg.type, rg.anchor FROM reactions r INNER JOIN nodes n ON r.node_id = n.id LEFT JOIN reagents rg on r.id = rg.reaction_id WHERE n.pathway_id = ";
+    
+    
+    
+    
+    string sql_query = "SELECT r.* FROM reactions r INNER JOIN nodes n ON r.node_id = n.id WHERE n.pathway_id = ";
     sql_query += pathway_id;
     sql_query += " ORDER BY r.id;";
-    if (mysql_query(conn, sql_query.c_str())) {
-        cout << "error: " << mysql_error(conn) << endl;
-        return 1;
-    }
-    res = mysql_use_result(conn);
+    
+    stmt = con->createStatement();
+    res = stmt->executeQuery(sql_query);
         
-    for(unsigned int i = 0; (field = mysql_fetch_field(res)); i++) {
-        column_names.insert(pair<string,int>(field->name, i));
+    
+    map<string, reaction* > all_reactions;
+    while (res->next()) {
+        reaction* r = new reaction();
+        r->id = res->getString("id");
+        r->node_id = res->getString("node_id");
+        r->anchor_in = res->getString("anchor_in");
+        r->anchor_out = res->getString("anchor_out");
+        r->reversible = res->getString("reversible");
+        all_reactions.insert(pair< string, reaction* >(r->id, r));
     }
     
-    cout << "{";
-    int last_id = -1;
-    int index = 0;
-    int index_r = 0;
-    while ((row = mysql_fetch_row(res)) != NULL){
-        
-        int id = atoi(row[column_names[string("id")]]);
-        if (last_id != id){
-            index_r = 0;
-            if (last_id != -1){
-                cout << "}},";
-            }
-            cout << "\"" << row[column_names[string("id")]] << "\": {\"i\":" << row[column_names[string("id")]] << ",";
-            cout << "\"n\":" << row[column_names[string("node_id")]] << ",";
-            cout << "\"in\":\"" << row[column_names[string("anchor_in")]] << "\",";
-            cout << "\"out\":\"" << row[column_names[string("anchor_out")]] << "\",";
-            cout << "\"v\":" << row[column_names[string("reversible")]] << ",";
-            cout << "\"r\":{";
-            
-            last_id = id;
-        }
-        
-        if (row[column_names[string("rg_id")]] != 0){
-            if (index_r) cout << ", ";
-            cout << "\"" << row[column_names[string("rg_id")]] << "\":{\"i\":" << row[column_names[string("rg_id")]] << ",";
-            cout << "\"r\":" << row[column_names[string("reaction_id")]] << ",";
-            cout << "\"n\":" << row[column_names[string("rg_node_id")]] << ",";
-            cout << "\"t\":\"" << row[column_names[string("type")]] << "\",";
-            cout << "\"a\":\"" << row[column_names[string("anchor")]] << "\"}";
-        }
-        
-        ++index_r;
-        ++index;
-    }
-    if (index_r) cout << "}";
-    if (index) cout << "}";
-    cout << "}" << endl;
     
-    mysql_free_result(res);
-    mysql_close(conn);
+    
+    
+    sql_query = "SELECT r.id, rg.id rg_id, rg.reaction_id, rg.node_id rg_node_id, rg.type, rg.anchor FROM reactions r INNER JOIN nodes n ON r.node_id = n.id INNER JOIN reagents rg on r.id = rg.reaction_id WHERE n.pathway_id = ";
+    sql_query += pathway_id;
+    sql_query += " ORDER BY r.id;";
+    
+    
+    res = stmt->executeQuery(sql_query);
+    while (res->next()) {
+        reagent* r = new reagent();
+        r->id = res->getString("rg_id");
+        r->reaction_id = res->getString("reaction_id");
+        r->node_id = res->getString("rg_node_id");
+        r->type = res->getString("type");
+        r->anchor = res->getString("anchor");
+        all_reactions[res->getString("id")]->reagents.push_back(r);
+    }
+    
+    
+    string data = "{";
+    for (auto entry : all_reactions){
+        if (data.length() > 1) data += ",";
+        data += "\"" + entry.first + "\":" + entry.second->to_string();
+    }
+    data += "}";
+    
+    
+    response += data;    
+    print_out(response, compress);
+    
+    delete res;
+    delete stmt;
+    delete con;
+    
+    return 0;
 }

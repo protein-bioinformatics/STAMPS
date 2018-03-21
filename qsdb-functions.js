@@ -881,6 +881,8 @@ pathway_title.prototype = new visual_element();
 pathway_title.prototype.constructor = pathway_title;
 
 function pathway_title(){
+    this.sort_order = 1000;
+    
     this.draw = function(ctx){
         var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
         ctx.fillStyle = "#f3f8ff";
@@ -903,6 +905,7 @@ select_field.prototype.constructor = select_field;
 function select_field(){
     this.start_position = false;
     this.end_position = false;
+    this.sort_order = 200;
     
     
     this.is_mouse_over = function(mouse){
@@ -1108,6 +1111,7 @@ function preview(){
     this.active_boundaries = [0, 0, 0, 0];
     this.scale_x = 1;
     this.scale_y = 1;
+    this.sort_order = 500;
     
     this.snapshot = function(){
         var ctx = document.getElementById("renderarea").getContext("2d");
@@ -1585,7 +1589,7 @@ function node(data){
     this.setup_label_meta = function(){
         var ctx = document.createElement("canvas").getContext("2d");
         ctx.font = (font_size / factor).toString() + "px Arial";
-        this.width = ctx.measureText(this.name).width;
+        this.width = 1.2 * ctx.measureText(this.name).width * factor;
         this.height = (text_size + 2) * factor;
     }
     
@@ -1816,7 +1820,7 @@ function node(data){
                 ctx.textAlign = "center";
                 ctx.font = ((text_size + 2) * factor).toString() + "px Arial";
                 ctx.fillStyle = label_color;
-                ctx.fillText(this.name, this.x, this.y + (this.height >> 2));
+                ctx.fillText(this.name, this.x, this.y + this.height * 0.3);
                 break;
                 
             case "membrane":
