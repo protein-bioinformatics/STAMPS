@@ -58,23 +58,6 @@ chromosomes = {"mouse": []};
 
 
 function init(){
-    /*
-    var xmlhttp_pw = new XMLHttpRequest();
-    xmlhttp_pw.onreadystatechange = function() {
-        if (xmlhttp_pw.readyState == 4 && xmlhttp_pw.status == 200) {
-            var pathway_dat = JSON.parse(xmlhttp_pw.responseText);
-            for (var i = 0; i < pathway_dat.length; ++i){
-                pathways[pathway_dat[i][0]] = pathway_dat[i][1];
-            }
-            set_pathway_menu();
-        }
-    }
-    
-    xmlhttp_pw.open("GET", "/qsdb/cgi-bin/get-pathways.bin", true);
-    xmlhttp_pw.send();
-    */
-    
-    
     
     // get pathways
     var xmlhttp_pathways = new XMLHttpRequest();
@@ -100,7 +83,7 @@ function init(){
             }
         }
     }
-    xmlhttp_pathways.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=pathways", true);
+    xmlhttp_pathways.open("GET", "/qsdb/admin/cgi-bin/manage-entries.bin?action=get&type=pathways", true);
     xmlhttp_pathways.send();
     
     
@@ -170,37 +153,27 @@ function init(){
     document.getElementById("renderarea").style.left = (document.getElementById("toolbox").offsetWidth).toString() + "px";
     resize_pathway_view();
     
-    // get metabolites
+    // get number of metabolites
     var xmlhttp_metabolites = new XMLHttpRequest();
     xmlhttp_metabolites.onreadystatechange = function() {
         if (xmlhttp_metabolites.readyState == 4 && xmlhttp_metabolites.status == 200) {
             metabolite_max_pages = Math.floor(parseInt(xmlhttp_metabolites.responseText) / max_per_page) + 1;
         }
     }
-    xmlhttp_metabolites.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=metabolites_num", true);
+    xmlhttp_metabolites.open("GET", "/qsdb/admin/cgi-bin/manage-entries.bin?action=get&type=metabolites_num", true);
     xmlhttp_metabolites.send();
     
     
     
-    
-    // get proteins
+    // get number of proteins
     var xmlhttp_proteins = new XMLHttpRequest();
     xmlhttp_proteins.onreadystatechange = function() {
         if (xmlhttp_proteins.readyState == 4 && xmlhttp_proteins.status == 200) {
             protein_max_pages = Math.floor(parseInt(xmlhttp_proteins.responseText) / max_per_page) + 1;
         }
     }
-    xmlhttp_proteins.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=proteins_num", true);
+    xmlhttp_proteins.open("GET", "/qsdb/admin/cgi-bin/manage-entries.bin?action=get&type=proteins_num", true);
     xmlhttp_proteins.send();
-    
-    var xmlhttp_ga = new XMLHttpRequest();
-    xmlhttp_ga.onreadystatechange = function() {
-        if (xmlhttp_ga.readyState == 4 && xmlhttp_ga.status == 200) {
-            var request = xmlhttp_ga.responseText;
-        }
-    }
-    xmlhttp_ga.open("GET", "/qsdb/cgi-bin/analytics.py?action=request&label=stamp-editor", true);
-    xmlhttp_ga.send();
     
     
     var xmlhttp_prot_col = new XMLHttpRequest();
@@ -214,7 +187,7 @@ function init(){
             }
         }
     }
-    xmlhttp_prot_col.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=proteins_col", false);
+    xmlhttp_prot_col.open("GET", "/qsdb/admin/cgi-bin/manage-entries.bin?action=get&type=proteins_col", true);
     xmlhttp_prot_col.send();
     
     
@@ -229,7 +202,7 @@ function init(){
             }
         }
     }
-    xmlhttp_meta_col.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=metabolites_col", false);
+    xmlhttp_meta_col.open("GET", "/qsdb/admin/cgi-bin/manage-entries.bin?action=get&type=metabolites_col", true);
     xmlhttp_meta_col.send();
     
     
@@ -244,7 +217,7 @@ function init(){
             }
         }
     }
-    xmlhttp_pw_col.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=pathways_col", false);
+    xmlhttp_pw_col.open("GET", "/qsdb/admin/cgi-bin/manage-entries.bin?action=get&type=pathways_col", true);
     xmlhttp_pw_col.send();
     
     
@@ -579,7 +552,7 @@ function editor_update_protein_node(){
     var continuing = true;
     
     // get proteins
-    var request = "/qsdb/admin/cgi-bin/manage-entries.py?action=set&table=nodeproteincorrelations&column=none&id=" + selected_protein_node + "&value=" + prot.proteins.join(":");
+    var request = "/qsdb/admin/cgi-bin/manage-entries.bin?action=set&table=nodeproteincorrelations&column=none&id=" + selected_protein_node + "&value=" +  encodeURL(prot.proteins.join(":"));
     var xmlhttp_set = new XMLHttpRequest();
     xmlhttp_set.onreadystatechange = function() {
         if (xmlhttp_set.readyState == 4 && xmlhttp_set.status == 200) {
@@ -658,7 +631,7 @@ function delete_entity(request){
 
 function update_entry(request){
     var xmlhttp = new XMLHttpRequest();
-    request = "/qsdb/admin/cgi-bin/manage-entries.py?" + request;
+    request = "/qsdb/admin/cgi-bin/manage-entries.bin?" + request;
     var successful_creation = false;
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -1193,12 +1166,12 @@ function editor_fill_metabolite_table(){
     var filter_formula = document.getElementById("editor_select_metabolite_table_filter_formula").value;
     
     var request = "action=get&type=metabolites";
-    request += "&column=" + metabolite_sort_columns[metabolite_sort_column];
-    request += "&limit=" + (metabolite_current_page * max_per_page).toString() + ":" + max_per_page.toString();
+    request += "&column=" + encodeURL(metabolite_sort_columns[metabolite_sort_column]);
+    request += "&limit=" + encodeURL((metabolite_current_page * max_per_page).toString() + ":" + max_per_page.toString());
     if (filter_name != "" || filter_cnumber != "" || filter_formula != ""){
-        request += "&filters=name:" + filter_name + ",c_number:" + filter_cnumber + ",formula:" + filter_formula;
+        request += "&filters=" + encodeURL("name:" + filter_name + ",c_number:" + filter_cnumber + ",formula:" + filter_formula);
     }
-    request = "/qsdb/admin/cgi-bin/manage-entries.py?" + request;
+    request = "/qsdb/admin/cgi-bin/manage-entries.bin?" + request;
     
     
     var sign_up = String.fromCharCode(9652);
@@ -1372,13 +1345,13 @@ function editor_fill_protein_table(){
     var filter_node = document.getElementById("editor_select_protein_table_filter_node").checked;
     
     var request = "action=get&type=proteins";
-    request += "&column=" + protein_sort_columns[protein_sort_column];
-    request += "&limit=" + (protein_current_page * max_per_page).toString() + ":" + max_per_page.toString();
+    request += "&column=" + encodeURL(protein_sort_columns[protein_sort_column]);
+    request += "&limit=" + encodeURL((protein_current_page * max_per_page).toString() + ":" + max_per_page.toString());
     if (filter_name != "" || filter_accession != "" || filter_description != ""){
-        request += "&filters=name:" + filter_name + ",accession:" + filter_accession + ",definition:" + filter_description;
+        request += "&filters=" + encodeURL("name:" + filter_name + ",accession:" + filter_accession + ",definition:" + filter_description);
     }
-    if (filter_node) request += "&checked=" + selected_protein_node;
-    request = "/qsdb/admin/cgi-bin/manage-entries.py?" + request;
+    if (filter_node) request += "&checked=" + encodeURL(selected_protein_node);
+    request = "/qsdb/admin/cgi-bin/manage-entries.bin?" + request;
     
     var sign_up = String.fromCharCode(9652);
     var sign_down = String.fromCharCode(9662);
@@ -1524,7 +1497,7 @@ function editor_fill_protein_table(){
             
         }
     }
-    xmlhttp_protein.open("GET", encodeURI(request), false);
+    xmlhttp_protein.open("GET", request, false);
     xmlhttp_protein.send();
 }
 
@@ -1538,7 +1511,7 @@ function manage_change_entity(entity){
             manage_max_pages = Math.floor(parseInt(xmlhttp_entity.responseText) / max_per_page) + 1;
         }
     }
-    xmlhttp_entity.open("GET", "/qsdb/admin/cgi-bin/manage-entries.py?action=get&type=" + entity + "_num", true);
+    xmlhttp_entity.open("GET", "/qsdb/admin/cgi-bin/manage-entries.bin?action=get&type=" + entity + "_num", false);
     xmlhttp_entity.send();
     manage_current_page = 0;
     
@@ -1573,10 +1546,10 @@ function manage_fill_table(){
     }
     
     var request = "action=get&type=" + manage_current_entry;
-    request += "&column=" + manage_sort_columns[manage_current_entry][manage_sort_column];
-    request += "&limit=" + (manage_current_page * max_per_page).toString() + ":" + max_per_page.toString();
-    if (filters.length > 0) request += "&filters=" + filters;
-    request = "/qsdb/admin/cgi-bin/manage-entries.py?" + request;
+    request += "&column=" + encodeURL(manage_sort_columns[manage_current_entry][manage_sort_column]);
+    request += "&limit=" + encodeURL((manage_current_page * max_per_page).toString() + ":" + max_per_page.toString());
+    if (filters.length > 0) request += "&filters=" + encodeURL(filters);
+    request = "/qsdb/admin/cgi-bin/manage-entries.bin?" + request;
     
     
     var sign_up = String.fromCharCode(9652);
@@ -1841,7 +1814,7 @@ function manage_fill_table(){
             
         }
     }
-    xmlhttp_manage.open("GET", encodeURI(request), false);
+    xmlhttp_manage.open("GET", request, false);
     xmlhttp_manage.send();
     document.getElementById("editor_select_manage_content_wrapper").style.width = (document.getElementById("editor_select_manage_table_header").offsetWidth).toString() + "px";
 }
@@ -1959,7 +1932,6 @@ function change_textfield_type(dom_obj, to_text){
         
         var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
         
-        console.log(request);
         
         var result = update_entry(request);
         if (!result){
@@ -2102,6 +2074,7 @@ function request_protein_data(){
     
     var request = "/qsdb/admin/cgi-bin/request-entity-data.py?type=protein&accession=" + accession;
     
+    
     var xmlhttp_protein_data = new XMLHttpRequest();
     xmlhttp_protein_data.onreadystatechange = function() {
         if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
@@ -2173,7 +2146,9 @@ function add_manage_proteins_add(){
     request += ",chromosome:" + document.getElementById("add_manage_proteins_chromosome")[document.getElementById("add_manage_proteins_chromosome").selectedIndex].value;
     request += ",species:" + document.getElementById("add_manage_proteins_species")[document.getElementById("add_manage_proteins_species").selectedIndex].value;
     
-    request = "/qsdb/admin/cgi-bin/manage-entries.py?action=insert&type=proteins&data=" + request;
+    request = "/qsdb/admin/cgi-bin/manage-entries.bin?action=insert&type=proteins&data=" + encodeURL(request);
+    
+    console.log(request);
     
     var xmlhttp_add_protein = new XMLHttpRequest();
     xmlhttp_add_protein.onreadystatechange = function() {
@@ -2201,8 +2176,7 @@ function add_manage_metabolites_add(){
     request += ",exact_mass:" + document.getElementById("add_manage_metabolites_exact_mass").value;
     request += ",smiles:" + document.getElementById("add_manage_metabolites_smiles").value;
     
-    request = "/qsdb/admin/cgi-bin/manage-entries.py?action=insert&type=metabolites&data=" + request;
-    console.log(request);
+    request = "/qsdb/admin/cgi-bin/manage-entries.bin?action=insert&type=metabolites&data=" + encodeURL(request);
     
     var xmlhttp_add_metabolite = new XMLHttpRequest();
     xmlhttp_add_metabolite.onreadystatechange = function() {
@@ -2240,7 +2214,6 @@ function manage_delete_metabolite(metabolite_id){
                 for (var node_id in data){
                     if (data[node_id].type == 'metabolite' && data[node_id].foreign_id == metabolite_id) node_ids.add(parseInt(node_id));
                 }
-                console.log(node_ids);
                 
                 var del_reactions = []
                 for (var reaction_id in edge_data){

@@ -127,11 +127,6 @@ int main(int argc, char** argv) {
         return -1;
     }
     
-    /*
-    pathway_id = "15";
-    species = "mouse";
-    */
-    
     
     string line;
     map< string, string > parameters;
@@ -164,11 +159,8 @@ int main(int argc, char** argv) {
     map< string, int > column_names_spectra;
     map< string, int > column_names_rest;
     map< int, node*> node_dict;
-    //all_peptides = new map<string, peptide* >();
     proteins = new vector< protein* >();
     all_proteins = new map < int, protein* >();
-    //spectra = new vector < spectrum* >();
-    //all_spectra = new map< int, spectrum* >();
     
     /* Connect to database */
     if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
@@ -294,12 +286,9 @@ int main(int argc, char** argv) {
 
     response += "[";
     map<int, node*>::iterator node_it = node_dict.begin();
-    if (node_dict.size()){
+    for (map<int, node*>::iterator node_it = node_dict.begin(); node_it != node_dict.end(); ++node_it){
+        if (node_it != node_dict.begin()) response += ",";
         response += (node_it->second)->to_string();
-        ++node_it;
-    }
-    for (; node_it != node_dict.end(); ++node_it){
-        response += "," + (node_it->second)->to_string();
     }
     response += "]";
     print_out(response, compress);

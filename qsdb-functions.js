@@ -3048,13 +3048,6 @@ function compute_edges(){
             edges.push(new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id));
         }
     }
-    
-    // sorting the edges, so that active edges will be drown as last, hence on top of inactive edges. Clever, eh?
-    edges.sort(function(a, b){
-        a_rank = data[a.start_id].type == 'pathway' || data[a.start_id].proteins.length > 0;
-        b_rank = data[b.start_id].type == 'pathway' || data[b.start_id].proteins.length > 0;
-        return a_rank - b_rank;
-    });
 }
 
 
@@ -3153,12 +3146,14 @@ function mouse_dblclick_listener(e){
 
 function change_pathway(p){
     if (typeof p === "undefined"){
-        var sorted_pathways = [];
-        for (var pathway_id in pathways) sorted_pathways.push([pathway_id, pathways[pathway_id]]);
-        sorted_pathways.sort(function(a, b) {
-            return a[1] > b[1];
-        });
-        p = sorted_pathways[0][0];
+        p = -1;
+        var min_pw_name = "~~~";
+        for (var pathway_id in pathways) {
+            if (min_pw_name > pathways[pathway_id]) {
+                min_pw_name = pathways[pathway_id];
+                p = pathway_id;
+            }
+        }
     }
     hide_select_pathway();
     collapse_statistics();
@@ -4444,6 +4439,11 @@ function load_data(reload){
     }, 1);
 }
 
+
+function encodeURL(str){
+    str = encodeURI(str);
+    return replaceAll(str, "=", "%3D");
+}
 
 
 function replaceAll(str, find, replace) {

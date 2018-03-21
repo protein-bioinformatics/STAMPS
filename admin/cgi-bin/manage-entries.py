@@ -11,9 +11,8 @@ import os
 import binascii
 
 
-a = "Content-Type: text/html\nContent-Encoding: deflate\n\n"
 
-sys.stdout.buffer.write( bytes(a, "utf-8"))
+sys.stdout.buffer.write( bytes("Content-Type: text/html\nContent-Encoding: deflate\n\n", "utf-8"))
 
 conf = {}
 with open("../qsdb.conf", mode="rt") as fl:
