@@ -23,7 +23,6 @@ point_suffix_length = 0;
 
 
 global_manage_data = -1;
-global_pathway_data = -1;
 global_protein_data = -1;
 global_metabolite_data = -1;
 selected_metabolite = -1;
@@ -62,27 +61,12 @@ function init(){
     var xmlhttp_pathways = new XMLHttpRequest();
     xmlhttp_pathways.onreadystatechange = function() {
         if (xmlhttp_pathways.readyState == 4 && xmlhttp_pathways.status == 200) {
-            global_pathway_data = JSON.parse(xmlhttp_pathways.responseText);
-            
-            var sorted_pathways = [];
-            for (var pathway_id in global_pathway_data){
-                pathways[pathway_id] = replaceAll(replaceAll(global_pathway_data[pathway_id][1], "\\\\n", ""), "-\\\\n", "");
-                sorted_pathways.push(global_pathway_data[pathway_id]);
-            }
-            sorted_pathways.sort(function(a, b) {
-                return a[1] > b[1];
-            });
+            pathways = JSON.parse(xmlhttp_pathways.responseText);
             set_pathway_menu();
-            
-            for (var i = 0; i < sorted_pathways.length; ++i){
-                var option = document.createElement("option");
-                option.id = sorted_pathways[i][0];
-                option.text = replaceAll(replaceAll(sorted_pathways[i][1], "\\\\n", ""), "-\\\\n", "");
-                document.getElementById("editor_select_pathway_field").add(option);
-            }
+            change_pathway();
         }
     }
-    xmlhttp_pathways.open("GET", "/qsdb/admin/cgi-bin/manage-entries.bin?action=get&type=pathways", true);
+    xmlhttp_pathways.open("GET", "/qsdb/cgi-bin/get-pathways.bin?all", true);
     xmlhttp_pathways.send();
     
     
@@ -108,7 +92,6 @@ function init(){
     document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
     
     
-    change_pathway();
     
     // get chromosomes
     var xmlhttp_chr = new XMLHttpRequest();
@@ -294,10 +277,8 @@ function mouse_click_listener(e){
         };
     }
     else if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY){
-        document.getElementById("editor_select_pathway").style.display = "inline";
-        document.getElementById("waiting_background").style.display = "inline";
-        document.getElementById("renderarea").style.filter = "blur(5px)";
-        document.getElementById("toolbox").style.filter = "blur(5px)";
+        open_select_pathway();
+        document.getElementById("editor_select_pathway_field").selectedIndex = 0;
         document.getElementById("editor_select_pathway_ok_button").setAttribute("onclick", "editor_create_pathway_node(); close_editor_select_pathway();");
         document.getElementById("editor_select_pathway_ok_button").innerHTML = "Create";
     }
@@ -369,17 +350,17 @@ function mouse_click_listener(e){
         if (highlight_element instanceof node){
             switch (highlight_element.type){
                 case "pathway":
+                    
+                    open_select_pathway();
+                    
                     var obj = document.getElementById("editor_select_pathway_field");
-                    for (var i = 0; i < obj.options.length; ++i){
+                    for (var i = 0; i < obj.children.length; ++i){
                         if (obj.options[i].id == highlight_element.foreign_id){
                             obj.selectedIndex = i;
                             break;
                         }
                     }
-                    document.getElementById("editor_select_pathway").style.display = "inline";
-                    document.getElementById("waiting_background").style.display = "inline";
-                    document.getElementById("renderarea").style.filter = "blur(5px)";
-                    document.getElementById("toolbox").style.filter = "blur(5px)";
+                    
                     document.getElementById("editor_select_pathway_ok_button").setAttribute("onclick", "editor_update_pathway_node(); close_editor_select_pathway();");
                     document.getElementById("editor_select_pathway_ok_button").innerHTML = "Update";
                     selected_pathway_node = highlight_element.id;
@@ -437,6 +418,31 @@ function mouse_click_listener(e){
             }
         }
     }
+}
+
+
+function open_select_pathway(){
+    var sorted_pathways = [];
+    for (var pathway_id in pathways){
+        sorted_pathways.push([pathway_id, pathways[pathway_id]]);
+    }
+    sorted_pathways.sort(function(a, b) {
+        return a[1] > b[1];
+    });
+    
+    var obj = document.getElementById("editor_select_pathway_field");
+    obj.innerHTML = "";
+    for (var i = 0; i < sorted_pathways.length; ++i){
+        var option = document.createElement("option");
+        option.id = sorted_pathways[i][0];
+        option.text = replaceAll(replaceAll(sorted_pathways[i][1], "\\\\n", ""), "-\\\\n", "");
+        obj.add(option);
+    }
+    
+    document.getElementById("editor_select_pathway").style.display = "inline";
+    document.getElementById("waiting_background").style.display = "inline";
+    document.getElementById("renderarea").style.filter = "blur(5px)";
+    document.getElementById("toolbox").style.filter = "blur(5px)";
 }
 
 
@@ -499,9 +505,11 @@ function editor_create_pathway_node(){
     var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
     var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
     var request = "type=pathway&pathway=" + current_pathway + "&foreign_id=" + foreign_id + "&x=" + x + "&y=" + y;
+    
+    
     var result = create_node(request);
     if (result[0]){
-        tmp_element.name = global_pathway_data[foreign_id][1];
+        tmp_element.name = pathways[foreign_id];
         tmp_element.foreign_id = foreign_id;
         tmp_element.setup_pathway_meta();
         tmp_element.scale(tmp_element.x, tmp_element.y, factor);
@@ -608,7 +616,7 @@ function editor_update_pathway_node(){
     var result = update_entry(request);
     if (result){
         var pw_node = data[selected_pathway_node];
-        pw_node.name = replaceAll(global_pathway_data[foreign_id][1], "\\\\n", "\n");
+        pw_node.name = replaceAll(pathways[foreign_id], "\\\\n", "\n");
         pw_node.foreign_id = foreign_id;
         pw_node.scale(pw_node.x, pw_node.y, 1. / factor);
         pw_node.setup_pathway_meta();
@@ -660,6 +668,7 @@ function update_entry(request){
 function create_node(request){
     var xmlhttp = new XMLHttpRequest();
     request = "/qsdb/admin/cgi-bin/create-node.py?" + request;
+    
     var successful_creation = [false, -1];
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -1852,7 +1861,7 @@ function manage_fill_table(){
                         var dom_div = document.createElement("div");
                         dom_td.appendChild(dom_div);
                         dom_td.setAttribute("style", "min-width: 860px; max-width: 860px;");
-                        dom_div.setAttribute("onclick", "change_textfield_type(this, true);");
+                        dom_div.setAttribute("onclick", "change_textarea_type(this, true);");
                         dom_div.setAttribute("style", "padding: 5px;");
                         dom_div.innerHTML = trim_text(row[j], 840);
                         dom_div.entity_id = row[0];
@@ -1910,28 +1919,9 @@ function manage_delete_pathway(entity_id){
     var request = "type=pathway&id=" + entity_id;
     request = "/qsdb/admin/cgi-bin/delete-entity.py?" + request
     
-    var del_nodes = new Set();
-    for (node_id in data){
-        if (data[node_id].foreign_id == entity_id && data[node_id].type == "pathway") del_nodes.add(node_id);
-    }
     
-    console.log(del_nodes);
     
-    /*
-    var del_reactions = []
-    for (var reaction_id in edge_data){
-        if (del_nodes.has(edge_data[reaction_id]['n'])) del_reactions.push(reaction_id);
-    }
-    for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
-    for (node_id of del_nodes) delete data[node_id];
 
-    compute_edges();
-    assemble_elements();
-    draw();
-    
-    */
-    
-    /*
     if (confirm("Do you want to delete the pathway '" + global_manage_data[entity_id][1] + "'?")) {
         var xmlhttp_protein_data = new XMLHttpRequest();
         xmlhttp_protein_data.onreadystatechange = function() {
@@ -1942,13 +1932,25 @@ function manage_delete_pathway(entity_id){
                 }
                 manage_fill_table();
                 
+                var del_nodes = new Set();
+                for (node_id in data){
+                    if (data[node_id].foreign_id == entity_id && data[node_id].type == "pathway") del_nodes.add(parseInt(node_id));
+                }
                 
+                var del_reactions = []
+                for (var reaction_id in edge_data){
+                    if (del_nodes.has(edge_data[reaction_id]['n'])) del_reactions.push(reaction_id);
+                }
+                for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
+                for (node_id of del_nodes) delete data[node_id.toString()];
+                compute_edges();
+                assemble_elements();
+                draw();
             }
         }
         xmlhttp_protein_data.open("GET", request, false);
         xmlhttp_protein_data.send();
     }
-    */
 }
 
 
@@ -2280,6 +2282,8 @@ function add_manage_pathways(){
                 alert("An error has occured while adding the pathway to the database. Please contact the administrator.");
             }
             manage_fill_table();
+            pathways[request] = new_pathway_name;
+            set_pathway_menu();
         }
     }
     xmlhttp_add_pathway.open("GET", request, false);

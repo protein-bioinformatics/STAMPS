@@ -9,6 +9,7 @@
 #include <math.h>
 
 void print_out(string response, bool compress){
+    replaceAll(response, "\n", "\\n");
     if (compress){
         cout << compress_string(response);        
     }

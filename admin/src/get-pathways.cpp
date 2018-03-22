@@ -7,34 +7,11 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include "bio-classes.h"
 
 using namespace std;
 
 
-
-vector<string> split(string str, char delimiter) {
-  vector<string> internal;
-  stringstream ss(str); // Turn the string into a stream.
-  string tok;
-  
-  while(getline(ss, tok, delimiter)) {
-    internal.push_back(tok);
-  }
-  
-  return internal;
-}
-
-
-void strip(string &str){
-    while (str.length() && (str[0] == ' ' || str[0] == 13 || str[0] == 10)){
-        str = str.substr(1);
-    }
-    int l = str.length();
-    while (l && (str[l - 1] == ' ' || str[l - 1] == 13 || str[l - 1] == 10)){
-        str = str.substr(0, l - 1);
-        --l;
-    }
-}
 
 main() {
     cout << "Content-Type: text/html" << endl << endl;
@@ -55,6 +32,29 @@ main() {
         myfile.close();
     }
     
+    
+    
+    // load get values
+    char* get_string_chr = getenv("QUERY_STRING");
+    bool print_all = false;
+    
+    if (get_string_chr){
+        string get_string = get_string_chr;
+    
+    
+        vector<string> get_entries = split(get_string, '&');
+        map< string, string > form;
+        for (uint i = 0; i < get_entries.size(); ++i){
+            vector<string> get_value = split(get_entries.at(i), '=');
+            string value = (get_value.size() > 1) ? get_value.at(1) : "";
+            form.insert(pair< string, string >(get_value.at(0), value));
+        }
+        if (form.find("all") != form.end()) print_all = true;
+    }
+    
+    
+    
+    
     MYSQL *conn = mysql_init(NULL);
     MYSQL_RES *res;
     MYSQL_RES *res_reagents;
@@ -72,7 +72,7 @@ main() {
         return 1;
     }
     /* send SQL query */
-    string sql_query = "SELECT distinct p.* FROM pathways p inner join nodes n on p.id = n.pathway_id ORDER BY p.name;";
+    string sql_query = (!print_all) ? "SELECT distinct p.* FROM pathways p inner join nodes n on p.id = n.pathway_id;" : "SELECT * FROM pathways;";
     if (mysql_query(conn, sql_query.c_str())) {
         cout << "error: " << mysql_error(conn) << endl;
         return 1;
@@ -83,14 +83,16 @@ main() {
         column_names.insert(pair<string,int>(field->name, i));
     }
     
-    cout << "[";
+    cout << "{";
     int index = 0;
     while ((row = mysql_fetch_row(res)) != NULL){
-        if (index++) cout << ", ";
-        cout << "[" << row[column_names[string("id")]] << ", ";
-        cout << "\"" << row[column_names[string("name")]] << "\"]";
+        if (index++) cout << ",";
+        cout << "\"" << row[column_names[string("id")]] << "\":";
+        string pw_name = row[column_names[string("name")]];
+        replaceAll(pw_name, "\n", "\\n");
+        cout << "\"" << pw_name << "\"";
     }
-    cout << "]" << endl;
+    cout << "}" << endl;
     
     mysql_free_result(res);
     mysql_close(conn);

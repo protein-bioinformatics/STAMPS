@@ -17,7 +17,7 @@ edges:
 	g++ -std=c++11 -O3 -I/usr/include/mysql -o $(BIN_PATH)/get-edges.bin get-edges.cpp bio-classes.cpp -L/usr/lib/x86_64-linux-gnu -lmysqlcppconn -lz
 	
 pathways:
-	g++ -std=c++11 -O3 -I/usr/include/mysql -o $(BIN_PATH)/get-pathways.bin get-pathways.cpp -L/usr/lib/x86_64-linux-gnu -lmysqlclient
+	g++ -std=c++11 -O3 -I/usr/include/mysql -o $(BIN_PATH)/get-pathways.bin get-pathways.cpp bio-classes.cpp -L/usr/lib/x86_64-linux-gnu -lmysqlclient -lz
 
 manage:
 	g++ -std=c++11 -O3 -I/usr/include/mysql -o $(ADMIN_PATH)/manage-entries.bin manage-entries.cpp bio-classes.cpp -L/usr/lib/x86_64-linux-gnu -lmysqlclient -lsqlite3 -lz

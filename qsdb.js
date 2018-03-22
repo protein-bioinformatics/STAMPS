@@ -5,11 +5,10 @@ function init(){
     var xmlhttp_pw = new XMLHttpRequest();
     xmlhttp_pw.onreadystatechange = function() {
         if (xmlhttp_pw.readyState == 4 && xmlhttp_pw.status == 200) {
-            var pathway_dat = JSON.parse(xmlhttp_pw.responseText);
-            for (var i = 0; i < pathway_dat.length; ++i){
-                pathways[pathway_dat[i][0]] = pathway_dat[i][1];
-            }
+            pathways = JSON.parse(xmlhttp_pw.responseText);
             set_pathway_menu();
+            change_pathway();
+            resize_pathway_view();
         }
     }
     xmlhttp_pw.open("GET", "/qsdb/cgi-bin/get-pathways.bin", true);
@@ -82,9 +81,6 @@ function init(){
         }
     }
     if (!read_cookie_information) document.getElementById('cookie_information').style.display = "inline";
-    
-    change_pathway();
-    resize_pathway_view();
     
     
     

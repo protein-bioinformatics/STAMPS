@@ -60,6 +60,7 @@ map < int, protein* >* all_proteins = 0;
 
 
 void print_out(string response, bool compress){
+    replaceAll(response, "\n", "\\n");
     if (compress){
         cout << compress_string(response);        
     }
@@ -70,7 +71,7 @@ void print_out(string response, bool compress){
 
 
 int main(int argc, char** argv) {
-    bool compress = true;
+    bool compress = false;
     string response = "";
     
     if (compress){

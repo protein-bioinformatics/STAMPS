@@ -468,11 +468,12 @@ function draw(sync){
 function set_pathway_menu(){
     var pathway_menu = "<table>";
     var sorted_pathways = [];
-    for (var pathway_id in pathways) sorted_pathways.push([pathway_id, pathways[pathway_id]]);
+    for (var pathway_id in pathways){
+        sorted_pathways.push([pathway_id, pathways[pathway_id]]);
+    }
     sorted_pathways.sort(function(a, b) {
         return a[1] > b[1];
     });
-    
     
     for (var i = 0; i < sorted_pathways.length; ++i){
         var selected = (sorted_pathways[i][0] == current_pathway) ? "selected_pathway_cell" : "select_pathway_cell";
@@ -1802,6 +1803,9 @@ function node(data){
                 ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
                 ctx.fillStyle = "black";
                 wrapText(this.name, this.x, this.y, this.width, 20 * factor, ctx);
+                
+                ctx.fillStyle = "red";
+                ctx.fillText(this.id, this.x, this.y);
                 break;
                 
                 
@@ -4451,7 +4455,7 @@ function encodeURL(str){
 
 
 function replaceAll(str, find, replace) {
-  return str.replace(new RegExp(find, 'g'), replace);
+    return str.replace(new RegExp(find, 'g'), replace);
 }
 
 

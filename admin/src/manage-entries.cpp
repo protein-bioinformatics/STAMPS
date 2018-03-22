@@ -397,8 +397,20 @@ int main(int argc, char** argv) {
             int result = system(command.c_str());
         }
             
-        
-        response += "0";
+        if (!action_type.compare("pathways")){
+            string sql_query = "SELECT max(id) from " + action_type + ";";
+            if (mysql_query(conn, sql_query.c_str())){
+                response += "-16";
+                print_out(response, compress);
+                return -16;
+            }
+            res = mysql_use_result(conn);
+            row = mysql_fetch_row(res);
+            response += row[0];
+        }
+        else {
+            response += "0";
+        }
         print_out(response, compress);
     }
     
