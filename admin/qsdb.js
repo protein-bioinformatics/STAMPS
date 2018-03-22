@@ -58,7 +58,6 @@ chromosomes = {"mouse": []};
 
 
 function init(){
-    
     // get pathways
     var xmlhttp_pathways = new XMLHttpRequest();
     xmlhttp_pathways.onreadystatechange = function() {
@@ -215,14 +214,12 @@ function init(){
                 manage_sort_columns["pathways"][(-i).toString()] = request[i] + ":DESC";
                 manage_columns["pathways"].push(request[i]);
             }
+            manage_change_entity("pathways");
+            resize_manage_view();
         }
     }
     xmlhttp_pw_col.open("GET", "/qsdb/admin/cgi-bin/manage-entries.bin?action=get&type=pathways_col", true);
     xmlhttp_pw_col.send();
-    
-    
-    manage_change_entity("proteins");
-    resize_manage_view();
     
     
     var xmlhttp_matomo = new XMLHttpRequest();
@@ -501,7 +498,7 @@ function editor_create_pathway_node(){
     
     var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
     var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
-    var request = "type=pathway&pathway=" + current_pathway + "&pathway_ref=" + foreign_id + "&x=" + x + "&y=" + y;
+    var request = "type=pathway&pathway=" + current_pathway + "&foreign_id=" + foreign_id + "&x=" + x + "&y=" + y;
     var result = create_node(request);
     if (result[0]){
         tmp_element.name = global_pathway_data[foreign_id][1];
@@ -1581,6 +1578,7 @@ function manage_fill_table(){
         dom_th_name.innerHTML = col_name + ((manage_sort_column == i) ? " " + sign_up : ((manage_sort_column == -i) ? " " + sign_down : ""));
         if (manage_current_entry == "proteins" && i == 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
         else if (manage_current_entry == "metabolites" && i == 5) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
+        else if (manage_current_entry == "pathways") dom_th_name.setAttribute("style", "cursor: pointer; min-width: 100%; max-width: 100%;");
         else dom_th_name.setAttribute("style", "cursor: pointer; min-width: 200px; max-width: 200px;");
     }
     
@@ -1645,6 +1643,12 @@ function manage_fill_table(){
         dom_nav_cell.appendChild(dom_new_metabolite);
         dom_new_metabolite.innerHTML = "New metabolite";
         dom_new_metabolite.setAttribute("onclick", "document.getElementById('add_manage_metabolites').style.display = 'inline';");
+    }
+    else if (manage_current_entry == "pathways"){
+        var dom_new_metabolite = document.createElement("button");
+        dom_nav_cell.appendChild(dom_new_metabolite);
+        dom_new_metabolite.innerHTML = "New pathway";
+        dom_new_metabolite.setAttribute("onclick", "add_manage_pathways();");
     }
     
     
@@ -1822,6 +1826,42 @@ function manage_fill_table(){
                 
             }
             
+            else if (manage_current_entry == "pathways"){
+    
+                for (var i = 0; i < global_manage_data_sorted.length; ++i){
+                    var bg_color = (i & 1) ? "#DDDDDD" : "white";
+                    var row = global_manage_data_sorted[i];
+                    
+                    var dom_tr = document.createElement("tr");
+                    dom_table.appendChild(dom_tr);
+                    var dom_td_del = document.createElement("td");
+                    dom_tr.appendChild(dom_td_del);
+                    dom_td_del.setAttribute("bgcolor", bg_color);
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                    var dom_image = document.createElement("img");
+                    dom_td_del.appendChild(dom_image);
+                    dom_image.setAttribute("src", "../images/delete-small.png");
+                    dom_image.setAttribute("onclick", "manage_delete_pathway(" + row[0] + ");");
+                    
+                    for (var j = 1; j < row.length; ++j){
+                        var dom_td = document.createElement("td");
+                        dom_tr.appendChild(dom_td);
+                        dom_td.setAttribute("bgcolor", bg_color);
+                        
+                        var dom_div = document.createElement("div");
+                        dom_td.appendChild(dom_div);
+                        dom_td.setAttribute("style", "min-width: 860px; max-width: 860px;");
+                        dom_div.setAttribute("onclick", "change_textfield_type(this, true);");
+                        dom_div.setAttribute("style", "padding: 5px;");
+                        dom_div.innerHTML = trim_text(row[j], 840);
+                        dom_div.entity_id = row[0];
+                        dom_div.col_id = j;
+                        dom_div.field_len = 860;
+                    }
+                }
+            }
+            
         }
     }
     xmlhttp_manage.open("GET", request, false);
@@ -1863,6 +1903,52 @@ function manage_delete_protein(prot_id){
         xmlhttp_protein_data.open("GET", request, false);
         xmlhttp_protein_data.send();
     }
+}
+
+
+function manage_delete_pathway(entity_id){
+    var request = "type=pathway&id=" + entity_id;
+    request = "/qsdb/admin/cgi-bin/delete-entity.py?" + request
+    
+    var del_nodes = new Set();
+    for (node_id in data){
+        if (data[node_id].foreign_id == entity_id && data[node_id].type == "pathway") del_nodes.add(node_id);
+    }
+    
+    console.log(del_nodes);
+    
+    /*
+    var del_reactions = []
+    for (var reaction_id in edge_data){
+        if (del_nodes.has(edge_data[reaction_id]['n'])) del_reactions.push(reaction_id);
+    }
+    for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
+    for (node_id of del_nodes) delete data[node_id];
+
+    compute_edges();
+    assemble_elements();
+    draw();
+    
+    */
+    
+    /*
+    if (confirm("Do you want to delete the pathway '" + global_manage_data[entity_id][1] + "'?")) {
+        var xmlhttp_protein_data = new XMLHttpRequest();
+        xmlhttp_protein_data.onreadystatechange = function() {
+            if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
+                var request = xmlhttp_protein_data.responseText;
+                if (request < 0){
+                    alert("Error: pathway could not be deleted from database.");
+                }
+                manage_fill_table();
+                
+                
+            }
+        }
+        xmlhttp_protein_data.open("GET", request, false);
+        xmlhttp_protein_data.send();
+    }
+    */
 }
 
 
@@ -2019,7 +2105,9 @@ function change_textarea_type(dom_obj, to_text){
 
 
 function resize_manage_view(){
-    var w_width = window.innerWidth * 0.9;
+    var window_width_factor = (manage_current_entry == "pathways") ? 0.5 : 0.9;
+    
+    var w_width = window.innerWidth * window_width_factor;
     var w_height = window.innerHeight * 0.9;
     document.getElementById("editor_select_manage").style.width = w_width.toString() + "px";
     document.getElementById("editor_select_manage").style.height = w_height.toString() + "px";
@@ -2172,6 +2260,30 @@ function add_manage_proteins_add(){
     }
     xmlhttp_add_protein.open("GET", request, false);
     xmlhttp_add_protein.send();
+}
+
+
+
+function add_manage_pathways(){
+    
+    var new_pathway_name = window.prompt("Write a pathway name");
+    
+    if (new_pathway_name == null || new_pathway_name.length == 0) return;
+    
+    request = "/qsdb/admin/cgi-bin/manage-entries.bin?action=insert&type=pathways&data=" + encodeURL("name:" + new_pathway_name);
+    
+    var xmlhttp_add_pathway = new XMLHttpRequest();
+    xmlhttp_add_pathway.onreadystatechange = function() {
+        if (xmlhttp_add_pathway.readyState == 4 && xmlhttp_add_pathway.status == 200) {
+            var request = xmlhttp_add_pathway.responseText;
+            if (request < 0){
+                alert("An error has occured while adding the pathway to the database. Please contact the administrator.");
+            }
+            manage_fill_table();
+        }
+    }
+    xmlhttp_add_pathway.open("GET", request, false);
+    xmlhttp_add_pathway.send();
 }
 
 
