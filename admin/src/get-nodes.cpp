@@ -112,9 +112,9 @@ int main(int argc, char** argv) {
         }
     }
     if (pathway_id == "" || species == "" || !is_integer_number(pathway_id) || species.find("'") != string::npos){
-        response += "-1";
+        response += "-2";
         print_out(response, compress);
-        return -1;
+        return -2;
     }
     
     
@@ -154,9 +154,9 @@ int main(int argc, char** argv) {
     
     /* Connect to database */
     if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
-        response += "error: " + string(mysql_error(conn)) + "\n";
+        response += "-3";
         print_out(response, compress);
-        return 1;
+        return -3;
     }
     /* send SQL query */
     string sql_query_nodes = "select * from nodes where pathway_id = ";
@@ -165,9 +165,9 @@ int main(int argc, char** argv) {
     
     
     if (mysql_query(conn, sql_query_nodes.c_str())) {
-        response += "error: " + string(mysql_error(conn)) + "\n";
+        response += "-4";
         print_out(response, compress);
-        return 1;
+        return -4;
     }
     res = mysql_use_result(conn);
         
@@ -193,9 +193,9 @@ int main(int argc, char** argv) {
     sql_query_proteins += "';";
     
     if (mysql_query(conn, sql_query_proteins.c_str())) {
-        response += "error: " + string(mysql_error(conn)) + "\n";
+        response += "-5";
         print_out(response, compress);
-        return 1;
+        return -5;
     }
     res = mysql_use_result(conn);
     
@@ -246,9 +246,9 @@ int main(int argc, char** argv) {
     sql_query_rest += ");";
     
     if (mysql_query(conn, sql_query_rest.c_str())) {
-        response += "error: " + string(mysql_error(conn)) + "\n";
+        response += "-6";
         print_out(response, compress);
-        return 1;
+        return -6;
     }
     res = mysql_use_result(conn);
     

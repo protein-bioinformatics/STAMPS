@@ -482,7 +482,7 @@ function set_pathway_menu(){
         pathway_menu += ");\">";
         var pathway_name = sorted_pathways[i][1];
         pathway_name = replaceAll(pathway_name, "-\\n", "");
-        pathway_name = replaceAll(pathway_name, "\n", "");
+        pathway_name = replaceAll(pathway_name, "\n", " ");
         pathway_menu += pathway_name; 
         pathway_menu += "</td></tr>";
     }
@@ -888,7 +888,7 @@ function pathway_title(){
         var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
         ctx.fillStyle = "#f3f8ff";
         ctx.strokeStyle = "#aaaaaa";
-        var curr_title_text = "Current pathway: " + pathways[current_pathway];
+        var curr_title_text = "Current pathway: " + replaceAll(replaceAll(pathways[current_pathway], "-\n", ""), "\n", " ");
         ctx.font = "bold 20px Arial";
         ctx.textAlign = "left";
         //ctx.textBaseline = 'top';
@@ -1551,11 +1551,11 @@ function node(data){
     this.setup_pathway_meta = function(){
         this.width = 0;
         var tokens = this.name.split("\n");
-        this.height = 40 + 20 * tokens.length;
+        this.height = 40 + 20 * tokens.length * factor;
         for (var j = 0; j < tokens.length; ++j){
             if (this.width < tokens[j].length) this.width = tokens[j].length;
         }
-        this.width *= 12;
+        this.width *= 12 * factor;
         this.tipp = false;
         this.pathway_enabled = this.type == 'pathway' && this.foreign_id != 0 && (this.foreign_id in pathways);
     }
@@ -1803,9 +1803,6 @@ function node(data){
                 ctx.font = ((text_size + 6) * factor).toString() + "px Arial";
                 ctx.fillStyle = "black";
                 wrapText(this.name, this.x, this.y, this.width, 20 * factor, ctx);
-                
-                ctx.fillStyle = "red";
-                ctx.fillText(this.id, this.x, this.y);
                 break;
                 
                 

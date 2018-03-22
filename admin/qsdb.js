@@ -435,7 +435,7 @@ function open_select_pathway(){
     for (var i = 0; i < sorted_pathways.length; ++i){
         var option = document.createElement("option");
         option.id = sorted_pathways[i][0];
-        option.text = replaceAll(replaceAll(sorted_pathways[i][1], "\\\\n", ""), "-\\\\n", "");
+        option.text = replaceAll(replaceAll(sorted_pathways[i][1], "-\n", ""), "\n", " ");
         obj.add(option);
     }
     
@@ -616,7 +616,7 @@ function editor_update_pathway_node(){
     var result = update_entry(request);
     if (result){
         var pw_node = data[selected_pathway_node];
-        pw_node.name = replaceAll(pathways[foreign_id], "\\\\n", "\n");
+        pw_node.name = pathways[foreign_id];
         pw_node.foreign_id = foreign_id;
         pw_node.scale(pw_node.x, pw_node.y, 1. / factor);
         pw_node.setup_pathway_meta();
@@ -1917,10 +1917,7 @@ function manage_delete_protein(prot_id){
 
 function manage_delete_pathway(entity_id){
     var request = "type=pathway&id=" + entity_id;
-    request = "/qsdb/admin/cgi-bin/delete-entity.py?" + request
-    
-    
-    
+    request = "/qsdb/admin/cgi-bin/delete-entity.py?" + request;
 
     if (confirm("Do you want to delete the pathway '" + global_manage_data[entity_id][1] + "'?")) {
         var xmlhttp_protein_data = new XMLHttpRequest();
@@ -1931,6 +1928,9 @@ function manage_delete_pathway(entity_id){
                     alert("Error: pathway could not be deleted from database.");
                 }
                 manage_fill_table();
+                delete pathways[entity_id];
+                
+                if (current_pathway == entity_id) change_pathway();
                 
                 var del_nodes = new Set();
                 for (node_id in data){
@@ -2036,6 +2036,10 @@ function change_textfield_type(dom_obj, to_text){
             alert("Error: database could not be updated.");
         }
         else {
+            if (manage_current_entry == "proteins" && manage_columns[manage_current_entry][col_id - 1] == "name"){
+                protein_dictionary[entity_id].name = content;
+                draw();
+            }
             manage_fill_table();
         }
         
@@ -2083,11 +2087,28 @@ function change_textarea_type(dom_obj, to_text){
         
         var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + encodeURL(content);
         
+        
+        
         var result = update_entry(request);
         if (!result){
             alert("Error: database could not be updated.");
         }
         else {
+            if (manage_current_entry == "pathways" && manage_columns[manage_current_entry][col_id - 1] == "name"){
+                pathways[entity_id] = content;
+                set_pathway_menu();
+                
+                for (node_id in data){
+                    if (data[node_id].type == "pathway" && data[node_id].foreign_id == entity_id){
+                        data[node_id].name = content;
+                        data[node_id].setup_pathway_meta();
+                    }
+                }
+                if (current_pathway == entity_id){
+                    current_pathway_title = new pathway_title();
+                }
+                draw();
+            }
             manage_fill_table();
         }
         parent.innerHTML = "";
@@ -2269,7 +2290,6 @@ function add_manage_proteins_add(){
 function add_manage_pathways(){
     
     var new_pathway_name = window.prompt("Write a pathway name");
-    
     if (new_pathway_name == null || new_pathway_name.length == 0) return;
     
     request = "/qsdb/admin/cgi-bin/manage-entries.bin?action=insert&type=pathways&data=" + encodeURL("name:" + new_pathway_name);
