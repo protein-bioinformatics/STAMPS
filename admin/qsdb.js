@@ -20,7 +20,7 @@ tmp_element = -1;
 tmp_edge = -1;
 letter_sizes = [];
 point_suffix_length = 0;
-
+deletion_cypher = "39d29e917c6901adf84418992b9b3892d37b61aefbc0f1fb353996e1ff8a2958";
 
 global_manage_data = -1;
 global_protein_data = -1;
@@ -1358,6 +1358,11 @@ function editor_fill_metabolite_table(){
     }
     dom_page.selectedIndex = metabolite_current_page;
     
+    var dom_div_max_pages = document.createElement("div");
+    dom_nav_cell.appendChild(dom_div_max_pages);
+    dom_div_max_pages.setAttribute("style", "display: inline;");
+    dom_div_max_pages.innerHTML = "&nbsp;&nbsp;/&nbsp;&nbsp;" + metabolite_max_pages;
+    
     if (metabolite_current_page + 1 < metabolite_max_pages){
         
         var dom_b2 = document.createElement("b");
@@ -1527,6 +1532,11 @@ function editor_fill_protein_table(){
         dom_option.innerHTML = (i + 1).toString();
     }
     dom_page.selectedIndex = protein_current_page;
+    
+    var dom_div_max_pages = document.createElement("div");
+    dom_nav_cell.appendChild(dom_div_max_pages);
+    dom_div_max_pages.setAttribute("style", "display: inline;");
+    dom_div_max_pages.innerHTML = "&nbsp;&nbsp;/&nbsp;&nbsp;" + protein_max_pages;
     
     if (protein_current_page + 1 < protein_max_pages){
         
@@ -1720,6 +1730,12 @@ function manage_fill_table(){
     }
     dom_page.selectedIndex = manage_current_page;
     
+    var dom_div_max_pages = document.createElement("div");
+    dom_nav_cell.appendChild(dom_div_max_pages);
+    dom_div_max_pages.setAttribute("style", "display: inline;");
+    dom_div_max_pages.innerHTML = "&nbsp;&nbsp;/&nbsp;&nbsp;" + manage_max_pages;
+    
+    
     if (manage_current_page + 1 < manage_max_pages){
         
         var dom_b2 = document.createElement("b");
@@ -1792,7 +1808,7 @@ function manage_fill_table(){
                     var dom_image = document.createElement("img");
                     dom_td_del.appendChild(dom_image);
                     dom_image.setAttribute("src", "../images/delete-small.png");
-                    dom_image.setAttribute("onclick", "manage_delete_protein(" + row[0] + ");");
+                    dom_image.setAttribute("onclick", "document.getElementById('confirm_deletion_hidden').value = 'manage_delete_protein';  document.getElementById('confirm_deletion_hidden_id').value = " + row[0] + "; document.getElementById('confirm_deletion_input').value = ''; document.getElementById('confirm_deletion').style.display = 'inline';");
                     
                     for (var j = 1; j < row.length; ++j){
                         var dom_td = document.createElement("td");
@@ -1910,7 +1926,8 @@ function manage_fill_table(){
                     var dom_image = document.createElement("img");
                     dom_td_del.appendChild(dom_image);
                     dom_image.setAttribute("src", "../images/delete-small.png");
-                    dom_image.setAttribute("onclick", "manage_delete_metabolite(" + row[0] + ");");
+                    
+                    dom_image.setAttribute("onclick", "document.getElementById('confirm_deletion_hidden').value = 'manage_delete_metabolite';  document.getElementById('confirm_deletion_hidden_id').value = " + row[0] + "; document.getElementById('confirm_deletion_input').value = ''; document.getElementById('confirm_deletion').style.display = 'inline';");
                     
                     for (var j = 1; j < row.length; ++j){
                         var dom_td = document.createElement("td");
@@ -1950,7 +1967,9 @@ function manage_fill_table(){
                     var dom_image = document.createElement("img");
                     dom_td_del.appendChild(dom_image);
                     dom_image.setAttribute("src", "../images/delete-small.png");
-                    dom_image.setAttribute("onclick", "manage_delete_pathway(" + row[0] + ");");
+                    dom_image.setAttribute("onclick", "document.getElementById('confirm_deletion_hidden').value = 'manage_delete_pathway';  document.getElementById('confirm_deletion_hidden_id').value = " + row[0] + "; document.getElementById('confirm_deletion_input').value = ''; document.getElementById('confirm_deletion').style.display = 'inline';");
+                    
+                    
                     
                     for (var j = 1; j < row.length; ++j){
                         var dom_td = document.createElement("td");
@@ -1979,77 +1998,75 @@ function manage_fill_table(){
 
 
 function manage_delete_protein(prot_id){
+    
     var request = "type=protein&id=" + prot_id;
     request = "/qsdb/admin/cgi-bin/delete-entity.py?" + request
     
     
-    if (confirm("Do you want to delete the protein '" + global_manage_data[prot_id][1] + "'?")) {
-        var xmlhttp_protein_data = new XMLHttpRequest();
-        xmlhttp_protein_data.onreadystatechange = function() {
-            if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
-                var request = xmlhttp_protein_data.responseText;
-                if (request < 0){
-                    alert("Error: protein could not be deleted from database.");
-                }
-                manage_fill_table();
-                if (prot_id in protein_dictionary){
-                    delete protein_dictionary[prot_id];
-                    for (node_id in data){
-                        var data_node = data[node_id];
-                        if (data_node.type == "protein"){
-                            for(var i = data_node.proteins.length - 1; i >= 0; --i){
-                                if (data_node.proteins[i] == prot_id){
-                                    data_node.proteins.splice(i, 1);
-                                }
+    var xmlhttp_protein_data = new XMLHttpRequest();
+    xmlhttp_protein_data.onreadystatechange = function() {
+        if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
+            var request = xmlhttp_protein_data.responseText;
+            if (request < 0){
+                alert("Error: protein could not be deleted from database.");
+            }
+            manage_fill_table();
+            if (prot_id in protein_dictionary){
+                delete protein_dictionary[prot_id];
+                for (node_id in data){
+                    var data_node = data[node_id];
+                    if (data_node.type == "protein"){
+                        for(var i = data_node.proteins.length - 1; i >= 0; --i){
+                            if (data_node.proteins[i] == prot_id){
+                                data_node.proteins.splice(i, 1);
                             }
                         }
                     }
-                    draw();
                 }
+                draw();
             }
         }
-        xmlhttp_protein_data.open("GET", request, false);
-        xmlhttp_protein_data.send();
     }
+    xmlhttp_protein_data.open("GET", request, false);
+    xmlhttp_protein_data.send();
 }
 
 
 function manage_delete_pathway(entity_id){
+    
     var request = "type=pathway&id=" + entity_id;
     request = "/qsdb/admin/cgi-bin/delete-entity.py?" + request;
-
-    if (confirm("Do you want to delete the pathway '" + global_manage_data[entity_id][1] + "'?")) {
-        var xmlhttp_protein_data = new XMLHttpRequest();
-        xmlhttp_protein_data.onreadystatechange = function() {
-            if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
-                var request = xmlhttp_protein_data.responseText;
-                if (request < 0){
-                    alert("Error: pathway could not be deleted from database.");
-                }
-                manage_fill_table();
-                delete pathways[entity_id];
-                
-                if (current_pathway == entity_id) change_pathway();
-                
-                var del_nodes = new Set();
-                for (node_id in data){
-                    if (data[node_id].foreign_id == entity_id && data[node_id].type == "pathway") del_nodes.add(parseInt(node_id));
-                }
-                
-                var del_reactions = []
-                for (var reaction_id in edge_data){
-                    if (del_nodes.has(edge_data[reaction_id]['n'])) del_reactions.push(reaction_id);
-                }
-                for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
-                for (node_id of del_nodes) delete data[node_id.toString()];
-                compute_edges();
-                assemble_elements();
-                draw();
+    
+    var xmlhttp_protein_data = new XMLHttpRequest();
+    xmlhttp_protein_data.onreadystatechange = function() {
+        if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
+            var request = xmlhttp_protein_data.responseText;
+            if (request < 0){
+                alert("Error: pathway could not be deleted from database.");
             }
+            manage_fill_table();
+            delete pathways[entity_id];
+            
+            if (current_pathway == entity_id) change_pathway();
+            
+            var del_nodes = new Set();
+            for (node_id in data){
+                if (data[node_id].foreign_id == entity_id && data[node_id].type == "pathway") del_nodes.add(parseInt(node_id));
+            }
+            
+            var del_reactions = []
+            for (var reaction_id in edge_data){
+                if (del_nodes.has(edge_data[reaction_id]['n'])) del_reactions.push(reaction_id);
+            }
+            for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
+            for (node_id of del_nodes) delete data[node_id.toString()];
+            compute_edges();
+            assemble_elements();
+            draw();
         }
-        xmlhttp_protein_data.open("GET", request, false);
-        xmlhttp_protein_data.send();
     }
+    xmlhttp_protein_data.open("GET", request, false);
+    xmlhttp_protein_data.send();
 }
 
 
@@ -2442,52 +2459,48 @@ function manage_delete_metabolite(metabolite_id){
     var request = "type=metabolite&id=" + metabolite_id;
     request = "/qsdb/admin/cgi-bin/delete-entity.py?" + request
     
-    
-    if (confirm("Do you want to delete the metabolite '" + global_manage_data[metabolite_id][1] + "'?")) {
-        
-        var xmlhttp_metabolite_data = new XMLHttpRequest();
-        xmlhttp_metabolite_data.onreadystatechange = function() {
-            if (xmlhttp_metabolite_data.readyState == 4 && xmlhttp_metabolite_data.status == 200) {
-                var request = xmlhttp_metabolite_data.responseText;
-                if (request < 0){
-                    alert("Error: protein could not be deleted from database.");
-                }
-                manage_fill_table();
-                
-                var node_ids = new Set();
-                for (var node_id in data){
-                    if (data[node_id].type == 'metabolite' && data[node_id].foreign_id == metabolite_id) node_ids.add(parseInt(node_id));
-                }
-                
-                var del_reactions = []
-                for (var reaction_id in edge_data){
-                    var curr_edge = edge_data[reaction_id];
-                    for (var reagent_id in curr_edge['r']){
-                        if (node_ids.has(curr_edge['r'][reagent_id]['n']) && data[curr_edge['n']].type == "pathway") del_reactions.push(reaction_id);
-                    }
-                }
-                
-                for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
-                
-                
-                for (var reaction_id in edge_data){
-                    var del_reagents = [];
-                    for (var reagent_id in edge_data[reaction_id]['r']){
-                        if (node_ids.has(edge_data[reaction_id]['r'][reagent_id]['n'])) del_reagents.push(reagent_id);
-                    }
-                    for (var i = 0; i < del_reagents.length; ++i) delete edge_data[reaction_id]['r'][del_reagents[i]];
-                }
-                
-                for (var node_id of node_ids) delete data[node_id];
-                compute_edges();
-                assemble_elements();
-                draw();
-                
+    var xmlhttp_metabolite_data = new XMLHttpRequest();
+    xmlhttp_metabolite_data.onreadystatechange = function() {
+        if (xmlhttp_metabolite_data.readyState == 4 && xmlhttp_metabolite_data.status == 200) {
+            var request = xmlhttp_metabolite_data.responseText;
+            if (request < 0){
+                alert("Error: protein could not be deleted from database.");
             }
+            manage_fill_table();
+            
+            var node_ids = new Set();
+            for (var node_id in data){
+                if (data[node_id].type == 'metabolite' && data[node_id].foreign_id == metabolite_id) node_ids.add(parseInt(node_id));
+            }
+            
+            var del_reactions = []
+            for (var reaction_id in edge_data){
+                var curr_edge = edge_data[reaction_id];
+                for (var reagent_id in curr_edge['r']){
+                    if (node_ids.has(curr_edge['r'][reagent_id]['n']) && data[curr_edge['n']].type == "pathway") del_reactions.push(reaction_id);
+                }
+            }
+            
+            for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
+            
+            
+            for (var reaction_id in edge_data){
+                var del_reagents = [];
+                for (var reagent_id in edge_data[reaction_id]['r']){
+                    if (node_ids.has(edge_data[reaction_id]['r'][reagent_id]['n'])) del_reagents.push(reagent_id);
+                }
+                for (var i = 0; i < del_reagents.length; ++i) delete edge_data[reaction_id]['r'][del_reagents[i]];
+            }
+            
+            for (var node_id of node_ids) delete data[node_id];
+            compute_edges();
+            assemble_elements();
+            draw();
+            
         }
-        xmlhttp_metabolite_data.open("GET", request, false);
-        xmlhttp_metabolite_data.send();
     }
+    xmlhttp_metabolite_data.open("GET", request, false);
+    xmlhttp_metabolite_data.send();
 }
 
 
