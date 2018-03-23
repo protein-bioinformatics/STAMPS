@@ -2037,7 +2037,7 @@ function change_textfield_type(dom_obj, to_text){
             alert("Error: database could not be updated.");
         }
         else {
-            if (manage_current_entry == "proteins" && manage_columns[manage_current_entry][col_id - 1] == "name"){
+            if (manage_current_entry == "proteins" && manage_columns[manage_current_entry][col_id - 1] == "name" && (entity_id in protein_dictionary)){
                 protein_dictionary[entity_id].name = content;
                 draw();
             }
