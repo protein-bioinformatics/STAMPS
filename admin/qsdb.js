@@ -1546,6 +1546,7 @@ function manage_change_entity(entity){
         dom_input.setAttribute("id", "editor_select_manage_table_filter_" + i.toString());
         dom_input.setAttribute("onkeyup", "manage_current_page = 0; manage_fill_table();");
     }
+    resize_manage_view();
 }
 
 

@@ -1,4 +1,3 @@
-#include <mysql.h>
 #include <stdio.h>
 #include <cstring>
 #include <iostream>
@@ -8,6 +7,12 @@
 #include <sstream>
 #include <math.h>
 #include "bio-classes.h"
+
+#include "mysql_connection.h"
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
 
 using namespace std;
 
@@ -29,30 +34,45 @@ class node {
         string exact_mass;
         vector<protein*> proteins;
         
+        node(){
+            id = "";
+            name = "";
+            pathway_id = "";
+            type = "";
+            foreign_id = "";
+            x = "";
+            y = "";
+            c_number = "";
+            smiles = "";
+            formula = "";
+            exact_mass = "";
+        }
         
         string to_string(){
             string str = "{";
-            str += "\"i\":" + id + ",";
-            str += "\"n\":\"" + name + "\",";
-            str += "\"t\":\"" + type + "\",";
-            str += "\"r\":" + (foreign_id.length() ? foreign_id : "0") + ",";
-            str += "\"x\":" + x + ",";
-            str += "\"y\":" + y + ",";
-            str += "\"c\":\"" + c_number + "\",";
-            str += "\"s\":\"" + smiles + "\",";
-            str += "\"f\":\"" + formula + "\",";
-            str += "\"e\":\"" + exact_mass + "\",";
-            str += "\"p\":[";
-            for (uint i = 0; i < proteins.size(); ++i){
-                if (i) str += ",";
-                str += proteins.at(i)->to_string();
+            str += "\"i\":" + id;
+            if (name.length() > 0) str += ",\"n\":\"" + name + "\"";
+            if (type.length() > 0) str += ",\"t\":\"" + type + "\"";
+            str += ",\"r\":" + (foreign_id.length() ? foreign_id : "0");
+            str += ",\"x\":" + x;
+            str += ",\"y\":" + y;
+            if (c_number.length() > 0) str += ",\"c\":\"" + c_number + "\"";
+            if (smiles.length() > 0) str += ",\"s\":\"" + smiles + "\"";
+            if (formula.length() > 0) str += ",\"f\":\"" + formula + "\"";
+            if (exact_mass.length() > 0) str += ",\"e\":\"" + exact_mass + "\"";
+            if (proteins.size() > 0) {
+                str += ",\"p\":[";
+                for (uint i = 0; i < proteins.size(); ++i){
+                    if (i) str += ",";
+                    str += proteins.at(i)->to_string();
+                }
+                str += "]";
             }
-            str += "]}";
+            str += "}";
             return str;
         }
 };
 
-map<string, peptide* >* all_peptides = 0;
 vector< protein* >* proteins = 0;
 map < int, protein* >* all_proteins = 0;
 
@@ -71,7 +91,7 @@ void print_out(string response, bool compress){
 
 
 int main(int argc, char** argv) {
-    bool compress = false;
+    bool compress = true;
     string response = "";
     
     if (compress){
@@ -135,92 +155,53 @@ int main(int argc, char** argv) {
     }
     
     
-    MYSQL *conn = mysql_init(NULL);
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    MYSQL_FIELD *field;
-    char *server = (char*)parameters["mysql_host"].c_str();
-    char *user = (char*)parameters["mysql_user"].c_str();
-    char *password = (char*)parameters["mysql_passwd"].c_str();
-    char *database = (char*)parameters["mysql_db"].c_str();
-    map< string, int > column_names_nodes;
-    map< string, int > column_names_proteins;
-    map< string, int > column_names_peptides;
-    map< string, int > column_names_spectra;
-    map< string, int > column_names_rest;
+    
+    // Create a connection and connect to database
+    sql::ResultSet *res;
+    sql::Driver *driver = get_driver_instance();
+    sql::Connection *con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
+    con->setSchema(parameters["mysql_db"]);
+    sql::Statement *stmt = con->createStatement();
+    
+    
     map< int, node*> node_dict;
     proteins = new vector< protein* >();
     all_proteins = new map < int, protein* >();
     
-    /* Connect to database */
-    if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
-        response += "-3";
-        print_out(response, compress);
-        return -3;
-    }
-    /* send SQL query */
+    
     string sql_query_nodes = "select * from nodes where pathway_id = ";
     sql_query_nodes += pathway_id;
     sql_query_nodes += " and type = 'protein';";
-    
-    
-    if (mysql_query(conn, sql_query_nodes.c_str())) {
-        response += "-4";
-        print_out(response, compress);
-        return -4;
-    }
-    res = mysql_use_result(conn);
-        
-    for(unsigned int i = 0; (field = mysql_fetch_field(res)); i++) {
-        column_names_nodes.insert(pair<string,int>(field->name, i));
-    }
-    
-    while ((row = mysql_fetch_row(res)) != NULL){
+    res = stmt->executeQuery(sql_query_nodes);
+       
+    while (res->next()){
         node* last_node = new node;
-        last_node->id = row[column_names_nodes[string("id")]];
-        last_node->pathway_id = row[column_names_nodes[string("pathway_id")]];
-        last_node->type = row[column_names_nodes[string("type")]];
-        last_node->x = row[column_names_nodes[string("x")]];
-        last_node->y = row[column_names_nodes[string("y")]];
+        last_node->id = res->getString("id");
+        last_node->pathway_id = res->getString("pathway_id");
+        last_node->type = res->getString("type");
+        last_node->x = res->getString("x");
+        last_node->y = res->getString("y");
         node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
     }
     
     
-    string sql_query_proteins = "select n.id nid, p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ";
+    string sql_query_proteins = "select n.id nid, p.id, p.name from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ";
     sql_query_proteins += pathway_id;
     sql_query_proteins += " and n.type = 'protein' and p.species = '";
     sql_query_proteins += species;
     sql_query_proteins += "';";
     
-    if (mysql_query(conn, sql_query_proteins.c_str())) {
-        response += "-5";
-        print_out(response, compress);
-        return -5;
-    }
-    res = mysql_use_result(conn);
-    
-    for(unsigned int i = 0; (field = mysql_fetch_field(res)); i++) {
-        column_names_proteins.insert(pair<string,int>(field->name, i));
-    }
-    
-    
-    while ((row = mysql_fetch_row(res)) != NULL){
-        int node_id = atoi(row[column_names_proteins[string("nid")]]);
-        string str_pid = row[column_names_proteins[string("id")]];
+    res = stmt->executeQuery(sql_query_proteins);
+       
+    while (res->next()){
+        int node_id = res->getInt("nid");
+        string str_pid = res->getString("id");
         int pid = atoi(str_pid.c_str());
         protein* last_protein = 0;
         
         if (all_proteins->find(pid) == all_proteins->end()){
             last_protein = new protein(str_pid);
-            last_protein->name = row[column_names_proteins[string("name")]];
-            last_protein->definition = row[column_names_proteins[string("definition")]];
-            last_protein->accession = row[column_names_proteins[string("accession")]];
-            last_protein->ec_number = row[column_names_proteins[string("ec_number")]];
-            last_protein->kegg = row[column_names_proteins[string("kegg_link")]];
-            last_protein->validation = row[column_names_proteins[string("validation")]];
-            last_protein->fasta = cleanFasta(row[column_names_proteins[string("fasta")]]);
-            last_protein->mass = compute_mass(last_protein->fasta);
-            last_protein->pI = predict_isoelectric_point(last_protein->fasta);
+            last_protein->name = res->getString("name");
             all_proteins->insert(pair<int, protein* >(pid, last_protein));
             proteins->push_back(last_protein);
         }
@@ -245,30 +226,21 @@ int main(int argc, char** argv) {
     sql_query_rest += pathway_id;
     sql_query_rest += ");";
     
-    if (mysql_query(conn, sql_query_rest.c_str())) {
-        response += "-6";
-        print_out(response, compress);
-        return -6;
-    }
-    res = mysql_use_result(conn);
-    
-    for(unsigned int i = 0; (field = mysql_fetch_field(res)); i++) {
-        column_names_rest.insert(pair<string,int>(field->name, i));
-    }
-    
-    while ((row = mysql_fetch_row(res)) != NULL){
+    res = stmt->executeQuery(sql_query_rest);
+       
+    while (res->next()){
         node* last_node = new node();
-        last_node->id = row[column_names_rest[string("id")]];
-        last_node->pathway_id = row[column_names_rest[string("pathway_id")]];
-        last_node->name = row[column_names_rest[string("name")]];
-        last_node->type = row[column_names_rest[string("type")]];
-        last_node->foreign_id = row[column_names_rest[string("foreign_id")]]; 
-        last_node->x = row[column_names_rest[string("x")]];
-        last_node->y = row[column_names_rest[string("y")]];
-        last_node->c_number = row[column_names_rest[string("c_number")]];
-        last_node->smiles = row[column_names_rest[string("smiles")]];
-        last_node->formula = row[column_names_rest[string("formula")]];
-        last_node->exact_mass = row[column_names_rest[string("exact_mass")]];
+        last_node->id = res->getString("id");
+        last_node->pathway_id = res->getString("pathway_id");
+        last_node->name = res->getString("name");
+        last_node->type = res->getString("type");
+        last_node->foreign_id = res->getString("foreign_id");
+        last_node->x = res->getString("x");
+        last_node->y = res->getString("y");
+        last_node->c_number = res->getString("c_number");
+        last_node->smiles = res->getString("smiles");
+        last_node->formula = res->getString("formula");
+        last_node->exact_mass = res->getString("exact_mass");
         node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
     }
     
@@ -287,8 +259,10 @@ int main(int argc, char** argv) {
     delete proteins;
     delete all_proteins;
     
-    mysql_free_result(res);
-    mysql_close(conn);
+    
+    delete res;
+    delete stmt;
+    delete con;
     
     return 0;
 }

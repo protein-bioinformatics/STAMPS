@@ -672,16 +672,16 @@ function Peptide(data){
 
 
 function Protein(data){
-    this.id = data['i'];
-    this.name = data['n'];
-    this.definition = data['d'];
-    this.kegg_link = data['k'];
-    this.accession = data['a'];
-    this.ec_number = data['e'];
-    this.mass = data['m'];
-    this.validation = data['v'];
-    this.sequence_length = data['l'];
-    this.pI = data['pI'];
+    this.id = ('i' in data) ? data['i'] : 0;
+    this.name = ('n' in data) ? data['n'] : "";
+    this.definition = ('d' in data) ? data['d'] : "";
+    this.kegg_link = ('k' in data) ? data['k'] : "";
+    this.accession = ('a' in data) ? data['a'] : "";
+    this.ec_number = ('e' in data) ? data['e'] : "";
+    this.mass = ('m' in data) ? data['m'] : "";
+    this.validation = ('v' in data) ? data['v'] : "";
+    this.sequence_length = ('l' in data) ? data['l'] : "";
+    this.pI = ('pI' in data) ? data['pI'] : 0;
     this.peptides = [];
     this.filter_valid = false;
     this.containing_spectra = 0;
@@ -691,16 +691,19 @@ function Protein(data){
     this.tissues = {};
     this.nsaf = {};
     
-    for (var i = 0; i < data['p'].length; ++i){
-        
-        var new_pep = new Peptide(data['p'][i]);
-        this.peptides.push(new_pep);
-        for (t in new_pep.tissues){
-            if (!(t in this.tissues)) this.tissues[t] = 0;
-            this.tissues[t] += new_pep.tissues[t];
-        }        
-        this.containing_spectra += this.peptides[i].spectra.length;
+    if ('p' in data){
+        for (var i = 0; i < data['p'].length; ++i){
+            
+            var new_pep = new Peptide(data['p'][i]);
+            this.peptides.push(new_pep);
+            for (t in new_pep.tissues){
+                if (!(t in this.tissues)) this.tissues[t] = 0;
+                this.tissues[t] += new_pep.tissues[t];
+            }        
+            this.containing_spectra += this.peptides[i].spectra.length;
+        }
     }
+    
     if (this.containing_spectra){
         this.fillStyle_rect = "white";
         this.fillStyle_text = text_color;
@@ -1520,14 +1523,14 @@ node.prototype.constructor = node;
 function node(data){
     this.x = parseInt(data['x']);
     this.y = parseInt(data['y']);
-    this.type = data['t'];
+    this.type = ('t' in data) ? data['t'] : "";
     this.id = data['i'];
-    this.name = data['n'];
+    this.name = ('n' in data) ? data['n'] : "";
     //this.name = " " + this.id;  // TODO: delete this line
-    this.c_number = data['c'];
-    this.smiles = data['s'];
-    this.formula = data['f'];
-    this.exact_mass = data['e'];
+    this.c_number = ('c' in data) ? data['c'] : "";
+    this.smiles = ('s' in data) ? data['s'] : "";
+    this.formula = ('f' in data) ? data['f'] : "";
+    this.exact_mass = ('e' in data) ? data['e'] : "";
     this.img = 0;
     this.highlight = false;
     this.foreign_id = data['r'];
@@ -1597,6 +1600,11 @@ function node(data){
     switch (this.type){
         case "protein":
             this.sort_order = 100;
+            if (!('p' in data)){
+                this.setup_protein_meta();
+                break;
+            }
+            
             for (var j = 0; j < data['p'].length; ++j){
                 var prot = 0;
                 var prot_id = data['p'][j]['i'];
@@ -3833,11 +3841,11 @@ function highlight_node_inner(node_id){
     var scale = Math.pow(Math.pow(scaling, highlight_zoom - zoom), 1 / (time * steps));
     var zoom_scale = (highlight_zoom - zoom) / (time * steps);
     
-    var moving = setInterval(function(){
+    var moving = setInterval(function(node_id){
         if (progress >= time) {
             zoom = highlight_zoom;
             var l = 0, ii = 0;
-            highlighting = setInterval(function(){
+            highlighting = setInterval(function(node_id){
                 if (ii >= 3){
                     clearInterval (highlighting);
                 }
@@ -3849,7 +3857,7 @@ function highlight_node_inner(node_id){
                         l = 0; ii += 1;
                     }
                 }
-            }, 20);
+            }, 20, node_id);
             document.getElementById("animation_background").style.display = "none";
             clearInterval (moving);
             zoom = highlight_zoom;
@@ -3895,7 +3903,7 @@ function highlight_node_inner(node_id){
             draw();
             progress += 1 / steps;
         }
-    }, steps);
+    }, steps, node_id);
     
 }
 

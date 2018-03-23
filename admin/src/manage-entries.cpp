@@ -1,4 +1,3 @@
-#include <mysql.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstring>
@@ -9,6 +8,12 @@
 #include <sstream>
 #include <math.h>
 #include "bio-classes.h"
+
+#include "mysql_connection.h"
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
 
 using namespace std;
 
@@ -105,21 +110,12 @@ int main(int argc, char** argv) {
     }
     
     
-    // Connect to database
-    MYSQL *conn = mysql_init(NULL);
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    MYSQL_FIELD *field;
-    char *server = (char*)parameters["mysql_host"].c_str();
-    char *user = (char*)parameters["mysql_user"].c_str();
-    char *password = (char*)parameters["mysql_passwd"].c_str();
-    char *database = (char*)parameters["mysql_db"].c_str();
-    map< string, int > column_names;
-    if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
-        response += "-3";
-        print_out(response, compress);
-        return -3;
-    }
+    // Create a connection and connect to database
+    sql::ResultSet *res;
+    sql::Driver *driver = get_driver_instance();
+    sql::Connection *con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
+    con->setSchema(parameters["mysql_db"]);
+    sql::Statement *stmt = con->createStatement();
     
     
     
@@ -158,19 +154,11 @@ int main(int argc, char** argv) {
         
         if (!set_table.compare("nodeproteincorrelations")){
             string sql_query = "DELETE FROM " + set_table + " WHERE node_id = " + set_id + ";";
-            if (mysql_query(conn, sql_query.c_str())) {
-                response += "-7";
-                print_out(response, compress);
-                return -7;
-            }
+            stmt->executeQuery(sql_query);
             
             for(string protein_id : split(set_value, ':')){
                 sql_query = "INSERT INTO " + set_table + "(node_id, protein_id) VALUES(" + set_id + ", " + protein_id + ");";
-                if (mysql_query(conn, sql_query.c_str())) {
-                    response += "-7";
-                    print_out(response, compress);
-                    return -7;
-                }
+                stmt->executeQuery(sql_query);
             }
         }
         
@@ -182,11 +170,7 @@ int main(int argc, char** argv) {
             } 
             
             string sql_query = "UPDATE " + set_table + " SET " + set_col + " = '" + set_value + "' WHERE id = " + set_id + ";";
-            if (mysql_query(conn, sql_query.c_str())) {
-                response += "-8";
-                print_out(response, compress);
-                return -8;
-            }
+            stmt->executeQuery(sql_query);
         
             response += "0";
             print_out(response, compress);
@@ -248,23 +232,18 @@ int main(int argc, char** argv) {
             }
                 
                 
-            if (mysql_query(conn, sql_query.c_str())) {
-                response += "-10";
-                print_out(response, compress);
-                return -10;
-            }
             
-            res = mysql_use_result(conn);
-            
-            int num_rows = 0;
-            while(field = mysql_fetch_field(res)) ++num_rows;
+            res = stmt->executeQuery(sql_query);
+            sql::ResultSetMetaData *res_meta;
+            res_meta = res->getMetaData();
+            int num_cols = res_meta->getColumnCount();
             
             string data = "{";
-            while ((row = mysql_fetch_row(res)) != NULL){
+            while (res->next()){
                 if (data.length() > 1) data += ",";
-                data += "\"" + string(row[0]) + "\":[" + string(row[0]);
-                for (int i = 1; i < num_rows; ++i){
-                    string content = row[i];
+                data += "\"" + res->getString(1) + "\":[" + res->getString(1);
+                for (int i = 2; i <= num_cols; ++i){
+                    string content = res->getString(i);
                     replaceAll(content, "\n", "\\n");
                     data += ",\"" + content + "\"";
                 }
@@ -278,30 +257,20 @@ int main(int argc, char** argv) {
         else if (!action_type.compare("proteins_num") || !action_type.compare("metabolites_num") || !action_type.compare("pathways_num")){
             replaceAll(action_type, "_num", "");
             string sql_query = "SELECT count(*) from " + action_type + ";";
-            if (mysql_query(conn, sql_query.c_str())){
-                response += "-11";
-                print_out(response, compress);
-                return -11;
-            }
-            res = mysql_use_result(conn);
-            row = mysql_fetch_row(res);
-            response += row[0];
+            res = stmt->executeQuery(sql_query);
+            res->next();
+            response += res->getString(1);
             print_out(response, compress);
         }
             
         else if (!action_type.compare("proteins_col") || !action_type.compare("metabolites_col") || !action_type.compare("pathways_col")){
             replaceAll(action_type, "_col", "");
             string sql_query = "SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = '" + parameters["mysql_db"] + "' AND `TABLE_NAME` = '" + action_type + "';";
-            if (mysql_query(conn, sql_query.c_str())){
-                response += "-12";
-                print_out(response, compress);
-                return -12;
-            }
-            res = mysql_use_result(conn);
+            res = stmt->executeQuery(sql_query);
             string data = "[";
-            while ((row = mysql_fetch_row(res)) != NULL){
+            while (res->next()){
                 if (data.length() > 1) data += ",";
-                data += "\"" + string(row[0]) + "\"";
+                data += "\"" + res->getString(1) + "\"";
             }
             data += "]";
             response += data;
@@ -372,24 +341,14 @@ int main(int argc, char** argv) {
             sql_query += insert_data[i][1];
         }
         sql_query += "');";
-        
-        if (mysql_query(conn, sql_query.c_str())) {
-            response += "-14";
-            print_out(response, compress);
-            return -14;
-        }
+        stmt->executeQuery(sql_query);
         
         if (!action_type.compare("metabolites")){
             sql_query = "SELECT max(id) max_id FROM metabolites;";
-            if (mysql_query(conn, sql_query.c_str())) {
-                response += "-15";
-                print_out(response, compress);
-                return -15;
-            }
-            res = mysql_use_result(conn);
-            row = mysql_fetch_row(res);
+            res = stmt->executeQuery(sql_query);
+            res->next();
             
-            string metabolite_id = row[0];
+            string metabolite_id = res->getString(1);
             
             
             string filepath = parameters["root_path"] + "/admin/cgi-bin";
@@ -399,14 +358,9 @@ int main(int argc, char** argv) {
             
         if (!action_type.compare("pathways")){
             string sql_query = "SELECT max(id) from " + action_type + ";";
-            if (mysql_query(conn, sql_query.c_str())){
-                response += "-16";
-                print_out(response, compress);
-                return -16;
-            }
-            res = mysql_use_result(conn);
-            row = mysql_fetch_row(res);
-            response += row[0];
+            res = stmt->executeQuery(sql_query);
+            res->next();
+            response += res->getString(1);
         }
         else {
             response += "0";
@@ -414,7 +368,10 @@ int main(int argc, char** argv) {
         print_out(response, compress);
     }
     
-    mysql_free_result(res);
-    mysql_close(conn);
+    
+    
+    delete res;
+    delete stmt;
+    delete con;
     return 0;
 }

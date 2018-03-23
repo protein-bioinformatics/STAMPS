@@ -241,7 +241,19 @@ string peptide::to_string(){
 
 
         
-protein::protein(string _id) : str_id(_id) {id = atoi(str_id.c_str());}
+protein::protein(string _id) : str_id(_id) {
+    id = atoi(str_id.c_str());
+    name = "";
+    definition = "";
+    mass = -1;
+    accession = "";
+    ec_number = "";
+    kegg = "";
+    fasta = "";
+    float pI = -1;
+    validation = "";
+    proteome_start_pos = -1;
+}
 
 string protein::to_string(){
     char fasta_length[20];
@@ -254,21 +266,24 @@ string protein::to_string(){
     sprintf(pI_str, "%0.3f", pI);
     
     string str = "{";
-    str += "\"i\":" + str_id + ",";
-    str += "\"n\":\"" + name + "\",";
-    str += "\"d\":\"" + definition + "\",";
-    str += "\"m\":\"" + string(mass_str) + "\",";
-    str += "\"l\":" + string(fasta_length) + ",";
-    str += "\"a\":\"" + accession + "\",";
-    str += "\"e\":\"" + ec_number + "\",";
-    str += "\"k\":\"" + kegg + "\",";
-    str += "\"v\":\"" + validation + "\",";
-    str += "\"pI\":" + string(pI_str) + ",";
-    str += "\"p\":[";
-    for (int i = 0; i < peptides.size(); ++i){
-        if (i) str += ",";
-        str += peptides.at(i)->to_string();
+    str += "\"i\":" + str_id;
+    if (name.length() > 0) str += ",\"n\":\"" + name + "\"";
+    if (definition.length() > 0) str += ",\"d\":\"" + definition + "\"";
+    if (mass > 0) str += ",\"m\":\"" + string(mass_str) + "\"";
+    if (fasta.length() > 0) str += ",\"l\":" + string(fasta_length);
+    if (accession.length() > 0) str += ",\"a\":\"" + accession + "\"";
+    if (ec_number.length() > 0) str += ",\"e\":\"" + ec_number + "\"";
+    if (kegg.length() > 0) str += ",\"k\":\"" + kegg + "\"";
+    if (validation.length() > 0) str += ",\"v\":\"" + validation + "\"";
+    if (pI > 0) str += ",\"pI\":" + string(pI_str);
+    if (peptides.size() > 0){
+        str += ",\"p\":[";
+        for (int i = 0; i < peptides.size(); ++i){
+            if (i) str += ",";
+            str += peptides.at(i)->to_string();
+        }
+        str += "]";
     }
-    str += "]}";
+    str += "}";
     return str;
 }

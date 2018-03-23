@@ -1,4 +1,3 @@
-#include <mysql.h>
 #include <stdio.h>
 #include <cstring>
 #include <iostream>
@@ -18,6 +17,12 @@
 #include "sais.h"
 #include "wavelet.h"
 #include "bio-classes.h"
+
+#include "mysql_connection.h"
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
 
 using namespace std;
 
@@ -110,49 +115,28 @@ static int callback(void *count, int argc, char **argv, char **azColName) {
 
 
 
-string get_protein_data(string sql_query_proteins, string species, MYSQL *conn, bool statistics){
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    MYSQL_FIELD *field;
-    
-    if (mysql_query(conn, sql_query_proteins.c_str())) {
-        cout << "error: " << mysql_error(conn) << endl;
-        exit (-1);
-    }
-    res = mysql_store_result(conn);
-    
-    map< string, int > column_names_proteins;
-    for(unsigned int i = 0; (field = mysql_fetch_field(res)); i++) {
-        column_names_proteins.insert(pair<string,int>(field->name, i));
-    }
-    
-    proteins = vector< protein* >(mysql_num_rows(res), 0);
+string get_protein_data(string sql_query_proteins, string species, sql::ResultSet *res, bool statistics){
     
     
     len_text = 1; // plus sentinal
-    int p_i = 0;
-    while ((row = mysql_fetch_row(res)) != NULL){
-        string pid = row[column_names_proteins[string("id")]];
+    while (res->next()){
+        string pid = res->getString("id");
         protein* last_protein = new protein(pid);
-        last_protein->name = row[column_names_proteins[string("name")]];
-        last_protein->definition = row[column_names_proteins[string("definition")]];
-        last_protein->accession = row[column_names_proteins[string("accession")]];
-        last_protein->ec_number = row[column_names_proteins[string("ec_number")]];
-        last_protein->kegg = row[column_names_proteins[string("kegg_link")]];
-        last_protein->fasta = cleanFasta(row[column_names_proteins[string("fasta")]]);
-        last_protein->validation = row[column_names_proteins[string("validation")]];
+        last_protein->name = res->getString("name");
+        last_protein->definition = res->getString("definition");
+        last_protein->accession = res->getString("accession");
+        last_protein->ec_number = res->getString("ec_number");
+        last_protein->kegg = res->getString("kegg_link");
+        last_protein->fasta = cleanFasta(res->getString("fasta"));
+        last_protein->validation = res->getString("validation");
         last_protein->pI = predict_isoelectric_point(last_protein->fasta);
         last_protein->mass = compute_mass(last_protein->fasta);
         last_protein->proteome_start_pos = len_text;
         len_text += last_protein->fasta.length() + 1;
-        proteins[p_i++] = last_protein;
+        proteins.push_back(last_protein);
     }
     
-    
-    mysql_free_result(res);
-    mysql_close(conn);
-    
-    if (!p_i) return "[]";
+    if (!proteins.size()) return "[]";
     
     // create FM index for fast pattern search    
     unsigned char* T = new unsigned char[len_text];
@@ -312,9 +296,6 @@ main(int argc, char** argv) {
     
     char* get_string_chr = getenv("QUERY_STRING");
     
-    // TODO: debugging
-    //get_string_chr = (char*)"statistics";
-    //get_string_chr = (char*)"loci=12";
     
     if (!get_string_chr){
         cout << -1;
@@ -391,45 +372,35 @@ main(int argc, char** argv) {
     
     
     
-    MYSQL *conn = mysql_init(NULL);
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    MYSQL_FIELD *field;
-    char *server = (char*)parameters["mysql_host"].c_str();
-    char *user = (char*)parameters["mysql_user"].c_str();
-    char *password = (char*)parameters["mysql_passwd"].c_str();
-    char *database = (char*)parameters["mysql_db"].c_str();
-    
-    /* Connect to database */
-    if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
-        cout << "error: " << mysql_error(conn) << endl;
-        return 1;
-    }
+     // Create a connection and connect to database
+    sql::ResultSet *res;
+    sql::Driver *driver = get_driver_instance();
+    sql::Connection *con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
+    con->setSchema(parameters["mysql_db"]);
+    sql::Statement *stmt = con->createStatement();
     
     if (statistics_pathways){
         string sql_query = "SELECT distinct pw.id pathway_id, pw.name, npc.protein_id FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id where p.unreviewed = 0 order by pw.name;";
-        if (mysql_query(conn, sql_query.c_str())) {
-            cout << "error: " << mysql_error(conn) << endl;
-            return 1;
-        }
-        res = mysql_use_result(conn);
+        
+        res = stmt->executeQuery(sql_query);
+       
         
         int index_pw = 0;
         int index_p = 0;
         string last_id = "";
         string response = "[";
-        while ((row = mysql_fetch_row(res)) != NULL){
-            if (last_id.compare(row[0])){
-                last_id = row[0];
+        while (res->next()){
+            if (last_id.compare(res->getString("pathway_id"))){
+                last_id = res->getString("pathway_id");
                 index_p = 0;
                 
                 if (index_pw++) response += "]],";
-                response += "[" + last_id + ",\"" + string(row[1]) + "\",[";
+                response += "[" + last_id + ",\"" + string(res->getString("name")) + "\",[";
             }
             
             
             if (index_p++) response += ",";
-            response += string(row[2]);
+            response += string(res->getString("protein_id"));
         }
         if (index_pw) response += "]]";
         response += "]";
@@ -450,8 +421,6 @@ main(int argc, char** argv) {
     }
     
     if (via_accessions){
-    
-        //accessions = "B2RQC6:Q9CZW5:Q9DCC8:Q9CPQ3:Q9DCC8:Q9QYA2";
         if (accessions == "" || accessions.find("'") != string::npos){
             cout << -1 << endl;
             return -1;
@@ -508,6 +477,7 @@ main(int argc, char** argv) {
         sql_query_proteins += "';";
     }
     
+    res = stmt->executeQuery(sql_query_proteins);
     
     string result = "";
     if (statistics){
@@ -535,17 +505,23 @@ main(int argc, char** argv) {
         }
         // otherwise retrieve the protein data the normal way and store in 'data' folder
         else {
-            result = get_protein_data(sql_query_proteins, species, conn, statistics);
+            result = get_protein_data(sql_query_proteins, species, res, statistics);
             if (compress) result = compress_string(result);
             ofstream json_file(statistics_json_filename.c_str(), ios::binary);
             json_file.write(result.c_str(), result.length());
         }
     }
     else {
-        result = get_protein_data(sql_query_proteins, species, conn, statistics);
+        result = get_protein_data(sql_query_proteins, species, res, statistics);
         if (compress) result = compress_string(result);
     }
     
     cout << result << endl;
+    
+    
+    delete res;
+    delete stmt;
+    delete con;
+    
     return 0;
 }

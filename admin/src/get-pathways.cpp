@@ -9,6 +9,12 @@
 #include <fstream>
 #include "bio-classes.h"
 
+#include "mysql_connection.h"
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
+
 using namespace std;
 
 
@@ -55,45 +61,31 @@ main() {
     
     
     
-    MYSQL *conn = mysql_init(NULL);
-    MYSQL_RES *res;
-    MYSQL_RES *res_reagents;
-    MYSQL_ROW row;
-    MYSQL_FIELD *field;
-    char *server = (char*)parameters["mysql_host"].c_str();
-    char *user = (char*)parameters["mysql_user"].c_str();
-    char *password = (char*)parameters["mysql_passwd"].c_str();
-    char *database = (char*)parameters["mysql_db"].c_str();
-    map< string, int > column_names;
+    // Create a connection and connect to database
+    sql::ResultSet *res;
+    sql::Driver *driver = get_driver_instance();
+    sql::Connection *con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
+    con->setSchema(parameters["mysql_db"]);
+    sql::Statement *stmt = con->createStatement();
     
-    /* Connect to database */
-    if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
-        cout << "error: " << mysql_error(conn) << endl;
-        return 1;
-    }
+    
     /* send SQL query */
     string sql_query = (!print_all) ? "SELECT distinct p.* FROM pathways p inner join nodes n on p.id = n.pathway_id;" : "SELECT * FROM pathways;";
-    if (mysql_query(conn, sql_query.c_str())) {
-        cout << "error: " << mysql_error(conn) << endl;
-        return 1;
-    }
-    res = mysql_use_result(conn);
-        
-    for(unsigned int i = 0; (field = mysql_fetch_field(res)); i++) {
-        column_names.insert(pair<string,int>(field->name, i));
-    }
+    res = stmt->executeQuery(sql_query);
     
-    cout << "{";
-    int index = 0;
-    while ((row = mysql_fetch_row(res)) != NULL){
-        if (index++) cout << ",";
-        cout << "\"" << row[column_names[string("id")]] << "\":";
-        string pw_name = row[column_names[string("name")]];
+    string data = "{";
+    while (res->next()){
+        if (data.length() > 1) data += ",";
+        data += "\"" + res->getString("id") + "\":";
+        string pw_name = res->getString("name");
         replaceAll(pw_name, "\n", "\\n");
-        cout << "\"" << pw_name << "\"";
+        data += "\"" + pw_name + "\"";
     }
-    cout << "}" << endl;
+    data += "}";
     
-    mysql_free_result(res);
-    mysql_close(conn);
+    cout << data;
+    
+    delete res;
+    delete stmt;
+    delete con;
 }
