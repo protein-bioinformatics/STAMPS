@@ -236,13 +236,21 @@ function resize_pathway_view(){
 function mouse_click_listener(e){
     if (!pathway_is_loaded) return;
     
-    if (toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE){
+    if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY || toolbox_button_selected == toolbox_states.CREATE_METABOLITE || toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE){
         var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
         var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
         var request = "";
         switch (toolbox_button_selected){
+            case toolbox_states.CREATE_PATHWAY:
+                request = "type=pathway&pathway=" + current_pathway + "&x=" + x + "&y=" + y + "&foreign_id=-1";
+                break;
+                
             case toolbox_states.CREATE_PROTEIN:
                 request = "type=protein&pathway=" + current_pathway + "&x=" + x + "&y=" + y;
+                break;
+                
+            case toolbox_states.CREATE_METABOLITE:
+                request = "type=metabolite&pathway=" + current_pathway + "&x=" + x + "&y=" + y + "&foreign_id=-1";
                 break;
                 
             case toolbox_states.CREATE_LABEL:
@@ -259,10 +267,17 @@ function mouse_click_listener(e){
             assemble_elements();
             draw();
             switch (toolbox_button_selected){
+                case toolbox_states.CREATE_PATHWAY:
+                    tmp_element = new node({"x": "0", "y": "0", "t": "pathway", "i": -1, "n": "undefined"});  
+                    break;        
                     
                 case toolbox_states.CREATE_PROTEIN:
                     edge_data[result[1]] = {'i': result[1], 'n': tmp_element.id, 'in': 'left', 'out': 'right', 'v': 0, 'r': []};
                     tmp_element = new node({"x": "0", "y": "0", "t": "protein", "i": -1, "n": "-", "p": []});
+                    break;
+                    
+                case toolbox_states.CREATE_METABOLITE:
+                    tmp_element = new node({"x": "0", "y": "0", "t": "metabolite", "i": -1, "n": "-"});
                     break;
                     
                 case toolbox_states.CREATE_LABEL:
@@ -277,7 +292,7 @@ function mouse_click_listener(e){
             tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
         };
-    }
+    }/*
     else if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY){
         open_select_pathway();
         document.getElementById("editor_select_pathway_field").selectedIndex = 0;
@@ -291,7 +306,7 @@ function mouse_click_listener(e){
         document.getElementById("toolbox").style.filter = "blur(5px)";
         metabolite_create_action = true;
         editor_fill_metabolite_table();
-    }
+    }*/
     else if (toolbox_button_selected == toolbox_states.DELETE_ENTRY){
         if (highlight_element){
             var request = "";
@@ -356,11 +371,16 @@ function mouse_click_listener(e){
                     open_select_pathway();
                     
                     var obj = document.getElementById("editor_select_pathway_field");
-                    for (var i = 0; i < obj.children.length; ++i){
-                        if (obj.options[i].id == highlight_element.foreign_id){
-                            obj.selectedIndex = i;
-                            break;
+                    if (highlight_element.foreign_id > -1){
+                        for (var i = 0; i < obj.children.length; ++i){
+                            if (obj.options[i].id == highlight_element.foreign_id){
+                                obj.selectedIndex = i;
+                                break;
+                            }
                         }
+                    }
+                    else {
+                        obj.selectedIndex = 0;
                     }
                     
                     document.getElementById("editor_select_pathway_ok_button").setAttribute("onclick", "editor_update_pathway_node(); close_editor_select_pathway();");
@@ -683,7 +703,7 @@ function repair_database(){
                     
                     
                     var xmlhttp_repair = new XMLHttpRequest();
-                    xmlhttp_repair = "/qsdb/admin/cgi-bin/inspect-database.py?mode=check_web";
+                    request_repair = "/qsdb/admin/cgi-bin/inspect-database.py?mode=del_web";
                     xmlhttp_repair.onreadystatechange = function() {
                         if (xmlhttp_repair.readyState == 4 && xmlhttp_repair.status == 200) {
                             if (xmlhttp.responseText == 0){
@@ -694,7 +714,7 @@ function repair_database(){
                             }
                         }
                     }
-                    xmlhttp_repair.open("GET", request, false);
+                    xmlhttp_repair.open("GET", request_repair, false);
                     xmlhttp_repair.send();
                     
                     
@@ -899,7 +919,7 @@ function mouse_move_listener(e){
         else c.style.cursor = "default";
         
     }
-    if(highlight_element && highlight_element.tipp && entity_moving == -1) Tip(e, highlight_element.id + " " + highlight_element.name);
+    if(highlight_element && highlight_element.tipp && entity_moving == -1) Tip(e, highlight_element.name);
     else unTip();
 }
 
@@ -1443,7 +1463,7 @@ function editor_fill_metabolite_table(){
                 dom_input.setAttribute("name", "foo");
                 dom_input.setAttribute("onclick", "selected_metabolite = this.id;");
                 
-                if ((metabolite_create_action && i == 0) || (highlight_element.foreign_id == row[0])) {
+                if (((metabolite_create_action || highlight_element.foreign_id == -1) && i == 0) || (highlight_element.foreign_id == row[0])) {
                     selected_metabolite = row[0];
                     dom_input.setAttribute("checked", "true");
                 }

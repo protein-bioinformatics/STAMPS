@@ -245,6 +245,32 @@ int main(int argc, char** argv) {
     }
     
     
+    sql_query_rest = "(select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass from nodes n where n.type = 'pathway' and n.foreign_id = -1 and n.pathway_id = ";
+    sql_query_rest += pathway_id; 
+    sql_query_rest += ") union ";
+    sql_query_rest += "(select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass from nodes n where n.type = 'metabolite' and n.foreign_id = -1 and n.pathway_id = ";
+    sql_query_rest += pathway_id;
+    sql_query_rest += ");";
+    
+    res = stmt->executeQuery(sql_query_rest);
+    
+    while (res->next()){
+        node* last_node = new node();
+        last_node->id = res->getString("id");
+        last_node->pathway_id = res->getString("pathway_id");
+        last_node->name = res->getString("name");
+        last_node->type = res->getString("type");
+        last_node->foreign_id = res->getString("foreign_id");
+        last_node->x = res->getString("x");
+        last_node->y = res->getString("y");
+        last_node->c_number = res->getString("c_number");
+        last_node->smiles = res->getString("smiles");
+        last_node->formula = res->getString("formula");
+        last_node->exact_mass = res->getString("exact_mass");
+        node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
+    }
+    
+    
 
     response += "[";
     map<int, node*>::iterator node_it = node_dict.begin();

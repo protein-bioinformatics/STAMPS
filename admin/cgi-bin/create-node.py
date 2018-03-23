@@ -109,6 +109,4 @@ elif node_type == "membrane":
     
     
 my_cur.execute("SELECT max(id) mid FROM nodes;")
-
-
 print( json.dumps( [[row for row in my_cur][0]["mid"], reaction_id] ) )

@@ -77,12 +77,12 @@ if len(node_foreign_pathway_ids - pathway_ids) > 0:
         print("inconsistency: pathway_id in nodes ->", (node_foreign_pathway_ids - pathway_ids))
 
 
-sql_query = "SELECT foreign_id FROM nodes WHERE type = 'pathway';"
+sql_query = "SELECT foreign_id FROM nodes WHERE type = 'pathway' and foreign_id <> -1;"
 my_cur.execute(sql_query)
 node_foreign_pathway_ids = set([entry[0] for entry in my_cur])
 if len(node_foreign_pathway_ids - pathway_ids) > 0:  
     if mode in ["del", "del_web"]:
-        sql_query = "DELETE FROM nodes WHERE type = 'pathway' and foreign_id NOT IN (SELECT id FROM pathways);"
+        sql_query = "DELETE FROM nodes WHERE type = 'pathway' and foreign_id <> -1 and foreign_id NOT IN (SELECT id FROM pathways);"
         my_cur.execute(sql_query)
         conn.commit()
     elif mode == "check_web":
@@ -91,12 +91,12 @@ if len(node_foreign_pathway_ids - pathway_ids) > 0:
     else:
         print("inconsistency: foreign_id (pathway) in nodes ->", (node_foreign_pathway_ids - pathway_ids))
 
-sql_query = "SELECT foreign_id FROM nodes WHERE type = 'metabolites';"
+sql_query = "SELECT foreign_id FROM nodes WHERE type = 'metabolites' foreign_id <> -1;"
 my_cur.execute(sql_query)
 node_foreign_metabolite_ids = set([entry[0] for entry in my_cur])
 if len(node_foreign_metabolite_ids - metabolite_ids) > 0:  
     if mode in ["del", "del_web"]:
-        sql_query = "DELETE FROM nodes WHERE type = 'metabolite' and foreign_id NOT IN (SELECT id FROM metabolites);"
+        sql_query = "DELETE FROM nodes WHERE type = 'metabolite' and foreign_id <> -1 and foreign_id NOT IN (SELECT id FROM metabolites);"
         my_cur.execute(sql_query)
         conn.commit()
     elif mode == "check_web":
