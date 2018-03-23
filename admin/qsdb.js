@@ -68,8 +68,7 @@ function init(){
             change_pathway();
         }
     }
-    //xmlhttp_pathways.open("GET", "/qsdb/cgi-bin/get-pathways.bin?all", true);
-    xmlhttp_pathways.open("GET", "/qsdb/cgi-bin/get-pathways.bin", true);
+    xmlhttp_pathways.open("GET", "/qsdb/cgi-bin/get-pathways.bin?all", true);
     xmlhttp_pathways.send();
     
     
