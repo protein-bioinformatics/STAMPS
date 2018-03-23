@@ -53,6 +53,8 @@ manage_current_page = 0;
 
 max_per_page = 30;
 chromosomes = {"mouse": []};
+draw_anchor_start = "";
+draw_anchor_end = "";
 
 
 
@@ -66,7 +68,8 @@ function init(){
             change_pathway();
         }
     }
-    xmlhttp_pathways.open("GET", "/qsdb/cgi-bin/get-pathways.bin?all", true);
+    //xmlhttp_pathways.open("GET", "/qsdb/cgi-bin/get-pathways.bin?all", true);
+    xmlhttp_pathways.open("GET", "/qsdb/cgi-bin/get-pathways.bin", true);
     xmlhttp_pathways.send();
     
     
@@ -752,10 +755,14 @@ function mouse_down_listener(e){
                 node_move_x = entity_moving.x;
                 node_move_y = entity_moving.y;
             }
-            else if (toolbox_button_selected == toolbox_states.DRAW_EDGE){
-                var ctx = document.getElementById("renderarea").getContext("2d");
-                data[-1] = new node({"x": highlight_element.x, "y": highlight_element.y, "t": "point", "i": highlight_element.id, "n": "undefined"});
+            else if (toolbox_button_selected == toolbox_states.DRAW_EDGE && highlight_element.constructor.name == "node"){
                 
+                var anchor = highlight_element.is_mouse_over_anchor(res);
+                if (anchor.length > 0){
+                    var ctx = document.getElementById("renderarea").getContext("2d");
+                    data[-1] = new node({"x": highlight_element.x, "y": highlight_element.y, "t": "point", "i": highlight_element.id, "n": "undefined"});
+                    draw_anchor_start = anchor;
+                }
             }
             offsetX = res.x;
             offsetY = res.y;
@@ -819,7 +826,7 @@ function mouse_move_listener(e){
             offsetX = res.x;
             offsetY = res.y;
         }
-        else if (toolbox_button_selected == toolbox_states.DRAW_EDGE && (-1 in data)){
+        else if (toolbox_button_selected == toolbox_states.DRAW_EDGE && (-1 in data)){ // -1 in data: dummy node
             var offset_move_x = null_x % (base_grid * factor);
             var offset_move_y = null_y % (base_grid * factor);
             
@@ -846,7 +853,7 @@ function mouse_move_listener(e){
                 }
                 
                 
-                tmp_edge = new edge(data[-1].x, data[-1].y, a_start, data[-1], data[-2].x, data[-2].y, a_end, data[-2], 0, -1, -1);
+                tmp_edge = new edge(data[-1].x, data[-1].y, draw_anchor_start, data[-1], data[-2].x, data[-2].y, a_end, data[-2], 0, -1, -1);
                 elements.push(tmp_edge);
                 
             }
@@ -885,8 +892,11 @@ function mouse_move_listener(e){
             }
         }
         if (toolbox_button_selected == toolbox_states.MOVE_ENTITY && highlight_element && highlight_element.constructor.name == "node") c.style.cursor = "all-scroll";
+        
         else if ((toolbox_button_selected == toolbox_states.ROTATE_PATHWAY || toolbox_button_selected == toolbox_states.ROTATE_PROTEIN || toolbox_button_selected == toolbox_states.ROTATE_METABOLITE) && highlight_element && highlight_element.constructor.name == "edge") c.style.cursor = "pointer";
+        
         else if (toolbox_button_selected == toolbox_states.DELETE_ENTRY && highlight_element) c.style.cursor = "no-drop";
+        
         else c.style.cursor = "default";
         
     }
@@ -919,64 +929,87 @@ function mouse_up_listener(event){
             }
         }
         if (target != -1){
-            var num_metabolites = 0;
-            num_metabolites += (target.type == "metabolite") ? 1 : 0;
-            num_metabolites += (data[data[-1].id].type == "metabolite") ? 1 : 0;
-            
-            var num_labels = 0;
-            num_labels += (target.type == "label") ? 1 : 0;
-            num_labels += (data[data[-1].id].type == "label") ? 1 : 0;
-            
-            var num_membranes = 0;
-            num_membranes += (target.type == "membrane") ? 1 : 0;
-            num_membranes += (data[data[-1].id].type == "membrane") ? 1 : 0;
-            
-            var num_proteins = 0;
-            num_proteins += (target.type == "protein") ? 1 : 0;
-            num_proteins += (data[data[-1].id].type == "protein") ? 1 : 0;
             
             
-            if (num_metabolites == 1 && num_labels == 0 && num_membranes == 0){
-                var results = add_edge(data[-1].id, target.id);
-                if (num_proteins == 1){
-                    var prot_id = -1;
-                    var meta_id = -1;
-                    var fooduct = "product";
-                    if (data[data[-1].id].type == "protein"){
-                        prot_id = data[-1].id;
-                        meta_id = target.id;
-                        fooduct = "product";
-                    }
-                    else {
-                        prot_id = target.id;
-                        meta_id = data[-1].id;
-                        fooduct = "educt";
-                    }
-                    var reaction = -1;
-                    for (var reaction_id in edge_data){
-                        if (edge_data[reaction_id]['n'] == prot_id){
-                            reaction = reaction_id;
-                            break;
+            var anchor = target.is_mouse_over_anchor(res);
+            if (anchor.length > 0){
+                draw_anchor_end = anchor;
+            
+                var num_metabolites = 0;
+                num_metabolites += (target.type == "metabolite") ? 1 : 0;
+                num_metabolites += (data[data[-1].id].type == "metabolite") ? 1 : 0;
+                
+                var num_labels = 0;
+                num_labels += (target.type == "label") ? 1 : 0;
+                num_labels += (data[data[-1].id].type == "label") ? 1 : 0;
+                
+                var num_membranes = 0;
+                num_membranes += (target.type == "membrane") ? 1 : 0;
+                num_membranes += (data[data[-1].id].type == "membrane") ? 1 : 0;
+                
+                var num_proteins = 0;
+                num_proteins += (target.type == "protein") ? 1 : 0;
+                num_proteins += (data[data[-1].id].type == "protein") ? 1 : 0;
+                
+                
+                if (num_metabolites == 1 && num_labels == 0 && num_membranes == 0){
+                    var results = add_edge(data[-1].id, target.id, draw_anchor_start, draw_anchor_end);
+                    if (num_proteins == 1){
+                        var prot_id = -1;
+                        var meta_id = -1;
+                        var fooduct = "product";
+                        if (data[data[-1].id].type == "protein"){
+                            prot_id = data[-1].id;
+                            meta_id = target.id;
+                            fooduct = "product";
+                        }
+                        else {
+                            prot_id = target.id;
+                            meta_id = data[-1].id;
+                            fooduct = "educt";
+                        }
+                        var reaction = -1;
+                        for (var reaction_id in edge_data){
+                            if (edge_data[reaction_id]['n'] == prot_id){
+                                reaction = reaction_id;
+                                break;
+                            }
+                        }
+                        if (fooduct == "product"){
+                            edge_data[reaction]["out"] = draw_anchor_start;
+                            edge_data[reaction]['r'][results[0]] = {"i": results[0], "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_end};
+                        }
+                        else {
+                            edge_data[reaction]["in"] = draw_anchor_end;
+                            edge_data[reaction]['r'][results[0]] = {"i": results[0], "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_start};
                         }
                     }
-                    edge_data[reaction]['r'][results[0]] = {"i": results[0], "r": reaction, "n": meta_id, "t": fooduct, "a": "left"};
-                }
-                else {
-                    var pathway_id = -1;
-                    var meta_id = -1;
-                    if (data[data[-1].id].type == "pathway"){
-                        pathway_id = data[-1].id;
-                        meta_id = target.id;
-                    }
                     else {
-                        pathway_id = target.id;
-                        meta_id = data[-1].id;
+                        var pathway_id = -1;
+                        var meta_id = -1;
+                        var pw_start = true;
+                        if (data[data[-1].id].type == "pathway"){
+                            pathway_id = data[-1].id;
+                            meta_id = target.id;
+                        }
+                        else {
+                            pw_start = false;
+                            pathway_id = target.id;
+                            meta_id = data[-1].id;
+                        }
+                        
+                        if (pw_start) {
+                            edge_data[results[1]] = {"i": results[1], "n": pathway_id, "in": draw_anchor_start, "out": opposite_anchor[draw_anchor_start], "v": 0, "r": {}};
+                            edge_data[results[1]]['r'][results[0]] = {"i": results[0], "r": results[1], "n": meta_id, "t": "educt", "a": draw_anchor_end};
+                        }
+                        else {
+                            edge_data[results[1]] = {"i": results[1], "n": pathway_id, "in": draw_anchor_end, "out": opposite_anchor[draw_anchor_end], "v": 0, "r": {}};
+                            edge_data[results[1]]['r'][results[0]] = {"i": results[0], "r": results[1], "n": meta_id, "t": "educt", "a": draw_anchor_start};
+                        }
                     }
-                    
-                    edge_data[results[1]] = {"i": results[1], "n": pathway_id, "in": "left", "out": "right", "v": 0, "r": {}};
-                    edge_data[results[1]]['r'][results[0]] = {"i": results[0], "r": results[1], "n": meta_id, "t": "educt", "a": "left"};
+                    compute_edges();
                 }
-                compute_edges();
+                
             }
         }
         delete data[-1];
@@ -989,7 +1022,7 @@ function mouse_up_listener(event){
 
 
 
-function add_edge(start_id, end_id){
+function add_edge(start_id, end_id, anchor_start, anchor_end){
     var xmlhttp = new XMLHttpRequest();
     var request = "/qsdb/admin/cgi-bin/add-edge.py?start_id=" + start_id + "&end_id=" + end_id;
     var successful_creation = [-1, -1];
@@ -1002,6 +1035,23 @@ function add_edge(start_id, end_id){
             else {
                 successful_creation[0] = response[1];
                 successful_creation[1] = response[2];
+                
+                
+                var request_update_reagent = "action=set&table=reagents&id=" + response[1] + "&column=anchor&value="
+                request_update_reagent += ((data[start_id].type == "metabolite") ? anchor_start : anchor_end);
+                request_update_reagent = "/qsdb/admin/cgi-bin/manage-entries.bin?" + request_update_reagent;
+                var xmlhttp_reagent = new XMLHttpRequest();
+                xmlhttp_reagent.open("GET", request_update_reagent, false);
+                xmlhttp_reagent.send();
+                
+                
+                var request_update_reaction = "action=set&table=reactions&id=" + response[2] + "&column=";
+                request_update_reaction += ((data[start_id].type != "metabolite" && data[start_id].type == "protein") ? "anchor_out" : "anchor_in");
+                request_update_reaction += "&value=" + ((data[start_id].type == "metabolite") ? anchor_end : anchor_start);
+                request_update_reaction = "/qsdb/admin/cgi-bin/manage-entries.bin?" + request_update_reaction;
+                var xmlhttp_reaction = new XMLHttpRequest();
+                xmlhttp_reaction.open("GET", request_update_reaction, false);
+                xmlhttp_reaction.send();
             }
         }
     }
@@ -1012,6 +1062,11 @@ function add_edge(start_id, end_id){
 
 
 function toolbox_button_clicked(button){
+    if(toolbox_button_selected == toolbox_states.DRAW_EDGE){
+        for (node_id in data) data[node_id].show_anchors = false;
+        draw();
+    }
+    
     for (var i = 0; i < toolbox_buttons.length; ++i){
         if (i == button){
             if (i == toolbox_button_selected){
@@ -1071,11 +1126,14 @@ function toolbox_button_clicked(button){
             elements.push(tmp_element);
             break;
             
-            
+        
         default:
             break;
     }
-    
+    if(toolbox_button_selected == toolbox_states.DRAW_EDGE){
+        for (node_id in data) data[node_id].show_anchors = true;
+        draw();
+    }
 }
 
 

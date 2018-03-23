@@ -170,6 +170,8 @@ int main(int argc, char** argv) {
             } 
             
             string sql_query = "UPDATE " + set_table + " SET " + set_col + " = '" + set_value + "' WHERE id = " + set_id + ";";
+            
+            
             stmt->executeQuery(sql_query);
         
             response += "0";

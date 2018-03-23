@@ -13,8 +13,8 @@ with open("../qsdb.conf", mode="rt") as fl:
         conf[token[0].strip(" ")] = token[1].strip(" ")
 
 form = FieldStorage()
-start_id = form.getvalue('start_id')
-end_id = form.getvalue('end_id')
+start_id = form.getvalue('start_id') if 'start_id' in form else ""
+end_id = form.getvalue('end_id') if 'end_id' in form else ""
 
 print("Content-Type: text/html")
 print()
@@ -55,10 +55,10 @@ if start_type == "protein" or end_type == "protein":
         
     
     my_cur.execute("SELECT id FROM reactions WHERE node_id = %s;", (prot_id))
-    reaction = [row for row in my_cur][0]["id"]
+    reaction_id = [row for row in my_cur][0]["id"]
     
     
-    my_cur.execute("INSERT INTO reagents (reaction_id, node_id, type, anchor) VALUES (%s, %s, %s, 'left');", (reaction, meta_id, fooduct))
+    my_cur.execute("INSERT INTO reagents (reaction_id, node_id, type, anchor) VALUES (%s, %s, %s, 'left');", (reaction_id, meta_id, fooduct))
     conn.commit()
     
     my_cur.execute("SELECT max(id) mid FROM reagents;")

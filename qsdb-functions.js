@@ -78,7 +78,9 @@ check_side_h = check_side * 0.5;
 check_side_d = check_side * 2;
 line_height = 20;
 anchors = ['left', 'top', 'right', 'bottom'];
+anchor_size = 5;
 next_anchor = {"left": "top", "top": "right", "right": "bottom", "bottom": "left"};
+opposite_anchor = {"left": "right", "top": "bottom", "right": "left", "bottom": "top"};
 on_slide = false;
 font_size = text_size * factor;
 radius = metabolite_radius * factor;
@@ -1549,6 +1551,7 @@ function node(data){
     this.lw = 2;    // line width for membrane
     this.o_y = 18;  // distance for second layer of membrane
     this.lipid_radius = 5;
+    this.show_anchors = false;
     
     
     this.setup_pathway_meta = function(){
@@ -1798,6 +1801,7 @@ function node(data){
                 ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
                 ctx.strokeStyle = this.proteins.length ? protein_stroke_color :  protein_disabled_stroke_color;
                 ctx.strokeRect(this.x - hw, this.y - hh, this.width, this.height);
+                
                 break;
                 
                 
@@ -1911,6 +1915,32 @@ function node(data){
                 break;
         }
         
+        
+        if (this.show_anchors && this.type != "membrane" && this.type != "label"){
+            ctx.lineWidth = line_width * factor;
+            ctx.strokeStyle = slide_color;
+            
+            ctx.beginPath();
+            ctx.arc(this.x - hw, this.y, anchor_size * factor, 0, 1.999 * Math.PI);
+            ctx.closePath();
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(this.x + hw, this.y, anchor_size * factor, 0, 1.999 * Math.PI);
+            ctx.closePath();
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(this.x, this.y - hh, anchor_size * factor, 0, 1.999 * Math.PI);
+            ctx.closePath();
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(this.x, this.y + hh, anchor_size * factor, 0, 1.999 * Math.PI);
+            ctx.closePath();
+            ctx.stroke();
+        }
+        
         //////////// TODO: delete this lines
         /*
         this.ctx.textAlign = "center";
@@ -1920,13 +1950,37 @@ function node(data){
         */
     };
     
+    this.is_mouse_over_anchor = function(mouse){
+        var hh = this.height * 0.5;
+        var hw = this.width * 0.5;
+        
+        var anchor_x = this.x - hw;
+        var anchor_y = this.y;
+        if (Math.sqrt(Math.pow(anchor_x - mouse.x, 2) + Math.pow(anchor_y - mouse.y, 2)) < (anchor_size + line_width) * factor) return "left";
+        
+        var anchor_x = this.x + hw;
+        var anchor_y = this.y;
+        if (Math.sqrt(Math.pow(anchor_x - mouse.x, 2) + Math.pow(anchor_y - mouse.y, 2)) < (anchor_size + line_width) * factor) return "right";
+        
+        var anchor_x = this.x;
+        var anchor_y = this.y - hh;
+        if (Math.sqrt(Math.pow(anchor_x - mouse.x, 2) + Math.pow(anchor_y - mouse.y, 2)) < (anchor_size + line_width) * factor) return "top";
+        
+        var anchor_x = this.x;
+        var anchor_y = this.y + hh;
+        if (Math.sqrt(Math.pow(anchor_x - mouse.x, 2) + Math.pow(anchor_y - mouse.y, 2)) < (anchor_size + line_width) * factor) return "bottom";
+        
+        return "";
+    }
+    
     this.is_mouse_over = function (mouse){
+        var lw = line_width * factor;
         switch (this.type){
             case "metabolite":
-                return (Math.sqrt(Math.pow(this.x - mouse.x, 2) + Math.pow(this.y - mouse.y, 2)) < radius);
+                return (Math.sqrt(Math.pow(this.x - mouse.x, 2) + Math.pow(this.y - mouse.y, 2)) < radius + lw);
                 
             default:
-                return (this.x - (this.width >> 1) <= mouse.x && mouse.x <= this.x + (this.width >> 1) && this.y - (this.height >> 1) <= mouse.y && mouse.y <= this.y + (this.height >> 1));
+                return (this.x - (this.width >> 1) - lw <= mouse.x && mouse.x <= this.x + (this.width >> 1) + lw && this.y - (this.height >> 1) - lw <= mouse.y && mouse.y <= this.y + (this.height >> 1) + lw);
         }
     };
     
