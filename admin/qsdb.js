@@ -665,6 +665,47 @@ function update_entry(request){
 }
 
 
+
+function repair_database(){
+    var xmlhttp = new XMLHttpRequest();
+    request = "/qsdb/admin/cgi-bin/inspect-database.py?mode=check_web";
+    
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            var request_data = xmlhttp.responseText;
+            if (0 <= request_data){
+                alert("No inconsistencies in database detected. Everything is fine.");
+            }
+            else {
+                if (confirm("Inconsistencies were detected in the database. In worst case, it can disable the usage of the complete framework. Do you want to repair the database?")) {
+                    
+                    
+                    var xmlhttp_repair = new XMLHttpRequest();
+                    xmlhttp_repair = "/qsdb/admin/cgi-bin/inspect-database.py?mode=check_web";
+                    xmlhttp_repair.onreadystatechange = function() {
+                        if (xmlhttp_repair.readyState == 4 && xmlhttp_repair.status == 200) {
+                            if (xmlhttp.responseText == 0){
+                                alert("Database was successfully repaired.");
+                            }
+                            else {
+                                alert("Repairing failed, thats not good. Please contact the administrator.");
+                            }
+                        }
+                    }
+                    xmlhttp_repair.open("GET", request, false);
+                    xmlhttp_repair.send();
+                    
+                    
+                }
+            }
+        }
+    }
+    xmlhttp.open("GET", request, false);
+    xmlhttp.send();
+}
+
+
+
 function create_node(request){
     var xmlhttp = new XMLHttpRequest();
     request = "/qsdb/admin/cgi-bin/create-node.py?" + request;
