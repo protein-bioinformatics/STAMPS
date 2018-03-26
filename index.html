@@ -105,7 +105,7 @@
 
 
 <div id="disclaimer" class="global_search" onclick="this.style.display = 'none';">
-    <table id="disclaimer_content" class="global_search_content" width="70%" height="30%"><tr><td>
+    <table id="disclaimer_content" class="global_search_content"><tr><td align="justify">
         <center><b>About QSDB</b></center><p>
         The quality standard database (QSDB) provides a pathway based approach to access proteomics assays for targeted proteomics.
         Currently, we are acquiring mass spectra for all proteins within the mouse organism.
@@ -245,56 +245,61 @@
 <div id="download" class="download"></div>
 <div id="check_spectra" class="check_spectra"></div>
 <div id="click_background" class="click_background"></div>
-
 <div id="waiting_background" class="light_background"></div>
-<div id="statistics" class="disclaimer">
-    Still in construction!!!<p>
-    <table>
-        <tr><td colspan="5">Tissues:</td><td></tr>
-        <tr><td><input type="checkbox" id="statistics_check_brain_nsaf" onchange="update_nsaf();" checked /> Brain</td>
-            <td><input type="checkbox" id="statistics_check_liver_nsaf" onchange="update_nsaf();" /> Liver</td>
-            <td><input type="checkbox" id="statistics_check_kidney_nsaf" onchange="update_nsaf();" /> Kidney</td>
-            <td><input type="checkbox" id="statistics_check_spleen_nsaf" onchange="update_nsaf();" /> Spleen</td>
-            <td><input type="checkbox" id="statistics_check_heart_nsaf" onchange="update_nsaf();" /> Heart</td>
-        </tr>
-        <tr><td><input type="checkbox" id="statistics_check_blood_nsaf" onchange="update_nsaf();" /> Plasma</td>
-            <td><input type="checkbox" id="statistics_check_fat_nsaf" onchange="update_nsaf();" /> Fat</td>
-            <td><input type="checkbox" id="statistics_check_lung_nsaf" onchange="update_nsaf();" /> Lung</td>
-            <td><input type="checkbox" id="statistics_check_eye_nsaf" onchange="update_nsaf();" /> Eye</td>
-            <td><input type="checkbox" id="statistics_check_gut_nsaf" onchange="update_nsaf();" /> Gut</td>
-        </tr>
-    </table><br>
-    <canvas id="nsaf_figure" width="600" height="300"></canvas>
-    <p><hr>
-    
-    <p>&nbsp;<p>
-    <select id="nsaf_pathway_figure_select" onchange="update_nsaf_pathway_figure();"></select><br>
-    <canvas id="nsaf_pathway_figure" width="600" height="300"></canvas>
-    <p><hr>
-    
-    <p>&nbsp;<p>
-    <table>
-        <tr><td colspan="5">Tissues:</td><td></tr>
-        <tr><td><input type="checkbox" id="statistics_check_brain_pI" onchange="update_pI();" checked /> Brain</td>
-            <td><input type="checkbox" id="statistics_check_liver_pI" onchange="update_pI();" /> Liver</td>
-            <td><input type="checkbox" id="statistics_check_kidney_pI" onchange="update_pI();" /> Kidney</td>
-            <td><input type="checkbox" id="statistics_check_spleen_pI" onchange="update_pI();" /> Spleen</td>
-            <td><input type="checkbox" id="statistics_check_heart_pI" onchange="update_pI();" /> Heart</td>
-        </tr>
-        <tr><td><input type="checkbox" id="statistics_check_blood_pI" onchange="update_pI();" /> Plasma</td>
-            <td><input type="checkbox" id="statistics_check_fat_pI" onchange="update_pI();" /> Fat</td>
-            <td><input type="checkbox" id="statistics_check_lung_pI" onchange="update_pI();" /> Lung</td>
-            <td><input type="checkbox" id="statistics_check_eye_pI" onchange="update_pI();" /> Eye</td>
-            <td><input type="checkbox" id="statistics_check_gut_pI" onchange="update_pI();" /> Gut</td>
-        </tr>
-    </table><br>
-    <canvas id="pI_figure" width="600" height="300"></canvas>
-    <p><hr>
-    
-    <p>&nbsp;<p>
-    <select id="ppm_pw_figure_select" onchange="update_ppm();"></select><br>
-    <canvas id="ppm_histogram" width="600" height="300"></canvas>
+
+
+<div id="statistics" class="global_search" onclick="this.style.display = 'none';">
+    <table id="statistics_table" class="global_search_content" width="1000"><tr><td>
+        Still in construction!!!<p>
+        <table>
+            <tr><td colspan="5">Tissues:</td><td></tr>
+            <tr><td><input type="checkbox" id="statistics_check_brain_nsaf" onchange="update_nsaf();" checked /> Brain</td>
+                <td><input type="checkbox" id="statistics_check_liver_nsaf" onchange="update_nsaf();" /> Liver</td>
+                <td><input type="checkbox" id="statistics_check_kidney_nsaf" onchange="update_nsaf();" /> Kidney</td>
+                <td><input type="checkbox" id="statistics_check_spleen_nsaf" onchange="update_nsaf();" /> Spleen</td>
+                <td><input type="checkbox" id="statistics_check_heart_nsaf" onchange="update_nsaf();" /> Heart</td>
+            </tr>
+            <tr><td><input type="checkbox" id="statistics_check_blood_nsaf" onchange="update_nsaf();" /> Plasma</td>
+                <td><input type="checkbox" id="statistics_check_fat_nsaf" onchange="update_nsaf();" /> Fat</td>
+                <td><input type="checkbox" id="statistics_check_lung_nsaf" onchange="update_nsaf();" /> Lung</td>
+                <td><input type="checkbox" id="statistics_check_eye_nsaf" onchange="update_nsaf();" /> Eye</td>
+                <td><input type="checkbox" id="statistics_check_gut_nsaf" onchange="update_nsaf();" /> Gut</td>
+            </tr>
+        </table><br>
+        <canvas id="nsaf_figure" width="600" height="300"></canvas>
+        <p><hr>
+        
+        <p>&nbsp;<p>
+        <select id="nsaf_pathway_figure_select" onchange="update_nsaf_pathway_figure();"></select><br>
+        <canvas id="nsaf_pathway_figure" width="600" height="300"></canvas>
+        <p><hr>
+        
+        <p>&nbsp;<p>
+        <table>
+            <tr><td colspan="5">Tissues:</td><td></tr>
+            <tr><td><input type="checkbox" id="statistics_check_brain_pI" onchange="update_pI();" checked /> Brain</td>
+                <td><input type="checkbox" id="statistics_check_liver_pI" onchange="update_pI();" /> Liver</td>
+                <td><input type="checkbox" id="statistics_check_kidney_pI" onchange="update_pI();" /> Kidney</td>
+                <td><input type="checkbox" id="statistics_check_spleen_pI" onchange="update_pI();" /> Spleen</td>
+                <td><input type="checkbox" id="statistics_check_heart_pI" onchange="update_pI();" /> Heart</td>
+            </tr>
+            <tr><td><input type="checkbox" id="statistics_check_blood_pI" onchange="update_pI();" /> Plasma</td>
+                <td><input type="checkbox" id="statistics_check_fat_pI" onchange="update_pI();" /> Fat</td>
+                <td><input type="checkbox" id="statistics_check_lung_pI" onchange="update_pI();" /> Lung</td>
+                <td><input type="checkbox" id="statistics_check_eye_pI" onchange="update_pI();" /> Eye</td>
+                <td><input type="checkbox" id="statistics_check_gut_pI" onchange="update_pI();" /> Gut</td>
+            </tr>
+        </table><br>
+        <canvas id="pI_figure" width="600" height="300"></canvas>
+        <p><hr>
+        
+        <p>&nbsp;<p>
+        <select id="ppm_pw_figure_select" onchange="update_ppm();"></select><br>
+        <canvas id="ppm_histogram" width="600" height="300"></canvas>
+    </td></tr></table>
 </div>
+
+
 <audio style="display: none;"><source src="kns.mp3"></source>
 </body>
 <script>
@@ -395,17 +400,18 @@ function update_nsaf(ctx){
 function resize_views(){
 
     windowWidth = window.innerWidth;
-    windowHeight = window.inner_height;
+    windowHeight = window.innerHeight;
     chromosome_height = window.innerHeight * 0.7;
     
     var close_again = document.getElementById("chromosome_search").style.display != "inline";
     var chr_height = chromosome_height - document.getElementById("chromosome_information_table_headers").offsetHeight;
     if (close_again) document.getElementById("chromosome_search").style.display != "none";
     document.getElementById("chromosome_information_table_wrapper").style.height = chr_height.toString() + "px";
-    document.getElementById("loci").style.height = (window.innerHeight * 0.6).toString() + "px";
-    document.getElementById("accessions").style.height = (window.innerHeight * 0.6).toString() + "px";
-    document.getElementById("function_search_field").style.height = (window.innerHeight * 0.6).toString() + "px";
-    
+    document.getElementById("loci").style.height = (windowHeight * 0.6).toString() + "px";
+    document.getElementById("accessions").style.height = (windowHeight * 0.6).toString() + "px";
+    document.getElementById("function_search_field").style.height = (windowHeight * 0.6).toString() + "px";
+    document.getElementById("statistics_table").style.height = (windowHeight * 0.8).toString() + "px";
+    document.getElementById("disclaimer_content").style.height = (windowHeight * 0.8).toString() + "px";
     
         
     var max_bases = 0;
@@ -478,11 +484,11 @@ function add_nsaf(t, curr, total, ctx){
 
 function open_statistics (){
     document.getElementById("statistics").style.display = "inline";
-    document.getElementById("click_background").style.display = "inline";
     background_hiding = hide_statistics;
     basket = {};
     spectra_exclude = [];
     
+    /*
     // request proteins
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -499,11 +505,6 @@ function open_statistics (){
                         for (var j = 0; j < peptide.spectra.length; ++j){
                             var spectrum = peptide.spectra[j];
                             if (t in spectrum.tissues) NSAF += spectrum.tissues[t];
-                            /*
-                            if (min_ppm <= spectrum.ppm && spectrum.ppm < max_ppm){
-                                ppm_histogram[Math.floor((spectrum.ppm - min_ppm) / ppm_steps)]++;
-                            }
-                            */                            
                         }
                     }
                     
@@ -536,6 +537,7 @@ function open_statistics (){
     xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?statistics&species=mouse", true);
     xmlhttp.send();
     
+    
     var xmlhttp_search = new XMLHttpRequest();
     xmlhttp_search.onreadystatechange = function() {
         if (xmlhttp_search.readyState == 4 && xmlhttp_search.status == 200) {
@@ -563,6 +565,7 @@ function open_statistics (){
     }
     xmlhttp_search.open("GET", "/qsdb/cgi-bin/get-proteins.bin?statistics_pathways", true);
     xmlhttp_search.send();
+    */
 }
 
 
@@ -1654,6 +1657,7 @@ document.getElementById("waiting_background").innerHTML = get_waiting_background
 window.addEventListener('resize', resize_views, false);
 
 document.getElementById("disclaimer_content").addEventListener('click', function(event){event.preventDefault(); event.stopPropagation(); return false;}, false);
+document.getElementById("statistics_table").addEventListener('click', function(event){event.preventDefault(); event.stopPropagation(); return false;}, false);
 
 var xmlhttp_matomo = new XMLHttpRequest();
 xmlhttp_matomo.onreadystatechange = function() {
