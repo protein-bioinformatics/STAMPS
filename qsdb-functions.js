@@ -4539,7 +4539,6 @@ function locus_search_request_data(){
     
     // request proteins
     var request = "/qsdb/cgi-bin/get-proteins.bin?loci=" + IDs + "&species=mouse";
-    console.log(request);
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
