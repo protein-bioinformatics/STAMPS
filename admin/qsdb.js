@@ -84,15 +84,11 @@ function init(){
     document.body.scroll = "no";
     
     document.addEventListener('keydown', key_down, false);
-    document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
-    document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
+    document.getElementById("menu_background").addEventListener("click", close_navigation, false);
     window.addEventListener('resize', resize_pathway_view, false);
     window.addEventListener('resize', resize_manage_view, false);
     
-    window.addEventListener('resize', resize_ms_view, false);
-    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
-    document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
-    
+    navigation_content = ["select_species", "select_pathway", "menu_background"];
     
     
     // get chromosomes
@@ -400,7 +396,6 @@ function mouse_click_listener(e){
                     current_protein_set = new Set(highlight_element.proteins);
                     editor_fill_protein_table();
                     document.getElementById("editor_select_protein").style.display = "inline";
-                    document.getElementById("waiting_background").style.display = "inline";
                     document.getElementById("renderarea").style.filter = "blur(5px)";
                     document.getElementById("toolbox").style.filter = "blur(5px)";
                     break;
@@ -414,7 +409,6 @@ function mouse_click_listener(e){
                     selected_metabolite_node = highlight_element.id;
                     editor_fill_metabolite_table();
                     document.getElementById("editor_select_metabolite").style.display = "inline";
-                    document.getElementById("waiting_background").style.display = "inline";
                     document.getElementById("renderarea").style.filter = "blur(5px)";
                     document.getElementById("toolbox").style.filter = "blur(5px)";
                     break;
@@ -462,7 +456,6 @@ function open_select_pathway(){
     }
     
     document.getElementById("editor_select_pathway").style.display = "inline";
-    document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("renderarea").style.filter = "blur(5px)";
     document.getElementById("toolbox").style.filter = "blur(5px)";
 }
@@ -497,7 +490,6 @@ function update_label(){
 
 function close_editor_select_pathway(){
     document.getElementById("editor_select_pathway").style.display = "none";
-    document.getElementById("waiting_background").style.display = "none";
     document.getElementById("renderarea").style.filter = "";
     document.getElementById("toolbox").style.filter = "";
 }
@@ -505,7 +497,6 @@ function close_editor_select_pathway(){
 
 function close_editor_select_protein(){
     document.getElementById("editor_select_protein").style.display = "none";
-    document.getElementById("waiting_background").style.display = "none";
     document.getElementById("renderarea").style.filter = "";
     document.getElementById("toolbox").style.filter = "";
 }
@@ -513,7 +504,6 @@ function close_editor_select_protein(){
 
 function close_editor_select_metabolite(){
     document.getElementById("editor_select_metabolite").style.display = "none";
-    document.getElementById("waiting_background").style.display = "none";
     document.getElementById("renderarea").style.filter = "";
     document.getElementById("toolbox").style.filter = "";
 }
@@ -1276,8 +1266,7 @@ edge.prototype.edit = function(){
 
 
 function manage_entries(){
-    document.getElementById("manage_entries").style.display = "inline";
-    document.getElementById("waiting_background").style.display = "inline";
+    document.getElementById("manage_entries").style.display = "inline-block";
     if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
         document.getElementById("renderarea").style.filter = "blur(5px)";
         document.getElementById("navigation").style.filter = "blur(5px)";
@@ -1287,7 +1276,6 @@ function manage_entries(){
 
 function close_manage_entries(){
     document.getElementById("manage_entries").style.display = "none";
-    document.getElementById("waiting_background").style.display = "none";
     document.getElementById("renderarea").style.filter = "";
     document.getElementById("navigation").style.filter = "";
 }
@@ -2279,7 +2267,6 @@ function resize_manage_view(){
 
 
 function hide_manage_entries (){
-    document.getElementById("waiting_background").style.display = "none";
     document.getElementById("manage_entries").style.display = "none";
     if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
         document.getElementById("renderarea").style.filter = "none";

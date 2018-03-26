@@ -115,7 +115,10 @@ static int callback(void *count, int argc, char **argv, char **azColName) {
 
 
 
-string get_protein_data(string sql_query_proteins, string species, sql::ResultSet *res, bool statistics){
+string get_protein_data(string sql_query_proteins, string species, sql::Connection *con, bool statistics){
+    
+    sql::Statement *my_stmt = con->createStatement();
+    sql::ResultSet *res = my_stmt->executeQuery(sql_query_proteins);
     
     
     len_text = 1; // plus sentinal
@@ -136,7 +139,10 @@ string get_protein_data(string sql_query_proteins, string species, sql::ResultSe
         proteins.push_back(last_protein);
     }
     
-    if (!proteins.size()) return "[]";
+    delete res;
+    delete my_stmt;
+    
+    if (!proteins.size()) return "{}";
     
     // create FM index for fast pattern search    
     unsigned char* T = new unsigned char[len_text];
@@ -160,13 +166,7 @@ string get_protein_data(string sql_query_proteins, string species, sql::ResultSe
     
     index_rank = new ranking(index_bitfield, len_field);
     
- 
-    ulong abc[2] = {zero, zero};
-    for (int i = 'A'; i <= 'Z'; ++i) abc[i >> shift] |= one << (i & mask);
-    abc['/' >> shift] |= one << ('/' & mask);
-    abc['$' >> shift] |= one << ('$' & mask);
-    
-    
+     
     SA = new int[len_text];
     for (int i = 0; i < len_text; ++i) SA[i] = i;
     sais(T, SA, len_text);
@@ -191,14 +191,6 @@ string get_protein_data(string sql_query_proteins, string species, sql::ResultSe
         cout << -2 << endl;
         exit(-2);
     }
-    int num_spectra = 0;
-    rc = sqlite3_exec(db, "select count(*) from RefSpectra;", callback, &num_spectra, &zErrMsg);
-    if (rc != SQLITE_OK) {
-        cout << -5 << endl;
-        sqlite3_free(zErrMsg);
-        exit(-5);
-    }
-    
     
     
     
@@ -211,6 +203,8 @@ string get_protein_data(string sql_query_proteins, string species, sql::ResultSe
         sqlite3_free(zErrMsg);
         exit(-3);
     }
+    
+    
     
     sqlite3_stmt *stmt;
     sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &zErrMsg);
@@ -307,7 +301,6 @@ main(int argc, char** argv) {
         cout << -1;
         return -1;
     }
-    
     
     
     string species = "";
@@ -453,7 +446,7 @@ main(int argc, char** argv) {
         
         sql_query_proteins = "select distinct p.* from proteins p inner join protein_loci pl on p.id = pl.protein_id where unreviewed = false and pl.locus_id in ('";
         sql_query_proteins += loci_ids;
-        sql_query_proteins += "') and species = '" + species + "';";
+        sql_query_proteins += "') and p.species = '" + species + "';";
     }
     else if (via_functions) {
         if (function_ids == "" || function_ids.find("'") != string::npos){
@@ -464,7 +457,7 @@ main(int argc, char** argv) {
         
         sql_query_proteins = "select distinct p.* from proteins p inner join protein_functions pf on p.id = pf.protein_id where unreviewed = false and pf.function_id in ('";
         sql_query_proteins += function_ids;
-        sql_query_proteins += "') and species = '" + species + "';";
+        sql_query_proteins += "') and p.species = '" + species + "';";
     }
     else if (statistics) {
         sql_query_proteins = "select * from proteins where unreviewed = false and species = '" + species + "';";
@@ -477,7 +470,7 @@ main(int argc, char** argv) {
         sql_query_proteins += "';";
     }
     
-    res = stmt->executeQuery(sql_query_proteins);
+    
     
     string result = "";
     if (statistics){
@@ -505,14 +498,14 @@ main(int argc, char** argv) {
         }
         // otherwise retrieve the protein data the normal way and store in 'data' folder
         else {
-            result = get_protein_data(sql_query_proteins, species, res, statistics);
+            result = get_protein_data(sql_query_proteins, species, con, statistics);
             if (compress) result = compress_string(result);
             ofstream json_file(statistics_json_filename.c_str(), ios::binary);
             json_file.write(result.c_str(), result.length());
         }
     }
     else {
-        result = get_protein_data(sql_query_proteins, species, res, statistics);
+        result = get_protein_data(sql_query_proteins, species, con, statistics);
         if (compress) result = compress_string(result);
     }
     

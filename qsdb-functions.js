@@ -34,6 +34,8 @@ filter_parameters["tissue_eye"] = true;
 filter_parameters["tissue_gut"] = true;
 filter_parameters["protein_tissues_visible"] = true;
 filter_parameters["peptide_tissues_visible"] = false;
+last_opened_menu = "";
+navigation_content = [];
 data = {};
 edge_data = 0;
 node_move_x = 0;
@@ -58,6 +60,8 @@ num_validation = [0, 0, 0];
 search_data = [];
 read_cookie_information = false;
 
+windowWidth = 0;
+windowHeight = 0;
 scaling = 1.25;
 expanding_percentage = 0.25;
 zoom = 0;
@@ -3222,7 +3226,7 @@ function change_pathway(p){
             }
         }
     }
-    hide_select_pathway();
+    close_navigation();
     collapse_statistics();
     current_pathway = p;
     set_pathway_menu();
@@ -3722,30 +3726,26 @@ function check_spectra(){
 
 function open_accession_search(){
     document.getElementById("accession_search").style.display = "inline";
-    document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("error_filter_text_accession").innerHTML = "";
 }
 
 function open_locus_search(){
     document.getElementById("locus_search").style.display = "inline";
-    document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("error_filter_text_locus").innerHTML = "";
 }
 
 function open_function_search(){
     document.getElementById("function_search").style.display = "inline";
-    document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("error_filter_text_function").innerHTML = "";
 }
 
 
 function open_chromosome_search(){
+    
     document.getElementById("chromosome_search").style.display = "inline";
-    document.getElementById("waiting_background").style.display = "inline";
-    chromosome_height = document.getElementById("chromosome_search").offsetHeight * 0.8;
-    document.getElementById("chromosome_information_table_wrapper").style.height = chromosome_height.toString() + "px";
     if (chromosome_selected == -1) draw_chromosome_ideograms();
     document.getElementById("error_filter_text_chromosome").innerHTML = "";
+    draw_chromosome_ideograms();
 }
 
 
@@ -3788,14 +3788,6 @@ function hide_check_spectra (){
 }
 
 
-function show_search(){
-    var search_text = document.getElementById("search_field").value;
-    var len_p = search_text.length;
-    if (len_p > 2 && document.getElementById("search_results").innerHTML.length){
-        document.getElementById("search_results").style.display = "inline";
-        document.getElementById("search_background").style.display = "inline";
-    }
-}
 
 function start_search(){
     var search_text = document.getElementById("search_field").value;
@@ -3834,7 +3826,7 @@ function start_search(){
         
         if (results.length){
             document.getElementById("search_results").style.display = "inline";
-            document.getElementById("search_background").style.display = "inline";
+            document.getElementById("menu_background").style.display = "inline";
             var rect = document.getElementById('search_field_nav').getBoundingClientRect();
             document.getElementById("search_results").style.top = (rect.top + document.getElementById('search_field_nav').offsetHeight).toString() + "px";
             document.getElementById("search_results").style.left = (rect.left).toString() + "px";
@@ -3854,17 +3846,17 @@ function start_search(){
             document.getElementById("search_results").style.width = (rect.top + document.getElementById('search_results').width + 20).toString() + "px";
         }
         else {
-            hide_search();
+            close_navigation();
         }
     }
     else {
-        hide_search();
+        close_navigation();
     }
 }
 
 
 function highlight_node(node_id, pathway_id){
-    hide_search();
+    close_navigation();
     if (pathway_id != current_pathway){
         change_pathway(pathway_id);
         var waiting_for_pathway = setInterval(function(){
@@ -3962,34 +3954,24 @@ function highlight_node_inner(node_id){
 }
 
 
-function hide_search(){
-    var search_results = document.getElementById("search_results");
-    if (search_results) search_results.style.display = "none";
-    var search_background = document.getElementById("search_background");
-    if (search_background) search_background.style.display = "none";
-}
-
 
 function select_species(){
-    if (document.getElementById("select_species").style.display == "inline"){
-        hide_select_species();
-    }
-    else {
+    if (last_opened_menu != "select_species"){
         var rect = document.getElementById('select_species_nav').getBoundingClientRect();
         document.getElementById("select_species").style.top = (rect.top + document.getElementById('select_species_nav').offsetHeight).toString() + "px";
         document.getElementById("select_species").style.left = (rect.left).toString() + "px";
         document.getElementById("select_species").style.display = "inline";
-        document.getElementById("select_species_background").style.display = "inline";
+        document.getElementById("menu_background").style.display = "inline";
+        last_opened_menu = "select_species";
+    }
+    else {
+        last_opened_menu = "";
     }
 }
 
 
 function open_filter_panel(){
-    if (document.getElementById("filter_panel_wrapper").style.display == "inline"){
-        hide_filter_panel();
-        document.getElementById("filter_panel_wrapper").innerHTML = "";
-    }
-    else {
+    if (last_opened_menu != "filter_panel_wrapper"){
         document.getElementById("filter_panel_check_spectra").innerHTML = "";
         document.getElementById("filter_panel_wrapper").innerHTML = filter_panel_data;
         document.getElementById("filter_panel_wrapper").style.display = "inline";
@@ -3997,14 +3979,12 @@ function open_filter_panel(){
         load_filter_parameters();
         document.getElementById("filter_panel_wrapper").style.top = (rect.top + document.getElementById('filter_panel_nav').offsetHeight).toString() + "px";
         document.getElementById("filter_panel_wrapper").style.left = (rect.left).toString() + "px";
-        document.getElementById("filter_panel_background").style.display = "inline";
+        document.getElementById("menu_background").style.display = "inline";
+        last_opened_menu = "filter_panel_wrapper";
     }
-}
-
-
-function hide_select_species(){
-    document.getElementById("select_species").style.display = "none";
-    document.getElementById("select_species_background").style.display = "none";
+    else {
+        last_opened_menu = "";
+    }
 }
 
 
@@ -4059,7 +4039,8 @@ function load_filter_parameters(){
 
 
 function hide_filter_panel(){
-    if (document.getElementById("filter_panel_wrapper").style.display == "inline"){
+    var filter_panel_wrapper = document.getElementById("filter_panel_wrapper");
+    if (typeof(filter_panel_wrapper) !== "undefined" && filter_panel_wrapper != null && filter_panel_wrapper.style.display == "inline"){
         var filter_changed = false;
         if (filter_parameters["min_peptide_length"] != document.getElementById("min_peptide_length").value) filter_changed = true;
         if (filter_parameters["max_peptide_length"] != document.getElementById("max_peptide_length").value) filter_changed = true;
@@ -4102,32 +4083,24 @@ function hide_filter_panel(){
             draw();
             setCookie();
         }
-        
-        
-        document.getElementById("filter_panel_wrapper").style.display = "none";
-        document.getElementById("filter_panel_background").style.display = "none";
     }
 }
 
 
 function select_pathway(){
-    if (document.getElementById("select_pathway").style.display == "inline"){
-        hide_select_pathway();
-    }
-    else {
+    if (last_opened_menu != "select_pathway"){
         var rect = document.getElementById('select_pathway_nav').getBoundingClientRect();
         document.getElementById("select_pathway").style.top = (rect.top + document.getElementById('select_pathway_nav').offsetHeight).toString() + "px";
         document.getElementById("select_pathway").style.left = (rect.left).toString() + "px";
         document.getElementById("select_pathway").style.display = "inline";
-        document.getElementById("select_pathway_background").style.display = "inline";
+        document.getElementById("menu_background").style.display = "inline";
+        last_opened_menu = "select_pathway";
+    }
+    else {
+        last_opened_menu = "";
     }
 }
 
-
-function hide_select_pathway(){
-    document.getElementById("select_pathway").style.display = "none";
-    document.getElementById("select_pathway_background").style.display = "none";
-}
 
 function round10(value, decimals) {
     return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
@@ -4263,27 +4236,11 @@ function collapse_statistics(){
 
 
 
-function close_navigation(nav){
-    switch (nav){
-        case 1:
-            hide_select_species();
-            hide_filter_panel();
-            break;
-        case 2:
-            hide_select_pathway();
-            hide_filter_panel();
-            break;
-        case 3:
-            hide_select_species();
-            hide_select_pathway();
-            break;
-        default:
-            hide_select_species();
-            hide_select_pathway();
-            hide_filter_panel();
-            break;
+function close_navigation(){
+    hide_filter_panel();
+    for (var i = 0; i < navigation_content.length; ++i){
+        document.getElementById(navigation_content[i]).style.display = "none";
     }
-    hide_search();
 }
 
 
@@ -4355,9 +4312,7 @@ function load_data(reload){
     pathway_is_loaded = false;
     if (!reload){
         reset_view();
-        var search_field = document.getElementById("search_field");
-        if (search_field) search_field.value = "";
-        hide_search();
+        close_navigation();
     }
     
     
@@ -4583,6 +4538,8 @@ function locus_search_request_data(){
     }
     
     // request proteins
+    var request = "/qsdb/cgi-bin/get-proteins.bin?loci=" + IDs + "&species=mouse";
+    console.log(request);
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -4590,7 +4547,7 @@ function locus_search_request_data(){
         }
     }
     
-    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?loci=" + IDs + "&species=mouse", true);
+    xmlhttp.open("GET", request, true);
     xmlhttp.send();
 }
 
@@ -4634,12 +4591,14 @@ function chromosome_search_request_data(){
         for (var i = 0; i < chromosome_data[chromosome_key].length; ++i){
             if (chromosome_data[chromosome_key][i][9]){
                 if (accessionIDs.length > 0) accessionIDs += ":";
-                accessionIDs += chromosome_data[chromosome_key][i][5];
+                accessionIDs += chromosome_data[chromosome_key][i][4];
             }
         }
     }
     
     // request proteins
+    var request = "/qsdb/cgi-bin/get-proteins.bin?accessions=" + accessionIDs + "&species=mouse";
+    console.log(request);
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -4647,7 +4606,7 @@ function chromosome_search_request_data(){
         }
     }
     
-    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?accessions=" + accessionIDs + "&species=mouse", true);
+    xmlhttp.open("GET", request, true);
     xmlhttp.send();
 }
 

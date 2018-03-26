@@ -42,6 +42,15 @@ string cleanFasta(string str){
     replaceAll(modified, "\n", "");
     replaceAll(modified, {10}, "");
     replaceAll(modified, {13}, "");
+    
+    for (int i = 0; i < modified.length(); ++i){
+        char c = modified[i];
+        if (!(abc[c >> shift] & (one << (c & mask)))){
+           modified = modified.substr(0, i) + modified.substr(i + 1, modified.length());
+           --i;
+        }
+    }
+    
     return modified;
 }
 

@@ -7,6 +7,7 @@
 #include <cstring>
 #include <math.h>
 #include <sys/time.h>
+#include "rank.h"
 
 using namespace std;
 
@@ -66,6 +67,35 @@ static float acids[] = {
 147.035404,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
+
+
+static ulong abc[2] = {(one << '/') | (one << '$'),
+    (one << ('A' & mask)) |
+    (one << ('B' & mask)) |
+    (one << ('C' & mask)) |
+    (one << ('D' & mask)) |
+    (one << ('E' & mask)) |
+    (one << ('F' & mask)) |
+    (one << ('G' & mask)) |
+    (one << ('H' & mask)) |
+    (one << ('I' & mask)) |
+    (one << ('J' & mask)) |
+    (one << ('K' & mask)) |
+    (one << ('L' & mask)) |
+    (one << ('M' & mask)) |
+    (one << ('N' & mask)) |
+    (one << ('O' & mask)) |
+    (one << ('P' & mask)) |
+    (one << ('Q' & mask)) |
+    (one << ('R' & mask)) |
+    (one << ('S' & mask)) |
+    (one << ('T' & mask)) |
+    (one << ('U' & mask)) |
+    (one << ('V' & mask)) |
+    (one << ('W' & mask)) |
+    (one << ('X' & mask)) |
+    (one << ('Y' & mask)) |
+    (one << ('Z' & mask))};
 
 
 static float aa_coefficients[][3] = {

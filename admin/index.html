@@ -5,7 +5,6 @@
 <meta charset="utf-8"/>
 <link rel="stylesheet" type="text/css" href="../qsdb.css">
 <script src="../qsdb-functions.js"></script>
-<script src="../ms-view.js"></script>
 <script src="../canvas2svg.js"></script>
 <script src="../sha-256.js"></script>
 <script src="qsdb.js"></script>
@@ -43,54 +42,50 @@
 <div id="tooltip" class="tooltip"></div>
 
 <div id="editor_select_pathway" class="global_search">
-    <table width="100%" height="100%"><tr><td align="center" valign="middle">
-        <table cellspacing=20 width="500" class="global_search_content">
-            <tr>
-                <td>
-                    <div style="display: inline;">
-                        Select a pathway:<br>
-                        <select id="editor_select_pathway_field" size=20 style="width:400px; height:480px;"></select>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td align=right><button onclick="close_editor_select_pathway();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_create_pathway_node(); close_editor_select_pathway();" id="editor_select_pathway_ok_button">Create</button>
-                </td>
-            </tr>
-        </table>
-    </td></tr></table>
+    <table cellspacing=20 width="500" class="global_search_content">
+        <tr>
+            <td>
+                <div style="display: inline;">
+                    Select a pathway:<br>
+                    <select id="editor_select_pathway_field" size=20 style="width:400px; height:480px;"></select>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td align=right><button onclick="close_editor_select_pathway();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_create_pathway_node(); close_editor_select_pathway();" id="editor_select_pathway_ok_button">Create</button>
+            </td>
+        </tr>
+    </table>
 </div>
 
 
 
 
 <div id="editor_select_metabolite" class="global_search">
-    <table width="100%" height="100%"><tr><td align="center" valign="middle">
-        <table cellspacing=20 class="global_search_content" width="1000" height="700">
-            <tr>
-                <td valign="top" colspan="2">
-                    Select a metabolite:<br>
-                    <table cellpadding="0" cellspacing="0" size=20 style="width:900px;">
-                        <tr id="editor_select_metabolite_table_header" cellpadding="0" cellspacing="0" size=20 style="width:900px;"></tr>                        
-                        <tr id="editor_select_metabolite_table_filters">
-                            <td><input type='text' id="editor_select_metabolite_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
-                            <td><input type='text' id="editor_select_metabolite_table_filter_cnumber" style="width: 100%; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
-                            <td><input type='text' id="editor_select_metabolite_table_filter_formula" style="width: 100%; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
-                            <td>&nbsp;&nbsp;&nbsp;&nbsp;<td>
-                        </tr>
-                    </table>
-                    <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:480px;">
-                        <table id="editor_select_metabolite_table" cellspacing="0" size=20 style="border-width: 1px; border-style: solid;"></table>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td align="left" width="50%" valign="bottom" id="editor_metabolite_page_navigation"><b style="cursor: pointer;">«</b>&nbsp;<b>‹</b> 1 2 3 4 <b>›</b>&nbsp;<b>»</b></td>
-                <td align="right" valign="bottom"><button onclick="close_editor_select_metabolite();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_create_metabolite_node(); close_editor_select_metabolite();" id="editor_select_metabolite_ok_button">Create</button>
-                </td>
-            </tr>
-        </table>
-    </td></tr></table>
+    <table cellspacing=20 class="global_search_content" width="1000" height="700">
+        <tr>
+            <td valign="top" colspan="2">
+                Select a metabolite:<br>
+                <table cellpadding="0" cellspacing="0" size=20 style="width:900px;">
+                    <tr id="editor_select_metabolite_table_header" cellpadding="0" cellspacing="0" size=20 style="width:900px;"></tr>                        
+                    <tr id="editor_select_metabolite_table_filters">
+                        <td><input type='text' id="editor_select_metabolite_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
+                        <td><input type='text' id="editor_select_metabolite_table_filter_cnumber" style="width: 100%; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
+                        <td><input type='text' id="editor_select_metabolite_table_filter_formula" style="width: 100%; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
+                        <td>&nbsp;&nbsp;&nbsp;&nbsp;<td>
+                    </tr>
+                </table>
+                <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:480px;">
+                    <table id="editor_select_metabolite_table" cellspacing="0" size=20 style="border-width: 1px; border-style: solid;"></table>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td align="left" width="50%" valign="bottom" id="editor_metabolite_page_navigation"><b style="cursor: pointer;">«</b>&nbsp;<b>‹</b> 1 2 3 4 <b>›</b>&nbsp;<b>»</b></td>
+            <td align="right" valign="bottom"><button onclick="close_editor_select_metabolite();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_create_metabolite_node(); close_editor_select_metabolite();" id="editor_select_metabolite_ok_button">Create</button>
+            </td>
+        </tr>
+    </table>
 </div>
 
 
@@ -99,32 +94,30 @@
 
 
 <div id="editor_select_protein" class="global_search">
-    <table width="100%" height="100%"><tr><td align="center" valign="middle">
-        <table cellspacing=20 class="global_search_content" width="1000" height="700">
-            <tr>
-                <td valign="top" colspan="2">
-                    Select proteins:<p>
-                    <table cellpadding="0" cellspacing="0" size=20 style="width:900px;">
-                        <tr id="editor_select_protein_table_header"></tr>
-                        <tr id="editor_select_protein_table_filters">
-                            <td><input type='text' id="editor_select_protein_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
-                            <td><input type='text' id="editor_select_protein_table_filter_accession" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
-                            <td><input type='text' id="editor_select_protein_table_filter_description" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
-                            <td width="1"><input type="checkbox" style="display: inline; margin-right: 25px;" onchange="protein_current_page = 0; editor_fill_protein_table();" id="editor_select_protein_table_filter_node"><td>
-                        </tr>
-                    </table>
-                    <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:470px;">
-                        <table id="editor_select_protein_table" cellspacing="0" size=20 style="border-width: 1px; border-style: solid;"></table>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td align="left" width="50%" valign="bottom" id="editor_protein_page_navigation"></td>
-                <td align="right" valign="bottom"><button onclick="close_editor_select_protein();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_update_protein_node(); close_editor_select_protein();">Update</button>
-                </td>
-            </tr>
-        </table>
-    </td></tr></table>
+    <table cellspacing=20 class="global_search_content" width="1000" height="700">
+        <tr>
+            <td valign="top" colspan="2">
+                Select proteins:<p>
+                <table cellpadding="0" cellspacing="0" size=20 style="width:900px;">
+                    <tr id="editor_select_protein_table_header"></tr>
+                    <tr id="editor_select_protein_table_filters">
+                        <td><input type='text' id="editor_select_protein_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
+                        <td><input type='text' id="editor_select_protein_table_filter_accession" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
+                        <td><input type='text' id="editor_select_protein_table_filter_description" style="width: 100%; box-sizing: border-box;" onkeyup="protein_current_page = 0; editor_fill_protein_table();"></td>
+                        <td width="1"><input type="checkbox" style="display: inline; margin-right: 25px;" onchange="protein_current_page = 0; editor_fill_protein_table();" id="editor_select_protein_table_filter_node"><td>
+                    </tr>
+                </table>
+                <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:470px;">
+                    <table id="editor_select_protein_table" cellspacing="0" size=20 style="border-width: 1px; border-style: solid;"></table>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td align="left" width="50%" valign="bottom" id="editor_protein_page_navigation"></td>
+            <td align="right" valign="bottom"><button onclick="close_editor_select_protein();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_update_protein_node(); close_editor_select_protein();">Update</button>
+            </td>
+        </tr>
+    </table>
 </div>
 
 
@@ -132,9 +125,9 @@
     <table>
     <tr height="60">
     <td width="50%"></td>
-    <td id="select_pathway_nav" style="border-left: white; border-left-style: solid; border-left-width: 1px;" class="navigation_cell_click" onclick="close_navigation(1); select_pathway();">
+    <td id="select_pathway_nav" style="border-left: white; border-left-style: solid; border-left-width: 1px;" class="navigation_cell_click" onclick="close_navigation(); select_pathway();">
         Select&nbsp;Pathway
-    </td><td id="select_species_nav" class="navigation_cell_click" onclick="close_navigation(2); select_species();">
+    </td><td id="select_species_nav" class="navigation_cell_click" onclick="close_navigation(); select_species();">
         Select&nbsp;Species
     </td>
     <!--
@@ -144,10 +137,10 @@
         Filter
     </td>
     -->
-    <td class="navigation_cell_click" onclick="close_navigation(0); manage_entries();" style="min-width: 100px; text-align: center;">
+    <td class="navigation_cell_click" onclick="close_navigation(); manage_entries();" style="min-width: 100px; text-align: center;">
         Manage&nbsp;Entries
     </td>
-    <td class="navigation_cell_click" onclick="close_navigation(0); repair_database();" style="min-width: 100px; text-align: center;">
+    <td class="navigation_cell_click" onclick="close_navigation(); repair_database();" style="min-width: 100px; text-align: center;">
         Repair&nbsp;Database
     </td>
     <td class="navigation_cell_click" onclick="location.href = '../.';" style="min-width: 100px; text-align: center;">
@@ -166,10 +159,9 @@
     </table>
 </div>
 
-<div id="filter_panel_wrapper" style="position: fixed; z-index: 80;"></div>
-<div id="filter_panel_background" class="filter_panel_background"></div>
+<div id="filter_panel_wrapper" class="menu_extend_item"></div>
 
-<div id="select_species" class="select_species">
+<div id="select_species" class="menu_extend_item">
     <table>
         <tr><td class="select_species_cell">
         <input type="checkbox" id="species_mouse" name="species" value="mouse" checked disabled>Mouse
@@ -179,10 +171,16 @@
         </td></tr> -->
     </table>
 </div>
-<div id="select_species_background" class="select_species_background"></div>
 
-<div id="select_pathway" class="select_pathway"></div>
+<div id="select_pathway" class="menu_extend_item"></div>
+<div id="menu_background" class="menu_background" onclick="last_opened_menu = '';"></div>
+
+
+
+
 <div id="select_pathway_background" class="select_pathway_background"></div>
+<div id="filter_panel_background" class="filter_panel_background"></div>
+<div id="select_species_background" class="select_species_background"></div>
 
 <div id="statistics" class="statistics">
     <font size="+2"><b>Statistics</b></font><p>
@@ -209,113 +207,102 @@
     </table>
 </div>
 
-<input id="label_text_field" size="30" style="display: none; position: absolute; z-index: 110;" onkeypress="label_text_field_listener(event);">
-<div id="label_text_field_background" class="light_background" onclick="update_label();"></div>
-
-<div id="waiting_background" class="waiting_background"></div>
-
-<div id="check_spectra" class="check_spectra"></div>
+<div id="label_text_field_background" class="light_background" onclick="update_label();">
+    <input id="label_text_field" size="30" style="display: none; position: absolute; z-index: 110;" onkeypress="label_text_field_listener(event);">
+</div>
 
 
 <div id="manage_entries" class="global_search">
-    <table width="100%" height="100%"><tr><td align="center" valign="middle">
-        <table cellspacing=20 id="editor_select_manage" class="global_search_content" width="1000" height="700">
-            <tr>
-                <td valign="top" colspan="2">
-                    <button onclick="manage_change_entity('pathways'); manage_fill_table();">Pathways</button>&nbsp;&nbsp;
-                    <button onclick="manage_change_entity('proteins'); manage_fill_table();">Proteins</button>&nbsp;&nbsp;
-                    <button onclick="manage_change_entity('metabolites'); manage_fill_table();">Metabolites</button><p>
-                    <div id="editor_select_manage_table_wrapper" style="position: fixed; overflow-x: scroll; overflow-y: hidden; width:910px; height: 470px;">
-                        <table cellpadding="0" cellspacing="0" size=20>
-                            <tr id="editor_select_manage_table_header"></tr>
-                            <tr id="editor_select_manage_table_filters"></tr>
-                        </table>
-                        <div id="editor_select_manage_content_wrapper" style="position: relative; overflow-x: hidden; overflow-y: scroll; width: 1200px; height:470px;">
-                            <table id="editor_select_manage_table" cellspacing="0" size=20 style="border-width: 1px; border-style: solid;"></table>
-                        </div>
+    <table cellspacing=20 id="editor_select_manage" class="global_search_content" width="1000" height="700">
+        <tr>
+            <td valign="top" colspan="2">
+                <button onclick="manage_change_entity('pathways'); manage_fill_table();">Pathways</button>&nbsp;&nbsp;
+                <button onclick="manage_change_entity('proteins'); manage_fill_table();">Proteins</button>&nbsp;&nbsp;
+                <button onclick="manage_change_entity('metabolites'); manage_fill_table();">Metabolites</button><p>
+                <div id="editor_select_manage_table_wrapper" style="position: fixed; overflow-x: scroll; overflow-y: hidden; width:910px; height: 470px;">
+                    <table cellpadding="0" cellspacing="0" size=20>
+                        <tr id="editor_select_manage_table_header"></tr>
+                        <tr id="editor_select_manage_table_filters"></tr>
+                    </table>
+                    <div id="editor_select_manage_content_wrapper" style="position: relative; overflow-x: hidden; overflow-y: scroll; width: 1200px; height:470px;">
+                        <table id="editor_select_manage_table" cellspacing="0" size=20 style="border-width: 1px; border-style: solid;"></table>
                     </div>
-                </td>
-            </tr>
-            <tr>
-                <td align="left" width="50%" valign="bottom" id="editor_manage_page_navigation"></td>
-                <td align="right" valign="bottom"><button onclick="close_manage_entries();">Close</button>
-                </td>
-            </tr>
-        </table>
-    </td></tr></table>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td align="left" width="50%" valign="bottom" id="editor_manage_page_navigation"></td>
+            <td align="right" valign="bottom"><button onclick="close_manage_entries();">Close</button>
+            </td>
+        </tr>
+    </table>
 </div>
 
 
 <div id="add_manage_proteins" class="global_search">
-    <table width="100%" height="100%"><tr><td align="center" valign="middle">
-        <table cellspacing=20 class="global_search_content" width="1000" height="700">
-            <tr>
-                <td valign="top">
-                    <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:530px;">
-                        <table id="add_manage_proteins_table" cellspacing="0" size=20 style="border-width: 1px; width: 100%; border-style: solid;">
-                            <tr><th width="30%">Accession</th><td><input id="add_manage_proteins_accession" type="text" style="min-width: 90%; max-width: 90%;" onkeyup="if (event.which == '13') this.blur();" onblur="request_protein_data();"></td></tr>
-                            <tr><th>Name</th><td><input type="text" id="add_manage_proteins_name" style="min-width: 90%; max-width: 90%;"></td></tr>
-                            <tr><th>Definition</th><td><input id="add_manage_proteins_definition" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
-                            <tr><th>Species</th><td><select id="add_manage_proteins_species" onchange="change_add_manage_proteins_chromosome();"><option checked>mouse</option></select></td></tr>
-                            <tr><th>KEGG ID</th><td><input id="add_manage_proteins_kegg" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
-                            <tr><th>EC number</th><td><input id="add_manage_proteins_ec_number" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
-                            <tr><th>Unreviewed</th><td><input id="add_manage_proteins_unreviewed" type="checkbox"></td></tr>
-                            <tr><th>Chromosome</th><td><select id="add_manage_proteins_chromosome"></td></tr>
-                            <tr><th>Chromosome start</th><td><input id="add_manage_proteins_chr_start" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
-                            <tr><th>Chromosome end</th><td><input id="add_manage_proteins_chr_end" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
-                            <tr><th>Fasta</th><td><textarea id="add_manage_proteins_fasta" style="min-width: 90%; max-width: 90%;" rows="20"></textarea></td></tr>
-                        </table>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td align="right" valign="bottom"><button onclick="document.getElementById('add_manage_proteins').style.display = 'none';" style="display: inline;">Cancel</button>&nbsp;<button onclick="add_manage_proteins_add();">Add protein</button>
-                </td>
-            </tr>
-        </table>
-    </td></tr></table>
+    <table cellspacing=20 class="global_search_content" width="1000" height="700">
+        <tr>
+            <td valign="top">
+                <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:530px;">
+                    <table id="add_manage_proteins_table" cellspacing="0" size=20 style="border-width: 1px; width: 100%; border-style: solid;">
+                        <tr><th width="30%">Accession</th><td><input id="add_manage_proteins_accession" type="text" style="min-width: 90%; max-width: 90%;" onkeyup="if (event.which == '13') this.blur();" onblur="request_protein_data();"></td></tr>
+                        <tr><th>Name</th><td><input type="text" id="add_manage_proteins_name" style="min-width: 90%; max-width: 90%;"></td></tr>
+                        <tr><th>Definition</th><td><input id="add_manage_proteins_definition" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                        <tr><th>Species</th><td><select id="add_manage_proteins_species" onchange="change_add_manage_proteins_chromosome();"><option checked>mouse</option></select></td></tr>
+                        <tr><th>KEGG ID</th><td><input id="add_manage_proteins_kegg" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                        <tr><th>EC number</th><td><input id="add_manage_proteins_ec_number" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                        <tr><th>Unreviewed</th><td><input id="add_manage_proteins_unreviewed" type="checkbox"></td></tr>
+                        <tr><th>Chromosome</th><td><select id="add_manage_proteins_chromosome"></td></tr>
+                        <tr><th>Chromosome start</th><td><input id="add_manage_proteins_chr_start" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                        <tr><th>Chromosome end</th><td><input id="add_manage_proteins_chr_end" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                        <tr><th>Fasta</th><td><textarea id="add_manage_proteins_fasta" style="min-width: 90%; max-width: 90%;" rows="20"></textarea></td></tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td align="right" valign="bottom"><button onclick="document.getElementById('add_manage_proteins').style.display = 'none';" style="display: inline;">Cancel</button>&nbsp;<button onclick="add_manage_proteins_add();">Add protein</button>
+            </td>
+        </tr>
+    </table>
 </div>
 
 
 <div id="add_manage_metabolites" class="global_search">
-    <table width="100%" height="100%"><tr><td align="center" valign="middle">
-        <table cellspacing=20 class="global_search_content" width="1000" height="400">
-            <tr>
-                <td valign="top">
-                    <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:230px;">
-                        <table id="add_manage_proteins_table" cellspacing="0" size=20 style="border-width: 1px; width: 100%; border-style: solid;">
-                            <tr><th width="30%">KEGG C-number</th><td><input id="add_manage_metabolites_c_number" type="text" style="min-width: 90%; max-width: 90%;" onkeyup="if (event.which == '13') this.blur();" onblur="request_metabolites_data();"></td></tr>
-                            <tr><th>Name</th><td><input type="text" id="add_manage_metabolites_name" style="min-width: 90%; max-width: 90%;"></td></tr>
-                            <tr><th>Formula</th><td><input id="add_manage_metabolites_formula" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
-                            <tr><th>Exact Mass</th><td><input id="add_manage_metabolites_exact_mass" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
-                            <tr><th>Smiles</th><td><input id="add_manage_metabolites_smiles" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
-                        </table>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td align="right" valign="bottom"><button onclick="document.getElementById('add_manage_metabolites').style.display = 'none';" style="display: inline;">Cancel</button>&nbsp;<button onclick="add_manage_metabolites_add();">Add metabolite</button>
-                </td>
-            </tr>
-        </table>
-    </td></tr></table>
+    <table cellspacing=20 class="global_search_content" width="1000" height="400">
+        <tr>
+            <td valign="top">
+                <div style="position: fixed; display: inline; overflow-y: scroll; width:900px; height:230px;">
+                    <table id="add_manage_proteins_table" cellspacing="0" size=20 style="border-width: 1px; width: 100%; border-style: solid;">
+                        <tr><th width="30%">KEGG C-number</th><td><input id="add_manage_metabolites_c_number" type="text" style="min-width: 90%; max-width: 90%;" onkeyup="if (event.which == '13') this.blur();" onblur="request_metabolites_data();"></td></tr>
+                        <tr><th>Name</th><td><input type="text" id="add_manage_metabolites_name" style="min-width: 90%; max-width: 90%;"></td></tr>
+                        <tr><th>Formula</th><td><input id="add_manage_metabolites_formula" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                        <tr><th>Exact Mass</th><td><input id="add_manage_metabolites_exact_mass" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                        <tr><th>Smiles</th><td><input id="add_manage_metabolites_smiles" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td align="right" valign="bottom"><button onclick="document.getElementById('add_manage_metabolites').style.display = 'none';" style="display: inline;">Cancel</button>&nbsp;<button onclick="add_manage_metabolites_add();">Add metabolite</button>
+            </td>
+        </tr>
+    </table>
 </div>
 
 
 <div id="confirm_deletion" class="global_search">
-    <table width="100%" height="100%"><tr><td align="center" valign="middle">
-        <table cellspacing=20 class="global_search_content" width="500" height="180">
-            <tr><td>
-                Please type in editor password to confirm deletion:<p>
-                <input size=50 type="password" id="confirm_deletion_input">
-                <input type="hidden" id="confirm_deletion_hidden" value="">
-                <input type="hidden" id="confirm_deletion_hidden_id" value="">
-            </td></tr>
-            <tr><td align="right">
-                <button id="confirm_deletion_cancel" onclick="document.getElementById('confirm_deletion').style.display = 'none';">Cancel</button> <button id="confirm_deletion_cancel" onclick="document.getElementById('confirm_deletion').style.display = 'none'; if(Sha256.hash(document.getElementById('confirm_deletion_input').value) == deletion_cypher){ var exec_deletion = document.getElementById('confirm_deletion_hidden').value; window[exec_deletion](document.getElementById('confirm_deletion_hidden_id').value);} else {alert('Password incorrect');}">Confirm</button>
-            </td></tr>
-        </table>
-    </td></tr></table>
+    <table cellspacing=20 class="global_search_content" width="500" height="180">
+        <tr><td>
+            Please type in editor password to confirm deletion:<p>
+            <input size=50 type="password" id="confirm_deletion_input">
+            <input type="hidden" id="confirm_deletion_hidden" value="">
+            <input type="hidden" id="confirm_deletion_hidden_id" value="">
+        </td></tr>
+        <tr><td align="right">
+            <button id="confirm_deletion_cancel" onclick="document.getElementById('confirm_deletion').style.display = 'none';">Cancel</button> <button id="confirm_deletion_cancel" onclick="document.getElementById('confirm_deletion').style.display = 'none'; if(Sha256.hash(document.getElementById('confirm_deletion_input').value) == deletion_cypher){ var exec_deletion = document.getElementById('confirm_deletion_hidden').value; window[exec_deletion](document.getElementById('confirm_deletion_hidden_id').value);} else {alert('Password incorrect');}">Confirm</button>
+        </td></tr>
+    </table>
 </div>
 
 <img src="/qsdb/images/zoom_in.png" id="zoom_in" style="display: none;">
@@ -326,8 +313,6 @@
 </body>
 <script>
     var qsdb_domain = true;
-    document.getElementById("check_spectra").innerHTML = get_check_spectra_content();
-    document.getElementById("waiting_background").innerHTML = get_waiting_background_content();
     document.addEventListener('DOMContentLoaded', init, false);
 </script>
 </html> 

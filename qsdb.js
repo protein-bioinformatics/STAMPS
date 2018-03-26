@@ -31,16 +31,14 @@ function init(){
         tissue[2].src = tissue[0];
     }
     
+    navigation_content = ["select_species", "select_pathway", "search_results", "filter_panel_wrapper", "menu_background"];
     
     document.documentElement.style.overflow = 'hidden';
     document.body.scroll = "no";
     
     document.addEventListener('keydown', key_down, false);
-    //document.addEventListener('keyup', key_up, false);
-    document.getElementById("search_background").addEventListener("click", hide_search, false);
-    document.getElementById("select_species_background").addEventListener("click", hide_select_species, false);
-    document.getElementById("select_pathway_background").addEventListener("click", hide_select_pathway, false);
-    document.getElementById("filter_panel_background").addEventListener("click", hide_filter_panel, false);
+    document.getElementById("menu_background").addEventListener("click", close_navigation, false);
+    
     document.getElementById("infobox_html_background").addEventListener("click", hide_infobox, false);
     
     window.addEventListener('resize', resize_ms_view, false);
