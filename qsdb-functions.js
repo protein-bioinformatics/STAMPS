@@ -1416,7 +1416,7 @@ function Infobox(ctx){
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Exact mass / Da:</b> " + data[this.node_id].exact_mass + "</div>";
             var c_number = data[this.node_id].c_number;
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>C number:</b> <a href='http://www.genome.jp/dbget-bin/www_bget?" + c_number + "' target=\"blank\">" + data[this.node_id].c_number + "</div><br>";
-            html_content += "<img src='/qsdb/images/metabolites/C" + data[this.node_id].foreign_id + ".png'>";
+            if (data[this.node_id].foreign_id != -1) html_content += "<img src='/qsdb/images/metabolites/C" + data[this.node_id].foreign_id + ".png'>";
             
             html_content += "</div>";
             
