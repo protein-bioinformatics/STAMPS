@@ -152,94 +152,102 @@
 
 
 <div id="locus_search" class="global_search">
-    <table cellspacing=20 width="500" class="global_search_content">
-        <tr>
-            <td>
-                <div id="accession_search_field" style="display: inline;">
-                    Select subcellular compartment(s):<br>
-                    <select id="loci" size=20 style="width:400px; height:480px;" multiple></select>Hold <b>[ctrl]</b> for multiple selection.
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td id="error_filter_text_locus" style="color: red; font-weight: bold;"></td>
-        </tr>
-        <tr>
-            <td align=right><button onclick="hide_locus_search(false);" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(1);">Next</button>
-            </td>
-        </tr>
-    </table>
+    <div class="global_search_content">
+        <table width="100%" height="100%">
+            <tr>
+                <td>
+                    <div id="accession_search_field" style="display: inline;">
+                        Select subcellular compartment(s):<br>
+                        <select id="loci" size=20 style="width:400px; height:480px;" multiple></select><br>Hold <b>[ctrl]</b> for multiple selection.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td id="error_filter_text_locus" style="color: red; font-weight: bold;"></td>
+            </tr>
+            <tr>
+                <td align=right><button onclick="hide_locus_search(false);" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(1);">Next</button>
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
 
 
 <div id="function_search" class="global_search">
-    <table cellspacing=20 width="800" class="global_search_content">
-        <tr>
-            <td>
-                Select protein function(s):<br>
-                <div id="function_search_field" style="min-width: 700px; width: 700px; border-width: 1px; border-color: gray; border-style: solid; overflow-y: scroll;">
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td id="error_filter_text_function" style="color: red; font-weight: bold;">
-        </tr>
-        <tr>
-            <td align=right><button onclick="hide_function_search(false);" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(2);">Next</button>
-            </td>
-        </tr>
-    </table>
+    <div class="global_search_content">
+        <table width="100%" height="100%">
+            <tr>
+                <td>
+                    Select protein function(s):<br>
+                    <div id="function_search_field" style="min-width: 700px; width: 700px; border-width: 1px; border-color: gray; border-style: solid; overflow-y: scroll;">
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td id="error_filter_text_function" style="color: red; font-weight: bold;">
+            </tr>
+            <tr>
+                <td align=right><button onclick="hide_function_search(false);" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(2);">Next</button>
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
 
 
 <div id="accession_search" class="global_search">
-    <table cellspacing=20 width="500" class="global_search_content">
-        <tr>
-            <td>
-                <div id="accession_search_field" style="display: inline;">
-                    Paste UniProt accession numbers:<br>
-                    <textarea id="accessions" style="width:400px; height:500px; font-size: 200%;"></textarea>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td id="error_filter_text_accession" style="color: red; font-weight: bold;">
-            </td>
-        </tr>
-        <tr>
-            <td align="right">
-                <button onclick="hide_accession_search();" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(0);">Next</button>
-            </td>
-        </tr>
-    </table>
+    <div class="global_search_content">
+        <table width="100%" height="100%">
+            <tr>
+                <td>
+                    <div id="accession_search_field" style="display: inline;">
+                        Paste UniProt accession numbers:<br>
+                        <textarea id="accessions" style="width:400px; height:500px; font-size: 200%;"></textarea>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td id="error_filter_text_accession" style="color: red; font-weight: bold;">
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <button onclick="hide_accession_search();" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(0);">Next</button>
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
 
 
 <div id="chromosome_search" class="global_search">
-    <table class="global_search_content">
-        <tr>
-            <td height="10%" id="chromosome_information" colspan="2" style="border-bottom: 1px solid #000;">Mouse, chromosome  <select onchange="change_chromosome_view_combo();" id="chromosome_selection_combo"></select>, bp: <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_start" value="0"></input> - <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_end" value="0"></input></td>
-        </tr><tr>
-            <td id="function_chromosome_field" style="position: relative; display: block-cell; overflow: hidden;"></td>
-            <td>
-                <table id="chromosome_information_table_headers" width="100%" cellpadding="0" cellspacing="0" style="margin: 0px;"><tr><th width="20%">Accession</th><th width="20%">Gene name</th><th width="20%">Gene start</th><th width="20%">Gene end</th><th align="right"><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(true);">select all</font><font size="-2"> /<br></font><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(false);">deselect all</font></th></tr></table>
-                <div style="overflow-y: auto;" id="chromosome_information_table_wrapper"><div id="chromosome_information_table"></div></div>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2" style="border-top: 1px solid #000;" >
-                <table width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                        <td width="70%" id="error_filter_text_chromosome" style="color: red; font-weight: bold;"></td>
-                        <td align="right" valign="bottom">
-                            <button onclick="hide_chromosome_search(false);" style="display: inline;">Cancel</button>&nbsp;
-                            <button onclick="check_filter_valid(3);">Next</button>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+    <div class="global_search_content">
+        <table width="100%" height="100%">
+            <tr>
+                <td height="10%" id="chromosome_information" colspan="2" style="border-bottom: 1px solid #000;">Mouse, chromosome  <select onchange="change_chromosome_view_combo();" id="chromosome_selection_combo"></select>, bp: <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_start" value="0"></input> - <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_end" value="0"></input></td>
+            </tr><tr>
+                <td id="function_chromosome_field" style="position: relative; display: block-cell; overflow: hidden;"></td>
+                <td>
+                    <table id="chromosome_information_table_headers" width="100%" cellpadding="0" cellspacing="0" style="margin: 0px;"><tr><th width="20%">Accession</th><th width="20%">Gene name</th><th width="20%">Gene start</th><th width="20%">Gene end</th><th align="right"><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(true);">select all</font><font size="-2"> /<br></font><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(false);">deselect all</font></th></tr></table>
+                    <div style="overflow-y: auto;" id="chromosome_information_table_wrapper"><div id="chromosome_information_table"></div></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border-top: 1px solid #000;" >
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td width="70%" id="error_filter_text_chromosome" style="color: red; font-weight: bold;"></td>
+                            <td align="right" valign="bottom">
+                                <button onclick="hide_chromosome_search(false);" style="display: inline;">Cancel</button>&nbsp;
+                                <button onclick="check_filter_valid(3);">Next</button>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
 
 <div id="download" class="download"></div>

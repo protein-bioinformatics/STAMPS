@@ -175,10 +175,10 @@
         Filter
     </td>
     -->
-    <td class="navigation_cell_click" onclick="close_navigation(); manage_entries();" style="min-width: 100px; text-align: center;">
+    <td class="navigation_cell_click" onclick="close_navigation(); last_opened_menu = ''; manage_entries();" style="min-width: 100px; text-align: center;">
         Manage&nbsp;Entries
     </td>
-    <td class="navigation_cell_click" onclick="close_navigation(); repair_database();" style="min-width: 100px; text-align: center;">
+    <td class="navigation_cell_click" onclick="close_navigation(); last_opened_menu = ''; repair_database();" style="min-width: 100px; text-align: center;">
         Repair&nbsp;Database
     </td>
     <td class="navigation_cell_click" onclick="location.href = '../.';" style="min-width: 100px; text-align: center;">
@@ -211,14 +211,10 @@
 </div>
 
 <div id="select_pathway" class="menu_extend_item"></div>
-<div id="menu_background" class="menu_background" onclick="last_opened_menu = '';"></div>
+<div id="menu_background" class="light_background" onclick="last_opened_menu = '';"></div>
 
 
 
-
-<div id="select_pathway_background" class="select_pathway_background"></div>
-<div id="filter_panel_background" class="filter_panel_background"></div>
-<div id="select_species_background" class="select_species_background"></div>
 
 <div id="statistics" class="statistics">
     <font size="+2"><b>Statistics</b></font><p>
