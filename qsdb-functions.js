@@ -3226,6 +3226,7 @@ function change_pathway(p){
             }
         }
     }
+    last_opened_menu = "";
     close_navigation();
     collapse_statistics();
     current_pathway = p;
@@ -4321,6 +4322,7 @@ function load_data(reload){
     clearInterval(highlighting);
     infobox.visible = false;
     collapse_statistics();
+    
     
     
     
