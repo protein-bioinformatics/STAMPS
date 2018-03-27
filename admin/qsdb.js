@@ -98,14 +98,13 @@ function init(){
             var ideom_data = JSON.parse(xmlhttp_chr.responseText);
             for (var chr in ideom_data) chromosomes["mouse"].push(chr);
             chromosomes["mouse"].sort(function(a, b) {
-                var int_a = 0;
-                var int_b = 0;
-                try{
-                    int_a = parseInt(a);
-                    int_b = parseInt(b);
-                    return int_a > int_b;
-                } catch (e) {
-                    return a < b;
+                var int_a = parseInt(a);
+                var int_b = parseInt(b);
+                if (!isNaN(int_a) && !isNaN(int_b)){
+                    return -1 + 2 * (int_a > int_b);
+                }
+                else {
+                    return a.localeCompare(b);
                 }
             });
             change_add_manage_proteins_chromosome();
@@ -443,7 +442,7 @@ function open_select_pathway(){
         sorted_pathways.push([pathway_id, pathways[pathway_id]]);
     }
     sorted_pathways.sort(function(a, b) {
-        return a[1] > b[1];
+        return a[1].localeCompare(b[1]);
     });
     
     var obj = document.getElementById("editor_select_pathway_field");
@@ -630,9 +629,7 @@ function editor_update_pathway_node(){
         var pw_node = data[selected_pathway_node];
         pw_node.name = pathways[foreign_id];
         pw_node.foreign_id = foreign_id;
-        pw_node.scale(pw_node.x, pw_node.y, 1. / factor);
         pw_node.setup_pathway_meta();
-        pw_node.scale(pw_node.x, pw_node.y, factor);
         compute_edges();
         assemble_elements();
         draw();
@@ -1397,17 +1394,17 @@ function editor_fill_metabolite_table(){
             global_metabolite_data_sorted = global_metabolite_data_sorted.sort(function(a, b) {
                 switch (metabolite_sort_column){
                     case 1:
-                        return a[1] > b[1];
+                        return a[1].localeCompare(b[1]);
                     case -1:
-                        return a[1] < b[1];
+                        return b[1].localeCompare(a[1]);
                     case 2:
-                        return a[2] > b[2];
+                        return a[2].localeCompare(b[2]);
                     case -2:
-                        return a[2] < b[2];
+                        return b[2].localeCompare(a[2]);
                     case 3:
-                        return a[3] > b[3];
+                        return a[3].localeCompare(b[3]);
                     case -3:
-                        return a[3] < b[3];
+                        return b[3].localeCompare(a[3]);
                 }
             });
             
@@ -1571,17 +1568,17 @@ function editor_fill_protein_table(){
             global_protein_data_sorted = global_protein_data_sorted.sort(function(a, b) {
                 switch (protein_sort_column){
                     case 1:
-                        return a[1] > b[1];
+                        return a[1].localeCompare(b[1]);
                     case -1:
-                        return a[1] < b[1];
+                        return b[1].localeCompare(a[1]);
                     case 2:
-                        return a[5] > b[5];
+                        return a[5].localeCompare(b[5]);
                     case -2:
-                        return a[5] < b[5];
+                        return b[5].localeCompare(a[5]);
                     case 3:
-                        return a[2] > b[2];
+                        return a[2].localeCompare(b[2]);
                     case -3:
-                        return a[2] < b[2];
+                        return b[2].localeCompare(a[2]);
                 }
             });
             
@@ -1696,6 +1693,7 @@ function manage_fill_table(){
     var dom_th_del = document.createElement("th");
     dom_table_header.appendChild(dom_th_del);
     dom_th_del.innerHTML = "Del";
+    dom_th_del.setAttribute("width", "32");
     for (var i = 1; i <= manage_columns[manage_current_entry].length; ++i){
         var dom_th_name = document.createElement("th");
         dom_table_header.appendChild(dom_th_name);
@@ -1791,8 +1789,8 @@ function manage_fill_table(){
             var global_manage_data_sorted = [];
             for (var manage_id in global_manage_data) global_manage_data_sorted.push(global_manage_data[manage_id]);
             global_manage_data_sorted = global_manage_data_sorted.sort(function(a, b) {
-                if (manage_sort_column > 0) return a[manage_sort_column] > b[manage_sort_column];
-                return a[-manage_sort_column] < b[-manage_sort_column];
+                if (manage_sort_column > 0) return a[manage_sort_column].localeCompare(b[manage_sort_column]);
+                return b[-manage_sort_column].localeCompare(a[-manage_sort_column]);
             });
             
             

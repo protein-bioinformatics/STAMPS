@@ -435,7 +435,7 @@ table.scrollTable tbody {
     overflow-y: scroll;
 }
 
-img.Brain {
+div.Brain {
     background-image: url('images/brain.png');
     background-repeat: no-repeat;
     width: 12px;
@@ -445,7 +445,7 @@ img.Brain {
     display: inline;
 }
 
-img.Liver {
+div.Liver {
     background-image: url('images/liver.png');
     background-repeat: no-repeat;
     width: 12px;
@@ -455,7 +455,7 @@ img.Liver {
     display: inline;
 }
 
-img.Kidney {
+div.Kidney {
     background-image: url('images/kidney.png');
     background-repeat: no-repeat;
     width: 12px;
@@ -465,7 +465,7 @@ img.Kidney {
     display: inline;
 }
 
-img.Spleen {
+div.Spleen {
     background-image: url('images/spleen.png');
     background-repeat: no-repeat;
     width: 12px;
@@ -475,37 +475,37 @@ img.Spleen {
     display: inline;
 }
 
-img.Heart {
+div.Heart {
+    float: left;
+    display: inline;
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+    background-repeat: no-repeat;
     background-image: url('images/heart.png');
-    background-repeat: no-repeat;
+}
+
+div.Blood {
+    float: left;
+    display: inline;
     width: 12px;
     height: 12px;
     margin-right: 2px;
-    float: left;
-    display: inline;
-}
-
-img.Blood {
+    background-repeat: no-repeat;
     background-image: url('images/blood.png');
-    background-repeat: no-repeat;
+}
+
+div.Fat {
+    float: left;
+    display: inline;
     width: 12px;
     height: 12px;
     margin-right: 2px;
-    float: left;
-    display: inline;
-}
-
-img.Fat {
+    background-repeat: no-repeat;
     background-image: url('images/fat.png');
-    background-repeat: no-repeat;
-    width: 12px;
-    height: 12px;
-    margin-right: 2px;
-    float: left;
-    display: inline;
 }
 
-img.Lung {
+div.Lung {
     background-image: url('images/lung.png');
     background-repeat: no-repeat;
     width: 12px;
@@ -515,7 +515,7 @@ img.Lung {
     display: inline;
 }
 
-img.Eye {
+div.Eye {
     background-image: url('images/eye.png');
     background-repeat: no-repeat;
     width: 12px;
@@ -525,7 +525,7 @@ img.Eye {
     display: inline;
 }
 
-img.Gut {
+div.Gut {
     background-image: url('images/gut.png');
     background-repeat: no-repeat;
     width: 12px;

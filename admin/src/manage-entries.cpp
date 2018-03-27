@@ -154,11 +154,11 @@ int main(int argc, char** argv) {
         
         if (!set_table.compare("nodeproteincorrelations")){
             string sql_query = "DELETE FROM " + set_table + " WHERE node_id = " + set_id + ";";
-            stmt->executeQuery(sql_query);
+            stmt->execute(sql_query);
             
             for(string protein_id : split(set_value, ':')){
                 sql_query = "INSERT INTO " + set_table + "(node_id, protein_id) VALUES(" + set_id + ", " + protein_id + ");";
-                stmt->executeQuery(sql_query);
+                stmt->execute(sql_query);
             }
         }
         
@@ -172,11 +172,11 @@ int main(int argc, char** argv) {
             string sql_query = "UPDATE " + set_table + " SET " + set_col + " = '" + set_value + "' WHERE id = " + set_id + ";";
             
             
-            stmt->executeQuery(sql_query);
+            stmt->execute(sql_query);
         
-            response += "0";
-            print_out(response, compress);
         }
+        response += "0";
+        print_out(response, compress);
     }
     
     
@@ -254,6 +254,7 @@ int main(int argc, char** argv) {
             data += "}";
             response += data;
             print_out(response, compress);
+            delete res;
         }
             
         else if (!action_type.compare("proteins_num") || !action_type.compare("metabolites_num") || !action_type.compare("pathways_num")){
@@ -263,6 +264,7 @@ int main(int argc, char** argv) {
             res->next();
             response += res->getString(1);
             print_out(response, compress);
+            delete res;
         }
             
         else if (!action_type.compare("proteins_col") || !action_type.compare("metabolites_col") || !action_type.compare("pathways_col")){
@@ -277,6 +279,7 @@ int main(int argc, char** argv) {
             data += "]";
             response += data;
             print_out(response, compress);
+            delete res;
             
         }
     }
@@ -343,7 +346,7 @@ int main(int argc, char** argv) {
             sql_query += insert_data[i][1];
         }
         sql_query += "');";
-        stmt->executeQuery(sql_query);
+        stmt->execute(sql_query);
         
         if (!action_type.compare("metabolites")){
             sql_query = "SELECT max(id) max_id FROM metabolites;";
@@ -352,6 +355,7 @@ int main(int argc, char** argv) {
             
             string metabolite_id = res->getString(1);
             
+            delete res;
             
             string filepath = parameters["root_path"] + "/admin/cgi-bin";
             string command = "java -cp " + filepath + "/cdk-2.0.jar:" + filepath + " DrawChem '" + filepath + "' '" + metabolite_id + "' '" + smiles_data + "'";
@@ -363,6 +367,8 @@ int main(int argc, char** argv) {
             res = stmt->executeQuery(sql_query);
             res->next();
             response += res->getString(1);
+            
+            delete res;
         }
         else {
             response += "0";
@@ -372,7 +378,6 @@ int main(int argc, char** argv) {
     
     
     
-    delete res;
     delete stmt;
     delete con;
     return 0;
