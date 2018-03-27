@@ -3502,6 +3502,8 @@ function check_spectra_expand_collapse_peptide(prot_id, do_collapse){
             
             
             
+            
+            
             var dom_pep_td2 = document.createElement("td");
             dom_pep_tr.appendChild(dom_pep_td2);
             dom_pep_td2.setAttribute("style", "border-bottom: 1px solid #d3d3d3; padding-right: 10px;");
@@ -3514,6 +3516,23 @@ function check_spectra_expand_collapse_peptide(prot_id, do_collapse){
             dom_pep_td2_input.setAttribute("onclick", onclick_command);
             dom_pep_td2_input.setAttribute("id", "cb-" + current_prot.id + "-" + j);
             dom_pep_td2_input.checked = peptite_checked;
+            
+            
+            
+            
+            var dom_pep_td3 = document.createElement("td");
+            dom_pep_tr.appendChild(dom_pep_td3);
+            dom_pep_td3.setAttribute("style", "border-bottom: 1px solid #d3d3d3;");
+            dom_pep_td3.setAttribute("align", "right");
+            
+            var dom_div_protter = document.createElement("font");
+            dom_pep_td3.appendChild(dom_div_protter);
+            dom_div_protter.setAttribute("style", "cursor: pointer; display: inline; margin: 0px; padding: 0px; float: left;");
+            dom_div_protter.setAttribute("face", "Arial,Helvetica");
+            dom_div_protter.setAttribute("color", "#e17009");
+            var protter_link = "http://wlab.ethz.ch/protter/#up=" + current_prot.accession + "&tm=auto&legend&n:myRegionName,fc:yellow,bc:blue,cc:white=" + (current_pep.start_pos + 1) + "-" + (current_pep.start_pos + current_pep.peptide_seq.length).toString();
+            dom_div_protter.setAttribute("onclick", "window.open('" + protter_link + "')");
+            dom_div_protter.innerHTML = "<b>P</b>";
             
             
             var dom_pep_tr2 = document.createElement("tr");

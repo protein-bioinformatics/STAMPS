@@ -120,8 +120,7 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     sql::Statement *my_stmt = con->createStatement();
     sql::ResultSet *res = my_stmt->executeQuery(sql_query_proteins);
     
-    
-    len_text = 1; // plus sentinal
+    len_text = 0;
     while (res->next()){
         string pid = res->getString("id");
         protein* last_protein = new protein(pid);
@@ -138,6 +137,7 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
         len_text += last_protein->fasta.length() + 1;
         proteins.push_back(last_protein);
     }
+    len_text += 1; // plus sentinal
     
     delete res;
     delete my_stmt;
