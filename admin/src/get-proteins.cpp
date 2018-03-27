@@ -253,6 +253,7 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     }
     response += "]";
     
+    replaceAll(response, "\n", "\\n");
     return response;
 }
 
@@ -397,6 +398,7 @@ main(int argc, char** argv) {
         }
         if (index_pw) response += "]]";
         response += "]";
+        replaceAll(response, "\n", "\\n");
         
         cout << (compress ? compress_string(response) : response);
         exit(0);
