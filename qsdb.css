@@ -178,14 +178,14 @@ div.global_search {
 
 
     
-table.global_search_content {
+div.global_search_content {
     background-color: rgba(255, 255, 255, 1);
     border: 1px black solid;
     z-index: 120;
     display: inline;
     padding: 20px;
     position: fixed;
-    overflow-y: scroll;
+    overflow-y: hidden;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);

@@ -1266,7 +1266,7 @@ edge.prototype.edit = function(){
 
 
 function manage_entries(){
-    document.getElementById("manage_entries").style.display = "inline-block";
+    document.getElementById("manage_entries").style.display = "inline";
     if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
         document.getElementById("renderarea").style.filter = "blur(5px)";
         document.getElementById("navigation").style.filter = "blur(5px)";
@@ -2254,19 +2254,56 @@ function change_textarea_type(dom_obj, to_text){
 function resize_manage_view(){
     var window_width_factor = (manage_current_entry == "pathways") ? 0.5 : 0.9;
     
-    var w_width = window.innerWidth * window_width_factor;
-    var w_height = window.innerHeight * 0.9;
-    document.getElementById("editor_select_manage").style.width = w_width.toString() + "px";
-    document.getElementById("editor_select_manage").style.height = w_height.toString() + "px";
-    document.getElementById("editor_select_manage_table_wrapper").style.width = (w_width - 90).toString() + "px";
-    document.getElementById("editor_select_manage_table_wrapper").style.height = (w_height - 200).toString() + "px";
-    document.getElementById("editor_select_manage_content_wrapper").style.width = (document.getElementById("editor_select_manage_table_header").offsetWidth).toString() + "px";
-    document.getElementById("editor_select_manage_content_wrapper").style.height = (w_height - 230).toString() + "px";
+    
+    // set height of manage selection window
+    var close_manage_window = document.getElementById("manage_entries").style.display != "inline";
+    document.getElementById("manage_entries").style.display = "inline";
+    
+    document.getElementById("editor_select_manage").style.width = (window.innerWidth * window_width_factor).toString() + "px";
+    document.getElementById("editor_select_manage").style.height = (window.innerHeight * 0.85).toString() + "px";
+    var wth_manage = document.getElementById("editor_select_manage_cell").offsetWidth;
+    var hgt_manage = document.getElementById("editor_select_manage_cell").offsetHeight;
+    document.getElementById("editor_select_manage_table_wrapper").style.width = wth_manage.toString() + "px";
+    document.getElementById("editor_select_manage_table_wrapper").style.height = hgt_manage.toString() + "px";
+    if (close_manage_window) document.getElementById("manage_entries").style.display = "none";
+    
+    
+    // set height of metabolite selection window
+    document.getElementById("editor_select_metabolite_window").style.height = (window.innerHeight * 0.85).toString() + "px";
+    var close_metabolite_window = document.getElementById("editor_select_metabolite").style.display != "inline";
+    document.getElementById("editor_select_metabolite").style.display = "inline";
+    var hgt_meta = document.getElementById("editor_select_metabolite_cell").offsetHeight * 0.95;
+    document.getElementById("editor_select_metabolite_table_wrapper").style.height = hgt_meta.toString() + "px";
+    if (close_metabolite_window) document.getElementById("editor_select_metabolite").style.display = "none";
+    
+    
+    // set height of pathway selection window
+    document.getElementById("editor_select_pathway_window").style.height = (window.innerHeight * 0.7).toString() + "px";
+    
+    // set height of metabolite selection window
+    document.getElementById("editor_select_protein_window").style.height = (window.innerHeight * 0.85).toString() + "px";
+    var close_protein_window = document.getElementById("editor_select_protein").style.display != "inline";
+    document.getElementById("editor_select_protein").style.display = "inline";
+    var hgt_prot = document.getElementById("editor_select_protein_cell").offsetHeight * 0.95;
+    document.getElementById("editor_select_protein_table_wrapper").style.height = hgt_prot.toString() + "px";
+    if (close_protein_window) document.getElementById("editor_select_protein").style.display = "none";
+    
+    // set height of protein adding window
+    document.getElementById("add_manage_proteins_window").style.height = (window.innerHeight * 0.7).toString() + "px";
+    var close_add_protein_window = document.getElementById("add_manage_proteins").style.display != "inline";
+    document.getElementById("add_manage_proteins").style.display = "inline";
+    var hgt_add_prot = document.getElementById("add_manage_proteins_cell").offsetHeight * 0.95;
+    document.getElementById("add_manage_proteins_wrapper").style.height = hgt_add_prot.toString() + "px";
+    if (close_add_protein_window) document.getElementById("add_manage_proteins").style.display = "none";
+    
+    // set height of metabolites adding window
+    document.getElementById("add_manage_metabolites_window").style.height = "230px";
 }
 
 
 
 function hide_manage_entries (){
+    resize_manage_view();
     document.getElementById("manage_entries").style.display = "none";
     if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
         document.getElementById("renderarea").style.filter = "none";
@@ -2509,6 +2546,3 @@ function manage_delete_metabolite(metabolite_id){
     xmlhttp_metabolite_data.open("GET", request, false);
     xmlhttp_metabolite_data.send();
 }
-
-
-document.addEventListener('DOMContentLoaded', init, false);

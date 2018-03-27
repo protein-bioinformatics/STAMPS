@@ -216,11 +216,11 @@
 
 
 <div id="chromosome_search" class="global_search">
-    <table class="global_search_content" width="90%">
+    <table class="global_search_content">
         <tr>
             <td height="10%" id="chromosome_information" colspan="2" style="border-bottom: 1px solid #000;">Mouse, chromosome  <select onchange="change_chromosome_view_combo();" id="chromosome_selection_combo"></select>, bp: <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_start" value="0"></input> - <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_end" value="0"></input></td>
         </tr><tr>
-            <td width="50%" id="function_chromosome_field" style="overflow: hidden;"></td>
+            <td id="function_chromosome_field" style="position: relative; display: block-cell; overflow: hidden;"></td>
             <td>
                 <table id="chromosome_information_table_headers" width="100%" cellpadding="0" cellspacing="0" style="margin: 0px;"><tr><th width="20%">Accession</th><th width="20%">Gene name</th><th width="20%">Gene start</th><th width="20%">Gene end</th><th align="right"><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(true);">select all</font><font size="-2"> /<br></font><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(false);">deselect all</font></th></tr></table>
                 <div style="overflow-y: auto;" id="chromosome_information_table_wrapper"><div id="chromosome_information_table"></div></div>
@@ -404,9 +404,15 @@ function resize_views(){
     chromosome_height = window.innerHeight * 0.7;
     
     var close_again = document.getElementById("chromosome_search").style.display != "inline";
+    document.getElementById("chromosome_search").style.display = "inline";
+    
     var chr_height = chromosome_height - document.getElementById("chromosome_information_table_headers").offsetHeight;
-    if (close_again) document.getElementById("chromosome_search").style.display != "none";
+    
+    //document.getElementById("function_chromosome_field").style.width = (windowWidth * 0.7).toString() + "px";
+    document.getElementById("chromosome_information_table_wrapper").style.width = (windowWidth * 0.4).toString() + "px";
     document.getElementById("chromosome_information_table_wrapper").style.height = chr_height.toString() + "px";
+    if (close_again) document.getElementById("chromosome_search").style.display = "none";
+    
     document.getElementById("loci").style.height = (windowHeight * 0.6).toString() + "px";
     document.getElementById("accessions").style.height = (windowHeight * 0.6).toString() + "px";
     document.getElementById("function_search_field").style.height = (windowHeight * 0.6).toString() + "px";
