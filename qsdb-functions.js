@@ -127,6 +127,7 @@ pathway_fill_color = "white";
 edge_color = "#f69301";
 edge_disabled_color = "#cccccc";
 slide_color = "#5792da";
+node_selected_color = "#ff0000";
 
 
 /*
@@ -1202,6 +1203,7 @@ function preview(){
             this.compute_boundaries();
             offsetX = mouse.x;
             offsetY = mouse.y;
+            update_browser_link();
         }
         return this.on_active;
     }
@@ -1563,6 +1565,7 @@ function node(data){
     this.o_y = 18;  // distance for second layer of membrane
     this.lipid_radius = 5;
     this.show_anchors = false;
+    this.selected = false;
     
     
     this.setup_pathway_meta = function(){
@@ -1813,7 +1816,7 @@ function node(data){
                 
                 // draw stroke
                 ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
-                ctx.strokeStyle = this.proteins.length ? protein_stroke_color :  protein_disabled_stroke_color;
+                ctx.strokeStyle = this.selected ? node_selected_color : (this.proteins.length ? protein_stroke_color :  protein_disabled_stroke_color);
                 ctx.strokeRect(this.x - hw, this.y - hh, this.width, this.height);
                 
                 break;
@@ -1821,7 +1824,7 @@ function node(data){
                 
             case "pathway":
                 ctx.fillStyle = pathway_fill_color;
-                ctx.strokeStyle = this.pathway_enabled ? pathway_stroke_color : pathway_disabled_stroke_color;
+                ctx.strokeStyle = (this.selected) ? node_selected_color : (this.pathway_enabled ? pathway_stroke_color : pathway_disabled_stroke_color);
                 ctx.lineWidth = (line_width + 2 * this.highlight * this.pathway_enabled) * factor;
                 roundRect(this.x - hw, this.y - hh, this.width, this.height, round_rect_radius * factor, ctx);
                 ctx.textAlign = "center";
@@ -1833,7 +1836,7 @@ function node(data){
                 
             case "metabolite":
                 ctx.fillStyle = metabolite_fill_color;
-                ctx.strokeStyle = metabolite_stroke_color;
+                ctx.strokeStyle = (this.selected) ? node_selected_color : metabolite_stroke_color;
                 ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, radius, 0, 1.999 * Math.PI);
@@ -1845,7 +1848,7 @@ function node(data){
             case "label":
                 ctx.textAlign = "center";
                 ctx.font = ((text_size + 2) * factor).toString() + "px Arial";
-                ctx.fillStyle = label_color;
+                ctx.fillStyle = this.selected ? node_selected_color : label_color;
                 ctx.fillText(this.name, this.x, this.y + this.height * 0.3);
                 break;
                 
@@ -1853,7 +1856,7 @@ function node(data){
                 var len_s = 3;
                 
                 ctx.fillStyle = metabolite_fill_color;
-                ctx.strokeStyle = metabolite_stroke_color;
+                ctx.strokeStyle = this.selected ? node_selected_color : metabolite_stroke_color;
                 ctx.lineWidth = this.lw * factor;
                 
                 var tmp_x = this.x - (this.width >> 1);
@@ -3981,6 +3984,7 @@ function highlight_node_inner(node_id){
         }
         else {
             var split = Math.exp(-0.5 * sq((progress - time * 0.5) / std_dev)) / (Math.sqrt(2 * Math.PI) * std_dev) / steps;
+            
             for (var node_id in data){
                 data[node_id].width *= scale;
                 data[node_id].height *= scale;
@@ -3994,6 +3998,8 @@ function highlight_node_inner(node_id){
                     edges[i].point_list[j].y = height + scale * (edges[i].point_list[j].y + split * (height - y) - height);
                 }
             }
+            
+            
             infobox.x = width + scale * (infobox.x + split * (width - x) - width);
             infobox.y = height + scale * (infobox.y + split * (height - y) - height);
             x = width + scale * (x - width);
@@ -4014,6 +4020,7 @@ function highlight_node_inner(node_id){
             
             zoom += zoom_scale;
             change_zoom();
+            update_browser_link();
             draw();
             progress += 1 / steps;
         }
@@ -4179,8 +4186,10 @@ function round10(value, decimals) {
 function update_browser_link(){
     var text_field = document.getElementById("browser_view");
     if (typeof(text_field) === "undefined" || text_field == null) return;
-    var view_text = location.hostname + location.pathname + "?pathway=" + current_pathway + "&zoom=" + zoom + "&position=" + null_x + ":" + null_y;
+    var view_text = location.hostname + location.pathname + "?pathway=" + current_pathway + "&zoom=" + zoom.toFixed(0) + "&position=" + null_x.toFixed(0) + ":" + null_y.toFixed(0);
     text_field.value = view_text;
+    text_field.focus();
+    text_field.setSelectionRange(view_text.length, view_text.length);
 }
 
 
@@ -4341,20 +4350,13 @@ function prepare_infobox(prot){
         }
         else {
             var split = Math.exp(-0.5 * sq((progress - time * 0.5) / std_dev)) / (Math.sqrt(2 * Math.PI) * std_dev) * inv_steps;
-            for (var node_id in data){
-                data[node_id].x += split * (width - x);
-                data[node_id].y += split * (height - y);
-            }
-            for (var i = 0; i < edges.length; ++i){
-                for (var j = 0; j < edges[i].point_list.length; ++j){
-                    edges[i].point_list[j].x += split * (width - x);
-                    edges[i].point_list[j].y += split * (height - y);
-                }
-            }
+            for (var node_id in elements) elements[node_id].move(split * (width - x), split * (height - y));
+                
             null_x += split * (width - x);
             null_y += split * (height - y);
             boundaries[0] += split * (width - x);
             boundaries[1] += split * (height - y);
+            update_browser_link();
             draw();
             
             var rect = c.getBoundingClientRect();

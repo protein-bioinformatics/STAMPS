@@ -56,6 +56,8 @@ chromosomes = {"mouse": []};
 draw_anchor_start = "";
 draw_anchor_end = "";
 
+multiple_selection = new Set();
+
 
 
 function init(){
@@ -287,21 +289,7 @@ function mouse_click_listener(e){
             tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
         };
-    }/*
-    else if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY){
-        open_select_pathway();
-        document.getElementById("editor_select_pathway_field").selectedIndex = 0;
-        document.getElementById("editor_select_pathway_ok_button").setAttribute("onclick", "editor_create_pathway_node(); close_editor_select_pathway();");
-        document.getElementById("editor_select_pathway_ok_button").innerHTML = "Create";
     }
-    else if (toolbox_button_selected == toolbox_states.CREATE_METABOLITE){
-        document.getElementById("editor_select_metabolite").style.display = "inline";
-        document.getElementById("waiting_background").style.display = "inline";
-        document.getElementById("renderarea").style.filter = "blur(5px)";
-        document.getElementById("toolbox").style.filter = "blur(5px)";
-        metabolite_create_action = true;
-        editor_fill_metabolite_table();
-    }*/
     else if (toolbox_button_selected == toolbox_states.DELETE_ENTRY){
         if (highlight_element){
             var request = "";
@@ -754,9 +742,20 @@ function mouse_down_listener(e){
         offsetY = res.y;
     }
     else if (e.buttons & 1){
+        
+        
+        
         if (highlight_element){
             highlight_element.mouse_down(res, e.which);
             if (toolbox_button_selected == toolbox_states.MOVE_ENTITY && highlight_element.constructor.name != "preview"){
+                if (!multiple_selection.has(highlight_element.id)){
+                    
+                    for (var node_id in data){
+                        data[node_id].selected = false;
+                    }
+                    multiple_selection = new Set();
+                }
+                
                 entity_moving = highlight_element;
                 node_move_x = entity_moving.x;
                 node_move_y = entity_moving.y;
@@ -772,6 +771,16 @@ function mouse_down_listener(e){
             }
             offsetX = res.x;
             offsetY = res.y;
+        }
+        else if (toolbox_button_selected == toolbox_states.MOVE_ENTITY) {
+            for (node_id of multiple_selection){
+                data[node_id].selected = false;
+            }
+            multiple_selection = new Set();
+            draw();
+            select_field_element.visible = true;
+            select_field_element.start_position = res;
+            select_field_element.end_position = res;
         }
     }
 }
@@ -817,20 +826,54 @@ function mouse_move_listener(e){
     }
     else if (e.buttons & 1){
         if (toolbox_button_selected == toolbox_states.MOVE_ENTITY){
-            var shift_x = res.x - offsetX;
-            var shift_y = res.y - offsetY;
-            if (shift_x != 0 || shift_y != 0){
-                moved = true;
+            if (select_field_element.visible == true){
+                
+                select_field_element.end_position = res;
+                var sx = Math.min(select_field_element.start_position.x, select_field_element.end_position.x);
+                var ex = Math.max(select_field_element.start_position.x, select_field_element.end_position.x);
+                var sy = Math.min(select_field_element.start_position.y, select_field_element.end_position.y);
+                var ey = Math.max(select_field_element.start_position.y, select_field_element.end_position.y);
+                for (var node_id in data){
+                    var current_node = data[node_id];
+                    if (sx <= current_node.x && sy <= current_node.y && current_node.x <= ex && current_node.y <= ey){
+                        current_node.highlight = true;
+                    }
+                    else {
+                        current_node.highlight = false;
+                    }
+                }
             }
-            node_move_x += shift_x;
-            node_move_y += shift_y;
-            entity_moving.x = Math.floor(node_move_x - (1000 * (node_move_x - null_x) % grid) / 1000.);
-            entity_moving.y = Math.floor(node_move_y - (1000 * (node_move_y - null_y) % grid) / 1000.);
-            compute_edges();
-            assemble_elements();
+            else {
+                var shift_x = res.x - offsetX;
+                var shift_y = res.y - offsetY;
+                if (shift_x != 0 || shift_y != 0){
+                    moved = true;
+                }
+                
+                node_move_x += shift_x;
+                node_move_y += shift_y;
+                if (!multiple_selection.has(entity_moving.id)){
+                    entity_moving.x = Math.floor(node_move_x - (1000 * (node_move_x - null_x) % grid) / 1000.);
+                    entity_moving.y = Math.floor(node_move_y - (1000 * (node_move_y - null_y) % grid) / 1000.);
+                }
+                else {
+                    var entity_x = Math.floor(node_move_x - (1000 * (node_move_x - null_x) % grid) / 1000.);
+                    var entity_y = Math.floor(node_move_y - (1000 * (node_move_y - null_y) % grid) / 1000.);
+                    for (var node_id of multiple_selection){
+                        if (node_id == entity_moving.id) continue;
+                        data[node_id].move(entity_x - entity_moving.x, entity_y - entity_moving.y);
+                    }
+                    entity_moving.x = entity_x;
+                    entity_moving.y = entity_y;
+                    
+                }
+                
+                compute_edges();
+                assemble_elements();
+                offsetX = res.x;
+                offsetY = res.y;
+            }
             draw();
-            offsetX = res.x;
-            offsetY = res.y;
         }
         else if (toolbox_button_selected == toolbox_states.DRAW_EDGE && (-1 in data)){ // -1 in data: dummy node
             var offset_move_x = null_x % (base_grid * factor);
@@ -921,8 +964,27 @@ function mouse_up_listener(event){
         highlight_element.mouse_up(res);
     }
     if (toolbox_button_selected == toolbox_states.MOVE_ENTITY) {
-        update_node(event);
-        entity_moving = -1;
+        if (select_field_element.visible) {
+            select_field_element.visible = false;
+            
+            var sx = Math.min(select_field_element.start_position.x, select_field_element.end_position.x);
+            var ex = Math.max(select_field_element.start_position.x, select_field_element.end_position.x);
+            var sy = Math.min(select_field_element.start_position.y, select_field_element.end_position.y);
+            var ey = Math.max(select_field_element.start_position.y, select_field_element.end_position.y);
+            
+            for (var node_id in data){
+                var current_node = data[node_id];
+                if (sx <= current_node.x && sy <= current_node.y && current_node.x <= ex && current_node.y <= ey){
+                    current_node.selected = true;
+                    multiple_selection.add(parseInt(node_id));
+                }
+            }
+            draw();
+        }
+        else {
+            update_node(event);
+            entity_moving = -1;
+        }
     }
     else if (toolbox_button_selected == toolbox_states.DRAW_EDGE){
         
@@ -1073,6 +1135,11 @@ function toolbox_button_clicked(button){
         draw();
     }
     
+    for (var node_id in data){
+        data[node_id].selected = false;
+    }
+    multiple_selection = new Set();
+    
     for (var i = 0; i < toolbox_buttons.length; ++i){
         if (i == button){
             if (i == toolbox_button_selected){
@@ -1138,8 +1205,8 @@ function toolbox_button_clicked(button){
     }
     if(toolbox_button_selected == toolbox_states.DRAW_EDGE){
         for (node_id in data) data[node_id].show_anchors = true;
-        draw();
     }
+    draw();
 }
 
 
@@ -1160,19 +1227,39 @@ function toolbox_button_mouseout(button){
 
 
 function update_node(event) {
-    var x = Math.round(Math.floor((entity_moving.x - null_x) / factor) / base_grid) * base_grid;
-    var y = Math.round(Math.floor((entity_moving.y - null_y) / factor) / base_grid) * base_grid;
-    
-    
-    var xmlhttp = new XMLHttpRequest();
-    var request = "/qsdb/admin/cgi-bin/update-node.py?id=";
-    request += entity_moving.id;
-    request += "&x=";
-    request += x;
-    request += "&y=";
-    request += y;
-    xmlhttp.open("GET", request, true);
-    xmlhttp.send();
+    if (multiple_selection.has(entity_moving.id)){
+        for (node_id of multiple_selection){
+            var node_element = data[node_id];
+            var x = Math.round(Math.floor((node_element.x - null_x) / factor) / base_grid) * base_grid;
+            var y = Math.round(Math.floor((node_element.y - null_y) / factor) / base_grid) * base_grid;
+            
+            
+            var xmlhttp = new XMLHttpRequest();
+            var request = "/qsdb/admin/cgi-bin/update-node.py?id=";
+            request += node_element.id;
+            request += "&x=";
+            request += x;
+            request += "&y=";
+            request += y;
+            xmlhttp.open("GET", request, true);
+            xmlhttp.send();
+        }
+    }
+    else {
+        var x = Math.round(Math.floor((entity_moving.x - null_x) / factor) / base_grid) * base_grid;
+        var y = Math.round(Math.floor((entity_moving.y - null_y) / factor) / base_grid) * base_grid;
+        
+        
+        var xmlhttp = new XMLHttpRequest();
+        var request = "/qsdb/admin/cgi-bin/update-node.py?id=";
+        request += entity_moving.id;
+        request += "&x=";
+        request += x;
+        request += "&y=";
+        request += y;
+        xmlhttp.open("GET", request, true);
+        xmlhttp.send();
+    }
 }
 
 
@@ -2494,6 +2581,13 @@ function add_manage_metabolites_add(){
     }
     xmlhttp_add_metabolite.open("GET", request, false);
     xmlhttp_add_metabolite.send();
+}
+
+
+function go_to_browser(){
+    var view_text = location.hostname + location.pathname + "?pathway=" + current_pathway;
+    view_text = replaceAll(view_text, "/admin", "");
+    location.href = view_text;
 }
 
 
