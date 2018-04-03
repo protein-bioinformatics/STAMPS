@@ -30,6 +30,12 @@ static long get_time(){
     long etime = end_timeval.tv_sec * 1000000 + end_timeval.tv_usec;
     return etime - stime;
 }
+static long elapsed_time(){
+    gettimeofday(&end_timeval, 0);
+    long stime = start_timeval.tv_sec * 1000000 + start_timeval.tv_usec;
+    long etime = end_timeval.tv_sec * 1000000 + end_timeval.tv_usec;
+    return etime - stime;
+}
 
 static float acids[] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

@@ -2,12 +2,66 @@
 
 function init(){
     
+    // read GET request
+    var pairs = location.search.substring(1).split('&');
+    for (var i = 0; i < pairs.length; i++) {
+        var pair = pairs[i].split('=');
+        HTTP_GET_VARS[pair[0]] = pair[1];
+    }
+    
+    
+    
     var xmlhttp_pw = new XMLHttpRequest();
     xmlhttp_pw.onreadystatechange = function() {
         if (xmlhttp_pw.readyState == 4 && xmlhttp_pw.status == 200) {
             pathways = JSON.parse(xmlhttp_pw.responseText);
             set_pathway_menu();
-            change_pathway();
+            if ("pathway" in HTTP_GET_VARS) change_pathway(parseInt(HTTP_GET_VARS["pathway"]));
+            else change_pathway();
+            
+            if ("zoom" in HTTP_GET_VARS) {
+                var wait_for_loading_zoom = setInterval(function(){
+                    if (pathway_is_loaded){
+                        pathway_is_loaded = false;
+                        clearInterval(wait_for_loading_zoom);
+                        
+                        var http_zoom = parseInt(HTTP_GET_VARS["zoom"]);
+                        http_zoom = Math.max(min_zoom, http_zoom);
+                        http_zoom = Math.min(max_zoom, http_zoom);
+                        for (var i = min_zoom; i < http_zoom; ++i) zoom_in_out(0, 0);
+                        draw();
+                        pathway_is_loaded = true;
+                    }
+                }, 20);
+            }
+            
+            
+            if ("shift" in HTTP_GET_VARS) {
+                var position = HTTP_GET_VARS["shift"].split(":");
+                if (position.length == 2){
+                    
+                    var shift_x = parseInt(position[0]);
+                    var shift_y = parseInt(position[1]);
+                    
+                    
+                    var wait_for_loading_shift = setInterval(function(){
+                        if (pathway_is_loaded){
+                            pathway_is_loaded = false;
+                            clearInterval(wait_for_loading_shift);
+                    
+                            for (var i = 0; i < elements.length; ++i) elements[i].move(shift_x, shift_y);
+                            
+                            null_x += shift_x;
+                            null_y += shift_y;
+                            boundaries[0] += shift_x;
+                            boundaries[1] += shift_y;                    
+                            draw();
+                            pathway_is_loaded = true;
+                        }
+                    }, 20);
+                }
+            }
+            
             resize_pathway_view();
         }
     }

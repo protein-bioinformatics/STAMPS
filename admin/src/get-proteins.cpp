@@ -52,6 +52,17 @@ string prev_pep_seq = "";
 peptide* prev_pep = 0;
 string statistics_json_suffix = ".json";
 
+
+void print_out(string response, bool compress){
+    replaceAll(response, "\n", "\\n");
+    if (compress){
+        cout << compress_string(response);        
+    }
+    else {
+        cout << response;
+    }
+}
+
 static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
     peptide* current_pep = 0;
     string P = argv[1];
@@ -88,28 +99,6 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
         current_pep->spectra.push_back(s1);
         spectrum_dict.insert(pair<int, spectrum* >(s1->id, s1));
     }
-    return 0;
-}
-
-static int sqlite_mem_callback(void *data, int argc, char **argv, char **azColName){
-    spectrum* s1 = spectrum_dict[atoi(argv[0])];
-    s1->charge = argv[1];
-    string mass = argv[2];
-    s1->mod_sequence = argv[3];
-    if (mass.find(".") != string::npos){
-        mass = mass.substr(0, mass.find(".") + 5);
-    }
-    s1->mass = mass;
-    s1->tissues = argv[4];
-    s1->tissue_numbers = argv[5];
-    return 0;
-}
-
-
-
-static int callback(void *count, int argc, char **argv, char **azColName) {
-    int *c = (int*)count;
-    *c = atoi(argv[0]);
     return 0;
 }
 
@@ -188,8 +177,8 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
         
     rc = sqlite3_open((char*)parameters["spectra_db_" + species].c_str(), &db);
     if( rc ){
-        cout << -2 << endl;
-        exit(-2);
+        print_out("-3", compress);
+        exit(-3);
     }
     
     
@@ -199,9 +188,8 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     char tmp_data;
     rc = sqlite3_exec(db, sql_query_lite2.c_str(), sqlite_callback, (void*)&tmp_data, &zErrMsg);
     if( rc != SQLITE_OK ){
-        cout << -3 << endl;
-        sqlite3_free(zErrMsg);
-        exit(-3);
+        print_out("-4", compress);
+        exit(-4);
     }
     
     
@@ -262,7 +250,6 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
 
 
 
-
 main(int argc, char** argv) {
     bool compress = true;
     bool caching = true;
@@ -293,14 +280,14 @@ main(int argc, char** argv) {
     
     
     if (!get_string_chr){
-        cout << -1;
+        print_out("-1", compress);
         return -1;
     }
     
     string get_string = string(get_string_chr);
     if (!get_string.length()){
-        cout << -1;
-        return -1;
+        print_out("-2", compress);
+        return -2;
     }
     
     
@@ -342,7 +329,7 @@ main(int argc, char** argv) {
     }
     
     if (via_accessions + via_ids + via_loci + via_functions + statistics + statistics_pathways + via_pathway != 1){
-        cout << -5;
+        print_out("-5", compress);
         return -5;
     }
     
@@ -400,25 +387,25 @@ main(int argc, char** argv) {
         response += "]";
         replaceAll(response, "\n", "\\n");
         
-        cout << (compress ? compress_string(response) : response);
-        exit(0);
+        print_out(response, compress);
+        return 0;
     }
     
     
     if (!species.length()){
-        cout << -7;
+        print_out("-7", compress);
         return -7;
     }
     
     if (parameters.find("spectra_db_" + species) == parameters.end()){
-        cout << -8;
+        print_out("-8", compress);
         return -8;
     }
     
     if (via_accessions){
         if (accessions == "" || accessions.find("'") != string::npos){
-            cout << -1 << endl;
-            return -1;
+            print_out("-9", compress);
+            return -9;
         }    
         replaceAll(accessions, string(":"), string("','"));
         
@@ -430,8 +417,8 @@ main(int argc, char** argv) {
     else if (via_ids){
     
         if (ids == "" || ids.find("'") != string::npos){
-            cout << -1 << endl;
-            return -1;
+            print_out("-10", compress);
+            return -10;
         }    
         replaceAll(ids, string(":"), string("','"));
         
@@ -441,8 +428,8 @@ main(int argc, char** argv) {
     }
     else if (via_loci) {
         if (loci_ids == "" || loci_ids.find("'") != string::npos){
-            cout << -1 << endl;
-            return -1;
+            print_out("-11", compress);
+            return -11;
         }    
         replaceAll(loci_ids, string(":"), string("','"));
         
@@ -452,8 +439,8 @@ main(int argc, char** argv) {
     }
     else if (via_functions) {
         if (function_ids == "" || function_ids.find("'") != string::npos){
-            cout << -1 << endl;
-            return -1;
+            print_out("-12", compress);
+            return -12;
         }    
         replaceAll(function_ids, string(":"), string("','"));
         
@@ -495,7 +482,7 @@ main(int argc, char** argv) {
             t.read((char*)result.data(), file_length);
             t.close();
             
-            cout << result << endl;
+            cout << result;
             return 0;
         }
         // otherwise retrieve the protein data the normal way and store in 'data' folder
@@ -508,10 +495,9 @@ main(int argc, char** argv) {
     }
     else {
         result = get_protein_data(sql_query_proteins, species, con, statistics);
-        if (compress) result = compress_string(result);
     }
     
-    cout << result << endl;
+    print_out(result, compress);
     
     
     delete res;

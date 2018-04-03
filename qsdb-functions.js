@@ -1,5 +1,5 @@
 moved = false;
-HTTP_GET_VARS = [];
+HTTP_GET_VARS = {};
 current_pathway = 1;
 current_pathway_list_index = 0;
 current_pathway_title = 0;
@@ -3187,6 +3187,7 @@ function zoom_in_out(dir, res){
         var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
         res.y = nav_height + (window.innerHeight - nav_height) * 0.5;
     }
+    
     for (var i = 0; i < elements.length; ++i){
         elements[i].scale(res.x, res.y, scale);
     }
@@ -3675,9 +3676,11 @@ function check_spectra(){
         dom_tr.appendChild(dom_td1);
         var dom_td2 = document.createElement("td");
         dom_tr.appendChild(dom_td2);
+        var dom_td3 = document.createElement("td");
+        dom_tr.appendChild(dom_td3);
         
         
-        dom_td1.setAttribute("width", "95%");
+        dom_td1.setAttribute("width", "90%");
         dom_td1.setAttribute("bgcolor", bg_color);
         dom_td1.setAttribute("onclick", "check_spectra_expand_collapse_peptide(" + current_prot.id + ");");
         dom_td1.setAttribute("style", "cursor: pointer;");
@@ -3720,11 +3723,29 @@ function check_spectra(){
         }
         dom_td2.setAttribute("bgcolor", bg_color);
         dom_td2.setAttribute("align", "right");
+        dom_td3.setAttribute("bgcolor", bg_color);
+        dom_td3.setAttribute("align", "right");
         
         var dom_img_del = document.createElement("div");
         dom_td2.appendChild(dom_img_del);
         dom_img_del.setAttribute("class", "Del");
         dom_img_del.setAttribute("onclick", "delete_from_protein_table(" + current_prot.id + ");");
+        
+        
+        var dom_div_protter = document.createElement("font");
+        dom_td3.appendChild(dom_div_protter);
+        dom_div_protter.setAttribute("style", "cursor: pointer; display: inline; margin: 0px; padding: 0px; float: left;");
+        dom_div_protter.setAttribute("face", "Arial,Helvetica");
+        dom_div_protter.setAttribute("color", "#e17009");
+        var protter_link = "http://wlab.ethz.ch/protter/#up=" + current_prot.accession + "&tm=auto&legend&n:myRegionName,fc:yellow,bc:blue,cc:white=";
+        
+        for (var j = 0; j < current_prot.peptides.length; ++j){
+            var current_pep = current_prot.peptides[j];
+            if (j > 0) protter_link += ",";
+            protter_link += (current_pep.start_pos + 1) + "-" + (current_pep.start_pos + current_pep.peptide_seq.length).toString();
+        }
+        dom_div_protter.setAttribute("onclick", "window.open('" + protter_link + "')");
+        dom_div_protter.innerHTML = "<b>P</b>";
         
         
         
