@@ -29,19 +29,35 @@ function init(){
                         http_zoom = Math.max(min_zoom, http_zoom);
                         http_zoom = Math.min(max_zoom, http_zoom);
                         for (var i = min_zoom; i < http_zoom; ++i) zoom_in_out(0, 0);
+                            
+                        if ("position" in HTTP_GET_VARS) {
+                                console.log(null_x);
+                            var position = HTTP_GET_VARS["position"].split(":");
+                            if (position.length == 2){
+                                
+                                var shift_x = parseFloat(position[0]) - null_x;
+                                var shift_y = parseFloat(position[1]) - null_y;
+                                for (var i = 0; i < elements.length; ++i) elements[i].move(shift_x, shift_y);
+                                null_x += shift_x;
+                                null_y += shift_y;
+                                boundaries[0] += shift_x;
+                                boundaries[1] += shift_y;
+                            }
+                        }
+                        
+                        update_browser_link();
                         draw();
                         pathway_is_loaded = true;
                     }
                 }, 20);
             }
             
-            
-            if ("shift" in HTTP_GET_VARS) {
-                var position = HTTP_GET_VARS["shift"].split(":");
+            else if ("position" in HTTP_GET_VARS) {
+                var position = HTTP_GET_VARS["position"].split(":");
                 if (position.length == 2){
                     
-                    var shift_x = parseInt(position[0]);
-                    var shift_y = parseInt(position[1]);
+                    var shift_x = parseFloat(position[0]) - null_x;
+                    var shift_y = parseFloat(position[1]) - null_y;
                     
                     
                     var wait_for_loading_shift = setInterval(function(){
@@ -50,11 +66,11 @@ function init(){
                             clearInterval(wait_for_loading_shift);
                     
                             for (var i = 0; i < elements.length; ++i) elements[i].move(shift_x, shift_y);
-                            
                             null_x += shift_x;
                             null_y += shift_y;
                             boundaries[0] += shift_x;
-                            boundaries[1] += shift_y;                    
+                            boundaries[1] += shift_y;
+                            update_browser_link();
                             draw();
                             pathway_is_loaded = true;
                         }
@@ -264,6 +280,7 @@ function mouse_move_listener(e){
                 null_y += shift_y;
                 boundaries[0] += shift_x;
                 boundaries[1] += shift_y;
+                update_browser_link();
             }
         }
         draw();

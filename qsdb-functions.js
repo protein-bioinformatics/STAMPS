@@ -1265,6 +1265,7 @@ function expand_collapse(dir){
     this.x = window.innerWidth - this.width * 1.3;
     var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
     this.y = nav_height + this.height * 0.3;
+    this.sort_order = 1000;
     
     this.mouse_click = function(mouse, key){
         if (this.dir){
@@ -1304,6 +1305,7 @@ function zoom_sign(dir){
     this.height = this.img.height * ratio;
     this.x = window.innerWidth - this.width * 1.3;
     this.y = window.innerHeight - this.height * (1.3 + dir);
+    this.sort_order = 1000;
     
     this.mouse_click = function(mouse, key){
         zoom_in_out(1 - this.dir, 0);
@@ -3197,6 +3199,7 @@ function zoom_in_out(dir, res){
     boundaries[1] = res.y + scale * (boundaries[1] - res.y);
     boundaries[2] *= scale;
     boundaries[3] *= scale;
+    update_browser_link();
 }
 
 
@@ -3224,6 +3227,7 @@ function mouse_dblclick_listener(e){
 
 
 function change_pathway(p){
+    pathway_is_loaded = false;
     if (typeof p === "undefined"){
         p = -1;
         var min_pw_name = "~~~";
@@ -3237,11 +3241,15 @@ function change_pathway(p){
     last_opened_menu = "";
     close_navigation();
     collapse_statistics();
-    current_pathway = p;
-    set_pathway_menu();
     reset_view();
-    document.title = "QSDB Home - " + pathways[p];
-    load_data();
+    
+    if (p in pathways){
+        current_pathway = p;
+        set_pathway_menu();
+        update_browser_link();
+        document.title = "QSDB Home - " + pathways[p];
+        load_data();
+    }
 }
 
 
@@ -4166,6 +4174,16 @@ function round10(value, decimals) {
     return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
 }
 
+
+
+function update_browser_link(){
+    var text_field = document.getElementById("browser_view");
+    if (typeof(text_field) === "undefined" || text_field == null) return;
+    var view_text = location.hostname + location.pathname + "?pathway=" + current_pathway + "&zoom=" + zoom + "&position=" + null_x + ":" + null_y;
+    text_field.value = view_text;
+}
+
+
 function compute_statistics(){
     if (typeof qsdb_domain === 'undefined' || qsdb_domain === null) return;
     document.getElementById("stat_pathway").innerHTML = pathways[current_pathway];
@@ -4179,19 +4197,6 @@ function compute_statistics(){
             proteins_content.add(data[node_id].proteins[j]);
         }
     }
-    /*
-    proteins_content.sort();
-    for (var i = proteins_content.length - 1; i > 0; --i){
-        if (proteins_content[i][0] == proteins_content[i - 1][0]){
-            if (proteins_content[i][3] && !proteins_content[i - 1][3]){
-                tmp = proteins_content[i];
-                proteins_content[i] = proteins_content[i - 1];
-                proteins_content[i - 1] = tmp;
-            }
-            proteins_content.splice(i, 1);
-        }
-    }
-    */
     
     var num_spectra = 0;
     var valid_spectra = 0;
