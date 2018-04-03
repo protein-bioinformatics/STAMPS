@@ -31,7 +31,6 @@ function init(){
                         for (var i = min_zoom; i < http_zoom; ++i) zoom_in_out(0, 0);
                             
                         if ("position" in HTTP_GET_VARS) {
-                                console.log(null_x);
                             var position = HTTP_GET_VARS["position"].split(":");
                             if (position.length == 2){
                                 
