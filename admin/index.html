@@ -131,6 +131,7 @@
         <table width="100%" height="100%">
             <tr>
                 <td valign="top" colspan="2">
+                    <button onclick="manage_change_entity('pathway_groups'); manage_fill_table();">Pathway groups</button>&nbsp;&nbsp;
                     <button onclick="manage_change_entity('pathways'); manage_fill_table();">Pathways</button>&nbsp;&nbsp;
                     <button onclick="manage_change_entity('proteins'); manage_fill_table();">Proteins</button>&nbsp;&nbsp;
                     <button onclick="manage_change_entity('metabolites'); manage_fill_table();">Metabolites</button><p>
@@ -203,14 +204,7 @@
 <div id="filter_panel_wrapper" class="menu_extend_item"></div>
 
 <div id="select_species" class="menu_extend_item">
-    <table>
-        <tr><td class="select_species_cell">
-        <input type="checkbox" id="species_mouse" name="species" value="mouse" checked disabled>Mouse
-        </td></tr>
-        <!-- <tr><td class="select_species_cell">
-        <input type="checkbox" id="species_human" name="species" value="human">Human
-        </td></tr> -->
-    </table>
+    <table id="select_species_table"></table>
 </div>
 
 <div id="select_pathway" class="menu_extend_item"></div>
@@ -294,6 +288,27 @@
                             <tr><th>Formula</th><td><input id="add_manage_metabolites_formula" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>Exact Mass</th><td><input id="add_manage_metabolites_exact_mass" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>Smiles</th><td><input id="add_manage_metabolites_smiles" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right" valign="bottom"><button onclick="document.getElementById('add_manage_metabolites').style.display = 'none';" style="display: inline;">Cancel</button>&nbsp;<button onclick="add_manage_metabolites_add();">Add metabolite</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div id="add_manage_pathways" class="global_search">
+    <div id="add_manage_pathways_window" class="global_search_content" style="width: 1000px;">
+        <table width="100%" height="100%">
+            <tr>
+                <td id="add_manage_pathways_cell" valign="top" height="100%">
+                    <div id="add_manage_pathways_wrapper" style="position: fixed; display: inline; overflow-y: auto; width: 1000px;">
+                        <table id="add_manage_pathways_table" cellspacing="0" size=20 style="border-width: 1px; width: 100%; border-style: solid;">
+                            <tr><th width="30%">Name</th><td><input id="add_manage_pathways_name" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>Pathway group</th><td><select id="add_manage_pathways_group" style="min-width: 90%; max-width: 90%;"></select></td></tr>
                         </table>
                     </div>
                 </td>

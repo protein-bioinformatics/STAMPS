@@ -9,7 +9,15 @@ function init(){
         HTTP_GET_VARS[pair[0]] = pair[1];
     }
     
-    
+    get_pathway_groups();
+    infobox = new Infobox();
+    zoom_sign_in = new zoom_sign(1);
+    zoom_sign_out = new zoom_sign(0);
+    expand_obj = new expand_collapse(1);
+    collapse_obj = new expand_collapse(0);
+    preview_element = new preview();
+    select_field_element = new select_field();
+    select_field_element.visible = false;
     
     var xmlhttp_pw = new XMLHttpRequest();
     xmlhttp_pw.onreadystatechange = function() {
@@ -83,6 +91,24 @@ function init(){
     xmlhttp_pw.open("GET", "/qsdb/cgi-bin/get-pathways.bin", true);
     xmlhttp_pw.send();
     
+    
+    var ss_table = document.getElementById("select_species_table");
+    var species_counter = 0;
+    for (var species_name in supported_species){
+        var dom_species_tr = document.createElement("tr");
+        ss_table.appendChild(dom_species_tr);
+        
+        var dom_species_td = document.createElement("td");
+        dom_species_tr.appendChild(dom_species_td);
+        dom_species_td.setAttribute("class", "select_species_cell");
+        dom_species_td.setAttribute("onclick", "last_opened_menu = ''; current_species = '" + species_name + "'; load_data(true);");        
+        dom_species_td.setAttribute("type", "radio");
+        dom_species_td.setAttribute("value", species_name);
+        dom_species_td.setAttribute("name", "species");
+        dom_species_td.setAttribute("id", "species_" + species_name);
+        if (species_counter++ == 0) current_species = species_name;
+        dom_species_td.innerHTML = supported_species[species_name];
+    }
     
     
     var xmlhttp_search = new XMLHttpRequest();

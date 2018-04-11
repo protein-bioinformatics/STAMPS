@@ -200,28 +200,24 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     string sql_prepare = "SELECT r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n FROM (SELECT id, precursorCharge, precursorMZ, peptideModSeq FROM RefSpectra WHERE id = ?) r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY r.id;";
     sqlite3_prepare_v2(db, sql_prepare.c_str(), -1, &stmt, 0);
     
-    char buffer[20];
+    
+    
     for(const auto& sd_pair : spectrum_dict){
         spectrum* s = sd_pair.second;
         sqlite3_bind_int(stmt, 1, s->id);
         int rc = sqlite3_step(stmt);
-        // encode charge
-        sprintf(buffer, "%i", sqlite3_column_int(stmt, 0));
-        s->charge = buffer;
-        // encode mass
-        sprintf(buffer, "%0.5f", sqlite3_column_double(stmt, 1));
-        s->mass = buffer;
+        s->charge = (char*)sqlite3_column_text(stmt, 0);
+        s->mass = (char*)sqlite3_column_text(stmt, 1);
         s->mod_sequence = (char*)sqlite3_column_text(stmt, 2);
         s->tissues = (char*)sqlite3_column_text(stmt, 3);
         s->tissue_numbers = (char*)sqlite3_column_text(stmt, 4);
         sqlite3_clear_bindings(stmt);
         sqlite3_reset(stmt);
+        
+        
     }
     sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, &zErrMsg);
     sqlite3_finalize(stmt);
-    
-    
-    
     
     
     sqlite3_close(db);
@@ -251,8 +247,8 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
 
 
 main(int argc, char** argv) {
-    bool compress = true;
-    bool caching = true;
+    bool compress = false;
+    bool caching = false;
     bool via_accessions = false;
     bool via_ids = false;
     bool via_loci = false;

@@ -44,8 +44,8 @@ metabolite_current_page = 0;
 metabolite_create_action = true;
 
 
-manage_sort_columns = {"proteins": {}, "pathways": {}, "metabolites": {}};
-manage_columns = {"proteins": [], "pathways": [], "metabolites": []};
+manage_sort_columns = {"pathway_groups": {}, "proteins": {}, "pathways": {}, "metabolites": {}};
+manage_columns = {"pathway_groups": [], "proteins": [], "pathways": [], "metabolites": []};
 manage_current_entry = "proteins";
 manage_sort_column = 1;
 manage_max_pages = -1;
@@ -61,6 +61,11 @@ multiple_selection = new Set();
 
 
 function init(){
+    preview_element = new preview();
+    select_field_element = new select_field();
+    select_field_element.visible = false;
+    get_pathway_groups();
+    
     // get pathways
     var xmlhttp_pathways = new XMLHttpRequest();
     xmlhttp_pathways.onreadystatechange = function() {
@@ -72,6 +77,25 @@ function init(){
     }
     xmlhttp_pathways.open("GET", "/qsdb/cgi-bin/get-pathways.bin?all", true);
     xmlhttp_pathways.send();
+    
+    
+    var ss_table = document.getElementById("select_species_table");
+    var species_counter = 0;
+    for (var species_name in supported_species){
+        var dom_species_tr = document.createElement("tr");
+        ss_table.appendChild(dom_species_tr);
+        
+        var dom_species_td = document.createElement("td");
+        dom_species_tr.appendChild(dom_species_td);
+        dom_species_td.setAttribute("class", "select_species_cell");
+        dom_species_td.setAttribute("onclick", "last_opened_menu = ''; current_species = '" + species_name + "'; load_data();");        
+        dom_species_td.setAttribute("type", "radio");
+        dom_species_td.setAttribute("value", species_name);
+        dom_species_td.setAttribute("name", "species");
+        dom_species_td.setAttribute("id", "species_" + species_name);
+        if (species_counter++ == 0) current_species = species_name;
+        dom_species_td.innerHTML = supported_species[species_name];
+    }
     
     
     var ctx = document.getElementById("renderarea").getContext("2d");
@@ -187,6 +211,23 @@ function init(){
     xmlhttp_meta_col.send();
     
     
+    var xmlhttp_pg_col = new XMLHttpRequest();
+    xmlhttp_pg_col.onreadystatechange = function() {
+        if (xmlhttp_pg_col.readyState == 4 && xmlhttp_pg_col.status == 200) {
+            var request = JSON.parse(xmlhttp_pg_col.responseText);
+            for (var i = 1; i < request.length; ++i){
+                manage_sort_columns["pathway_groups"][i.toString()] = request[i] + ":ASC";
+                manage_sort_columns["pathway_groups"][(-i).toString()] = request[i] + ":DESC";
+                manage_columns["pathway_groups"].push(request[i]);
+            }
+            manage_change_entity("pathway_groups");
+            resize_manage_view();
+        }
+    }
+    xmlhttp_pg_col.open("GET", "/qsdb/admin/cgi-bin/manage-entries.bin?action=get&type=pathway_groups_col", true);
+    xmlhttp_pg_col.send();
+    
+    
     var xmlhttp_pw_col = new XMLHttpRequest();
     xmlhttp_pw_col.onreadystatechange = function() {
         if (xmlhttp_pw_col.readyState == 4 && xmlhttp_pw_col.status == 200) {
@@ -196,8 +237,6 @@ function init(){
                 manage_sort_columns["pathways"][(-i).toString()] = request[i] + ":DESC";
                 manage_columns["pathways"].push(request[i]);
             }
-            manage_change_entity("pathways");
-            resize_manage_view();
         }
     }
     xmlhttp_pw_col.open("GET", "/qsdb/admin/cgi-bin/manage-entries.bin?action=get&type=pathways_col", true);
@@ -1736,6 +1775,7 @@ function manage_change_entity(entity){
     var dom_th_nav_del = document.createElement("td");
     dom_tr.appendChild(dom_th_nav_del);
     dom_th_nav_del.innerHTML = "&nbsp;";
+    dom_th_nav_del.setAttribute("style", "cursor: pointer; min-width: 34px; max-width: 34px;");
     for (var i = 0; i < manage_columns[entity].length; ++i){
         var dom_td = document.createElement("td");
         dom_tr.appendChild(dom_td);
@@ -1746,10 +1786,15 @@ function manage_change_entity(entity){
         dom_input.setAttribute("id", "editor_select_manage_table_filter_" + i.toString());
         dom_input.setAttribute("onkeyup", "manage_current_page = 0; manage_fill_table();");
     }
+    var dom_td_filler = document.createElement("td");
+    dom_tr.appendChild(dom_td_filler);
+    dom_td_filler.setAttribute("style", "width: 100%; box-sizing: border-box;");
     resize_manage_view();
 }
 
-
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
 
 function manage_fill_table(){
     
@@ -1789,10 +1834,14 @@ function manage_fill_table(){
         dom_th_name.innerHTML = col_name + ((manage_sort_column == i) ? " " + sign_up : ((manage_sort_column == -i) ? " " + sign_down : ""));
         if (manage_current_entry == "proteins" && i == 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
         else if (manage_current_entry == "metabolites" && i == 5) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
-        else if (manage_current_entry == "pathways") dom_th_name.setAttribute("style", "cursor: pointer; min-width: 100%; max-width: 100%;");
+        else if (manage_current_entry == "pathways" && i == 1) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 600px; max-width: 600px;");
+        else if (manage_current_entry == "pathways" && i == 2) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 300px; max-width: 300px;");
+        else if (manage_current_entry == "pathway_groups" && i == 1) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 700px; max-width: 700px;");
         else dom_th_name.setAttribute("style", "cursor: pointer; min-width: 200px; max-width: 200px;");
     }
-    
+    var dom_th_name_filler = document.createElement("th");
+    dom_table_header.appendChild(dom_th_name_filler);
+    dom_th_name_filler.setAttribute("style", "min-width: 100%; max-width: 100%;");
     
     
     var dom_nav_cell = document.getElementById("editor_manage_page_navigation");
@@ -1876,8 +1925,24 @@ function manage_fill_table(){
             var global_manage_data_sorted = [];
             for (var manage_id in global_manage_data) global_manage_data_sorted.push(global_manage_data[manage_id]);
             global_manage_data_sorted = global_manage_data_sorted.sort(function(a, b) {
-                if (manage_sort_column > 0) return a[manage_sort_column].localeCompare(b[manage_sort_column]);
-                return b[-manage_sort_column].localeCompare(a[-manage_sort_column]);
+                
+                if (manage_sort_column > 0) {
+                    if (isNumeric(a[manage_sort_column]) && isNumeric(b[manage_sort_column])){
+                        return parseInt(a[manage_sort_column]) > parseInt(b[manage_sort_column]);
+                    }
+                    else {
+                        return a[manage_sort_column].localeCompare(b[manage_sort_column]);
+                    }
+                    
+                }
+                else {
+                    if (isNumeric(a[-manage_sort_column]) && isNumeric(b[-manage_sort_column])){
+                        return parseInt(a[-manage_sort_column]) <= parseInt(b[-manage_sort_column]);
+                    }
+                    else {
+                        return b[-manage_sort_column].localeCompare(a[-manage_sort_column]);
+                    }
+                }
             });
             
             
@@ -1917,16 +1982,19 @@ function manage_fill_table(){
                             var dom_option1 = document.createElement("option");
                             dom_select.appendChild(dom_option1);
                             dom_option1.innerHTML = "is";
+                            dom_option1.value = "is";
                             if (row[j] == "is") selected_option = 0;
                             
                             var dom_option2 = document.createElement("option");
                             dom_select.appendChild(dom_option2);
                             dom_option2.innerHTML = "prm";
+                            dom_option2.value = "prm";
                             if (row[j] == "prm") selected_option = 1;
                             
                             var dom_option3 = document.createElement("option");
                             dom_select.appendChild(dom_option3);
                             dom_option3.innerHTML = "topn";
+                            dom_option3.value = "topn";
                             if (row[j] == "topn") selected_option = 2;
                             
                             dom_select.selectedIndex = selected_option;
@@ -1944,6 +2012,7 @@ function manage_fill_table(){
                                 var dom_option = document.createElement("option");
                                 dom_select.appendChild(dom_option);
                                 dom_option.innerHTML = chromosomes["mouse"][k];
+                                dom_option.value = chromosomes["mouse"][k];
                                 if (row[j] == chromosomes["mouse"][k]) selected_option = k;
                             }
                             dom_select.selectedIndex = selected_option;
@@ -1985,6 +2054,7 @@ function manage_fill_table(){
                             var dom_option = document.createElement("option");
                             dom_select.appendChild(dom_option);
                             dom_option.innerHTML = "mouse";
+                            dom_option.value = "mouse";
                             dom_select.field_len = 200;
                         }
                         else {
@@ -2063,25 +2133,111 @@ function manage_fill_table(){
                     dom_image.setAttribute("onclick", "document.getElementById('confirm_deletion_hidden').value = 'manage_delete_pathway';  document.getElementById('confirm_deletion_hidden_id').value = " + row[0] + "; document.getElementById('confirm_deletion_input').value = ''; document.getElementById('confirm_deletion').style.display = 'inline';");
                     
                     
+                    var sorted_pathway_groups = [];
+                    for (var pg_id in pathway_groups) sorted_pathway_groups.push([pathway_groups[pg_id][1], pg_id]);
+                    sorted_pathway_groups.sort();
                     
                     for (var j = 1; j < row.length; ++j){
                         var dom_td = document.createElement("td");
                         dom_tr.appendChild(dom_td);
                         dom_td.setAttribute("bgcolor", bg_color);
                         
-                        var dom_div = document.createElement("div");
-                        dom_td.appendChild(dom_div);
-                        dom_td.setAttribute("style", "min-width: 860px; max-width: 860px;");
-                        dom_div.setAttribute("onclick", "change_textarea_type(this, true);");
-                        dom_div.setAttribute("style", "padding: 5px;");
-                        dom_div.innerHTML = trim_text(row[j], 840);
-                        dom_div.entity_id = row[0];
-                        dom_div.col_id = j;
-                        dom_div.field_len = 860;
+                        if (j == 1){
+                            var dom_div = document.createElement("div");
+                            dom_td.appendChild(dom_div);
+                            dom_td.setAttribute("style", "min-width: 600px; max-width: 600px;");
+                            dom_div.setAttribute("onclick", "change_textarea_type(this, true);");
+                            dom_div.setAttribute("style", "padding: 5px;");
+                            dom_div.innerHTML = trim_text(row[j], 580);
+                            dom_div.entity_id = row[0];
+                            dom_div.col_id = j;
+                            dom_div.field_len = 580;
+                        }
+                        else if (j == 2){                            
+                            var dom_select = document.createElement("select");
+                            dom_td.appendChild(dom_select);
+                            dom_select.setAttribute("style", "min-width: 300px; max-width: 300px;");
+                            var selected_option = 0;
+                            var k = 0;
+                            for (var group_row of sorted_pathway_groups){
+                                var pg_id = group_row[1];
+                                var dom_option = document.createElement("option");
+                                dom_select.appendChild(dom_option);
+                                dom_option.innerHTML = group_row[0];
+                                dom_option.value = pg_id;
+                                if (parseInt(row[j]) == parseInt(pg_id)) selected_option = k;
+                                ++k;
+                            }
+                            dom_select.selectedIndex = selected_option;
+                            dom_select.setAttribute("onchange", "change_select_type(this);");
+                            dom_select.entity_id = row[0];
+                            dom_select.col_id = j;
+                        }
                     }
+                    var dom_td_filler = document.createElement("td");
+                    dom_tr.appendChild(dom_td_filler);
+                    dom_td_filler.setAttribute("style", "width: 100%; box-sizing: border-box;");
                 }
             }
             
+            
+            
+            
+            else if (manage_current_entry == "pathway_groups"){
+    
+                for (var i = 0; i < global_manage_data_sorted.length; ++i){
+                    var bg_color = (i & 1) ? "#DDDDDD" : "white";
+                    var row = global_manage_data_sorted[i];
+                    
+                    var dom_tr = document.createElement("tr");
+                    dom_table.appendChild(dom_tr);
+                    var dom_td_del = document.createElement("td");
+                    dom_tr.appendChild(dom_td_del);
+                    dom_td_del.setAttribute("bgcolor", bg_color);
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                    var dom_image = document.createElement("img");
+                    dom_td_del.appendChild(dom_image);
+                    dom_image.setAttribute("src", "../images/delete-small.png");
+                    dom_image.setAttribute("onclick", "document.getElementById('confirm_deletion_hidden').value = 'manage_delete_pathway';  document.getElementById('confirm_deletion_hidden_id').value = " + row[0] + "; document.getElementById('confirm_deletion_input').value = ''; document.getElementById('confirm_deletion').style.display = 'inline';");
+                    
+                    
+                    
+                    for (var j = 1; j < row.length; ++j){
+                        var dom_td = document.createElement("td");
+                        dom_tr.appendChild(dom_td);
+                        dom_td.setAttribute("bgcolor", bg_color);
+                        var dom_div = document.createElement("div");
+                        dom_td.appendChild(dom_div);
+                        if (j == 1){
+                            dom_td.setAttribute("style", "min-width: 700px; max-width: 700px;");
+                            dom_div.setAttribute("onclick", "change_textarea_type(this, true);");
+                        }
+                        else {
+                            dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                            dom_div.setAttribute("onclick", "change_textfield_type(this, true);");
+                        }
+                        dom_div.setAttribute("style", "padding: 5px;");
+                        dom_div.innerHTML = trim_text(row[j], dom_div.offsetWidth - 20);
+                        dom_div.entity_id = row[0];
+                        dom_div.col_id = j;
+                        dom_div.field_len = dom_div.offsetWidth - 20;
+                    }
+                    
+                    
+                    var dom_td_filler = document.createElement("td");
+                    dom_tr.appendChild(dom_td_filler);
+                    dom_td_filler.setAttribute("style", "width: 100%; box-sizing: border-box;");
+                }
+            }
+            
+            for (var i = 0; i < 5; ++i){
+                var dom_tr_filler_1 = document.createElement("tr");
+                dom_table.appendChild(dom_tr_filler_1);
+                var dom_td_filler_1 = document.createElement("td");
+                dom_tr_filler_1.appendChild(dom_td_filler_1);
+                dom_td_filler_1.innerHTML = "&nbsp;"
+            }
         }
     }
     xmlhttp_manage.open("GET", request, false);
@@ -2198,6 +2354,7 @@ function change_select_type(dom_obj){
     var col_id = dom_obj.col_id;
     var content = dom_obj[dom_obj.selectedIndex].value;
     var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + content;
+    
        
     var result = update_entry(request);
     if (!result){
@@ -2318,6 +2475,13 @@ function change_textarea_type(dom_obj, to_text){
                 }
                 draw();
             }
+            else if (manage_current_entry == "pathways" && manage_columns[manage_current_entry][col_id - 1] == "pathway_group_id"){
+                set_pathway_menu();
+            }
+            else if (manage_current_entry == "pathway_groups"){
+                
+                set_pathway_menu();
+            }
             manage_fill_table();
         }
         parent.innerHTML = "";
@@ -2337,7 +2501,7 @@ function change_textarea_type(dom_obj, to_text){
 
 
 function resize_manage_view(){
-    var window_width_factor = (manage_current_entry == "pathways") ? 0.5 : 0.9;
+    var window_width_factor = (manage_current_entry == "pathways" || manage_current_entry == "pathway_groups") ? 0.5 : 0.9;
     
     
     // set height of manage selection window

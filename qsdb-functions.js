@@ -10,7 +10,10 @@ null_x = 0;
 null_y = 0;
 mouse_x = 0;
 mouse_y = 0;
+zoom_options = [0, 0, 0];
 filter_parameters = {};
+supported_species = {"mouse": "Mouse", "human": "Human", "rat": "Rat"};
+current_species = "";
 filter_parameters["min_peptide_length"] = 8;
 filter_parameters["max_peptide_length"] = 25;
 filter_parameters["min_precursor_charge"] = 2;
@@ -36,6 +39,7 @@ filter_parameters["protein_tissues_visible"] = true;
 filter_parameters["peptide_tissues_visible"] = false;
 last_opened_menu = "";
 navigation_content = [];
+pathway_groups = {};
 data = {};
 edge_data = 0;
 node_move_x = 0;
@@ -474,26 +478,55 @@ function draw(sync){
 }
 
 function set_pathway_menu(){
-    var pathway_menu = "<table>";
-    var sorted_pathways = [];
-    for (var pathway_id in pathways){
-        sorted_pathways.push([pathway_id, pathways[pathway_id]]);
-    }
-    sorted_pathways.sort(function(a, b) {
-        return a[1].localeCompare(b[1]);
+    if (Object.keys(pathways).length === 0 || Object.keys(pathway_groups).length === 0) return;
+    
+    var sorted_groups = [];
+    for (var pg_id in pathway_groups) sorted_groups.push([pathway_groups[pg_id][3], pg_id]);
+    sorted_groups.sort(function(a, b){
+        return parseInt(a) <= parseInt(b);
     });
     
-    for (var i = 0; i < sorted_pathways.length; ++i){
-        var selected = (sorted_pathways[i][0] == current_pathway) ? "selected_pathway_cell" : "select_pathway_cell";
-        pathway_menu += "<tr><td class=\"" + selected + "\" onclick=\"change_pathway(";
-        pathway_menu += sorted_pathways[i][0];
-        pathway_menu += ");\">";
-        var pathway_name = sorted_pathways[i][1];
-        pathway_name = replaceAll(pathway_name, "-\\n", "");
-        pathway_name = replaceAll(pathway_name, "\n", " ");
-        pathway_menu += pathway_name; 
+    var pathway_menu = "<table id=\"pathway_menu\">";
+    for (var row of sorted_groups){
+        var pg_id = row[1];
+        pathway_menu += "<tr><td class=\"select_pathway_cell\" onclick=\"  \
+            var pw_menu = document.getElementById('pathway_menu'); \
+            for (var child of pw_menu.children[0].children){ \
+                if (child.id == 'pg_" + pg_id + "') { \
+                    if (child.style.display == 'none') child.style.display = 'table-row'; \
+                    else child.style.display = 'none'; \
+                } \
+            }\">";
+        pathway_menu += pathway_groups[pg_id][1];
         pathway_menu += "</td></tr>";
+        
+        var sorted_pathways = [];
+        for (pathway_id of pathway_groups[pg_id][2]){
+            if (pathway_id in pathways) sorted_pathways.push([pathway_id, pathways[pathway_id]]);
+        }
+        sorted_pathways.sort(function(a, b) {
+            return a[1].localeCompare(b[1]);
+        });
+        
+        for (var i = 0; i < sorted_pathways.length; ++i){
+            var selected = (sorted_pathways[i][0] == current_pathway) ? "selected_pathway_cell" : "select_pathway_cell";
+            pathway_menu += "<tr id=\"pg_" + pg_id + "\" style=\"display: none;\"><td class=\"" + selected + "\" onclick=\" \
+                var pw_menu = document.getElementById('pathway_menu'); \
+                for (var child of pw_menu.children[0].children){ \
+                    child.children[0].className = 'select_pathway_cell'; \
+                } \
+                this.className = 'selected_pathway_cell'; \
+                change_pathway(";
+            pathway_menu += sorted_pathways[i][0];
+            pathway_menu += ");\">&nbsp;&nbsp;&nbsp;&nbsp;";
+            var pathway_name = sorted_pathways[i][1];
+            pathway_name = replaceAll(pathway_name, "-\\n", "");
+            pathway_name = replaceAll(pathway_name, "\n", " ");
+            pathway_menu += pathway_name; 
+            pathway_menu += "</td></tr>";
+        }
     }
+    
     pathway_menu += "</table>";
     document.getElementById("select_pathway").innerHTML = pathway_menu;
 }
@@ -1602,6 +1635,8 @@ function node(data){
         }
         
         this.width += 50 + this.slide * 20;
+        this.height *= factor;
+        this.width *= factor;
         this.name = name;
         //this.tipp = (name.length || true);
         this.tipp = false;
@@ -1803,6 +1838,8 @@ function node(data){
                 }
                 
                 this.proteins.sort(function(a, b) {
+                    if (!(a in protein_dictionary)) console.log(a);
+                    
                     return protein_dictionary[a].name > protein_dictionary[b].name;
                 });
                 
@@ -3139,14 +3176,14 @@ function assemble_elements(skip_rest){
     for (var i = 0; i < edges.length; ++i) elements.push(edges[i]);    
     for (var node_id in data) elements.push(data[node_id]);
     if (typeof skip_rest == 'undefined') {
-        elements.push(infobox);
-        elements.push(zoom_sign_in);
-        elements.push(zoom_sign_out);
-        elements.push(expand_obj);
-        elements.push(collapse_obj);
-        elements.push(preview_element);
-        elements.push(select_field_element);
-        elements.push(current_pathway_title);
+        if (infobox != 0) elements.push(infobox);
+        if (zoom_sign_in != 0) elements.push(zoom_sign_in);
+        if (zoom_sign_out != 0) elements.push(zoom_sign_out);
+        if (expand_obj != 0) elements.push(expand_obj);
+        if (collapse_obj != 0) elements.push(collapse_obj);
+        if (preview_element != 0) elements.push(preview_element);
+        if (select_field_element != 0) elements.push(select_field_element);
+        if (current_pathway_title != 0) elements.push(current_pathway_title);
     }
 }
 
@@ -3248,7 +3285,6 @@ function change_pathway(p){
     
     if (p in pathways){
         current_pathway = p;
-        set_pathway_menu();
         update_browser_link();
         document.title = "QSDB Home - " + pathways[p];
         load_data();
@@ -3310,7 +3346,7 @@ function download_assay(){
     
     var xmlhttp = new XMLHttpRequest();
     var download_link = "";
-    var request = "cgi-bin/prepare-download.py?spectra=" + spectra_list + "&proteins=" + proteins_list + "&species=mouse";
+    var request = "cgi-bin/prepare-download.py?spectra=" + spectra_list + "&proteins=" + proteins_list + "&species=" + current_species;
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             download_link = xmlhttp.responseText;
@@ -3793,6 +3829,19 @@ function check_spectra(){
 }
 
 
+function get_pathway_groups(){
+    // get pathway groups
+    var xmlhttp_pg = new XMLHttpRequest();
+    xmlhttp_pg.onreadystatechange = function() {
+        if (xmlhttp_pg.readyState == 4 && xmlhttp_pg.status == 200) {
+            pathway_groups = JSON.parse(xmlhttp_pg.responseText);
+            for (pg_id in pathway_groups) pathway_groups[pg_id][2] = new Set(pathway_groups[pg_id][2].split(","));
+            set_pathway_menu();
+        }
+    }
+    xmlhttp_pg.open("GET", "/qsdb/cgi-bin/get-pathway-groups.py", false);
+    xmlhttp_pg.send();
+}
 
 
 function open_accession_search(){
@@ -4379,49 +4428,45 @@ function load_data(reload){
     pathway_is_loaded = false;
     if (!reload){
         reset_view();
-        close_navigation();
     }
-    
-    
-    elements = [];
-    edges = [];
-    clearInterval(highlighting);
-    infobox.visible = false;
+    close_navigation();
     collapse_statistics();
     
     
     
+    // reset current information
+    if(!reload){
+        data = {};
+        edge_data = 0;
+        edges = [];
+    }
+    else {
+        for (var node_id in data){
+            if (data[node_id].type == "protein"){
+                var protein_node = data[node_id];
+                protein_node.proteins = [];
+                protein_node.fill_style = protein_disabled_fill_color;
+                protein_node.setup_protein_meta();
+            }
+        }
+    }
+    var tmp_data = 0;
+    elements = [];
+    clearInterval(highlighting);
+    infobox.visible = false;
+    
     
     var c = document.getElementById("renderarea");
-    //c.style.display = "none";
     var ctx = c.getContext("2d");
     
-    infobox = new Infobox();
-    zoom_sign_in = new zoom_sign(1);
-    zoom_sign_out = new zoom_sign(0);
-    expand_obj = new expand_collapse(1);
-    collapse_obj = new expand_collapse(0);
-    preview_element = new preview();
-    select_field_element = new select_field();
-    select_field_element.visible = false;
     collapse_obj.visible = false;
     current_pathway_title = new pathway_title();
     
     
-    var species = [];
-    if(document.getElementById("species_mouse").checked) species.push("mouse");
-    //if(document.getElementById("species_human").checked) species.push("human");
-    var species_string = species.join(":");
-    
-    // get data information
-    data = {};
-    var tmp_data = 0;
-    edge_data = 0;
     protein_dictionary = {};
     for (prot_id in basket) protein_dictionary[prot_id] = basket[prot_id];
     
     
-    toggled_proteins = new Set();
     process_edges_semaphore = false;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -4439,7 +4484,7 @@ function load_data(reload){
     }
     
     
-    xmlhttp.open("GET", "/qsdb/cgi-bin/get-nodes.bin?pathway=" + current_pathway + "&species=" + species_string, true);
+    xmlhttp.open("GET", "/qsdb/cgi-bin/get-nodes.bin?pathway=" + current_pathway + "&species=" + current_species, true);
     xmlhttp.send();
     
     
@@ -4447,34 +4492,24 @@ function load_data(reload){
     xmlhttp_edge.send();
     
     
-    
     var x_min = 1e100, x_max = -1e100;
     var y_min = 1e100, y_max = -1e100;
     var preview_zoom = 0, m_zoom = 0;
     var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
     
-    
-    
     var process_nodes = setInterval(function(){
         if (tmp_data){
-            for (var i = 0; i < tmp_data.length; ++i){
-                var new_node = new node(tmp_data[i]);
-                data[new_node.id] = new_node;
-                x_min = Math.min(x_min, new_node.x - new_node.width * 0.5);
-                x_max = Math.max(x_max, new_node.x + new_node.width * 0.5);
-                y_min = Math.min(y_min, new_node.y - new_node.height * 0.5);
-                y_max = Math.max(y_max, new_node.y + new_node.height * 0.5);
-            }
-            if (reload){
-                for (var node_id in data){
-                    data[node_id].move(null_x, null_y);
-                    data[node_id].width *= factor;
-                    data[node_id].height *= factor;
-                    data[node_id].x = null_x + factor * (data[node_id].x - null_x);
-                    data[node_id].y = null_y + factor * (data[node_id].y - null_y);
-                }
-            }
             if (!reload){
+                
+                for (var i = 0; i < tmp_data.length; ++i){
+                    var new_node = new node(tmp_data[i]);
+                    data[new_node.id] = new_node;
+                    x_min = Math.min(x_min, new_node.x - new_node.width * 0.5);
+                    x_max = Math.max(x_max, new_node.x + new_node.width * 0.5);
+                    y_min = Math.min(y_min, new_node.y - new_node.height * 0.5);
+                    y_max = Math.max(y_max, new_node.y + new_node.height * 0.5);
+                }
+                
                 var shift_x = (ctx.canvas.width - x_min - x_max) * 0.5;
                 var shift_y = nav_height + (ctx.canvas.height - nav_height - y_min - y_max) * 0.5;
                 for (var node_id in data){
@@ -4492,7 +4527,47 @@ function load_data(reload){
                     m_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height)) / Math.log(scaling));
                     preview_zoom = -Math.ceil(Math.log((y_max - y_min) / (ctx.canvas.height - nav_height) * 5) / Math.log(scaling));
                 }
+                
+                zoom_options[0] = preview_zoom;
+                zoom_options[1] = m_zoom;
             }
+            
+            else {
+                zoom_options[2] = zoom;
+                for (var i = 0; i < tmp_data.length; ++i){
+                    var t_data = tmp_data[i];
+                    if (t_data['t'] != "protein") continue;
+                    var node_id = t_data['i'];
+                    var protein_node = data[node_id];
+                    protein_node.fill_style = protein_disabled_fill_color;
+                    if (!('p' in t_data)){
+                        protein_node.setup_protein_meta();
+                        continue;
+                    }
+                    
+                    for (var j = 0; j < t_data['p'].length; ++j){
+                        var prot = 0;
+                        var prot_id = t_data['p'][j]['i'];
+                        
+                        if (prot_id in protein_dictionary){
+                            prot = protein_dictionary[prot_id];
+                        }
+                        else {
+                            prot = new Protein(t_data['p'][j]);
+                            protein_dictionary[prot_id] = prot;
+                        }
+                        
+                        protein_node.proteins.push(prot_id);
+                        protein_node.containing_spectra += prot.containing_spectra;
+                        protein_node.fill_style = protein_fill_color;
+                    }
+                    protein_node.setup_protein_meta();
+                }
+            }
+            
+            
+            
+            
             process_edges_semaphore = true;
             clearInterval(process_nodes);
             
@@ -4504,23 +4579,29 @@ function load_data(reload){
                 }
             }
             
-            xmlhttp_prot.open("GET", "/qsdb/cgi-bin/get-proteins.bin?pathway=" + current_pathway + "&species=mouse", true);
+            xmlhttp_prot.open("GET", "/qsdb/cgi-bin/get-proteins.bin?pathway=" + current_pathway + "&species=" + current_species, true);
             xmlhttp_prot.send();
         }
     }, 1);
         
-    
+        
     var process_edges = setInterval(function(){
         if (tmp_data && edge_data && process_edges_semaphore){
             compute_edges();
             assemble_elements(1);
-            min_zoom = preview_zoom;
-            for (var i = zoom; i >= preview_zoom; --i) zoom_in_out(1, 0);
-            draw(1);
-            preview_element.snapshot();
+            
+            //if (!reload){
+                min_zoom = zoom_options[0];
+                for (var i = zoom; i >= min_zoom; --i) zoom_in_out(1, 0);
+                draw(1);
+                preview_element.snapshot();
+                assemble_elements();
+                var t_zoom = reload ? zoom_options[2] : zoom_options[1];
+                for (var i = 0; i < (t_zoom - zoom_options[0]); ++i) zoom_in_out(0, 0);
+                min_zoom = zoom_options[1];
+            //}
+            
             assemble_elements();
-            for (var i = 0; i < (m_zoom - preview_zoom); ++i) zoom_in_out(0, 0);
-            min_zoom = m_zoom;
             draw(1);
             pathway_is_loaded = true;
             c.style.display = "inline";
@@ -4563,7 +4644,7 @@ function accession_search_parse_accessions(accessions, synchronous){
         }
     }
     
-    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?accessions=" + accessions + "&species=mouse", synchronous);
+    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?accessions=" + accessions + "&species=" + current_species, synchronous);
     xmlhttp.send();
 }
 
@@ -4606,7 +4687,7 @@ function locus_search_request_data(){
     }
     
     // request proteins
-    var request = "/qsdb/cgi-bin/get-proteins.bin?loci=" + IDs + "&species=mouse";
+    var request = "/qsdb/cgi-bin/get-proteins.bin?loci=" + IDs + "&species=" + current_species;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -4643,7 +4724,7 @@ function function_search_request_data(){
         }
     }
     
-    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?functions=" + IDs + "&species=mouse", true);
+    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?functions=" + IDs + "&species=" + current_species, true);
     xmlhttp.send();
 }
 
@@ -4664,7 +4745,7 @@ function chromosome_search_request_data(){
     }
     
     // request proteins
-    var request = "/qsdb/cgi-bin/get-proteins.bin?accessions=" + accessionIDs + "&species=mouse";
+    var request = "/qsdb/cgi-bin/get-proteins.bin?accessions=" + accessionIDs + "&species=" + current_species;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {

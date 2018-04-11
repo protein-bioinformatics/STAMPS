@@ -203,7 +203,8 @@ string spectrum::to_string(){
     replaceAll(mod_mod_sequence, "M[+16.0]", "m");
     replaceAll(mod_mod_sequence, "C[+57.0]", "c");
     float theo_mass = compute_mass(mod_mod_sequence);
-    float observ_mass = atof(mass.c_str()) * atoi(charge.c_str()) - (atoi(charge.c_str()) - 2) * 1.007276;
+    float chg = atof(charge.c_str());
+    float observ_mass = atof(mass.c_str()) * chg - (chg - 2) * 1.007276 - chg * 0.00054857990946;
     float ppm = (observ_mass - theo_mass) / theo_mass * 1000000.;
     char ppm_str[50];
     sprintf(ppm_str, "%0.5f", ppm);

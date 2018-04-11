@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
         
         chromosome_band* cb = new chromosome_band();
         cb->chromosome;
-        cb->arm = res->getString("chromosome");
+        cb->arm = res->getString("arm");
         cb->name = res->getString("name");
         cb->start = res->getString("start");
         cb->end = res->getString("end");
