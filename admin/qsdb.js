@@ -52,7 +52,7 @@ manage_max_pages = -1;
 manage_current_page = 0;
 
 max_per_page = 30;
-chromosomes = {"mouse": []};
+chromosomes = {};
 draw_anchor_start = "";
 draw_anchor_end = "";
 
@@ -78,25 +78,7 @@ function init(){
     xmlhttp_pathways.open("GET", "/qsdb/cgi-bin/get-pathways.bin?all", true);
     xmlhttp_pathways.send();
     
-    
-    var ss_table = document.getElementById("select_species_table");
-    var species_counter = 0;
-    for (var species_name in supported_species){
-        var dom_species_tr = document.createElement("tr");
-        ss_table.appendChild(dom_species_tr);
-        
-        var dom_species_td = document.createElement("td");
-        dom_species_tr.appendChild(dom_species_td);
-        dom_species_td.setAttribute("class", "select_species_cell");
-        dom_species_td.setAttribute("onclick", "last_opened_menu = ''; current_species = '" + species_name + "'; load_data();");        
-        dom_species_td.setAttribute("type", "radio");
-        dom_species_td.setAttribute("value", species_name);
-        dom_species_td.setAttribute("name", "species");
-        dom_species_td.setAttribute("id", "species_" + species_name);
-        if (species_counter++ == 0) current_species = species_name;
-        dom_species_td.innerHTML = supported_species[species_name];
-    }
-    
+    set_species_menu();
     
     var ctx = document.getElementById("renderarea").getContext("2d");
     ctx.font = "17px serif";
@@ -118,26 +100,43 @@ function init(){
     
     
     // get chromosomes
-    var xmlhttp_chr = new XMLHttpRequest();
-    xmlhttp_chr.onreadystatechange = function() {
-        if (xmlhttp_chr.readyState == 4 && xmlhttp_chr.status == 200) {
-            var ideom_data = JSON.parse(xmlhttp_chr.responseText);
-            for (var chr in ideom_data) chromosomes["mouse"].push(chr);
-            chromosomes["mouse"].sort(function(a, b) {
-                var int_a = parseInt(a);
-                var int_b = parseInt(b);
-                if (!isNaN(int_a) && !isNaN(int_b)){
-                    return -1 + 2 * (int_a > int_b);
-                }
-                else {
-                    return a.localeCompare(b);
-                }
-            });
-            change_add_manage_proteins_chromosome();
+    var species_count = 0;
+    var tmp_array = [];
+    for (var curr_species in supported_species){
+        chromosomes[curr_species] = [];
+        
+        var species_option = document.createElement("option");
+        document.getElementById("add_manage_proteins_species").appendChild(species_option);
+        
+        species_option.setAttribute("value", curr_species);
+        species_option.innerHTML = supported_species[curr_species];
+        
+        tmp_array.push(new XMLHttpRequest());
+        tmp_array[species_count].species = curr_species;
+        tmp_array[species_count].onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                
+                var ideom_data = JSON.parse(this.responseText);
+                for (var chr in ideom_data) chromosomes[this.species].push(chr);
+                chromosomes[this.species].sort(function(a, b) {
+                    var int_a = parseInt(a);
+                    var int_b = parseInt(b);
+                    if (!isNaN(int_a) && !isNaN(int_b)){
+                        return -1 + 2 * (int_a > int_b);
+                    }
+                    else {
+                        return a.localeCompare(b);
+                    }
+                });
+                change_add_manage_proteins_chromosome();
+                
+            }
         }
+        tmp_array[species_count].open("GET", "/qsdb/cgi-bin/get-chromosomes.bin?species=" + curr_species, true);
+        tmp_array[species_count].send();
+        
+        if (species_count++ == 0) species_option.setAttribute("checked", "true");
     }
-    xmlhttp_chr.open("GET", "/qsdb/cgi-bin/get-chromosomes.bin?species=mouse", true);
-    xmlhttp_chr.send();
     
     
     var c = document.getElementById("renderarea");
@@ -1597,8 +1596,9 @@ function editor_fill_protein_table(){
     var request = "action=get&type=proteins";
     request += "&column=" + encodeURL(protein_sort_columns[protein_sort_column]);
     request += "&limit=" + encodeURL((protein_current_page * max_per_page).toString() + ":" + max_per_page.toString());
+    request += "&filters=species:" + current_species;
     if (filter_name != "" || filter_accession != "" || filter_description != ""){
-        request += "&filters=" + encodeURL("name:" + filter_name + ",accession:" + filter_accession + ",definition:" + filter_description);
+        request += encodeURL(",name:" + filter_name + ",accession:" + filter_accession + ",definition:" + filter_description);
     }
     if (filter_node) request += "&checked=" + encodeURL(selected_protein_node);
     request = "/qsdb/admin/cgi-bin/manage-entries.bin?" + request;
@@ -2008,12 +2008,13 @@ function manage_fill_table(){
                             var dom_select = document.createElement("select");
                             dom_td.appendChild(dom_select);
                             var selected_option = 0;
-                            for (var k = 0; k < chromosomes["mouse"].length; ++k){
-                                var dom_option = document.createElement("option");
+                            
+                            for (var k = 0; k < chromosomes[current_species].length; ++k){
+                                var dom_option = document.createElement(current_species);
                                 dom_select.appendChild(dom_option);
-                                dom_option.innerHTML = chromosomes["mouse"][k];
-                                dom_option.value = chromosomes["mouse"][k];
-                                if (row[j] == chromosomes["mouse"][k]) selected_option = k;
+                                dom_option.innerHTML = chromosomes[current_species][k];
+                                dom_option.value = chromosomes[current_species][k];
+                                if (row[j] == chromosomes[current_species][k]) selected_option = k;
                             }
                             dom_select.selectedIndex = selected_option;
                             dom_select.setAttribute("onchange", "change_select_type(this);");
@@ -2051,10 +2052,17 @@ function manage_fill_table(){
                             dom_select.setAttribute("onchange", "change_select_type(this);");
                             dom_select.entity_id = row[0];
                             dom_select.col_id = j;
-                            var dom_option = document.createElement("option");
-                            dom_select.appendChild(dom_option);
-                            dom_option.innerHTML = "mouse";
-                            dom_option.value = "mouse";
+                            var sel_index = 0, iter = 0;
+                            
+                            for (var species_name in supported_species){
+                                var dom_option = document.createElement("option");
+                                dom_select.appendChild(dom_option);
+                                dom_option.innerHTML = supported_species[species_name];
+                                dom_option.value = species_name;
+                                if (species_name == row[j]) sel_index = iter;
+                                ++iter;
+                            }
+                            dom_select.selectedIndex = sel_index;
                             dom_select.field_len = 200;
                         }
                         else {
@@ -2563,7 +2571,6 @@ function hide_manage_entries (){
 
 function change_add_manage_proteins_chromosome(){
     var species = document.getElementById("add_manage_proteins_species")[document.getElementById("add_manage_proteins_species").selectedIndex].value;
-    
     if (species in chromosomes){
         var dom_chromosome_select = document.getElementById("add_manage_proteins_chromosome");
         dom_chromosome_select.innerHTML = "";
@@ -2633,7 +2640,7 @@ function request_protein_data(){
                 var dom_species_select = document.getElementById("add_manage_proteins_species");
                 var selected_index = -1;
                 for (var i = 0; i < dom_species_select.length; ++i){
-                    if (dom_species_select[i].innerHTML == request["species"]){
+                    if (dom_species_select[i].value == request["species"]){
                         selected_index = i;
                         break;
                     }

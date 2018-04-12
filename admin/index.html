@@ -49,7 +49,7 @@
         <table width="100%" height="100%"><tr><td>
                 Select a pathway:
         </td></tr>
-        <tr><td id="editor_select_pathway_cell" valign="top" height="80%">
+        <tr><td id="editor_select_menu_cell" valign="top" height="80%">
             <select id="editor_select_pathway_field" size=5 style="width:400px; height: 100%;"></select>
         </td></tr>
         <tr>
@@ -255,7 +255,7 @@
                             <tr><th width="30%">Accession</th><td><input id="add_manage_proteins_accession" type="text" style="min-width: 90%; max-width: 90%;" onkeyup="if (event.which == '13') this.blur();" onblur="request_protein_data();"></td></tr>
                             <tr><th>Name</th><td><input type="text" id="add_manage_proteins_name" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>Definition</th><td><input id="add_manage_proteins_definition" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
-                            <tr><th>Species</th><td><select id="add_manage_proteins_species" onchange="change_add_manage_proteins_chromosome();"><option checked>mouse</option></select></td></tr>
+                            <tr><th>Species</th><td><select id="add_manage_proteins_species" onchange="change_add_manage_proteins_chromosome();"></select></td></tr>
                             <tr><th>KEGG ID</th><td><input id="add_manage_proteins_kegg" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>EC number</th><td><input id="add_manage_proteins_ec_number" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>Unreviewed</th><td><input id="add_manage_proteins_unreviewed" type="checkbox"></td></tr>

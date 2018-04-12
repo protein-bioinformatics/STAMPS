@@ -375,7 +375,9 @@ div.menu_extend_item {
 
 
 
-td.select_species_cell {
+
+
+td.select_menu_cell {
     border-bottom: 1px dashed #d3d3d3;
     background: white;
     padding: 10px;
@@ -383,16 +385,7 @@ td.select_species_cell {
 }
 
 
-
-td.select_pathway_cell {
-    border-bottom: 1px dashed #d3d3d3;
-    background: white;
-    padding: 10px;
-    cursor: pointer;
-}
-
-
-td.selected_pathway_cell {
+td.selected_menu_cell {
     border-bottom: 1px dashed #d3d3d3;
     background: #eeeeee;
     padding: 10px;
@@ -400,7 +393,7 @@ td.selected_pathway_cell {
 }
 
 
-td.select_pathway_cell:hover {
+td.select_menu_cell:hover {
     border-bottom: 1px dashed #d3d3d3;
     background: #eeeeee;
     padding: 10px;

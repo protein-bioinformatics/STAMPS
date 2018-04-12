@@ -92,23 +92,7 @@ function init(){
     xmlhttp_pw.send();
     
     
-    var ss_table = document.getElementById("select_species_table");
-    var species_counter = 0;
-    for (var species_name in supported_species){
-        var dom_species_tr = document.createElement("tr");
-        ss_table.appendChild(dom_species_tr);
-        
-        var dom_species_td = document.createElement("td");
-        dom_species_tr.appendChild(dom_species_td);
-        dom_species_td.setAttribute("class", "select_species_cell");
-        dom_species_td.setAttribute("onclick", "last_opened_menu = ''; current_species = '" + species_name + "'; load_data(true);");        
-        dom_species_td.setAttribute("type", "radio");
-        dom_species_td.setAttribute("value", species_name);
-        dom_species_td.setAttribute("name", "species");
-        dom_species_td.setAttribute("id", "species_" + species_name);
-        if (species_counter++ == 0) current_species = species_name;
-        dom_species_td.innerHTML = supported_species[species_name];
-    }
+    set_species_menu();
     
     
     var xmlhttp_search = new XMLHttpRequest();
@@ -156,8 +140,6 @@ function init(){
     c.addEventListener('contextmenu', function(event){event.preventDefault(); return false;}, false);
     c.addEventListener("mouseout", mouse_up_listener, false);
     
-    //document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
-    //document.cookie = "";
     
     // cookie treatment
     var cookie_data = document.cookie;
