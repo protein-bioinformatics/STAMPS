@@ -2799,7 +2799,7 @@ function add_manage_metabolites_add(){
 
 
 function go_to_browser(){
-    var view_text = location.hostname + location.pathname + "?pathway=" + current_pathway;
+    var view_text = location.pathname + "browser.html?pathway=" + current_pathway;
     view_text = replaceAll(view_text, "/admin", "");
     location.href = view_text;
 }
