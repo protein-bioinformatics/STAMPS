@@ -1507,7 +1507,7 @@ function Infobox(ctx){
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Exact mass / Da:</b> " + data[this.node_id].exact_mass + "</div>";
             var c_number = data[this.node_id].c_number;
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>C number:</b> <a href='http://www.genome.jp/dbget-bin/www_bget?" + c_number + "' target=\"blank\">" + data[this.node_id].c_number + "</div><br>";
-            if (data[this.node_id].foreign_id != -1) html_content += "<img src='/qsdb/images/metabolites/C" + data[this.node_id].foreign_id + ".png'>";
+            if (data[this.node_id].foreign_id != -1) html_content += "<img src='/stamp/images/metabolites/C" + data[this.node_id].foreign_id + ".png'>";
             
             html_content += "</div>";
             
@@ -1734,7 +1734,7 @@ function node(data){
             this.img = new Image();
             if (this.foreign_id != -1){
                 var load_process = setInterval(function(nd){
-                    nd.img.src = "/qsdb/images/metabolites/C" + nd.foreign_id + ".png";
+                    nd.img.src = "/stamp/images/metabolites/C" + nd.foreign_id + ".png";
                     clearInterval(load_process);
                 }, 1, this);
             }
@@ -3338,7 +3338,7 @@ function change_pathway(p){
     if (p in pathways){
         current_pathway = p;
         update_browser_link();
-        document.title = "QSDB Home - " + pathways[p];
+        document.title = "STAMP Home - " + pathways[p];
         
         var pw_menu = document.getElementById('pathway_menu');
         var pw_group = 0;
@@ -3407,7 +3407,7 @@ function download_assay(){
     }
     
     html = "<table width=100% height=100%><tr><td align=\"center\">";
-    html += "<img src=\"/qsdb/images/ajax-loader.gif\"></td></tr></table>"
+    html += "<img src=\"/stamp/images/ajax-loader.gif\"></td></tr></table>"
     document.getElementById("download").innerHTML = html;
     
     
@@ -3906,7 +3906,7 @@ function get_pathway_groups(){
             set_pathway_menu();
         }
     }
-    xmlhttp_pg.open("GET", "/qsdb/cgi-bin/get-pathway-groups.py", false);
+    xmlhttp_pg.open("GET", "/stamp/cgi-bin/get-pathway-groups.py", false);
     xmlhttp_pg.send();
 }
 
@@ -4551,11 +4551,11 @@ function load_data(reload){
     }
     
     
-    xmlhttp.open("GET", "/qsdb/cgi-bin/get-nodes.bin?pathway=" + current_pathway + "&species=" + current_species, true);
+    xmlhttp.open("GET", "/stamp/cgi-bin/get-nodes.bin?pathway=" + current_pathway + "&species=" + current_species, true);
     xmlhttp.send();
     
     
-    xmlhttp_edge.open("GET", "/qsdb/cgi-bin/get-edges.bin?pathway=" + current_pathway, true);
+    xmlhttp_edge.open("GET", "/stamp/cgi-bin/get-edges.bin?pathway=" + current_pathway, true);
     xmlhttp_edge.send();
     
     
@@ -4624,7 +4624,7 @@ function load_data(reload){
                 }
             }
             
-            xmlhttp_prot.open("GET", "/qsdb/cgi-bin/get-proteins.bin?pathway=" + current_pathway + "&species=" + current_species, true);
+            xmlhttp_prot.open("GET", "/stamp/cgi-bin/get-proteins.bin?pathway=" + current_pathway + "&species=" + current_species, true);
             xmlhttp_prot.send();
         }
     }, 1);
@@ -4687,7 +4687,7 @@ function accession_search_parse_accessions(accessions, synchronous){
         }
     }
     
-    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?accessions=" + accessions + "&species=" + current_species, synchronous);
+    xmlhttp.open("GET", "/stamp/cgi-bin/get-proteins.bin?accessions=" + accessions + "&species=" + current_species, synchronous);
     xmlhttp.send();
 }
 
@@ -4730,7 +4730,7 @@ function locus_search_request_data(){
     }
     
     // request proteins
-    var request = "/qsdb/cgi-bin/get-proteins.bin?loci=" + IDs + "&species=" + current_species;
+    var request = "/stamp/cgi-bin/get-proteins.bin?loci=" + IDs + "&species=" + current_species;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -4767,7 +4767,7 @@ function function_search_request_data(){
         }
     }
     
-    xmlhttp.open("GET", "/qsdb/cgi-bin/get-proteins.bin?functions=" + IDs + "&species=" + current_species, true);
+    xmlhttp.open("GET", "/stamp/cgi-bin/get-proteins.bin?functions=" + IDs + "&species=" + current_species, true);
     xmlhttp.send();
 }
 
@@ -4788,7 +4788,7 @@ function chromosome_search_request_data(){
     }
     
     // request proteins
-    var request = "/qsdb/cgi-bin/get-proteins.bin?accessions=" + accessionIDs + "&species=" + current_species;
+    var request = "/stamp/cgi-bin/get-proteins.bin?accessions=" + accessionIDs + "&species=" + current_species;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {

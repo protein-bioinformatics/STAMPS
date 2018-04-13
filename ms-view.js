@@ -278,7 +278,7 @@ function load_spectrum(spectrum_id){
             spectrum_data = JSON.parse(xmlhttp.responseText);
         }
     }
-    xmlhttp.open("GET", "/qsdb/cgi-bin/get-msdata.py?spectrum_id=" + spectrum_id + "&species=mouse", false);
+    xmlhttp.open("GET", "/stamp/cgi-bin/get-msdata.py?spectrum_id=" + spectrum_id + "&species=mouse", false);
     xmlhttp.send();
     
     
