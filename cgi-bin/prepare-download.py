@@ -100,4 +100,4 @@ zip_file = "../tmp/%s/assay.zip" % rnd
 os.system("zip -j %s %s %s > /dev/null" % (zip_file, fasta_file, blib_file))
 
 #send download link back
-print("/qsdb/tmp/%s/assay.zip" % rnd)
+print("/stamp/tmp/%s/assay.zip" % rnd)
