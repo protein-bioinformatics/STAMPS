@@ -3338,7 +3338,7 @@ function change_pathway(p){
     if (p in pathways){
         current_pathway = p;
         update_browser_link();
-        document.title = "STAMP  Home - " + pathways[p];
+        document.title = "STAMP Home - " + pathways[p];
         
         var pw_menu = document.getElementById('pathway_menu');
         var pw_group = 0;
