@@ -66,6 +66,24 @@ function init(){
     select_field_element.visible = false;
     get_pathway_groups();
     
+    var pg_select = document.getElementById("add_manage_pathways_group");
+    var sorted_pathway_groups = [];
+    for (var pg_id in pathway_groups) sorted_pathway_groups.push([pathway_groups[pg_id][3], pathway_groups[pg_id][1], pg_id]);
+    sorted_pathway_groups.sort(function(a, b) {
+        var int_a = parseInt(a[0]);
+        var int_b = parseInt(b[0]);
+        return int_a < int_b;
+    });
+    
+    for (var row of sorted_pathway_groups){
+        var pg_option = document.createElement("option");
+        pg_select.appendChild(pg_option);
+        
+        pg_option.setAttribute("value", row[2]);
+        pg_option.innerHTML = row[1];
+    }
+    if (pg_select.children.length > 0) pg_select.selectedIndex = 0;
+    
     // get pathways
     var xmlhttp_pathways = new XMLHttpRequest();
     xmlhttp_pathways.onreadystatechange = function() {
@@ -1911,10 +1929,10 @@ function manage_fill_table(){
         dom_new_metabolite.setAttribute("onclick", "document.getElementById('add_manage_metabolites').style.display = 'inline';");
     }
     else if (manage_current_entry == "pathways"){
-        var dom_new_metabolite = document.createElement("button");
-        dom_nav_cell.appendChild(dom_new_metabolite);
-        dom_new_metabolite.innerHTML = "New pathway";
-        dom_new_metabolite.setAttribute("onclick", "add_manage_pathways();");
+        var dom_new_pathway = document.createElement("button");
+        dom_nav_cell.appendChild(dom_new_pathway);
+        dom_new_pathway.innerHTML = "New pathway";
+        dom_new_pathway.setAttribute("onclick", "document.getElementById('add_manage_pathways').style.display = 'inline';");
     }
     
     
@@ -2291,6 +2309,22 @@ function manage_delete_protein(prot_id){
 
 function manage_delete_pathway(entity_id){
     
+    var ref_pg_id = -1;
+    var ref_pos = 0;
+    for (pg_id in pathway_groups){
+        if (ref_pg_id != -1) break;
+        
+        for (var i = 0; i < pathway_groups[pg_id][2].length; ++i){
+            var pw_id = pathway_groups[pg_id][2][i];
+            
+            if (pw_id == entity_id){
+                ref_pg_id = pw_id;
+                ref_pos = i;
+                break;
+            }
+        }
+    }
+    
     var request = "type=pathway&id=" + entity_id;
     request = "/qsdb/admin/cgi-bin/delete-entity.py?" + request;
     
@@ -2303,6 +2337,9 @@ function manage_delete_pathway(entity_id){
             }
             manage_fill_table();
             delete pathways[entity_id];
+            
+            if (ref_pg_id > -1) pathway_groups[ref_pg_id][2].splice(ref_pos, 1);
+            set_pathway_menu();
             
             if (current_pathway == entity_id) change_pathway();
             
@@ -2555,6 +2592,9 @@ function resize_manage_view(){
     
     // set height of metabolites adding window
     document.getElementById("add_manage_metabolites_window").style.height = "230px";
+    
+    // set height of pathways adding window
+    document.getElementById("add_manage_pathways_window").style.height = "130px";
 }
 
 
@@ -2705,10 +2745,11 @@ function add_manage_proteins_add(){
 
 function add_manage_pathways(){
     
-    var new_pathway_name = window.prompt("Write a pathway name");
-    if (new_pathway_name == null || new_pathway_name.length == 0) return;
+    var new_pathway_name = document.getElementById("add_manage_pathways_name").value;
+    var pathway_group = document.getElementById("add_manage_pathways_group")[document.getElementById("add_manage_pathways_group").selectedIndex].value;
+    var request = "name:" + new_pathway_name + ",pathway_group_id:" + pathway_group;
     
-    request = "/qsdb/admin/cgi-bin/manage-entries.bin?action=insert&type=pathways&data=" + encodeURL("name:" + new_pathway_name);
+    request = "/qsdb/admin/cgi-bin/manage-entries.bin?action=insert&type=pathways&data=" + encodeURL(request);
     
     var xmlhttp_add_pathway = new XMLHttpRequest();
     xmlhttp_add_pathway.onreadystatechange = function() {
@@ -2717,8 +2758,10 @@ function add_manage_pathways(){
             if (request < 0){
                 alert("An error has occured while adding the pathway to the database. Please contact the administrator.");
             }
+            document.getElementById('add_manage_pathways').style.display = 'none';
             manage_fill_table();
             pathways[request] = new_pathway_name;
+            pathway_groups[pathway_group][2].add(request);
             set_pathway_menu();
         }
     }
