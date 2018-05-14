@@ -3431,7 +3431,7 @@ function download_assay(){
                     var matomo = xmlhttp_matomo.responseText;
                 }
             }
-            xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=BMBF Metrics&e_a=download&e_n=stamp", true);
+            xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=stamp=download", true);
             xmlhttp_matomo.send();
         }
     }

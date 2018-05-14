@@ -266,7 +266,7 @@ function init(){
             var matomo = xmlhttp_matomo.responseText;
         }
     }
-    xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=BMBF Metrics&e_a=request&e_n=stamp-editor", true);
+    xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=stamp-editor&e_a=request", true);
     xmlhttp_matomo.send();
 }
 
@@ -2026,9 +2026,8 @@ function manage_fill_table(){
                             var dom_select = document.createElement("select");
                             dom_td.appendChild(dom_select);
                             var selected_option = 0;
-                            
                             for (var k = 0; k < chromosomes[current_species].length; ++k){
-                                var dom_option = document.createElement(current_species);
+                                var dom_option = document.createElement("option");
                                 dom_select.appendChild(dom_option);
                                 dom_option.innerHTML = chromosomes[current_species][k];
                                 dom_option.value = chromosomes[current_species][k];
