@@ -13,8 +13,7 @@ function init(){
     infobox = new Infobox();
     zoom_sign_in = new zoom_sign(1);
     zoom_sign_out = new zoom_sign(0);
-    expand_obj = new expand_collapse(1);
-    collapse_obj = new expand_collapse(0);
+    expand_collapse_obj = new expand_collapse();
     preview_element = new preview();
     select_field_element = new select_field();
     select_field_element.visible = false;

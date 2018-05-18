@@ -119,7 +119,7 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
         last_protein->ec_number = res->getString("ec_number");
         last_protein->kegg = res->getString("kegg_link");
         last_protein->fasta = cleanFasta(res->getString("fasta"));
-        last_protein->validation = res->getString("validation");
+        last_protein->validation = res->getString("validation2");
         last_protein->pI = predict_isoelectric_point(last_protein->fasta);
         last_protein->mass = compute_mass(last_protein->fasta);
         last_protein->proteome_start_pos = len_text;

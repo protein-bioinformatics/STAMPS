@@ -284,7 +284,7 @@ string protein::to_string(){
     if (accession.length() > 0) str += ",\"a\":\"" + accession + "\"";
     if (ec_number.length() > 0) str += ",\"e\":\"" + ec_number + "\"";
     if (kegg.length() > 0) str += ",\"k\":\"" + kegg + "\"";
-    if (validation.length() > 0) str += ",\"v\":\"" + validation + "\"";
+    if (validation.length() > 0) str += ",\"v\":" + validation;
     if (pI > 0) str += ",\"pI\":" + string(pI_str);
     if (peptides.size() > 0){
         str += ",\"p\":[";

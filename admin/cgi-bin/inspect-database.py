@@ -91,7 +91,7 @@ if len(node_foreign_pathway_ids - pathway_ids) > 0:
     else:
         print("inconsistency: foreign_id (pathway) in nodes ->", (node_foreign_pathway_ids - pathway_ids))
 
-sql_query = "SELECT foreign_id FROM nodes WHERE type = 'metabolites' foreign_id <> -1;"
+sql_query = "SELECT foreign_id FROM nodes WHERE type = 'metabolite' and foreign_id <> -1;"
 my_cur.execute(sql_query)
 node_foreign_metabolite_ids = set([entry[0] for entry in my_cur])
 if len(node_foreign_metabolite_ids - metabolite_ids) > 0:  

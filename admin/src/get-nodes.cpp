@@ -23,6 +23,7 @@ class node {
     public:
         string id;
         string name;
+        string short_name;
         string pathway_id;
         string type;
         string foreign_id;
@@ -32,11 +33,13 @@ class node {
         string smiles;
         string formula;
         string exact_mass;
+        string position;
         vector<protein*> proteins;
         
         node(){
             id = "";
             name = "";
+            short_name = "";
             pathway_id = "";
             type = "";
             foreign_id = "";
@@ -46,12 +49,14 @@ class node {
             smiles = "";
             formula = "";
             exact_mass = "";
+            position = "";
         }
         
         string to_string(){
             string str = "{";
             str += "\"i\":" + id;
             if (name.length() > 0) str += ",\"n\":\"" + name + "\"";
+            if (short_name.length() > 0) str += ",\"sn\":\"" + short_name + "\"";
             if (type.length() > 0) str += ",\"t\":\"" + type + "\"";
             str += ",\"r\":" + (foreign_id.length() ? foreign_id : "0");
             str += ",\"x\":" + x;
@@ -59,6 +64,7 @@ class node {
             if (c_number.length() > 0) str += ",\"c\":\"" + c_number + "\"";
             if (smiles.length() > 0) str += ",\"s\":\"" + smiles + "\"";
             if (formula.length() > 0) str += ",\"f\":\"" + formula + "\"";
+            if (position.length() > 0) str += ",\"pos\":\"" + position + "\"";
             if (exact_mass.length() > 0) str += ",\"e\":\"" + exact_mass + "\"";
             if (proteins.size() > 0) {
                 str += ",\"p\":[";
@@ -108,6 +114,7 @@ int main(int argc, char** argv) {
     
     
     char* get_string_chr = getenv("QUERY_STRING");
+    bool with_unreviewed = false;
     
     if (!get_string_chr){
         cout << -1;
@@ -129,6 +136,9 @@ int main(int argc, char** argv) {
         }
         else if (get_values.size() && get_values.at(0) == "species"){
             species = get_values.at(1);
+        }
+        else if (get_values.size() && get_values.at(0) == "unreviewed"){
+            with_unreviewed = (get_values.size() > 1) && (get_values.at(1) == "true");
         }
     }
     if (pathway_id == "" || species == "" || !is_integer_number(pathway_id) || species.find("'") != string::npos){
@@ -188,8 +198,9 @@ int main(int argc, char** argv) {
     string sql_query_proteins = "select n.id nid, p.id, p.name from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ";
     sql_query_proteins += pathway_id;
     sql_query_proteins += " and n.type = 'protein' and p.species = '";
-    sql_query_proteins += species;
-    sql_query_proteins += "';";
+    sql_query_proteins += species + "'";
+    if (!with_unreviewed) sql_query_proteins += " and unreviewed = 0";
+    sql_query_proteins += ";";
     
     res = stmt->executeQuery(sql_query_proteins);
        
@@ -213,16 +224,16 @@ int main(int argc, char** argv) {
     
     
     
-    string sql_query_rest = "(select n.id, p.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ";
+    string sql_query_rest = "(select n.id, p.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass, '' position, '' short_name from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ";
     sql_query_rest += pathway_id; 
     sql_query_rest += ") union ";
-    sql_query_rest += "(select n.id, m.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, m.c_number, m.smiles, m.formula, m.exact_mass from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ";
+    sql_query_rest += "(select n.id, m.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, m.c_number, m.smiles, m.formula, m.exact_mass, position, short_name from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ";
     sql_query_rest += pathway_id;
     sql_query_rest += ") union ";
-    sql_query_rest += "(select id, '', pathway_id, type, 0, x, y, 0, '', '', '' from nodes n where n.type = 'membrane' and n.pathway_id = ";
+    sql_query_rest += "(select id, '', pathway_id, type, 0, x, y, 0, '', '', '', '' position, '' short_name from nodes n where n.type = 'membrane' and n.pathway_id = ";
     sql_query_rest += pathway_id;
     sql_query_rest += ") union ";
-    sql_query_rest += "(select n.id, l.label, n.pathway_id, n.type, n.foreign_id, n.x, n.y, 0, '', '', '' from nodes n inner join labels l on n.foreign_id = l.id where n.type = 'label' and n.pathway_id = ";
+    sql_query_rest += "(select n.id, l.label, n.pathway_id, n.type, n.foreign_id, n.x, n.y, 0, '', '', '', '' position, '' short_name from nodes n inner join labels l on n.foreign_id = l.id where n.type = 'label' and n.pathway_id = ";
     sql_query_rest += pathway_id;
     sql_query_rest += ");";
     
@@ -233,6 +244,7 @@ int main(int argc, char** argv) {
         last_node->id = res->getString("id");
         last_node->pathway_id = res->getString("pathway_id");
         last_node->name = res->getString("name");
+        last_node->short_name = res->getString("short_name");
         last_node->type = res->getString("type");
         last_node->foreign_id = res->getString("foreign_id");
         last_node->x = res->getString("x");
@@ -241,14 +253,15 @@ int main(int argc, char** argv) {
         last_node->smiles = res->getString("smiles");
         last_node->formula = res->getString("formula");
         last_node->exact_mass = res->getString("exact_mass");
+        last_node->position = res->getString("position");
         node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
     }
     
     
-    sql_query_rest = "(select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass from nodes n where n.type = 'pathway' and n.foreign_id = -1 and n.pathway_id = ";
+    sql_query_rest = "(select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass, '' position from nodes n where n.type = 'pathway' and n.foreign_id = -1 and n.pathway_id = ";
     sql_query_rest += pathway_id; 
     sql_query_rest += ") union ";
-    sql_query_rest += "(select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass from nodes n where n.type = 'metabolite' and n.foreign_id = -1 and n.pathway_id = ";
+    sql_query_rest += "(select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass, position from nodes n where n.type = 'metabolite' and n.foreign_id = -1 and n.pathway_id = ";
     sql_query_rest += pathway_id;
     sql_query_rest += ");";
     
@@ -267,6 +280,7 @@ int main(int argc, char** argv) {
         last_node->smiles = res->getString("smiles");
         last_node->formula = res->getString("formula");
         last_node->exact_mass = res->getString("exact_mass");
+        last_node->position = res->getString("position");
         node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
     }
     

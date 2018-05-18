@@ -9,11 +9,12 @@ toolbox_states = {
     ROTATE_PATHWAY: 6,
     ROTATE_PROTEIN: 7,
     ROTATE_METABOLITE: 8,
-    DRAW_EDGE: 9,
-    CHANGE_EDGE: 10,
-    DELETE_ENTRY: 11
+    ROTATE_METABOLITE_LABEL: 9,
+    DRAW_EDGE: 10,
+    CHANGE_EDGE: 11,
+    DELETE_ENTRY: 12
 };
-toolbox_buttons = ["toolbox_button_create_pathway", "toolbox_button_create_protein", "toolbox_button_create_metabolite", "toolbox_button_create_label", "toolbox_button_create_membrane", "toolbox_button_move_entity", "toolbox_button_rotate_pathway_anchor", "toolbox_button_rotate_protein_anchor", "toolbox_button_rotate_metabolite_anchor", "toolbox_button_draw_edge", "toolbox_button_change_edge", "toolbox_button_delete_entity"];
+toolbox_buttons = ["toolbox_button_create_pathway", "toolbox_button_create_protein", "toolbox_button_create_metabolite", "toolbox_button_create_label", "toolbox_button_create_membrane", "toolbox_button_move_entity", "toolbox_button_rotate_pathway_anchor", "toolbox_button_rotate_protein_anchor", "toolbox_button_rotate_metabolite_anchor", "toolbox_button_rotate_metabolite_label", "toolbox_button_draw_edge", "toolbox_button_change_edge", "toolbox_button_delete_entity"];
 toolbox_button_selected = -1;
 entity_moving = -1;
 tmp_element = -1;
@@ -65,6 +66,12 @@ function init(){
     select_field_element = new select_field();
     select_field_element.visible = false;
     get_pathway_groups();
+    
+    infobox = new Infobox();
+    zoom_sign_in = new zoom_sign(1);
+    zoom_sign_out = new zoom_sign(0);
+    expand_collapse_obj = new expand_collapse();
+    preview_element = new preview();
     
     var pg_select = document.getElementById("add_manage_pathways_group");
     var sorted_pathway_groups = [];
@@ -402,6 +409,9 @@ function mouse_click_listener(e){
     else if (toolbox_button_selected == toolbox_states.ROTATE_PATHWAY || toolbox_button_selected == toolbox_states.ROTATE_METABOLITE || toolbox_button_selected == toolbox_states.ROTATE_PROTEIN){
         if (highlight_element && highlight_element instanceof edge) highlight_element.edit();
     }
+    else if (toolbox_button_selected == toolbox_states.ROTATE_METABOLITE_LABEL){
+        if (highlight_element && (highlight_element instanceof node) && highlight_element.type == "metabolite") rotate_metabolite_label();
+    }
     else if (highlight_element && toolbox_button_selected == -1){
         if (highlight_element instanceof node){
             switch (highlight_element.type){
@@ -509,6 +519,29 @@ function label_text_field_listener(evt){
     var charCode = evt.keyCode || evt.which;
     if (charCode == 10 || charCode == 13){
         update_label();
+    }
+}
+
+
+
+function rotate_metabolite_label(){
+    var pos = highlight_element.pos;
+    var rotation = {"tc": "tr", "tr": "mr", "mr": "br", "br": "bc", "bc": "bl", "bl": "ml", "ml": "tl", "tl": "tc"};
+    
+    if (pos == "" || !(pos in rotation)) pos = "tc";
+    else {
+        pos = rotation[pos];
+    }
+    
+    var request = "action=set&table=nodes&id=" + highlight_element.id + "&column=position&value=" + pos;
+       
+    var result = update_entry(request);
+    if (!result){
+        alert("Error: database could not be updated.");
+    }
+    else {
+        highlight_element.pos = pos;
+        draw();
     }
 }
 

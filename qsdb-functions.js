@@ -48,8 +48,7 @@ edges = [];
 infobox = 0;
 zoom_sign_in = 0;
 zoom_sign_out = 0;
-expand_obj = 0;
-collapse_obj = 0;
+expand_collapse_obj = 0;
 elements = [];
 boundaries = [0, 0, 0, 0];
 pathway_is_loaded = false;
@@ -60,7 +59,7 @@ protein_dictionary = {};
 toggled_proteins = new Set();
 spectra_exclude = [];
 back_function = 0;
-num_validation = [0, 0, 0];
+num_validation = [0, 0, 0, 0, 0, 0, 0, 0];
 search_data = [];
 read_cookie_information = false;
 
@@ -765,7 +764,8 @@ function Protein(data){
     this.accession = ('a' in data) ? data['a'] : "";
     this.ec_number = ('e' in data) ? data['e'] : "";
     this.mass = ('m' in data) ? data['m'] : "";
-    this.validation = ('v' in data) ? data['v'] : "";
+    this.prm = ('v' in data) ? ((data['v'] & 1) == 1) : 0;
+    this.is = ('v' in data) ? ((data['v'] & 2) == 2) : 0; // is = internal standard
     this.sequence_length = ('l' in data) ? data['l'] : "";
     this.pI = ('pI' in data) ? data['pI'] : 0;
     this.peptides = [];
@@ -813,6 +813,11 @@ function Protein(data){
         }
     }
     this.filtering();
+    
+    
+    this.get_validation = function(){
+        return (this.containing_spectra > 0) + 2 * (this.prm > 0) + 4 * (this.is > 0);
+    }
     
     this.get_statistics = function(){
         var num_spectra = 0;
@@ -873,8 +878,8 @@ function Protein(data){
         ctx.stroke();
         
         ctx.fillStyle = this.fillStyle_text;
+        var x_pos = x + (check_side_d + ctx.measureText(this.name).width) * 1.1;
         ctx.fillText(this.name, x + check_side_d, y + line_height * factor_h * 0.5);
-        
         
         // draw hooklet
         if (this.id in basket){
@@ -894,6 +899,33 @@ function Protein(data){
             ctx.stroke();
         }
         
+        // draw validation semephore
+        var radius = line_height * factor_h * 0.4;
+        ctx.lineWidth = factor;
+        ctx.strokeStyle = "black";
+        if (this.containing_spectra > 0){
+            ctx.beginPath();
+            ctx.arc(x_pos + radius, y, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffbebe';
+            ctx.fill();
+            if (factor >= 0.5) ctx.stroke();
+        }
+        
+        if (this.prm > 0){
+            ctx.beginPath();
+            ctx.arc(x_pos + 3 * radius, y, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#feff90';
+            ctx.fill();
+            if (factor >= 0.5) ctx.stroke();
+        }
+        
+        if (this.is > 0){
+            ctx.beginPath();
+            ctx.arc(x_pos + 5 * radius, y, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#a0ff90';
+            ctx.fill();
+            if (factor >= 0.5) ctx.stroke();
+        }
     };
     
     this.toggle_marked = function(){
@@ -1335,9 +1367,9 @@ function preview(){
 expand_collapse.prototype = new visual_element();
 expand_collapse.prototype.constructor = expand_collapse;
 
-function expand_collapse(dir){
-    this.dir = dir;
-    this.name = dir ? "expand" : "collapse";
+function expand_collapse(){
+    this.dir = 1;
+    this.name = this.dir ? "expand" : "collapse";
     this.img = document.getElementById(this.name);
     var ratio = 0.02 * window.innerWidth / this.img.width;
     this.width = this.img.width * ratio;
@@ -1354,6 +1386,23 @@ function expand_collapse(dir){
         else {
             collapse_statistics();
         }
+        this.dir = !this.dir;
+        this.name = this.dir ? "expand" : "collapse";
+        this.img = document.getElementById(this.name);
+    }
+    
+    this.expand = function(){
+        expand_statistics();
+        this.dir = 0;
+        this.name = "collapse";
+        this.img = document.getElementById(this.name);
+    }
+    
+    this.collapse = function(){
+        this.dir = 1;
+        collapse_statistics();
+        this.name = "expand";
+        this.img = document.getElementById(this.name);
     }
     
     this.is_mouse_over = function(mouse){
@@ -1369,6 +1418,7 @@ function expand_collapse(dir){
             ctx.globalAlpha = 1.;
         }
     }
+    
 }
 
 
@@ -1619,11 +1669,13 @@ function node(data){
     this.type = ('t' in data) ? data['t'] : "";
     this.id = data['i'];
     this.name = ('n' in data) ? data['n'] : "";
+    this.short_name = ('sn' in data) ? data['sn'] : "";
     //this.name = " " + this.id;  // TODO: delete this line
     this.c_number = ('c' in data) ? data['c'] : "";
     this.smiles = ('s' in data) ? data['s'] : "";
     this.formula = ('f' in data) ? data['f'] : "";
     this.exact_mass = ('e' in data) ? data['e'] : "";
+    this.pos = ('pos' in data) ? data['pos'] : "";
     this.img = 0;
     this.highlight = false;
     this.foreign_id = data['r'];
@@ -1679,7 +1731,7 @@ function node(data){
             name += prot_name;
         }
         
-        this.width += 50 + this.slide * 20;
+        this.width += 70 + this.slide * 20;
         this.height *= factor;
         this.width *= factor;
         this.orig_height *= factor;
@@ -1698,26 +1750,24 @@ function node(data){
     switch (this.type){
         case "protein":
             this.sort_order = 100;
-            if (!('p' in data)){
-                this.setup_protein_meta();
-                break;
-            }
             
-            for (var j = 0; j < data['p'].length; ++j){
-                var prot = 0;
-                var prot_id = data['p'][j]['i'];
-                
-                if (prot_id in protein_dictionary){
-                    prot = protein_dictionary[prot_id];
+            if ('p' in data){
+                for (var j = 0; j < data['p'].length; ++j){
+                    var prot = 0;
+                    var prot_id = data['p'][j]['i'];
+                    
+                    if (prot_id in protein_dictionary){
+                        prot = protein_dictionary[prot_id];
+                    }
+                    else {
+                        prot = new Protein(data['p'][j]);
+                        protein_dictionary[prot_id] = prot;
+                    }
+                    
+                    this.proteins.push(prot_id);
+                    this.containing_spectra += prot.containing_spectra;
+                    this.fill_style = protein_fill_color;
                 }
-                else {
-                    prot = new Protein(data['p'][j]);
-                    protein_dictionary[prot_id] = prot;
-                }
-                
-                this.proteins.push(prot_id);
-                this.containing_spectra += prot.containing_spectra;
-                this.fill_style = protein_fill_color;
             }
             this.setup_protein_meta();
             break;
@@ -1922,13 +1972,51 @@ function node(data){
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
+                ctx.font = ((text_size - 3) * factor).toString() + "px Arial";
+                ctx.fillStyle = "black";
+                var x = this.x;
+                var y = this.y + this.height * 0.15;
+                var ww = ctx.measureText(this.name).width;
+                
+                if (this.pos == "tl"){
+                    x -= ww + 1.5 * radius;
+                    y -= 2 * radius;
+                }
+                else if (this.pos == "tc"){
+                    x -= ww >> 1;
+                    y -= 2 * radius;
+                }
+                else if (this.pos == "tr"){
+                    x += 1.5 * radius;
+                    y -= 2 * radius;
+                }
+                else if (this.pos == "ml"){
+                    x -= ww + 1.5 * radius;
+                }
+                else if (this.pos == "mr"){
+                    x += 1.5 * radius;
+                }
+                else if (this.pos == "bl"){
+                    x -= ww + 1.5 * radius;
+                    y += 2 * radius;
+                }
+                else if (this.pos == "bc"){
+                    x -= ww >> 1;
+                    y += 2 * radius;
+                }
+                else if (this.pos == "br"){
+                    x += 1.5 * radius;
+                    y += 2 * radius;
+                }
+                
+                ctx.fillText(this.name, x, y);
                 break;
                 
             case "label":
                 ctx.textAlign = "center";
                 ctx.font = ((text_size + 2) * factor).toString() + "px Arial";
                 ctx.fillStyle = this.selected ? node_selected_color : label_color;
-                ctx.fillText(this.name, this.x, this.y + this.height * 0.3);
+                ctx.fillText(this.short_name.length > 0 ? this.short_name : this.name, this.x, this.y + this.height * 0.3);
                 break;
                 
             case "membrane":
@@ -3033,7 +3121,9 @@ function compute_edges(){
         var reagents = edge_data[reaction_id]['r'];
         
         for (var reagent_id in reagents){
+            
             var metabolite_id = reagents[reagent_id]['n'];
+            if (!(metabolite_id in data)) continue;
             var angle_metabolite = compute_angle(data[metabolite_id].x, data[metabolite_id].y, data[node_id].x, data[node_id].y, reagents[reagent_id]['a']);
             
             
@@ -3221,8 +3311,7 @@ function assemble_elements(skip_rest){
         if (infobox != 0) elements.push(infobox);
         if (zoom_sign_in != 0) elements.push(zoom_sign_in);
         if (zoom_sign_out != 0) elements.push(zoom_sign_out);
-        if (expand_obj != 0) elements.push(expand_obj);
-        if (collapse_obj != 0) elements.push(collapse_obj);
+        if (expand_collapse_obj != 0) elements.push(expand_collapse_obj);
         if (preview_element != 0) elements.push(preview_element);
         if (select_field_element != 0) elements.push(select_field_element);
         if (current_pathway_title != 0) elements.push(current_pathway_title);
@@ -3309,7 +3398,6 @@ function mouse_dblclick_listener(e){
 
 
 function change_pathway(p){
-    pathway_is_loaded = false;
     if (typeof p === "undefined"){
         var highest_group = -1;
         var highest_group_val = 0;
@@ -3332,8 +3420,9 @@ function change_pathway(p){
     }
     last_opened_menu = "";
     close_navigation();
-    collapse_statistics();
+    expand_collapse_obj.collapse();
     reset_view();
+    pathway_is_loaded = false;
     
     if (p in pathways){
         current_pathway = p;
@@ -4314,15 +4403,14 @@ function compute_statistics(){
     document.getElementById("stat_pathway").innerHTML = pathways[current_pathway];
     
     
-    var num_proteins = 0;
     var proteins_content = new Set();
     for (var node_id in data){
-        num_proteins += data[node_id].proteins.length;
         for (var j = 0; j < data[node_id].proteins.length; ++j){
             proteins_content.add(data[node_id].proteins[j]);
         }
     }
     
+    var num_proteins = proteins_content.size;
     var num_spectra = 0;
     var valid_spectra = 0;
     var num_peptides = 0;
@@ -4331,7 +4419,7 @@ function compute_statistics(){
     var sel_proteins = 0;
     var sel_peptides = 0;
     var sel_spectra = 0;
-    num_validation = [0, 0, 0];
+    num_validation = [0, 0, 0, 0, 0, 0, 0, 0]; // n, t, p, i, tp, ti, pi, tpi
     proteins_content.forEach (prot_id => {
         var prot = protein_dictionary[prot_id];
         var tmp = prot.get_statistics();
@@ -4340,9 +4428,7 @@ function compute_statistics(){
         valid_peptides += tmp[3];
         num_spectra += tmp[4];
         valid_spectra += tmp[5];
-        if (prot.validation == "is") num_validation[2] += 1;
-        else if (prot.validation == "prm") num_validation[1] += 1;
-        else if (prot.validation == "topn") num_validation[0] += 1;
+        num_validation[prot.get_validation()] += 1;
         if (prot_id in basket){
             sel_proteins += 1;
             sel_peptides += tmp[3];
@@ -4373,42 +4459,75 @@ function expand_statistics(){
     document.getElementById("statistics").style.width = (window.innerWidth * expanding_percentage).toString() + "px";
     document.getElementById("statistics").style.height = "100%";
     document.getElementById("statistics").style.display = "inline";
-    expand_obj.visible = false;
-    collapse_obj.visible = true;
     compute_statistics();
     var canvas_pie = document.getElementById('piechart');
     var context_pie = canvas_pie.getContext('2d');
-    var centerX = canvas_pie.width / 2;
-    var centerY = canvas_pie.height / 2;
-    var radius = centerX - 1;
-
+    
+    context_pie.clearRect(0, 0, canvas_pie.width, canvas_pie.height);
+    
+    // fill the venn diagram
+    context_pie.globalAlpha = .4;
+    var centerX = canvas_pie.width / 3;
+    var centerY = canvas_pie.height / 3;
+    var radius = centerY + 5;
+    
+    
+    centerX += 5;
+    centerY += 5;
     context_pie.beginPath();
     context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    context_pie.fillStyle = '#ffbebe';
+    context_pie.fillStyle = '#ff4d4d';
     context_pie.fill();
     
-    var arc_prm = (num_validation[2] + num_validation[1]) / (num_validation[0] + num_validation[1] + num_validation[2]) * 2 * Math.PI;
-    
-    context_pie.beginPath();
-    context_pie.moveTo(canvas_pie.width / 2, canvas_pie.height / 2);
-    context_pie.arc(centerX, centerY, radius, 0, arc_prm);
-    context_pie.moveTo(canvas_pie.width / 2, canvas_pie.height / 2);
-    context_pie.fillStyle = '#feff90';
-    context_pie.fill();
-    
-    var arc_is = (num_validation[2]) / (num_validation[0] + num_validation[1] + num_validation[2]) * 2 * Math.PI;
-    context_pie.beginPath();
-    context_pie.moveTo(canvas_pie.width / 2, canvas_pie.height / 2);
-    context_pie.arc(centerX, centerY, radius, 0, arc_is);
-    context_pie.moveTo(canvas_pie.width / 2, canvas_pie.height / 2);
-    context_pie.fillStyle = '#a0ff90';
-    context_pie.fill();
-    
+    centerX += canvas_pie.width / 3 - 10;
     context_pie.beginPath();
     context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    context_pie.fillStyle = '#fdff38';
+    context_pie.fill();
+    
+    centerX = canvas_pie.width / 2;
+    centerY += canvas_pie.height / 3 - 10;
+    context_pie.beginPath();
+    context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    context_pie.fillStyle = '#55ff38';
+    context_pie.fill();
+    context_pie.globalAlpha = 1;
+    
+    
+    
+    // create stroke around the circles
     context_pie.lineWidth = 1;
     context_pie.strokeStyle = '#000000';
+    centerX = canvas_pie.width / 3 + 5;
+    centerY = canvas_pie.height / 3 + 5;
+    context_pie.beginPath();
+    context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
     context_pie.stroke();
+    
+    centerX += canvas_pie.width / 3 - 10;
+    context_pie.beginPath();
+    context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    context_pie.stroke();
+    
+    centerX = canvas_pie.width / 2;
+    centerY += canvas_pie.height / 3 - 10;
+    context_pie.beginPath();
+    context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    context_pie.stroke();
+    
+    
+    context_pie.textAlign = "center";
+    context_pie.font = "16px Arial";
+    context_pie.fillStyle = "black";
+    
+    context_pie.fillText(num_validation[3], canvas_pie.width / 2, canvas_pie.height * 0.2);
+    context_pie.fillText(num_validation[7], canvas_pie.width / 2, canvas_pie.height * 0.5);
+    context_pie.fillText(num_validation[4], canvas_pie.width / 2, canvas_pie.height * 0.89);
+    context_pie.fillText(num_validation[1], canvas_pie.width / 7, canvas_pie.height * 0.32);
+    context_pie.fillText(num_validation[2], canvas_pie.width * 6 / 7, canvas_pie.height * 0.32);
+    context_pie.fillText(num_validation[5], canvas_pie.width * 0.25, canvas_pie.height * 0.62);
+    context_pie.fillText(num_validation[6], canvas_pie.width * 0.75, canvas_pie.height * 0.62);
+    context_pie.fillText(num_validation[0], canvas_pie.width * 0.92, canvas_pie.height * 0.9);
     
     if (pathway_is_loaded) draw();
 }
@@ -4418,8 +4537,6 @@ function collapse_statistics(){
     if (!pathway_is_loaded) return;
     document.getElementById("renderarea").width  = window.innerWidth;
     document.getElementById("statistics").style.display = "none";
-    expand_obj.visible = true;
-    collapse_obj.visible = false;
     draw();
 }
 
@@ -4496,9 +4613,6 @@ function load_data(reload){
     if (!reload){
         reset_view();
     }
-    close_navigation();
-    collapse_statistics();
-    
     
     
     // reset current information
@@ -4526,7 +4640,6 @@ function load_data(reload){
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     
-    collapse_obj.visible = false;
     current_pathway_title = new pathway_title();
     
     
