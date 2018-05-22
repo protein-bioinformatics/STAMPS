@@ -565,7 +565,12 @@ function set_pathway_menu(){
             pm_pw_td.setAttribute("class", selected);
             pm_pw_td.setAttribute("onclick", "change_pathway(" + sorted_pathways[i][0] + ");");
             var pathway_name = sorted_pathways[i][1];
-            pathway_name = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + replaceAll(pathway_name, "-\\n", "");
+            var separator = "&nbsp;&nbsp;" + (i == sorted_pathways.length - 1 ? "└" : "├") + "────&nbsp;&nbsp;";
+            pathway_name = separator + replaceAll(pathway_name, "-\\n", "");
+            
+            
+            
+            
             pathway_name = replaceAll(pathway_name, "\n", " ");
             pm_pw_td.innerHTML = pathway_name;
         }
@@ -4689,6 +4694,10 @@ function load_data(reload){
                     y_min = Math.min(y_min, new_node.y - new_node.height * 0.5);
                     y_max = Math.max(y_max, new_node.y + new_node.height * 0.5);
                 }
+                x_min -= base_grid * 4;
+                y_min -= base_grid * 4;
+                x_max += base_grid * 4;
+                y_max += base_grid * 4;
                 
                 var shift_x = (ctx.canvas.width - x_min - x_max) * 0.5;
                 var shift_y = nav_height + (ctx.canvas.height - nav_height - y_min - y_max) * 0.5;
