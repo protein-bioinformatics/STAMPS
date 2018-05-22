@@ -34,6 +34,7 @@ class node {
         string formula;
         string exact_mass;
         string position;
+        string highlight;
         vector<protein*> proteins;
         
         node(){
@@ -50,6 +51,7 @@ class node {
             formula = "";
             exact_mass = "";
             position = "";
+            highlight = "";
         }
         
         string to_string(){
@@ -66,6 +68,7 @@ class node {
             if (formula.length() > 0) str += ",\"f\":\"" + formula + "\"";
             if (position.length() > 0) str += ",\"pos\":\"" + position + "\"";
             if (exact_mass.length() > 0) str += ",\"e\":\"" + exact_mass + "\"";
+            if (highlight.length() > 0 && highlight == "1") str += ",\"h\":1";
             if (proteins.size() > 0) {
                 str += ",\"p\":[";
                 for (uint i = 0; i < proteins.size(); ++i){
@@ -224,16 +227,16 @@ int main(int argc, char** argv) {
     
     
     
-    string sql_query_rest = "(select n.id, p.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass, '' position, '' short_name from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ";
+    string sql_query_rest = "(select n.id, p.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass, '' position, '' short_name, '' highlight from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ";
     sql_query_rest += pathway_id; 
     sql_query_rest += ") union ";
-    sql_query_rest += "(select n.id, m.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, m.c_number, m.smiles, m.formula, m.exact_mass, position, short_name from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ";
+    sql_query_rest += "(select n.id, m.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, m.c_number, m.smiles, m.formula, m.exact_mass, position, short_name, highlight from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ";
     sql_query_rest += pathway_id;
     sql_query_rest += ") union ";
-    sql_query_rest += "(select id, '', pathway_id, type, 0, x, y, 0, '', '', '', '' position, '' short_name from nodes n where n.type = 'membrane' and n.pathway_id = ";
+    sql_query_rest += "(select id, '', pathway_id, type, 0, x, y, 0, '', '', '', '' position, '' short_name, '' highlight from nodes n where n.type = 'membrane' and n.pathway_id = ";
     sql_query_rest += pathway_id;
     sql_query_rest += ") union ";
-    sql_query_rest += "(select n.id, l.label, n.pathway_id, n.type, n.foreign_id, n.x, n.y, 0, '', '', '', '' position, '' short_name from nodes n inner join labels l on n.foreign_id = l.id where n.type = 'label' and n.pathway_id = ";
+    sql_query_rest += "(select n.id, l.label, n.pathway_id, n.type, n.foreign_id, n.x, n.y, 0, '', '', '', '' position, '' short_name, '' highlight from nodes n inner join labels l on n.foreign_id = l.id where n.type = 'label' and n.pathway_id = ";
     sql_query_rest += pathway_id;
     sql_query_rest += ");";
     
@@ -254,6 +257,7 @@ int main(int argc, char** argv) {
         last_node->formula = res->getString("formula");
         last_node->exact_mass = res->getString("exact_mass");
         last_node->position = res->getString("position");
+        last_node->highlight = res->getString("highlight");
         node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
     }
     

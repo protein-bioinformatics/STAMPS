@@ -10,11 +10,12 @@ toolbox_states = {
     ROTATE_PROTEIN: 7,
     ROTATE_METABOLITE: 8,
     ROTATE_METABOLITE_LABEL: 9,
-    DRAW_EDGE: 10,
-    CHANGE_EDGE: 11,
-    DELETE_ENTRY: 12
+    HIGHLIGHT_METABOLITE: 10,
+    DRAW_EDGE: 11,
+    CHANGE_EDGE: 12,
+    DELETE_ENTRY: 13
 };
-toolbox_buttons = ["toolbox_button_create_pathway", "toolbox_button_create_protein", "toolbox_button_create_metabolite", "toolbox_button_create_label", "toolbox_button_create_membrane", "toolbox_button_move_entity", "toolbox_button_rotate_pathway_anchor", "toolbox_button_rotate_protein_anchor", "toolbox_button_rotate_metabolite_anchor", "toolbox_button_rotate_metabolite_label", "toolbox_button_draw_edge", "toolbox_button_change_edge", "toolbox_button_delete_entity"];
+toolbox_buttons = ["toolbox_button_create_pathway", "toolbox_button_create_protein", "toolbox_button_create_metabolite", "toolbox_button_create_label", "toolbox_button_create_membrane", "toolbox_button_move_entity", "toolbox_button_rotate_pathway_anchor", "toolbox_button_rotate_protein_anchor", "toolbox_button_rotate_metabolite_anchor", "toolbox_button_rotate_metabolite_label", "toolbox_button_highlight_metabolite", "toolbox_button_draw_edge", "toolbox_button_change_edge", "toolbox_button_delete_entity"];
 toolbox_button_selected = -1;
 entity_moving = -1;
 tmp_element = -1;
@@ -412,6 +413,9 @@ function mouse_click_listener(e){
     else if (toolbox_button_selected == toolbox_states.ROTATE_METABOLITE_LABEL){
         if (highlight_element && (highlight_element instanceof node) && highlight_element.type == "metabolite") rotate_metabolite_label();
     }
+    else if (toolbox_button_selected == toolbox_states.HIGHLIGHT_METABOLITE){
+        if (highlight_element && (highlight_element instanceof node) && highlight_element.type == "metabolite") highlight_metabolite_label();
+    }
     else if (highlight_element && toolbox_button_selected == -1){
         if (highlight_element instanceof node){
             switch (highlight_element.type){
@@ -541,6 +545,22 @@ function rotate_metabolite_label(){
     }
     else {
         highlight_element.pos = pos;
+        draw();
+    }
+}
+
+
+function highlight_metabolite_label(){
+    var highlight_flag = !highlight_element.text_highlight;
+    
+    var request = "action=set&table=nodes&id=" + highlight_element.id + "&column=highlight&value=" + (highlight_flag ? "1" : "0");
+       
+    var result = update_entry(request);
+    if (!result){
+        alert("Error: database could not be updated.");
+    }
+    else {
+        highlight_element.text_highlight = highlight_flag;
         draw();
     }
 }

@@ -123,6 +123,8 @@ protein_disabled_stroke_color = "#cccccc";
 label_color = "#777777";
 protein_disabled_fill_color = "#eeeeee";
 metabolite_stroke_color = "#f69301";
+metabolite_label_stroke_color = "#999999";
+metabolite_highlight_label_stroke_color = "#000000";
 metabolite_fill_color = "white";;
 pathway_stroke_color = "#f69301";
 pathway_disabled_stroke_color = "#cccccc";
@@ -1675,13 +1677,14 @@ function node(data){
     this.id = data['i'];
     this.name = ('n' in data) ? data['n'] : "";
     this.short_name = ('sn' in data) ? data['sn'] : "";
-    //this.name = " " + this.id;  // TODO: delete this line
+    //this.name += " (" + this.id + ")";  // TODO: delete this line
     this.c_number = ('c' in data) ? data['c'] : "";
     this.smiles = ('s' in data) ? data['s'] : "";
     this.formula = ('f' in data) ? data['f'] : "";
     this.exact_mass = ('e' in data) ? data['e'] : "";
     this.pos = ('pos' in data) ? data['pos'] : "";
     this.img = 0;
+    this.text_highlight = ('h' in data) ? data['h'] == "1" : false;
     this.highlight = false;
     this.foreign_id = data['r'];
     this.pathway_enabled = false;
@@ -1977,8 +1980,8 @@ function node(data){
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
-                ctx.font = ((text_size - 3) * factor).toString() + "px Arial";
-                ctx.fillStyle = "black";
+                ctx.font = (this.text_highlight ? "bold " : "") + ((text_size - (this.text_highlight ? 0 : 3)) * factor).toString() + "px Arial";
+                ctx.fillStyle = this.text_highlight ? metabolite_highlight_label_stroke_color : metabolite_label_stroke_color;
                 var x = this.x;
                 var y = this.y + this.height * 0.15;
                 var ww = ctx.measureText(this.name).width;
