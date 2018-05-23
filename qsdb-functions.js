@@ -1984,7 +1984,10 @@ function node(data){
                 ctx.fillStyle = this.text_highlight ? metabolite_highlight_label_stroke_color : metabolite_label_stroke_color;
                 var x = this.x;
                 var y = this.y + this.height * 0.15;
-                var ww = ctx.measureText(this.name).width;
+                
+                
+                var selected_name = (this.short_name.length > 0 && this.short_name.length < this.name.length) ? this.short_name : this.name;
+                var ww = ctx.measureText(selected_name).width;
                 
                 if (this.pos == "tl"){
                     x -= ww + 1.5 * radius;
@@ -2017,15 +2020,17 @@ function node(data){
                     y += 2 * radius;
                 }
                 
-                ctx.fillText(this.name, x, y);
+                ctx.fillText(selected_name, x, y);
                 break;
+                
                 
             case "label":
                 ctx.textAlign = "center";
                 ctx.font = ((text_size + 2) * factor).toString() + "px Arial";
                 ctx.fillStyle = this.selected ? node_selected_color : label_color;
-                ctx.fillText(this.short_name.length > 0 ? this.short_name : this.name, this.x, this.y + this.height * 0.3);
+                ctx.fillText(this.name, this.x, this.y + this.height * 0.3);
                 break;
+                
                 
             case "membrane":
                 var len_s = 3;
