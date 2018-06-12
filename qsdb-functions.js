@@ -35,9 +35,9 @@ filter_parameters["tissue_fat"] = true;
 filter_parameters["tissue_lung"] = true;
 filter_parameters["tissue_eye"] = true;
 filter_parameters["tissue_gut"] = true;
-filter_parameters["validadion_top_n"] = true;
-filter_parameters["validadion_prm"] = true;
-filter_parameters["validadion_is"] = true;
+filter_parameters["validation_top_n"] = true;
+filter_parameters["validation_prm"] = true;
+filter_parameters["validation_is"] = true;
 filter_parameters["protein_tissues_visible"] = true;
 filter_parameters["peptide_tissues_visible"] = false;
 last_opened_menu = "";
@@ -201,9 +201,9 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
                     <td><input type=\"checkbox\" id=\"check_gut\" /> Gut</td> \
                 </tr> \
         <tr><td colspan=\"2\"><br>Validation:<br>\
-        <input type=\"checkbox\" id=\"validadion_top_n\" /> Top-n experiment<br> \
-        <input type=\"checkbox\" id=\"validadion_prm\" /> PRM<br> \
-        <input type=\"checkbox\" id=\"validadion_is\" /> SRM + internal standard</td><td></tr> \
+        <input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment<br> \
+        <input type=\"checkbox\" id=\"validation_prm\" /> PRM<br> \
+        <input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard</td><td></tr> \
         <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
         document.getElementById('min_peptide_length').value = 8; \
         document.getElementById('max_peptide_length').value = 25; \
@@ -221,6 +221,9 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
         document.getElementById('check_lung').checked = true; \
         document.getElementById('check_eye').checked = true; \
         document.getElementById('check_gut').checked = true; \
+        document.getElementById('validation_top_n').checked = true; \
+        document.getElementById('validation_prm').checked = true; \
+        document.getElementById('validation_is').checked = true; \
         ;\">default settings</td></tr> \
     </table> \
 </div>";
@@ -240,6 +243,19 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
             document.getElementById('max_precursor_charge').value = 3; \
             document.getElementById('oxy_m_off').checked = true; \
             document.getElementById('carba_c_off').checked = true; \
+            document.getElementById('check_brain').checked = true; \
+            document.getElementById('check_liver').checked = true; \
+            document.getElementById('check_kidney').checked = true; \
+            document.getElementById('check_spleen').checked = true; \
+            document.getElementById('check_heart').checked = true; \
+            document.getElementById('check_blood').checked = true; \ \
+            document.getElementById('check_fat').checked = true; \
+            document.getElementById('check_lung').checked = true; \
+            document.getElementById('check_eye').checked = true; \
+            document.getElementById('check_gut').checked = true; \
+            document.getElementById('validation_top_n').checked = true; \
+            document.getElementById('validation_prm').checked = true; \
+            document.getElementById('validation_is').checked = true; \
             ;\">default settings</td></tr> \
         </table></td> \
         <td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \
@@ -257,7 +273,7 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
                 <td></tr> \
             </table> \
         </td> \
-        <td valign=\"top\"> \
+        <td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \
             <table> \
                 <tr><td colspan=\"2\">Tissues:</td><td></tr> \
                 <tr><td><input type=\"checkbox\" id=\"check_brain\" /> Brain</td> \
@@ -274,6 +290,15 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
                 </tr> \
                 <tr><td><input type=\"checkbox\" id=\"check_eye\" /> Eye</td> \
                     <td><input type=\"checkbox\" id=\"check_gut\" /> Gut</td> \
+                </tr> \
+            </table> \
+        </td> \
+        <td valign=\"top\"> \
+            <table> \
+                <tr><td colspan=\"2\">Validation:</td><td></tr> \
+                <tr><td><input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment</td><tr> \
+                <tr><td><input type=\"checkbox\" id=\"validation_prm\" /> PRM</td><tr> \
+                <tr><td><input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard</td><tr> \
                 </tr> \
             </table> \
         </td> \
@@ -821,6 +846,17 @@ function Protein(data){
             this.peptides[i].filtering();
             this.filter_valid |= this.peptides[i].filter_valid;
         }
+        
+        if (this.filter_valid){
+            var num_validations = 3;
+            var tissue_set = new Set(Object.keys(this.tissues).map(Number))
+            if (!filter_parameters["validation_top_n"] && (this.peptides.length > 0)) num_validations -= 1;
+            if (!filter_parameters["validation_prm"] && this.prm) num_validations -= 1;
+            if (!filter_parameters["validation_is"] && this.is) num_validations -= 1;
+            this.filter_valid = (num_validations != 0);
+        }
+        
+        
         
         if (this.filter_valid){
             this.fillStyle_rect = "white";
@@ -4317,9 +4353,9 @@ function adopt_filter_parameters(){
     filter_parameters["tissue_lung"] = document.getElementById("check_lung").checked;
     filter_parameters["tissue_eye"] = document.getElementById("check_eye").checked;
     filter_parameters["tissue_gut"] = document.getElementById("check_gut").checked;
-    filter_parameters["validadion_top_n"] = document.getElementById("validadion_top_n").checked;
-    filter_parameters["validadion_prm"] = document.getElementById("validadion_prm").checked;
-    filter_parameters["validadion_is"] = document.getElementById("validadion_is").checked;
+    filter_parameters["validation_top_n"] = document.getElementById("validation_top_n").checked;
+    filter_parameters["validation_prm"] = document.getElementById("validation_prm").checked;
+    filter_parameters["validation_is"] = document.getElementById("validation_is").checked;
 }
 
 
@@ -4344,9 +4380,9 @@ function load_filter_parameters(){
     document.getElementById("check_lung").checked = filter_parameters["tissue_lung"];
     document.getElementById("check_eye").checked = filter_parameters["tissue_eye"];
     document.getElementById("check_gut").checked = filter_parameters["tissue_gut"];
-    document.getElementById("validadion_top_n").checked = filter_parameters["validadion_top_n"];
-    document.getElementById("validadion_prm").checked = filter_parameters["validadion_prm"];
-    document.getElementById("validadion_is").checked = filter_parameters["validadion_is"];
+    document.getElementById("validation_top_n").checked = filter_parameters["validation_top_n"];
+    document.getElementById("validation_prm").checked = filter_parameters["validation_prm"];
+    document.getElementById("validation_is").checked = filter_parameters["validation_is"];
 }
 
 
@@ -4375,9 +4411,9 @@ function hide_filter_panel(){
         if (filter_parameters["tissue_lung"] != document.getElementById("check_lung").checked) filter_changed = true;
         if (filter_parameters["tissue_eye"] != document.getElementById("check_eye").checked) filter_changed = true;
         if (filter_parameters["tissue_gut"] != document.getElementById("check_gut").checked) filter_changed = true;
-        if (filter_parameters["validadion_top_n"] != document.getElementById("validadion_top_n").checked) filter_changed = true;
-        if (filter_parameters["validadion_prm"] != document.getElementById("validadion_prm").checked) filter_changed = true;
-        if (filter_parameters["validadion_is"] != document.getElementById("validadion_is").checked) filter_changed = true;
+        if (filter_parameters["validation_top_n"] != document.getElementById("validation_top_n").checked) filter_changed = true;
+        if (filter_parameters["validation_prm"] != document.getElementById("validation_prm").checked) filter_changed = true;
+        if (filter_parameters["validation_is"] != document.getElementById("validation_is").checked) filter_changed = true;
         
         if (filter_changed){
             var proceed = true;
