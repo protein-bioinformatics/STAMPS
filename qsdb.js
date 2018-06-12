@@ -17,6 +17,7 @@ function init(){
     preview_element = new preview();
     select_field_element = new select_field();
     select_field_element.visible = false;
+    current_species = mouse;
     
     var xmlhttp_pw = new XMLHttpRequest();
     xmlhttp_pw.onreadystatechange = function() {
