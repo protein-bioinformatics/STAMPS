@@ -35,6 +35,9 @@ filter_parameters["tissue_fat"] = true;
 filter_parameters["tissue_lung"] = true;
 filter_parameters["tissue_eye"] = true;
 filter_parameters["tissue_gut"] = true;
+filter_parameters["validadion_top_n"] = true;
+filter_parameters["validadion_prm"] = true;
+filter_parameters["validadion_is"] = true;
 filter_parameters["protein_tissues_visible"] = true;
 filter_parameters["peptide_tissues_visible"] = false;
 last_opened_menu = "";
@@ -170,7 +173,7 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
         <tr><td>Max. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"max_peptide_length\" /><td></tr> \
         <tr><td>Min. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"min_precursor_charge\" /><td></tr> \
         <tr><td>Max. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"max_precursor_charge\" /><td></tr> \
-        <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td><td></tr> \
+        <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td></tr> \
         <tr><td>Oxydation of M</td><td> \
         <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" /> off \
         <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
@@ -181,7 +184,7 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
         <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
         <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
         <td></tr> \
-        <tr><td colspan=\"2\">Tissues:</td><td></tr> \
+        <tr><td colspan=\"2\"><br>Tissues:</td></tr> \
                 <tr><td><input type=\"checkbox\" id=\"check_brain\" /> Brain</td> \
                     <td><input type=\"checkbox\" id=\"check_liver\" /> Liver</td> \
                 </tr> \
@@ -197,6 +200,10 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
                 <tr><td><input type=\"checkbox\" id=\"check_eye\" /> Eye</td> \
                     <td><input type=\"checkbox\" id=\"check_gut\" /> Gut</td> \
                 </tr> \
+        <tr><td colspan=\"2\"><br>Validation:<br>\
+        <input type=\"checkbox\" id=\"validadion_top_n\" /> Top-n experiment<br> \
+        <input type=\"checkbox\" id=\"validadion_prm\" /> PRM<br> \
+        <input type=\"checkbox\" id=\"validadion_is\" /> SRM + internal standard</td><td></tr> \
         <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
         document.getElementById('min_peptide_length').value = 8; \
         document.getElementById('max_peptide_length').value = 25; \
@@ -637,6 +644,7 @@ function Spectrum(data){
     this.charge = data['c'];
     this.mod_sequence = data['s'];
     this.ppm = data['p'];
+    this.confidence = data['q'];
     this.filter_valid = false;
     this.user_selected = true;
     this.tissues = data['t'];
@@ -717,12 +725,14 @@ function Peptide(data){
     this.peptide_seq = data['p'];
     this.start_pos = data['b'];
     this.spectra = [];
+    this.confidence = 0;
     this.filter_valid = false;
     this.user_selected = true;
     this.tissues = {};
     
     for (var i = 0; i < data['s'].length; ++i){
         var new_spec = new Spectrum(data['s'][i]);
+        this.confidence |= new_spec.confidence;
         this.spectra.push(new_spec);
         for (t in new_spec.tissues){
             if (!(t in this.tissues)) this.tissues[t] = 0;
@@ -771,8 +781,8 @@ function Protein(data){
     this.accession = ('a' in data) ? data['a'] : "";
     this.ec_number = ('e' in data) ? data['e'] : "";
     this.mass = ('m' in data) ? data['m'] : "";
-    this.prm = ('v' in data) ? ((data['v'] & 1) == 1) : 0;
-    this.is = ('v' in data) ? ((data['v'] & 2) == 2) : 0; // is = internal standard
+    this.prm = 0;
+    this.is = 0; // is = internal standard
     this.sequence_length = ('l' in data) ? data['l'] : "";
     this.pI = ('pI' in data) ? data['pI'] : 0;
     this.peptides = [];
@@ -788,6 +798,8 @@ function Protein(data){
         for (var i = 0; i < data['p'].length; ++i){
             
             var new_pep = new Peptide(data['p'][i]);
+            this.prm |= (new_pep.confidence & 1) == 1 ? 1 : 0;
+            this.is |= (new_pep.confidence & 2) == 2 ? 1 : 0;
             this.peptides.push(new_pep);
             for (t in new_pep.tissues){
                 if (!(t in this.tissues)) this.tissues[t] = 0;
@@ -3816,6 +3828,8 @@ function check_spectra_expand_collapse_peptide(prot_id, do_collapse){
 function check_spectra(){
     var expanded_proteins = [];
     var expanded_peptides = [];
+    last_opened_menu = "";
+    document.getElementById("filter_panel_wrapper").innerHTML = "";
     if (document.getElementById("spectra_panel").innerHTML != ""){
         var table_children = document.getElementById("spectra_panel").children[0].children;
         for (var i = 0; i < table_children.length; ++i){
@@ -4303,6 +4317,9 @@ function adopt_filter_parameters(){
     filter_parameters["tissue_lung"] = document.getElementById("check_lung").checked;
     filter_parameters["tissue_eye"] = document.getElementById("check_eye").checked;
     filter_parameters["tissue_gut"] = document.getElementById("check_gut").checked;
+    filter_parameters["validadion_top_n"] = document.getElementById("validadion_top_n").checked;
+    filter_parameters["validadion_prm"] = document.getElementById("validadion_prm").checked;
+    filter_parameters["validadion_is"] = document.getElementById("validadion_is").checked;
 }
 
 
@@ -4327,6 +4344,9 @@ function load_filter_parameters(){
     document.getElementById("check_lung").checked = filter_parameters["tissue_lung"];
     document.getElementById("check_eye").checked = filter_parameters["tissue_eye"];
     document.getElementById("check_gut").checked = filter_parameters["tissue_gut"];
+    document.getElementById("validadion_top_n").checked = filter_parameters["validadion_top_n"];
+    document.getElementById("validadion_prm").checked = filter_parameters["validadion_prm"];
+    document.getElementById("validadion_is").checked = filter_parameters["validadion_is"];
 }
 
 
@@ -4355,6 +4375,9 @@ function hide_filter_panel(){
         if (filter_parameters["tissue_lung"] != document.getElementById("check_lung").checked) filter_changed = true;
         if (filter_parameters["tissue_eye"] != document.getElementById("check_eye").checked) filter_changed = true;
         if (filter_parameters["tissue_gut"] != document.getElementById("check_gut").checked) filter_changed = true;
+        if (filter_parameters["validadion_top_n"] != document.getElementById("validadion_top_n").checked) filter_changed = true;
+        if (filter_parameters["validadion_prm"] != document.getElementById("validadion_prm").checked) filter_changed = true;
+        if (filter_parameters["validadion_is"] != document.getElementById("validadion_is").checked) filter_changed = true;
         
         if (filter_changed){
             var proceed = true;
@@ -4817,7 +4840,7 @@ function accession_search_parse_accessions(accessions, synchronous){
         }
     }
     
-    xmlhttp.open("GET", "/stamp/cgi-bin/get-proteins.bin?accessions=" + accessions + "&species=" + current_species, synchronous);
+    xmlhttp.open("GET", "/stamp/cgi-bin/get-proteins.bin?accessions=" + accessions + "&species=mouse" + current_species, synchronous);
     xmlhttp.send();
 }
 

@@ -174,7 +174,6 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     sqlite3 *db;
     char *zErrMsg = 0;
     int rc;
-        
     rc = sqlite3_open((char*)parameters["spectra_db_" + species].c_str(), &db);
     if( rc ){
         print_out("-3", compress);
@@ -197,7 +196,7 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     sqlite3_stmt *stmt;
     sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &zErrMsg);
     
-    string sql_prepare = "SELECT r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n FROM (SELECT id, precursorCharge, precursorMZ, peptideModSeq FROM RefSpectra WHERE id = ?) r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY r.id;";
+    string sql_prepare = "SELECT r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n, r.confidence q FROM (SELECT id, precursorCharge, precursorMZ, peptideModSeq, confidence FROM RefSpectra WHERE id = ?) r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY r.id;";
     sqlite3_prepare_v2(db, sql_prepare.c_str(), -1, &stmt, 0);
     
     
@@ -211,6 +210,7 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
         s->mod_sequence = (char*)sqlite3_column_text(stmt, 2);
         s->tissues = (char*)sqlite3_column_text(stmt, 3);
         s->tissue_numbers = (char*)sqlite3_column_text(stmt, 4);
+        s->confidence = (char*)sqlite3_column_text(stmt, 5);
         sqlite3_clear_bindings(stmt);
         sqlite3_reset(stmt);
         

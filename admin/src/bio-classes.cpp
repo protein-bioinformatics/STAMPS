@@ -213,6 +213,7 @@ string spectrum::to_string(){
     str += "\"i\":" + str_id + ",";
     str += "\"s\":\"" + mod_sequence + "\",";
     str += "\"c\":" + charge + ",";
+    str += "\"q\":" + confidence + ",";
     str += "\"m\":\"" + mass + "\"";
     str += ",\"p\":" + string(ppm_str);
     

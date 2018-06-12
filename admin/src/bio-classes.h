@@ -165,9 +165,11 @@ class spectrum {
         const string str_id;
         string charge = "0";
         string mass = "0";
+        string confidence = "0";
         string mod_sequence = "A";
         string tissues = "-";
         string tissue_numbers = "1";
+        
         
         spectrum(string _id);
         string to_string();
