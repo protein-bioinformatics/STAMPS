@@ -284,8 +284,8 @@
 <div id="statistics" class="global_search" onclick="this.style.display = 'none';">
     <div id="statistics_table" class="global_search_content" style="width: 1000px; overflow-y: scroll;">
     <table width="100%" height="100%">
-        <tr><td>
-            Still in construction!!!<p>
+        <tr><td width="100%">
+            <center><b>Normalized spectrum abundance factor</b></center><br>
             <table>
                 <tr><td colspan="5">Tissues:</td><td></tr>
                 <tr><td><input type="checkbox" id="statistics_check_brain_nsaf" onchange="update_nsaf();" checked /> Brain</td>
@@ -301,15 +301,17 @@
                     <td><input type="checkbox" id="statistics_check_gut_nsaf" onchange="update_nsaf();" /> Gut</td>
                 </tr>
             </table><br>
-            <canvas id="nsaf_figure" width="600" height="300"></canvas>
-            <p><hr>
+            <center><canvas id="nsaf_figure" width="600" height="300"></canvas></center>
+            <p>&nbsp;<p><hr>
             
             <p>&nbsp;<p>
+            <center><b>Distribution of protein abundances</b></center><br>
             <select id="nsaf_pathway_figure_select" onchange="update_nsaf_pathway_figure();"></select><br>
-            <canvas id="nsaf_pathway_figure" width="600" height="300"></canvas>
+            <center><canvas id="nsaf_pathway_figure" width="600" height="300"></canvas></center>
             <p><hr>
             
             <p>&nbsp;<p>
+            <center><b>Protein isoelectric point vs. mass</b></center><br>
             <table>
                 <tr><td colspan="5">Tissues:</td><td></tr>
                 <tr><td><input type="checkbox" id="statistics_check_brain_pI" onchange="update_pI();" checked /> Brain</td>
@@ -325,12 +327,13 @@
                     <td><input type="checkbox" id="statistics_check_gut_pI" onchange="update_pI();" /> Gut</td>
                 </tr>
             </table><br>
-            <canvas id="pI_figure" width="600" height="300"></canvas>
-            <p><hr>
+            <center><canvas id="pI_figure" width="600" height="300"></canvas></center>
+            <p>&nbsp;<p><hr>
             
             <p>&nbsp;<p>
+            <center><b>Mass accuracy residuals</b></center><br>
             <select id="ppm_pw_figure_select" onchange="update_ppm();"></select><br>
-            <canvas id="ppm_histogram" width="600" height="300"></canvas>
+            <center><canvas id="ppm_histogram" width="600" height="300"></canvas></center>
         </td></tr></table>
     </div>
 </div>
@@ -396,7 +399,7 @@ function update_nsaf(ctx){
     
             
     var w_box = 600;
-    var w_offset = 50;
+    var w_offset = 70;
     var h_box = 250;
     ctx.clearRect(0, 0, w_box, h_box + w_offset);
 
@@ -419,6 +422,44 @@ function update_nsaf(ctx){
     ctx.moveTo(w_offset, h_box);
     ctx.lineTo(w_offset, 0);
     ctx.stroke();
+    
+    
+    ctx.font="14px Arial";
+    ctx.textAlign = 'center';
+    ctx.save();
+    ctx.translate(20, h_box >> 1);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = "black";
+    ctx.fillText("log10(NSAF)", 0, 0);
+    ctx.restore();
+    
+    
+    // y-scale
+    ctx.lineWidth = 1;
+    ctx.textAlign="right";
+    ctx.textBaseline="middle";
+    var h_factor = 0.97;            
+    var step = 1;
+    ctx.font="14px Arial";
+    
+    for (var h = max_NSAF; h > min_NSAF; h -= step){
+        var y = (h - max_NSAF) / (min_NSAF - max_NSAF) * h_box + h_box * (1 - h_factor);
+        ctx.strokeStyle = "#dddddd";
+        ctx.beginPath();
+        ctx.moveTo(w_offset, y);
+        ctx.lineTo(w_box, y);
+        ctx.stroke();
+        
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(w_offset - 5, y);
+        ctx.lineTo(w_offset + 5, y);
+        ctx.stroke();
+        
+        
+        ctx.fillStyle = "black";
+        ctx.fillText(h + "%", w_offset - 8, y);
+    }
     
     
     var num_checked = 0;
@@ -475,7 +516,7 @@ function resize_views(){
 function add_nsaf(t, curr, total, ctx){
     
     var w_box = 600;
-    var w_offset = 50;
+    var w_offset = 70;
     var h_box = 250;
     
     
@@ -569,6 +610,8 @@ function open_statistics (){
                 }
             }
             
+            max_NSAF = Math.ceil(max_NSAF);
+            
             statistics_loaded++;
             update_nsaf();
             update_nsaf_pathway_figure();
@@ -654,9 +697,21 @@ function update_ppm(){
     ppm_ctx.clearRect(0, 0, ppm_histogram_canvas.width, ppm_histogram_canvas.height);
             
     var w_box = 600;
-    var w_offset = 50;
+    var w_offset = 70;
     var h_box = 250;
     
+    
+    
+    
+    
+    ppm_ctx.font="14px Arial";
+    ppm_ctx.textAlign = 'center';
+    ppm_ctx.save();
+    ppm_ctx.translate(20, h_box >> 1);
+    ppm_ctx.rotate(-Math.PI / 2);
+    ppm_ctx.fillStyle = "black";
+    ppm_ctx.fillText("relative a.u.", 0, 0);
+    ppm_ctx.restore();
     
     
     //scales
@@ -735,7 +790,7 @@ function update_ppm(){
     // axes labels
     ppm_ctx.fillStyle = "black";
     ppm_ctx.textAlign="center";
-    ppm_ctx.fillText("Mass accuracy difference / ppm", (w_box + w_offset) / 2, h_box + 40);
+    ppm_ctx.fillText("Mass accuracy residual / ppm", (w_box + w_offset) / 2, h_box + 40);
     
 }
 
@@ -748,7 +803,7 @@ function update_pI(){
     pI_ctx.clearRect(0, 0, nsaf_figure.width, nsaf_figure.height);
             
     var w_box = 590;
-    var w_offset = 40;
+    var w_offset = 50;
     var w_bar = 30;
     var h_box = 250;
 
@@ -803,6 +858,17 @@ function update_pI(){
         }
     }
     
+    
+    pI_ctx.font="14px Arial";
+    pI_ctx.textAlign = 'center';
+    pI_ctx.fillStyle = "black";
+    pI_ctx.save();
+    pI_ctx.translate(20, h_box >> 1);
+    pI_ctx.rotate(-Math.PI / 2);
+    pI_ctx.fillText("log10(protein mass / Da)", 0, 0);
+    pI_ctx.restore();
+    pI_ctx.fillText("isoelectric point", w_offset + ((w_box - w_offset) >> 1), h_box + 40);
+    
     // scale
     // x-scale
     pI_ctx.font="14px Arial";
@@ -842,7 +908,7 @@ function update_nsaf_pathway_figure(ctx){
     }
             
     var w_box = 600;
-    var w_offset = 50;
+    var w_offset = 70;
     var w_bar = 30;
     var h_box = 250;
     ctx.clearRect(0, 0, w_box, h_box);
@@ -884,6 +950,15 @@ function update_nsaf_pathway_figure(ctx){
         max_val = Math.max(max_val, tissue_nsafs[t]);
     }
     
+    ctx.font="14px Arial";
+    ctx.textAlign = 'center';
+    ctx.save();
+    ctx.translate(20, h_box >> 1);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = "black";
+    ctx.fillText("relative protein abundance", 0, 0);
+    ctx.restore();
+    
     
     ctx.lineWidth = 1;
     ctx.textAlign="right";
@@ -891,6 +966,8 @@ function update_nsaf_pathway_figure(ctx){
     var v_factor = 0.94;
     
     var step = 20;
+    
+    
     
     // y-scale
     ctx.font="14px Arial";
@@ -912,6 +989,10 @@ function update_nsaf_pathway_figure(ctx){
         ctx.fillStyle = "black";
         ctx.fillText(h + "%", w_offset - 8, y + 5);
     }
+    
+    
+    
+    
     
     var i = 0;
     var w = (w_box - w_offset) / 10;
