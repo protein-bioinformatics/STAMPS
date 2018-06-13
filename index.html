@@ -23,9 +23,8 @@
             <div style="display: inline; font-weight: bold;">P</div>athways
         </td>
     
-        <td class="navigation_cell_click" align="center" style="border-left: white; border-left-style: solid; border-left-width: 1px;">Feedback</td>
-        <td class="navigation_cell_click" align="center">References</td>
-        <td class="navigation_cell_click" align="center" onclick="location.href = 'mailto:dominik.kopczynski@isas.de';">Contact</td>
+        <td class="navigation_cell_click" align="center" style="border-left: white; border-left-style: solid; border-left-width: 1px;"  onclick="document.getElementById('citation').style.display = 'inline';">Reference / Citation</td>
+        <td class="navigation_cell_click" align="center" onclick="location.href = 'mailto:robert.ahrends@isas.de';">Feedback / Contact</td>
     </tr></table>
 </div>
 
@@ -104,11 +103,34 @@
     </div>
 </div>
 
+
+
+<div id="citation" class="global_search" onclick="this.style.display = 'none';">
+    <div id="disclaimer_content" class="global_search_content" style="overflow-y: auto;">
+    <table width="100%" height="100%"><tr><td valign="top" align="justify">
+            <center><b>Citation</b></center><p>
+            If you are using STAMP in your publication, please include one of these references:<p>
+            <table cellspacing='5px'>
+            <tr><td valign='top'>⚫ </td><td>Hentschel et al., <i>#journal</i>, #year.<br></td></tr>
+            <tr><td valign='top'>⚫ </td><td>Hentschel, A., Kopczynski, D., Lorenz C., Sickmann, A.,  Ahrends, R. (2018). Simple Targeted Assays for Metabolic Pathways: a powerful kickoff tool for targeted proteomics. <i>#journal</i>, #number, #pages.<br></td></tr>
+            <tr><td valign='top'>⚫ </td><td>Andreas Hentschel, Dominik Kopczynski, Christina Lorenz, Albert Sickmann, and Robert Ahrends. "Simple Targeted Assays for Metabolic Pathways: a powerful kickoff tool for targeted proteomics." <i>#journal</i> #number (2018): #pages.<br></td></tr>
+            </table>
+            
+            <p>&nbsp;<p>&nbsp;<p>
+
+            <center><b>References</b></center><p>
+            
+        </td></tr></table>
+    </div>
+</div>
+
+
+
 <div id="disclaimer" class="global_search" onclick="this.style.display = 'none';">
     <div id="disclaimer_content" class="global_search_content" style="overflow-y: auto;">
     <table width="100%" height="100%"><tr><td align="justify">
-            <center><b>About QSDB</b></center><p>
-            The quality standard database (QSDB) provides a pathway based approach to access proteomics assays for targeted proteomics.
+            <center><b>About STAMP</b></center><p>
+            The Simple Targeted Assays for Metabolic Pathways (STAMP) database provides a pathway based approach to access proteomics assays for targeted proteomics.
             Currently, we are acquiring mass spectra for all proteins within the mouse organism.
             Our mass spetrometer is a QExactive Plus or HF, capable to produce high-resolution high-mass accuracy LC-MS/MS spectra.<p>
             Responsible people for this database are:<br>
@@ -116,7 +138,7 @@
             Andreas Hentschel: Acquisition and processing of the data<br>
             Robert Ahrends: Coordination<p>
             The ISAS team is supported by the German network of bioinformatics services (<a href="http://www.denbi.de" target="_blank">de.NBI</a>).
-            If you have questions, suggestions or other issues, please <a href="mailto:foo@foo.de">contact</a> us.
+            If you have questions, suggestions or other issues, please <a href="mailto:robert.ahrends@isas.de">contact</a> us.
             <p>&nbsp;<p>&nbsp;<p>
 
 

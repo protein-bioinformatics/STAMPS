@@ -966,7 +966,7 @@ function Protein(data){
         
         if (this.prm > 0){
             ctx.beginPath();
-            ctx.arc(x_pos + 3 * radius, y, radius, 0, 2 * Math.PI);
+            ctx.arc(x_pos + 3.5 * radius, y, radius, 0, 2 * Math.PI);
             ctx.fillStyle = '#feff90';
             ctx.fill();
             if (factor >= 0.5) ctx.stroke();
@@ -974,7 +974,7 @@ function Protein(data){
         
         if (this.is > 0){
             ctx.beginPath();
-            ctx.arc(x_pos + 5 * radius, y, radius, 0, 2 * Math.PI);
+            ctx.arc(x_pos + 6 * radius, y, radius, 0, 2 * Math.PI);
             ctx.fillStyle = '#a0ff90';
             ctx.fill();
             if (factor >= 0.5) ctx.stroke();
@@ -3694,8 +3694,8 @@ function check_spectra_expand_collapse_peptide(prot_id, do_collapse){
         document.getElementById("protein_sign_" + current_prot.id).innerHTML = sign_down;
         dom_pep.style.display = "inline";
         for (var j = 0; j < current_prot.peptides.length; ++j){
-            if (!current_prot.peptides[j].filter_valid) continue;
             var current_pep = current_prot.peptides[j];
+            if (!current_pep.filter_valid) continue;
             var specs = prot_id + "_" + current_pep.peptide_seq;
             var n_specs = current_pep.spectra.length;
             var peptite_checked = current_pep.user_selected ? "checked" : "";
