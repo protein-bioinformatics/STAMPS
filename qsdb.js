@@ -351,7 +351,13 @@ function key_down(event){// canvas to svg
     if (event.which === 17){ // CTRL
         //pathway_to_svg();
         //nsaf_to_svg();
-        return false;
+    }
+    else if (event.which === 27){ // ESC
+        hide_check_spectra();
+        hide_download();
+        collapse_statistics();
+        close_navigation();
+        last_opened_menu = "";
     }
     
     // easter egg

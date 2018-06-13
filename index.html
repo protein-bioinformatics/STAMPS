@@ -128,7 +128,7 @@
 
 
 <div id="disclaimer" class="global_search" onclick="this.style.display = 'none';">
-    <div id="disclaimer_content" class="global_search_content" style="overflow-y: auto;">
+    <div id="disclaimer_content" class="global_search_content" style="overflow-y: auto; height: 80%;">
     <table width="100%" height="100%"><tr><td align="justify">
             <center><b>About STAMP</b></center><p>
             The Simple Targeted Assays for Metabolic Pathways (STAMP) database provides a pathway based approach to access proteomics assays for targeted proteomics.
@@ -1520,7 +1520,18 @@ function advanced_search_init(){
 function key_down(event){
     if (event.which === 17){ // CTRL
         //pathway_to_svg();
-    }    
+    }
+    else if (event.which === 27){ // ESC
+        document.getElementById("statistics").style.display = "none";
+        document.getElementById('disclaimer').style.display = "none";
+        document.getElementById('citation').style.display = "none";
+        hide_locus_search(false);
+        hide_function_search(false);
+        hide_chromosome_search(false);
+        hide_accession_search();
+        hide_check_spectra();
+        hide_download();
+    }   
 
 
     // easter egg

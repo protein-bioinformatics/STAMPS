@@ -1433,15 +1433,7 @@ function expand_collapse(){
     this.sort_order = 1000;
     
     this.mouse_click = function(mouse, key){
-        if (this.dir){
-            expand_statistics();
-        }
-        else {
-            collapse_statistics();
-        }
-        this.dir = !this.dir;
-        this.name = this.dir ? "expand" : "collapse";
-        this.img = document.getElementById(this.name);
+        this.toggle();
     }
     
     this.expand = function(){
@@ -1451,12 +1443,20 @@ function expand_collapse(){
         this.img = document.getElementById(this.name);
     }
     
+    
     this.collapse = function(){
         this.dir = 1;
-        collapse_statistics();
         this.name = "expand";
         this.img = document.getElementById(this.name);
+        hide_statistics();
     }
+    
+    
+    this.toggle = function(){
+        if (this.dir == 1) this.expand();
+        else this.collapse();
+    }
+    
     
     this.is_mouse_over = function(mouse){
         if (!this.visible) return false;
@@ -4634,6 +4634,10 @@ function expand_statistics(){
 
 function collapse_statistics(){
     if (!pathway_is_loaded) return;
+    expand_collapse_obj.collapse();
+}    
+    
+function hide_statistics(){
     document.getElementById("renderarea").width  = window.innerWidth;
     document.getElementById("statistics").style.display = "none";
     draw();

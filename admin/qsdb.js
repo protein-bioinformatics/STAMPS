@@ -1380,24 +1380,15 @@ function key_down(event){
         pathway_to_svg();
     }
     */
+    if (event.which === 27){ // ESC
+        hide_manage_entries();
+        close_editor_select_pathway();
+        close_editor_select_protein();
+        close_editor_select_metabolite();
+        close_navigation();
+        last_opened_menu = "";
+    }
     
-    
-    // easter egg
-    var k_code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
-    last_keys.push(event.which);
-    while (last_keys.length > 10) last_keys.shift();
-    if (last_keys.length == 10){
-        var k_is_valid = true;
-        for (var i = 0; i < 10; ++i){
-            if (k_code[i] != last_keys[i]){
-                k_is_valid = false;
-                break;
-            }
-        }
-        if (k_is_valid){
-            alert("You breaked the master code - you sneaky hacker. We'll flood your mailbox with yellow bananas. Your database will be dropped, your client destroyed. All your base are belong to us!!!");
-        }
-    }    
     if (!pathway_is_loaded) return;
     
     if(event.which == 45){
