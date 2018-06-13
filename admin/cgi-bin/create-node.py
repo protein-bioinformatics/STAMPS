@@ -16,7 +16,7 @@ with open("../qsdb.conf", mode="rt") as fl:
 print("Content-Type: text/html")
 print()
 
-
+form, node_type, x, y, pathway = None, None, None, None, None
 try:
     form = FieldStorage()
     node_type = form.getvalue('type')
@@ -27,7 +27,6 @@ try:
 except:
     print(-1)
     exit()   
-
 
 
 if type(x) is not str or type(y) is not str or type(pathway) is not str or node_type not in ["pathway", "protein", "metabolite", "label", "membrane"]:

@@ -200,7 +200,6 @@ class protein {
         string fasta;
         float pI;
         vector<peptide*> peptides;
-        string validation;
         int proteome_start_pos;
         
         protein(string _id);

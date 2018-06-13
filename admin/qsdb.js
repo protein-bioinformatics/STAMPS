@@ -816,6 +816,7 @@ function create_node(request){
     var xmlhttp = new XMLHttpRequest();
     request = "/stamp/admin/cgi-bin/create-node.py?" + request;
     
+    
     var successful_creation = [false, -1];
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -1280,13 +1281,13 @@ function toolbox_button_clicked(button){
     switch (toolbox_button_selected){
         case toolbox_states.CREATE_PATHWAY:
             tmp_element = new node({"x": "0", "y": "0", "t": "pathway", "i": -1, "n": "undefined"});
-            tmp_element.scale(0, 0, factor);
+            //tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
             break;
             
         case toolbox_states.CREATE_PROTEIN:
             tmp_element = new node({"x": "0", "y": "0", "t": "protein", "i": -1, "n": "-", "p": []});
-            tmp_element.scale(0, 0, factor);
+            //tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
             break;
             
@@ -1298,7 +1299,7 @@ function toolbox_button_clicked(button){
             
         case toolbox_states.CREATE_LABEL:
             tmp_element = new node({"x": "0", "y": "0", "t": "label", "i": -1, "n": "undefined"});
-            tmp_element.scale(0, 0, factor);
+            //tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
             break;
             
