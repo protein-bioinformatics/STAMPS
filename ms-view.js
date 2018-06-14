@@ -211,16 +211,16 @@ function resize_ms_view(){
     }
     
     
-    var scl = (document.getElementById("msarea").width * 0.95 - document.getElementById("msarea").width * 0.05) / (right_border - left_border);
-    origin_x *= scl;
-    last_x *= scl;
+    var scl_w = (document.getElementById("msarea").width - 40 - 70) / (right_border - left_border);
+    origin_x *= scl_w;
+    last_x *= scl_w;
     for (var i = 0; i < peaks.length; ++i) {
-        peaks[i].x *= scl;
+        peaks[i].x *= scl_w;
     }
-    left_border = document.getElementById("msarea").width * 0.05;
-    right_border = document.getElementById("msarea").width * 0.95;
-    top_border = document.getElementById("msarea").height * 0.05;
-    bottom_border = document.getElementById("msarea").height * 0.95;
+    left_border = 70;
+    right_border = document.getElementById("msarea").width - 40;
+    top_border = 40;
+    bottom_border = document.getElementById("msarea").height - 25;
     
     if (spectrum_loaded) draw_spectrum();
 }
@@ -294,10 +294,10 @@ function load_spectrum(spectrum_id){
     }
     var canvas_width = ctx.canvas.width;
     
-    left_border = canvas_width * 0.065;
-    right_border = canvas_width * 0.96;
-    top_border = ctx.canvas.height * 0.06;
-    bottom_border = ctx.canvas.height * 0.95;
+    left_border = 70;
+    right_border = ctx.canvas.width - 40;
+    top_border = 40;
+    bottom_border = ctx.canvas.height - 25;
     
     
     peaks.push(new peak(0, 0, 0));
@@ -381,7 +381,7 @@ function draw_spectrum(ctx){
     ctx.textAlign = "right";
     ctx.textBaseline = 'middle';
     for (var i = 0; i < max_intensity; i += y_tic){
-        var y = bottom_border - i * ctx.canvas.height * 0.85 / max_intensity;
+        var y = bottom_border - i * (bottom_border - top_border) / max_intensity;
         ctx.setLineDash([0]);
         ctx.strokeStyle = label_color;
         ctx.lineWidth = 2;
@@ -412,8 +412,8 @@ function draw_spectrum(ctx){
     ctx.lineWidth = 1;
     ctx.setLineDash([0]);
     ctx.strokeStyle = ion_type_colors[ion_type.no_type];
-    var y_factor = ctx.canvas.height * 0.85 / max_intensity;
-    var y_offset = ctx.canvas.height * 0.02;
+    var y_factor = (bottom_border - top_border) / max_intensity;
+    var y_offset = 5;
     var annotated = [];
     for (var i = 0; i < peaks.length; ++i) {
         if (left_border <= peaks[i].x && peaks[i].x <= right_border){
@@ -466,12 +466,14 @@ function draw_spectrum(ctx){
     ctx.font="16px Arial";
     ctx.textAlign = "left";
     ctx.textBaseline = 'top';
-    ctx.fillText("m/z", right_border * 1.005, bottom_border);
+    ctx.fillText("m/z", right_border  + 5, bottom_border - 8);
     ctx.save();
     ctx.translate(0, 0);
     ctx.rotate(-Math.PI/2);
     ctx.textAlign = "center";
     //ctx.fillText("intensity", left_border - 100, top_border);
+    
+    
     ctx.restore();
 }
 
