@@ -15,7 +15,7 @@
 <body>
 <div class="navigation">
     <table width="100%" height=50><tr>
-        <td class="navigation_cell" style="font-size: 150%; display: inline; border-width: 0px;">
+        <td class="navigation_cell" style="font-size: 1.6vw; display: inline; border-width: 0px;">
             <div style="display: inline; font-weight: bold;">S</div>imple
             <div style="display: inline; font-weight: bold;">T</div>argeted
             <div style="display: inline; font-weight: bold;">A</div>ssays for
@@ -55,53 +55,52 @@
 </div>
 
 
-<div style="position:fixed; width:100%; height: 130px; bottom: 0px;">
-    <div id="navigation_startpage" class="navigation_startpage">
-    <table height=130>
+<div id="navigation_startpage" class="navigation_startpage">
+    <table>
     <tr><td width="50%">
     </td>
     
-    <td style="min-width: 150px; border-left: white; border-left-style: solid; border-left-width: 1px;" id="how_to_nav" class="navigation_cell_click" align="center">
-        <img src="images/how-to.svg" height=80><br>
+    <td style="border-left: white; border-left-style: solid; border-left-width: 1px;" id="how_to_nav" class="navigation_cell_click" align="center">
+        <img src="images/how-to.svg" class="navigation_cell_click_image"><br>
         How&nbsp;To
     </td>
     
-    <td style="min-width: 150px;" class="navigation_cell_click" id="pathway_browser_nav" align="center" onclick="location.href = 'browser.html';">
-        <img src="images/pathway-browser.svg" height=80><br>
+    <td class="navigation_cell_click" id="pathway_browser_nav" align="center" onclick="location.href = 'browser.html';">
+        <img src="images/pathway-browser.svg" class="navigation_cell_click_image"><br>
         Pathway&nbsp;Browser
     </td>
     
-    <td style="min-width: 150px;" class="navigation_cell_click" id="subcellular_search_nav" align="center" onclick="advanced_search_init(); open_locus_search();">
-        <img src="images/cell.svg" height=80><br>
+    <td class="navigation_cell_click" id="subcellular_search_nav" align="center" onclick="advanced_search_init(); open_locus_search();">
+        <img src="images/cell.svg" class="navigation_cell_click_image"><br>
         Subcellular&nbsp;Search
     </td>
     
-    <td style="min-width: 150px;" class="navigation_cell_click" id="functional_search_nav" align="center" onclick="advanced_search_init(); open_function_search();">
-        <img src="images/gears.svg" height=80><br>
+    <td class="navigation_cell_click" id="functional_search_nav" align="center" onclick="advanced_search_init(); open_function_search();">
+        <img src="images/gears.svg" class="navigation_cell_click_image"><br>
         Functional&nbsp;Search
     </td>
     
-    <td style="min-width: 150px;" class="navigation_cell_click" id="accession_search_nav" align="center" onclick="advanced_search_init(); open_accession_search();">
-        <img src="images/accession-search.svg" height=80><br>
+    <td class="navigation_cell_click" id="accession_search_nav" align="center" onclick="advanced_search_init(); open_accession_search();">
+        <img src="images/accession-search.svg" class="navigation_cell_click_image"><br>
         Accession&nbsp;Search
     </td>
     
-    <td style="min-width: 150px;" class="navigation_cell_click" id="chromosome_search_nav" align="center" onclick="advanced_search_init(); open_chromosome_search();">
-        <img src="images/chromosome.svg" height=80><br>
+    <td class="navigation_cell_click" id="chromosome_search_nav" align="center" onclick="advanced_search_init(); open_chromosome_search();">
+        <img src="images/chromosome.svg" class="navigation_cell_click_image"><br>
         Chromosome&nbsp;Search
     </td>
     
-    <td style="min-width: 150px;" id="statistics_nav" class="navigation_cell_click" align="center" onclick="open_statistics();">
-        <img src="images/statistics.svg" height=80><br>
+    <td id="statistics_nav" class="navigation_cell_click" align="center" onclick="open_statistics();">
+        <img src="images/statistics.svg" class="navigation_cell_click_image"><br>
         Statistics
     </td>
     
-    <td style="min-width: 150px;" id="about_nav" class="navigation_cell_click" align="center" onclick="document.getElementById('disclaimer').style.display = 'inline';">
-        <img src="images/about.svg" height=80><br>
+    <td id="about_nav" class="navigation_cell_click" align="center" onclick="document.getElementById('disclaimer').style.display = 'inline';">
+        <img src="images/about.svg" class="navigation_cell_click_image"><br>
         About
     </td><td width="50%"></tr>
+    
     </table>
-    </div>
 </div>
 
 
