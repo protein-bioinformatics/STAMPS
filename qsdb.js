@@ -340,7 +340,7 @@ function mouse_move_listener(e){
     
     var set_mouse_pointer = -1;
     if(highlight_element instanceof node){
-        set_mouse_pointer = highlight_element.check_mouse_over_protein_name(res);
+        set_mouse_pointer = highlight_element.mouse_pointer_cursor(res);
     }
     c.style.cursor = (set_mouse_pointer >= 0) ? "pointer" : "default";
 }

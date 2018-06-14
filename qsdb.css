@@ -304,7 +304,7 @@ td.navigation_cell_click {
     width: auto;
     max-width: 200px;
     height: auto;
-    font-size: 0.9vw;
+    font-size: calc(7px + 0.5vw);
 }
 
 

@@ -1795,9 +1795,21 @@ function node(data){
     
     
     this.setup_label_meta = function(){
+        var tokens = this.name.split(" ");
+        this.short_name = "";
+        this.formula = "";
+        for (var token of tokens){
+            if (token.indexOf("http") > -1){
+                this.formula = token;
+            }
+            else {
+                if (this.short_name.length > 0) this.short_name += " ";
+                this.short_name += token;
+            }
+        }
         var ctx = document.createElement("canvas").getContext("2d");
         ctx.font = (font_size / factor).toString() + "px Arial";
-        this.width = 1.2 * ctx.measureText(this.name).width * factor;
+        this.width = 1.2 * ctx.measureText(this.short_name).width * factor;
         this.height = (text_size + 2) * factor;
     }
     
@@ -2074,7 +2086,7 @@ function node(data){
                 ctx.textAlign = "center";
                 ctx.font = ((text_size + 2) * factor).toString() + "px Arial";
                 ctx.fillStyle = this.selected ? node_selected_color : label_color;
-                ctx.fillText(this.name, this.x, this.y + this.height * 0.3);
+                ctx.fillText(this.short_name, this.x, this.y + this.height * 0.3);
                 break;
                 
                 
@@ -2215,6 +2227,20 @@ function node(data){
         return "";
     }
     
+    this.mouse_pointer_cursor = function (res){
+    
+        switch (this.type){
+            case "protein":
+                return this.check_mouse_over_protein_name(res);
+                
+            case "label":
+                return (this.is_mouse_over(res) && this.formula.length > 0);
+                
+            default:
+                return false;
+        }
+    }
+    
     this.is_mouse_over = function (mouse){
         var lw = line_width * factor;
         switch (this.type){
@@ -2224,6 +2250,8 @@ function node(data){
             default:
                 return (this.x - (this.width >> 1) - lw <= mouse.x && mouse.x <= this.x + (this.width >> 1) + lw && this.y - (this.height >> 1) - lw <= mouse.y && mouse.y <= this.y + (this.height >> 1) + lw);
         }
+        
+                
     };
     
     this.mark_protein_checkbox = function(res){
@@ -2291,6 +2319,10 @@ function node(data){
             if (this.pathway_enabled){
                 change_pathway(this.foreign_id);
             }
+        }
+        else if (this.type == 'label' && this.formula.length > 0){
+            var win = window.open(this.formula, '_blank');
+            win.focus();
         }
     }
     
