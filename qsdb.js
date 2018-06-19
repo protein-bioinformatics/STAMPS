@@ -168,6 +168,19 @@ function resize_pathway_view(){
     ctx.canvas.width  = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
     preview_element.y = window.innerHeight - preview_element.height;
+  
+    var rect = document.getElementById('select_pathway_nav').getBoundingClientRect();
+    document.getElementById("select_pathway").style.top = (rect.top + document.getElementById('select_pathway_nav').offsetHeight).toString() + "px";
+    document.getElementById("select_pathway").style.left = (rect.left).toString() + "px";
+    
+    rect = document.getElementById('select_species_nav').getBoundingClientRect();
+    document.getElementById("select_species").style.top = (rect.top + document.getElementById('select_species_nav').offsetHeight).toString() + "px";
+    document.getElementById("select_species").style.left = (rect.left).toString() + "px";
+    
+    rect = document.getElementById('filter_panel_nav').getBoundingClientRect();
+    document.getElementById("filter_panel_wrapper").style.top = (rect.top + document.getElementById('filter_panel_nav').offsetHeight).toString() + "px";
+    document.getElementById("filter_panel_wrapper").style.left = (rect.left).toString() + "px";
+    
     draw();
 }
 
