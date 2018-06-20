@@ -20,7 +20,7 @@ entity_id = form.getvalue('id')
 print("Content-Type: text/html")
 print()
 
-if type(entity_type) is not str or type(entity_id) is not str or entity_type not in ["node", "edge", "protein", "metabolite", "pathway"]:
+if type(entity_type) is not str or type(entity_id) is not str or entity_type not in ["node", "edge", "protein", "metabolite", "pathway", "pathway_group"]:
     print(-1)
     exit()
    
@@ -162,4 +162,41 @@ elif entity_type == "metabolite":
     
     filepath = os.path.dirname(os.path.abspath(__file__))
     os.system("rm -f %s/../../images/metabolites/C%s.png" % (filepath, entity_id))
+    
+    
+    
+    
+    
+elif entity_type == "pathway_group":
+    
+    sql_query = "SELECT id FROM pathways WHERE pathway_group_id = %s;" # reactions for pathways
+    my_cur.execute(sql_query, (entity_id))
+    ids_for_delete = [str(row["id"]) for row in my_cur]
+    for pw_id in ids_for_delete:
+    
+        sql_query = "DELETE FROM reagents WHERE reaction_id IN (SELECT r.id FROM reactions r INNER JOIN nodes n on r.node_id = n.id WHERE n.type = 'pathway' AND foreign_id = %s);"
+        my_cur.execute(sql_query, (pw_id))
+        conn.commit()
+        
+        sql_query = "DELETE FROM reactions WHERE node_id IN (SELECT id FROM nodes WHERE type = 'pathway' AND foreign_id = %s);"
+        my_cur.execute(sql_query, (pw_id))
+        conn.commit()
+        
+        sql_query = "DELETE FROM nodes WHERE type = 'pathway' AND foreign_id = %s;"
+        my_cur.execute(sql_query, (pw_id))
+        conn.commit()
+        
+        sql_query = "DELETE FROM nodes WHERE pathway_id = %s;"
+        my_cur.execute(sql_query, (pw_id))
+        conn.commit()
+        
+        sql_query = "DELETE FROM pathways WHERE id = %s;"
+        my_cur.execute(sql_query, (pw_id))
+        conn.commit()
+        
+        
+        
+    sql_query = "DELETE FROM pathway_groups WHERE id = %s;"
+    my_cur.execute(sql_query, (entity_id))
+    conn.commit()
 print(0)

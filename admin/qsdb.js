@@ -573,6 +573,7 @@ function update_label(){
     var label = document.getElementById("label_text_field").value;
     if (label == "") label = "undefined";
     label = label.replaceAll("\t", "");
+    label = label.replaceAll("\n", "");
     
     var request = "action=set&table=labels&id=" + data[selected_label_node].foreign_id + "&column=label&value=" + encodeURL(label);
     var result = update_entry(request);
@@ -2270,7 +2271,7 @@ function manage_fill_table(){
                     var dom_image = document.createElement("img");
                     dom_td_del.appendChild(dom_image);
                     dom_image.setAttribute("src", "../images/delete-small.png");
-                    dom_image.setAttribute("onclick", "document.getElementById('confirm_deletion_hidden').value = 'manage_delete_pathway';  document.getElementById('confirm_deletion_hidden_id').value = " + row[0] + "; document.getElementById('confirm_deletion_input').value = ''; document.getElementById('confirm_deletion').style.display = 'inline';");
+                    dom_image.setAttribute("onclick", "document.getElementById('confirm_deletion_hidden').value = 'manage_delete_pathway_group';  document.getElementById('confirm_deletion_hidden_id').value = " + row[0] + "; document.getElementById('confirm_deletion_input').value = ''; document.getElementById('confirm_deletion').style.display = 'inline';");
                     
                     
                     
@@ -2350,6 +2351,32 @@ function manage_delete_protein(prot_id){
     xmlhttp_protein_data.open("GET", request, false);
     xmlhttp_protein_data.send();
 }
+
+
+
+
+function manage_delete_pathway_group(entity_id){
+    var request = "type=pathway_group&id=" + entity_id;
+    request = "/stamp/admin/cgi-bin/delete-entity.py?" + request;
+    
+    console.log(request);
+    
+    var xmlhttp_protein_data = new XMLHttpRequest();
+    xmlhttp_protein_data.onreadystatechange = function() {
+        if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
+            var request = xmlhttp_protein_data.responseText;
+            if (request < 0){
+                alert("Error: pathway group could not be deleted from database.");
+            }
+            manage_fill_table();
+        }
+    }
+    xmlhttp_protein_data.open("GET", request, false);
+    xmlhttp_protein_data.send();
+}
+
+
+
 
 
 function manage_delete_pathway(entity_id){
@@ -2540,9 +2567,6 @@ function change_textarea_type(dom_obj, to_text){
         var entity_id = dom_obj.entity_id;
         var col_id = dom_obj.col_id;
         var field_len = dom_obj.field_len;
-        
-        var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + encodeURL(content);
-        
         
         
         var result = update_entry(request);
