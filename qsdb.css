@@ -422,22 +422,31 @@ ul {
     list-style: none;
 }
  
-ul li.empty:before {
+li.empty:before {
     content: '';
+}
+ 
+li.empty:hover {
+    cursor: pointer;
 }
 
  
-ul li.collapsed:before {
+li.collapsed:before {
     content: '▸ ';
 }
 
  
-ul li.expanded:before {
+li.collapsed:hover {
+    cursor: pointer;
+}
+
+ 
+li.expanded:before {
     content: '▾ ';
 }
 
  
-ul li:hover {
+li.expanded:hover {
     cursor: pointer;
 }
 
