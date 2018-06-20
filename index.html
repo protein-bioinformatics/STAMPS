@@ -10,17 +10,19 @@
 <script src="qsdb-functions.js"></script>
 <script src="ms-view.js"></script>
 <script src="qsdb.js"></script>
+
 <title>STAMP Home</title>
 </head>
-<body>
+<body style="background: linear-gradient(8deg, #6babcd, #6babcd, #6babcd, #f3f8ff, #f3f8ff); background-attachment: fixed;">
+
 <div class="navigation">
     <table width="100%" height=50><tr>
-        <td class="navigation_cell" style="font-size: 1.6vw; display: inline; border-width: 0px;">
-            <div style="display: inline; font-weight: bold;">S</div>imple
-            <div style="display: inline; font-weight: bold;">T</div>argeted
-            <div style="display: inline; font-weight: bold;">A</div>ssays for
-            <div style="display: inline; font-weight: bold;">M</div>etabolomics
-            <div style="display: inline; font-weight: bold;">P</div>athways
+        <td class="navigation_cell" style="min-height: 70px; font-size: 1.3vw; display: inline; border-width: 0px;">
+            <font style="font-size: 1.5vw;">S</font>imple
+            <font style="font-size: 1.5vw;">T</font>argeted
+            <font style="font-size: 1.5vw;">A</font>ssays for
+            <font style="font-size: 1.5vw;">M</font>etabolomics
+            <font style="font-size: 1.5vw;">P</font>athways
         </td>
     
         <td class="navigation_cell_click" align="center" style="border-left: white; border-left-style: solid; border-left-width: 1px;"  onclick="document.getElementById('citation').style.display = 'inline';">Reference / Citation</td>
@@ -29,7 +31,8 @@
 </div>
 
 
-<div style="position:fixed; width:100%; height: 90%; top: 50px;">
+<div style="position:fixed; width:100%; height: 90%;">
+    <!--
     <p>&nbsp;<p>
     <table width=100% height=100%><tr>
         <td width=50% align="center" valign="top">
@@ -52,6 +55,42 @@
             </div>
         </td>
     </tr></table>
+    -->
+    <table width=100% height=70% cellspacing=0 cellpadding=0>
+        <tr>
+            <td colspan=3 height=40% valign="top" align="right">
+                <div style="position: fixed; width: 50%; right: 20px; top: 70px;">
+                    <img src="images/magnifier.svg" style="min-height: 200px; width: 50vw; height: 70vh;">
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td width=10% height=20 bgcolor="#68a4c9">&nbsp;</td>
+            <td width=20% style="margin: 0px;" valign="top">
+                <div style="width: auto; font-family: Arial, Helvetica Neue, Helvetica, sans-serif; font-weight: bold; font-size: 4vw; font-size-adjust: 1; color: #ffffff; display: inline-block; margin-top: -1.5vw; margin-bottom: -1.8vw;">STAMP</div>
+            </td>
+            <td bgcolor="#68a4c9" valign="top">&nbsp;</td>
+        </tr>
+        <tr>
+            <td height=50%></td>
+            <td height=50% colspan=2 style="color: #ffffff;">
+            <p>
+            <font size="+2" style="text-shadow: 2px 2px #555555;"><b>Features</b></font><p>
+            <ul>
+                <li><font size="+1" style="text-shadow: 2px 2px #555555;"><b>&nbsp;• Quality measures on pathways / proteins</b></font></li>
+                <li><font size="+1" style="text-shadow: 2px 2px #555555;"><b>&nbsp;• Manually curated MS/MS spectra</b></font></li>
+                <li><font size="+1" style="text-shadow: 2px 2px #555555;"><b>&nbsp;• Network-based interactive pathway interface</b></font></li>
+                <li><font size="+1" style="text-shadow: 2px 2px #555555;"><b>&nbsp;• Provision of internal standards</b></font></li>
+            </ul>
+            </td>
+        </tr>
+    <!--
+    <tr>
+        <td width=50%>aeie</td>
+        <td><img src="images/magnifier.svg" height="200%"></td>
+    </tr>
+    -->
+    </table>
 </div>
 
 
@@ -337,7 +376,6 @@
         </td></tr></table>
     </div>
 </div>
-
 
 <audio style="display: none;"><source src="kns.mp3"></source>
 </body>
@@ -1553,7 +1591,7 @@ function key_down(event){
                 for (var i = 0; i < nav_ids.length; ++i){
                     document.getElementById(nav_ids[i]).style.backgroundColor = "";
                 }
-                document.getElementById(nav_ids[scanner_data[1]]).style.backgroundColor = "#a20000";
+                document.getElementById(nav_ids[scanner_data[1]]).style.backgroundColor = "#9fc2d4";
                 
                 if (scanner_data[0] == -1 && scanner_data[1] == 0) scanner_data[0] = 1;
                 if (scanner_data[0] == 1 && scanner_data[1] == 7) scanner_data[0] = -1;

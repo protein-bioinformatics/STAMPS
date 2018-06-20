@@ -5,13 +5,12 @@ html {
 
 
 body {
-    margin: 0px;
     top: 0px;
+    margin: 0px;
     background-color: #f3f8ff;
     z-index: 0;
     min-height: 100%;
 }
-
 
 footer{
     height: 100px; 
@@ -257,7 +256,7 @@ div.navigation {
     top: 0px;
     left: 0px;
     width: 100%;
-    background-color: #640000;
+    background-color: #007ec1;
     color: white;
     position: fixed;    
     z-index: 100;
@@ -268,7 +267,7 @@ div.navigation_startpage {
     font-weight: bold;
     left: 0px;
     width: 100%;
-    background-color: #640000;
+    background-color: #007ec1;
     color: white;
     position: fixed;
     z-index: 100;
@@ -277,8 +276,13 @@ div.navigation_startpage {
 }
 
 
+li{
+  margin: 10px 0;
+}
+
+
 td.navigation_cell {
-    color: #fff6d5;
+    color: #ffffff;
     padding: 8px;
     margin: 5px;
     border-right: white;
@@ -288,14 +292,14 @@ td.navigation_cell {
 
 
 td.navigation_cell_name {
-    color: #fff6d5;
+    color: #ffffff;
     padding: 8px;
     margin: 5px;
 }
 
 
 td.navigation_cell_click {
-    color: #fff6d5;
+    color: #ffffff;
     padding: 8px;
     margin: 5px;
     border-right: white;
@@ -317,7 +321,7 @@ img.navigation_cell_click_image {
 
 
 td.navigation_cell_click:hover {
-    background-color: #a20000;
+    background-color: #9fc2d4;
     cursor: pointer;
 }
 
@@ -492,7 +496,7 @@ div.Heart {
     background-image: url('images/heart.png');
 }
 
-div.Blood {
+div.Platelet {
     float: left;
     display: inline;
     width: 12px;

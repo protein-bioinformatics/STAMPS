@@ -105,7 +105,7 @@ tissues = {1: ["images/brain.svg", "Brain", 0, "statistics_check_brain", "#f4e50
            3: ["images/kidney.svg", "Kidney", 0, "statistics_check_kidney", "#f18e1c"],
            4: ["images/spleen.svg", "Spleen", 0, "statistics_check_spleen", "#ea621f"],
            5: ["images/heart.svg", "Heart", 0, "statistics_check_heart", "#e32322"],
-           6: ["images/blood.svg", "Blood", 0, "statistics_check_blood", "#c4037d"],
+           6: ["images/blood.svg", "Platelet", 0, "statistics_check_blood", "#c4037d"],
            7: ["images/fat.svg", "Fat", 0, "statistics_check_fat", "#6d398b"],
            8: ["images/lung.svg", "Lung", 0, "statistics_check_lung", "#444e99"],
            9: ["images/eye.svg", "Eye", 0, "statistics_check_eye", "#2a71b0"],
@@ -582,7 +582,16 @@ function set_pathway_menu(){
             if (pathway_id in pathways) sorted_pathways.push([pathway_id, pathways[pathway_id]]);
         }
         sorted_pathways.sort(function(a, b) {
-            return a[1].localeCompare(b[1]);
+            var l_a = a[1].length;
+            var l_b = b[1].length;
+            
+            for (var i = 0; i < Math.min(l_a, l_b); ++i){
+                if (a[1].charCodeAt(i) < b[1].charCodeAt(i)) return -1;
+                else if (a[1].charCodeAt(i) > b[1].charCodeAt(i)) return 1;
+            }
+            if (l_a < l_b) return -1;
+            else if (l_a > l_b) return 1;
+            return 0;
         });
         
         for (var i = 0; i < sorted_pathways.length; ++i){
@@ -3505,7 +3514,16 @@ function change_pathway(p){
             if (pathway_id in pathways) sorted_pathways.push([pathway_id, pathways[pathway_id]]);
         }
         sorted_pathways.sort(function(a, b) {
-            return a[1].localeCompare(b[1]);
+            var l_a = a[1].length;
+            var l_b = b[1].length;
+            
+            for (var i = 0; i < Math.min(l_a, l_b); ++i){
+                if (a[1].charCodeAt(i) < b[1].charCodeAt(i)) return -1;
+                else if (a[1].charCodeAt(i) > b[1].charCodeAt(i)) return 1;
+            }
+            if (l_a < l_b) return -1;
+            else if (l_a > l_b) return 1;
+            return 0;
         });
         if (sorted_pathways.length > 0) p = sorted_pathways[0][0];
         
