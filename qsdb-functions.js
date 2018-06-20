@@ -4913,7 +4913,7 @@ function load_data(reload){
             preview_element.snapshot();
             assemble_elements();
             var t_zoom = reload ? zoom_options[2] : zoom_options[1];
-            for (var i = 0; i < (t_zoom - zoom_options[0]); ++i) zoom_in_out(0, 0);
+            for (var i = 0; i < (t_zoom - zoom_options[0] + 4); ++i) zoom_in_out(0, 0);
             min_zoom = zoom_options[1];
             
             draw(1);

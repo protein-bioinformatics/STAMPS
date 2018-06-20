@@ -1,4 +1,4 @@
 AuthType Basic
 AuthName "QSDB Protected Editor"
-AuthUserFile /var/www/html/stamp/admin/.htpasswd
+AuthUserFile /var/www/stamp/admin/.htpasswd
 Require valid-user
