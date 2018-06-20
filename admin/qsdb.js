@@ -521,7 +521,7 @@ function open_select_pathway(){
 function label_text_field_listener(evt){
     evt = evt || window.event;
     var charCode = evt.keyCode || evt.which;
-    if (charCode == 10 || charCode == 13){
+    if (charCode == 10 || charCode == 13 || charCode == 9){
         update_label();
     }
 }
@@ -572,6 +572,7 @@ function update_label(){
     
     var label = document.getElementById("label_text_field").value;
     if (label == "") label = "undefined";
+    label = label.replaceAll("\t", "");
     
     var request = "action=set&table=labels&id=" + data[selected_label_node].foreign_id + "&column=label&value=" + encodeURL(label);
     var result = update_entry(request);

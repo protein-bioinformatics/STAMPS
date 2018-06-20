@@ -575,7 +575,7 @@ function set_pathway_menu(){
                     else child.style.display = 'none'; \
                 } \
             }");
-        pm_td.innerHTML = pathway_groups[pg_id][1];
+        pm_td.innerHTML = "<b>" + pathway_groups[pg_id][1] + "</b>";
         
         var sorted_pathways = [];
         for (pathway_id of pathway_groups[pg_id][2]){
@@ -602,7 +602,8 @@ function set_pathway_menu(){
             pm_pw_td.setAttribute("class", selected);
             pm_pw_td.setAttribute("onclick", "change_pathway(" + sorted_pathways[i][0] + ");");
             var pathway_name = sorted_pathways[i][1];
-            var separator = "&nbsp;&nbsp;" + (i == sorted_pathways.length - 1 ? "└" : "├") + "────&nbsp;&nbsp;";
+            //var separator = "&nbsp;&nbsp;" + (i == sorted_pathways.length - 1 ? "└" : "├") + "────&nbsp;&nbsp;";
+            var separator = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             pathway_name = separator + replaceAll(pathway_name, "-\\n", "");
             
             
