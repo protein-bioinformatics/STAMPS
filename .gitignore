@@ -1,0 +1,3 @@
+admin/.htaccess
+admin/.htpasswd
+admin/qsdb.conf
