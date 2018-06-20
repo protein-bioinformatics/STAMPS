@@ -572,8 +572,8 @@ function update_label(){
     
     var label = document.getElementById("label_text_field").value;
     if (label == "") label = "undefined";
-    label = label.replaceAll("\t", "");
-    label = label.replaceAll("\n", "");
+    label = replaceAll(label, "\t", "");
+    label = replaceAll(label, "\n", "");
     
     var request = "action=set&table=labels&id=" + data[selected_label_node].foreign_id + "&column=label&value=" + encodeURL(label);
     var result = update_entry(request);
