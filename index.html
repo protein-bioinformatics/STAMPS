@@ -185,12 +185,13 @@
         
 
 
-<div id="locus_search" class="global_search">
+div<div id="locus_search" class="global_search">
     <div class="global_search_content">
         <table width="100%" height="100%">
             <tr>
                 <td>
                     <div id="accession_search_field" style="display: inline;">
+                        Select species: <select id="locus_browser_species_select" onchange="change_species(this);"></select><br>
                         Select subcellular compartment(s):<br>
                         <select id="loci" size=20 style="width:400px; height:480px;" multiple></select><br>Hold <b>[ctrl]</b> for multiple selection.
                     </div>
@@ -213,6 +214,7 @@
         <table width="100%" height="100%">
             <tr>
                 <td>
+                    Select species: <select id="function_browser_species_select" onchange="change_species(this);"></select><br>
                     Select protein function(s):<br>
                     <div id="function_search_field" style="min-width: 700px; width: 700px; border-width: 1px; border-color: gray; border-style: solid; overflow-y: scroll;">
                     </div>
@@ -236,6 +238,7 @@
             <tr>
                 <td>
                     <div id="accession_search_field" style="display: inline;">
+                        Select species: <select id="accession_browser_species_select" onchange="change_species(this);"></select><br>
                         Paste UniProt accession numbers:<br>
                         <textarea id="accessions" style="width:400px; height:500px; font-size: 200%;" placeholder="e.g.
                         P37238
@@ -263,7 +266,7 @@
     <div class="global_search_content">
         <table width="100%" height="100%">
             <tr>
-                <td height="10%" id="chromosome_information" colspan="2" style="border-bottom: 1px solid #000;"><select id="chromosome_browser_species_select"></select>, chromosome  <select onchange="change_chromosome_view_combo();" id="chromosome_selection_combo"></select>, bp: <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_start" value="0"></input> - <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_end" value="0"></input></td>
+                <td height="10%" id="chromosome_information" colspan="2" style="border-bottom: 1px solid #000;"><select id="chromosome_browser_species_select" onchange="change_species(this);"></select>, chromosome  <select onchange="change_chromosome_view_combo();" id="chromosome_selection_combo"></select>, bp: <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_start" value="0"></input> - <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_end" value="0"></input></td>
             </tr><tr>
                 <td id="function_chromosome_field" style="position: relative; display: block-cell; overflow: hidden;"></td>
                 <td>
@@ -632,7 +635,7 @@ function open_statistics (){
         }
     }
     
-    xmlhttp.open("GET", "/stamp/cgi-bin/get-proteins.bin?statistics&species=mouse", true);
+    xmlhttp.open("GET", "/stamp/cgi-bin/get-proteins.bin?statistics&species=" + current_species, true);
     xmlhttp.send();
     
     
@@ -1390,12 +1393,23 @@ var species_select = document.getElementById("chromosome_browser_species_select"
 // tpyes 0: accession, 1: locus, 2: function, 3: chromosome
 function check_filter_valid(filter_type){
 
+    var selected_loci = false;
     var selected_functions = false;
     var chromosomes_selected_protein = false;
     if (filter_type == 1){
         var loci_select = document.getElementById("loci");
         for (var i = 0; i < loci_select.options.length; ++i){
             if (loci_select.options[i].selected){
+                selected_loci = true;
+                break;
+            }
+        }
+    }
+    else if (filter_type == 2){
+    
+    var function_select = document.getElementById("function_search_field").getElementsByTagName("li");
+        for (var i = 0; i < function_select.length; ++i){
+            if (function_select[i].style.backgroundColor != ""){
                 selected_functions = true;
                 break;
             }
@@ -1415,8 +1429,11 @@ function check_filter_valid(filter_type){
     if (filter_type == 0 && document.getElementById("accessions").value.length == 0){
         document.getElementById("error_filter_text_accession").innerHTML = "Error: no accession number provided!";
     }
-    else if (filter_type == 1 && !selected_functions){
+    else if (filter_type == 1 && !selected_loci){
         document.getElementById("error_filter_text_locus").innerHTML = "Error: no compartment selected!";
+    }
+    else if (filter_type == 2 && !selected_functions){
+        document.getElementById("error_filter_text_function").innerHTML = "Error: no function selected!";
     }
     else if (filter_type == 3 && !chromosomes_selected_protein){
         document.getElementById("error_filter_text_chromosome").innerHTML = "Error: no protein selected!";
@@ -1656,7 +1673,7 @@ function load_all_data(){
             ideom_data = JSON.parse(xmlhttp_chr.responseText);
         }
     }
-    xmlhttp_chr.open("GET", "/stamp/cgi-bin/get-chromosomes.bin?species=mouse", true);
+    xmlhttp_chr.open("GET", "/stamp/cgi-bin/get-chromosomes.bin?species=" + current_species, true);
     xmlhttp_chr.send();
     
     // load tissue images
@@ -1665,8 +1682,39 @@ function load_all_data(){
         tissue[2] = new Image();
         tissue[2].src = tissue[0];
     }
+    
+    var select = document.getElementById("chromosome_browser_species_select");
+    for (var c_species in supported_species){
+        var opt = document.createElement("option");
+        opt.id = c_species;
+        opt.innerHTML = supported_species[c_species];
+        select.add(opt);
+    }
+    
+    select = document.getElementById("accession_browser_species_select");
+    for (var c_species in supported_species){
+        var opt = document.createElement("option");
+        opt.id = c_species;
+        opt.innerHTML = supported_species[c_species];
+        select.add(opt);
+    }
+    
+    select = document.getElementById("function_browser_species_select");
+    for (var c_species in supported_species){
+        var opt = document.createElement("option");
+        opt.id = c_species;
+        opt.innerHTML = supported_species[c_species];
+        select.add(opt);
+    }
+    
+    select = document.getElementById("locus_browser_species_select");
+    for (var c_species in supported_species){
+        var opt = document.createElement("option");
+        opt.id = c_species;
+        opt.innerHTML = supported_species[c_species];
+        select.add(opt);
+    }
 }
-load_all_data();
 
 
 function draw_chromosome_ideograms(){
@@ -1752,7 +1800,7 @@ function draw_chromosome_ideograms(){
                 chromosomes[this.chromosome_key].draw();
             }
         }
-        chromosome_requests[key].open("GET", "/stamp/cgi-bin/get-chromosome-data.py?chromosome=" + key + "&species=mouse", true);
+        chromosome_requests[key].open("GET", "/stamp/cgi-bin/get-chromosome-data.py?chromosome=" + key + "&species=" + current_species, true);
         chromosome_requests[key].send();
     }
 }
@@ -1787,6 +1835,91 @@ function nsaf_to_svg(){
 }
 
 
+
+
+function open_accession_search(){
+    document.getElementById("accession_search").style.display = "inline";
+    document.getElementById("error_filter_text_accession").innerHTML = "";
+    select = document.getElementById("accession_browser_species_select");
+    var i = 0;
+    for (var child of select.children){
+        if (child.id == current_species){
+            select.selectedIndex = i;
+            break;
+        }
+        ++i;
+    }
+}
+
+function open_locus_search(){
+    document.getElementById("locus_search").style.display = "inline";
+    document.getElementById("error_filter_text_locus").innerHTML = "";
+    select = document.getElementById("locus_browser_species_select");
+    var i = 0;
+    for (var child of select.children){
+        if (child.id == current_species){
+            select.selectedIndex = i;
+            break;
+        }
+        ++i;
+    }
+}
+
+function open_function_search(){
+    document.getElementById("function_search").style.display = "inline";
+    document.getElementById("error_filter_text_function").innerHTML = "";
+    select = document.getElementById("function_browser_species_select");
+    var i = 0;
+    for (var child of select.children){
+        if (child.id == current_species){
+            select.selectedIndex = i;
+            break;
+        }
+        ++i;
+    }
+}
+
+
+function open_chromosome_search(){
+    
+    document.getElementById("chromosome_search").style.display = "inline";
+    if (chromosome_selected == -1) draw_chromosome_ideograms();
+    document.getElementById("error_filter_text_chromosome").innerHTML = "";
+    
+    select = document.getElementById("chromosome_browser_species_select");
+    var i = 0;
+    for (var child of select.children){
+        if (child.id == current_species){
+            select.selectedIndex = i;
+            break;
+        }
+        ++i;
+    }
+    draw_chromosome_ideograms();
+}
+
+
+
+function change_species(select){
+    current_species = select[select.selectedIndex].id;
+    
+    if (document.getElementById("chromosome_search").style.display == "inline"){
+        // get chromosome bands
+        var xmlhttp_chr = new XMLHttpRequest();
+        xmlhttp_chr.onreadystatechange = function() {
+            if (xmlhttp_chr.readyState == 4 && xmlhttp_chr.status == 200) {
+                ideom_data = JSON.parse(xmlhttp_chr.responseText);
+            }
+        }
+        xmlhttp_chr.open("GET", "/stamp/cgi-bin/get-chromosomes.bin?species=" + current_species, false);
+        xmlhttp_chr.send();
+        draw_chromosome_ideograms();
+        //chromosome_selection_changed(true);
+    }
+}
+
+
+
 current_species = "mouse";
 var kr_keys = [];
 var scanner_data = [1, 0, 0]; // scanner_up, scanner_index, scanner_count
@@ -1802,6 +1935,7 @@ document.getElementById("click_background").addEventListener("click", hide_backg
 document.getElementById("check_spectra").innerHTML = get_check_spectra_content();
 document.getElementById("waiting_background").innerHTML = get_waiting_background_content();
 window.addEventListener('resize', resize_views, false);
+load_all_data();
 
 document.getElementById("disclaimer_content").addEventListener('click', function(event){event.stopPropagation(); return false;}, false);
 document.getElementById("statistics_table").addEventListener('click', function(event){event.stopPropagation(); return false;}, false);

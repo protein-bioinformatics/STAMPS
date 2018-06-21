@@ -122,6 +122,7 @@ text_color = "black";
 
 
 protein_stroke_color = "#f69301";
+protein_unconnected_stroke_color = "#7eaddd";
 protein_fill_color = "#fff6d5";
 protein_disabled_stroke_color = "#cccccc";
 label_color = "#777777";
@@ -1760,6 +1761,7 @@ function node(data){
     this.lipid_radius = 5;
     this.show_anchors = false;
     this.selected = false;
+    this.unconnected = true;
     
     
     this.setup_pathway_meta = function(){
@@ -2021,7 +2023,12 @@ function node(data){
                 
                 // draw stroke
                 ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
-                ctx.strokeStyle = this.selected ? node_selected_color : (this.proteins.length ? protein_stroke_color :  protein_disabled_stroke_color);
+                if (this.selected) ctx.strokeStyle = node_selected_color;
+                else if (this.proteins.length > 0){
+                    if (this.unconnected) ctx.strokeStyle = protein_unconnected_stroke_color;
+                    else ctx.strokeStyle = protein_stroke_color;
+                }
+                else ctx.strokeStyle = protein_disabled_stroke_color;
                 ctx.strokeRect(this.x - hw, this.y - hh, this.width, this.height);
                 
                 break;
@@ -3399,6 +3406,8 @@ function compute_edges(){
         var l2_norm = Math.sqrt(Math.pow(start_x - end_x, 2) + Math.pow(start_y - end_y, 2));
         if (l2_norm > base_grid * factor) {
             edges.push(new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id));
+            data[node_id].unconnected = false;
+            data[metabolite_id].unconnected = false;
         }
     }
 }
@@ -4138,31 +4147,6 @@ function get_pathway_groups(){
     }
     xmlhttp_pg.open("GET", "/stamp/cgi-bin/get-pathway-groups.py", false);
     xmlhttp_pg.send();
-}
-
-
-function open_accession_search(){
-    document.getElementById("accession_search").style.display = "inline";
-    document.getElementById("error_filter_text_accession").innerHTML = "";
-}
-
-function open_locus_search(){
-    document.getElementById("locus_search").style.display = "inline";
-    document.getElementById("error_filter_text_locus").innerHTML = "";
-}
-
-function open_function_search(){
-    document.getElementById("function_search").style.display = "inline";
-    document.getElementById("error_filter_text_function").innerHTML = "";
-}
-
-
-function open_chromosome_search(){
-    
-    document.getElementById("chromosome_search").style.display = "inline";
-    if (chromosome_selected == -1) draw_chromosome_ideograms();
-    document.getElementById("error_filter_text_chromosome").innerHTML = "";
-    draw_chromosome_ideograms();
 }
 
 
@@ -4912,7 +4896,7 @@ function load_data(reload){
             draw(1);
             preview_element.snapshot();
             assemble_elements();
-            var t_zoom = reload ? zoom_options[2] : zoom_options[1];
+            var t_zoom = reload ? zoom_options[2] - 4 : zoom_options[1];
             for (var i = 0; i < (t_zoom - zoom_options[0] + 4); ++i) zoom_in_out(0, 0);
             min_zoom = zoom_options[1];
             
