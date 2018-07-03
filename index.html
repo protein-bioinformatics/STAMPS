@@ -298,10 +298,10 @@ div<div id="locus_search" class="global_search">
 
 
 <div id="statistics" class="global_search" onclick="this.style.display = 'none';">
-    <div id="statistics_table" class="global_search_content" style="width: 1000px; overflow-y: scroll;">
+    <div id="statistics_table" class="global_search_content" style="width: 1400px; overflow-y: scroll;">
     <table width="100%" height="100%">
-        <tr><td width="100%">
-            <center><b>Normalized spectrum abundance factor</b></center><br>
+        <tr><td width="50%" valign="top">
+            <b>Normalized spectrum abundance factor</b><br>
             <table>
                 <tr><td colspan="5">Tissues:</td><td></tr>
                 <tr><td><input type="checkbox" id="statistics_check_brain_nsaf" onchange="update_nsaf();" checked /> Brain</td>
@@ -317,17 +317,23 @@ div<div id="locus_search" class="global_search">
                     <td><input type="checkbox" id="statistics_check_gut_nsaf" onchange="update_nsaf();" /> Gut</td>
                 </tr>
             </table><br>
-            <center><canvas id="nsaf_figure" width="600" height="300"></canvas></center>
-            <p>&nbsp;<p><hr>
+            <canvas id="nsaf_figure" width="600" height="300">
             
-            <p>&nbsp;<p>
-            <center><b>Distribution of protein abundances</b></center><br>
+        </td><td valign="top">
+        
+            <b>Distribution of protein abundances</b><br>
             <select id="nsaf_pathway_figure_select" onchange="update_nsaf_pathway_figure();"></select><br>
-            <center><canvas id="nsaf_pathway_figure" width="600" height="300"></canvas></center>
-            <p><hr>
+            <canvas id="nsaf_pathway_figure" width="600" height="300"></canvas>
+            
+            
+            
+        </tr><tr><td width="50%" valign="top"><hr width="80%">  
+            
+            
+            
             
             <p>&nbsp;<p>
-            <center><b>Protein isoelectric point vs. mass</b></center><br>
+            <b>Protein isoelectric point vs. mass</b><br>
             <table>
                 <tr><td colspan="5">Tissues:</td><td></tr>
                 <tr><td><input type="checkbox" id="statistics_check_brain_pI" onchange="update_pI();" checked /> Brain</td>
@@ -343,13 +349,15 @@ div<div id="locus_search" class="global_search">
                     <td><input type="checkbox" id="statistics_check_gut_pI" onchange="update_pI();" /> Gut</td>
                 </tr>
             </table><br>
-            <center><canvas id="pI_figure" width="600" height="300"></canvas></center>
-            <p>&nbsp;<p><hr>
-            
+            <canvas id="pI_figure" width="600" height="300"></canvas>
             <p>&nbsp;<p>
-            <center><b>Mass accuracy residuals</b></center><br>
+            
+        </td><td valign="top"><hr width="80%">
+        
+            <p>&nbsp;<p>
+            <b>Mass accuracy residuals</b><br>
             <select id="ppm_pw_figure_select" onchange="update_ppm();"></select><br>
-            <center><canvas id="ppm_histogram" width="600" height="300"></canvas></center>
+            <canvas id="ppm_histogram" width="600" height="300"></canvas>
         </td></tr></table>
     </div>
 </div>
