@@ -3613,7 +3613,6 @@ function download_assay(){
         alert("No proteins are selected.");
         return;
     }
-    return;
     
     document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("download").style.display = "inline";
