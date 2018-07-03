@@ -88,9 +88,9 @@ lite_cur.execute("CREATE TABLE blib.SpectrumSourceFiles AS SELECT * FROM Spectru
 lite_cur.execute("CREATE TABLE blib.ScoreTypes AS SELECT * FROM ScoreTypes;")
 lite_cur.execute("CREATE TABLE blib.RetentionTimes AS SELECT * FROM RetentionTimes rt INNER JOIN blib.RefSpectra ref ON rt.RefSpectraID = ref.id;")
 
-lite_cur.execute("CREATE INDEX idxPeptide ON RefSpectra (peptideSeq, precursorCharge)")
-lite_cur.execute("CREATE INDEX idxPeptideMod ON RefSpectra (peptideModSeq, precursorCharge)")
-lite_cur.execute("CREATE INDEX idxRefIdPeaks ON RefSpectraPeaks (RefSpectraID)")
+lite_cur.execute("CREATE INDEX blib.idxPeptide ON RefSpectra (peptideSeq, precursorCharge)")
+lite_cur.execute("CREATE INDEX blib.idxPeptideMod ON RefSpectra (peptideModSeq, precursorCharge)")
+lite_cur.execute("CREATE INDEX blib.idxRefIdPeaks ON RefSpectraPeaks (RefSpectraID)")
 db.commit()
 
 lite_cur.execute("DROP TABLE blib.tmp;")
