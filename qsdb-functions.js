@@ -1741,7 +1741,7 @@ function node(data){
     this.id = data['i'];
     this.name = ('n' in data) ? data['n'] : "";
     this.short_name = ('sn' in data) ? data['sn'] : "";
-    //this.name += " (" + this.id + ")";  // TODO: delete this line
+    this.name += " (" + this.id + ")";  // TODO: delete this line
     this.c_number = ('c' in data) ? data['c'] : "";
     this.smiles = ('s' in data) ? data['s'] : "";
     this.formula = ('f' in data) ? data['f'] : "";
@@ -2533,7 +2533,7 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
     this.reagent_id = reagent_id;
     
     
-    this.bidirectional = start_node.type == "metabolite" && edge_data[this.reaction_id]['v'];
+    this.bidirectional = start_node.type == "metabolite" && reagent_id >= 0 && edge_data['reactions'][this.reaction_id]['v'];
     this.tail_start = 0;
     
     
@@ -3229,11 +3229,12 @@ function compute_edges(){
         nodes_anchors[node_id] = {left: [], right: [], top: [], bottom: []};
     }
     
+    var reactions = edge_data['reactions'];
     
-    for (var reaction_id in edge_data){
-        var node_id = edge_data[reaction_id]['n'];
-        var reversible = parseInt(edge_data[reaction_id]['v']);
-        var reagents = edge_data[reaction_id]['r'];
+    for (var reaction_id in reactions){
+        var node_id = reactions[reaction_id]['n'];
+        var reversible = parseInt(reactions[reaction_id]['v']);
+        var reagents = reactions[reaction_id]['r'];
         
         for (var reagent_id in reagents){
             
@@ -3243,19 +3244,42 @@ function compute_edges(){
             
             
             if (reagents[reagent_id]['t'] == 'educt'){
-                var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, edge_data[reaction_id]['in']);
-                connections.push([node_id, edge_data[reaction_id]['in'], metabolite_id, reagents[reagent_id]['a'], reversible, reaction_id, reagent_id]);
-                nodes_anchors[node_id][edge_data[reaction_id]['in']].push([metabolite_id, connections.length - 1, angle_node]);
+                var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, reactions[reaction_id]['in']);
+                connections.push([node_id, reactions[reaction_id]['in'], metabolite_id, reagents[reagent_id]['a'], reversible, reaction_id, reagent_id]);
+                nodes_anchors[node_id][reactions[reaction_id]['in']].push([metabolite_id, connections.length - 1, angle_node]);
             }
             else{
-                var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, edge_data[reaction_id]['out']);
-                connections.push([node_id, edge_data[reaction_id]['out'], metabolite_id, reagents[reagent_id]['a'], true, reaction_id, reagent_id]);
-                nodes_anchors[node_id][edge_data[reaction_id]['out']].push([metabolite_id, connections.length - 1, angle_node]);
+                var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, reactions[reaction_id]['out']);
+                connections.push([node_id, reactions[reaction_id]['out'], metabolite_id, reagents[reagent_id]['a'], true, reaction_id, reagent_id]);
+                nodes_anchors[node_id][reactions[reaction_id]['out']].push([metabolite_id, connections.length - 1, angle_node]);
                 
             }
             nodes_anchors[metabolite_id][reagents[reagent_id]['a']].push([node_id, connections.length - 1, angle_metabolite]);
         }
     }
+    
+    
+    
+    var directs = edge_data['direct'];
+    for (var direct_id in directs){
+        var node_id_start = directs[direct_id]["ns"];
+        var node_id_end = directs[direct_id]["ne"];
+        var anchor_start = directs[direct_id]["as"];
+        var anchor_end = directs[direct_id]["ae"];
+        if (!(node_id_start in data) || !(node_id_end in data)) continue;
+        
+        connections.push([node_id_start, anchor_start, node_id_end, anchor_end, true, direct_id, -1]);
+        
+        var angle_start = compute_angle(data[node_id_start].x, data[node_id_start].y, data[node_id_end].x, data[node_id_end].y, anchor_end);
+        nodes_anchors[node_id_start][anchor_start].push([node_id_end, connections.length - 1, angle_start]);
+        
+        var angle_end = compute_angle(data[node_id_end].x, data[node_id_end].y, data[node_id_start].x, data[node_id_start].y, anchor_start);
+        nodes_anchors[node_id_end][anchor_end].push([node_id_start, connections.length - 1, angle_end]);
+        
+        
+    }
+    
+    
     
     
     for (var node_id in nodes_anchors){
@@ -3264,19 +3288,9 @@ function compute_edges(){
             var len = node_p.length;
             if (node_p.length > 1){
                 
-                // bubble sort, don't worry, the array are very short, not longer than 5
-                for (var j = 0; j < len; ++j){
-                    var swps = 0;
-                    for (var k = 0; k < len - 1; ++k){
-                        if (node_p[k][2] > node_p[k + 1][2]){
-                            var tmp = node_p[k];
-                            node_p[k] = node_p[k + 1];
-                            node_p[k + 1] = tmp;
-                            swps += 1;
-                        }
-                    }
-                    if (!swps) break;
-                }
+                node_p.sort(function(a, b) {
+                    return a[2] > b[2];
+                });
             }
         }
     }

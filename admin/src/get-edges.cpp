@@ -46,6 +46,26 @@ class reagent {
         }
 };
 
+class direct {
+    public:
+        string id;
+        string node_id_start;
+        string node_id_end;
+        string anchor_start;
+        string anchor_end;
+        string reversible;
+        
+        string to_string(){
+            string data = "{\"i\":" + id;
+            data += ",\"ns\":" + node_id_start;
+            data += ",\"ne\":" + node_id_end;
+            data += ",\"as\":\"" + anchor_start + "\"";
+            data += ",\"ae\":\"" + anchor_end + "\"";
+            data += ",\"r\":" + reversible + "}";
+            return data;
+        }
+};
+
 class reaction {
     public:
         string id;
@@ -193,12 +213,49 @@ main() {
     }
     
     
-    string data = "{";
+    
+    
+    sql_query = "SELECT r.* FROM reag r INNER JOIN nodes n ON r.node_id_start = n.id INNER JOIN nodes nn ON r.node_id_end = nn.id WHERE n.pathway_id = ";
+    sql_query += pathway_id;
+    sql_query += " AND nn.pathway_id = ";
+    sql_query += pathway_id;
+    sql_query += " ORDER BY r.id;";
+    
+    stmt = con->createStatement();
+    res = stmt->executeQuery(sql_query);
+        
+    
+    map<string, direct* > all_directs;
+    while (res->next()) {
+        direct* r = new direct();
+        r->id = res->getString("id");
+        r->node_id_start = res->getString("node_id_start");
+        r->node_id_end = res->getString("node_id_end");
+        r->anchor_start = res->getString("anchor_start");
+        r->anchor_end = res->getString("anchor_end");
+        r->reversible = res->getString("reversible");
+        all_directs.insert(pair< string, direct* >(r->id, r));
+    }
+    
+    
+    
+    
+    
+    
+    
+    string data = "{\"reactions\":{";
+    int i = 0; 
     for (auto entry : all_reactions){
-        if (data.length() > 1) data += ",";
+        if (i++) data += ",";
         data += "\"" + entry.first + "\":" + entry.second->to_string();
     }
-    data += "}";
+    data += "}, \"direct\":{";
+    i = 0; 
+    for (auto entry : all_directs){
+        if (i++) data += ",";
+        data += "\"" + entry.first + "\":" + entry.second->to_string();
+    }
+    data += "}}";
     
     
     response += data;    
