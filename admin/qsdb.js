@@ -1245,81 +1245,49 @@ function mouse_up_listener(event){
             var anchor = target.is_mouse_over_anchor(res);
             if (anchor.length > 0){
                 draw_anchor_end = anchor;
-            
-                var num_metabolites = 0;
-                num_metabolites += (target.type == "metabolite") ? 1 : 0;
-                num_metabolites += (data[data[-1].id].type == "metabolite") ? 1 : 0;
                 
-                var num_labels = 0;
-                num_labels += (target.type == "label") ? 1 : 0;
-                num_labels += (data[data[-1].id].type == "label") ? 1 : 0;
+                var count_types = {"metabolite": 0, "label": 0,"membrane": 0,"protein": 0, "pathway": 0, "image": 0};
                 
-                var num_membranes = 0;
-                num_membranes += (target.type == "membrane") ? 1 : 0;
-                num_membranes += (data[data[-1].id].type == "membrane") ? 1 : 0;
-                
-                var num_proteins = 0;
-                num_proteins += (target.type == "protein") ? 1 : 0;
-                num_proteins += (data[data[-1].id].type == "protein") ? 1 : 0;
+                count_types[target.type] += 1;
+                count_types[data[data[-1].id].type] += 1;
                 
                 
-                if (num_metabolites == 1 && num_labels == 0 && num_membranes == 0){
-                    var results = add_edge(data[-1].id, target.id, draw_anchor_start, draw_anchor_end);
-                    if (num_proteins == 1){
-                        var prot_id = -1;
-                        var meta_id = -1;
-                        var fooduct = "product";
-                        if (data[data[-1].id].type == "protein"){
-                            prot_id = data[-1].id;
-                            meta_id = target.id;
-                            fooduct = "product";
-                        }
-                        else {
-                            prot_id = target.id;
-                            meta_id = data[-1].id;
-                            fooduct = "educt";
-                        }
-                        var reaction = -1;
-                        for (var reaction_id in edge_data){
-                            if (edge_data[reaction_id]['n'] == prot_id){
-                                reaction = reaction_id;
-                                break;
-                            }
-                        }
-                        if (fooduct == "product"){
-                            edge_data[reaction]["out"] = draw_anchor_start;
-                            edge_data[reaction]['r'][results[0]] = {"i": results[0], "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_end};
-                        }
-                        else {
-                            edge_data[reaction]["in"] = draw_anchor_end;
-                            edge_data[reaction]['r'][results[0]] = {"i": results[0], "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_start};
-                        }
+                var results = add_edge(data[-1].id, target.id, draw_anchor_start, draw_anchor_end);
+                if (count_types["metabolite"] == 1 && count_types["protein"]){
+                    var prot_id = -1;
+                    var meta_id = -1;
+                    var fooduct = "product";
+                    if (data[data[-1].id].type == "protein"){
+                        prot_id = data[-1].id;
+                        meta_id = target.id;
+                        fooduct = "product";
                     }
                     else {
-                        var pathway_id = -1;
-                        var meta_id = -1;
-                        var pw_start = true;
-                        if (data[data[-1].id].type == "pathway"){
-                            pathway_id = data[-1].id;
-                            meta_id = target.id;
-                        }
-                        else {
-                            pw_start = false;
-                            pathway_id = target.id;
-                            meta_id = data[-1].id;
-                        }
-                        
-                        if (pw_start) {
-                            edge_data[results[1]] = {"i": results[1], "n": pathway_id, "in": draw_anchor_start, "out": opposite_anchor[draw_anchor_start], "v": 0, "r": {}};
-                            edge_data[results[1]]['r'][results[0]] = {"i": results[0], "r": results[1], "n": meta_id, "t": "educt", "a": draw_anchor_end};
-                        }
-                        else {
-                            edge_data[results[1]] = {"i": results[1], "n": pathway_id, "in": draw_anchor_end, "out": opposite_anchor[draw_anchor_end], "v": 0, "r": {}};
-                            edge_data[results[1]]['r'][results[0]] = {"i": results[0], "r": results[1], "n": meta_id, "t": "educt", "a": draw_anchor_start};
+                        prot_id = target.id;
+                        meta_id = data[-1].id;
+                        fooduct = "educt";
+                    }
+                    var reaction = -1;
+                    for (var reaction_id in edge_data["reactions"]){
+                        if (edge_data["reactions"][reaction_id]['n'] == prot_id){
+                            reaction = reaction_id;
+                            break;
                         }
                     }
-                    compute_edges();
+                    if (fooduct == "product"){
+                        edge_data["reactions"][reaction]["out"] = draw_anchor_start;
+                        edge_data["reactions"][reaction]['r'][results[0]] = {"i": results[0], "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_end};
+                    }
+                    else {
+                        edge_data["reactions"][reaction]["in"] = draw_anchor_end;
+                        edge_data["reactions"][reaction]['r'][results[0]] = {"i": results[0], "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_start};
+                    }
                 }
+                else {
+                    edge_data["direct"][results[0]] = {"i": results[0], "ns": data[-1].id, "ne": target.id, "as": draw_anchor_start, "ae": draw_anchor_end, "r": 0};
+                    
+                }
+                compute_edges();
                 
             }
         }
@@ -1335,7 +1303,7 @@ function mouse_up_listener(event){
 
 function add_edge(start_id, end_id, anchor_start, anchor_end){
     var xmlhttp = new XMLHttpRequest();
-    var request = "/stamp/admin/cgi-bin/add-edge.py?start_id=" + start_id + "&end_id=" + end_id;
+    var request = "/stamp/admin/cgi-bin/add-edge.py?start_id=" + start_id + "&end_id=" + end_id + "&anchor_start=" + anchor_start + "&anchor_end=" + anchor_end;
     var successful_creation = [-1, -1];
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -1347,22 +1315,28 @@ function add_edge(start_id, end_id, anchor_start, anchor_end){
                 successful_creation[0] = response[1];
                 successful_creation[1] = response[2];
                 
-                
-                var request_update_reagent = "action=set&table=reagents&id=" + response[1] + "&column=anchor&value="
-                request_update_reagent += ((data[start_id].type == "metabolite") ? anchor_start : anchor_end);
-                request_update_reagent = "/stamp/admin/cgi-bin/manage-entries.bin?" + request_update_reagent;
-                var xmlhttp_reagent = new XMLHttpRequest();
-                xmlhttp_reagent.open("GET", request_update_reagent, false);
-                xmlhttp_reagent.send();
-                
-                
-                var request_update_reaction = "action=set&table=reactions&id=" + response[2] + "&column=";
-                request_update_reaction += ((data[start_id].type != "metabolite" && data[start_id].type == "protein") ? "anchor_out" : "anchor_in");
-                request_update_reaction += "&value=" + ((data[start_id].type == "metabolite") ? anchor_end : anchor_start);
-                request_update_reaction = "/stamp/admin/cgi-bin/manage-entries.bin?" + request_update_reaction;
-                var xmlhttp_reaction = new XMLHttpRequest();
-                xmlhttp_reaction.open("GET", request_update_reaction, false);
-                xmlhttp_reaction.send();
+                /*
+                if (response[1] > -1){
+                    var request_update_reagent = "action=set&table=reagents&id=" + response[1] + "&column=anchor&value="
+                    request_update_reagent += ((data[start_id].type == "metabolite") ? anchor_start : anchor_end);
+                    request_update_reagent = "/stamp/admin/cgi-bin/manage-entries.bin?" + request_update_reagent;
+                    var xmlhttp_reagent = new XMLHttpRequest();
+                    xmlhttp_reagent.open("GET", request_update_reagent, false);
+                    xmlhttp_reagent.send();
+                    
+                    
+                    var request_update_reaction = "action=set&table=reactions&id=" + response[2] + "&column=";
+                    request_update_reaction += ((data[start_id].type != "metabolite" && data[start_id].type == "protein") ? "anchor_out" : "anchor_in");
+                    request_update_reaction += "&value=" + ((data[start_id].type == "metabolite") ? anchor_end : anchor_start);
+                    request_update_reaction = "/stamp/admin/cgi-bin/manage-entries.bin?" + request_update_reaction;
+                    var xmlhttp_reaction = new XMLHttpRequest();
+                    xmlhttp_reaction.open("GET", request_update_reaction, false);
+                    xmlhttp_reaction.send();
+                }
+                else {
+                    
+                }
+                */
             }
         }
     }
@@ -2520,11 +2494,11 @@ function manage_delete_pathway(entity_id){
                 if (data[node_id].foreign_id == entity_id && data[node_id].type == "pathway") del_nodes.add(parseInt(node_id));
             }
             
-            var del_reactions = []
-            for (var reaction_id in edge_data){
-                if (del_nodes.has(edge_data[reaction_id]['n'])) del_reactions.push(reaction_id);
+            var del_directs = []
+            for (var direct_id in edge_data['direct']){
+                if (del_nodes.has(edge_data['direct'][direct_id]['n'])) del_directs.push(direct_id);
             }
-            for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
+            for (var i = 0; i < del_directs.length; ++i) delete edge_data['direct'][del_directs[i]];
             for (node_id of del_nodes) delete data[node_id.toString()];
             compute_edges();
             assemble_elements();
@@ -2992,26 +2966,25 @@ function manage_delete_metabolite(metabolite_id){
                 if (data[node_id].type == 'metabolite' && data[node_id].foreign_id == metabolite_id) node_ids.add(parseInt(node_id));
             }
             
-            var del_reactions = []
-            for (var reaction_id in edge_data){
-                var curr_edge = edge_data[reaction_id];
-                for (var reagent_id in curr_edge['r']){
-                    if (node_ids.has(curr_edge['r'][reagent_id]['n']) && data[curr_edge['n']].type == "pathway") del_reactions.push(reaction_id);
-                }
-            }
-            
-            for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
-            
-            
-            for (var reaction_id in edge_data){
+            for (var reaction_id in edge_data['reactions']){
                 var del_reagents = [];
-                for (var reagent_id in edge_data[reaction_id]['r']){
-                    if (node_ids.has(edge_data[reaction_id]['r'][reagent_id]['n'])) del_reagents.push(reagent_id);
+                for (var reagent_id in edge_data['reactions'][reaction_id]['r']){
+                    if (node_ids.has(edge_data['reactions'][reaction_id]['r'][reagent_id]['n'])) del_reagents.push(reagent_id);
                 }
-                for (var i = 0; i < del_reagents.length; ++i) delete edge_data[reaction_id]['r'][del_reagents[i]];
+                for (var i = 0; i < del_reagents.length; ++i) delete edge_data['reactions'][reaction_id]['r'][del_reagents[i]];
             }
+            
+            
+            var del_directs = []
+            for (var direct_id in edge_data['direct']){
+                if (node_ids.has(edge_data['direct'][direct_id]['ns']) || node_ids.has(edge_data['direct'][direct_id]['ne'])) del_directs.push(direct_id);
+            }
+            for (var i = 0; i < del_directs.length; ++i) delete del_directs['direct'][del_directs[i]];
             
             for (var node_id of node_ids) delete data[node_id];
+            
+            
+            
             compute_edges();
             assemble_elements();
             draw();
