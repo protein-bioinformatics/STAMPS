@@ -332,7 +332,7 @@ function mouse_click_listener(e){
                     break;        
                     
                 case toolbox_states.CREATE_PROTEIN:
-                    edge_data[result[1]] = {'i': result[1], 'n': tmp_element.id, 'in': 'left', 'out': 'right', 'v': 0, 'r': []};
+                    edge_data['reactions'][result[1]] = {'i': result[1], 'n': tmp_element.id, 'in': 'left', 'out': 'right', 'v': 0, 'r': []};
                     tmp_element = new node({"x": "0", "y": "0", "t": "protein", "i": -1, "n": "-", "p": []});
                     break;
                     
@@ -419,8 +419,16 @@ function mouse_click_listener(e){
                 
             }
             else if (highlight_element instanceof edge){
-                request = "type=edge&id=" + highlight_element.reagent_id;
-                delete edge_data[highlight_element.reaction_id]['r'][highlight_element.reagent_id];
+                var is_direct = (highlight_element.reagent_id != -1);
+                
+                if (is_direct){
+                    delete edge_data['direct'][highlight_element.reaction_id];
+                    request = "type=edge_direct&id=" + highlight_element.reaction_id;
+                }
+                else {
+                    delete edge_data['reactions'][highlight_element.reaction_id]['r'][highlight_element.reagent_id];
+                    request = "type=edge&id=" + highlight_element.reagent_id;
+                }
             }
             delete_entity(request);
             compute_edges();
@@ -1542,49 +1550,6 @@ function key_down(event){
 
 
 
-
-node.prototype.edit = function() {
-    
-}
-
-
-
-edge.prototype.edit = function(){
-    var element = "";
-    if (toolbox_button_selected == toolbox_states.ROTATE_METABOLITE){
-        var anchor = edge_data[this.reaction_id]['r'][this.reagent_id]['a'];
-        edge_data[this.reaction_id]['r'][this.reagent_id]['a'] = next_anchor[anchor];
-        element = "metabolite";
-    }
-    else if (toolbox_button_selected == toolbox_states.ROTATE_PROTEIN || toolbox_button_selected == toolbox_states.ROTATE_PATHWAY){
-        if (toolbox_button_selected == toolbox_states.ROTATE_PATHWAY && (data[this.start_id].type == 'protein' || data[this.end_id].type == 'protein')) return;
-        if (toolbox_button_selected == toolbox_states.ROTATE_PROTEIN && (data[this.start_id].type == 'pathway' || data[this.end_id].type == 'pathway')) return;
-        
-        
-        if (edge_data[this.reaction_id]['r'][this.reagent_id]['t'] == "educt"){
-            edge_data[this.reaction_id]['in'] = next_anchor[edge_data[this.reaction_id]['in']];
-        }
-        else {
-            edge_data[this.reaction_id]['out'] = next_anchor[edge_data[this.reaction_id]['out']];
-        }
-        
-        element = (toolbox_button_selected == toolbox_states.ROTATE_PROTEIN) ? "protein" : "pathway";
-    }
-    else return;
-    
-    var xmlhttp = new XMLHttpRequest();
-    var request = "/stamp/admin/cgi-bin/update-edge.py?id=";
-    request += this.reagent_id;
-    request += "&element=";
-    request += element;
-    
-    xmlhttp.open("GET", request, true);
-    xmlhttp.send();
-    
-    compute_edges();
-    assemble_elements();
-    draw();
-}
 
 
 function manage_entries(){
