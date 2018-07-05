@@ -2038,6 +2038,12 @@ function node(data){
                 else ctx.strokeStyle = protein_disabled_stroke_color;
                 ctx.strokeRect(this.x - hw, this.y - hh, this.width, this.height);
                 
+                
+                /*
+                ctx.fillStyle = this.selected ? node_selected_color : (this.formula.length > 0 ? "darkblue" : label_color);
+                ctx.fillText(this.name, this.x, this.y + this.height * 0.3);
+                */
+                
                 break;
                 
                 
@@ -2520,7 +2526,7 @@ edge.prototype.constructor = edge;
 
 function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction_id, reagent_id){
     
-    this.head = head;
+    this.head = (reagent_id >= 0) ? head : true;
     this.head_start = 0;
     this.point_list = [];
     this.start_point = (x_s, y_s, "");
@@ -2533,11 +2539,11 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
     this.reagent_id = reagent_id;
     
     
-    this.bidirectional = start_node.type == "metabolite" && reagent_id >= 0 && edge_data['reactions'][this.reaction_id]['v'];
+    this.bidirectional = (reagent_id >= 0) ? start_node.type == "metabolite" && edge_data['reactions'][this.reaction_id]['v'] : head;
     this.tail_start = 0;
     
     
-    this.dashed_edge = data[this.start_id].type == "pathway";
+    this.dashed_edge = data[this.start_id].type == "pathway" || data[this.end_id].type == "pathway";
     this.edge_enabled = data[this.start_id].proteins.length > 0 || (this.dashed_edge && data[this.start_id].pathway_enabled);
     this.sort_order = this.edge_enabled ? 20 : 10;
     
@@ -3033,8 +3039,7 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
     
     this.routing(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node);
     
-    this.draw = function(ctx){
-        
+    this.draw = function(ctx){        
         ctx.strokeStyle = this.edge_enabled ? edge_color : edge_disabled_color;
         ctx.fillStyle = this.edge_enabled ? edge_color : edge_disabled_color;
         if (this.dashed_edge) ctx.setLineDash([10 * factor, 10 * factor]);
@@ -3099,7 +3104,7 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
                     x_head = p2_x + l * (p1_x - p2_x);
                     y_head = p2_y + l * (p1_y - p2_y);
                     
-                    ctx.lineWidth = line_width * factor;
+                    ctx.lineWidth = (line_width - this.dashed_edge * 3) * factor;
                     ctx.beginPath();
                     ctx.moveTo(p1_x, p1_y);
                     ctx.lineTo(x_head, y_head);
@@ -3158,20 +3163,24 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
                     break;
             }
             
+            
             switch (this.point_list[0].b){
+                
                 case 2:
                     var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - p1_x) + sq(p2_y - p1_y)));
                     x_head = p2_x + l * (p1_x - p2_x);
                     y_head = p2_y + l * (p1_y - p2_y);
                     
-                    ctx.lineWidth = line_width * factor;
+                    /*
+                    ctx.lineWidth = (line_width - this.dashed_edge * 3) * factor;
                     ctx.beginPath();
                     ctx.moveTo(p1_x, p1_y);
                     ctx.lineTo(x_head, y_head);
                     ctx.stroke();
-                    
+                    */
                     break;
-                
+                    
+                    
                 default:
                     var t = this.head_start;
                     x_head = (1 - t) * (1 - t) * p1_x + 2 * (1 - t) * t * ct_x + t * t * p2_x;
@@ -3266,20 +3275,18 @@ function compute_edges(){
         var node_id_end = directs[direct_id]["ne"];
         var anchor_start = directs[direct_id]["as"];
         var anchor_end = directs[direct_id]["ae"];
+        var reversible = directs[direct_id]["r"];
         if (!(node_id_start in data) || !(node_id_end in data)) continue;
         
-        connections.push([node_id_start, anchor_start, node_id_end, anchor_end, true, direct_id, -1]);
+        connections.push([node_id_start, anchor_start, node_id_end, anchor_end, reversible, direct_id, -1]);
         
-        var angle_start = compute_angle(data[node_id_start].x, data[node_id_start].y, data[node_id_end].x, data[node_id_end].y, anchor_end);
+        var angle_start = compute_angle(data[node_id_start].x, data[node_id_start].y, data[node_id_end].x, data[node_id_end].y, anchor_start);
+        var angle_end = compute_angle(data[node_id_end].x, data[node_id_end].y, data[node_id_start].x, data[node_id_start].y, anchor_end);
+        
         nodes_anchors[node_id_start][anchor_start].push([node_id_end, connections.length - 1, angle_start]);
-        
-        var angle_end = compute_angle(data[node_id_end].x, data[node_id_end].y, data[node_id_start].x, data[node_id_start].y, anchor_start);
         nodes_anchors[node_id_end][anchor_end].push([node_id_start, connections.length - 1, angle_end]);
         
-        
     }
-    
-    
     
     
     for (var node_id in nodes_anchors){

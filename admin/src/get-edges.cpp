@@ -215,7 +215,7 @@ main() {
     
     
     
-    sql_query = "SELECT r.* FROM reag r INNER JOIN nodes n ON r.node_id_start = n.id INNER JOIN nodes nn ON r.node_id_end = nn.id WHERE n.pathway_id = ";
+    sql_query = "SELECT r.* FROM reactions_direct r INNER JOIN nodes n ON r.node_id_start = n.id INNER JOIN nodes nn ON r.node_id_end = nn.id WHERE n.pathway_id = ";
     sql_query += pathway_id;
     sql_query += " AND nn.pathway_id = ";
     sql_query += pathway_id;

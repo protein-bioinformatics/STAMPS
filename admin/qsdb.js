@@ -5,17 +5,15 @@ toolbox_states = {
     CREATE_METABOLITE: 2,
     CREATE_LABEL: 3,
     CREATE_MEMBRANE: 4,
-    MOVE_ENTITY: 5,
-    ROTATE_PATHWAY: 6,
-    ROTATE_PROTEIN: 7,
-    ROTATE_METABOLITE: 8,
-    ROTATE_METABOLITE_LABEL: 9,
-    HIGHLIGHT_METABOLITE: 10,
-    DRAW_EDGE: 11,
-    CHANGE_EDGE: 12,
-    DELETE_ENTRY: 13
+    DRAW_EDGE: 5,
+    MOVE_ENTITY: 6,
+    CHANGE_EDGE_ANCHOR: 7,
+    ROTATE_METABOLITE_LABEL: 8,
+    HIGHLIGHT_METABOLITE: 9,
+    CHANGE_EDGE: 10,
+    DELETE_ENTRY: 11
 };
-toolbox_buttons = ["toolbox_button_create_pathway", "toolbox_button_create_protein", "toolbox_button_create_metabolite", "toolbox_button_create_label", "toolbox_button_create_membrane", "toolbox_button_move_entity", "toolbox_button_rotate_pathway_anchor", "toolbox_button_rotate_protein_anchor", "toolbox_button_rotate_metabolite_anchor", "toolbox_button_rotate_metabolite_label", "toolbox_button_highlight_metabolite", "toolbox_button_draw_edge", "toolbox_button_change_edge", "toolbox_button_delete_entity"];
+toolbox_buttons = ["toolbox_button_create_pathway", "toolbox_button_create_protein", "toolbox_button_create_metabolite", "toolbox_button_create_label", "toolbox_button_create_membrane", "toolbox_button_draw_edge", "toolbox_button_move_entity", "toolbox_button_change_edge_anchor", "toolbox_button_rotate_metabolite_label", "toolbox_button_highlight_metabolite", "toolbox_button_change_edge", "toolbox_button_delete_entity"];
 toolbox_button_selected = -1;
 entity_moving = -1;
 tmp_element = -1;
@@ -32,6 +30,7 @@ selected_metabolite_node = -1;
 selected_pathway_node = -1;
 selected_protein_node = -1;
 selected_label_node = -1;
+edge_change_selected = -1;
 
 protein_sort_columns = {'-3': "definition:DESC", '-2': "accession:DESC", '-1': "name:DESC", 1: "name:ASC", 2: "accession:ASC", 3: "definition:ASC"};
 protein_sort_column = 1;
@@ -407,15 +406,38 @@ function mouse_click_listener(e){
             draw();
         }
     }
-    else if (toolbox_button_selected == toolbox_states.ROTATE_PATHWAY || toolbox_button_selected == toolbox_states.ROTATE_METABOLITE || toolbox_button_selected == toolbox_states.ROTATE_PROTEIN){
-        if (highlight_element && highlight_element instanceof edge) highlight_element.edit();
+    
+    else if (toolbox_button_selected == toolbox_states.CHANGE_EDGE_ANCHOR){
+        if (highlight_element && highlight_element instanceof edge) {
+            
+            
+            if (edge_change_selected != highlight_element && edge_change_selected != -1){
+                var old_start_id = edge_change_selected.start_id;
+                var old_end_id = edge_change_selected.end_id;
+                
+                if ((old_start_id in data) && (old_end_id in data)){
+                    data[old_start_id].show_anchors = false;
+                    data[old_end_id].show_anchors = false;
+                }
+            }
+            
+            
+            var start_id = highlight_element.start_id;
+            var end_id = highlight_element.end_id;
+            
+            if ((start_id in data) && (end_id in data)){
+                data[start_id].show_anchors = true;
+                data[end_id].show_anchors = true;
+            }
+            edge_change_selected = highlight_element;
+            draw();
+            
+        }
+        else {
+            
+        }
     }
-    else if (toolbox_button_selected == toolbox_states.ROTATE_METABOLITE_LABEL){
-        if (highlight_element && (highlight_element instanceof node) && highlight_element.type == "metabolite") rotate_metabolite_label();
-    }
-    else if (toolbox_button_selected == toolbox_states.HIGHLIGHT_METABOLITE){
-        if (highlight_element && (highlight_element instanceof node) && highlight_element.type == "metabolite") highlight_metabolite_label();
-    }
+    
     else if (highlight_element && toolbox_button_selected == -1){
         if (highlight_element instanceof node){
             switch (highlight_element.type){
@@ -492,6 +514,8 @@ function mouse_click_listener(e){
         }
     }
 }
+
+
 
 
 function open_select_pathway(){
@@ -855,8 +879,6 @@ function mouse_down_listener(e){
     }
     else if (e.buttons & 1){
         
-        
-        
         if (highlight_element){
             highlight_element.mouse_down(res, e.which);
             if (toolbox_button_selected == toolbox_states.MOVE_ENTITY && highlight_element.constructor.name != "preview"){
@@ -896,6 +918,9 @@ function mouse_down_listener(e){
         }
     }
 }
+
+
+
 
 
 function mouse_move_listener(e){
@@ -1242,6 +1267,18 @@ function add_edge(start_id, end_id, anchor_start, anchor_end){
 
 
 function toolbox_button_clicked(button){
+    if (edge_change_selected != -1){
+        var start_id = edge_change_selected.start_id;
+        var end_id = edge_change_selected.end_id;
+        
+        if ((start_id in data) && (end_id in data)){
+            data[start_id].show_anchors = false;
+            data[end_id].show_anchors = false;
+        }        
+    }
+    edge_change_selected = -1;
+    
+    
     if(toolbox_button_selected == toolbox_states.DRAW_EDGE){
         for (node_id in data) data[node_id].show_anchors = false;
         draw();
