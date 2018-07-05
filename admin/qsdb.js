@@ -361,31 +361,53 @@ function mouse_click_listener(e){
                 
                 switch (highlight_element.type){
                     case "pathway":
-                    case "protein":
-                        var del_reactions = []
-                        for (var reaction_id in edge_data){
-                            if (edge_data[reaction_id]['n'] == node_id) del_reactions.push(reaction_id);
+                        var del_directs = [];
+                        for (var direct_id in edge_data['direct']){
+                            if (edge_data['direct'][reaction_id]['ns'] == node_id || edge_data['direct'][reaction_id]['ne'] == node_id) del_directs.push(reaction_id);
                         }
-                        for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
+                        for (var i = 0; i < del_directs.length; ++i) delete edge_data['direct'][del_directs[i]];
+                        
+                        
+                        
+                    case "protein":
+                        var del_reactions = [];
+                        for (var reaction_id in edge_data['reactions']){
+                            if (edge_data['reactions'][reaction_id]['n'] == node_id) del_reactions.push(reaction_id);
+                        }
+                        for (var i = 0; i < del_reactions.length; ++i) delete edge_data['reactions'][del_reactions[i]];
+                        
+                        
+                        var del_directs = [];
+                        for (var direct_id in edge_data['direct']){
+                            if (edge_data['direct'][reaction_id]['ns'] == node_id || edge_data['direct'][reaction_id]['ne'] == node_id) del_directs.push(reaction_id);
+                        }
+                        for (var i = 0; i < del_directs.length; ++i) delete edge_data['direct'][del_directs[i]];
                         break;
                         
                     case "metabolite":
                         var del_reactions = []
-                        for (var reaction_id in edge_data){
-                            for (var reagent_id in edge_data[reaction_id]['r']){
-                                if (edge_data[reaction_id]['r'][reagent_id]['n'] == node_id && data[edge_data[reaction_id]['n']].type == "pathway") del_reactions.push(reaction_id);
+                        for (var reaction_id in edge_data['reactions']){
+                            for (var reagent_id in edge_data['reactions'][reaction_id]['r']){
+                                if (edge_data['reactions'][reaction_id]['r'][reagent_id]['n'] == node_id && data[edge_data['reactions'][reaction_id]['n']].type == "pathway") del_reactions.push(reaction_id);
                             }
                         }
-                        for (var i = 0; i < del_reactions.length; ++i) delete edge_data[del_reactions[i]];
+                        for (var i = 0; i < del_reactions.length; ++i) delete edge_data['reactions'][del_reactions[i]];
                         
                         
-                        for (var reaction_id in edge_data){
+                        for (var reaction_id in edge_data['reactions']){
                             var del_reagents = [];
-                            for (var reagent_id in edge_data[reaction_id]['r']){
-                                if (edge_data[reaction_id]['r'][reagent_id]['n'] == node_id) del_reagents.push(reagent_id);
+                            for (var reagent_id in edge_data['reactions'][reaction_id]['r']){
+                                if (edge_data['reactions'][reaction_id]['r'][reagent_id]['n'] == node_id) del_reagents.push(reagent_id);
                             }
-                            for (var i = 0; i < del_reagents.length; ++i) delete edge_data[reaction_id]['r'][del_reagents[i]];
+                            for (var i = 0; i < del_reagents.length; ++i) delete edge_data['reactions'][reaction_id]['r'][del_reagents[i]];
                         }
+                        
+                        
+                        var del_directs = [];
+                        for (var direct_id in edge_data['direct']){
+                            if (edge_data['direct'][reaction_id]['ns'] == node_id || edge_data['direct'][reaction_id]['ne'] == node_id) del_directs.push(reaction_id);
+                        }
+                        for (var i = 0; i < del_directs.length; ++i) delete edge_data['direct'][del_directs[i]];
                         break;
                     
                     default:
@@ -408,10 +430,12 @@ function mouse_click_listener(e){
     }
     
     else if (toolbox_button_selected == toolbox_states.CHANGE_EDGE_ANCHOR){
+        
+        // highlight anchor of adjacent nodes of selected edge
         if (highlight_element && highlight_element instanceof edge) {
             
-            
-            if (edge_change_selected != highlight_element && edge_change_selected != -1){
+            var blured_edge = -1;
+            if (edge_change_selected != -1){
                 var old_start_id = edge_change_selected.start_id;
                 var old_end_id = edge_change_selected.end_id;
                 
@@ -419,22 +443,42 @@ function mouse_click_listener(e){
                     data[old_start_id].show_anchors = false;
                     data[old_end_id].show_anchors = false;
                 }
+                blured_edge = edge_change_selected;
+                edge_change_selected = -1;
             }
             
-            
-            var start_id = highlight_element.start_id;
-            var end_id = highlight_element.end_id;
-            
-            if ((start_id in data) && (end_id in data)){
-                data[start_id].show_anchors = true;
-                data[end_id].show_anchors = true;
+            if (blured_edge != highlight_element){
+                var start_id = highlight_element.start_id;
+                var end_id = highlight_element.end_id;
+                
+                if ((start_id in data) && (end_id in data)){
+                    data[start_id].show_anchors = true;
+                    data[end_id].show_anchors = true;
+                }
+                edge_change_selected = highlight_element;
             }
-            edge_change_selected = highlight_element;
             draw();
             
         }
+        // if a visible anchor is clicked, change edge to the anchor
         else {
-            
+            var c = document.getElementById("renderarea");
+            var res = get_mouse_pos(c, e);
+            var target = -1;
+            for (var node_id in data){
+                if (data[node_id].is_mouse_over(res)){
+                    target = data[node_id];
+                    break; 
+                }
+            }
+            if (target != -1){
+                
+                
+                var anchor = target.is_mouse_over_anchor(res);
+                if (anchor.length > 0){
+                    change_edge_anchor(edge_change_selected, target.id, anchor);
+                }
+            }
         }
     }
     
@@ -518,6 +562,57 @@ function mouse_click_listener(e){
 
 
 
+
+function change_edge_anchor(change_edge, target_id, anchor){
+    var is_direct = (change_edge.reagent_id == -1);
+    var table = "";
+    var id = -1;
+    var column = "";
+    
+    if (is_direct){
+        var start_end_anchor = "a" + ((change_edge.start_id == target_id) ? "s" : "e");
+        edge_data["direct"][change_edge.reaction_id][start_end_anchor] = anchor;
+        table = "reactions_direct";
+        id = change_edge.reaction_id;
+        column = "anchor_" + ((change_edge.start_id == target_id) ? "start" : "end");
+    }
+    else {
+        if (edge_data["reactions"][change_edge.reaction_id]['n'] == target_id){
+            if (edge_data["reactions"][change_edge.reaction_id]['r'][change_edge.reagent_id]['t'] == 'educt') {
+                edge_data["reactions"][change_edge.reaction_id]['in'] = anchor;
+                column = "anchor_in";
+            }
+            else{
+                edge_data["reactions"][change_edge.reaction_id]['out'] = anchor;
+                column = "anchor_out";
+            }
+            table = "reactions";
+            id = change_edge.reaction_id;
+            
+        }
+        else {
+            edge_data["reactions"][change_edge.reaction_id]['r'][change_edge.reagent_id]['a'] = anchor;
+            table = "reagents";
+            id = change_edge.reagent_id;
+            column = "anchor";
+        }
+    }
+    
+    
+    var request = "action=set&table=" + table + "&column=" + column + "&id=" + id + "&value=" + anchor;
+    
+    var result = update_entry(request);
+    if (result){
+        compute_edges();
+        assemble_elements();
+        draw();
+    }
+}
+
+
+
+
+
 function open_select_pathway(){
     var sorted_pathways = [];
     for (var pathway_id in pathways){
@@ -540,6 +635,9 @@ function open_select_pathway(){
     document.getElementById("renderarea").style.filter = "blur(5px)";
     document.getElementById("toolbox").style.filter = "blur(5px)";
 }
+
+
+
 
 
 function label_text_field_listener(evt){
