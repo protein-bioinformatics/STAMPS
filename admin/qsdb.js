@@ -5,15 +5,16 @@ toolbox_states = {
     CREATE_METABOLITE: 2,
     CREATE_LABEL: 3,
     CREATE_MEMBRANE: 4,
-    DRAW_EDGE: 5,
-    MOVE_ENTITY: 6,
-    CHANGE_EDGE_ANCHOR: 7,
-    ROTATE_METABOLITE_LABEL: 8,
-    HIGHLIGHT_METABOLITE: 9,
-    CHANGE_EDGE: 10,
-    DELETE_ENTRY: 11
+    CREATE_BG_IMAGE: 5,
+    DRAW_EDGE: 6,
+    MOVE_ENTITY: 7,
+    CHANGE_EDGE_ANCHOR: 8,
+    ROTATE_METABOLITE_LABEL: 9,
+    HIGHLIGHT_METABOLITE: 10,
+    CHANGE_EDGE: 11,
+    DELETE_ENTRY: 12
 };
-toolbox_buttons = ["toolbox_button_create_pathway", "toolbox_button_create_protein", "toolbox_button_create_metabolite", "toolbox_button_create_label", "toolbox_button_create_membrane", "toolbox_button_draw_edge", "toolbox_button_move_entity", "toolbox_button_change_edge_anchor", "toolbox_button_rotate_metabolite_label", "toolbox_button_highlight_metabolite", "toolbox_button_change_edge", "toolbox_button_delete_entity"];
+toolbox_buttons = ["toolbox_button_create_pathway", "toolbox_button_create_protein", "toolbox_button_create_metabolite", "toolbox_button_create_label", "toolbox_button_create_membrane", "toolbox_button_create_bg_image", "toolbox_button_draw_edge", "toolbox_button_move_entity", "toolbox_button_change_edge_anchor", "toolbox_button_rotate_metabolite_label", "toolbox_button_highlight_metabolite", "toolbox_button_change_edge", "toolbox_button_delete_entity"];
 toolbox_button_selected = -1;
 entity_moving = -1;
 tmp_element = -1;
@@ -29,6 +30,7 @@ selected_metabolite = -1;
 selected_metabolite_node = -1;
 selected_pathway_node = -1;
 selected_protein_node = -1;
+selected_image_node = -1;
 selected_label_node = -1;
 edge_change_selected = -1;
 
@@ -296,7 +298,7 @@ function resize_pathway_view(){
 function mouse_click_listener(e){
     if (!pathway_is_loaded) return;
     
-    if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY || toolbox_button_selected == toolbox_states.CREATE_METABOLITE || toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE){
+    if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY || toolbox_button_selected == toolbox_states.CREATE_METABOLITE || toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE || toolbox_button_selected == toolbox_states.CREATE_BG_IMAGE){
         var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
         var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
         var request = "";
@@ -319,6 +321,10 @@ function mouse_click_listener(e){
                 
             case toolbox_states.CREATE_MEMBRANE:
                 request = "type=membrane&pathway=" + current_pathway + "&x=" + x + "&y=" + y;
+                break;
+                
+            case toolbox_states.CREATE_BG_IMAGE:
+                request = "type=image&pathway=" + current_pathway + "&x=" + x + "&y=" + y;
                 break;
         }
         var result = create_node(request);
@@ -347,6 +353,10 @@ function mouse_click_listener(e){
                     
                 case toolbox_states.CREATE_MEMBRANE:
                     tmp_element = new node({"x": "0", "y": "0", "t": "membrane", "i": -1, "n": "-"});
+                    break;
+                    
+                case toolbox_states.CREATE_BG_IMAGE:
+                    tmp_element = new node({"x": "0", "y": "0", "t": "image", "i": -1, "n": "-"});
                     break;
             }
             tmp_element.scale(0, 0, factor);
@@ -379,7 +389,7 @@ function mouse_click_listener(e){
                         
                         var del_directs = [];
                         for (var direct_id in edge_data['direct']){
-                            if (edge_data['direct'][reaction_id]['ns'] == node_id || edge_data['direct'][reaction_id]['ne'] == node_id) del_directs.push(reaction_id);
+                            if (edge_data['direct'][direct_id]['ns'] == node_id || edge_data['direct'][direct_id]['ne'] == node_id) del_directs.push(direct_id);
                         }
                         for (var i = 0; i < del_directs.length; ++i) delete edge_data['direct'][del_directs[i]];
                         break;
@@ -524,6 +534,12 @@ function mouse_click_listener(e){
                     selected_pathway_node = highlight_element.id;
                     break;
                     
+                    
+                case "image":
+                    selected_image_node = highlight_element.id;
+                    open_upload_image();
+                    break;
+                    
                 case "protein":
                     
     
@@ -657,6 +673,13 @@ function change_edge_anchor(change_edge, target_id, anchor){
 
 
 
+function open_upload_image(){
+    
+    document.getElementById("editor_upload_image").style.display = "inline";
+    document.getElementById("renderarea").style.filter = "blur(5px)";
+    document.getElementById("toolbox").style.filter = "blur(5px)";
+}
+
 
 
 function open_select_pathway(){
@@ -754,11 +777,24 @@ function update_label(){
 }
 
 
+
+
+function close_editor_upload_image(){
+    document.getElementById("editor_upload_image").style.display = "none";
+    document.getElementById("renderarea").style.filter = "";
+    document.getElementById("toolbox").style.filter = "";
+}
+
+
+
+
 function close_editor_select_pathway(){
     document.getElementById("editor_select_pathway").style.display = "none";
     document.getElementById("renderarea").style.filter = "";
     document.getElementById("toolbox").style.filter = "";
 }
+
+
 
 
 function close_editor_select_protein(){
@@ -768,11 +804,53 @@ function close_editor_select_protein(){
 }
 
 
+
+
 function close_editor_select_metabolite(){
     document.getElementById("editor_select_metabolite").style.display = "none";
     document.getElementById("renderarea").style.filter = "";
     document.getElementById("toolbox").style.filter = "";
 }
+
+
+
+
+function editor_upload_image(){
+    if (document.getElementById('editor_upload_image_input').files.length == 0) return;
+    var file = document.getElementById('editor_upload_image_input').files[0];
+    var reader = new FileReader();
+    reader.filename = file.name;
+    reader.id = selected_image_node;
+    reader.readAsBinaryString(file);
+    
+    data[selected_image_node].pos = "";
+    data[selected_image_node].setup_image();
+    
+    reader.onload = function(){
+        
+        var re = /(?:\.([^.]+))?$/;
+        
+        var xhttp = new XMLHttpRequest();
+        var encoded = btoa(this.result);
+        encoded = encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/\=+$/, '');
+        
+        xhttp.filename = this.filename;
+        xhttp.id = this.id;
+        xhttp.extension = re.exec(this.filename)[1].toLowerCase();
+        
+        xhttp.onreadystatechange = function() {
+            if (xhttp.readyState == 4 && xhttp.status == 200){
+                if (xhttp.responseText == 0){
+                    data[this.id].pos = this.extension;
+                    data[this.id].setup_image();
+                }
+            }
+        }
+        xhttp.open("POST", "/stamp/admin/cgi-bin/upload-file.py", false);
+        xhttp.send("id=" + this.id + "&extension=" + xhttp.extension + "&content=" + encoded);
+    }
+}
+
 
 
 function editor_create_pathway_node(){
@@ -1192,7 +1270,7 @@ function mouse_move_listener(e){
         }
     }
     else {
-        if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY || toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_METABOLITE || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE){
+        if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY || toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_METABOLITE || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE || toolbox_button_selected == toolbox_states.CREATE_BG_IMAGE){
             
             
             var offset_move_x = null_x % (base_grid * factor);
@@ -1445,6 +1523,12 @@ function toolbox_button_clicked(button){
             elements.push(tmp_element);
             break;
             
+        case toolbox_states.CREATE_BG_IMAGE:
+            tmp_element = new node({"x": "0", "y": "0", "t": "image", "i": -1, "n": "-"});
+            tmp_element.scale(0, 0, factor);
+            elements.push(tmp_element);
+            break;
+            
         
         default:
             break;
@@ -1549,6 +1633,9 @@ function manage_entries(){
     }
     manage_fill_table();
 }
+
+
+
 
 function close_manage_entries(){
     document.getElementById("manage_entries").style.display = "none";

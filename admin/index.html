@@ -22,6 +22,7 @@
     <div id="toolbox_button_create_metabolite" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_METABOLITE);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_METABOLITE);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_METABOLITE);"><span>Create metabolite node</span></div>
     <div id="toolbox_button_create_label" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_LABEL);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_LABEL);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_LABEL);"><span>Create label node</span></div>
     <div id="toolbox_button_create_membrane" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_MEMBRANE);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_MEMBRANE);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_MEMBRANE);"><span>Create membrane node</span></div>
+    <div id="toolbox_button_create_bg_image" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_BG_IMAGE);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_BG_IMAGE);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_BG_IMAGE);"><span>Create image node</span></div>
     <div id="toolbox_button_draw_edge" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.DRAW_EDGE);" onmouseover="toolbox_button_mouseover(toolbox_states.DRAW_EDGE);" onmouseout="toolbox_button_mouseout(toolbox_states.DRAW_EDGE);"><span>Draw edge</span></div>
     
     <p><hr><p>
@@ -58,6 +59,24 @@
         </tr></table>
     </div>
 </div>
+
+
+
+<div id="editor_upload_image" class="global_search">
+    <div id="editor_upload_image_window" class="global_search_content">
+        <table width="100%" height="100%"><tr><td>
+                Select an image:
+        </td></tr>
+        <tr><td id="editor_upload_image_cell" valign="top" height="50px" width="500px">
+            <input type="file" id="editor_upload_image_input" accept="image/*" />
+        </td></tr>
+        <tr>
+            <td align=right><button onclick="close_editor_upload_image();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_upload_image(); close_editor_upload_image();" id="editor_upload_image_upload_button">Upload</button>
+            </td>
+        </tr></table>
+    </div>
+</div>
+
 
 
 

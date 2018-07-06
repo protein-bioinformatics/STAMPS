@@ -635,7 +635,7 @@ function visual_element() {
     this.width = 0;
     this.height = 0;
     this.name = "";
-    this.include_preview = false;
+    this.include_preview = true;
     this.mouse_click = function(mouse, key){return -1;};
     this.mouse_dbl_click = function(mouse, key){return -1;};
     this.mouse_down = function(mouse, key){return -1;};
@@ -1837,6 +1837,29 @@ function node(data){
         this.height = (text_size + 2) * factor;
     }
     
+    this.setup_image = function(){
+        this.width = 100;
+        this.height = 100;
+        this.slide = false;
+        this.img = new Image();
+        var load_process = setInterval(function(nd){
+            try {
+                nd.img.onload = function () {
+                    nd.width = nd.img.width;
+                    nd.height = nd.img.height;
+                    nd.slide = true;
+                    draw();
+                }
+            }
+            catch (e) {
+            }
+            nd.img.src = "/stamp/images/visual_images/I" + nd.id + "." + nd.pos + "?" + new Date().getTime();;
+            clearInterval(load_process);
+        }, 1, this);
+    }
+    
+    
+    
     switch (this.type){
         case "protein":
             this.sort_order = 100;
@@ -1883,27 +1906,12 @@ function node(data){
             break;
             
         case "image":
-            
-            this.sort_order = 5;
-            this.width = -1;
-            this.height = -1;
-            this.img = new Image();
-            var load_process = setInterval(function(nd){
-                try {
-                    nd.img.onload = function () {
-                        nd.width = nd.img.width;
-                        nd.height = nd.img.height;
-                    }
-                }
-                catch (e) {
-                }
-                nd.img.src = "/stamp/images/visual_images/I" + nd.id + "." + nd.pos;
-                clearInterval(load_process);
-            }, 1, this);
+            this.sort_order = 1;
+            this.setup_image();
             break;
             
         case "membrane":
-            this.sort_order = 0;
+            this.sort_order = 5;
             this.width = this.length * (2 * this.lipid_radius + this.lw) * factor;
             this.height = (this.o_y + 2 * this.lipid_radius + this.lw) * factor;
             break;
@@ -2139,26 +2147,26 @@ function node(data){
                 break;
                 
             case "image":
-                if (this.width > 0){
+                if (this.slide){
                     ctx.drawImage(this.img, this.x - (this.width >> 1), this.y - (this.height >> 1), this.width, this.height);
                 }
                 else {
-                    ctx.fillStyle = "black";
-                    ctx.rect(this.x - 50, this.y - 50, 100, 100);
+                    ctx.strokeStyle = "black";
+                    ctx.rect(this.x - (this.width >> 1), this.y - (this.height >> 1), this.width, this.height);
                     ctx.stroke();
                     
                     ctx.strokeStyle = "red";
-                    ctx.lineWidth = 5;
+                    ctx.lineWidth = 5 * factor;
                     
                     ctx.beginPath();
-                    ctx.moveTo(this.x - 45, this.y - 45);
-                    ctx.lineTo(this.x + 45, this.y + 45);
+                    ctx.moveTo(this.x - (this.width * 0.9 >> 1), this.y - (this.height * 0.9 >> 1));
+                    ctx.lineTo(this.x + (this.width * 0.9 >> 1), this.y + (this.height * 0.9 >> 1));
                     ctx.closePath();
                     ctx.stroke();
                     
                     ctx.beginPath();
-                    ctx.moveTo(this.x + 45, this.y - 45);
-                    ctx.lineTo(this.x - 45, this.y + 45);
+                    ctx.moveTo(this.x - (this.width * 0.9 >> 1), this.y + (this.height * 0.9 >> 1));
+                    ctx.lineTo(this.x + (this.width * 0.9 >> 1), this.y - (this.height * 0.9 >> 1));
                     ctx.closePath();
                     ctx.stroke();
                 }

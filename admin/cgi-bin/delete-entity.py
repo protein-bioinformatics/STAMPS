@@ -91,7 +91,7 @@ if entity_type == "node":
         conn.commit()
         
         
-    elif entity_type in ["label", "membrane"]:
+    elif entity_type in ["label", "membrane", "image"]:
         sql_query = "DELETE FROM nodes WHERE id = %s;"
         my_cur.execute(sql_query, (entity_id))
         conn.commit()

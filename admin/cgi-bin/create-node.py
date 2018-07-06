@@ -29,7 +29,7 @@ except:
     exit()   
 
 
-if type(x) is not str or type(y) is not str or type(pathway) is not str or node_type not in ["pathway", "protein", "metabolite", "label", "membrane"]:
+if type(x) is not str or type(y) is not str or type(pathway) is not str or node_type not in ["pathway", "protein", "metabolite", "label", "membrane", "image"]:
     print(-2)
     exit()
    
@@ -102,6 +102,11 @@ elif node_type == "label":
     
     
 elif node_type == "membrane":
+    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (%s, %s, 0, %s, %s);"
+    my_cur.execute(sql_query, (pathway, node_type, x, y))
+    conn.commit()
+    
+elif node_type == "image":
     sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (%s, %s, 0, %s, %s);"
     my_cur.execute(sql_query, (pathway, node_type, x, y))
     conn.commit()
