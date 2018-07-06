@@ -442,7 +442,9 @@ function mouse_click_listener(e){
     else if (toolbox_button_selected == toolbox_states.HIGHLIGHT_METABOLITE){
         if (highlight_element && (highlight_element instanceof node) && highlight_element.type == "metabolite") highlight_metabolite_label();
     }
-
+    else if (toolbox_button_selected == toolbox_states.CHANGE_EDGE){
+        if (highlight_element && (highlight_element instanceof edge)) change_edge_type();
+    }
     
     else if (toolbox_button_selected == toolbox_states.CHANGE_EDGE_ANCHOR){
         
@@ -575,6 +577,35 @@ function mouse_click_listener(e){
 }
 
 
+
+
+
+function change_edge_type(){
+    var is_direct = (highlight_element.reagent_id == -1);
+    var table = "";
+    var id = highlight_element.reaction_id;
+    var value = 0;
+    
+    if (is_direct){
+        value = !edge_data['direct'][id]['r'];
+        edge_data['direct'][id]['r'] = value;
+        table = "reactions_direct";
+    }
+    else {
+        value = !edge_data['reactions'][id]['v'];
+        edge_data['reactions'][id]['v'] = value;
+        table = "reactions";
+    }
+    
+    var request = "action=set&table=" + table + "&column=reversible&id=" + id + "&value=" + value;
+    
+    var result = update_entry(request);
+    if (result){
+        compute_edges();
+        assemble_elements();
+        draw();
+    }
+}
 
 
 
@@ -930,7 +961,7 @@ function repair_database(){
                     request_repair = "/stamp/admin/cgi-bin/inspect-database.py?mode=del_web";
                     xmlhttp_repair.onreadystatechange = function() {
                         if (xmlhttp_repair.readyState == 4 && xmlhttp_repair.status == 200) {
-                            if (xmlhttp.responseText == 0){
+                            if (xmlhttp_repair.responseText == 0){
                                 alert("Database was successfully repaired.");
                             }
                             else {

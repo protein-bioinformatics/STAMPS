@@ -234,9 +234,14 @@ if len(reaction_foreign_node_ids - node_ids) > 0:
     else:
         print("inconsistency: node_id in reactions ->", (reaction_foreign_node_ids - node_ids))
 
+
+
+
 sql_query = "SELECT id FROM reactions;"
 my_cur.execute(sql_query)
 reaction_ids = set([entry[0] for entry in my_cur])
+
+
 
 
 
@@ -254,6 +259,10 @@ if len(reagent_foreign_node_ids - node_ids) > 0:
     else:
         print("inconsistency: node_id in reagents ->", (reagent_foreign_node_ids - node_ids))
 
+
+
+
+
 sql_query = "SELECT reaction_id FROM reagents;"
 my_cur.execute(sql_query)
 reagent_foreign_reaction_ids = set([entry[0] for entry in my_cur])
@@ -267,6 +276,41 @@ if len(reagent_foreign_reaction_ids - reaction_ids) > 0:
         exit()
     else:
         print("inconsistency: reaction_id in reagents ->", (reagent_foreign_reaction_ids - reaction_ids))
+
+
+
+
+sql_query = "SELECT node_id_start FROM reactions_direct;"
+my_cur.execute(sql_query)
+reaction_direct_foreign_node_ids_start = set([entry[0] for entry in my_cur])
+if len(reaction_direct_foreign_node_ids_start - node_ids) > 0:  
+    if mode in ["del", "del_web"]:
+        sql_query = "DELETE FROM reactions_direct WHERE node_id_start NOT IN (SELECT id FROM nodes);"
+        my_cur.execute(sql_query)
+        conn.commit()
+    elif mode == "check_web":
+        print(-1)
+        exit()
+    else:
+        print("inconsistency: node_id_start in reactions_direct ->", (reaction_direct_foreign_node_ids_start - node_ids))
+
+
+
+
+sql_query = "SELECT node_id_end FROM reactions_direct;"
+my_cur.execute(sql_query)
+reaction_direct_foreign_node_ids_end = set([entry[0] for entry in my_cur])
+if len(reaction_direct_foreign_node_ids_end - node_ids) > 0:  
+    if mode in ["del", "del_web"]:
+        sql_query = "DELETE FROM reactions_direct WHERE node_id_end NOT IN (SELECT id FROM nodes);"
+        my_cur.execute(sql_query)
+        conn.commit()
+    elif mode == "check_web":
+        print(-1)
+        exit()
+    else:
+        print("inconsistency: node_id_end in reactions_direct ->", (reaction_direct_foreign_node_ids_end - node_ids))
+
 
 
 

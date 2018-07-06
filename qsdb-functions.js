@@ -3236,7 +3236,7 @@ function compute_edges(){
     
     for (var reaction_id in reactions){
         var node_id = reactions[reaction_id]['n'];
-        var reversible = parseInt(reactions[reaction_id]['v']);
+        var reversible = reactions[reaction_id]['v'] == 1;
         var reagents = reactions[reaction_id]['r'];
         
         for (var reagent_id in reagents){
@@ -3269,7 +3269,7 @@ function compute_edges(){
         var node_id_end = directs[direct_id]["ne"];
         var anchor_start = directs[direct_id]["as"];
         var anchor_end = directs[direct_id]["ae"];
-        var reversible = directs[direct_id]["r"];
+        var reversible = directs[direct_id]["r"] == 1;
         if (!(node_id_start in data) || !(node_id_end in data)) continue;
         
         connections.push([node_id_start, anchor_start, node_id_end, anchor_end, reversible, direct_id, -1]);
