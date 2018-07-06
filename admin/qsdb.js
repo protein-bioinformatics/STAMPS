@@ -419,7 +419,7 @@ function mouse_click_listener(e){
                 
             }
             else if (highlight_element instanceof edge){
-                var is_direct = (highlight_element.reagent_id != -1);
+                var is_direct = (highlight_element.reagent_id == -1);
                 
                 if (is_direct){
                     delete edge_data['direct'][highlight_element.reaction_id];
@@ -885,6 +885,7 @@ function delete_entity(request){
 function update_entry(request){
     var xmlhttp = new XMLHttpRequest();
     request = "/stamp/admin/cgi-bin/manage-entries.bin?" + request;
+    
     var successful_creation = false;
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -1224,7 +1225,7 @@ function mouse_up_listener(event){
             }
             draw();
         }
-        else {
+        else if (entity_moving != -1) {
             update_node(event);
             entity_moving = -1;
         }
@@ -1305,8 +1306,10 @@ function add_edge(start_id, end_id, anchor_start, anchor_end){
     var xmlhttp = new XMLHttpRequest();
     var request = "/stamp/admin/cgi-bin/add-edge.py?start_id=" + start_id + "&end_id=" + end_id + "&anchor_start=" + anchor_start + "&anchor_end=" + anchor_end;
     var successful_creation = [-1, -1];
+    console.log(request);
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            console.log(xmlhttp.responseText);
             response = JSON.parse(xmlhttp.responseText);
             if (response[0] < 0){
                 alert("An error has occured, the edge could not be added into the database. Please contact the administrator.");
@@ -1456,6 +1459,7 @@ function toolbox_button_mouseout(button){
 
 
 function update_node(event) {
+    
     if (multiple_selection.has(entity_moving.id)){
         for (node_id of multiple_selection){
             var node_element = data[node_id];
@@ -1463,31 +1467,28 @@ function update_node(event) {
             var y = Math.round(Math.floor((node_element.y - null_y) / factor) / base_grid) * base_grid;
             
             
-            var xmlhttp = new XMLHttpRequest();
-            var request = "/stamp/admin/cgi-bin/update-node.py?id=";
-            request += node_element.id;
-            request += "&x=";
-            request += x;
-            request += "&y=";
-            request += y;
-            xmlhttp.open("GET", request, true);
-            xmlhttp.send();
+            
+            var request_X = "action=set&id=" + node_element.id;
+            request_X += "&table=nodes&column=x&value=" + x;
+            update_entry(request_X);
+            
+            var request_Y = "action=set&id=" + node_element.id;
+            request_Y += "&table=nodes&column=y&value=" + y;
+            update_entry(request_Y);
+            
         }
     }
     else {
         var x = Math.round(Math.floor((entity_moving.x - null_x) / factor) / base_grid) * base_grid;
         var y = Math.round(Math.floor((entity_moving.y - null_y) / factor) / base_grid) * base_grid;
         
+        var request_X = "action=set&id=" + entity_moving.id;
+        request_X += "&table=nodes&column=x&value=" + x;
+        update_entry(request_X);
         
-        var xmlhttp = new XMLHttpRequest();
-        var request = "/stamp/admin/cgi-bin/update-node.py?id=";
-        request += entity_moving.id;
-        request += "&x=";
-        request += x;
-        request += "&y=";
-        request += y;
-        xmlhttp.open("GET", request, true);
-        xmlhttp.send();
+        var request_Y = "action=set&id=" + entity_moving.id;
+        request_Y += "&table=nodes&column=y&value=" + y;
+        update_entry(request_Y);
     }
 }
 

@@ -89,7 +89,7 @@ else:
     conn.commit()
     
     my_cur.execute("SELECT max(id) mid FROM reactions_direct;")
-    reactions_direct_id = [row for row in my_cur][0]["mid"]
+    reaction_id = [row for row in my_cur][0]["mid"]
     
     
-print([0, reagent_id, reactions_direct_id])
+print([0, reagent_id, reaction_id])
