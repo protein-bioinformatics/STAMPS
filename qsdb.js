@@ -291,17 +291,14 @@ function mouse_move_listener(e){
                 c.style.cursor = "all-scroll";
             }
             
-            
-            if (!highlight_element){
-                for (var i = 0; i < elements.length; ++i){
-                    elements[i].move(shift_x, shift_y);
-                }
-                null_x += shift_x;
-                null_y += shift_y;
-                boundaries[0] += shift_x;
-                boundaries[1] += shift_y;
-                update_browser_link();
+            for (var i = 0; i < elements.length; ++i){
+                elements[i].move(shift_x, shift_y);
             }
+            null_x += shift_x;
+            null_y += shift_y;
+            boundaries[0] += shift_x;
+            boundaries[1] += shift_y;
+            update_browser_link();
         }
         draw();
         offsetX = res.x;

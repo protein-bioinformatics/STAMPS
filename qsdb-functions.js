@@ -495,7 +495,7 @@ function draw(sync){
             
             //draw elements visual elements
             for (var i = 0; i < elements.length; ++i){
-                if (elements[i].visible) elements[i].draw(ctx);
+                if (elements[i].visible && elements[i].include_preview) elements[i].draw(ctx);
             }
          
             clearInterval(dr);
@@ -508,7 +508,7 @@ function draw(sync){
         
         //draw elements visual elements
         for (var i = 0; i < elements.length; ++i){
-            if (elements[i].visible) elements[i].draw(ctx);
+            if (elements[i].visible && elements[i].include_preview) elements[i].draw(ctx);
         }
     }
     
@@ -635,6 +635,7 @@ function visual_element() {
     this.width = 0;
     this.height = 0;
     this.name = "";
+    this.include_preview = false;
     this.mouse_click = function(mouse, key){return -1;};
     this.mouse_dbl_click = function(mouse, key){return -1;};
     this.mouse_down = function(mouse, key){return -1;};
@@ -1312,13 +1313,17 @@ function preview(){
         var x_min = 1e100, x_max = -1e100;
         var y_min = 1e100, y_max = -1e100;
         this.visible = false;
-        for (var node_id in data){
-            this.visible = true;
-            x_min = Math.min(x_min, data[node_id].x - data[node_id].width * 0.5);
-            x_max = Math.max(x_max, data[node_id].x + data[node_id].width * 0.5);
-            y_min = Math.min(y_min, data[node_id].y - data[node_id].height * 0.5);
-            y_max = Math.max(y_max, data[node_id].y + data[node_id].height * 0.5);
+        
+        for (var element of elements){
+            if (element instanceof node && element.include_preview){
+                this.visible = true;
+                x_min = Math.min(x_min, element.x - element.width * 0.5);
+                x_max = Math.max(x_max, element.x + element.width * 0.5);
+                y_min = Math.min(y_min, element.y - element.height * 0.5);
+                y_max = Math.max(y_max, element.y + element.height * 0.5);
+            }
         }
+        
         if (!this.visible) return;
         x_min -= 5;
         x_max += 5;
@@ -1877,6 +1882,26 @@ function node(data){
             this.tipp = true;
             break;
             
+        case "image":
+            
+            this.sort_order = 5;
+            this.width = -1;
+            this.height = -1;
+            this.img = new Image();
+            var load_process = setInterval(function(nd){
+                try {
+                    nd.img.onload = function () {
+                        nd.width = nd.img.width;
+                        nd.height = nd.img.height;
+                    }
+                }
+                catch (e) {
+                }
+                nd.img.src = "/stamp/images/visual_images/I" + nd.id + "." + nd.pos;
+                clearInterval(load_process);
+            }, 1, this);
+            break;
+            
         case "membrane":
             this.sort_order = 0;
             this.width = this.length * (2 * this.lipid_radius + this.lw) * factor;
@@ -2111,6 +2136,32 @@ function node(data){
                 ctx.font = ((text_size + 2) * factor).toString() + "px Arial";
                 ctx.fillStyle = this.selected ? node_selected_color : (this.formula.length > 0 ? "darkblue" : label_color);
                 ctx.fillText(this.short_name, this.x, this.y + this.height * 0.3);
+                break;
+                
+            case "image":
+                if (this.width > 0){
+                    ctx.drawImage(this.img, this.x - (this.width >> 1), this.y - (this.height >> 1), this.width, this.height);
+                }
+                else {
+                    ctx.fillStyle = "black";
+                    ctx.rect(this.x - 50, this.y - 50, 100, 100);
+                    ctx.stroke();
+                    
+                    ctx.strokeStyle = "red";
+                    ctx.lineWidth = 5;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(this.x - 45, this.y - 45);
+                    ctx.lineTo(this.x + 45, this.y + 45);
+                    ctx.closePath();
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(this.x + 45, this.y - 45);
+                    ctx.lineTo(this.x - 45, this.y + 45);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
                 break;
                 
                 
@@ -3456,19 +3507,37 @@ function compute_edges(){
 }
 
 
-function assemble_elements(skip_rest){
+function assemble_elements(do_preview){
+    if (typeof do_preview === 'undefined') do_preview = false;
+    
     elements = [];
-    for (var i = 0; i < edges.length; ++i) elements.push(edges[i]);    
-    for (var node_id in data) elements.push(data[node_id]);
-    if (typeof skip_rest == 'undefined') {
-        if (infobox != 0) elements.push(infobox);
-        if (zoom_sign_in != 0) elements.push(zoom_sign_in);
-        if (zoom_sign_out != 0) elements.push(zoom_sign_out);
-        if (expand_collapse_obj != 0) elements.push(expand_collapse_obj);
-        if (preview_element != 0) elements.push(preview_element);
-        if (select_field_element != 0) elements.push(select_field_element);
-        if (current_pathway_title != 0) elements.push(current_pathway_title);
+    
+    for (var edge of edges){
+        edge.include_preview = true;
+        elements.push(edge);
     }
+    
+    for (var node_id in data){
+        data[node_id].include_preview = !do_preview || data[node_id].type != "image";
+        elements.push(data[node_id]);
+    }
+    
+    if (infobox != 0) elements.push(infobox);
+    if (zoom_sign_in != 0) elements.push(zoom_sign_in);
+    if (zoom_sign_out != 0) elements.push(zoom_sign_out);
+    if (expand_collapse_obj != 0) elements.push(expand_collapse_obj);
+    if (preview_element != 0) elements.push(preview_element);
+    if (select_field_element != 0) elements.push(select_field_element);
+    if (current_pathway_title != 0) elements.push(current_pathway_title);
+    
+    
+    if (infobox != 0) infobox.include_preview = !do_preview;
+    if (zoom_sign_in != 0) zoom_sign_in.include_preview = !do_preview;
+    if (zoom_sign_out != 0) zoom_sign_out.include_preview = !do_preview;
+    if (expand_collapse_obj != 0) expand_collapse_obj.include_preview = !do_preview;
+    if (preview_element != 0) preview_element.include_preview = !do_preview;
+    if (select_field_element != 0) select_field_element.include_preview = !do_preview;
+    if (current_pathway_title != 0) current_pathway_title.include_preview = !do_preview;
 }
 
 
@@ -4925,19 +4994,20 @@ function load_data(reload){
     var process_edges = setInterval(function(){
         if (tmp_data && edge_data && process_edges_semaphore){
             compute_edges();
-            assemble_elements(1);
-            
+            assemble_elements(true);
             // create preview
             min_zoom = zoom_options[0];
             for (var i = zoom; i >= min_zoom; --i) zoom_in_out(1, 0);
             draw(1);
             preview_element.snapshot();
+            
+            
             assemble_elements();
             var t_zoom = reload ? zoom_options[2] - 4 : zoom_options[1];
             for (var i = 0; i < (t_zoom - zoom_options[0] + 4); ++i) zoom_in_out(0, 0);
             min_zoom = zoom_options[1];
             
-            draw(1);
+            //draw(1);
             pathway_is_loaded = true;
             c.style.display = "inline";
             clearInterval(process_edges);
