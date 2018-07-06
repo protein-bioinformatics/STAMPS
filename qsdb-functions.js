@@ -1741,7 +1741,7 @@ function node(data){
     this.id = data['i'];
     this.name = ('n' in data) ? data['n'] : "";
     this.short_name = ('sn' in data) ? data['sn'] : "";
-    this.name += " (" + this.id + ")";  // TODO: delete this line
+    //this.name += " (" + this.id + ")";  // TODO: delete this line
     this.c_number = ('c' in data) ? data['c'] : "";
     this.smiles = ('s' in data) ? data['s'] : "";
     this.formula = ('f' in data) ? data['f'] : "";
@@ -2037,12 +2037,6 @@ function node(data){
                 }
                 else ctx.strokeStyle = protein_disabled_stroke_color;
                 ctx.strokeRect(this.x - hw, this.y - hh, this.width, this.height);
-                
-                
-                /*
-                ctx.fillStyle = this.selected ? node_selected_color : (this.formula.length > 0 ? "darkblue" : label_color);
-                ctx.fillText(this.name, this.x, this.y + this.height * 0.3);
-                */
                 
                 break;
                 
@@ -3337,39 +3331,60 @@ function compute_edges(){
         }
         var len_adjacent = diameter * (-1 / metabolite_len + 1);
         var correction_shift = metabolite_pos / (metabolite_len - 1);
-        switch (metabolite_anchor){
-            case "top":
-                end_y -= radius;
-                var w = len_adjacent;
-                end_x -= w * 0.5;
-                if (metabolite_len > 1){
-                    end_x += w * correction_shift;
-                }
-                break;
-            case "bottom":
-                end_y += radius;
-                var w = len_adjacent;
-                end_x += w * 0.5;
-                if (metabolite_len > 1){
-                    end_x -= w * correction_shift;
-                }
-                break;
-            case "left":
-                end_x -= radius;
-                var h = len_adjacent;
-                end_y += h * 0.5;
-                if (metabolite_len > 1){
-                    end_y -= h * correction_shift;
-                }
-                break;
-            case "right":
-                end_x += radius;
-                var h = len_adjacent;
-                end_y -= h * 0.5;
-                if (metabolite_len > 1){
-                    end_y += h * correction_shift;
-                }
-                break;
+        
+        
+        if (data[node_id].type == "metabolite"){
+            
+            switch (metabolite_anchor){
+                case "top":
+                    end_y -= radius;
+                    var w = len_adjacent;
+                    end_x -= w * 0.5;
+                    if (metabolite_len > 1){
+                        end_x += w * correction_shift;
+                    }
+                    break;
+                case "bottom":
+                    end_y += radius;
+                    var w = len_adjacent;
+                    end_x += w * 0.5;
+                    if (metabolite_len > 1){
+                        end_x -= w * correction_shift;
+                    }
+                    break;
+                case "left":
+                    end_x -= radius;
+                    var h = len_adjacent;
+                    end_y += h * 0.5;
+                    if (metabolite_len > 1){
+                        end_y -= h * correction_shift;
+                    }
+                    break;
+                case "right":
+                    end_x += radius;
+                    var h = len_adjacent;
+                    end_y -= h * 0.5;
+                    if (metabolite_len > 1){
+                        end_y += h * correction_shift;
+                    }
+                    break;
+            }
+        }
+        else {
+            switch (metabolite_anchor){
+                case "top":
+                    end_y -= data[metabolite_id].height >> 1;
+                    break;
+                case "bottom":
+                    end_y += data[metabolite_id].height >> 1;
+                    break;
+                case "left":
+                    end_x -= data[metabolite_id].width >> 1;
+                    break;
+                case "right":
+                    end_x += data[metabolite_id].width >> 1;
+                    break;
+            }
         }
         
         if (data[node_id].type == "metabolite"){

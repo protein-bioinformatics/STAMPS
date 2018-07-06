@@ -76,7 +76,9 @@ if count_types["protein"] == 1 and count_types["metabolite"] == 1:
     my_cur.execute("INSERT INTO reagents (reaction_id, node_id, type, anchor) VALUES (%s, %s, %s, %s);", (reaction_id, meta_id, fooduct, meta_a))
     conn.commit()
     
+    
     my_cur.execute("UPDATE reactions SET %s = '%s' where id = %s" % (reac_a, prot_a, reaction_id))
+    conn.commit()
     
     
     my_cur.execute("SELECT max(id) mid FROM reagents;")
