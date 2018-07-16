@@ -8,6 +8,38 @@ import os
 import hashlib
 
 
+acids = {}
+acids['A'] =  71.037110
+acids['R'] = 156.101110
+acids['N'] = 114.042930
+acids['D'] = 115.026940
+acids['C'] = 103.009190
+acids['c'] = 160.030654
+acids['E'] = 129.042590
+acids['Q'] = 128.058580
+acids['G'] =  57.021460
+acids['H'] = 137.058910
+acids['I'] = 113.084060
+acids['L'] = 113.084060
+acids['K'] = 128.094960
+acids['M'] = 131.040490
+acids['m'] = 147.035404
+acids['n'] = 163.030318
+acids['F'] = 147.068410
+acids['P'] =  97.052760
+acids['S'] =  87.032030
+acids['T'] = 101.047680
+acids['W'] = 186.079310
+acids['Y'] = 163.063330
+acids['V'] =  99.068410
+H =       1.007276
+C12 =    12.000000
+O =      15.994914
+H3O =    19.016742
+O2 =     31.989829
+acetyl = 43.016742
+electron = 0.00054857990946
+
 
 def split_string(text, separator, quote):
     inQuote, tokens, token = False, [], ""
@@ -31,6 +63,17 @@ def split_string(text, separator, quote):
 
 
 
+def compute_mass(seq):
+    seq = seq.replace("C[+57.0]", "c")
+    seq = seq.replace("M[+16.0]", "m")
+    mass = 0
+    for AA in seq:
+        mass += acids[AA]
+        
+    return mass + O + 2 * (H + electron)
+
+
+
 def get_attributes(text):
     if text[0] != ">": return {}
 
@@ -38,7 +81,7 @@ def get_attributes(text):
     
     headers = text[1:].split(" ")[0]
     attributes["name"] = headers
-    attributes["decription"] = " ".join(text[1:].split(" ")[1:])
+    attributes["description"] = " ".join(text[1:].split(" ")[1:])
     headers = headers.split("|")
     if len(headers) >= 1: attributes["db"] = headers[0]
     if len(headers) >= 2: attributes["accession"] = headers[1]
@@ -55,6 +98,14 @@ def get_attributes(text):
         attributes[attrib] = value
         eq_pos = next_pos
         
+    if "name" not in attributes: attributes["name"] = ""
+    if "description" not in attributes: attributes["description"] = ""
+    if "GN" not in attributes: attributes["GN"] = ""
+    if "db" not in attributes: attributes["db"] = ""
+    if "accession" not in attributes: attributes["accession"] = ""
+    if "gene_name" not in attributes: attributes["gene_name"] = ""
+    if "OS" not in attributes: attributes["OS"] = ""
+        
     return attributes
 
 
@@ -68,6 +119,10 @@ def format_protein_seq(seq):
         new_seq += seq[cnt : cnt + add] + " "
         cnt += add
     return new_seq
+
+
+def make_dict(cur):
+    return {key[0]: value for key, value in zip(cur.description, cur.fetchall()[0])}
 
 
 
@@ -90,7 +145,6 @@ print()
 
 form = cgi.FieldStorage()
 proteins = form.getvalue('proteins')
-
 
 
 
@@ -146,13 +200,17 @@ with open(fasta_file, mode="wt") as fl:
 
 # create blib file
 blib_file = "../tmp/%s/spectra.blib" % rnd
-db = sqlite3.connect(conf["spectra_db_%s" % species])
+spectra_db = "spectra_db_" + species
+
+if spectra_db not in conf:
+    print(-1)
+    exit()
+    
+db = sqlite3.connect(conf[spectra_db])
 lite_cur = db.cursor()
 lite_cur.execute("ATTACH DATABASE '%s' As blib;" % blib_file)
 lite_cur.execute("CREATE TABLE blib.tmp (id INTEGER PRIMARY KEY, sid INTEGER);")
 db.commit()
-
-
 
 
 
@@ -281,8 +339,14 @@ with open(view_file, mode = "wt") as out_view_file:
 
 
 
+pep_and_spec = {}
+lite_cur.execute("SELECT r.id, r.peptideSeq, r.peptideModSeq, s.peakMZ, s.peakIntensity FROM RefSpectra r INNER JOIN RefSpectraPeaks s ON r.id = s.RefSpectraID WHERE r.id IN (%s);" % ",".join(str(sid) for sid in spectra))
 
 
+
+for row in lite_cur:
+    pep_and_spec[row[0]] = row
+    
 
 
 
@@ -320,11 +384,29 @@ with open(skyline_file, mode = "wt") as out_skyline_file:
     <data_settings document_guid=\"111c1931-8827-4e11-9896-608225cb1e88\" />\n \
   </settings_summary>\n")
     
+    
+    
     for accession in proteome:
         attributes = proteome_headers[accession]
+        proteinSeq = proteome[accession]
     
-        out_skyline_file.write("<protein name=\"%s\" description=\"Cytochrome P450 2E1 OS=Mus musculus GN=Cyp2e1 PE=1 SV=1\" accession=\"Q05421\" gene=\"Cyp2e1\" species=\"Mus musculus\" preferred_name=\"CP2E1_MOUSE\" websearch_status=\"X\">" % attributes["name"])
-                               
+        out_skyline_file.write("  <protein name=\"%s\" description=\"%s\" accession=\"%s\" gene=\"%s\" species=\"%s\" preferred_name=\"%s\" websearch_status=\"X\">\n" % (attributes["name"], attributes["description"], accession, attributes["GN"], attributes["OS"], attributes["gene_name"]))
+        out_skyline_file.write("    <sequence>%s</sequence>\n" % format_protein_seq(proteome[accession]))
+        
+        for spec_id in proteins_to_spectra[accession]:
+            peptideSeq = pep_and_spec[spec_id][1]
+            print(peptideSeq)
+            peptideModSeq = pep_and_spec[spec_id][2]
+            start = proteinSeq.find(peptideSeq)
+            end = start + len(peptideModSeq)
+            prev_aa = proteinSeq[start - 1] if start > 1 else "-"
+            next_aa = proteinSeq[end] if end < len(proteinSeq) else "-"
+            calc_neutral_pep_mass = compute_mass(peptideModSeq)
+            
+            out_skyline_file.write("    <peptide sequence=\"%s\" modified_sequence=\"%s\" start=\"%i\" end=\"%i\" prev_aa=\"%s\" next_aa=\"%s\" calc_neutral_pep_mass=\"%0.5f\" num_missed_cleavages=\"0\">\n" % (peptideSeq, peptideModSeq, start, end, prev_aa, next_aa, calc_neutral_pep_mass))
+            
+            
+        
         """
     <protein name="sp|Q05421|CP2E1_MOUSE" description="Cytochrome P450 2E1 OS=Mus musculus GN=Cyp2e1 PE=1 SV=1" accession="Q05421" gene="Cyp2e1" species="Mus musculus" preferred_name="CP2E1_MOUSE" websearch_status="X">
     <sequence>
