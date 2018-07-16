@@ -1167,7 +1167,7 @@ function mouse_move_listener(e){
             }
             
             
-            if (!highlight_element){
+            //if (!highlight_element){
                 
                 for (var i = 0; i < elements.length; ++i){
                     elements[i].move(shift_x, shift_y);
@@ -1178,7 +1178,7 @@ function mouse_move_listener(e){
                 null_y += shift_y;
                 boundaries[0] += shift_x;
                 boundaries[1] += shift_y;
-            }
+            //}
         }
         draw();
         offsetX = res.x;

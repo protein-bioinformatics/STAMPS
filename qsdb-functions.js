@@ -1853,7 +1853,7 @@ function node(data){
             }
             catch (e) {
             }
-            nd.img.src = "/stamp/images/visual_images/I" + nd.id + "." + nd.pos + "?" + new Date().getTime();;
+            nd.img.src = "/stamp/images/visual_images/I" + nd.id + "." + nd.pos + "?" + new Date().getTime();
             clearInterval(load_process);
         }, 1, this);
     }
@@ -3392,7 +3392,7 @@ function compute_edges(){
         var correction_shift = metabolite_pos / (metabolite_len - 1);
         
         
-        if (data[node_id].type == "metabolite"){
+        if (data[metabolite_id].type == "metabolite"){
             
             switch (metabolite_anchor){
                 case "top":
@@ -3710,7 +3710,7 @@ function download_assay(){
     for (key in basket){
         var prot = basket[key];
         if (proteins_list.length) proteins_list += ":";
-        proteins_list += prot.id;
+        proteins_list += prot.id + "|";
         for (var i = 0; i < prot.peptides.length; ++i){
             var pep = prot.peptides[i];
             if (!pep.filter_valid || !pep.user_selected) continue;
@@ -3721,8 +3721,10 @@ function download_assay(){
                 }
             }
         }
+        proteins_list += spectra_list + "|";
+        spectra_list = "";
     }
-    if (!spectra_list.length){
+    if (!proteins_list.length){
         alert("No proteins are selected.");
         return;
     }
@@ -3741,7 +3743,8 @@ function download_assay(){
     
     var xmlhttp = new XMLHttpRequest();
     var download_link = "";
-    var request = "cgi-bin/prepare-download.py?spectra=" + spectra_list + "&proteins=" + proteins_list + "&species=" + current_species;
+    var request = "cgi-bin/prepare-download.py?proteins=" + proteins_list + "&species=" + current_species;
+    console.log(request);
     
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
