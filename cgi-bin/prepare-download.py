@@ -6,6 +6,8 @@ import sqlite3
 from random import random
 import os
 import hashlib
+import zlib
+import struct
 
 
 acids = {}
@@ -121,12 +123,74 @@ def format_protein_seq(seq):
     return new_seq
 
 
+
+
 def make_dict(cur):
     return {key[0]: value for key, value in zip(cur.description, cur.fetchall()[0])}
 
 
 
 
+def binary_search(peaks, key):
+    low, high = 0, len(peaks) - 1
+    best_index = low
+    while low <= high:
+        mid = (low + high) >> 1
+        if peaks[mid][0] < key: low = mid + 1
+        elif peaks[mid][0] > key: high = mid - 1
+        else:
+            best_index = mid
+            break
+            
+        if abs(peaks[mid][0] - key) < abs(peaks[best_index][0] - key): best_index = mid
+    
+    
+    mass_diff = abs(peaks[best_index][0] - key)
+    return [mass_diff, best_index]
+
+
+
+
+def annotation(peaks, peptideModSeq):
+    # annotate y-ions
+    tolerance = 0.02 # dalton
+    peptideModSeq = peptideModSeq.replace("C[+57.0]", "c")
+    peptideModSeq = peptideModSeq.replace("M[+16.0]", "m")
+    rev_peptide = peptideModSeq[::-1]
+    mass = 0
+    
+    
+    # annotate b-ions
+    mass = H
+    for i, AA in enumerate(peptideModSeq):
+        mass += acids[AA]
+        
+        for crg in range(1, 4):
+            if mass >= 800 * (crg - 1):
+                diff_mass = binary_search(peaks, (mass + H * (crg - 1)) / crg)
+                if diff_mass[0] < tolerance:
+                    peaks[diff_mass[1]][2] = i
+                    peaks[diff_mass[1]][3] = AA
+                    peaks[diff_mass[1]][4] = "b"
+                    peaks[diff_mass[1]][5] = mass
+                    peaks[diff_mass[1]][6] = crg
+                    
+    
+    # annotate y-ions
+    mass = H3O
+    for i, AA in enumerate(rev_peptide):
+        mass += acids[AA]
+        for crg in range(1, 4):
+            if mass >= 800 * (crg - 1):
+                diff_mass = binary_search(peaks, (mass + H * (crg - 1)) / crg)
+                if diff_mass[0] < tolerance:
+                    peaks[diff_mass[1]][2] = i
+                    peaks[diff_mass[1]][3] = AA
+                    peaks[diff_mass[1]][4] = "y"
+                    peaks[diff_mass[1]][5] = mass
+                    peaks[diff_mass[1]][6] = crg
+                    
+                    
 
 
 conf = {}
@@ -338,15 +402,20 @@ with open(view_file, mode = "wt") as out_view_file:
 </DockPanel>\n")
 
 
-
-pep_and_spec = {}
-lite_cur.execute("SELECT r.id, r.peptideSeq, r.peptideModSeq, s.peakMZ, s.peakIntensity FROM RefSpectra r INNER JOIN RefSpectraPeaks s ON r.id = s.RefSpectraID WHERE r.id IN (%s);" % ",".join(str(sid) for sid in spectra))
-
-
-
-for row in lite_cur:
-    pep_and_spec[row[0]] = row
+proteins_to_peptides = {}
+peptides_to_spectra = {}
+spectra = {}
+for accession in proteins_to_spectra:
+        
+    lite_cur.execute("SELECT r.id, r.peptideSeq, r.peptideModSeq, r.precursorCharge, s.peakMZ, s.peakIntensity FROM RefSpectra r INNER JOIN RefSpectraPeaks s ON r.id = s.RefSpectraID WHERE r.id IN (%s);" % ",".join(str(sid) for sid in proteins_to_spectra[accession]))
     
+    proteins_to_peptides[accession] = set()
+    for row in lite_cur:
+        spectra[row[0]] = row
+        if row[2] not in peptides_to_spectra: peptides_to_spectra[row[2]] = []
+        peptides_to_spectra[row[2]].append(row[0])
+        proteins_to_peptides[accession].add(row[2])
+
 
 
 
@@ -363,7 +432,7 @@ with open(skyline_file, mode = "wt") as out_skyline_file:
         <peptide_exclusions />\n \
       </peptide_filter>\n \
       <peptide_libraries pick=\"library\">\n \
-        <bibliospec_lite_library name=\"e\" file_name_hint=\"spectra.blib\" lsid=\"urn:lsid:proteome.gs.washington.edu:spectral_library:bibliospec:nr:spectra\" revision=\"1\" />\n \
+        <bibliospec_lite_library name=\"stamp_spectra\" file_name_hint=\"spectra.blib\" lsid=\"urn:lsid:proteome.gs.washington.edu:spectral_library:bibliospec:nr:spectra\" revision=\"1\" />\n \
       </peptide_libraries>\n \
       <peptide_modifications max_variable_mods=\"3\" max_neutral_losses=\"1\">\n \
         <static_modifications>\n \
@@ -393,10 +462,8 @@ with open(skyline_file, mode = "wt") as out_skyline_file:
         out_skyline_file.write("  <protein name=\"%s\" description=\"%s\" accession=\"%s\" gene=\"%s\" species=\"%s\" preferred_name=\"%s\" websearch_status=\"X\">\n" % (attributes["name"], attributes["description"], accession, attributes["GN"], attributes["OS"], attributes["gene_name"]))
         out_skyline_file.write("    <sequence>%s</sequence>\n" % format_protein_seq(proteome[accession]))
         
-        for spec_id in proteins_to_spectra[accession]:
-            peptideSeq = pep_and_spec[spec_id][1]
-            print(peptideSeq)
-            peptideModSeq = pep_and_spec[spec_id][2]
+        for peptideModSeq in proteins_to_peptides[accession]:
+            peptideSeq = spectra[peptides_to_spectra[peptideModSeq][0]][1]
             start = proteinSeq.find(peptideSeq)
             end = start + len(peptideModSeq)
             prev_aa = proteinSeq[start - 1] if start > 1 else "-"
@@ -405,7 +472,56 @@ with open(skyline_file, mode = "wt") as out_skyline_file:
             
             out_skyline_file.write("    <peptide sequence=\"%s\" modified_sequence=\"%s\" start=\"%i\" end=\"%i\" prev_aa=\"%s\" next_aa=\"%s\" calc_neutral_pep_mass=\"%0.5f\" num_missed_cleavages=\"0\">\n" % (peptideSeq, peptideModSeq, start, end, prev_aa, next_aa, calc_neutral_pep_mass))
             
+            for spec_id in peptides_to_spectra[peptideModSeq]:
+                charge = spectra[spec_id][3]
+                masses = spectra[spec_id][4]
+                intensities = spectra[spec_id][5]
+                precursor_mz = (calc_neutral_pep_mass + charge * H) / charge
+                out_skyline_file.write("      <precursor charge=\"%i\" calc_neutral_mass=\"%0.5f\" precursor_mz=\"%0.5f\" collision_energy=\"0\" modified_sequence=\"%s\">\n" % (charge, calc_neutral_pep_mass, precursor_mz, peptideModSeq))
+                
+                
+                out_skyline_file.write("        <bibliospec_spectrum_info library_name=\"stamp_spectra\" count_measured=\"1\" />\n")
+                
+                try: masses = zlib.decompress(masses)
+                except: pass
+                masses = struct.unpack("%id" % (len(masses) / 8), masses)
+                
+
+                try: intensities = zlib.decompress(intensities)
+                except: pass
+                intensities = struct.unpack("%if" % (len(intensities) / 4), intensities)
+                
+                peaks = [[m, i, -1, "-", "-", -1, -1] for m, i in zip(masses, intensities)] # mass, intensity, annotation, AA, b / y, mass, charge
+                
+                
+                
+                annotation(peaks, peptideModSeq)                    # peak annotation
+                peaks = [t for t in peaks if t[2] > -1]             # removing unannotated peaks
+                peaks.sort(key = lambda x: x[1], reverse = True)    # desc sorting according to intensity
+                
+                # for top three
+                for i in range(min(3, len(peaks))):
+                    f_type = peaks[i][4]
+                    ordinal = peaks[i][2]
+                    neutral_mass = peaks[i][5]
+                    charge = peaks[i][6]
+                    cleavage_AA = peaks[i][3]
+                
+                    out_skyline_file.write("        <transition fragment_type=\"%s\" fragment_ordinal=\"%i\" calc_neutral_mass=\"%0.5f\" product_charge=\"%i\" cleavage_aa=\"%s\" loss_neutral_mass=\"0\">\n" % (f_type, ordinal, neutral_mass, charge, cleavage_AA))
+                
+                    out_skyline_file.write("          <precursor_mz>%0.5f</precursor_mz>\n" % precursor_mz)
+                    out_skyline_file.write("          <product_mz>%0.5f</product_mz>\n" % ((neutral_mass + (charge * H)) / charge))
+                    out_skyline_file.write("          <collision_energy>0</collision_energy>\n")
+                    out_skyline_file.write("          <transition_lib_info rank=\"%i\" intensity=\"%0.3f\" />\n" % (i, peaks[i][1]))
+                
+                    out_skyline_file.write("        <transition>\n")
+                
+                out_skyline_file.write("      </precursor>\n")
             
+            out_skyline_file.write("    </peptide>\n")
+            
+        out_skyline_file.write("  </protein>\n")
+                
         
         """
     <protein name="sp|Q05421|CP2E1_MOUSE" description="Cytochrome P450 2E1 OS=Mus musculus GN=Cyp2e1 PE=1 SV=1" accession="Q05421" gene="Cyp2e1" species="Mus musculus" preferred_name="CP2E1_MOUSE" websearch_status="X">
