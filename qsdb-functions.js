@@ -2597,7 +2597,7 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
     
     
     this.dashed_edge = data[this.start_id].type == "pathway" || data[this.end_id].type == "pathway";
-    this.edge_enabled = data[this.start_id].proteins.length > 0 || (this.dashed_edge && data[this.start_id].pathway_enabled);
+    this.edge_enabled = reagent_id < 0 || data[this.start_id].proteins.length > 0 || (this.dashed_edge && data[this.start_id].pathway_enabled);
     this.sort_order = this.edge_enabled ? 20 : 10;
     
     
