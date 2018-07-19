@@ -1370,7 +1370,7 @@ function mouse_up_listener(event){
                     count_types[data[data[-1].id].type] += 1;
                     
                     
-                    var results = add_edge(data[-1].id, target.id, draw_anchor_start, draw_anchor_end);
+                    var result = add_edge(data[-1].id, target.id, draw_anchor_start, draw_anchor_end);
                     if (count_types["metabolite"] == 1 && count_types["protein"]){
                         var prot_id = -1;
                         var meta_id = -1;
@@ -1394,15 +1394,15 @@ function mouse_up_listener(event){
                         }
                         if (fooduct == "product"){
                             edge_data["reactions"][reaction]["out"] = draw_anchor_start;
-                            edge_data["reactions"][reaction]['r'][results[0]] = {"i": results[0], "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_end};
+                            edge_data["reactions"][reaction]['r'][result] = {"i": result, "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_end};
                         }
                         else {
                             edge_data["reactions"][reaction]["in"] = draw_anchor_end;
-                            edge_data["reactions"][reaction]['r'][results[0]] = {"i": results[0], "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_start};
+                            edge_data["reactions"][reaction]['r'][result] = {"i": result, "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_start};
                         }
                     }
                     else {
-                        edge_data["direct"][results[0]] = {"i": results[0], "ns": data[-1].id, "ne": target.id, "as": draw_anchor_start, "ae": draw_anchor_end, "r": 0};
+                        edge_data["direct"][result] = {"i": result, "ns": data[-1].id, "ne": target.id, "as": draw_anchor_start, "ae": draw_anchor_end, "r": 0};
                         
                     }
                     compute_edges();
@@ -1423,16 +1423,15 @@ function mouse_up_listener(event){
 function add_edge(start_id, end_id, anchor_start, anchor_end){
     var xmlhttp = new XMLHttpRequest();
     var request = "/stamp/admin/cgi-bin/add-edge.py?start_id=" + start_id + "&end_id=" + end_id + "&anchor_start=" + anchor_start + "&anchor_end=" + anchor_end;
-    var successful_creation = [-1, -1];
+    var successful_creation = -1;
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             response = JSON.parse(xmlhttp.responseText);
-            if (response[0] < 0){
+            if (response < 0){
                 alert("An error has occured, the edge could not be added into the database. Please contact the administrator.");
             }
             else {
-                successful_creation[0] = response[1];
-                successful_creation[1] = response[2];
+                successful_creation = response;
             }
         }
     }

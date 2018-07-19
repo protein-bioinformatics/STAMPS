@@ -4717,10 +4717,15 @@ function expand_statistics(){
     context_pie.clearRect(0, 0, canvas_pie.width, canvas_pie.height);
     
     // fill the venn diagram
-    context_pie.globalAlpha = .4;
+    context_pie.globalAlpha = .1;
     var centerX = canvas_pie.width / 3;
     var centerY = canvas_pie.height / 3;
     var radius = centerY + 5;
+    
+    
+    
+    roundRect(0, 0, canvas_pie.width, canvas_pie.height, 25, context_pie);
+    context_pie.globalAlpha = .4;
     
     
     centerX += 5;

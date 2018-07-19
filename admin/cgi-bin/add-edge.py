@@ -50,8 +50,7 @@ start_type = [row for row in my_cur][0]["type"]
 my_cur.execute("SELECT type FROM nodes WHERE id = %s;", (end_id))
 end_type = [row for row in my_cur][0]["type"]
 
-reagent_id = -1
-reaction_id = -1
+result = -1
 
 count_types = {"metabolite": 0, "label": 0,"membrane": 0,"protein": 0, "pathway": 0, "image": 0}
 count_types[start_type] += 1
@@ -82,7 +81,7 @@ if count_types["protein"] == 1 and count_types["metabolite"] == 1:
     
     
     my_cur.execute("SELECT max(id) mid FROM reagents;")
-    reagent_id = [row for row in my_cur][0]["mid"]
+    result = [row for row in my_cur][0]["mid"]
     
 else:
         
@@ -91,7 +90,7 @@ else:
     conn.commit()
     
     my_cur.execute("SELECT max(id) mid FROM reactions_direct;")
-    reaction_id = [row for row in my_cur][0]["mid"]
+    result = [row for row in my_cur][0]["mid"]
     
     
-print([0, reagent_id, reaction_id])
+print(result)
