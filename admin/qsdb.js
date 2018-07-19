@@ -373,7 +373,7 @@ function mouse_click_listener(e){
                     case "pathway":
                         var del_directs = [];
                         for (var direct_id in edge_data['direct']){
-                            if (edge_data['direct'][reaction_id]['ns'] == node_id || edge_data['direct'][reaction_id]['ne'] == node_id) del_directs.push(reaction_id);
+                            if (edge_data['direct'][direct_id]['ns'] == node_id || edge_data['direct'][direct_id]['ne'] == node_id) del_directs.push(direct_id);
                         }
                         for (var i = 0; i < del_directs.length; ++i) delete edge_data['direct'][del_directs[i]];
                         
