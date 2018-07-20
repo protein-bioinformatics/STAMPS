@@ -601,19 +601,22 @@ function change_edge_type(){
     var table = "";
     var id = highlight_element.reaction_id;
     var value = 0;
+    var column = "";
     
     if (is_direct){
-        value = !edge_data['direct'][id]['r'];
-        edge_data['direct'][id]['r'] = value;
+        value = (edge_data['direct'][id]['h'] + 1) % 3;
+        edge_data['direct'][id]['h'] = value;
         table = "reactions_direct";
+        column = "head";
     }
     else {
-        value = !edge_data['reactions'][id]['v'];
+        value = 1 - edge_data['reactions'][id]['v'];
         edge_data['reactions'][id]['v'] = value;
         table = "reactions";
+        column = "reversible";
     }
     
-    var request = "action=set&table=" + table + "&column=reversible&id=" + id + "&value=" + value;
+    var request = "action=set&table=" + table + "&column=" + column + "&id=" + id + "&value=" + value;
     
     var result = update_entry(request);
     if (result){
