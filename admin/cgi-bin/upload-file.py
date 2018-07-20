@@ -2,6 +2,7 @@
 from cgi import FieldStorage
 from pymysql import connect, cursors
 from base64 import b64decode
+import xml.etree.ElementTree as ET
 import os
 
 conf = {}
@@ -30,10 +31,28 @@ if type(node_id) is not str or len(content) == 0:
 
 
 filepath = os.path.dirname(os.path.abspath(__file__))
-with open("%s/../../images/visual_images/I%s.%s" % (filepath, node_id, extension), mode="wb") as fl:
-    content = (content + '===')[: len(content) + (len(content) % 4)]
-    content = content.replace('-', '+').replace('_', '/')
-    fl.write(b64decode(content))
+filename = "%s/../../images/visual_images/I%s.%s" % (filepath, node_id, extension)
+content = (content + '===')[: len(content) + (len(content) % 4)]
+content = content.replace('-', '+').replace('_', '/')
+content = b64decode(content)
+
+
+write = True
+if extension.lower() == "svg":
+    root = ET.fromstring(content)
+    if "width" not in root.attrib or "height" not in root.attrib:
+        write = False
+        if "viewBox" in root.attrib:
+            viewBox = root.attrib["viewBox"]
+            root.attrib["width"] = viewBox.split(" ")[2]
+            root.attrib["height"] = viewBox.split(" ")[3]
+        tree = ET.ElementTree(root)
+        tree.write(filename, encoding="UTF-8")
+        
+        
+if write:
+    with open(filename, mode="wb") as fl:
+        fl.write(content)
     
 
 conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])

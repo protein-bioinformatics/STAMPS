@@ -839,8 +839,8 @@ function editor_upload_image(){
         xhttp.extension = re.exec(this.filename)[1].toLowerCase();
         
         xhttp.onreadystatechange = function() {
+            console.log(xhttp.status);
             if (xhttp.readyState == 4 && xhttp.status == 200){
-                console.log(xhttp.responseText);
                 if (xhttp.responseText == 0){
                     data[this.id].pos = this.extension;
                     data[this.id].setup_image();

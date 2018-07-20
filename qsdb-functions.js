@@ -1847,11 +1847,30 @@ function node(data){
                 nd.img.onload = function () {
                     nd.width = nd.img.width;
                     nd.height = nd.img.height;
+                    
+                    // must be done when svg contains no decent information about width and height
+                    if (nd.pos.toLowerCase() == "svg" && (nd.width == 0 || nd.height == 0)){
+                        var svgrequest = new XMLHttpRequest();
+                        svgrequest.onload = function() {
+                            try {
+                                var xmlDoc = new DOMParser().parseFromString(svgrequest.responseText,'text/xml');
+                                nd.width = xmlDoc.children[0].viewBox.baseVal.width;
+                                nd.height = xmlDoc.children[0].viewBox.baseVal.height;
+                            }
+                            catch(e){
+                            }
+                        }
+                        svgrequest.open("GET", nd.img.src, false);
+                        svgrequest.send();
+                        
+                    }
+                    
                     nd.slide = true;
                     draw();
                 }
             }
             catch (e) {
+                
             }
             nd.img.src = "/stamp/images/visual_images/I" + nd.id + "." + nd.pos + "?" + new Date().getTime();
             clearInterval(load_process);
@@ -2152,6 +2171,7 @@ function node(data){
                 }
                 else {
                     ctx.strokeStyle = "black";
+                    ctx.fillStyle = "none";
                     ctx.rect(this.x - (this.width >> 1), this.y - (this.height >> 1), this.width, this.height);
                     ctx.stroke();
                     
