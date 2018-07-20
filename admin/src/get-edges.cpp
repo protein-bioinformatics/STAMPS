@@ -53,7 +53,7 @@ class direct {
         string node_id_end;
         string anchor_start;
         string anchor_end;
-        string reversible;
+        string head;
         
         string to_string(){
             string data = "{\"i\":" + id;
@@ -61,7 +61,7 @@ class direct {
             data += ",\"ne\":" + node_id_end;
             data += ",\"as\":\"" + anchor_start + "\"";
             data += ",\"ae\":\"" + anchor_end + "\"";
-            data += ",\"r\":" + reversible + "}";
+            data += ",\"h\":" + head + "}";
             return data;
         }
 };
@@ -233,12 +233,9 @@ main() {
         r->node_id_end = res->getString("node_id_end");
         r->anchor_start = res->getString("anchor_start");
         r->anchor_end = res->getString("anchor_end");
-        r->reversible = res->getString("reversible");
+        r->head = res->getString("head");
         all_directs.insert(pair< string, direct* >(r->id, r));
     }
-    
-    
-    
     
     
     

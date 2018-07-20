@@ -36,7 +36,7 @@ function init(){
                         var http_zoom = parseInt(HTTP_GET_VARS["zoom"]);
                         http_zoom = Math.max(min_zoom, http_zoom);
                         http_zoom = Math.min(max_zoom, http_zoom);
-                        for (var i = min_zoom; i < http_zoom; ++i) zoom_in_out(0, 0);
+                        for (var i = min_zoom + start_zoom_delta; i < http_zoom; ++i) zoom_in_out(0, 0);
                             
                         if ("position" in HTTP_GET_VARS) {
                             var position = HTTP_GET_VARS["position"].split(":");
@@ -261,6 +261,7 @@ function mouse_up_listener(event){
     res = get_mouse_pos(c, event);
     c.style.cursor = "auto";
     if (highlight_element) highlight_element.mouse_up(res);
+    moved = false;
 }
 
 

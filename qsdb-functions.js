@@ -52,6 +52,7 @@ edges = [];
 infobox = 0;
 zoom_sign_in = 0;
 zoom_sign_out = 0;
+start_zoom_delta = 4;
 expand_collapse_obj = 0;
 elements = [];
 boundaries = [0, 0, 0, 0];
@@ -2611,7 +2612,7 @@ edge.prototype.constructor = edge;
 
 function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction_id, reagent_id){
     
-    this.head = (reagent_id >= 0) ? head : true;
+    this.head = head;
     this.head_start = 0;
     this.point_list = [];
     this.start_point = (x_s, y_s, "");
@@ -2624,7 +2625,7 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
     this.reagent_id = reagent_id;
     
     
-    this.bidirectional = (reagent_id >= 0) ? start_node.type == "metabolite" && edge_data['reactions'][this.reaction_id]['v'] : head;
+    //this.bidirectional = (reagent_id >= 0) ? start_node.type == "metabolite" && edge_data['reactions'][this.reaction_id]['v'] : this.head > 0;
     this.tail_start = 0;
     
     
@@ -2961,7 +2962,7 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
             }
         }
         
-        if (this.head && this.point_list.length >= 2){
+        if (this.head > 0 && this.point_list.length >= 2){
             var p_len = this.point_list.length;
             var x_head = -1;
             var y_head = -1;
@@ -3041,6 +3042,7 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
             }
         }
          
+        /*
         if (this.bidirectional){
             var x_head = -1;
             var y_head = -1;
@@ -3119,6 +3121,7 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
                     break;
             }
         }
+        */
     }
     
     
@@ -3129,17 +3132,12 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
         ctx.fillStyle = this.edge_enabled ? edge_color : edge_disabled_color;
         if (this.dashed_edge) ctx.setLineDash([10 * factor, 10 * factor]);
         
-        /*
-        if (data[data_ref[this.start_id]].type == "metabolite"){
-            ctx.strokeStyle = "#ff0000";
-            ctx.fillStyle = "#ff0000";
-        }*/
         
         ctx.lineWidth = (line_width - this.dashed_edge * 3) * factor;
         ctx.beginPath();
         ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
         var p_len = this.point_list.length;
-        for (var i = 0; i < p_len - 1 - this.head; ++i){
+        for (var i = 0; i < p_len - 1 - (this.head > 0); ++i){
             var control = new point(0, 0, 0);
             
             switch (this.point_list[i].b){
@@ -3163,7 +3161,7 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
         }
         ctx.stroke();
         
-        if (this.head && this.point_list.length >= 2){
+        if (this.head > 0 && this.point_list.length >= 2){
             var x_head = -1;
             var y_head = -1;
             var p2_x = this.point_list[p_len - 1].x;
@@ -3210,24 +3208,41 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
                     
             }
             
-            var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - x_head) + sq(p2_y - y_head)));
-            var x_l = x_head - l * 0.65 * (y_head - p2_y);
-            var y_l = y_head + l * 0.65 * (x_head - p2_x);
+            
+            switch (this.head){
+                case 1:
+                    var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - x_head) + sq(p2_y - y_head)));
+                    var x_l = x_head - l * 0.65 * (y_head - p2_y);
+                    var y_l = y_head + l * 0.65 * (x_head - p2_x);
+                            
+                    var x_r = x_head + l * 0.65 * (y_head - p2_y);
+                    var y_r = y_head - l * 0.65 * (x_head - p2_x);
                     
-            var x_r = x_head + l * 0.65 * (y_head - p2_y);
-            var y_r = y_head - l * 0.65 * (x_head - p2_x);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(p2_x, p2_y);
+                    ctx.lineTo(x_r, y_r);
+                    ctx.lineTo(x_l, y_l);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
             
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(p2_x, p2_y);
-            ctx.lineTo(x_r, y_r);
-            ctx.lineTo(x_l, y_l);
-            ctx.closePath();
-            ctx.fill();
-            
-            
+                case 2:
+                    var x1 = x_head - 1 * (y_head - p2_y);
+                    var y1 = y_head + 1 * (x_head - p2_x);
+                    
+                    var x2 = x_head + 1 * (y_head - p2_y);
+                    var y2 = y_head - 1 * (x_head - p2_x);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+                    break;
+            }
         }
         
+        /*
         if (this.bidirectional){
             var x_head = -1;
             var y_head = -1;
@@ -3255,14 +3270,6 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
                     var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - p1_x) + sq(p2_y - p1_y)));
                     x_head = p2_x + l * (p1_x - p2_x);
                     y_head = p2_y + l * (p1_y - p2_y);
-                    
-                    /*
-                    ctx.lineWidth = (line_width - this.dashed_edge * 3) * factor;
-                    ctx.beginPath();
-                    ctx.moveTo(p1_x, p1_y);
-                    ctx.lineTo(x_head, y_head);
-                    ctx.stroke();
-                    */
                     break;
                     
                     
@@ -3296,6 +3303,7 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
             
             
         }
+        */
         ctx.setLineDash([]);
     }
 };
@@ -3327,7 +3335,7 @@ function compute_edges(){
     
     for (var reaction_id in reactions){
         var node_id = reactions[reaction_id]['n'];
-        var reversible = reactions[reaction_id]['v'] == 1;
+        var reversible = reactions[reaction_id]['v'];
         var reagents = reactions[reaction_id]['r'];
         
         for (var reagent_id in reagents){
@@ -3344,7 +3352,7 @@ function compute_edges(){
             }
             else{
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, reactions[reaction_id]['out']);
-                connections.push([node_id, reactions[reaction_id]['out'], metabolite_id, reagents[reagent_id]['a'], true, reaction_id, reagent_id]);
+                connections.push([node_id, reactions[reaction_id]['out'], metabolite_id, reagents[reagent_id]['a'], 1, reaction_id, reagent_id]);
                 nodes_anchors[node_id][reactions[reaction_id]['out']].push([metabolite_id, connections.length - 1, angle_node]);
                 
             }
@@ -3360,10 +3368,10 @@ function compute_edges(){
         var node_id_end = directs[direct_id]["ne"];
         var anchor_start = directs[direct_id]["as"];
         var anchor_end = directs[direct_id]["ae"];
-        var reversible = directs[direct_id]["r"] == 1;
+        var head = directs[direct_id]["h"];
         if (!(node_id_start in data) || !(node_id_end in data)) continue;
         
-        connections.push([node_id_start, anchor_start, node_id_end, anchor_end, reversible, direct_id, -1]);
+        connections.push([node_id_start, anchor_start, node_id_end, anchor_end, head, direct_id, -1]);
         
         var angle_start = compute_angle(data[node_id_start].x, data[node_id_start].y, data[node_id_end].x, data[node_id_end].y, anchor_start);
         var angle_end = compute_angle(data[node_id_end].x, data[node_id_end].y, data[node_id_start].x, data[node_id_start].y, anchor_end);
@@ -5050,8 +5058,8 @@ function load_data(reload){
             
             
             assemble_elements();
-            var t_zoom = reload ? zoom_options[2] - 4 : zoom_options[1];
-            for (var i = 0; i < (t_zoom - zoom_options[0] + 4); ++i) zoom_in_out(0, 0);
+            var t_zoom = reload ? zoom_options[2] - start_zoom_delta : zoom_options[1];
+            for (var i = 0; i < (t_zoom - zoom_options[0] + start_zoom_delta); ++i) zoom_in_out(0, 0);
             min_zoom = zoom_options[1];
             
             //draw(1);
