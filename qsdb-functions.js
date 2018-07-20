@@ -364,6 +364,7 @@ function debug(text){
 
 function change_zoom(){
     factor = Math.pow(scaling, zoom);
+    console.log("zoom: " + zoom);
     font_size = text_size * factor;
     radius = metabolite_radius * factor;
     check_side = check_len * factor;
@@ -1865,6 +1866,8 @@ function node(data){
                         
                     }
                     
+                    nd.height *= factor;
+                    nd.width *= factor;
                     nd.slide = true;
                     draw();
                 }
