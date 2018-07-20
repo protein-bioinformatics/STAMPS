@@ -2173,14 +2173,10 @@ function node(data){
                     ctx.drawImage(this.img, this.x - (this.width >> 1), this.y - (this.height >> 1), this.width, this.height);
                 }
                 else {
-                    ctx.strokeStyle = "black";
-                    ctx.fillStyle = "none";
-                    ctx.rect(this.x - (this.width >> 1), this.y - (this.height >> 1), this.width, this.height);
-                    ctx.stroke();
                     
-                    ctx.strokeStyle = "red";
+                    
                     ctx.lineWidth = 5 * factor;
-                    
+                    ctx.strokeStyle = "red";
                     ctx.beginPath();
                     ctx.moveTo(this.x - (this.width * 0.9 >> 1), this.y - (this.height * 0.9 >> 1));
                     ctx.lineTo(this.x + (this.width * 0.9 >> 1), this.y + (this.height * 0.9 >> 1));
@@ -2192,6 +2188,20 @@ function node(data){
                     ctx.lineTo(this.x + (this.width * 0.9 >> 1), this.y - (this.height * 0.9 >> 1));
                     ctx.closePath();
                     ctx.stroke();
+                    
+                    
+                    ctx.strokeStyle = "black";
+                    ctx.lineWidth = 2 * factor;
+                    ctx.beginPath();
+                    ctx.rect(this.x - (this.width >> 1), this.y - (this.height >> 1), this.width, this.height);
+                    ctx.stroke();
+                    
+                    
+                    
+                    
+                    
+                    /*
+                    */
                 }
                 break;
                 
