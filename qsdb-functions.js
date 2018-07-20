@@ -364,7 +364,6 @@ function debug(text){
 
 function change_zoom(){
     factor = Math.pow(scaling, zoom);
-    console.log("zoom: " + zoom);
     font_size = text_size * factor;
     radius = metabolite_radius * factor;
     check_side = check_len * factor;
@@ -3777,7 +3776,6 @@ function download_assay(){
     var xmlhttp = new XMLHttpRequest();
     var download_link = "";
     var request = "cgi-bin/prepare-download.py?proteins=" + proteins_list + "&species=" + current_species;
-    console.log(request);
     
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
