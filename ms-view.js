@@ -348,12 +348,12 @@ function draw_spectrum(ctx){
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(x, bottom_border);
-            ctx.lineTo(x, bottom_border * 1.015);    
+            ctx.lineTo(x, bottom_border + 8);    
             ctx.closePath();
             ctx.stroke();
             
             var txt = i.toString();
-            ctx.fillText(txt, x, ctx.canvas.height * 0.975);
+            ctx.fillText(txt, x, bottom_border + 14);
             
             
             ctx.setLineDash([10]);
@@ -387,12 +387,12 @@ function draw_spectrum(ctx){
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(left_border, y);
-        ctx.lineTo(left_border * 0.9, y);    
+        ctx.lineTo(left_border - 8, y);    
         ctx.closePath();
         ctx.stroke();
         
         var txt = i.toString();
-        ctx.fillText(txt, left_border * 0.86, y);
+        ctx.fillText(txt, left_border - 16, y);
         
         ctx.setLineDash([10]);
         ctx.strokeStyle = grid_color;
