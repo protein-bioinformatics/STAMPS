@@ -86,7 +86,7 @@ if count_types["protein"] == 1 and count_types["metabolite"] == 1:
 else:
         
         
-    my_cur.execute("INSERT INTO reactions_direct (node_id_start, node_id_end, anchor_start, anchor_end, reversible) VALUES (%s, %s, %s, %s, 0);", (start_id, end_id, anchor_start, anchor_end))
+    my_cur.execute("INSERT INTO reactions_direct (node_id_start, node_id_end, anchor_start, anchor_end, head) VALUES (%s, %s, %s, %s, 0);", (start_id, end_id, anchor_start, anchor_end))
     conn.commit()
     
     my_cur.execute("SELECT max(id) mid FROM reactions_direct;")

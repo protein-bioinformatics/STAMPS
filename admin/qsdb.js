@@ -842,7 +842,6 @@ function editor_upload_image(){
         xhttp.extension = re.exec(this.filename)[1].toLowerCase();
         
         xhttp.onreadystatechange = function() {
-            console.log(xhttp.status);
             if (xhttp.readyState == 4 && xhttp.status == 200){
                 if (xhttp.responseText == 0){
                     data[this.id].pos = this.extension;
@@ -2538,7 +2537,6 @@ function manage_delete_pathway_group(entity_id){
     var request = "type=pathway_group&id=" + entity_id;
     request = "/stamp/admin/cgi-bin/delete-entity.py?" + request;
     
-    console.log(request);
     
     var xmlhttp_protein_data = new XMLHttpRequest();
     xmlhttp_protein_data.onreadystatechange = function() {
