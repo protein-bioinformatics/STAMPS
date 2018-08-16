@@ -204,9 +204,9 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
                     <td><input type=\"checkbox\" id=\"check_gut\" /> Gut</td> \
                 </tr> \
         <tr><td colspan=\"2\"><br>Validation:<br>\
-        <input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment<br> \
-        <input type=\"checkbox\" id=\"validation_prm\" /> PRM<br> \
-        <input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard</td><td></tr> \
+        <input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment&nbsp;<font color='#ffbebe'>🌑</font><br> \
+        <input type=\"checkbox\" id=\"validation_prm\" /> PRM&nbsp;<font color='#feff90'>🌑</font><br> \
+        <input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard&nbsp;<font color='#a0ff90'>🌑</font></td><td></tr> \
         <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
         document.getElementById('min_peptide_length').value = 8; \
         document.getElementById('max_peptide_length').value = 25; \
@@ -299,9 +299,9 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
         <td valign=\"top\"> \
             <table> \
                 <tr><td colspan=\"2\">Validation:</td><td></tr> \
-                <tr><td><input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment</td><tr> \
-                <tr><td><input type=\"checkbox\" id=\"validation_prm\" /> PRM</td><tr> \
-                <tr><td><input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard</td><tr> \
+                <tr><td><input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment&nbsp;<font color='#ffbebe'>🌑</font></td><tr> \
+                <tr><td><input type=\"checkbox\" id=\"validation_prm\" /> PRM&nbsp;<font color='#feff90'>🌑</font></td><tr> \
+                <tr><td><input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard&nbsp;<font color='#a0ff90'>🌑</font></td><tr> \
                 </tr> \
             </table> \
         </td> \
