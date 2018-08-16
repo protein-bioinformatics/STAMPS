@@ -711,6 +711,7 @@ function Spectrum(data){
     
     
     this.filtering = function(){
+        
         this.filter_valid = true;
         if (typeof this.mod_sequence === 'undefined'){
             this.filter_valid = false;
@@ -738,7 +739,10 @@ function Spectrum(data){
             this.filter_valid = false;
         }
         
-        this.filter_valid = filter_parameters["validation_top_n"] || (filter_parameters["validation_prm"] && ((this.confidence & 1) == 1)) || (filter_parameters["validation_is"] && ((this.confidence & 2) == 2));
+        
+        
+        this.filter_valid &= filter_parameters["validation_top_n"] || (filter_parameters["validation_prm"] && ((this.confidence & 1) == 1)) || (filter_parameters["validation_is"] && ((this.confidence & 2) == 2));
+        
         
         this.filter_valid &= filter_parameters["min_precursor_charge"] <= this.charge && this.charge <= filter_parameters["max_precursor_charge"];
         
@@ -754,7 +758,7 @@ function Spectrum(data){
             if (!filter_parameters["tissue_lung"] && tissue_set.has(8)) tissue_set.delete(8);
             if (!filter_parameters["tissue_eye"] && tissue_set.has(9)) tissue_set.delete(9);
             if (!filter_parameters["tissue_gut"] && tissue_set.has(10)) tissue_set.delete(10);
-            this.filter_valid = (tissue_set.size != 0);
+            this.filter_valid &= (tissue_set.size != 0);
         }
         
     }
