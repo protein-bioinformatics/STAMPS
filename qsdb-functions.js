@@ -3932,7 +3932,14 @@ function check_spectra_expand_collapse_peptide(prot_id, do_collapse){
                 if (!curr_pep.spectra[k].filter_valid) continue; \
                 curr_pep.spectra[k].user_selected = curr_pep.user_selected; \
                 document.getElementById('cb-" + current_prot.id + "-" + j + "-' + curr_pep.spectra[k].id).checked = curr_pep.user_selected; \
-            }";
+            } \
+            var curr_prot = protein_dictionary[" + current_prot.id + "]; \
+            var num_pep = 0; \
+            for (var j = 0; j < protein_dictionary[" + current_prot.id + "].peptides.length; ++j){ \
+                if (!curr_prot.peptides[j].filter_valid || !curr_prot.peptides[j].user_selected) continue; \
+                ++num_pep; \
+            } \
+            document.getElementById('prot-' + " + current_prot.id + " + '-num_pep').innerHTML = num_pep;";
             var dom_pep_tr = document.createElement("tr");
             dom_pep.appendChild(dom_pep_tr);
             dom_pep_tr.setAttribute("id", specs);
@@ -4064,12 +4071,18 @@ function check_spectra_expand_collapse_peptide(prot_id, do_collapse){
                 if (!current_pep.spectra[k].filter_valid) continue;
                 var curr_spec = current_pep.spectra[k];
                 var onclick_spec_command = "var curr_spec = protein_dictionary[" + current_prot.id + "].peptides[" + j + "].spectra[" + k + "]; \
-                if (curr_spec.user_selected = !curr_spec.user_selected; \
+                curr_spec.user_selected = !curr_spec.user_selected; \
                 if (curr_spec.user_selected && !document.getElementById('cb-" + current_prot.id + "-" + j + "').checked) { \
                     protein_dictionary[" + current_prot.id + "].peptides[" + j + "].user_selected = true; \
                     document.getElementById('cb-" + current_prot.id + "-" + j + "').checked = true; \
-                }";
-            
+                } \
+                var curr_prot = protein_dictionary[" + current_prot.id + "]; \
+                var num_pep = 0; \
+                for (var j = 0; j < protein_dictionary[" + current_prot.id + "].peptides.length; ++j){ \
+                    if (!curr_prot.peptides[j].filter_valid || !curr_prot.peptides[j].user_selected) continue; \
+                    ++num_pep; \
+                } \
+                document.getElementById('prot-' + " + current_prot.id + " + '-num_pep').innerHTML = num_pep;";
                 
                 var dom_spec_tr = document.createElement("tr");
                 dom_spec_table.appendChild(dom_spec_tr);
@@ -4177,7 +4190,7 @@ function check_spectra(){
         var bg_color = (i & 1) ? "#DDDDDD" : "white";
         var num_pep = 0;
         for (var j = 0; j < current_prot.peptides.length; ++j){
-            if (!current_prot.peptides[j].filter_valid) continue;
+            if (!current_prot.peptides[j].filter_valid || !current_prot.peptides[j].user_selected) continue;
             num_pep += 1;
         }
         
@@ -4213,8 +4226,17 @@ function check_spectra(){
         dom_td1.appendChild(dom_div_prot_info);
         dom_div_prot_info.setAttribute("style", "display: inline; margin: 0px; padding: 0px; float: left;");
         var sing_plur = "Peptide" + (num_pep > 1 ? "s" : "");
-        var dom_t_info = document.createTextNode("\u00A0" + proteins_content[i][0] + " | " + current_prot.accession + " | " + num_pep + " " + sing_plur + "\u00A0");
+        
+        var dom_div_prot_num_pep = document.createElement("div");
+        dom_div_prot_num_pep.setAttribute("id", "prot-" + current_prot.id + "-num_pep");
+        dom_div_prot_num_pep.setAttribute("style", "display: inline; margin: 0px; padding: 0px;");
+        dom_div_prot_num_pep.innerHTML = num_pep;
+        
+        var dom_t_info = document.createTextNode("\u00A0" + proteins_content[i][0] + " | " + current_prot.accession + " | ");
+        var dom_t_info2 = document.createTextNode(" " + sing_plur + "\u00A0");
         dom_div_prot_info.appendChild(dom_t_info);
+        dom_div_prot_info.appendChild(dom_div_prot_num_pep);
+        dom_div_prot_info.appendChild(dom_t_info2);
         
         
         var curr_tissues = Array.from(Object.keys(current_prot.tissues)).sort();
