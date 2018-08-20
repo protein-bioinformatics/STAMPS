@@ -134,22 +134,33 @@ elif entity_type == "protein":
     
     
 elif entity_type == "pathway":
-        sql_query = "DELETE FROM reactions_direct WHERE node_id_start IN (SELECT id FROM nodes WHERE type = 'pathway' AND foreign_id = %s) OR node_id_end IN (SELECT id FROM nodes WHERE type = 'pathway' AND foreign_id = %s);"
-        my_cur.execute(sql_query, (entity_id))
-        conn.commit()
-        
-        sql_query = "DELETE FROM nodes WHERE type = 'pathway' AND foreign_id = %s;"
-        my_cur.execute(sql_query, (entity_id))
-        conn.commit()
-        
-        sql_query = "DELETE FROM nodes WHERE pathway_id = %s;"
-        my_cur.execute(sql_query, (entity_id))
-        conn.commit()
-        
-        sql_query = "DELETE FROM pathways WHERE id = %s;"
-        my_cur.execute(sql_query, (entity_id))
-        conn.commit()
+    sql_query = "DELETE FROM reagents WHERE reaction_id IN (SELECT r.id FROM reactions r INNER JOIN nodes n on r.node_id = n.id WHERE n.type = 'protein' AND pathway_id = %s);"
+    my_cur.execute(sql_query, (entity_id))
+    conn.commit()
     
+    sql_query = "DELETE FROM reactions WHERE node_id IN (SELECT id FROM nodes WHERE type = 'protein' AND pathway_id = %s);"
+    my_cur.execute(sql_query, (entity_id))
+    conn.commit()
+    
+    sql_query = "DELETE FROM reactions_direct WHERE node_id_start IN (SELECT id FROM nodes WHERE pathway_id = %s) OR node_id_end IN (SELECT id FROM nodes WHERE pathway_id = %s);"
+    my_cur.execute(sql_query, (entity_id))
+    conn.commit()
+    
+    sql_query = "DELETE FROM nodeproteincorrelations npc INNER JOIN nodes n on npc.node_id = n.id WHERE n.pathway_id = %s;"
+    my_cur.execute(sql_query, (entity_id))
+    conn.commit()
+    
+    sql_query = "DELETE FROM nodes WHERE type = 'pathway' AND foreign_id = %s;"
+    my_cur.execute(sql_query, (entity_id))
+    conn.commit()
+    
+    sql_query = "DELETE FROM nodes WHERE pathway_id = %s;"
+    my_cur.execute(sql_query, (entity_id))
+    conn.commit()
+    
+    sql_query = "DELETE FROM pathways WHERE id = %s;"
+    my_cur.execute(sql_query, (entity_id))
+    conn.commit()
     
     
 elif entity_type == "metabolite":
