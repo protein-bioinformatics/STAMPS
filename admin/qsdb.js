@@ -123,7 +123,7 @@ function init(){
     window.addEventListener('resize', resize_pathway_view, false);
     window.addEventListener('resize', resize_manage_view, false);
     
-    navigation_content = ["select_species", "select_pathway", "menu_background"];
+    navigation_content = ["select_species", "select_signaling_pathway", "select_metabolic_pathway", "menu_background"];
     
     
     // get chromosomes
