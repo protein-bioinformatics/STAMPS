@@ -4980,6 +4980,9 @@ function load_data(reload){
         }
     }
     
+    var request_nodes = "/stamp/cgi-bin/get-nodes.bin?pathway=" + current_pathway + "&species=" + current_species;
+    var request_edges = "/stamp/cgi-bin/get-edges.bin?pathway=" + current_pathway;
+    
     // get nodes information
     var xmlhttp_edge = new XMLHttpRequest();
     xmlhttp_edge.onreadystatechange = function() {
@@ -4988,12 +4991,12 @@ function load_data(reload){
         }
     }
     
-    
-    xmlhttp.open("GET", "/stamp/cgi-bin/get-nodes.bin?pathway=" + current_pathway + "&species=" + current_species, true);
+    console.log(request_nodes);
+    xmlhttp.open("GET", request_nodes, true);
     xmlhttp.send();
     
     
-    xmlhttp_edge.open("GET", "/stamp/cgi-bin/get-edges.bin?pathway=" + current_pathway, true);
+    xmlhttp_edge.open("GET", request_edges, true);
     xmlhttp_edge.send();
     
     
