@@ -22,8 +22,10 @@
     <table>
     <tr>
     <td width="50%"></td>
-    <td id="select_pathway_nav" style="border-left: white; border-left-style: solid; border-left-width: 1px;" class="navigation_cell_click" onclick="close_navigation(); select_pathway();">
-        Select&nbsp;Pathway
+    <td id="select_metabolic_pathway_nav" style="border-left: white; border-left-style: solid; border-left-width: 1px;" class="navigation_cell_click" onclick="close_navigation(); select_metabolic_pathway();">
+        Metabolic&nbsp;Pathways
+    </td><td id="select_signaling_pathway_nav" class="navigation_cell_click" onclick="close_navigation(); select_signaling_pathway();">
+        Signaling&nbsp;Pathways
     </td><td id="select_species_nav" class="navigation_cell_click" onclick="close_navigation(); select_species();">
         Select&nbsp;Species
     </td><td id="search_field_nav" class="navigation_cell" title="Search for name, definition, UniProt accession number, EC number or peptide amino sequence.">
@@ -49,7 +51,8 @@
     <table id="select_species_table"></table>
 </div>
 
-<div id="select_pathway" class="menu_extend_item"></div>
+<div id="select_metabolic_pathway" class="menu_extend_item"></div>
+<div id="select_signaling_pathway" class="menu_extend_item"></div>
 <div id="search_results" class="menu_extend_item"></div>
 <div id="animation_background" class="light_background"></div>
 

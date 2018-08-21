@@ -78,8 +78,9 @@ main() {
         if (data.length() > 1) data += ",";
         data += "\"" + res->getString("id") + "\":";
         string pw_name = res->getString("name");
+        string signaling_pw = res->getString("signaling_pathway");
         replaceAll(pw_name, "\n", "\\n");
-        data += "\"" + pw_name + "\"";
+        data += "[\"" + pw_name + "\"," + signaling_pw + "]";
     }
     data += "}";
     

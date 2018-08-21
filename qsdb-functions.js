@@ -556,21 +556,23 @@ function set_pathway_menu(){
         return parseInt(a) <= parseInt(b);
     });
     
-    document.getElementById("select_pathway").innerHTML = "";
-    var pathway_menu = document.createElement("table");
-    document.getElementById("select_pathway").appendChild(pathway_menu);
-    pathway_menu.setAttribute("id", "pathway_menu");
+    
+    // menu for metabolic pathways
+    document.getElementById("select_metabolic_pathway").innerHTML = "";
+    var metabolic_pathway_menu = document.createElement("table");
+    document.getElementById("select_metabolic_pathway").appendChild(metabolic_pathway_menu);
+    metabolic_pathway_menu.setAttribute("id", "metabolic_pathway_menu");
     var select_pg = 0;
     for (var row of sorted_groups){
         var pg_id = row[1];
         var pm_tr = document.createElement("tr");
-        pathway_menu.appendChild(pm_tr);
+        metabolic_pathway_menu.appendChild(pm_tr);
         pm_tr.setAttribute("id", "pg_" + pg_id);
         
         var pm_td = document.createElement("td");
         pm_tr.appendChild(pm_td);
         pm_td.setAttribute("class", "select_menu_cell");
-        pm_td.setAttribute("onclick", "var pw_menu = document.getElementById('pathway_menu'); \
+        pm_td.setAttribute("onclick", "var pw_menu = document.getElementById('metabolic_pathway_menu'); \
             for (var child of pw_menu.children){ \
                 if (child.id.startsWith('pg_" + pg_id + "_pw_')) { \
                     if (child.style.display == 'none') child.style.display = 'table-row'; \
@@ -581,7 +583,9 @@ function set_pathway_menu(){
         
         var sorted_pathways = [];
         for (pathway_id of pathway_groups[pg_id][2]){
-            if (pathway_id in pathways) sorted_pathways.push([pathway_id, pathways[pathway_id]]);
+            if (pathway_id in pathways && pathways[pathway_id][1] != "1"){
+                sorted_pathways.push([pathway_id, pathways[pathway_id][0]]);
+            }
         }
         sorted_pathways.sort(function(a, b) {
             var l_a = a[1].length;
@@ -604,7 +608,7 @@ function set_pathway_menu(){
             }
             
             var pm_pw_tr = document.createElement("tr");
-            pathway_menu.appendChild(pm_pw_tr);
+            metabolic_pathway_menu.appendChild(pm_pw_tr);
             pm_pw_tr.setAttribute("id", "pg_" + pg_id + "_pw_" + sorted_pathways[i][0]);
             pm_pw_tr.setAttribute("style", "display: none;");
         
@@ -625,9 +629,68 @@ function set_pathway_menu(){
         }
     }
     
-    document.getElementById("select_pathway").appendChild(pathway_menu);
+    document.getElementById("select_metabolic_pathway").appendChild(metabolic_pathway_menu);
     select_pg.className = 'selected_menu_cell';
+    
+    
+    
+    // menu for signaling pathways
+    document.getElementById("select_signaling_pathway").innerHTML = "";
+    var signaling_pathway_menu = document.createElement("table");
+    document.getElementById("select_signaling_pathway").appendChild(signaling_pathway_menu);
+    signaling_pathway_menu.setAttribute("id", "signaling_pathway_menu");
+    
+    
+    var sorted_pathways = [];
+    for (pathway_id in pathways){
+        if (pathways[pathway_id][1] == "1"){
+            sorted_pathways.push([pathway_id, pathways[pathway_id][0]]);
+        }
+    }
+    sorted_pathways.sort(function(a, b) {
+        var l_a = a[1].length;
+        var l_b = b[1].length;
+        
+        for (var i = 0; i < Math.min(l_a, l_b); ++i){
+            if (a[1].charCodeAt(i) < b[1].charCodeAt(i)) return -1;
+            else if (a[1].charCodeAt(i) > b[1].charCodeAt(i)) return 1;
+        }
+        if (l_a < l_b) return -1;
+        else if (l_a > l_b) return 1;
+        return 0;
+    });
+        
+    for (var sorted_pathway of sorted_pathways){
+        var selected =  "select_menu_cell";
+        if (sorted_pathway[0] == current_pathway){
+            selected = "selected_menu_cell";
+            select_pg = pm_td;
+        }
+        
+        var pm_pw_tr = document.createElement("tr");
+        signaling_pathway_menu.appendChild(pm_pw_tr);
+        pm_pw_tr.setAttribute("id", "sig_pw_" + sorted_pathway[0]);
+    
+        var pm_pw_td = document.createElement("td");
+        pm_pw_tr.appendChild(pm_pw_td);
+        pm_pw_td.setAttribute("class", selected);
+        pm_pw_td.setAttribute("onclick", "change_pathway(" + sorted_pathway[0] + ");");
+        var pathway_name = sorted_pathway[1];
+        pathway_name = replaceAll(pathway_name, "-\\n", "");
+        pathway_name = replaceAll(pathway_name, "\n", " ");
+        pm_pw_td.innerHTML = pathway_name;
+    }
+    
+    document.getElementById("select_signaling_pathway").appendChild(signaling_pathway_menu);
+    
 }
+
+
+
+
+
+
+
 
 
 function visual_element() {
@@ -1086,7 +1149,7 @@ function pathway_title(){
         var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
         ctx.fillStyle = "#f3f8ff";
         ctx.strokeStyle = "#aaaaaa";
-        var curr_title_text = "Current pathway: " + replaceAll(replaceAll(pathways[current_pathway], "-\n", ""), "\n", " ");
+        var curr_title_text = "Current pathway: " + replaceAll(replaceAll(pathways[current_pathway][0], "-\n", ""), "\n", " ");
         ctx.font = "bold 20px Arial";
         ctx.textAlign = "left";
         //ctx.textBaseline = 'top';
@@ -3684,7 +3747,7 @@ function change_pathway(p){
         
         var sorted_pathways = [];
         for (pathway_id of pathway_groups[highest_group][2]){
-            if (pathway_id in pathways) sorted_pathways.push([pathway_id, pathways[pathway_id]]);
+            if (pathway_id in pathways) sorted_pathways.push([pathway_id, pathways[pathway_id][0]]);
         }
         sorted_pathways.sort(function(a, b) {
             var l_a = a[1].length;
@@ -3710,13 +3773,13 @@ function change_pathway(p){
     if (p in pathways){
         current_pathway = p;
         update_browser_link();
-        document.title = "STAMP Home - " + pathways[p];
+        document.title = "STAMP Home - " + pathways[p][0];
         
-        var pw_menu = document.getElementById('pathway_menu');
+        var metabolic_pw_menu = document.getElementById('metabolic_pathway_menu');
         var pw_group = 0;
         var pw_pathway = 0;
         var still_searching = true;
-        for (var child of pw_menu.children){
+        for (var child of metabolic_pw_menu.children){
             child.children[0].className = 'select_menu_cell';
             if (child.id.endsWith("_pw_" + p)){
                 still_searching = false;
@@ -3724,7 +3787,15 @@ function change_pathway(p){
             }
             else if ((child.id.indexOf("_pw_") == -1) && still_searching) pw_group = child.children[0];
         }
-        pw_group.className = 'selected_menu_cell';
+        for (var child of signaling_pathway_menu.children){
+            child.children[0].className = 'select_menu_cell';
+            if (child.id.endsWith("sig_pw_" + p)){
+                still_searching = false;
+                pw_pathway = child.children[0];
+            }
+        }
+        
+        if (pw_group != 0) pw_group.className = 'selected_menu_cell';
         pw_pathway.className = 'selected_menu_cell';
         load_data();
     }
@@ -4683,14 +4754,29 @@ function hide_filter_panel(){
 }
 
 
-function select_pathway(){
-    if (last_opened_menu != "select_pathway"){
-        var rect = document.getElementById('select_pathway_nav').getBoundingClientRect();
-        document.getElementById("select_pathway").style.top = (rect.top + document.getElementById('select_pathway_nav').offsetHeight).toString() + "px";
-        document.getElementById("select_pathway").style.left = (rect.left).toString() + "px";
-        document.getElementById("select_pathway").style.display = "inline";
+function select_metabolic_pathway(){
+    if (last_opened_menu != "select_metabolic_pathway"){
+        var rect = document.getElementById('select_metabolic_pathway_nav').getBoundingClientRect();
+        document.getElementById("select_metabolic_pathway").style.top = (rect.top + document.getElementById('select_metabolic_pathway_nav').offsetHeight).toString() + "px";
+        document.getElementById("select_metabolic_pathway").style.left = (rect.left).toString() + "px";
+        document.getElementById("select_metabolic_pathway").style.display = "inline";
         document.getElementById("menu_background").style.display = "inline";
-        last_opened_menu = "select_pathway";
+        last_opened_menu = "select_metabolic_pathway";
+    }
+    else {
+        last_opened_menu = "";
+    }
+}
+
+
+function select_signaling_pathway(){
+    if (last_opened_menu != "select_signaling_pathway"){
+        var rect = document.getElementById('select_signaling_pathway_nav').getBoundingClientRect();
+        document.getElementById("select_signaling_pathway").style.top = (rect.top + document.getElementById('select_signaling_pathway_nav').offsetHeight).toString() + "px";
+        document.getElementById("select_signaling_pathway").style.left = (rect.left).toString() + "px";
+        document.getElementById("select_signaling_pathway").style.display = "inline";
+        document.getElementById("menu_background").style.display = "inline";
+        last_opened_menu = "select_signaling_pathway";
     }
     else {
         last_opened_menu = "";
@@ -4768,8 +4854,8 @@ function compute_statistics(){
 
 function expand_statistics(){
     var wdth = window.innerWidth * (1 - expanding_percentage);
-    var rect = document.getElementById('select_pathway_nav').getBoundingClientRect();
-    document.getElementById("statistics").style.top = (rect.top + document.getElementById('select_pathway_nav').offsetHeight).toString() + "px";
+    var rect = document.getElementById('select_metabolic_pathway_nav').getBoundingClientRect();
+    document.getElementById("statistics").style.top = (rect.top + document.getElementById('select_metabolic_pathway_nav').offsetHeight).toString() + "px";
     document.getElementById("renderarea").width = wdth;
     document.getElementById("statistics").style.left = (wdth).toString() + "px";
     document.getElementById("statistics").style.width = (window.innerWidth * expanding_percentage).toString() + "px";
@@ -4991,7 +5077,6 @@ function load_data(reload){
         }
     }
     
-    console.log(request_nodes);
     xmlhttp.open("GET", request_nodes, true);
     xmlhttp.send();
     

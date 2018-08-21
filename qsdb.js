@@ -110,7 +110,7 @@ function init(){
         tissue[2].src = tissue[0];
     }
     
-    navigation_content = ["select_species", "select_pathway", "search_results", "filter_panel_wrapper", "menu_background"];
+    navigation_content = ["select_species", "select_metabolic_pathway", "select_signaling_pathway", "search_results", "filter_panel_wrapper", "menu_background"];
     
     document.documentElement.style.overflow = 'hidden';
     document.body.scroll = "no";
@@ -169,9 +169,9 @@ function resize_pathway_view(){
     ctx.canvas.height = window.innerHeight;
     preview_element.y = window.innerHeight - preview_element.height;
   
-    var rect = document.getElementById('select_pathway_nav').getBoundingClientRect();
-    document.getElementById("select_pathway").style.top = (rect.top + document.getElementById('select_pathway_nav').offsetHeight).toString() + "px";
-    document.getElementById("select_pathway").style.left = (rect.left).toString() + "px";
+    var rect = document.getElementById('select_metabolic_pathway_nav').getBoundingClientRect();
+    document.getElementById("select_metabolic_pathway").style.top = (rect.top + document.getElementById('select_metabolic_pathway_nav').offsetHeight).toString() + "px";
+    document.getElementById("select_metabolic_pathway").style.left = (rect.left).toString() + "px";
     
     rect = document.getElementById('select_species_nav').getBoundingClientRect();
     document.getElementById("select_species").style.top = (rect.top + document.getElementById('select_species_nav').offsetHeight).toString() + "px";
