@@ -157,15 +157,16 @@ function init(){
     }
     if (!read_cookie_information) document.getElementById('cookie_information').style.display = "inline";
     
-    
-    
 }
+
+
+
 
 function resize_pathway_view(){
     
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
-    ctx.canvas.width  = window.innerWidth;
+    resize_renderarea_width(0);
     ctx.canvas.height = window.innerHeight;
     preview_element.y = window.innerHeight - preview_element.height;
   
@@ -183,6 +184,15 @@ function resize_pathway_view(){
     
     draw();
 }
+
+
+function resize_renderarea_width(subtract){
+    var c = document.getElementById("renderarea");
+    var ctx = c.getContext("2d");
+    ctx.canvas.width  = window.innerWidth - subtract;
+}
+
+
 
 
 function mouse_click_listener(e){
@@ -389,11 +399,11 @@ function key_down(event){// canvas to svg
     }    
     if (!pathway_is_loaded) return;
     
-    if(event.which == 45){
+    if(event.which == 45 || event.which == 109){
         zoom_in_out(1, 0);
         draw();
     }
-    else if (event.which == 43){
+    else if (event.which == 43 || event.which == 107){
         zoom_in_out(0, 0);
         draw();
     }

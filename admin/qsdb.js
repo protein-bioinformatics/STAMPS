@@ -72,8 +72,9 @@ function init(){
     infobox = new Infobox();
     zoom_sign_in = new zoom_sign(1);
     zoom_sign_out = new zoom_sign(0);
-    expand_collapse_obj = new expand_collapse();
+    //expand_collapse_obj = new expand_collapse();
     preview_element = new preview();
+    
     
     var pg_select = document.getElementById("add_manage_pathways_group");
     var sorted_pathway_groups = [];
@@ -277,26 +278,36 @@ function init(){
     }
     xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=stamp-editor&e_a=request", true);
     xmlhttp_matomo.send();
+    
 }
 
 
 function resize_pathway_view(){
-    
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     document.getElementById("toolbox").style.width = (toolbox_width).toString() + "px";
     document.getElementById("toolbox").style.top = (document.getElementById("navigation").offsetHeight).toString() + "px";
     document.getElementById("toolbox").style.height = (window.innerHeight - document.getElementById("navigation").offsetHeight).toString() + "px";
     c.style.left  = (toolbox_width).toString() + "px";
-    ctx.canvas.width  = window.innerWidth - toolbox_width;
+    resize_renderarea_width(0);
     ctx.canvas.height = window.innerHeight;
     preview_element.y = window.innerHeight - preview_element.height;
     draw();
 }
 
 
+function resize_renderarea_width(subtract){
+    var c = document.getElementById("renderarea");
+    var ctx = c.getContext("2d");
+    ctx.canvas.width  = window.innerWidth - toolbox_width - subtract;
+}
+
+
+
+
 function mouse_click_listener(e){
     if (!pathway_is_loaded) return;
+    
     
     if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY || toolbox_button_selected == toolbox_states.CREATE_METABOLITE || toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE || toolbox_button_selected == toolbox_states.CREATE_BG_IMAGE){
         var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
@@ -588,6 +599,11 @@ function mouse_click_listener(e){
                 default:
                     break;
             }
+        }
+        else if (highlight_element instanceof zoom_sign) {
+            var c = document.getElementById("renderarea");
+            var res = get_mouse_pos(c, e);
+            highlight_element.mouse_click(res, e.which);
         }
     }
 }
@@ -1611,11 +1627,11 @@ function key_down(event){
     
     if (!pathway_is_loaded) return;
     
-    if(event.which == 45){
+    if(event.which == 45 || event.which == 109){
         zoom_in_out(1, 0);
         draw();
     }
-    else if (event.which == 43){
+    else if (event.which == 43 || event.which == 107){
         zoom_in_out(0, 0);
         draw();
     }

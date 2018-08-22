@@ -486,7 +486,7 @@ function draw(sync){
         return a.sort_order > b.sort_order;
     });
     
-    if (typeof(sync) == "undefined"){
+    if (typeof(sync) === "undefined"){
         var dc = Math.random();
         draw_code = dc;
         var dr = setInterval(function(dc){
@@ -2099,7 +2099,6 @@ function node(data){
         switch (this.type){
             
             case "protein":
-                
                 // draw fill
                 ctx.fillStyle = this.fill_style;
                 ctx.fillRect(this.x - hw, this.y - hh, this.width, this.height);
@@ -3766,7 +3765,7 @@ function change_pathway(p){
     }
     last_opened_menu = "";
     close_navigation();
-    expand_collapse_obj.collapse();
+    if (expand_collapse_obj != 0) expand_collapse_obj.collapse();
     reset_view();
     pathway_is_loaded = false;
     
@@ -4856,7 +4855,7 @@ function expand_statistics(){
     var wdth = window.innerWidth * (1 - expanding_percentage);
     var rect = document.getElementById('select_metabolic_pathway_nav').getBoundingClientRect();
     document.getElementById("statistics").style.top = (rect.top + document.getElementById('select_metabolic_pathway_nav').offsetHeight).toString() + "px";
-    document.getElementById("renderarea").width = wdth;
+    resize_renderarea_width(window.innerWidth - wdth);
     document.getElementById("statistics").style.left = (wdth).toString() + "px";
     document.getElementById("statistics").style.width = (window.innerWidth * expanding_percentage).toString() + "px";
     document.getElementById("statistics").style.height = "100%";
@@ -4946,7 +4945,7 @@ function collapse_statistics(){
 }    
     
 function hide_statistics(){
-    document.getElementById("renderarea").width  = window.innerWidth;
+    resize_renderarea_width(0);
     document.getElementById("statistics").style.display = "none";
     draw();
 }
