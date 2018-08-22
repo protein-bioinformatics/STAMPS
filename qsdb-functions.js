@@ -2,7 +2,6 @@ moved = false;
 HTTP_GET_VARS = {};
 current_pathway = 1;
 current_pathway_list_index = 0;
-current_pathway_title = 0;
 highlight_element = 0;
 offsetX = 0;
 offsetY = 0;
@@ -1139,27 +1138,6 @@ CanvasRenderingContext2D.prototype.draw_line = function (x1, y1, x2, y2) {
 }
 
 
-pathway_title.prototype = new visual_element();
-pathway_title.prototype.constructor = pathway_title;
-
-function pathway_title(){
-    this.sort_order = 1000;
-    
-    this.draw = function(ctx){
-        var nav_height = document.getElementById("navigation").getBoundingClientRect().height;
-        ctx.fillStyle = "#f3f8ff";
-        ctx.strokeStyle = "#aaaaaa";
-        var curr_title_text = "Current pathway: " + replaceAll(replaceAll(pathways[current_pathway][0], "-\n", ""), "\n", " ");
-        ctx.font = "bold 20px Arial";
-        ctx.textAlign = "left";
-        //ctx.textBaseline = 'top';
-        var wdth = ctx.measureText(curr_title_text).width + 30;
-        ctx.fillRect(-2, nav_height - 2, wdth, 40);
-        ctx.strokeRect(-2, nav_height - 2, wdth, 40);
-        ctx.fillStyle = "#aaaaaa";
-        ctx.fillText(curr_title_text, 10, nav_height - 2 + 20 + 5);
-    }
-}
 
 select_field.prototype = new visual_element();
 select_field.prototype.constructor = select_field;
@@ -3642,7 +3620,6 @@ function assemble_elements(do_preview){
     if (expand_collapse_obj != 0) elements.push(expand_collapse_obj);
     if (preview_element != 0) elements.push(preview_element);
     if (select_field_element != 0) elements.push(select_field_element);
-    if (current_pathway_title != 0) elements.push(current_pathway_title);
     
     
     if (infobox != 0) infobox.include_preview = !do_preview;
@@ -3651,7 +3628,6 @@ function assemble_elements(do_preview){
     if (expand_collapse_obj != 0) expand_collapse_obj.include_preview = !do_preview;
     if (preview_element != 0) preview_element.include_preview = !do_preview;
     if (select_field_element != 0) select_field_element.include_preview = !do_preview;
-    if (current_pathway_title != 0) current_pathway_title.include_preview = !do_preview;
 }
 
 
@@ -3773,6 +3749,7 @@ function change_pathway(p){
         current_pathway = p;
         update_browser_link();
         document.title = "STAMP Home - " + pathways[p][0];
+        document.getElementById('pathway_title').innerHTML = pathways[p][0];
         
         var metabolic_pw_menu = document.getElementById('metabolic_pathway_menu');
         var pw_group = 0;
@@ -5050,7 +5027,6 @@ function load_data(reload){
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     
-    current_pathway_title = new pathway_title();
     
     
     protein_dictionary = {};

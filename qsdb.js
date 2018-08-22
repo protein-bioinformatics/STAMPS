@@ -184,6 +184,9 @@ function resize_pathway_view(){
     document.getElementById("filter_panel_wrapper").style.top = (rect.top + document.getElementById('filter_panel_nav').offsetHeight).toString() + "px";
     document.getElementById("filter_panel_wrapper").style.left = (rect.left).toString() + "px";
     
+    
+    document.getElementById("pathway_title_field").style.top = (document.getElementById('navigation').offsetHeight).toString() + "px";
+    document.getElementById("pathway_title_field").style.left = "0px";
     draw();
 }
 

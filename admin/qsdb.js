@@ -292,6 +292,11 @@ function resize_pathway_view(){
     resize_renderarea_width(0);
     ctx.canvas.height = window.innerHeight;
     preview_element.y = window.innerHeight - preview_element.height;
+    
+    document.getElementById("pathway_title_field").style.top = (document.getElementById('navigation').offsetHeight).toString() + "px";
+    document.getElementById("pathway_title_field").style.left = (toolbox_width).toString() + "px";
+    
+    
     draw();
 }
 
