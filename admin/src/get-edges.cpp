@@ -35,12 +35,14 @@ class reagent {
         string node_id;
         string type;
         string anchor;
+        string head;
         
         string to_string(){
             string data = "{\"i\":" + id;
             data += ",\"r\":" + reaction_id;
             data += ",\"n\":" + node_id;
             data += ",\"t\":\"" + type + "\"";
+            data += ",\"h\":" + head;
             data += ",\"a\":\"" + anchor + "\"}";
             return data;
         }
@@ -72,7 +74,6 @@ class reaction {
         string node_id;
         string anchor_in;
         string anchor_out;
-        string reversible;
         vector<reagent*> reagents;
         
         string to_string(){
@@ -81,7 +82,6 @@ class reaction {
             data += ",\"n\":" + node_id;
             data += ",\"in\":\"" + anchor_in + "\"";
             data += ",\"out\":\"" + anchor_out + "\"";
-            data += ",\"v\":" + reversible;
             data += ",\"r\":{";
             for (int i = 0; i < reagents.size(); ++i){
                 if (i) data += ",";
@@ -189,14 +189,13 @@ main() {
         r->node_id = res->getString("node_id");
         r->anchor_in = res->getString("anchor_in");
         r->anchor_out = res->getString("anchor_out");
-        r->reversible = res->getString("reversible");
         all_reactions.insert(pair< string, reaction* >(r->id, r));
     }
     
     
     
     
-    sql_query = "SELECT r.id, rg.id rg_id, rg.reaction_id, rg.node_id rg_node_id, rg.type, rg.anchor FROM reactions r INNER JOIN nodes n ON r.node_id = n.id INNER JOIN reagents rg on r.id = rg.reaction_id WHERE n.pathway_id = ";
+    sql_query = "SELECT r.id, rg.id rg_id, rg.reaction_id, rg.node_id rg_node_id, rg.type, rg.anchor, rg.head FROM reactions r INNER JOIN nodes n ON r.node_id = n.id INNER JOIN reagents rg on r.id = rg.reaction_id WHERE n.pathway_id = ";
     sql_query += pathway_id;
     sql_query += " ORDER BY r.id;";
     
@@ -209,6 +208,7 @@ main() {
         r->node_id = res->getString("rg_node_id");
         r->type = res->getString("type");
         r->anchor = res->getString("anchor");
+        r->head = res->getString("head");
         all_reactions[res->getString("id")]->reagents.push_back(r);
     }
     

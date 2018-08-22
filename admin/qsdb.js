@@ -504,7 +504,7 @@ function mouse_click_listener(e){
             
         }
         // if a visible anchor is clicked, change edge to the anchor
-        else {
+        else if (edge_change_selected != -1) {
             var c = document.getElementById("renderarea");
             var res = get_mouse_pos(c, e);
             var target = -1;
@@ -515,8 +515,6 @@ function mouse_click_listener(e){
                 }
             }
             if (target != -1){
-                
-                
                 var anchor = target.is_mouse_over_anchor(res);
                 if (anchor.length > 0){
                     change_edge_anchor(edge_change_selected, target.id, anchor);
@@ -620,21 +618,21 @@ function mouse_click_listener(e){
 function change_edge_type(){
     var is_direct = (highlight_element.reagent_id == -1);
     var table = "";
-    var id = highlight_element.reaction_id;
+    var id = -1;
     var value = 0;
-    var column = "";
+    var column = "head";
     
     if (is_direct){
-        value = (edge_data['direct'][id]['h'] + 1) % 3;
-        edge_data['direct'][id]['h'] = value;
+        value = (edge_data['direct'][highlight_element.reaction_id]['h'] + 1) % 10;
+        edge_data['direct'][highlight_element.reaction_id]['h'] = value;
         table = "reactions_direct";
-        column = "head";
+        id = highlight_element.reaction_id;
     }
     else {
-        value = 1 - edge_data['reactions'][id]['v'];
-        edge_data['reactions'][id]['v'] = value;
-        table = "reactions";
-        column = "reversible";
+        value = (edge_data['reactions'][highlight_element.reaction_id]['r'][highlight_element.reagent_id]['h'] + 1) % 10;
+        edge_data['reactions'][highlight_element.reaction_id]['r'][highlight_element.reagent_id]['h'] = value;
+        table = "reagents";
+        id = highlight_element.reagent_id;
     }
     
     var request = "action=set&table=" + table + "&column=" + column + "&id=" + id + "&value=" + value;
@@ -1458,6 +1456,7 @@ function add_edge(start_id, end_id, anchor_start, anchor_end){
             }
         }
     }
+    console.log(request);
     xmlhttp.open("GET", request, false);
     xmlhttp.send();
     return successful_creation;

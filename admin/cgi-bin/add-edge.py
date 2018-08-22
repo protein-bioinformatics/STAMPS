@@ -72,7 +72,7 @@ if count_types["protein"] == 1 and count_types["metabolite"] == 1:
     my_cur.execute("SELECT id FROM reactions WHERE node_id = %s;", (prot_id))
     reaction_id = [row for row in my_cur][0]["id"]
     
-    my_cur.execute("INSERT INTO reagents (reaction_id, node_id, type, anchor) VALUES (%s, %s, %s, %s);", (reaction_id, meta_id, fooduct, meta_a))
+    my_cur.execute("INSERT INTO reagents (reaction_id, node_id, type, anchor, head) VALUES (%s, %s, %s, %s, 0);", (reaction_id, meta_id, fooduct, meta_a))
     conn.commit()
     
     

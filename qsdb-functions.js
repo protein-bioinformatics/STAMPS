@@ -2168,37 +2168,42 @@ function node(data){
                 
                 
                 var selected_name = (this.short_name.length > 0 && this.short_name.length < this.name.length) ? this.short_name : this.name;
-                var ww = ctx.measureText(selected_name).width;
                 
                 if (this.pos == "tl"){
-                    x -= ww + 1.5 * radius;
+                    x -= 1.5 * radius;
                     y -= 2 * radius;
+                    ctx.textAlign = "right";
                 }
                 else if (this.pos == "tc"){
-                    x -= ww >> 1;
                     y -= 2 * radius;
+                    ctx.textAlign = "center";
                 }
                 else if (this.pos == "tr"){
                     x += 1.5 * radius;
                     y -= 2 * radius;
+                    ctx.textAlign = "left";
                 }
                 else if (this.pos == "ml"){
-                    x -= ww + 1.5 * radius;
+                    x -= 1.5 * radius;
+                    ctx.textAlign = "right";
                 }
                 else if (this.pos == "mr"){
                     x += 1.5 * radius;
+                    ctx.textAlign = "left";
                 }
                 else if (this.pos == "bl"){
-                    x -= ww + 1.5 * radius;
+                    x -= 1.5 * radius;
                     y += 2 * radius;
+                    ctx.textAlign = "right";
                 }
                 else if (this.pos == "bc"){
-                    x -= ww >> 1;
                     y += 2 * radius;
+                    ctx.textAlign = "center";
                 }
                 else if (this.pos == "br"){
                     x += 1.5 * radius;
                     y += 2 * radius;
+                    ctx.textAlign = "left";
                 }
                 
                 ctx.fillText(selected_name, x, y);
@@ -2656,6 +2661,11 @@ edge.prototype.constructor = edge;
 
 function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction_id, reagent_id){
     
+    // update reagents set head = 2 where type = "product";
+    // update reagents rg inner join reactions r on rg.reaction_id = r.id set rg.head = 2 where rg.type = "educt" and r.reversible = 1;
+    
+    
+    
     this.head = head;
     this.head_start = 0;
     this.point_list = [];
@@ -2669,11 +2679,10 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
     this.reagent_id = reagent_id;
     
     
-    //this.bidirectional = (reagent_id >= 0) ? start_node.type == "metabolite" && edge_data['reactions'][this.reaction_id]['v'] : this.head > 0;
     this.tail_start = 0;
     
     
-    this.dashed_edge = data[this.start_id].type == "pathway" || data[this.end_id].type == "pathway";
+    this.dashed_edge = (head & 1) == 1;
     this.edge_enabled = reagent_id < 0 || data[this.start_id].proteins.length > 0 || (this.dashed_edge && data[this.start_id].pathway_enabled);
     this.sort_order = this.edge_enabled ? 20 : 10;
     
@@ -3006,7 +3015,9 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
             }
         }
         
-        if (this.head > 0 && this.point_list.length >= 2){
+        
+        
+        if (1 < this.head && this.head <= 5 && this.point_list.length >= 2){
             var p_len = this.point_list.length;
             var x_head = -1;
             var y_head = -1;
@@ -3086,8 +3097,7 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
             }
         }
          
-        /*
-        if (this.bidirectional){
+        else if (6 <= this.head && this.head <= 9 && this.point_list.length >= 2){
             var x_head = -1;
             var y_head = -1;
             var p2_x = this.point_list[0].x;
@@ -3165,7 +3175,6 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
                     break;
             }
         }
-        */
     }
     
     
@@ -3177,24 +3186,30 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
         if (this.dashed_edge) ctx.setLineDash([10 * factor, 10 * factor]);
         
         
+        var p_len = this.point_list.length;
+        var point_start = (6 <= this.head) ? 1 : 0;
+        var point_end = p_len - 1 - ((2 <= this.head && this.head < 6) ? 1 : 0);
+        
+        
         ctx.lineWidth = (line_width - this.dashed_edge * 3) * factor;
         ctx.beginPath();
-        ctx.moveTo(this.point_list[0].x, this.point_list[0].y);
-        var p_len = this.point_list.length;
-        for (var i = 0; i < p_len - 1 - (this.head > 0); ++i){
+        ctx.moveTo(this.point_list[point_start].x, this.point_list[point_start].y);
+        
+        
+        for (var i = point_start; i < point_end; ++i){
             var control = new point(0, 0, 0);
             
             switch (this.point_list[i].b){
                 case 0:
                     control.x = this.point_list[i + 1].x;
                     control.y = this.point_list[i].y;
-                    ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    ctx.bezierCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y, this.point_list[i + 1].x, this.point_list[i + 1].y);
                     break;
                     
                 case 1:
                     control.x = this.point_list[i].x;
                     control.y = this.point_list[i + 1].y;
-                    ctx.quadraticCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y);
+                    ctx.bezierCurveTo(control.x, control.y, this.point_list[i + 1].x, this.point_list[i + 1].y, this.point_list[i + 1].x, this.point_list[i + 1].y);
                     break;
                     
                 default:
@@ -3205,7 +3220,7 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
         }
         ctx.stroke();
         
-        if (this.head > 0 && this.point_list.length >= 2){
+        if (1 < this.head && this.head <= 5 && this.point_list.length >= 2){
             var x_head = -1;
             var y_head = -1;
             var p2_x = this.point_list[p_len - 1].x;
@@ -3253,8 +3268,104 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
             }
             
             
+            ctx.setLineDash([]);
             switch (this.head){
+                case 2:
+                case 3:
+                    var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - x_head) + sq(p2_y - y_head)));
+                    
+                    var x_l = x_head - l * 0.65 * (y_head - p2_y);
+                    var y_l = y_head + l * 0.65 * (x_head - p2_x);
+                            
+                    var x_r = x_head + l * 0.65 * (y_head - p2_y);
+                    var y_r = y_head - l * 0.65 * (x_head - p2_x);
+                    
+                    
+                    
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(p2_x, p2_y);
+                    ctx.lineTo(x_r, y_r);
+                    ctx.lineTo(x_l, y_l);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+            
+                case 4:
+                case 5:
+                    var x1 = x_head - 1 * (y_head - p2_y);
+                    var y1 = y_head + 1 * (x_head - p2_x);
+                    
+                    var x2 = x_head + 1 * (y_head - p2_y);
+                    var y2 = y_head - 1 * (x_head - p2_x);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+                    break;
+                    
+                default:
+                    break;
+            }
+        }
+        
+        else if (6 <= this.head && this.head <= 9 && this.point_list.length >= 2){
+            if (this.dashed_edge) ctx.setLineDash([10 * factor, 10 * factor]);
+            var x_head = -1;
+            var y_head = -1;
+            var p2_x = this.point_list[0].x;
+            var p2_y = this.point_list[0].y;
+            var p1_x = this.point_list[1].x;
+            var p1_y = this.point_list[1].y;
+            var ct_x = -1;
+            var ct_y = -1;
+            switch (this.point_list[0].b){
                 case 1:
+                    ct_x = this.point_list[0].x;
+                    ct_y = this.point_list[1].y;
+                    break;
+                case 0:
+                    ct_x = this.point_list[1].x;
+                    ct_y = this.point_list[0].y;
+                    break;
+            }
+            
+            
+            switch (this.point_list[0].b){
+                
+                case 2:
+                    var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - p1_x) + sq(p2_y - p1_y)));
+                    x_head = p2_x + l * (p1_x - p2_x);
+                    y_head = p2_y + l * (p1_y - p2_y);
+                    
+                    ctx.lineWidth = (line_width - this.dashed_edge * 3) * factor;
+                    ctx.beginPath();
+                    ctx.moveTo(p1_x, p1_y);
+                    ctx.lineTo(x_head, y_head);
+                    ctx.stroke();
+                    
+                    break;
+                    
+                    
+                default:
+                    var t = this.tail_start;
+                    x_head = (1 - t) * (1 - t) * p1_x + 2 * (1 - t) * t * ct_x + t * t * p2_x;
+                    y_head = (1 - t) * (1 - t) * p1_y + 2 * (1 - t) * t * ct_y + t * t * p2_y;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(p1_x, p1_y);
+                    ctx.bezierCurveTo(ct_x, ct_y, x_head, y_head, x_head, y_head);
+                    ctx.stroke();
+                    break;
+                    
+            }
+            
+            
+            ctx.setLineDash([]);
+            switch (this.head){
+                case 6:
+                case 7:
                     var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - x_head) + sq(p2_y - y_head)));
                     var x_l = x_head - l * 0.65 * (y_head - p2_y);
                     var y_l = y_head + l * 0.65 * (x_head - p2_x);
@@ -3271,7 +3382,8 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
                     ctx.fill();
                     break;
             
-                case 2:
+                case 8:
+                case 9:
                     var x1 = x_head - 1 * (y_head - p2_y);
                     var y1 = y_head + 1 * (x_head - p2_x);
                     
@@ -3283,71 +3395,17 @@ function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction
                     ctx.lineTo(x2, y2);
                     ctx.stroke();
                     break;
-            }
-        }
-        
-        /*
-        if (this.bidirectional){
-            var x_head = -1;
-            var y_head = -1;
-            var p2_x = this.point_list[0].x;
-            var p2_y = this.point_list[0].y;
-            var p1_x = this.point_list[1].x;
-            var p1_y = this.point_list[1].y;
-            var ct_x = -1;
-            var ct_y = -1;
-            switch (this.point_list[0].b){
-                case 0:
-                    ct_x = this.point_list[0].x;
-                    ct_y = this.point_list[1].y;
-                    break;
-                case 1:
-                    ct_x = this.point_list[1].x;
-                    ct_y = this.point_list[0].y;
-                    break;
-            }
-            
-            
-            switch (this.point_list[0].b){
-                
-                case 2:
-                    var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - p1_x) + sq(p2_y - p1_y)));
-                    x_head = p2_x + l * (p1_x - p2_x);
-                    y_head = p2_y + l * (p1_y - p2_y);
-                    break;
-                    
                     
                 default:
-                    var t = this.head_start;
-                    x_head = (1 - t) * (1 - t) * p1_x + 2 * (1 - t) * t * ct_x + t * t * p2_x;
-                    y_head = (1 - t) * (1 - t) * p1_y + 2 * (1 - t) * t * ct_y + t * t * p2_y;
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(p1_x, p1_y);
-                    ctx.bezierCurveTo(ct_x, ct_y, x_head, y_head, x_head, y_head);
-                    ctx.stroke();
                     break;
-                    
             }
             
-            var l = Math.sqrt(Math.pow(arrow_length * factor, 2) / (sq(p2_x - x_head) + sq(p2_y - y_head)));
-            var x_l = x_head - l * 0.65 * (y_head - p2_y);
-            var y_l = y_head + l * 0.65 * (x_head - p2_x);
-                    
-            var x_r = x_head + l * 0.65 * (y_head - p2_y);
-            var y_r = y_head - l * 0.65 * (x_head - p2_x);
             
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(p2_x, p2_y);
-            ctx.lineTo(x_r, y_r);
-            ctx.lineTo(x_l, y_l);
-            ctx.closePath();
-            ctx.fill();
             
+            ctx.setLineDash([]);
             
         }
-        */
+        
         ctx.setLineDash([]);
     }
 };
@@ -3379,7 +3437,6 @@ function compute_edges(){
     
     for (var reaction_id in reactions){
         var node_id = reactions[reaction_id]['n'];
-        var reversible = reactions[reaction_id]['v'];
         var reagents = reactions[reaction_id]['r'];
         
         for (var reagent_id in reagents){
@@ -3391,12 +3448,12 @@ function compute_edges(){
             
             if (reagents[reagent_id]['t'] == 'educt'){
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, reactions[reaction_id]['in']);
-                connections.push([node_id, reactions[reaction_id]['in'], metabolite_id, reagents[reagent_id]['a'], reversible, reaction_id, reagent_id]);
+                connections.push([node_id, reactions[reaction_id]['in'], metabolite_id, reagents[reagent_id]['a'], reagents[reagent_id]['h'], reaction_id, reagent_id]);
                 nodes_anchors[node_id][reactions[reaction_id]['in']].push([metabolite_id, connections.length - 1, angle_node]);
             }
             else{
                 var angle_node = compute_angle(data[node_id].x, data[node_id].y, data[metabolite_id].x, data[metabolite_id].y, reactions[reaction_id]['out']);
-                connections.push([node_id, reactions[reaction_id]['out'], metabolite_id, reagents[reagent_id]['a'], 1, reaction_id, reagent_id]);
+                connections.push([node_id, reactions[reaction_id]['out'], metabolite_id, reagents[reagent_id]['a'], reagents[reagent_id]['h'], reaction_id, reagent_id]);
                 nodes_anchors[node_id][reactions[reaction_id]['out']].push([metabolite_id, connections.length - 1, angle_node]);
                 
             }
@@ -3447,7 +3504,7 @@ function compute_edges(){
         var metabolite_id = connections[i][2];
         var metabolite_anchor = connections[i][3];
         var metabolite_len = nodes_anchors[metabolite_id][metabolite_anchor].length;
-        var has_head = connections[i][4];
+        var head = connections[i][4];
         var reaction_id = connections[i][5];
         var reagent_id = connections[i][6];
         var start_x = 0, start_y = 0;
@@ -3591,7 +3648,7 @@ function compute_edges(){
         }
         var l2_norm = Math.sqrt(Math.pow(start_x - end_x, 2) + Math.pow(start_y - end_y, 2));
         if (l2_norm > base_grid * factor) {
-            edges.push(new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], has_head, reaction_id, reagent_id));
+            edges.push(new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], head, reaction_id, reagent_id));
             data[node_id].unconnected = false;
             data[metabolite_id].unconnected = false;
         }
