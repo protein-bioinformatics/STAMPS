@@ -1958,6 +1958,27 @@ function change_species(select){
 
 
 
+
+function mobile_check() {
+
+    if( navigator.userAgent.match(/Android/i)
+    || navigator.userAgent.match(/webOS/i)
+    || navigator.userAgent.match(/iPhone/i)
+    || navigator.userAgent.match(/iPad/i)
+    || navigator.userAgent.match(/iPod/i)
+    || navigator.userAgent.match(/BlackBerry/i)
+    || navigator.userAgent.match(/Windows Phone/i)
+    ){
+        return true;
+    }
+    else {
+        return false;
+    }
+};
+
+
+
+
 current_species = "mouse";
 var kr_keys = [];
 var scanner_data = [1, 0, 0]; // scanner_up, scanner_index, scanner_count
@@ -1978,12 +1999,15 @@ load_all_data();
 document.getElementById("disclaimer_content").addEventListener('click', function(event){event.stopPropagation(); return false;}, false);
 document.getElementById("statistics_table").addEventListener('click', function(event){event.stopPropagation(); return false;}, false);
 
-
-var process_stat_loading = setInterval(function(){
-    load_statistics();
-    clearInterval(process_stat_loading);
-}, 1);
-
+if (mobile_check()){
+    alert("We recognized, that you are browsing with a mobile device. We strongly recommend to browse STAMP from a desktop computer or laptop. Some functionality may not work. Due to high data traffic, some information provision is turned off. We apologize for inconvenience.");
+}
+else {
+    var process_stat_loading = setInterval(function(){
+        load_statistics();
+        clearInterval(process_stat_loading);
+    }, 1);
+}
 
 var xmlhttp_matomo = new XMLHttpRequest();
 xmlhttp_matomo.onreadystatechange = function() {

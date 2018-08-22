@@ -157,6 +157,8 @@ function init(){
     }
     if (!read_cookie_information) document.getElementById('cookie_information').style.display = "inline";
     
+    
+    
 }
 
 
@@ -184,6 +186,8 @@ function resize_pathway_view(){
     
     draw();
 }
+
+
 
 
 function resize_renderarea_width(subtract){
