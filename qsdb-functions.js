@@ -2258,7 +2258,7 @@ function node(data){
                     ctx.strokeStyle = slide_color;
                     
                     ctx.beginPath();
-                    ctx.arc(this.x + hw, this.y + hh, anchor_size * factor, 0, 1.999 * Math.PI);
+                    ctx.arc(this.x + hw, this.y + hh, 2 * anchor_size * factor, 0, 1.999 * Math.PI);
                     ctx.closePath();
                     ctx.stroke();
                 }
@@ -2426,7 +2426,7 @@ function node(data){
         
         var anchor_x = this.x + hw;
         var anchor_y = this.y + hh;
-        return (Math.sqrt(Math.pow(anchor_x - mouse.x, 2) + Math.pow(anchor_y - mouse.y, 2)) < (anchor_size + line_width) * factor);
+        return (Math.sqrt(Math.pow(anchor_x - mouse.x, 2) + Math.pow(anchor_y - mouse.y, 2)) < 2 * (anchor_size + line_width) * factor);
     }
     
     this.mouse_pointer_cursor = function (res){
