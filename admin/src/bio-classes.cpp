@@ -208,13 +208,18 @@ string spectrum::to_string(){
     float ppm = (observ_mass - theo_mass) / theo_mass * 1000000.;
     char ppm_str[50];
     sprintf(ppm_str, "%0.5f", ppm);
+    
+    
+    
+    char mass_str[20];
+    sprintf(mass_str, "%0.4f", atof(mass.c_str()));
         
     string str = "{";
     str += "\"i\":" + str_id + ",";
     str += "\"s\":\"" + mod_sequence + "\",";
     str += "\"c\":" + charge + ",";
     str += "\"q\":" + confidence + ",";
-    str += "\"m\":\"" + mass + "\"";
+    str += "\"m\":\"" + string(mass_str) + "\"";
     str += ",\"p\":" + string(ppm_str);
     
     vector<string> tissues_split = split(tissues, ',');

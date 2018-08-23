@@ -225,10 +225,6 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     delete SA;
 
     
-    
-    
-    
-    
     string response = "[";
     for (int i = 0; i < proteins.size(); ++i){
         if (i) response += ",";
@@ -243,24 +239,15 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
 
 
 
-
-
 main(int argc, char** argv) {
-    bool compress = false;
-    bool caching = false;
+    bool compress = true;
+    bool caching = true;
+    bool rewrite_cache = false;
     bool via_accessions = false;
     bool via_ids = false;
     bool via_loci = false;
     bool via_functions = false;
     bool via_pathway = false;
-    
-    if (compress){
-        cout << "Content-Type: text/html" << endl;
-        cout << "Content-Encoding: deflate" << endl << endl;
-    }
-    else {
-        cout << "Content-Type: text/html" << endl << endl;
-    }
     
     string accessions = "";
     string ids = "";
@@ -278,6 +265,10 @@ main(int argc, char** argv) {
         print_out("-1", compress);
         return -1;
     }
+    
+    
+    
+    
     
     string get_string = string(get_string_chr);
     if (!get_string.length()){
@@ -314,6 +305,15 @@ main(int argc, char** argv) {
             else if (get_values.at(0) == "statistics"){
                 statistics = true;
             }
+            else if (get_values.at(0) == "compress"){
+                compress = (get_values.at(1) == "false") ? false : true;
+            }
+            else if (get_values.at(0) == "caching"){
+                caching = (get_values.at(1) == "false") ? false : true;
+            }
+            else if (get_values.at(0) == "rewrite_cache"){
+                rewrite_cache = get_values.at(1) == "true";
+            }
             else if (get_values.at(0) == "statistics_pathways"){
                 statistics_pathways = true;
             }
@@ -328,6 +328,15 @@ main(int argc, char** argv) {
         return -5;
     }
     
+    
+    
+    if (compress){
+        cout << "Content-Type: text/html" << endl;
+        cout << "Content-Encoding: deflate" << endl << endl;
+    }
+    else {
+        cout << "Content-Type: text/html" << endl << endl;
+    }
     
     
     string sql_query_proteins = "";
@@ -466,7 +475,9 @@ main(int argc, char** argv) {
         
         
         // reading the protein data from a cached file only if cached file exists and sqlite_db last modification date is older than cached json file date
-        if (caching && !stat((char*)parameters["spectra_db_" + species].c_str(), &date_sqlite_db) && !stat((char*)statistics_json_filename.c_str(), &date_sqlite_json) && date_sqlite_db.st_ctime < date_sqlite_json.st_ctime){
+        if (caching && !rewrite_cache && !stat((char*)parameters["spectra_db_" + species].c_str(), &date_sqlite_db) && !stat((char*)statistics_json_filename.c_str(), &date_sqlite_json) && date_sqlite_db.st_ctime < date_sqlite_json.st_ctime){
+            
+            
             ifstream t;
             int file_length = 0;
             t.open(statistics_json_filename.c_str(), ios::binary);
@@ -477,13 +488,16 @@ main(int argc, char** argv) {
             t.read((char*)result.data(), file_length);
             t.close();
             
-            cout << result;
-            return 0;
+            //cout << result;
+            //return 0;
         }
         // otherwise retrieve the protein data the normal way and store in 'data' folder
         else {
+            
+            remove(statistics_json_filename.c_str());
+            
             result = get_protein_data(sql_query_proteins, species, con, statistics);
-            if (compress) result = compress_string(result);
+            
             ofstream json_file(statistics_json_filename.c_str(), ios::binary);
             json_file.write(result.c_str(), result.length());
         }
