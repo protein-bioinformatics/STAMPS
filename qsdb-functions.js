@@ -5451,6 +5451,11 @@ function pathway_to_svg(){
         min_y = Math.min(min_y, elements[i].y - elements[i].height * 0.5);
         max_y = Math.max(max_y, elements[i].y + elements[i].height * 0.5);
     }
+    min_x -= 2 * base_grid;
+    min_y -= 2 * base_grid;
+    max_x += 2 * base_grid;
+    max_y += 2 * base_grid;
+    
     var shift_x = (svg_margin >> 1) - min_x;
     var shift_y = (svg_margin >> 1) - min_y;
     var svg_ctx = new C2S(svg_margin + max_x - min_x, svg_margin + max_y - min_y);
@@ -5460,13 +5465,7 @@ function pathway_to_svg(){
     svg_ctx.clearRect(0, 0, svg_margin + max_x - min_x, svg_margin + max_y - min_y);
     for (var i = 0; i < elements.length; ++i){
         elements[i].move(shift_x, shift_y);
-        elements[i].ctx = svg_ctx;
-        if (elements[i].type == "protein"){
-            for(var j = 0; j < elements[i].proteins.length; ++j){
-                elements[i].proteins[j].ctx = svg_ctx;
-            }
-        }
-        if (elements[i].visible) elements[i].draw();
+        if (elements[i].include_preview) elements[i].draw(svg_ctx);
     }
     var svgCode = svg_ctx.getSerializedSvg(true);
     
@@ -5489,5 +5488,18 @@ function pathway_to_svg(){
     var parts = svgCode.split("/>");
     svgCode = parts.join("/>\n");
     
-    window.open("data:application/txt," + encodeURIComponent(svgCode), "_self");
+    
+    var serializer = new XMLSerializer();
+    var svg_blob = new Blob([svgCode], {'type': "image/svg+xml"});
+    
+    
+    const tempLink = document.createElement('a');
+    tempLink.style.display = 'none';
+    tempLink.href = window.URL.createObjectURL(svg_blob);
+    tempLink.setAttribute('download', "pathway.svg");
+    tempLink.setAttribute('target', '_blank');
+    document.body.appendChild(tempLink);
+    tempLink.click();
+    document.body.removeChild(tempLink);
+        
 }
