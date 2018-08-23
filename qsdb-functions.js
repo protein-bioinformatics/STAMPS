@@ -2356,7 +2356,7 @@ function node(data){
         }
         
         
-        if (this.show_anchors && this.type != "membrane" && this.type != "label"){
+        if (this.show_anchors){
             ctx.lineWidth = line_width * factor;
             ctx.strokeStyle = slide_color;
             

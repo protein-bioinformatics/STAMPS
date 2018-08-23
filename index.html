@@ -448,7 +448,8 @@ function update_nsaf(ctx){
     var w_box = 600;
     var w_offset = 70;
     var h_box = 250;
-    ctx.clearRect(0, 0, w_box, h_box + w_offset);
+    var h_offset = 50;
+    ctx.clearRect(0, 0, w_box, h_box + h_offset);
 
     ctx.beginPath();
     ctx.moveTo(w_offset, 0);
@@ -630,7 +631,10 @@ function load_statistics(){
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            request_load_proteins(JSON.parse(xmlhttp.responseText), false);
+            
+            var parsed = JSON.parse(xmlhttp.responseText);
+            
+            request_load_proteins(parsed, false);
             
             for (var t = 1; t <= 10; ++t){
                 var sum_NSAF = 0;
@@ -752,6 +756,8 @@ function update_ppm(){
     var w_box = 600;
     var w_offset = 70;
     var h_box = 250;
+    var h_offset = 50;
+    ppm_ctx.clearRect(0, 0, w_box, h_box + h_offset);
     
     
     
@@ -859,6 +865,8 @@ function update_pI(){
     var w_offset = 50;
     var w_bar = 30;
     var h_box = 250;
+    var h_offset = 50;
+    pI_ctx.clearRect(0, 0, w_box, h_box + h_offset);
 
     pI_ctx.beginPath();
     pI_ctx.moveTo(w_offset, 0);
@@ -964,7 +972,8 @@ function update_nsaf_pathway_figure(ctx){
     var w_offset = 70;
     var w_bar = 30;
     var h_box = 250;
-    ctx.clearRect(0, 0, w_box, h_box);
+    var h_offset = 50;
+    ctx.clearRect(0, 0, w_box, h_box + h_offset);
 
     ctx.beginPath();
     ctx.moveTo(w_offset, 0);

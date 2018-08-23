@@ -35,7 +35,7 @@ revert_commands = []
   
 try:
     print("testing reagents table")
-    sql_query = "INSERT INTO reagents (reaction_id, node_id, type, anchor) VALUES (%s, %s, %s, %s);"
+    sql_query = "INSERT INTO reagents (reaction_id, node_id, type, anchor, head) VALUES (%s, %s, %s, %s, 0);"
     my_cur.execute(sql_query, ("20", "5", "educt", "top"))
     conn.commit()
     sql_query = "SELECT max(id) max_id FROM reagents;"

@@ -655,7 +655,7 @@ function change_edge_type(){
     var request = "action=set&table=" + table + "&column=" + column + "&id=" + id + "&value=" + value;
     
     var result = update_entry(request);
-    console.log(result);
+    
     if (result){
         compute_edges();
         assemble_elements();
