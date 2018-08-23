@@ -1916,6 +1916,7 @@ function node(data){
                     nd.height *= factor * nd.foreign_id / 10000.;
                     nd.width *= factor * nd.foreign_id / 10000.;
                     nd.slide = true;
+                    
                     draw();
                 }
             }

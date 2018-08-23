@@ -1602,7 +1602,7 @@ function toolbox_button_clicked(button){
             break;
             
         case toolbox_states.CREATE_BG_IMAGE:
-            tmp_element = new node({"x": "0", "y": "0", "t": "image", "i": -1, "n": "-"});
+            tmp_element = new node({"x": "0", "y": "0", "t": "image", "i": -1, "n": "-", "r": 10000.});
             tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
             break;
