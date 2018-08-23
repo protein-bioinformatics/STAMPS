@@ -22,19 +22,19 @@
     <table>
     <tr>
     <td width="50%"></td>
-    <td id="select_metabolic_pathway_nav" style="border-left: white; border-left-style: solid; border-left-width: 1px;" class="navigation_cell_click" onclick="close_navigation(); select_metabolic_pathway();">
+    <td id="select_metabolic_pathway_nav" style="border-left: white; border-left-style: solid; border-left-width: 1px;" class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); select_metabolic_pathway();">
         Metabolic&nbsp;Pathways
-    </td><td id="select_signaling_pathway_nav" class="navigation_cell_click" onclick="close_navigation(); select_signaling_pathway();">
+    </td><td id="select_signaling_pathway_nav" class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); select_signaling_pathway();">
         Signaling&nbsp;Pathways
-    </td><td id="select_species_nav" class="navigation_cell_click" onclick="close_navigation(); select_species();">
+    </td><td id="select_species_nav" class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); select_species();">
         Select&nbsp;Species
     </td><td id="search_field_nav" class="navigation_cell" title="Search for name, definition, UniProt accession number, EC number or peptide amino sequence.">
-        <table><tr><td>Search: </td><td><input type="text" onkeyup="start_search();" onfocus="close_navigation(); start_search();" class="search_field" id="search_field" size=24></td></tr></table>
-    </td><td id="filter_panel_nav"  class="navigation_cell_click" onclick="close_navigation(); open_filter_panel();" style="min-width: 100px; text-align: center;">
+        <table><tr><td>Search: </td><td><input type="text" onkeyup="start_search();" onfocus="hide_infobox(); close_navigation(); start_search();" class="search_field" id="search_field" size=24></td></tr></table>
+    </td><td id="filter_panel_nav"  class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); open_filter_panel();" style="min-width: 100px; text-align: center;">
         Filter
-    </td><td class="navigation_cell_click" onclick="close_navigation(); back_function = hide_check_spectra; check_spectra();">
+    </td><td class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); back_function = hide_check_spectra; check_spectra();">
         Check&nbsp;Spectra
-    </td><td class="navigation_cell_click" onclick="close_navigation(); download_assay();">
+    </td><td class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); download_assay();">
         Download&nbsp;Assay
     </td><td class="navigation_cell_click" onclick="location.href = '.';" style="min-width: 100px; text-align: center;">
         Back

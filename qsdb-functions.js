@@ -1819,6 +1819,7 @@ function node(data){
     this.o_y = 18;  // distance for second layer of membrane
     this.lipid_radius = 5;
     this.show_anchors = false;
+    this.show_scale = false;
     this.selected = false;
     this.unconnected = true;
     
@@ -1912,8 +1913,8 @@ function node(data){
                         
                     }
                     
-                    nd.height *= factor;
-                    nd.width *= factor;
+                    nd.height *= factor * nd.foreign_id / 10000.;
+                    nd.width *= factor * nd.foreign_id / 10000.;
                     nd.slide = true;
                     draw();
                 }
@@ -2249,11 +2250,16 @@ function node(data){
                     ctx.stroke();
                     
                     
+                }
+                
+                if (this.show_scale){
+                    ctx.lineWidth = line_width * factor;
+                    ctx.strokeStyle = slide_color;
                     
-                    
-                    
-                    /*
-                    */
+                    ctx.beginPath();
+                    ctx.arc(this.x + hw, this.y + hh, anchor_size * factor, 0, 1.999 * Math.PI);
+                    ctx.closePath();
+                    ctx.stroke();
                 }
                 break;
                 
@@ -2411,6 +2417,15 @@ function node(data){
         if (Math.sqrt(Math.pow(anchor_x - mouse.x, 2) + Math.pow(anchor_y - mouse.y, 2)) < (anchor_size + line_width) * factor) return "bottom";
         
         return "";
+    }
+    
+    this.is_mouse_over_scale_anchor = function(mouse){
+        var hh = this.height * 0.5;
+        var hw = this.width * 0.5;
+        
+        var anchor_x = this.x + hw;
+        var anchor_y = this.y + hh;
+        return (Math.sqrt(Math.pow(anchor_x - mouse.x, 2) + Math.pow(anchor_y - mouse.y, 2)) < (anchor_size + line_width) * factor);
     }
     
     this.mouse_pointer_cursor = function (res){

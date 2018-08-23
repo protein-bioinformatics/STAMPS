@@ -107,7 +107,7 @@ elif node_type == "membrane":
     conn.commit()
     
 elif node_type == "image":
-    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (%s, %s, 0, %s, %s);"
+    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (%s, %s, 10000, %s, %s);"
     my_cur.execute(sql_query, (pathway, node_type, x, y))
     conn.commit()
     
