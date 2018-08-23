@@ -207,7 +207,7 @@ string spectrum::to_string(){
     float observ_mass = atof(mass.c_str()) * chg - (chg - 2) * 1.007276 - chg * 0.00054857990946;
     float ppm = (observ_mass - theo_mass) / theo_mass * 1000000.;
     char ppm_str[50];
-    sprintf(ppm_str, "%0.5f", ppm);
+    sprintf(ppm_str, "%0.2f", ppm);
     
     
     
