@@ -177,9 +177,7 @@ function init(){
     c.addEventListener("mousewheel", mouse_wheel_listener, false);
     c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
     
-    c.oncontextmenu = function (event){
-        return false;
-    }
+    c.oncontextmenu = right_mouse_click_listener;
     
     document.getElementById("toolbox").style.top = (document.getElementById("navigation").offsetHeight).toString() + "px";
     document.getElementById("renderarea").style.left = (document.getElementById("toolbox").offsetWidth).toString() + "px";
@@ -307,6 +305,23 @@ function resize_renderarea_width(subtract){
     ctx.canvas.width  = window.innerWidth - toolbox_width - subtract;
 }
 
+
+
+
+function right_mouse_click_listener(e){
+    if (highlight_element && toolbox_button_selected == toolbox_states.MOVE_ENTITY && highlight_element instanceof node && highlight_element.type == "membrane"){
+
+        var value = !highlight_element.text_highlight;
+        highlight_element.text_highlight = value;
+        var request = "action=set&table=nodes&column=highlight&id=" + highlight_element.id + "&value=" + (value ? "1" : "0");
+        
+        var result = update_entry(request);
+        if (result){
+            draw();
+        }
+    }
+    return false;
+}
 
 
 

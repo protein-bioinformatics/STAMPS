@@ -1800,6 +1800,7 @@ function node(data){
     this.pos = ('pos' in data) ? data['pos'] : "";
     this.img = 0;
     this.text_highlight = ('h' in data) ? data['h'] == "1" : false;
+    if (this.type == "membrane") console.log("th: " + this.text_highlight);
     this.highlight = false;
     this.foreign_id = data['r'];
     this.pathway_enabled = false;
@@ -2156,6 +2157,7 @@ function node(data){
                 ctx.fillStyle = metabolite_fill_color;
                 ctx.strokeStyle = (this.selected) ? node_selected_color : metabolite_stroke_color;
                 ctx.lineWidth = (line_width + 2 * this.highlight) * factor;
+                
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, radius, 0, 1.999 * Math.PI);
                 ctx.closePath();
@@ -2257,29 +2259,44 @@ function node(data){
                 
             case "membrane":
                 var len_s = 3;
+                var rotating = this.text_highlight;
+                
+                var this_x = this.x;
+                var this_y = this.y;
+                if (rotating){
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(Math.PI / 2.);
+                    this_x = 0;
+                    this_y = 0;
+                }
+                
                 
                 ctx.fillStyle = metabolite_fill_color;
                 ctx.strokeStyle = this.selected ? node_selected_color : metabolite_stroke_color;
                 ctx.lineWidth = this.lw * factor;
                 
-                var tmp_x = this.x - (this.width >> 1);
+                
+                
+                
+                var tmp_x = this_x - (this.width >> 1);
                 for (var i = 0; i < this.length; ++i){
                     ctx.beginPath();
-                    ctx.arc(tmp_x, this.y - this.o_y * factor, this.lipid_radius * factor, 0, 2 * Math.PI);
+                    ctx.arc(tmp_x, this_y - this.o_y * factor, this.lipid_radius * factor, 0, 2 * Math.PI);
                     ctx.closePath();
                     ctx.stroke();
                     
                     
                     ctx.beginPath();
-                    ctx.arc(tmp_x, this.y + this.o_y * factor, this.lipid_radius * factor, 0, 2 * Math.PI);
+                    ctx.arc(tmp_x, this_y + this.o_y * factor, this.lipid_radius * factor, 0, 2 * Math.PI);
                     ctx.closePath();
                     ctx.stroke();
                     tmp_x += (2 * this.lipid_radius + this.lw) * factor;
                 }
                 
-                tmp_x = this.x - (this.width >> 1);
-                var tmp_yt = this.y - (this.o_y - this.lipid_radius) * factor;
-                var tmp_yb = this.y + (this.o_y - this.lipid_radius) * factor;
+                tmp_x = this_x - (this.width >> 1);
+                var tmp_yt = this_y - (this.o_y - this.lipid_radius) * factor;
+                var tmp_yb = this_y + (this.o_y - this.lipid_radius) * factor;
                 ctx.lineWidth = (this.lw - 1) * factor;
                 for (var i = 0; i < this.length; ++i){
                     var ttx = tmp_x + this.lipid_radius * factor / 4;
@@ -2330,6 +2347,9 @@ function node(data){
                         ctx.stroke();
                     }
                     tmp_x += (2 * this.lipid_radius + this.lw) * factor;
+                }
+                if (rotating){
+                    ctx.restore();
                 }
                 break;
         }
@@ -2411,6 +2431,15 @@ function node(data){
         switch (this.type){
             case "metabolite":
                 return (Math.sqrt(Math.pow(this.x - mouse.x, 2) + Math.pow(this.y - mouse.y, 2)) < radius + lw);
+                
+            case "membrane":
+                var this_width = this.width;
+                var this_height = this.height;
+                if (this.text_highlight){
+                    this_width = this.height;
+                    this_height = this.width;
+                }
+                return (this.x - (this_width >> 1) - lw <= mouse.x && mouse.x <= this.x + (this_width >> 1) + lw && this.y - (this_height >> 1) - lw <= mouse.y && mouse.y <= this.y + (this_height >> 1) + lw);
                 
             default:
                 return (this.x - (this.width >> 1) - lw <= mouse.x && mouse.x <= this.x + (this.width >> 1) + lw && this.y - (this.height >> 1) - lw <= mouse.y && mouse.y <= this.y + (this.height >> 1) + lw);
@@ -2660,10 +2689,6 @@ edge.prototype = new visual_element();
 edge.prototype.constructor = edge;
 
 function edge(x_s, y_s, a_s, start_node, x_e, y_e, a_e, end_node, head, reaction_id, reagent_id){
-    
-    // update reagents set head = 2 where type = "product";
-    // update reagents rg inner join reactions r on rg.reaction_id = r.id set rg.head = 2 where rg.type = "educt" and r.reversible = 1;
-    
     
     
     this.head = head;
