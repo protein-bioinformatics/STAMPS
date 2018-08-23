@@ -488,8 +488,8 @@ main(int argc, char** argv) {
             t.read((char*)result.data(), file_length);
             t.close();
             
-            //cout << result;
-            //return 0;
+            cout << result;
+            return 0;
         }
         // otherwise retrieve the protein data the normal way and store in 'data' folder
         else {
@@ -497,9 +497,12 @@ main(int argc, char** argv) {
             remove(statistics_json_filename.c_str());
             
             result = get_protein_data(sql_query_proteins, species, con, statistics);
-            
-            ofstream json_file(statistics_json_filename.c_str(), ios::binary);
-            json_file.write(result.c_str(), result.length());
+            if (caching){
+                string output = result;
+                if (compress) output = compress_string(output);
+                ofstream json_file(statistics_json_filename.c_str(), ios::binary);
+                json_file.write(output.c_str(), output.length());
+            }
         }
     }
     else {
