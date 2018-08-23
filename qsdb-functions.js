@@ -1,4 +1,5 @@
 moved = false;
+editor_mode = false;
 HTTP_GET_VARS = {};
 current_pathway = 1;
 current_pathway_list_index = 0;
@@ -1800,7 +1801,6 @@ function node(data){
     this.pos = ('pos' in data) ? data['pos'] : "";
     this.img = 0;
     this.text_highlight = ('h' in data) ? data['h'] == "1" : false;
-    if (this.type == "membrane") console.log("th: " + this.text_highlight);
     this.highlight = false;
     this.foreign_id = data['r'];
     this.pathway_enabled = false;
@@ -2154,6 +2154,7 @@ function node(data){
                 
                 
             case "metabolite":
+                if (this.name == "undefined" && !editor_mode) break;
                 ctx.fillStyle = metabolite_fill_color;
                 ctx.strokeStyle = (this.selected) ? node_selected_color : metabolite_stroke_color;
                 ctx.lineWidth = (line_width + 2 * this.highlight) * factor;

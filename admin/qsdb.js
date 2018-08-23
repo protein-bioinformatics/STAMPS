@@ -64,6 +64,7 @@ multiple_selection = new Set();
 
 
 function init(){
+    editor_mode = true;
     preview_element = new preview();
     select_field_element = new select_field();
     select_field_element.visible = false;
@@ -631,6 +632,7 @@ function mouse_click_listener(e){
 
 
 function change_edge_type(){
+    
     var is_direct = (highlight_element.reagent_id == -1);
     var table = "";
     var id = -1;
@@ -653,6 +655,7 @@ function change_edge_type(){
     var request = "action=set&table=" + table + "&column=" + column + "&id=" + id + "&value=" + value;
     
     var result = update_entry(request);
+    console.log(result);
     if (result){
         compute_edges();
         assemble_elements();
@@ -1430,15 +1433,15 @@ function mouse_up_listener(event){
                         }
                         if (fooduct == "product"){
                             edge_data["reactions"][reaction]["out"] = draw_anchor_start;
-                            edge_data["reactions"][reaction]['r'][result] = {"i": result, "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_end};
+                            edge_data["reactions"][reaction]['r'][result] = {"i": result, "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_end, "h": 0};
                         }
                         else {
                             edge_data["reactions"][reaction]["in"] = draw_anchor_end;
-                            edge_data["reactions"][reaction]['r'][result] = {"i": result, "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_start};
+                            edge_data["reactions"][reaction]['r'][result] = {"i": result, "r": reaction, "n": meta_id, "t": fooduct, "a": draw_anchor_start, "h": 0};
                         }
                     }
                     else {
-                        edge_data["direct"][result] = {"i": result, "ns": data[-1].id, "ne": target.id, "as": draw_anchor_start, "ae": draw_anchor_end, "r": 0};
+                        edge_data["direct"][result] = {"i": result, "ns": data[-1].id, "ne": target.id, "as": draw_anchor_start, "ae": draw_anchor_end, "r": 0, "h": 0};
                         
                     }
                     compute_edges();
@@ -1471,7 +1474,7 @@ function add_edge(start_id, end_id, anchor_start, anchor_end){
             }
         }
     }
-    console.log(request);
+    
     xmlhttp.open("GET", request, false);
     xmlhttp.send();
     return successful_creation;
