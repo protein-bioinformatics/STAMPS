@@ -492,6 +492,9 @@ div<div id="locus_search" class="global_search">
                 <option>Lung</option>
                 <option>Eye</option>
                 <option>Gut</option>
+            </select> in 
+            <select id="correlation_pathway_select" onchange="update_correlation_tissues();" style="width: 300px;">
+                <option value="-1">All proteins</option>
             </select>
         </td><td width="50%" valign="bottom">
             <select id="nsaf_pathway_figure_select_signaling" onchange="update_nsaf_pathway_figure(0, 'signaling');"></select>
@@ -708,6 +711,9 @@ function update_correlation_tissues(){
     var tissue1_name = document.getElementById("correlation_tissue1_select").options[document.getElementById("correlation_tissue1_select").selectedIndex].innerHTML;
     var tissue2_name = document.getElementById("correlation_tissue2_select").options[document.getElementById("correlation_tissue2_select").selectedIndex].innerHTML;
             
+    var pathway_index = document.getElementById("correlation_pathway_select").options[document.getElementById("correlation_pathway_select").selectedIndex].value;
+            
+            
     var tissue1_id = tissue_name_to_id[tissue1_name];
     var tissue2_id = tissue_name_to_id[tissue2_name];
             
@@ -720,47 +726,15 @@ function update_correlation_tissues(){
     ctx.font="14px Arial";
     ctx.textAlign = 'center';
     ctx.save();
-    ctx.translate(35, h_box >> 1);
+    ctx.translate(10, h_box >> 1);
     ctx.rotate(-Math.PI / 2);
     ctx.fillStyle = "black";
-    ctx.fillText(tissue1_name, 0, 0);
+    ctx.fillText("log10(NSAF) " + tissue1_name, 0, 0);
     ctx.restore();
     
-    ctx.fillText(tissue2_name, (w_box + w_offset) / 2, h_box + 20);
-    
-    nsaf_list1 = [];
-    nsaf_list2 = [];
-    for (var prot_id in protein_dictionary){
-        var protein = protein_dictionary[prot_id];
-        if (tissue1_id in protein.nsaf && tissue2_id in protein.nsaf){
-            nsaf_list1.push([protein.nsaf[tissue1_id], protein.id]);
-            nsaf_list2.push([protein.nsaf[tissue2_id], protein.id]);
-        }
-    }
-    nsaf_list1.sort();
-    nsaf_list2.sort();
-    
-    nsaf_dict2 = {};
-    for (var i = 0; i < nsaf_list2.length; ++i) nsaf_dict2[nsaf_list2[i][1]] = i;
+    ctx.fillText("log10(NSAF) " + tissue2_name, (w_box + w_offset) / 2, h_box + 30);
     
     
-    
-    var nsaf_set = new Set();
-    for (var i = 0; i < nsaf_list1.length; ++i){
-        var i2 = nsaf_dict2[nsaf_list1[i][1]];
-    
-        var x = Math.floor(w_offset + 2 + (w_box - w_offset) * i / nsaf_list1.length);
-        var y = h_box - 2 - h_box * i2 / nsaf_list1.length;
-        
-        var hash = x * h_box + y;
-        
-        if (!nsaf_set.has(hash)){
-            ctx.beginPath();
-            ctx.arc(x, y, 1, 0, 2 * Math.PI);
-            ctx.fill();
-            nsaf_set.add(hash);
-        }
-    }
     
     
     
@@ -783,6 +757,92 @@ function update_correlation_tissues(){
     ctx.moveTo(w_offset, h_box);
     ctx.lineTo(w_offset, 0);
     ctx.stroke();
+    
+    ctx.lineWidth = 1;
+    ctx.textAlign="right";
+    ctx.textBaseline="middle";
+    var h_factor = 0.97;            
+    var step = 1;
+    ctx.font="14px Arial";
+    
+    // y-scale
+    var h_factor = 0.97;          
+    var step = 1;
+    for (var h = max_NSAF; h > min_NSAF; h -= step){
+        var y = h_box - (h - max_NSAF) * h_factor / (min_NSAF - max_NSAF) * h_box - h_box * (1 - h_factor);
+        ctx.strokeStyle = "#dddddd";
+        ctx.beginPath();
+        ctx.moveTo(w_offset, y);
+        ctx.lineTo(w_box, y);
+        ctx.stroke();
+        
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(w_offset - 5, y);
+        ctx.lineTo(w_offset + 5, y);
+        ctx.stroke();
+        
+        
+        ctx.fillStyle = "black";
+        ctx.fillText(Math.floor(h), w_offset - 8, y);
+    }
+    
+    // x-scale
+    for (var h = max_NSAF; h > min_NSAF; h -= step){
+        var x = (h - max_NSAF) * h_factor / (min_NSAF - max_NSAF) * (w_box - w_offset) + w_offset + w_box * (1 - h_factor);
+        ctx.beginPath();
+        ctx.moveTo(x, h_box - 5);
+        ctx.lineTo(x, h_box + 5);
+        ctx.stroke();
+        ctx.fillStyle = "black";
+        ctx.textBaseline="top";
+        ctx.textAlign="center";
+        ctx.fillText(h, x, h_box + 10);
+    }
+    
+    var nsaf_points = [];
+    if (pathway_index == -1){
+        for (var prot_id in protein_dictionary){
+            var protein = protein_dictionary[prot_id];
+            if (tissue1_id in protein.nsaf && tissue2_id in protein.nsaf){
+                nsaf_points.push([protein.nsaf[tissue2_id], protein.nsaf[tissue1_id]]);
+            }
+        }
+    }
+    else {
+        for (prot_id of pathways_to_proteins[pathway_index][1]){
+            var protein = protein_dictionary[prot_id];
+            if (tissue1_id in protein.nsaf && tissue2_id in protein.nsaf){
+                nsaf_points.push([protein.nsaf[tissue2_id], protein.nsaf[tissue1_id]]);
+            }
+        }
+    }
+    
+    var nsaf_set = new Set();    
+    for (var i = 0; i < nsaf_points.length; ++i){
+        var x = nsaf_points[i][0];
+        var y = nsaf_points[i][1];
+        
+        // transform from nsaf to percentage [0, 1]
+        x = (x - min_NSAF) / (max_NSAF - min_NSAF);
+        y = (y - min_NSAF) / (max_NSAF - min_NSAF);
+        
+        // transform to axes pixels
+        x = Math.floor(w_offset + 2 + (w_box - w_offset) * x);
+        y = Math.floor(h_box - 2 - h_box * y);
+        
+        var hash = x * h_box + y;
+        
+        if (!nsaf_set.has(hash)){
+            ctx.beginPath();
+            ctx.arc(x, y, 1, 0, 2 * Math.PI);
+            ctx.fill();
+            nsaf_set.add(hash);
+        }
+    }
+    
+    
+    
 }
 
 
@@ -956,22 +1016,26 @@ function load_statistics(){
             var tmp_pw = JSON.parse(xmlhttp_search.responseText);
             statistics_loaded++;
             
+            var pw_select_metabolic = document.getElementById("nsaf_pathway_figure_select_metabolic");
+            var pw_select_signaling = document.getElementById("nsaf_pathway_figure_select_signaling");
+            var ppm_pw_select = document.getElementById("ppm_pw_figure_select");
+            var pw_correlation_pathway_select = document.getElementById("correlation_pathway_select");
+            
             for (var i = 0; i < tmp_pw.length; ++i){
-                var pw_select_metabolic = document.getElementById("nsaf_pathway_figure_select_metabolic");
-                var pw_select_signaling = document.getElementById("nsaf_pathway_figure_select_signaling");
-                var ppm_pw_select = document.getElementById("ppm_pw_figure_select");
-                
-                
                 var new_option_nsaf = document.createElement("option");
                 var new_option_ppm = document.createElement("option");
+                var new_option_corr = document.createElement("option");
                 new_option_nsaf.text = tmp_pw[i][1];
                 new_option_ppm.text = tmp_pw[i][1];
+                new_option_corr.text = tmp_pw[i][1];
                 new_option_nsaf.id = tmp_pw[i][0];
                 new_option_ppm.id = tmp_pw[i][0];
+                new_option_corr.value = tmp_pw[i][0];
                 
                 if (tmp_pw[i][3]) pw_select_signaling.add(new_option_nsaf);
                 else pw_select_metabolic.add(new_option_nsaf);
                 
+                pw_correlation_pathway_select.add(new_option_corr);
                 ppm_pw_select.add(new_option_ppm);
                 pathways_to_proteins[tmp_pw[i][0]] = [tmp_pw[i][1], tmp_pw[i][2]];
             }
