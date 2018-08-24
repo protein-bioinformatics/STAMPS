@@ -72,7 +72,7 @@
     <tr><td width="50%">
     </td>
     
-    <td style="border-left: white; border-left-style: solid; border-left-width: 1px;" id="how_to_nav" class="navigation_cell_click" align="center">
+    <td style="border-left: white; border-left-style: solid; border-left-width: 1px;" id="how_to_nav" class="navigation_cell_click" align="center" onclick="document.getElementById('how_to').style.display = 'inline';">
         <img src="images/how-to.svg" width="100%" class="navigation_cell_click_image"><br>
         How&nbsp;To
     </td>
@@ -114,6 +114,111 @@
     
     </table>
 </div>
+
+
+
+
+
+
+
+<div id="how_to" class="global_search" onclick="this.style.display = 'none';">
+    <div id="how_to_content" class="global_search_content" style="overflow-y: auto; height: 80%;">
+    <table width="100%" height="100%"><tr><td align="justify">
+            <h2><center><b>Creating Assay using Pathway Browser</b></center></h2><p>
+            
+            <h3>1) Select pathway browser</h3>
+            When opening the STAMP1 website, the first page is leading to all main protein selection dialogs as visible in <a href="#stamp_main">Figure&nbsp;1</a>. Clicking on „Pathway Browser“ in the lower panel, the main pathway browser window will be opened, consider Figure&nbsp;2. The pathway browser is an interactive browser, the view can be shifted (right click), the zoom can be changed (mouse wheel or magnifier icons on bottom right position).
+            <figure>
+                <a name="stamp_main">
+                <img src="images/tutorial/stamp-1.png" alt="Main page of STAMP providing easy accession to all functions and statistical summaries" style="width:100%">
+                <figcaption>Figure 1 | Main page of STAMP providing easy accession to all functions and statistical summaries</figcaption>
+            </figure>
+            The metabolic pathways are plotted in a graph-based fashion. Metabolites are presented as circles; proteins which act in the same metabolic reaction are grouped in protein boxes. By directly clicking on metabolite or protein labels, additional information is presented. Pathway references are presented in round-corned boxes. By clicking on, the according pathway will be opened.
+            <figure>
+                <a name="stamp_browser">
+                <img src="images/tutorial/stamp-2.png" alt="The interactive pathway browser as the main protein selection window" style="width:100%">
+                <figcaption>Figure 2 | The interactive pathway browser as the main protein selection window</figcaption>
+            </figure>
+            <p>&nbsp;
+            
+
+            <h3>2) Select pathway(s)</h3>
+            In the upper panel, the pathway of interest can be chosen in a drop down menu by clicking the button “Select pathway”. The protein selection is preserved when switching back to a pathway where proteins were selected. Additional functions are (i) changing the placed over organism  (in the current version, only mouse data is available), (ii) various filters for viewing proteins and (iii) a case insensitive search function for key words like a protein/metabolite name, description, accession or even peptide sequence. When clicking on a found entry, the view is automatically centered and zoomed on the hit in the pathway map.<p>&nbsp;
+            
+            <h3>3) Select proteins</h3>
+            Proteins of choice can be (de)selected by clicking on their checkboxes. By double clicking on a protein group box, all proteins of the according box will be (de)selected. By clicking and holding down the left mouse button on a free space and moving the mouse, a protein selection area will be spanned. When releasing the button, all proteins within this selection window will be (de)selected.
+            <p>&nbsp;
+            
+            <h3>4) Pathway statistical overview</h3>
+            For each pathway the user has the possibility to get a statistical overview by clicking on the arrows in the upper corner on the right hand side. A window will appear giving information of the total protein number of the selected pathway, protein coverage, number of selected proteins and additional information regarding number of peptides, spectra and validation (see Figure S3).
+            <figure>
+                <a name="statistics">
+                <center>
+                    <img src="images/tutorial/stamp-6.png" alt="Statistics box displaying all relevant information for a certain pathway." style="width:40%">
+                </center>
+                <figcaption>Figure 3 | Statistics box displaying all relevant information for a certain pathway.</figcaption>
+            </figure>
+            <p>&nbsp;
+
+            <h3>5) Check your protein selection and review spectra</h3>
+            Having selected all proteins for an assay, the user can review the selection by clicking on “Check spectra” in the upper panel. A new window is opening as shown in Figure&nbsp;4. On the left-hand side, a table is showing all selected proteins. Here, the user has the possibility to expand each protein to show its corresponding peptides that are stored with an according spectrum in the database. By clicking on the shown precursor mass, the corresponding spectrum is displayed showing y and b ions.  The user has to take into consideration  that only proteins, peptides and precursors will be displayed, which were identified and stored in our database and in addition satisfy the adjusted filter criteria. All proteins, peptides or spectra can be (de)selected on this screen for the final assay by checking or unchecking the blue boxes. To refine the assay even more, specific filter criteria can be applied. For instance the user can filter for peptide length and precursor charge as well as choose between variable and fixed modification of the oxidation of methionine and/or the carbamidomethylation of cystein. In Addition there is the possibility to filter for specific tissues.
+            <figure>
+                <a name="spectra_review">
+                <center>
+                    <img src="images/tutorial/stamp-3.png" alt="Review dialog for (de)selecting proteins, peptides or single spectra in the assay" style="width:100%">
+                </center>
+                <figcaption>Figure 4 | Review dialog for (de)selecting proteins, peptides or single spectra in the assay.</figcaption>
+            </figure>
+            <p>&nbsp;
+
+            <h3>6) Download your assay</h3>
+            Once the selection is satisfying, the user can proceed to download by clicking on “Go to download” on bottom right side of the dialog. A spectral library in .blib format, a .fasta file containing all selected protein sequences and a Skyline project file are being created on the fly and packed as a .zip file offered for download. After downloading and unzipping, the Skyline project file can easily be opened in <a href="http://skyline.ms" target="_blank">Skyline</a> with the complete assay ready start the targeted analyses.<p>&nbsp;<p>&nbsp;
+            
+            
+            <h2><center><b>Creating Assay using Accession List</b></center></h2><p>
+            
+            <h3>1) Open protein selection dialog via accession IDs</h3>
+            For the next step, a list of Uniprot1 accession IDs is required. Click on main page (consider <a href="#stamp_main">Figure&nbsp;1</a>) on “Accession Search” in the lower panel.<p>&nbsp;
+
+
+            <h3>2) Paste your protein accession IDs</h3>
+            A dialog for inserting the accessions IDs is being opened (as seen in Figure&nbsp;5). Select the desired species with the upper combo box. Write down your accession IDs into the text field. If you have a longer list, copy and paste it into the text field. Click on “Next” to proceed.
+            <figure>
+                <a name="accession_field">
+                <center>
+                    <img src="images/tutorial/stamp-4.png" alt="Dialog for selecting proteins via a list of Uniprot accession IDs" style="width:40%">
+                </center>
+                <figcaption>Figure 5 | Dialog for selecting proteins via a list of Uniprot accession IDs.</figcaption>
+            </figure>
+            <p>&nbsp;
+
+            <h3>3) Check your protein selection and review spectra</h3>
+            The review dialog appears as it is known from previous instruction (consider <a>Figure&nbsp;4) at step 5. Continue with this step.<p>&nbsp;<p>&nbsp;
+            
+            
+            
+            <h2><center><b>Creating Assay using Chromosome Browser</b></center></h2><p>
+            
+            <h3>1) Open protein selection dialog via chromosome browser</h3>
+            Another way of selecting proteins and building assays for targeted LC-MS/MS analysis is according to their location within the chromosomes. On the main page (consider <a href="#stamp_main">Figure&nbsp;1</a>) click on “Chromosome Search” in the lower panel.
+
+            <h3>2) Paste your protein accession IDs</h3>
+            A dialog for selecting proteins within chromosomes appears (as illustrated in Figure&nbsp;6). Select your desired species with the upper panel. The user can select  different regions on each chromosome by clicking on a specific spot and adjust the size of the selection box by using the mouse wheel. Alternatively it is possible to drag and drop the box along the chromosome or by entering a specific chromosome location in the upper panel. 
+            On the right-hand side, a protein table lists all registered proteins available in the particular chromosome region including gene name and accession number. Proteins can be (de)selected with the checkboxes to the right. When the selection is complete, one can proceed by clicking on “Next”. Only proteins and peptides that were identified and stored in the background library will be displayed.
+            <figure>
+                <a name="chromosome_browser">
+                <center>
+                    <img src="images/tutorial/stamp-5.png" alt="Lightweight chromosome browser for selecting proteins within regions of chromosomes" style="width:100%">
+                </center>
+                <figcaption>Figure 6 | Lightweight chromosome browser for selecting proteins within regions of chromosomes.</figcaption>
+            </figure>
+
+            <h3>3) Check your protein selection and review spectra</h3>
+            The review dialog appears as it is known from first instruction (consider Figure&nbsp;4) at step 5. Continue with this step.<p>&nbsp;<p>&nbsp;<p>&nbsp;<p>&nbsp;
+        </td></tr></table>
+    </div>
+</div>
+
 
 
 
@@ -2013,7 +2118,7 @@ if (mobile_check()){
 }
 else {
     var process_stat_loading = setInterval(function(){
-        load_statistics();
+        //load_statistics();
         clearInterval(process_stat_loading);
     }, 1);
 }
