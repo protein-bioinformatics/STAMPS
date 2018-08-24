@@ -365,29 +365,21 @@ main(int argc, char** argv) {
     sql::Statement *stmt = con->createStatement();
     
     if (statistics_pathways){
-        string sql_query = "SELECT distinct pw.id pathway_id, pw.name, npc.protein_id FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id where p.unreviewed = 0 order by pw.name;";
+        string sql_query = "SET SESSION group_concat_max_len=4294967295;";
+        stmt->execute(sql_query);
+        
+        
+        sql_query = "SELECT distinct pw.id pathway_id, pw.name, GROUP_CONCAT(npc.protein_id) prot_id, pw.signaling_pathway FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id where p.unreviewed = 0 group by pw.id order by pw.name;";
         
         res = stmt->executeQuery(sql_query);
        
         
-        int index_pw = 0;
-        int index_p = 0;
-        string last_id = "";
         string response = "[";
         while (res->next()){
-            if (last_id.compare(res->getString("pathway_id"))){
-                last_id = res->getString("pathway_id");
-                index_p = 0;
-                
-                if (index_pw++) response += "]],";
-                response += "[" + last_id + ",\"" + string(res->getString("name")) + "\",[";
-            }
+            if (response.length() > 1) response += ",";
             
-            
-            if (index_p++) response += ",";
-            response += string(res->getString("protein_id"));
+            response += "[" + string(res->getString("pathway_id")) + ",\"" + string(res->getString("name")) + "\",[" + string(res->getString("prot_id")) + "]," + string(res->getString("signaling_pathway")) + "]";
         }
-        if (index_pw) response += "]]";
         response += "]";
         replaceAll(response, "\n", "\\n");
         

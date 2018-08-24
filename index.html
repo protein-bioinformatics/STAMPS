@@ -143,7 +143,7 @@
             
 
             <h3>2) Select pathway(s)</h3>
-            In the upper panel, the pathway of interest can be chosen in a drop down menu by clicking the button “Select pathway”. The protein selection is preserved when switching back to a pathway where proteins were selected. Additional functions are (i) changing the placed over organism  (in the current version, only mouse data is available), (ii) various filters for viewing proteins and (iii) a case insensitive search function for key words like a protein/metabolite name, description, accession or even peptide sequence. When clicking on a found entry, the view is automatically centered and zoomed on the hit in the pathway map.<p>&nbsp;
+            In the upper panel, the pathway of interest can be chosen in a drop down menu by clicking the Metabolic Pathways” or “Signaling Pathways” button. The protein selection is preserved when switching back to a pathway where proteins were selected. Additional functions are (i) changing the placed over organism  (in the current version, only mouse data is available), (ii) various filters for viewing proteins and (iii) a case insensitive search function for key words like a protein/metabolite name, description, accession or even peptide sequence. When clicking on a found entry, the view is automatically centered and zoomed on the hit in the pathway map.<p>&nbsp;
             
             <h3>3) Select proteins</h3>
             Proteins of choice can be (de)selected by clicking on their checkboxes. By double clicking on a protein group box, all proteins of the according box will be (de)selected. By clicking and holding down the left mouse button on a free space and moving the mouse, a protein selection area will be spanned. When releasing the button, all proteins within this selection window will be (de)selected.
@@ -412,7 +412,7 @@ div<div id="locus_search" class="global_search">
         <tr><td width="50%" valign="top">
             <b>Normalized spectrum abundance factor</b>
         </td><td>
-            <b>Distribution of protein abundances</b>
+            <b>Distribution of protein abundances for metabolic pathways</b>
         </td></tr>
         
         <tr><td width="50%" valign="bottom">
@@ -424,7 +424,7 @@ div<div id="locus_search" class="global_search">
                     <td><input type="checkbox" id="statistics_check_spleen_nsaf" onchange="update_nsaf();" /> Spleen</td>
                     <td><input type="checkbox" id="statistics_check_heart_nsaf" onchange="update_nsaf();" /> Heart</td>
                 </tr>
-                <tr><td><input type="checkbox" id="statistics_check_blood_nsaf" onchange="update_nsaf();" /> Plasma</td>
+                <tr><td><input type="checkbox" id="statistics_check_blood_nsaf" onchange="update_nsaf();" /> Platelet</td>
                     <td><input type="checkbox" id="statistics_check_fat_nsaf" onchange="update_nsaf();" /> Fat</td>
                     <td><input type="checkbox" id="statistics_check_lung_nsaf" onchange="update_nsaf();" /> Lung</td>
                     <td><input type="checkbox" id="statistics_check_eye_nsaf" onchange="update_nsaf();" /> Eye</td>
@@ -432,13 +432,13 @@ div<div id="locus_search" class="global_search">
                 </tr>
             </table>
         </td><td width="50%" valign="bottom">
-            <select id="nsaf_pathway_figure_select" onchange="update_nsaf_pathway_figure();"></select>
+            <select id="nsaf_pathway_figure_select_metabolic" onchange="update_nsaf_pathway_figure(0, 'metabolic');"></select>
         </td></tr>
         
         <tr><td width="50%" valign="top">
             <canvas id="nsaf_figure" width="600" height="300">
         </td><td width="50%" valign="top">
-            <canvas id="nsaf_pathway_figure" width="600" height="300"></canvas>
+            <canvas id="nsaf_pathway_figure_metabolic" width="600" height="300"></canvas>
         </td></tr>
             
         <tr><td width="50%" valign="top">
@@ -453,6 +453,74 @@ div<div id="locus_search" class="global_search">
         </td><td width="50%" valign="top">
             &nbsp;
         </td></tr>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr><td width="50%" valign="top">
+            <b>Correlation between tissue abundances</b>
+        </td><td width="50%" valign="top">
+            <b>Distribution of protein abundances for signaling pathways</b>
+        </td></tr>
+            
+        <tr><td width="50%" valign="bottom">
+            <select id="correlation_tissue1_select" onchange="update_correlation_tissues();">
+                <option>Brain</option>
+                <option>Liver</option>
+                <option>Kidney</option>
+                <option>Spleen</option>
+                <option>Heart</option>
+                <option>Platelet</option>
+                <option>Fat</option>
+                <option>Lung</option>
+                <option>Eye</option>
+                <option>Gut</option>
+            </select> vs. 
+            <select id="correlation_tissue2_select" onchange="update_correlation_tissues();">
+                <option>Brain</option>
+                <option>Liver</option>
+                <option>Kidney</option>
+                <option>Spleen</option>
+                <option>Heart</option>
+                <option>Platelet</option>
+                <option>Fat</option>
+                <option>Lung</option>
+                <option>Eye</option>
+                <option>Gut</option>
+            </select>
+        </td><td width="50%" valign="bottom">
+            <select id="nsaf_pathway_figure_select_signaling" onchange="update_nsaf_pathway_figure(0, 'signaling');"></select>
+        </td></tr>
+        
+        <tr><td width="50%" valign="top" align="center">
+            <canvas id="correlation_tissue_tissue" width="300" height="300"></canvas>
+        </td><td width="50%" valign="top">
+            <canvas id="nsaf_pathway_figure_signaling" width="600" height="300"></canvas>
+        </td></tr>
+            
+        <tr><td width="50%" valign="top">
+            <hr width="80%">  
+        </td><td width="50%" valign="top">
+            <hr width="80%">  
+        </td></tr>
+            
+            
+        <tr><td width="50%" valign="top">
+            &nbsp;
+        </td><td width="50%" valign="top">
+            &nbsp;
+        </td></tr>
+        
+        
+        
+        
+        
+        
             
             
         <tr><td width="50%" valign="top">
@@ -470,7 +538,7 @@ div<div id="locus_search" class="global_search">
                     <td><input type="checkbox" id="statistics_check_spleen_pI" onchange="update_pI();" /> Spleen</td>
                     <td><input type="checkbox" id="statistics_check_heart_pI" onchange="update_pI();" /> Heart</td>
                 </tr>
-                <tr><td><input type="checkbox" id="statistics_check_blood_pI" onchange="update_pI();" /> Plasma</td>
+                <tr><td><input type="checkbox" id="statistics_check_blood_pI" onchange="update_pI();" /> Platelet</td>
                     <td><input type="checkbox" id="statistics_check_fat_pI" onchange="update_pI();" /> Fat</td>
                     <td><input type="checkbox" id="statistics_check_lung_pI" onchange="update_pI();" /> Lung</td>
                     <td><input type="checkbox" id="statistics_check_eye_pI" onchange="update_pI();" /> Eye</td>
@@ -628,6 +696,100 @@ function update_nsaf(ctx){
 
 
 
+
+
+
+function update_correlation_tissues(){
+    if (statistics_loaded < 2) return;
+    
+    var correlation_tissue_tissue = document.getElementById("correlation_tissue_tissue");
+    var ctx = correlation_tissue_tissue.getContext("2d");
+    
+    var tissue1_name = document.getElementById("correlation_tissue1_select").options[document.getElementById("correlation_tissue1_select").selectedIndex].innerHTML;
+    var tissue2_name = document.getElementById("correlation_tissue2_select").options[document.getElementById("correlation_tissue2_select").selectedIndex].innerHTML;
+            
+    var tissue1_id = tissue_name_to_id[tissue1_name];
+    var tissue2_id = tissue_name_to_id[tissue2_name];
+            
+    var w_box = 300;
+    var w_offset = 50;
+    var h_box = 250;
+    var h_offset = 50;
+    ctx.clearRect(0, 0, w_box, h_box + h_offset);
+    
+    ctx.font="14px Arial";
+    ctx.textAlign = 'center';
+    ctx.save();
+    ctx.translate(35, h_box >> 1);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = "black";
+    ctx.fillText(tissue1_name, 0, 0);
+    ctx.restore();
+    
+    ctx.fillText(tissue2_name, (w_box + w_offset) / 2, h_box + 20);
+    
+    nsaf_list1 = [];
+    nsaf_list2 = [];
+    for (var prot_id in protein_dictionary){
+        var protein = protein_dictionary[prot_id];
+        if (tissue1_id in protein.nsaf && tissue2_id in protein.nsaf){
+            nsaf_list1.push([protein.nsaf[tissue1_id], protein.id]);
+            nsaf_list2.push([protein.nsaf[tissue2_id], protein.id]);
+        }
+    }
+    nsaf_list1.sort();
+    nsaf_list2.sort();
+    
+    nsaf_dict2 = {};
+    for (var i = 0; i < nsaf_list2.length; ++i) nsaf_dict2[nsaf_list2[i][1]] = i;
+    
+    
+    
+    var nsaf_set = new Set();
+    for (var i = 0; i < nsaf_list1.length; ++i){
+        var i2 = nsaf_dict2[nsaf_list1[i][1]];
+    
+        var x = Math.floor(w_offset + 2 + (w_box - w_offset) * i / nsaf_list1.length);
+        var y = h_box - 2 - h_box * i2 / nsaf_list1.length;
+        
+        var hash = x * h_box + y;
+        
+        if (!nsaf_set.has(hash)){
+            ctx.beginPath();
+            ctx.arc(x, y, 1, 0, 2 * Math.PI);
+            ctx.fill();
+            nsaf_set.add(hash);
+        }
+    }
+    
+    
+    
+    ctx.beginPath();
+    ctx.moveTo(w_offset, 0);
+    ctx.lineTo(w_box, 0);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, 0);
+    ctx.lineTo(w_box, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, h_box);
+    ctx.lineTo(w_offset, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_offset, h_box);
+    ctx.lineTo(w_offset, 0);
+    ctx.stroke();
+}
+
+
+
+
+
+
 function resize_views(){
 
     windowWidth = window.innerWidth;
@@ -776,9 +938,11 @@ function load_statistics(){
             
             statistics_loaded++;
             update_nsaf();
-            update_nsaf_pathway_figure();
+            update_nsaf_pathway_figure(0, "metabolic");
+            update_nsaf_pathway_figure(0, "signaling");
             update_pI();
             update_ppm();
+            update_correlation_tissues();
         }
     }
     
@@ -793,22 +957,30 @@ function load_statistics(){
             statistics_loaded++;
             
             for (var i = 0; i < tmp_pw.length; ++i){
-                var pw_select = document.getElementById("nsaf_pathway_figure_select");
+                var pw_select_metabolic = document.getElementById("nsaf_pathway_figure_select_metabolic");
+                var pw_select_signaling = document.getElementById("nsaf_pathway_figure_select_signaling");
                 var ppm_pw_select = document.getElementById("ppm_pw_figure_select");
+                
+                
                 var new_option_nsaf = document.createElement("option");
                 var new_option_ppm = document.createElement("option");
                 new_option_nsaf.text = tmp_pw[i][1];
                 new_option_ppm.text = tmp_pw[i][1];
                 new_option_nsaf.id = tmp_pw[i][0];
                 new_option_ppm.id = tmp_pw[i][0];
-                pw_select.add(new_option_nsaf);
+                
+                if (tmp_pw[i][3]) pw_select_signaling.add(new_option_nsaf);
+                else pw_select_metabolic.add(new_option_nsaf);
+                
                 ppm_pw_select.add(new_option_ppm);
                 pathways_to_proteins[tmp_pw[i][0]] = [tmp_pw[i][1], tmp_pw[i][2]];
             }
             update_nsaf();
-            update_nsaf_pathway_figure();
+            update_nsaf_pathway_figure(0, "metabolic");
+            update_nsaf_pathway_figure(0, "signaling");
             update_pI();
             update_ppm();
+            update_correlation_tissues();
         }
     }
     xmlhttp_search.open("GET", "/stamp/cgi-bin/get-proteins.bin?statistics_pathways", true);
@@ -1064,12 +1236,12 @@ function update_pI(){
 }
 
 
-function update_nsaf_pathway_figure(ctx){
+function update_nsaf_pathway_figure(ctx, suffix){
     if (statistics_loaded < 2) return;
-    var pw_option = document.getElementById("nsaf_pathway_figure_select").options[document.getElementById("nsaf_pathway_figure_select").selectedIndex];
+    var pw_option = document.getElementById("nsaf_pathway_figure_select_" + suffix).options[document.getElementById("nsaf_pathway_figure_select_" + suffix).selectedIndex];
     
-    if (typeof(ctx) === 'undefined'){
-        var nsaf_figure = document.getElementById("nsaf_pathway_figure");
+    if (typeof(ctx) === 'undefined' || ctx == 0){
+        var nsaf_figure = document.getElementById("nsaf_pathway_figure_" + suffix);
         ctx = nsaf_figure.getContext("2d");
     }
             
@@ -1183,10 +1355,20 @@ function update_nsaf_pathway_figure(ctx){
     }
 }
 
+
+
+
+
+
+
+
 function hide_statistics (){
     document.getElementById("statistics").style.display = "none";
     document.getElementById("waiting_background").style.display = "none";
 }
+
+
+
 
 
 
@@ -1958,6 +2140,8 @@ function draw_chromosome_ideograms(){
 }
 
 
+
+/*
 function nsaf_pathway_to_svg(){
     if (statistics_loaded < 2) return;
     
@@ -1986,7 +2170,7 @@ function nsaf_to_svg(){
     window.open("data:application/txt," + encodeURIComponent(svgCode), "_self");
 }
 
-
+*/
 
 
 function open_accession_search(){
@@ -2118,7 +2302,7 @@ if (mobile_check()){
 }
 else {
     var process_stat_loading = setInterval(function(){
-        //load_statistics();
+        load_statistics();
         clearInterval(process_stat_loading);
     }, 1);
 }

@@ -112,9 +112,17 @@ tissues = {1: ["images/brain.svg", "Brain", 0, "statistics_check_brain", "#f4e50
            9: ["images/eye.svg", "Eye", 0, "statistics_check_eye", "#2a71b0"],
            10: ["images/gut.svg", "Gut", 0, "statistics_check_gut", "#0696bb"]}
            
-           
-
-
+tissue_name_to_id = {"Brain": 1,
+                     "Liver": 2,
+                     "Kidney": 3,
+                     "Spleen": 4,
+                     "Heart": 5,
+                     "Platelet": 6,
+                     "Fat": 7,
+                     "Lung": 8,
+                     "Eye": 9,
+                     "Gut": 10}
+                     
 line_width = 5;
 disabled_text_color = "#bbbbbb";
 disabled_fill_color = "#cccccc";
