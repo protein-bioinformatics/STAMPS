@@ -2821,6 +2821,10 @@ function change_textarea_type(dom_obj, to_text){
         var col_id = dom_obj.col_id;
         var field_len = dom_obj.field_len;
         
+        var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + encodeURL(content);
+        
+
+        
         
         var result = update_entry(request);
         if (!result){

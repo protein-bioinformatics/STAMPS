@@ -405,26 +405,40 @@ div<div id="locus_search" class="global_search">
 <div id="waiting_background" class="light_background"></div>
 
 
+
+
+
+
+
+
 <div id="statistics" class="global_search" onclick="this.style.display = 'none';">
     <div id="statistics_table" class="global_search_content" style="width: 1400px; overflow-y: scroll;">
     <table width="100%" height="100%">
     
         <tr><td width="50%" valign="top">
-            <b>Distribution of protein abundances for metabolic pathways</b>
+            <b>Normalized distribution of protein abundances per pathway</b>
         </td><td>
-            <b>Distribution of protein abundances for signaling pathways</b>
+            <b>Absolute number of proteins</b>
         </td></tr>
         
         <tr><td width="50%" valign="bottom">
-            <select id="nsaf_pathway_figure_select_metabolic" onchange="update_nsaf_pathway_figure(0, 'metabolic');"></select>
+            <input type="radio" id="nsaf_pathway_radio_metabolic" name="NSAF_Pathway_Type" onclick="update_nsaf_pathway_select();" checked />
+            <label> Metabolic</label>
+            <input type="radio" id="nsaf_pathway_radio_signaling" name="NSAF_Pathway_Type" onclick="update_nsaf_pathway_select();" />
+            <label> Signaling</label>&nbsp;&nbsp;&nbsp;
+            <select id="nsaf_pathway_figure_select" onchange="update_nsaf_pathway_figure();" style="width: 250px;"></select>
         </td><td width="50%" valign="bottom">
-            <select id="nsaf_pathway_figure_select_signaling" onchange="update_nsaf_pathway_figure(0, 'signaling');"></select>
+            <input type="radio" id="absolute_pathway_radio_metabolic" name="Absolute_Pathway_Type" onclick="update_absolute_pathway_select();" checked />
+            <label> Metabolic</label>
+            <input type="radio" id="absolute_pathway_radio_signaling" name="Absolute_Pathway_Type" onclick="update_absolute_pathway_select();" />
+            <label> Signaling</label>&nbsp;&nbsp;&nbsp;
+            <select id="absolute_pathway_figure_select" onchange="update_absolute_pathway_figure();" style="width: 250px;"></select>
         </td></tr>
         
         <tr><td width="50%" valign="top">
-            <canvas id="nsaf_pathway_figure_metabolic" width="600" height="300"></canvas>
+            <canvas id="nsaf_pathway_figure" width="600" height="300"></canvas>
         </td><td width="50%" valign="top">
-            <canvas id="nsaf_pathway_figure_signaling" width="600" height="300"></canvas>
+            <canvas id="absolute_pathway_figure" width="600" height="300"></canvas>
         </td></tr>
             
         <tr><td width="50%" valign="top">
@@ -449,13 +463,16 @@ div<div id="locus_search" class="global_search">
         
         
         <tr><td width="50%" valign="top">
-        
+            <b>Normalized distribution of protein abundances per tissue</b>
         </td><td width="50%" valign="top">
             <b>Normalized spectrum abundance factor</b>
         </td></tr>
             
         <tr><td width="50%" valign="bottom">
-        
+            <table width="100%"><tr><td valign="middle"><select id="tissue_tissue_select" onchange="update_tissue();"></select>&nbsp;&nbsp;</td>
+            <td width="99%">&nbsp;&nbsp;<select id="tissue_pathway_select" multiple size="5" onchange="update_tissue();"></select><br>&nbsp;&nbsp;
+                <font size="-2">Multiple selection holding CTRL key</font>
+            </td></tr></table>
         </td><td width="50%" valign="bottom">
             <table>
                 <tr><td colspan="5">Tissues:</td><td></tr>
@@ -531,19 +548,19 @@ div<div id="locus_search" class="global_search">
                 <option>Gut</option>
             </select>
         </td><td width="500%" valign="bottom">
-                <input type="radio" id="correlation_pathway_radio_metabolic" name="Pathway_Type" onclick="update_pathway_select();" checked />
+                <input type="radio" id="correlation_pathway_radio_metabolic" name="Pathway_Type" onclick="update_correlation_pathway_select();" checked />
                 <label> Metabolic</label>
-                <input type="radio" id="correlation_pathway_radio_signaling" name="Pathway_Type" onclick="update_pathway_select();" />
+                <input type="radio" id="correlation_pathway_radio_signaling" name="Pathway_Type" onclick="update_correlation_pathway_select();" />
                 <label> Signaling</label>&nbsp;&nbsp;&nbsp;
             <select id="correlation_pathway_select" onchange="update_correlation_tissues_pathway();" style="width: 300px;"></select>
         </td></tr>
         
-        <tr><td width="50%" valign="top" align="center">
-            <canvas id="correlation_tissue_tissue" width="300" height="300"></canvas>
-        </td><td width="50%" valign="top">
-            <table width="100%"><tr><td width="50%">
+        <tr><td width="100%" valign="top" align="center" colspan="2">
+            <table width="100%"><tr><td width="33%">
+                <canvas id="correlation_tissue_tissue" width="300" height="300"></canvas>
+            </td><td width="33%" valign="top">
                 <canvas id="correlation_tissue_tissue_pathway" width="300" height="300"></canvas>
-            </td><td width="50%" valign="top">
+            </td><td width="33%" valign="top">
                 <select id="correlation_tissue_tissue_pathway_proteins" size=20 style="width:100%; height: 250px;" multiple>
             </td></tr></table>
         </td></tr>
@@ -661,30 +678,123 @@ var min_NSAF = 0;
 
 
 
-function update_pathway_select(){
-    var chosen_select = 0;
-    if (document.getElementById("correlation_pathway_radio_metabolic").checked){
-        chosen_select = document.getElementById("nsaf_pathway_figure_select_metabolic");
-    }
-    else {
-        chosen_select = document.getElementById("nsaf_pathway_figure_select_signaling");
-    }
+
+function update_nsaf_pathway_select(){
+    var signaling = document.getElementById("nsaf_pathway_radio_signaling").checked;
     
-    target_select = document.getElementById("correlation_pathway_select");
-    for(i = target_select.options.length - 1 ; i >= 0 ; i--)
+    var target_select = document.getElementById("nsaf_pathway_figure_select");
+    for(var i = target_select.options.length - 1 ; i >= 0 ; i--)
     {
         target_select.remove(i);
     }
     
+    var pw_list = [];
+    for (pw_id in pathways_to_proteins){
+        if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
+    }
+    pw_list.sort();
     
-    for (var i = 0; i < chosen_select.options.length; ++i){
+    for (pw_row of pw_list){
         var new_option = document.createElement("option");
-        new_option.text = chosen_select.options[i].text;
-        new_option.value = chosen_select.options[i].value;
+        new_option.text = pw_row[0];
+        new_option.value = pw_row[1];
+        target_select.add(new_option);
+    }
+    update_nsaf_pathway_figure();
+}
+
+
+
+
+function update_absolute_pathway_select(){
+    var signaling = document.getElementById("absolute_pathway_radio_signaling").checked;
+    
+    var target_select = document.getElementById("absolute_pathway_figure_select");
+    for(var i = target_select.options.length - 1 ; i >= 0 ; i--)
+    {
+        target_select.remove(i);
+    }
+    
+    var pw_list = [];
+    for (pw_id in pathways_to_proteins){
+        if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
+    }
+    pw_list.sort();
+    
+    for (pw_row of pw_list){
+        var new_option = document.createElement("option");
+        new_option.text = pw_row[0];
+        new_option.value = pw_row[1];
+        target_select.add(new_option);
+    }
+    update_absolute_pathway_figure();
+}
+
+
+
+
+
+
+
+function update_correlation_pathway_select(){
+    var signaling = document.getElementById("correlation_pathway_radio_signaling").checked;
+    
+    var target_select = document.getElementById("correlation_pathway_select");
+    for(var i = target_select.options.length - 1 ; i >= 0 ; i--)
+    {
+        target_select.remove(i);
+    }
+    
+    var pw_list = [];
+    for (pw_id in pathways_to_proteins){
+        if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
+    }
+    pw_list.sort();
+    
+    for (pw_row of pw_list){
+        var new_option = document.createElement("option");
+        new_option.text = pw_row[0];
+        new_option.value = pw_row[1];
         target_select.add(new_option);
     }
     update_correlation_tissues_pathway();
 }
+
+
+
+
+var selected_tissues = new Set();
+function update_tissue(){
+    var max_items = 5;
+    var tissue_pathway_select = document.getElementById("tissue_pathway_select");
+    var current_selected_tissues = new Set();
+    for (var i = 0; i < tissue_pathway_select.options.length; ++i){
+        var opt = tissue_pathway_select.options[i];
+        if (opt.selected) current_selected_tissues.add(opt.value);
+    }
+    var diff_del = new Set([...selected_tissues].filter(x => !current_selected_tissues.has(x)));
+    var diff_add = new Set([...current_selected_tissues].filter(x => !selected_tissues.has(x)));
+    
+    for (var val of diff_del) selected_tissues.delete(val);
+    for (var val of diff_add){
+        if (selected_tissues.size >= max_items){
+            alert("5 pathways at most can be selected!");
+            break;
+        }
+        selected_tissues.add(val);
+    }
+    
+    for (var i = 0; i < tissue_pathway_select.options.length; ++i){
+        tissue_pathway_select.options[i].selected = selected_tissues.has(tissue_pathway_select.options[i].value);
+    }
+    
+    
+}
+
+
 
 
 
@@ -1174,6 +1284,16 @@ function open_statistics (){
 
 
 function load_statistics(){
+
+    var tissue_tissue_select = document.getElementById("tissue_tissue_select");
+    for (t in tissues){
+        var tissue_option = document.createElement("option");
+        tissue_option.text = tissues[t][1];
+        tissue_option.value = t;
+        tissue_tissue_select.add(tissue_option);
+    }
+
+
     // request proteins
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -1217,12 +1337,14 @@ function load_statistics(){
             max_NSAF = Math.ceil(max_NSAF);
             
             statistics_loaded++;
+            update_nsaf_pathway_select();
+            update_absolute_pathway_select();
             update_nsaf();
-            update_nsaf_pathway_figure(0, "metabolic");
-            update_nsaf_pathway_figure(0, "signaling");
+            update_nsaf_pathway_figure();
+            update_absolute_pathway_figure();
             update_pI();
             update_ppm();
-            update_pathway_select();
+            update_correlation_pathway_select();
             update_correlation_tissues();
             update_correlation_tissues_pathway();
         }
@@ -1241,27 +1363,35 @@ function load_statistics(){
             var pw_select_metabolic = document.getElementById("nsaf_pathway_figure_select_metabolic");
             var pw_select_signaling = document.getElementById("nsaf_pathway_figure_select_signaling");
             var ppm_pw_select = document.getElementById("ppm_pw_figure_select");
+            var tissue_pathway_select = document.getElementById("tissue_pathway_select");
             
             for (var i = 0; i < tmp_pw.length; ++i){
                 var new_option_nsaf = document.createElement("option");
                 var new_option_ppm = document.createElement("option");
+                var new_option_tps = document.createElement("option");
                 new_option_nsaf.text = tmp_pw[i][1];
                 new_option_ppm.text = tmp_pw[i][1];
+                new_option_tps.text = tmp_pw[i][1];
                 new_option_nsaf.value = tmp_pw[i][0];
                 new_option_ppm.value = tmp_pw[i][0];
-                
-                if (tmp_pw[i][3]) pw_select_signaling.add(new_option_nsaf);
-                else pw_select_metabolic.add(new_option_nsaf);
+                new_option_tps.value = tmp_pw[i][0];
                 
                 ppm_pw_select.add(new_option_ppm);
-                pathways_to_proteins[tmp_pw[i][0]] = [tmp_pw[i][1], tmp_pw[i][2]];
+                tissue_pathway_select.add(new_option_tps);
+                
+                var protein_ids = new Set();
+                for (prot_id of tmp_pw[i][2]) protein_ids.add(prot_id);
+                
+                pathways_to_proteins[tmp_pw[i][0]] = [tmp_pw[i][1], protein_ids, tmp_pw[i][3] == "1"];
             }
+            update_nsaf_pathway_select();
+            update_absolute_pathway_select();
             update_nsaf();
-            update_nsaf_pathway_figure(0, "metabolic");
-            update_nsaf_pathway_figure(0, "signaling");
+            update_nsaf_pathway_figure();
+            update_absolute_pathway_figure();
             update_pI();
             update_ppm();
-            update_pathway_select();
+            update_correlation_pathway_select();
             update_correlation_tissues();
             update_correlation_tissues_pathway();
         }
@@ -1289,8 +1419,8 @@ function update_ppm(){
     var protein_ids = pathways_to_proteins[pw_option.value][1];
     var aaa = 0;
     var ttt = 0;
-    for (var i = 0; i < protein_ids.length; ++i){
-        var protein = protein_dictionary[protein_ids[i]];
+    for (prot_id of protein_ids){
+        var protein = protein_dictionary[prot_id];
         for (var j = 0; j < protein.peptides.length; ++j){
             var peptide = protein.peptides[j];
             for (var k = 0; k < peptide.spectra.length; ++k){
@@ -1519,14 +1649,128 @@ function update_pI(){
 }
 
 
-function update_nsaf_pathway_figure(ctx, suffix){
+
+
+
+
+
+
+
+function update_absolute_pathway_figure(){
     if (statistics_loaded < 2) return;
-    var pw_option = document.getElementById("nsaf_pathway_figure_select_" + suffix).options[document.getElementById("nsaf_pathway_figure_select_" + suffix).selectedIndex];
     
-    if (typeof(ctx) === 'undefined' || ctx == 0){
-        var nsaf_figure = document.getElementById("nsaf_pathway_figure_" + suffix);
-        ctx = nsaf_figure.getContext("2d");
+    var pw_option = document.getElementById("absolute_pathway_figure_select").options[document.getElementById("absolute_pathway_figure_select").selectedIndex];
+    var nsaf_figure = document.getElementById("absolute_pathway_figure");
+    var ctx = nsaf_figure.getContext("2d");
+            
+    var w_box = 600;
+    var w_offset = 70;
+    var w_bar = 30;
+    var h_box = 250;
+    var h_offset = 50;
+    ctx.clearRect(0, 0, w_box, h_box + h_offset);
+
+    ctx.beginPath();
+    ctx.moveTo(w_offset, 0);
+    ctx.lineTo(w_box, 0);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, 0);
+    ctx.lineTo(w_box, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, h_box);
+    ctx.lineTo(w_offset, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_offset, h_box);
+    ctx.lineTo(w_offset, 0);
+    ctx.stroke();    
+    
+    
+    var num_proteins = {};
+    var max_num = 0;
+    for (prot_id of pathways_to_proteins[pw_option.value][1]){
+        var protein = protein_dictionary[prot_id];
+        for (key in protein.nsaf){
+            if (!(key in num_proteins)) num_proteins[key] = 0;
+            num_proteins[key]++;
+            if (max_num < num_proteins[key]) max_num = num_proteins[key];
+        }
     }
+    
+    
+    // y-scale
+    ctx.lineWidth = 1;
+    ctx.textAlign="right";
+    ctx.textBaseline="middle";
+    var v_factor = 0.94;            
+    var step = max_num < 20 ? 5 : (max_num < 80 ? 10 : 20);
+    ctx.font="14px Arial";
+    max_num = Math.ceil(max_num / step) * step;
+    
+    
+    for (var h = step; h <= max_num; h += step){
+        var y = h_box - (h / max_num * h_box) * v_factor;
+        ctx.strokeStyle = "#dddddd";
+        ctx.beginPath();
+        ctx.moveTo(w_offset, y);
+        ctx.lineTo(w_box, y);
+        ctx.stroke();
+        
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(w_offset - 5, y);
+        ctx.lineTo(w_offset + 5, y);
+        ctx.stroke();
+        
+        ctx.fillStyle = "black";
+        ctx.fillText(h, w_offset - 8, y);
+    }
+    
+    
+    
+    
+    
+     // x-axis
+    var i = 0;
+    var w = (w_box - w_offset) / 10;
+    ctx.textAlign = 'right';
+    for (t in tissues){
+        var x = Math.floor(w_offset + (i + 0.5) * w - w_bar * 0.5);
+        var y = (num_proteins[t] / max_num * h_box) * v_factor;
+    
+        ctx.fillStyle = tissues[t][4];
+        ctx.fillRect(x, h_box - 1 - y, w_bar, y);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.save();
+        ctx.translate(w_offset + (i + 0.5) * w, h_box + 2);
+        ctx.rotate(-Math.PI / 4);
+        ctx.fillStyle = "black";
+        ctx.fillText(tissues[t][1], 0, 8);
+        ctx.restore();
+        ++i;
+    }
+}
+
+
+
+
+
+
+
+
+function update_nsaf_pathway_figure(){
+    if (statistics_loaded < 2) return;
+    
+    var pw_option = document.getElementById("nsaf_pathway_figure_select").options[document.getElementById("nsaf_pathway_figure_select").selectedIndex];
+    var nsaf_figure = document.getElementById("nsaf_pathway_figure");
+    var ctx = nsaf_figure.getContext("2d");
             
     var w_box = 600;
     var w_offset = 70;
@@ -1559,8 +1803,8 @@ function update_nsaf_pathway_figure(ctx, suffix){
     var tissue_nsafs = {};
     for (key in tissues) tissue_nsafs[key] = 0;
     var max_val = 0;
-    for (var i = 0; i < protein_ids.length; ++i){
-        var protein = protein_dictionary[protein_ids[i]];
+    for (prot_id of pathways_to_proteins[pw_option.value][1]){
+        var protein = protein_dictionary[prot_id];
         for (key in protein.nsaf){
             tissue_nsafs[key] += Math.pow(10, protein.nsaf[key]);
         }
@@ -1591,7 +1835,7 @@ function update_nsaf_pathway_figure(ctx, suffix){
     
     
     
-    // y-scale
+    // y-axis
     ctx.font="14px Arial";
     for (var h = step; h <= 100; h += step){
         var y = h_box - (h / 100 * h_box) * v_factor;
@@ -1615,7 +1859,7 @@ function update_nsaf_pathway_figure(ctx, suffix){
     
     
     
-    
+    // x-axis
     var i = 0;
     var w = (w_box - w_offset) / 10;
     ctx.textAlign = 'right';

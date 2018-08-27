@@ -4885,7 +4885,7 @@ function update_browser_link(){
 
 function compute_statistics(){
     if (typeof qsdb_domain === 'undefined' || qsdb_domain === null) return;
-    document.getElementById("stat_pathway").innerHTML = pathways[current_pathway];
+    document.getElementById("stat_pathway").innerHTML = pathways[current_pathway][0];
     
     
     var proteins_content = new Set();
