@@ -470,8 +470,11 @@ div<div id="locus_search" class="global_search">
             
         <tr><td width="50%" valign="bottom">
             <table width="100%"><tr><td valign="middle"><select id="tissue_tissue_select" onchange="update_tissue();"></select>&nbsp;&nbsp;</td>
-            <td width="99%">&nbsp;&nbsp;<select id="tissue_pathway_select" multiple size="5" onchange="update_tissue();"></select><br>&nbsp;&nbsp;
-                <font size="-2">Multiple selection holding CTRL key</font>
+            <td valign="middle">
+                <table><tr><td><input type="radio" id="tissue_pathway_radio_metabolic" name="tissue_Pathway_Type" onclick="update_tissue_pathway_select();" checked /></td><td><label> Metabolic</label></td></tr></table>
+                <table><tr><td><input type="radio" id="tissue_pathway_radio_signaling" name="tissue_Pathway_Type" onclick="update_tissue_pathway_select();" /></td><td>                <label> Signaling</label></td></tr></table>
+            </td>
+            <td width="99%">&nbsp;&nbsp;<select id="tissue_pathway_select" multiple size="5" onchange="update_tissue();" style="width: 400px;"></select><br>&nbsp;&nbsp;<font size="-2">Multiple selection holding CTRL key</font>
             </td></tr></table>
         </td><td width="50%" valign="bottom">
             <table>
@@ -492,7 +495,7 @@ div<div id="locus_search" class="global_search">
         </td></tr>
         
         <tr><td width="50%" valign="top" align="center">
-            <canvas id="tissue_figure" width="600" height="500"></canvas>
+            <canvas id="tissue_figure" width="600" height="400"></canvas>
         </td><td width="50%" valign="top">
             <canvas id="nsaf_figure" width="600" height="300"></canvas>
         </td></tr>
@@ -736,6 +739,34 @@ function update_absolute_pathway_select(){
 
 
 
+function update_tissue_pathway_select(){
+    var signaling = document.getElementById("tissue_pathway_radio_signaling").checked;
+    
+    var target_select = document.getElementById("tissue_pathway_select");
+    for(var i = target_select.options.length - 1 ; i >= 0 ; i--)
+    {
+        target_select.remove(i);
+    }
+    
+    var pw_list = [];
+    for (pw_id in pathways_to_proteins){
+        if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
+    }
+    pw_list.sort();
+    
+    for (pw_row of pw_list){
+        var new_option = document.createElement("option");
+        new_option.text = pw_row[0];
+        new_option.value = pw_row[1];
+        target_select.add(new_option);
+    }
+    update_tissue();
+}
+
+
+
+
 
 
 
@@ -810,7 +841,7 @@ function update_tissue(){
     var w_offset = 70;
     var w_bar = 30;
     var h_box = 250;
-    var h_offset = 250;
+    var h_offset = 150;
     ctx.clearRect(0, 0, w_box, h_box + h_offset);
 
     ctx.beginPath();
