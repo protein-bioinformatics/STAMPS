@@ -492,6 +492,7 @@ div<div id="locus_search" class="global_search">
         </td></tr>
         
         <tr><td width="50%" valign="top" align="center">
+            <canvas id="tissue_figure" width="600" height="500"></canvas>
         </td><td width="50%" valign="top">
             <canvas id="nsaf_figure" width="600" height="300"></canvas>
         </td></tr>
@@ -766,32 +767,160 @@ function update_correlation_pathway_select(){
 
 
 
-var selected_tissues = new Set();
+
+
+
+var selected_pathways = new Set();
 function update_tissue(){
-    var max_items = 5;
+    if (statistics_loaded < 2) return;
+    
+    
+    
+    var max_items = 10;
     var tissue_pathway_select = document.getElementById("tissue_pathway_select");
-    var current_selected_tissues = new Set();
+    var tissue_id = document.getElementById("tissue_tissue_select").options[document.getElementById("tissue_tissue_select").selectedIndex].value;
+    var current_selected_pathways = new Set();
+    
     for (var i = 0; i < tissue_pathway_select.options.length; ++i){
         var opt = tissue_pathway_select.options[i];
-        if (opt.selected) current_selected_tissues.add(opt.value);
+        if (opt.selected) current_selected_pathways.add(opt.value);
     }
-    var diff_del = new Set([...selected_tissues].filter(x => !current_selected_tissues.has(x)));
-    var diff_add = new Set([...current_selected_tissues].filter(x => !selected_tissues.has(x)));
+    var diff_del = new Set([...selected_pathways].filter(x => !current_selected_pathways.has(x)));
+    var diff_add = new Set([...current_selected_pathways].filter(x => !selected_pathways.has(x)));
     
-    for (var val of diff_del) selected_tissues.delete(val);
+    for (var val of diff_del) selected_pathways.delete(val);
     for (var val of diff_add){
-        if (selected_tissues.size >= max_items){
-            alert("5 pathways at most can be selected!");
+        if (selected_pathways.size >= max_items){
+            alert("Only " + max_items + " pathways at most can be selected!");
             break;
         }
-        selected_tissues.add(val);
+        selected_pathways.add(val);
     }
     
     for (var i = 0; i < tissue_pathway_select.options.length; ++i){
-        tissue_pathway_select.options[i].selected = selected_tissues.has(tissue_pathway_select.options[i].value);
+        tissue_pathway_select.options[i].selected = selected_pathways.has(tissue_pathway_select.options[i].value);
     }
     
     
+    
+    var tissue_figure = document.getElementById("tissue_figure");
+    var ctx = tissue_figure.getContext("2d");
+            
+    var w_box = 600;
+    var w_offset = 70;
+    var w_bar = 30;
+    var h_box = 250;
+    var h_offset = 250;
+    ctx.clearRect(0, 0, w_box, h_box + h_offset);
+
+    ctx.beginPath();
+    ctx.moveTo(w_offset, 0);
+    ctx.lineTo(w_box, 0);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, 0);
+    ctx.lineTo(w_box, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, h_box);
+    ctx.lineTo(w_offset, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_offset, h_box);
+    ctx.lineTo(w_offset, 0);
+    ctx.stroke();
+    
+    
+    
+    
+    var pathway_nsafs = {};
+    var max_val = 0;
+    for (pw_id of selected_pathways) {
+        var protein_ids = pathways_to_proteins[pw_id][1];
+    
+        pathway_nsafs[pw_id] = 0;
+    
+        for (prot_id of protein_ids){
+            var protein = protein_dictionary[prot_id];
+            
+            if (tissue_id in protein.nsaf){
+                pathway_nsafs[pw_id] += Math.pow(10, protein.nsaf[tissue_id]);
+            }
+        }
+    }
+    
+    for (pw_id in pathway_nsafs){
+        max_val = Math.max(max_val, pathway_nsafs[pw_id]);
+    }
+    
+    ctx.font="14px Arial";
+    ctx.textAlign = 'center';
+    ctx.save();
+    ctx.translate(20, h_box >> 1);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = "black";
+    ctx.fillText("relative protein abundance", 0, 0);
+    ctx.restore();
+    
+    
+    ctx.lineWidth = 1;
+    ctx.textAlign="right";
+    var v_factor = 0.94;
+    
+    var step = 20;
+    
+    
+    
+    // y-axis
+    ctx.font="14px Arial";
+    for (var h = step; h <= 100; h += step){
+        var y = h_box - (h / 100 * h_box) * v_factor;
+        ctx.strokeStyle = "#dddddd";
+        ctx.beginPath();
+        ctx.moveTo(w_offset, y);
+        ctx.lineTo(w_box, y);
+        ctx.stroke();
+        
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(w_offset - 5, y);
+        ctx.lineTo(w_offset + 5, y);
+        ctx.stroke();
+        
+        
+        ctx.fillStyle = "black";
+        ctx.fillText(h + "%", w_offset - 8, y + 5);
+    }
+    
+    if (selected_pathways.size == 0) return;
+    
+    
+    
+    // x-axis
+    var i = 0;
+    var w = (w_box - w_offset) / selected_pathways.size;
+    ctx.textAlign = 'right';
+    for (pw_id in pathway_nsafs){
+        var x = Math.floor(w_offset + (i + 0.5) * w - w_bar * 0.5);
+        var h = Math.floor(pathway_nsafs[pw_id] / max_val * h_box * v_factor);
+    
+        ctx.fillStyle = "red";
+        ctx.fillRect(x, h_box - 1 - h, w_bar, h);
+        ctx.fill();
+        ctx.stroke();
+        
+        
+        ctx.save();
+        ctx.translate(w_offset + (i + 0.5) * w, h_box + 2);
+        ctx.rotate(-Math.PI / 8);
+        ctx.fillStyle = "black";
+        ctx.fillText(pathways_to_proteins[pw_id][0], 0, 8);
+        ctx.restore();
+        ++i;
+    }
 }
 
 
@@ -1180,6 +1309,9 @@ function update_correlation_tissues_pathway(){
 
 
 
+
+
+
 function resize_views(){
 
     windowWidth = window.innerWidth;
@@ -1273,12 +1405,17 @@ function add_nsaf(t, curr, total, ctx){
 
 
 
+
+
 function open_statistics (){
     document.getElementById("statistics").style.display = "inline";
     background_hiding = hide_statistics;
     basket = {};
     spectra_exclude = [];
 }
+
+
+
 
 
 
@@ -1341,6 +1478,7 @@ function load_statistics(){
             update_absolute_pathway_select();
             update_nsaf();
             update_nsaf_pathway_figure();
+            update_tissue();
             update_absolute_pathway_figure();
             update_pI();
             update_ppm();
@@ -1388,6 +1526,7 @@ function load_statistics(){
             update_absolute_pathway_select();
             update_nsaf();
             update_nsaf_pathway_figure();
+            update_tissue();
             update_absolute_pathway_figure();
             update_pI();
             update_ppm();
@@ -1399,6 +1538,11 @@ function load_statistics(){
     xmlhttp_search.open("GET", "/stamp/cgi-bin/get-proteins.bin?statistics_pathways", true);
     xmlhttp_search.send();
 }
+
+
+
+
+
 
 
 function update_ppm(){
@@ -1542,6 +1686,9 @@ function update_ppm(){
     ppm_ctx.fillText("Mass accuracy residual / ppm", (w_box + w_offset) / 2, h_box + 40);
     
 }
+
+
+
 
 
 function update_pI(){

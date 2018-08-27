@@ -765,7 +765,8 @@ function open_select_pathway(){
 function label_text_field_listener(evt){
     evt = evt || window.event;
     var charCode = evt.keyCode || evt.which;
-    if (charCode == 10 || charCode == 13 || charCode == 9){
+    console.log(charCode);
+    if (charCode == 27 || charCode == 9){ // 33: ESC; 9: Horizontal tab
         update_label();
     }
 }
@@ -814,10 +815,15 @@ function update_label(){
     document.getElementById("label_text_field").style.display = "none";
     document.getElementById("label_text_field_background").style.display = "none";
     
+    
+    
     var label = document.getElementById("label_text_field").value;
+    console.log("'" + label + "'");
+    
+    
     if (label == "") label = "undefined";
     label = replaceAll(label, "\t", "");
-    label = replaceAll(label, "\n", "");
+    label = replaceAll(label, "\n", "\\n");
     
     var request = "action=set&table=labels&id=" + data[selected_label_node].foreign_id + "&column=label&value=" + encodeURL(label);
     var result = update_entry(request);
