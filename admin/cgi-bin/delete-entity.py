@@ -42,7 +42,11 @@ if entity_type == "node":
     entity_type = [row for row in my_cur][0]["type"]
     
     if entity_type == "pathway":
-        sql_query = "DELETE FROM reactions_direct WHERE node_id_start = %s OR node_id_end = %s;"
+        sql_query = "DELETE FROM reactions_direct WHERE node_id_start = %s;"
+        my_cur.execute(sql_query, (entity_id, entity_id))
+        conn.commit()
+        
+        sql_query = "DELETE FROM reactions_direct WHERE node_id_end = %s;"
         my_cur.execute(sql_query, (entity_id, entity_id))
         conn.commit()
         
@@ -69,7 +73,11 @@ if entity_type == "node":
         my_cur.execute(sql_query, (entity_id))
         conn.commit()
         
-        sql_query = "DELETE FROM reactions_direct WHERE node_id_start = %s OR node_id_end = %s;"
+        sql_query = "DELETE FROM reactions_direct WHERE node_id_start = %s;"
+        my_cur.execute(sql_query, (entity_id))
+        conn.commit()
+        
+        sql_query = "DELETE FROM reactions_direct WHERE node_id_end = %s;"
         my_cur.execute(sql_query, (entity_id))
         conn.commit()
         
@@ -92,12 +100,21 @@ if entity_type == "node":
         my_cur.execute(sql_query, (entity_id))
         conn.commit()
         
-        sql_query = "DELETE FROM reactions_direct WHERE node_id_start = %s OR node_id_end = %s;"
+        sql_query = "DELETE FROM reactions_direct WHERE node_id_start = %s;"
+        my_cur.execute(sql_query, (entity_id))
+        conn.commit()
+        
+        sql_query = "DELETE FROM reactions_direct WHERE node_id_end = %s;"
         my_cur.execute(sql_query, (entity_id))
         conn.commit()
         
         
     elif entity_type in ["label", "membrane", "image"]:
+        if entity_type == "label":
+            sql_query = "DELETE FROM labels WHERE id IN (SELECT foreign_id from nodes WHERE id = %s);"
+            my_cur.execute(sql_query, (entity_id))
+            conn.commit()
+        
         sql_query = "DELETE FROM nodes WHERE id = %s;"
         my_cur.execute(sql_query, (entity_id))
         conn.commit()
@@ -142,7 +159,11 @@ elif entity_type == "pathway":
     my_cur.execute(sql_query, (entity_id))
     conn.commit()
     
-    sql_query = "DELETE FROM reactions_direct WHERE node_id_start IN (SELECT id FROM nodes WHERE pathway_id = %s) OR node_id_end IN (SELECT id FROM nodes WHERE pathway_id = %s);"
+    sql_query = "DELETE FROM reactions_direct WHERE node_id_start IN (SELECT id FROM nodes WHERE pathway_id = %s);"
+    my_cur.execute(sql_query, (entity_id))
+    conn.commit()
+    
+    sql_query = "DELETE FROM reactions_direct WHERE node_id_end IN (SELECT id FROM nodes WHERE pathway_id = %s);"
     my_cur.execute(sql_query, (entity_id))
     conn.commit()
     
@@ -208,7 +229,11 @@ elif entity_type == "pathway_group":
         my_cur.execute(sql_query, (pw_id))
         conn.commit()
         
-        sql_query = "DELETE FROM reactions_direct WHERE node_id_start IN (SELECT id FROM nodes WHERE pathway_id = %s) OR node_id_end IN (SELECT id FROM nodes WHERE pathway_id = %s);"
+        sql_query = "DELETE FROM reactions_direct WHERE node_id_start IN (SELECT id FROM nodes WHERE pathway_id = %s);"
+        my_cur.execute(sql_query, (pw_id))
+        conn.commit()
+        
+        sql_query = "DELETE FROM reactions_direct WHERE node_id_end IN (SELECT id FROM nodes WHERE pathway_id = %s);"
         my_cur.execute(sql_query, (pw_id))
         conn.commit()
         
