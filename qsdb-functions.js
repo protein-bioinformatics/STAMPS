@@ -1903,7 +1903,7 @@ function node(data){
             this.width = ctx.measureText(this.short_name).width;
         }
         this.width *= 1.3 * factor;
-        this.height *= (text_size + 2) * factor;
+        this.height *= (text_size + 2) * factor * 1.3;
     }
     
     this.setup_image = function(){
