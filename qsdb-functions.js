@@ -1891,11 +1891,9 @@ function node(data){
         }
         var ctx = document.createElement("canvas").getContext("2d");
         ctx.font = (font_size / factor).toString() + "px Arial";
-        console.log(this.short_name + " " + this.width + " " + this.height);
         this.short_name = replaceAll(this.short_name, "\\n", "\n");
         if (this.short_name.indexOf("\n") > -1){
             var tokens = this.short_name.split("\n");
-            console.log("multi " + tokens.length);
             for (var token of tokens){
                 this.width = Math.max(this.width, ctx.measureText(token).width);
             }
@@ -1906,8 +1904,6 @@ function node(data){
         }
         this.width *= 1.3 * factor;
         this.height *= (text_size + 2) * factor * 1.3;
-        console.log(this.short_name + " " + this.width + " " + this.height);
-        console.log();
     }
     
     this.setup_image = function(){
