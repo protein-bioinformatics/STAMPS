@@ -1894,7 +1894,7 @@ function node(data){
         this.short_name = replaceAll(this.short_name, "\\n", "\n");
         if (this.short_name.indexOf("\n") > -1){
             var tokens = this.name.split("\n");
-            for (var token in tokens){
+            for (var token of tokens){
                 this.width = Math.max(this.width, ctx.measureText(token).width);
             }
             this.height = tokens.length;
@@ -1902,7 +1902,7 @@ function node(data){
         else {
             this.width = ctx.measureText(this.short_name).width;
         }
-        this.width *= 1.2 * factor;
+        this.width *= 1.3 * factor;
         this.height *= (text_size + 2) * factor;
     }
     

@@ -765,7 +765,6 @@ function open_select_pathway(){
 function label_text_field_listener(evt){
     evt = evt || window.event;
     var charCode = evt.keyCode || evt.which;
-    console.log(charCode);
     if (charCode == 27 || charCode == 9){ // 33: ESC; 9: Horizontal tab
         update_label();
     }
@@ -818,8 +817,6 @@ function update_label(){
     
     
     var label = document.getElementById("label_text_field").value;
-    console.log("'" + label + "'");
-    
     
     if (label == "") label = "undefined";
     label = replaceAll(label, "\t", "");
