@@ -1878,6 +1878,8 @@ function node(data){
         var tokens = this.name.split(" ");
         this.short_name = "";
         this.formula = "";
+        this.width = 0;
+        this.height = 1;
         for (var token of tokens){
             if (token.indexOf("http") > -1){
                 this.formula = token;
@@ -1889,8 +1891,19 @@ function node(data){
         }
         var ctx = document.createElement("canvas").getContext("2d");
         ctx.font = (font_size / factor).toString() + "px Arial";
-        this.width = 1.2 * ctx.measureText(this.short_name).width * factor;
-        this.height = (text_size + 2) * factor;
+        this.short_name = replaceAll(this.short_name, "\\n", "\n");
+        if (this.short_name.indexOf("\n") > -1){
+            var tokens = this.name.split("\n");
+            for (var token in tokens){
+                this.width = Math.max(this.width, ctx.measureText(token).width);
+            }
+            this.height = tokens.length;
+        }
+        else {
+            this.width = ctx.measureText(this.short_name).width;
+        }
+        this.width *= 1.2 * factor;
+        this.height *= (text_size + 2) * factor;
     }
     
     this.setup_image = function(){
@@ -2227,7 +2240,12 @@ function node(data){
                 ctx.textAlign = "center";
                 ctx.font = ((text_size + 2) * factor).toString() + "px Arial";
                 ctx.fillStyle = this.selected ? node_selected_color : (this.formula.length > 0 ? "darkblue" : label_color);
-                ctx.fillText(this.short_name, this.x, this.y + this.height * 0.3);
+                if (this.short_name.indexOf("\n") > -1){
+                    wrapText(this.short_name, this.x, this.y, this.width, pathway_font_size * factor, ctx);
+                }
+                else {
+                    ctx.fillText(this.short_name, this.x, this.y + this.height * 0.3);
+                }
                 break;
                 
             case "image":
@@ -5274,7 +5292,8 @@ function encodeURL(str){
 
 
 function replaceAll(str, find, replace) {
-    return str.replace(new RegExp(find, 'g'), replace);
+    //return str.replace(new RegExp(find, 'g'), replace);
+    return str.split(find).join(replace);
 }
 
 
