@@ -416,9 +416,9 @@ div<div id="locus_search" class="global_search">
     <table width="100%" height="100%">
     
         <tr><td width="50%" valign="top">
-            <b>Normalized distribution of protein abundances per pathway</b>
+            <b>Normalized distribution of protein abundances per pathway</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('nsaf_pathway');" height="24" />
         </td><td>
-            <b>Absolute number of proteins</b>
+            <b>Absolute number of proteins</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('absolute_pathway');" height="24" />
         </td></tr>
         
         <tr><td width="50%" valign="bottom">
@@ -463,9 +463,9 @@ div<div id="locus_search" class="global_search">
         
         
         <tr><td width="50%" valign="top">
-            <b>Normalized distribution of protein abundances per tissue</b>
+            <b>Normalized distribution of protein abundances per tissue</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('tissue_pathway');" height="24" />
         </td><td width="50%" valign="top">
-            <b>Normalized spectrum abundance factor</b>
+            <b>Normalized spectrum abundance factor</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('nsaf');" height="24" />
         </td></tr>
             
         <tr><td width="50%" valign="bottom">
@@ -588,9 +588,9 @@ div<div id="locus_search" class="global_search">
             
             
         <tr><td width="50%" valign="top">
-            <b>Protein isoelectric point vs. mass</b>
+            <b>Protein isoelectric point vs. mass</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('pI');" height="24" />
         </td><td width="50%" valign="top">
-            <b>Mass accuracy residuals</b>
+            <b>Mass accuracy residuals</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('ppm');" height="24" />
         </td></tr>
             
         <tr><td width="50%" valign="bottom">
@@ -802,8 +802,14 @@ function update_correlation_pathway_select(){
 
 
 var selected_pathways = new Set();
-function update_tissue(){
+function update_tissue(ctx){
     if (statistics_loaded < 2) return;
+    
+    
+    if (typeof(ctx) === 'undefined'){
+        var tissue_figure = document.getElementById("tissue_figure");
+        ctx = tissue_figure.getContext("2d");
+    }
     
     
     
@@ -834,8 +840,7 @@ function update_tissue(){
     
     
     
-    var tissue_figure = document.getElementById("tissue_figure");
-    var ctx = tissue_figure.getContext("2d");
+    
             
     var w_box = 600;
     var w_offset = 70;
@@ -948,7 +953,7 @@ function update_tissue(){
         ctx.translate(w_offset + (i + 0.5) * w, h_box + 2);
         ctx.rotate(-Math.PI / 8);
         ctx.fillStyle = "black";
-        ctx.fillText(pathways_to_proteins[pw_id][0], 0, 8);
+        ctx.fillText(pathways_to_proteins[pw_id][0], 0, 16);
         ctx.restore();
         ++i;
     }
@@ -961,6 +966,7 @@ function update_tissue(){
 
 function update_nsaf(ctx){
     if (statistics_loaded < 2) return;
+    
     if (typeof(ctx) === 'undefined'){
         var nsaf_figure = document.getElementById("nsaf_figure");
         ctx = nsaf_figure.getContext("2d");
@@ -1007,7 +1013,6 @@ function update_nsaf(ctx){
     // y-scale
     ctx.lineWidth = 1;
     ctx.textAlign="right";
-    ctx.textBaseline="middle";
     var h_factor = 0.97;            
     var step = 1;
     ctx.font="14px Arial";
@@ -1028,7 +1033,7 @@ function update_nsaf(ctx){
         
         
         ctx.fillStyle = "black";
-        ctx.fillText(h, w_offset - 8, y);
+        ctx.fillText(h, w_offset - 8, y + 5);
     }
     
     
@@ -1048,11 +1053,15 @@ function update_nsaf(ctx){
 
 
 
-function update_correlation_tissues(){
+function update_correlation_tissues(ctx){
     if (statistics_loaded < 2) return;
     
-    var correlation_tissue_tissue = document.getElementById("correlation_tissue_tissue");
-    var ctx = correlation_tissue_tissue.getContext("2d");
+    if (typeof(ctx) === 'undefined'){
+        var correlation_tissue_tissue = document.getElementById("correlation_tissue_tissue");
+        ctx = correlation_tissue_tissue.getContext("2d");
+    }
+    
+    
     
     var tissue1_name = document.getElementById("correlation_tissue1_select").options[document.getElementById("correlation_tissue1_select").selectedIndex].innerHTML;
     var tissue2_name = document.getElementById("correlation_tissue2_select").options[document.getElementById("correlation_tissue2_select").selectedIndex].innerHTML;
@@ -1076,7 +1085,7 @@ function update_correlation_tissues(){
     ctx.fillText("log10(NSAF) " + tissue1_name, 0, 0);
     ctx.restore();
     
-    ctx.fillText("log10(NSAF) " + tissue2_name, (w_box + w_offset) / 2, h_box + 30);
+    ctx.fillText("log10(NSAF) " + tissue2_name, (w_box + w_offset) / 2, h_box + 40);
     
     
     
@@ -1104,7 +1113,6 @@ function update_correlation_tissues(){
     
     ctx.lineWidth = 1;
     ctx.textAlign="right";
-    ctx.textBaseline="middle";
     var h_factor = 0.97;            
     var step = 1;
     ctx.font="14px Arial";
@@ -1128,7 +1136,7 @@ function update_correlation_tissues(){
         
         
         ctx.fillStyle = "black";
-        ctx.fillText(Math.floor(h), w_offset - 8, y);
+        ctx.fillText(Math.floor(h), w_offset - 8, y + 5);
     }
     
     // x-scale
@@ -1139,9 +1147,8 @@ function update_correlation_tissues(){
         ctx.lineTo(x, h_box + 5);
         ctx.stroke();
         ctx.fillStyle = "black";
-        ctx.textBaseline="top";
         ctx.textAlign="center";
-        ctx.fillText(h, x, h_box + 10);
+        ctx.fillText(h, x, h_box + 20);
     }
     
     var nsaf_points = [];
@@ -1183,11 +1190,13 @@ function update_correlation_tissues(){
 
 
 
-function update_correlation_tissues_pathway(){
+function update_correlation_tissues_pathway(ctx){
     if (statistics_loaded < 2) return;
     
-    var correlation_tissue_tissue_pathway = document.getElementById("correlation_tissue_tissue_pathway");
-    var ctx = correlation_tissue_tissue_pathway.getContext("2d");
+    if (typeof(ctx) === 'undefined'){
+        var correlation_tissue_tissue_pathway = document.getElementById("correlation_tissue_tissue_pathway");
+        ctx = correlation_tissue_tissue_pathway.getContext("2d");
+    }
     
     var tissue1_name = document.getElementById("correlation_tissue1_select").options[document.getElementById("correlation_tissue1_select").selectedIndex].innerHTML;
     var tissue2_name = document.getElementById("correlation_tissue2_select").options[document.getElementById("correlation_tissue2_select").selectedIndex].innerHTML;
@@ -1212,7 +1221,7 @@ function update_correlation_tissues_pathway(){
     ctx.fillText("log10(NSAF) " + tissue1_name, 0, 0);
     ctx.restore();
     
-    ctx.fillText("log10(NSAF) " + tissue2_name, (w_box + w_offset) / 2, h_box + 30);
+    ctx.fillText("log10(NSAF) " + tissue2_name, (w_box + w_offset) / 2, h_box + 40);
     
     
     
@@ -1240,7 +1249,6 @@ function update_correlation_tissues_pathway(){
     
     ctx.lineWidth = 1;
     ctx.textAlign="right";
-    ctx.textBaseline="middle";
     var h_factor = 0.97;            
     var step = 1;
     ctx.font="14px Arial";
@@ -1264,7 +1272,7 @@ function update_correlation_tissues_pathway(){
         
         
         ctx.fillStyle = "black";
-        ctx.fillText(Math.floor(h), w_offset - 8, y);
+        ctx.fillText(Math.floor(h), w_offset - 8, y + 5);
     }
     
     // x-scale
@@ -1275,9 +1283,8 @@ function update_correlation_tissues_pathway(){
         ctx.lineTo(x, h_box + 5);
         ctx.stroke();
         ctx.fillStyle = "black";
-        ctx.textBaseline="top";
         ctx.textAlign="center";
-        ctx.fillText(h, x, h_box + 10);
+        ctx.fillText(h, x, h_box + 20);
     }
     
     
@@ -1427,9 +1434,8 @@ function add_nsaf(t, curr, total, ctx){
     ctx.translate(w_offset + (curr + 0.5) * w, h_box + 2);
     ctx.rotate(-Math.PI / 4);
     ctx.fillStyle = "black";
-    ctx.textBaseline="middle";
     ctx.textAlign="right";
-    ctx.fillText(tissues[t][1], 0, 8);
+    ctx.fillText(tissues[t][1], 0, 16);
     ctx.restore();
 }
 
@@ -1576,8 +1582,13 @@ function load_statistics(){
 
 
 
-function update_ppm(){
+function update_ppm(ppm_ctx){
     if (statistics_loaded < 2) return;
+    
+    if (typeof(ppm_ctx) === 'undefined'){
+        var ppm_histogram_canvas = document.getElementById("ppm_histogram");
+        ppm_ctx = ppm_histogram_canvas.getContext("2d");
+    }
     
     var pw_option = document.getElementById("ppm_pw_figure_select").options[document.getElementById("ppm_pw_figure_select").selectedIndex];
     
@@ -1614,9 +1625,8 @@ function update_ppm(){
         sum_ppm += ppm_histogram[i];
     }
     
-    var ppm_histogram_canvas = document.getElementById("ppm_histogram");
-    var ppm_ctx = ppm_histogram_canvas.getContext("2d");
-    ppm_ctx.clearRect(0, 0, ppm_histogram_canvas.width, ppm_histogram_canvas.height);
+    
+    ppm_ctx.clearRect(0, 0, ppm_ctx.canvas.width, ppm_ctx.canvas.height);
             
     var w_box = 600;
     var w_offset = 70;
@@ -1648,14 +1658,12 @@ function update_ppm(){
         ppm_ctx.lineTo(x, h_box + 5);
         ppm_ctx.stroke();
         ppm_ctx.fillStyle = "black";
-        ppm_ctx.textBaseline="top";
         ppm_ctx.textAlign="center";
-        ppm_ctx.fillText(i, x, h_box + 10);
+        ppm_ctx.fillText(i, x, h_box + 20);
     }
     // y-scale
     ppm_ctx.lineWidth = 1;
     ppm_ctx.textAlign="right";
-    ppm_ctx.textBaseline="middle";
     var v_factor = 0.94;            
     var step = (ppm_max_val / sum_ppm) < 0.2 ? 2.5 : 10;
     ppm_ctx.font="14px Arial";
@@ -1677,7 +1685,7 @@ function update_ppm(){
         
         
         ppm_ctx.fillStyle = "black";
-        ppm_ctx.fillText(h + "%", w_offset - 8, y);
+        ppm_ctx.fillText(h + "%", w_offset - 8, y + 5);
     }
 
     ppm_ctx.beginPath();
@@ -1722,11 +1730,13 @@ function update_ppm(){
 
 
 
-function update_pI(){
+function update_pI(pI_ctx){
     if (statistics_loaded < 2) return;
-
-    var pI_figure = document.getElementById("pI_figure");
-    var pI_ctx = pI_figure.getContext("2d");
+    
+    if (typeof(pI_ctx) === 'undefined'){
+        var pI_figure = document.getElementById("pI_figure");
+        pI_ctx = pI_figure.getContext("2d");
+    }
     pI_ctx.clearRect(0, 0, nsaf_figure.width, nsaf_figure.height);
             
     var w_box = 590;
@@ -1808,21 +1818,21 @@ function update_pI(){
         pI_ctx.lineTo(x, h_box + 5);
         pI_ctx.stroke();
         pI_ctx.fillStyle = "black";
-        pI_ctx.textBaseline="top";
         pI_ctx.textAlign="center";
-        pI_ctx.fillText(i, x, h_box + 10);
+        pI_ctx.fillText(i, x, h_box + 20);
     }
+    
+    
     // y-scale
-    for (var i = Math.floor(min_mass); i < max_mass; ++i){
+    for (var i = Math.floor(min_mass) + 1; i < max_mass; ++i){
         var y = h_box - (i - min_mass) / (max_mass - min_mass) * h_box;
         pI_ctx.beginPath();
         pI_ctx.moveTo(w_offset - 5, y);
         pI_ctx.lineTo(w_offset + 5, y);
         pI_ctx.stroke();
         pI_ctx.fillStyle = "black";
-        pI_ctx.textBaseline="middle";
         pI_ctx.textAlign="right";
-        pI_ctx.fillText(i, w_offset - 10, y);
+        pI_ctx.fillText(i, w_offset - 10, y + 5);
     }
 }
 
@@ -1834,12 +1844,14 @@ function update_pI(){
 
 
 
-function update_absolute_pathway_figure(){
+function update_absolute_pathway_figure(ctx){
     if (statistics_loaded < 2) return;
     
     var pw_option = document.getElementById("absolute_pathway_figure_select").options[document.getElementById("absolute_pathway_figure_select").selectedIndex];
-    var nsaf_figure = document.getElementById("absolute_pathway_figure");
-    var ctx = nsaf_figure.getContext("2d");
+    if (typeof(ctx) === "undefined"){
+        var nsaf_figure = document.getElementById("absolute_pathway_figure");
+        ctx = nsaf_figure.getContext("2d");
+    }
             
     var w_box = 600;
     var w_offset = 70;
@@ -1881,14 +1893,24 @@ function update_absolute_pathway_figure(){
     }
     
     
+    ctx.font="14px Arial";
+    ctx.textAlign = 'center';
+    ctx.save();
+    ctx.translate(20, h_box >> 1);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = "black";
+    ctx.fillText("absolute protein count", 0, 0);
+    ctx.restore();
+    
+    
     // y-scale
     ctx.lineWidth = 1;
     ctx.textAlign="right";
-    ctx.textBaseline="middle";
     var v_factor = 0.94;            
     var step = max_num < 20 ? 5 : (max_num < 80 ? 10 : 20);
     ctx.font="14px Arial";
     max_num = Math.ceil(max_num / step) * step;
+    
     
     
     for (var h = step; h <= max_num; h += step){
@@ -1906,7 +1928,7 @@ function update_absolute_pathway_figure(){
         ctx.stroke();
         
         ctx.fillStyle = "black";
-        ctx.fillText(h, w_offset - 8, y);
+        ctx.fillText(h, w_offset - 8, y + 5);
     }
     
     
@@ -1930,7 +1952,7 @@ function update_absolute_pathway_figure(){
         ctx.translate(w_offset + (i + 0.5) * w, h_box + 2);
         ctx.rotate(-Math.PI / 4);
         ctx.fillStyle = "black";
-        ctx.fillText(tissues[t][1], 0, 8);
+        ctx.fillText(tissues[t][1], 0, 16);
         ctx.restore();
         ++i;
     }
@@ -1943,12 +1965,14 @@ function update_absolute_pathway_figure(){
 
 
 
-function update_nsaf_pathway_figure(){
+function update_nsaf_pathway_figure(ctx){
     if (statistics_loaded < 2) return;
     
     var pw_option = document.getElementById("nsaf_pathway_figure_select").options[document.getElementById("nsaf_pathway_figure_select").selectedIndex];
-    var nsaf_figure = document.getElementById("nsaf_pathway_figure");
-    var ctx = nsaf_figure.getContext("2d");
+    if (typeof(ctx) === "undefined"){
+        var nsaf_figure = document.getElementById("nsaf_pathway_figure");
+        ctx = nsaf_figure.getContext("2d");
+    }
             
     var w_box = 600;
     var w_offset = 70;
@@ -2006,7 +2030,6 @@ function update_nsaf_pathway_figure(){
     
     ctx.lineWidth = 1;
     ctx.textAlign="right";
-    //ctx.textBaseline="middle";
     var v_factor = 0.94;
     
     var step = 20;
@@ -2054,7 +2077,7 @@ function update_nsaf_pathway_figure(){
         ctx.translate(w_offset + (i + 0.5) * w, h_box + 2);
         ctx.rotate(-Math.PI / 4);
         ctx.fillStyle = "black";
-        ctx.fillText(tissues[t][1], 0, 8);
+        ctx.fillText(tissues[t][1], 0, 16);
         ctx.restore();
         ++i;
     }
@@ -2846,36 +2869,77 @@ function draw_chromosome_ideograms(){
 
 
 
-/*
-function nsaf_pathway_to_svg(){
+function to_svg(figure){
     if (statistics_loaded < 2) return;
     
-    var svg_ctx = new C2S(600, 300);
-    update_nsaf_pathway_figure(svg_ctx);
+    
+    var svg_ctx = 0;
+    var download_name = "";
+    switch (figure){
+        case "nsaf_pathway":
+            var svg_ctx = new C2S(600, 300);
+            update_nsaf_pathway_figure(svg_ctx);
+            download_name = "NormalizedDistributionOfProteinAbundancesPerPathway.svg";
+            break;
+            
+        case "absolute_pathway":
+            var svg_ctx = new C2S(600, 300);
+            update_absolute_pathway_figure(svg_ctx);
+            download_name = "AbsoluteNumberOfProteins.svg";
+            break;
+            
+        case "tissue_pathway":
+            var svg_ctx = new C2S(600, 300);
+            update_tissue(svg_ctx);
+            download_name = "NormalizedDistributionOfProteinAbundancesPerTissue.svg";
+            break;
+            
+        case "nsaf":
+            var svg_ctx = new C2S(600, 300);
+            update_nsaf(svg_ctx);
+            download_name = "NormalizedSpectrumAbundanceFactor.svg";
+            break;
+            
+        case "pI":
+            var svg_ctx = new C2S(600, 300);
+            update_pI(svg_ctx);
+            download_name = "ProteinIsoelectricPointVsMass.svg";
+            break;
+            
+        case "ppm":
+            var svg_ctx = new C2S(600, 300);
+            update_ppm(svg_ctx);
+            download_name = "MassAccuracyResiduals.svg";
+            break;
+            
+        default:
+            return;
+    }
     
     var svgCode = svg_ctx.getSerializedSvg(true);
     var parts = svgCode.split("/>");
     svgCode = parts.join("/>\n");
     
-    window.open("data:application/txt," + encodeURIComponent(svgCode), "_self");
-}
-
-
-
-function nsaf_to_svg(){
-    if (statistics_loaded < 2) return;
     
-    var svg_ctx = new C2S(600, 300);
-    update_nsaf(svg_ctx);
-    
-    var svgCode = svg_ctx.getSerializedSvg(true);
     var parts = svgCode.split("/>");
     svgCode = parts.join("/>\n");
     
-    window.open("data:application/txt," + encodeURIComponent(svgCode), "_self");
+    
+    var serializer = new XMLSerializer();
+    var svg_blob = new Blob([svgCode], {'type': "image/svg+xml"});
+    
+    
+    const tempLink = document.createElement('a');
+    tempLink.style.display = 'none';
+    tempLink.href = window.URL.createObjectURL(svg_blob);
+    tempLink.setAttribute('download', download_name);
+    tempLink.setAttribute('target', '_blank');
+    document.body.appendChild(tempLink);
+    tempLink.click();
+    document.body.removeChild(tempLink);
 }
 
-*/
+
 
 
 function open_accession_search(){
