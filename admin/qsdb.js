@@ -485,7 +485,7 @@ function mouse_click_listener(e){
         if (highlight_element && (highlight_element instanceof node) && highlight_element.type == "metabolite") rotate_metabolite_label();
     }
     else if (toolbox_button_selected == toolbox_states.HIGHLIGHT_METABOLITE){
-        if (highlight_element && (highlight_element instanceof node) && highlight_element.type == "metabolite") highlight_metabolite_label();
+        if (highlight_element && (highlight_element instanceof node) && (highlight_element.type == "metabolite" || highlight_element.type == "label")) highlight_label();
     }
     else if (toolbox_button_selected == toolbox_states.CHANGE_EDGE){
         if (highlight_element && (highlight_element instanceof edge)) change_edge_type();
@@ -794,7 +794,7 @@ function rotate_metabolite_label(){
 }
 
 
-function highlight_metabolite_label(){
+function highlight_label(){
     var highlight_flag = !highlight_element.text_highlight;
     
     var request = "action=set&table=nodes&id=" + highlight_element.id + "&column=highlight&value=" + (highlight_flag ? "1" : "0");

@@ -2238,7 +2238,9 @@ function node(data){
                 
             case "label":
                 ctx.textAlign = "center";
-                ctx.font = ((text_size + 2) * factor).toString() + "px Arial";
+                
+                
+                ctx.font = (this.text_highlight ? "bold " : "") + ((text_size + (this.text_highlight ? 6 : 2)) * factor).toString() + "px Arial";
                 ctx.fillStyle = this.selected ? node_selected_color : (this.formula.length > 0 ? "darkblue" : label_color);
                 if (this.short_name.indexOf("\n") > -1){
                     wrapText(this.short_name, this.x, this.y, this.width, pathway_font_size * factor, ctx);

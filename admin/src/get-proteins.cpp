@@ -182,7 +182,7 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     
     
     // retrieve all additional information from spectral library
-    string sql_query_lite2 = "SELECT id i, peptideSeq p FROM RefSpectra ORDER BY p;";
+    string sql_query_lite2 = "SELECT id i, peptideSeq p FROM RefSpectra WHERE scoreType <> -1 ORDER BY p;";
     char tmp_data;
     rc = sqlite3_exec(db, sql_query_lite2.c_str(), sqlite_callback, (void*)&tmp_data, &zErrMsg);
     if( rc != SQLITE_OK ){
