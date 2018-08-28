@@ -611,8 +611,8 @@ function mouse_click_listener(e){
                     var label_height = document.getElementById("label_text_field").offsetHeight;
                     
                     
-                    document.getElementById("label_text_field").value = highlight_element.name;
-                    var text_len = highlight_element.name.length;
+                    document.getElementById("label_text_field").value = highlight_element.short_name;
+                    var text_len = highlight_element.short_name.length;
                     document.getElementById("label_text_field").setSelectionRange(text_len, text_len);
                     document.getElementById("label_text_field").style.left = (toolbox_width + highlight_element.x - (label_width >> 1)).toString() + "px";
                     document.getElementById("label_text_field").style.top = (highlight_element.y - (label_height >> 1)).toString() + "px";
