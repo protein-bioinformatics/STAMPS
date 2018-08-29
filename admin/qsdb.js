@@ -1693,6 +1693,7 @@ function update_node(event) {
 
 function key_down(event){
     if (document.getElementById("check_spectra").style.display != "none"){
+        event.preventDefault();
         switch(event.which){
             case 27:
                 hide_check_spectra();
@@ -1739,7 +1740,6 @@ function key_down(event){
         zoom_in_out(0, 0);
         draw();
     }
-    event.preventDefault();
 }
 
 
