@@ -127,6 +127,7 @@ function init(){
     document.getElementById("menu_background").addEventListener("click", close_navigation, false);
     window.addEventListener('resize', resize_pathway_view, false);
     window.addEventListener('resize', resize_manage_view, false);
+    window.addEventListener('resize', resize_ms_view, false);
     
     navigation_content = ["select_species", "select_signaling_pathway", "select_metabolic_pathway", "menu_background"];
     
@@ -3179,4 +3180,17 @@ function manage_delete_metabolite(metabolite_id){
     }
     xmlhttp_metabolite_data.open("GET", request, false);
     xmlhttp_metabolite_data.send();
+}
+
+
+function curate_spectra(){
+    document.getElementById("spectra_panel").innerHTML = "";
+    
+    document.getElementById("check_spectra").style.display = "inline";
+    document.getElementById("waiting_background").style.display = "inline";
+    document.getElementById("renderarea").style.filter = "blur(5px)";
+    document.getElementById("navigation").style.filter = "blur(5px)";
+    resize_ms_view();
+    spectrum_loaded = false;
+    draw_spectrum();
 }
