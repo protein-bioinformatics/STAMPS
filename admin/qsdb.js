@@ -3271,7 +3271,8 @@ function curate_spectra_checking(row_num){
     }
     xmlhttp_spectra_update.open("GET", "/stamp/admin/cgi-bin/curate-spectral-library.py?" + request, false);
     xmlhttp_spectra_update.send();
-    load_spectrum(spec_id);
+    spectrum_active = spectra_checks[spec_id];
+    draw_spectrum();
 }
 
 
