@@ -45,8 +45,9 @@ cur = db.cursor()
 
 if action == "count":
     cur.execute('SELECT count(*) cnt FROM RefSpectra;')
-    result = make_dict(cur)
-    print(result["cnt"])
+    print(cur.fetchone()[0])
+   
+   
    
 elif action == "select":
     limit = form.getvalue('limit')
@@ -78,7 +79,11 @@ elif action == "update":
         exit()
         
     
-    sql_query = "UPDATE RefSpectra SET scoreType = %s WHERE id = %s;" % (value, e_id)
-    cur.execute(sql_query)
+    try:
+        sql_query = "UPDATE RefSpectra SET scoreType = %s WHERE id = %s;" % (value, e_id)
+        cur.execute(sql_query)
+    except:
+        print(-6)
+        exit()
     db.commit()
     print(0)

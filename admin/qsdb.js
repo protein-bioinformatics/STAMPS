@@ -23,6 +23,7 @@ tmp_edge = -1;
 letter_sizes = [];
 point_suffix_length = 0;
 deletion_cypher = "39d29e917c6901adf84418992b9b3892d37b61aefbc0f1fb353996e1ff8a2958";
+spectrum_selection_color = "#80c8ff";
 
 global_manage_data = -1;
 global_protein_data = -1;
@@ -50,6 +51,11 @@ metabolite_current_page = 0;
 metabolite_create_action = true;
 
 
+spectra_max_pages = -1;
+spectra_current_page = 0;
+current_spectrum_selected = 0;
+spectra_checks = {};
+
 manage_sort_columns = {"pathway_groups": {}, "proteins": {}, "pathways": {}, "metabolites": {}};
 manage_columns = {"pathway_groups": [], "proteins": [], "pathways": [], "metabolites": []};
 manage_current_entry = "proteins";
@@ -58,6 +64,7 @@ manage_max_pages = -1;
 manage_current_page = 0;
 
 max_per_page = 30;
+max_spectra_per_page = 100;
 chromosomes = {};
 draw_anchor_start = "";
 draw_anchor_end = "";
@@ -224,6 +231,17 @@ function init(){
     }
     xmlhttp_prot_col.open("GET", "/stamp/admin/cgi-bin/manage-entries.bin?action=get&type=proteins_col", true);
     xmlhttp_prot_col.send();
+    
+    
+    // get number of spectra
+    var xmlhttp_spectra = new XMLHttpRequest();
+    xmlhttp_spectra.onreadystatechange = function() {
+        if (xmlhttp_spectra.readyState == 4 && xmlhttp_spectra.status == 200) {
+            spectra_max_pages = Math.floor(parseInt(xmlhttp_spectra.responseText) / max_spectra_per_page) + 1;
+        }
+    }
+    xmlhttp_spectra.open("GET", "/stamp/admin/cgi-bin/curate-spectral-library.py?action=count&species=" + current_species, false);
+    xmlhttp_spectra.send();
     
     
     var xmlhttp_meta_col = new XMLHttpRequest();
@@ -1674,18 +1692,40 @@ function update_node(event) {
 
 
 function key_down(event){
-    // canvas to svg
-    /*
-    if (event.which === 32){
-        pathway_to_svg();
+    if (document.getElementById("check_spectra").style.display != "none"){
+        switch(event.which){
+            case 27:
+                hide_check_spectra();
+                break;
+                
+            case 13:
+            case 32:
+                curate_spectra_checking(current_spectrum_selected);
+                break;
+                
+            case 38:
+                var previous_spectrum_selected = Math.max(0, current_spectrum_selected - 1);
+                curate_spectra_change_selection(previous_spectrum_selected);
+                break;
+                
+            case 40:
+                var next_spectrum_selected = Math.min(max_spectra_per_page - 1, current_spectrum_selected + 1);
+                curate_spectra_change_selection(next_spectrum_selected);
+                break;
+                
+            default:
+                break;
+        }
     }
-    */
+    
+    
     if (event.which === 27){ // ESC
         hide_manage_entries();
         close_editor_select_pathway();
         close_editor_select_protein();
         close_editor_select_metabolite();
         close_navigation();
+        hide_check_spectra();
         last_opened_menu = "";
     }
     
@@ -1699,6 +1739,7 @@ function key_down(event){
         zoom_in_out(0, 0);
         draw();
     }
+    event.preventDefault();
 }
 
 
@@ -1908,6 +1949,8 @@ function editor_fill_metabolite_table(){
     xmlhttp_metabolites.open("GET", request, true);
     xmlhttp_metabolites.send();
 }
+
+
 
 
 function editor_fill_protein_table(){
@@ -3183,14 +3226,183 @@ function manage_delete_metabolite(metabolite_id){
 }
 
 
+
+
+
+function curate_spectra_change_selection(row_num){
+    var dom_table = document.getElementById("curate_spectra_panel_table");
+    var bg_color = (current_spectrum_selected & 1) ? "#DDDDDD" : "white";
+    
+    for (dom_td of dom_table.children[current_spectrum_selected].children){
+        dom_td.setAttribute("bgcolor", bg_color);
+    }
+    
+    for (dom_td of dom_table.children[row_num].children){
+        dom_td.setAttribute("bgcolor", spectrum_selection_color);
+    }
+         
+    current_spectrum_selected = row_num;
+    load_spectrum(dom_table.children[current_spectrum_selected].getAttribute("value"));
+    
+    var spectra_panel = document.getElementById("spectra_panel");
+    
+    var unit = spectra_panel.scrollHeight / max_spectra_per_page;
+    var row_pos = unit * row_num;
+    if (row_pos < spectra_panel.scrollTop) spectra_panel.scrollTop = row_pos - 1;
+    if (spectra_panel.scrollTop + spectra_panel.clientHeight - unit < row_pos) spectra_panel.scrollTop = row_pos + 1 + unit - spectra_panel.clientHeight;
+}
+
+
+
+
+
+function curate_spectra_checking(row_num){
+    var dom_table = document.getElementById("curate_spectra_panel_table");
+    var spec_id = dom_table.children[row_num].getAttribute("value");
+    spectra_checks[spec_id] = !spectra_checks[spec_id];
+    document.getElementById("spec-checkbox-"+ spec_id).checked = spectra_checks[spec_id];
+    
+    var request = "action=update&id=" + spec_id + "&value=" + (spectra_checks[spec_id] ? "18" : "-1") + "&species=" + current_species;
+    var xmlhttp_spectra_update = new XMLHttpRequest();
+    xmlhttp_spectra_update.onreadystatechange = function() {
+        if (xmlhttp_spectra_update.readyState == 4 && xmlhttp_spectra_update.status == 200) {
+            response = xmlhttp_spectra_update.responseText;
+        }
+    }
+    xmlhttp_spectra_update.open("GET", "/stamp/admin/cgi-bin/curate-spectral-library.py?" + request, false);
+    xmlhttp_spectra_update.send();
+    load_spectrum(spec_id);
+}
+
+
+
+
 function curate_spectra(){
-    document.getElementById("spectra_panel").innerHTML = "";
+    var dom_nav_cell = document.getElementById("curate_spectra_navigation");
+    dom_nav_cell.innerHTML = "";
+    if (spectra_current_page > 0){
+        var dom_b = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b);
+        dom_b.setAttribute("onclick", "spectra_current_page = 0; curate_spectra();");
+        dom_b.setAttribute("style", "cursor: pointer;");
+        dom_b.innerHTML = "&nbsp;«&nbsp;";
+        
+        var dom_b2 = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b2);
+        dom_b2.setAttribute("onclick", "spectra_current_page -= 1; curate_spectra();");
+        dom_b2.setAttribute("style", "cursor: pointer;");
+        dom_b2.innerHTML = "&nbsp;‹&nbsp;&nbsp;";
+    }
+    
+        
+    var dom_page = document.createElement("select");
+    dom_nav_cell.appendChild(dom_page);
+    dom_page.setAttribute("style", "display: inline;");
+    dom_page.setAttribute("onchange", "spectra_current_page = this.selectedIndex; curate_spectra();");
+    for (var i = 0; i < spectra_max_pages; ++i){
+        var dom_option = document.createElement("option");
+        dom_page.appendChild(dom_option);
+        dom_option.innerHTML = (i + 1).toString();
+    }
+    dom_page.selectedIndex = spectra_current_page;
+    
+    var dom_div_max_pages = document.createElement("div");
+    dom_nav_cell.appendChild(dom_div_max_pages);
+    dom_div_max_pages.setAttribute("style", "display: inline;");
+    dom_div_max_pages.innerHTML = "&nbsp;&nbsp;/&nbsp;&nbsp;" + spectra_max_pages;
+    
+    
+    if (spectra_current_page + 1 < spectra_max_pages){
+        var dom_b2 = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b2);
+        dom_b2.setAttribute("onclick", "spectra_current_page += 1; curate_spectra();");
+        dom_b2.setAttribute("style", "cursor: pointer;");
+        dom_b2.innerHTML = "&nbsp;&nbsp;›&nbsp;";
+        
+        var dom_b = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b);
+        dom_b.setAttribute("onclick", "spectra_current_page = spectra_max_pages - 1; curate_spectra();");
+        dom_b.setAttribute("style", "cursor: pointer;");
+        dom_b.innerHTML = "&nbsp;»&nbsp;";
+    }
+    
+    
+    
+    var request = "action=select&limit=" + ((spectra_current_page - 1) * max_spectra_per_page) + "," + max_spectra_per_page + "&species=" + current_species;
+    var xmlhttp_spectra_meta = new XMLHttpRequest();
+    xmlhttp_spectra_meta.onreadystatechange = function() {
+        if (xmlhttp_spectra_meta.readyState == 4 && xmlhttp_spectra_meta.status == 200) {
+            spectra_meta = JSON.parse(xmlhttp_spectra_meta.responseText);
+            
+            current_spectrum_selected = 0;
+            var spectra_panel = document.getElementById("spectra_panel");
+            spectra_panel.innerHTML = "";
+            var dom_table = document.createElement("table");
+            spectra_panel.appendChild(dom_table);
+            dom_table.setAttribute("width", "100%"); 
+            dom_table.setAttribute("cellspacing", "0"); 
+            dom_table.setAttribute("border", "0"); 
+            dom_table.setAttribute("id", "curate_spectra_panel_table");
+            spectra_checks = {};
+            
+            var row_cnt = 0;
+            for (var spectrum_meta of spectra_meta){
+                var bg_color = (row_cnt & 1) ? "#DDDDDD" : "white";
+                
+                var dom_tr = document.createElement("tr");
+                dom_table.appendChild(dom_tr);
+                dom_tr.setAttribute("value", spectrum_meta[0]);
+                dom_tr.setAttribute("style", "cursor: pointer;");
+                dom_tr.setAttribute("onclick", "curate_spectra_change_selection(" + row_cnt + ");");
+                
+                
+                var dom_td1 = document.createElement("td");
+                dom_tr.appendChild(dom_td1);
+                dom_td1.setAttribute("width", "90%");
+                dom_td1.setAttribute("bgcolor", bg_color);
+                
+                var charge = parseInt(spectrum_meta[2]);
+                var peptide_seq = spectrum_meta[1];
+                while (peptide_seq.indexOf("M[+16.0]") != -1){
+                    peptide_seq = peptide_seq.replace("M[+16.0]", "m");
+                }
+                while (peptide_seq.indexOf("C[+57.0]") != -1){
+                    peptide_seq = peptide_seq.replace("C[+57.0]", "c");
+                }
+                for (var i = 0; i < charge; ++i) peptide_seq += "+";
+                dom_td1.innerHTML = peptide_seq;
+                
+                var dom_td2 = document.createElement("td");
+                dom_tr.appendChild(dom_td2);
+                dom_td2.setAttribute("align", "right");
+                dom_td2.setAttribute("bgcolor", bg_color);
+                
+                var dom_td2_input = document.createElement("input");
+                dom_td2.appendChild(dom_td2_input);
+                dom_td2_input.setAttribute("style", "display: inline;");
+                dom_td2_input.setAttribute("type", "checkbox");
+                dom_td2_input.setAttribute("id", "spec-checkbox-" + spectrum_meta[0]);
+                if (spectrum_meta[3] != -1) dom_td2_input.setAttribute("checked", "true");
+                dom_td2_input.setAttribute("onclick", "curate_spectra_checking(" + row_cnt + ");");
+                
+                spectra_checks[spectrum_meta[0]] = spectrum_meta[3] != -1;
+                
+                ++row_cnt;
+            }
+            
+        }
+    }
+    xmlhttp_spectra_meta.open("GET", "/stamp/admin/cgi-bin/curate-spectral-library.py?" + request, false);
+    xmlhttp_spectra_meta.send();
+    
     
     document.getElementById("check_spectra").style.display = "inline";
     document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("renderarea").style.filter = "blur(5px)";
     document.getElementById("navigation").style.filter = "blur(5px)";
+    change_match_error();
     resize_ms_view();
     spectrum_loaded = false;
     draw_spectrum();
+    curate_spectra_change_selection(0);
 }

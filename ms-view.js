@@ -22,6 +22,7 @@ O2 =     31.989829;
 acetyl = 43.016742;
 peptide = "";
 peptide_mod = "";
+spectrum_active = true;
 charge = 0;
 precursor_mass = 0;
 grid_color = "#DDDDDD";
@@ -286,6 +287,9 @@ function load_spectrum(spectrum_id){
     precursor_mass = spectrum_data["precursorMZ"];
     charge = spectrum_data["precursorCharge"];
     peptide_mod = spectrum_data["peptideModSeq"];
+    spectrum_active = spectrum_data["scoreType"] != -1;
+    
+    
     while (peptide_mod.indexOf("M[+16.0]") != -1){
         peptide_mod = peptide_mod.replace("M[+16.0]", "m");
     }
@@ -332,6 +336,9 @@ function draw_spectrum(ctx){
     ctx.font="10px Arial";
     
     
+    
+    
+    ctx.fillStyle = "black";
     // Add x-axis tics, values and grid
     var max_tic = peaks[peaks.length - 1].mass;
     var tics_start = Math.min(peaks[0].x, left_border);
@@ -475,6 +482,17 @@ function draw_spectrum(ctx){
     
     
     ctx.restore();
+    
+    
+    if (!spectrum_active) {
+        ctx.globalAlpha = 0.7;
+        ctx.fillStyle = "#bbbbbb";
+        ctx.beginPath();
+        ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+    }
 }
 
 

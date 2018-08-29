@@ -243,24 +243,22 @@
 
 
 
-<div id="check_spectra" class="check_spectra">
+<div id="check_spectra" class="check_spectra" style="display: none;">
     <canvas id="msarea" class="msarea"></canvas> 
     <fieldset id="spectra_options" class="spectra_options" style="position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;"> 
         <input type="radio" onchange="change_match_error();" id="radio_ppm" name="select_error" value="ppm" style="border: 0px; margin: 0px; top: 0px; padding: 0px;"  checked><label for="radio_ppm">Relative</label> 
         <input type="radio" onchange="change_match_error();" id="radio_da" name="select_error" value="Da" style="border: 0px; margin: 0px; top: 0px; padding: 0px;"><label for="radio_da">Absolute</label> 
-        <input type="text" onchange="change_match_error_value();" id="error_value" value="-" size=1 style="text-align: right;"><label id="unit">ppm</label> 
+        <input type="text" onchange="change_match_error_value();" id="error_value" value="-" size=3 style="text-align: right;"><label id="unit">ppm</label> 
     </fieldset> 
     
     <div id="spectra_panel" class="spectra_panel"></div> 
     
     <div id="check_spectra_functions" style="margin: 0px; position: fixed;"> 
-        <table width="100%"><tr><td><font size="-1" color="blue" style="cursor: pointer;" onclick="check_spectra_expand_collapse_all(false);">Expand</font> / 
-        <font size="-1" color="blue" style="cursor: pointer;" onclick="check_spectra_expand_collapse_all(true);">Collapse</font></td> 
-        <td align="right"> <font size="-1" color="blue" style="cursor: pointer;" onclick="clean_basket();">Delete all proteins</font></td></tr></table> 
+        <table width="100%"><tr><td id="curate_spectra_navigation"></td></tr></table> 
     </div> 
     
     <table width="100%" height="100%"><tr><td valign="bottom" align="right">
-        <button onclick="hide_check_spectra(); back_function();">Back</button>
+        <button onclick="hide_check_spectra();">Back</button>
     </td></tr></table>
 </div>
 
