@@ -2700,8 +2700,6 @@ function manage_delete_pathway(entity_id){
     var request = "type=pathway&id=" + entity_id;
     request = "/stamp/admin/cgi-bin/delete-entity.py?" + request;
     
-    console.log(request);
-    
     var xmlhttp_protein_data = new XMLHttpRequest();
     xmlhttp_protein_data.onreadystatechange = function() {
         if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
