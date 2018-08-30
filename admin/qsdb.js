@@ -3173,7 +3173,6 @@ function add_manage_metabolites_add(){
             manage_fill_table();
         }
     }
-    console.log(request);
     xmlhttp_add_metabolite.open("GET", request, false);
     xmlhttp_add_metabolite.send();
 }
