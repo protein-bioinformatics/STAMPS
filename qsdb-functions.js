@@ -2397,23 +2397,31 @@ function node(data){
             ctx.lineWidth = line_width * factor;
             ctx.strokeStyle = slide_color;
             
+            var anchor_hw = hw;
+            var anchor_hh = hh;
+            
+            if (this.type == "membrane" && this.text_highlight){
+                anchor_hw = hh;
+                anchor_hh = hw;
+            }
+            
             ctx.beginPath();
-            ctx.arc(this.x - hw, this.y, anchor_size * factor, 0, 1.999 * Math.PI);
+            ctx.arc(this.x - anchor_hw, this.y, anchor_size * factor, 0, 1.999 * Math.PI);
             ctx.closePath();
             ctx.stroke();
             
             ctx.beginPath();
-            ctx.arc(this.x + hw, this.y, anchor_size * factor, 0, 1.999 * Math.PI);
+            ctx.arc(this.x + anchor_hw, this.y, anchor_size * factor, 0, 1.999 * Math.PI);
             ctx.closePath();
             ctx.stroke();
             
             ctx.beginPath();
-            ctx.arc(this.x, this.y - hh, anchor_size * factor, 0, 1.999 * Math.PI);
+            ctx.arc(this.x, this.y - anchor_hh, anchor_size * factor, 0, 1.999 * Math.PI);
             ctx.closePath();
             ctx.stroke();
             
             ctx.beginPath();
-            ctx.arc(this.x, this.y + hh, anchor_size * factor, 0, 1.999 * Math.PI);
+            ctx.arc(this.x, this.y + anchor_hh, anchor_size * factor, 0, 1.999 * Math.PI);
             ctx.closePath();
             ctx.stroke();
         }
