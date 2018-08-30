@@ -757,7 +757,7 @@ function open_upload_image(){
 function open_select_pathway(){
     var sorted_pathways = [];
     for (var pathway_id in pathways){
-        sorted_pathways.push([pathway_id, pathways[pathway_id]]);
+        sorted_pathways.push([pathway_id, pathways[pathway_id][0]]);
     }
     sorted_pathways.sort(function(a, b) {
         return a[1].localeCompare(b[1]);
@@ -1047,7 +1047,7 @@ function editor_update_pathway_node(){
     var result = update_entry(request);
     if (result){
         var pw_node = data[selected_pathway_node];
-        pw_node.name = pathways[foreign_id];
+        pw_node.name = pathways[foreign_id][0];
         pw_node.foreign_id = foreign_id;
         pw_node.setup_pathway_meta();
         compute_edges();
