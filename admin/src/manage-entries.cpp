@@ -17,7 +17,7 @@
 
 using namespace std;
 
-
+char data_sepatator = '~';
 
 string urlDecode(string &SRC) {
     string ret;
@@ -309,7 +309,7 @@ int main(int argc, char** argv) {
         }
       
       
-        vector<string> data_token = split(data, '|');
+        vector<string> data_token = split(data, data_sepatator);
         string smiles_data = "";
         vector< vector<string> > insert_data;
         

@@ -24,6 +24,7 @@ letter_sizes = [];
 point_suffix_length = 0;
 deletion_cypher = "39d29e917c6901adf84418992b9b3892d37b61aefbc0f1fb353996e1ff8a2958";
 spectrum_selection_color = "#80c8ff";
+data_separator = "~";
 
 global_manage_data = -1;
 global_protein_data = -1;
@@ -2546,6 +2547,17 @@ function manage_fill_table(){
                             dom_select.entity_id = row[0];
                             dom_select.col_id = j;
                         }
+                        else if (j == 3){
+                            var dom_input = document.createElement("input");
+                            dom_td.appendChild(dom_input);
+                            dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                            dom_input.setAttribute("type", "checkbox");
+                            if (row[j] == "1") dom_input.setAttribute("checked", "true");
+                            dom_input.setAttribute("onchange", "change_checkbox_type(this);");
+                            dom_input.entity_id = row[0];
+                            dom_input.col_id = j;
+                            dom_input.field_len = 200;
+                        }
                     }
                     var dom_td_filler = document.createElement("td");
                     dom_tr.appendChild(dom_td_filler);
@@ -2761,6 +2773,10 @@ function change_checkbox_type(dom_obj){
         alert("Error: database could not be updated.");
     }
     else {
+        if (manage_current_entry == "pathways"){
+            if (col_id == 3) pathways[entity_id][1] = content;
+            set_pathway_menu();
+        }
         manage_fill_table();
     }
 }
@@ -3087,18 +3103,18 @@ function add_manage_proteins_add(){
     }
     
     var request = "name:" + document.getElementById("add_manage_proteins_name").value;
-    request += ",accession:" + document.getElementById("add_manage_proteins_accession").value;
-    request += ",definition:" + document.getElementById("add_manage_proteins_definition").value;
-    request += ",fasta:" + document.getElementById("add_manage_proteins_fasta").value;
-    request += ",ec_number:" + document.getElementById("add_manage_proteins_ec_number").value;
-    request += ",kegg_link:" + document.getElementById("add_manage_proteins_kegg").value;
+    request += data_separator + "accession:" + document.getElementById("add_manage_proteins_accession").value;
+    request += data_separator + "definition:" + document.getElementById("add_manage_proteins_definition").value;
+    request += data_separator + "fasta:" + document.getElementById("add_manage_proteins_fasta").value;
+    request += data_separator + "ec_number:" + document.getElementById("add_manage_proteins_ec_number").value;
+    request += data_separator + "kegg_link:" + document.getElementById("add_manage_proteins_kegg").value;
     var val = document.getElementById("add_manage_proteins_chr_start").value;
-    request += ",chr_start:" + (val.length > 0 ? val : "-1");
+    request += data_separator + "chr_start:" + (val.length > 0 ? val : "-1");
     val = document.getElementById("add_manage_proteins_chr_end").value;
-    request += ",chr_end:" + (val.length > 0 ? val : "-1");
-    request += ",unreviewed:" + (document.getElementById("add_manage_proteins_unreviewed").checked ? "1" : "0");
-    request += ",chromosome:" + document.getElementById("add_manage_proteins_chromosome")[document.getElementById("add_manage_proteins_chromosome").selectedIndex].value;
-    request += ",species:" + document.getElementById("add_manage_proteins_species")[document.getElementById("add_manage_proteins_species").selectedIndex].value;
+    request += data_separator + "chr_end:" + (val.length > 0 ? val : "-1");
+    request += data_separator + "unreviewed:" + (document.getElementById("add_manage_proteins_unreviewed").checked ? "1" : "0");
+    request += data_separator + "chromosome:" + document.getElementById("add_manage_proteins_chromosome")[document.getElementById("add_manage_proteins_chromosome").selectedIndex].value;
+    request += data_separator + "species:" + document.getElementById("add_manage_proteins_species")[document.getElementById("add_manage_proteins_species").selectedIndex].value;
     
     request = "/stamp/admin/cgi-bin/manage-entries.bin?action=insert&type=proteins&data=" + encodeURL(request);
     
@@ -3124,7 +3140,8 @@ function add_manage_pathways(){
     
     var new_pathway_name = document.getElementById("add_manage_pathways_name").value;
     var pathway_group = document.getElementById("add_manage_pathways_group")[document.getElementById("add_manage_pathways_group").selectedIndex].value;
-    var request = "name:" + new_pathway_name + ",pathway_group_id:" + pathway_group;
+    var signaling = document.getElementById("add_manage_pathways_signaling").checked;
+    var request = "name:" + new_pathway_name + data_separator + "pathway_group_id:" + pathway_group + data_separator + "signaling_pathway:" + (signaling ? "1" : "0");
     
     request = "/stamp/admin/cgi-bin/manage-entries.bin?action=insert&type=pathways&data=" + encodeURL(request);
     
@@ -3137,7 +3154,7 @@ function add_manage_pathways(){
             }
             document.getElementById('add_manage_pathways').style.display = 'none';
             manage_fill_table();
-            pathways[request] = new_pathway_name;
+            pathways[request] = [new_pathway_name, (signaling ? 1 : 0)];
             pathway_groups[pathway_group][2].add(request);
             set_pathway_menu();
         }
@@ -3152,11 +3169,11 @@ function add_manage_metabolites_add(){
     
     
     var request = "name:" + document.getElementById("add_manage_metabolites_name").value;
-    request += "|short_name:" + document.getElementById("add_manage_metabolites_name").value;
-    request += "|c_number:" + document.getElementById("add_manage_metabolites_c_number").value;
-    request += "|formula:" + document.getElementById("add_manage_metabolites_formula").value;
-    request += "|exact_mass:" + document.getElementById("add_manage_metabolites_exact_mass").value;
-    request += "|smiles:" + document.getElementById("add_manage_metabolites_smiles").value;
+    request += data_separator + "short_name:" + document.getElementById("add_manage_metabolites_name").value;
+    request += data_separator + "c_number:" + document.getElementById("add_manage_metabolites_c_number").value;
+    request += data_separator + "formula:" + document.getElementById("add_manage_metabolites_formula").value;
+    request += data_separator + "exact_mass:" + document.getElementById("add_manage_metabolites_exact_mass").value;
+    request += data_separator + "smiles:" + document.getElementById("add_manage_metabolites_smiles").value;
     
     request = "/stamp/admin/cgi-bin/manage-entries.bin?action=insert&type=metabolites&data=" + encodeURL(request);
     
