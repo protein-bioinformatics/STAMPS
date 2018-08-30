@@ -610,7 +610,11 @@ div<div id="locus_search" class="global_search">
                 </tr>
             </table>
         </td><td width="50%" valign="bottom">
-            <select id="ppm_pw_figure_select" onchange="update_ppm();"></select>
+            <input type="radio" id="ppm_pw_radio_metabolic" name="ppm_pw_Type" onclick="update_ppm_pw_select();" checked />
+            <label> Metabolic</label>
+            <input type="radio" id="ppm_pw_radio_signaling" name="ppm_pw_Type" onclick="update_ppm_pw_select();" />
+            <label> Signaling</label>&nbsp;&nbsp;&nbsp;
+            <select id="ppm_pw_figure_select" onchange="update_ppm();" style="width: 250px;"></select>
         </td></tr>
         
         <tr><td width="50%" valign="top">
@@ -678,6 +682,36 @@ function change_chromosome_view_keydown(e){
 var statistics_loaded = 0;
 var max_NSAF = -1000000;
 var min_NSAF = 0;
+
+
+
+
+
+function update_ppm_pw_select(){
+    var signaling = document.getElementById("ppm_pw_radio_signaling").checked;
+    
+    var target_select = document.getElementById("ppm_pw_figure_select");
+    for(var i = target_select.options.length - 1 ; i >= 0 ; i--)
+    {
+        target_select.remove(i);
+    }
+    
+    var pw_list = [];
+    for (pw_id in pathways_to_proteins){
+        if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        if (pathways_to_proteins[pw_id][1].size == 0) continue;
+        pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
+    }
+    pw_list.sort();
+    
+    for (pw_row of pw_list){
+        var new_option = document.createElement("option");
+        new_option.text = pw_row[0];
+        new_option.value = pw_row[1];
+        target_select.add(new_option);
+    }
+    update_ppm();
+}
 
 
 

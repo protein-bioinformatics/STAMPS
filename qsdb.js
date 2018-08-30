@@ -169,7 +169,11 @@ function resize_pathway_view(){
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     resize_renderarea_width(0);
+    
+    var statistics_window = document.getElementById("statistics");
+    
     ctx.canvas.height = window.innerHeight;
+    ctx.canvas.width = window.innerWidth - (statistics_window.style.display != "none" ? statistics_window.getBoundingClientRect().width : 0);
     preview_element.y = window.innerHeight - preview_element.height;
   
     var rect = document.getElementById('select_metabolic_pathway_nav').getBoundingClientRect();
