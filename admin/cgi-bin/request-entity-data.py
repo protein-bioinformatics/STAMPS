@@ -23,7 +23,7 @@ if entity_type == "protein":
     accession = form.getvalue('accession') if "accession" in form else ""
 
     if len(accession) == 0:
-        print(-2)
+        print(-1)
         exit()
 
     kegg_id = ""
@@ -141,38 +141,41 @@ elif entity_type == "metabolite":
     exact_mass = ""
     smiles = ""
     
-    response = urlopen('http://rest.kegg.jp/get/%s' % c_number)
-    lines = response.read().decode("utf8").split("\n")
-    
-    for line in lines:
-        if line[:4] == "NAME":
-            name = line[4:].split(";")[0].strip(" ")
-            
-        elif line[:7] == "FORMULA":
-            formula = line[7:].strip(" ")
-            
-        elif line[:10] == "EXACT_MASS":
-            exact_mass = line[10:].strip(" ")
-            
-        elif line.find("ChEBI: ") > -1:
-            pubnum = line.split(":")[1].strip(" ")
-            if pubnum.find(" ") > -1: pubnum = pubnum.split(" ")[0]
-            
-            response2 = urlopen("http://www.ebi.ac.uk/webservices/chebi/2.0/test/getCompleteEntity?chebiId=%s" % pubnum)
-            xml = "".join(chr(c) for c in response2.read()).split("\n")[0]
-            
-            st = xml.find("<smiles>")
-            if st > 0:
-                st += 8
-                en = xml.find("</smiles>", st)
-                smiles = xml[st:en]
+    try:
+        response = urlopen('http://rest.kegg.jp/get/%s' % c_number)
+        lines = response.read().decode("utf8").split("\n")
+        
+        for line in lines:
+            if line[:4] == "NAME":
+                name = line[4:].split(";")[0].strip(" ")
+                
+            elif line[:7] == "FORMULA":
+                formula = line[7:].strip(" ")
+                
+            elif line[:10] == "EXACT_MASS":
+                exact_mass = line[10:].strip(" ")
+                
+            elif line.find("ChEBI: ") > -1:
+                pubnum = line.split(":")[1].strip(" ")
+                if pubnum.find(" ") > -1: pubnum = pubnum.split(" ")[0]
+                
+                response2 = urlopen("http://www.ebi.ac.uk/webservices/chebi/2.0/test/getCompleteEntity?chebiId=%s" % pubnum)
+                xml = "".join(chr(c) for c in response2.read()).split("\n")[0]
+                
+                st = xml.find("<smiles>")
+                if st > 0:
+                    st += 8
+                    en = xml.find("</smiles>", st)
+                    smiles = xml[st:en]
 
-    print(json.dumps({"name": name,
-            "formula": formula,
-            "exact_mass": exact_mass,
-            "smiles": smiles
-            }))
-    
+        print(json.dumps({"name": name,
+                "formula": formula,
+                "exact_mass": exact_mass,
+                "smiles": smiles
+                }))
+        
+    except:
+        print(-1)
     
     
     

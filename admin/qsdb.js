@@ -2700,6 +2700,8 @@ function manage_delete_pathway(entity_id){
     var request = "type=pathway&id=" + entity_id;
     request = "/stamp/admin/cgi-bin/delete-entity.py?" + request;
     
+    console.log(request);
+    
     var xmlhttp_protein_data = new XMLHttpRequest();
     xmlhttp_protein_data.onreadystatechange = function() {
         if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
@@ -3006,10 +3008,12 @@ function request_metabolites_data(){
     xmlhttp_metabolite_data.onreadystatechange = function() {
         if (xmlhttp_metabolite_data.readyState == 4 && xmlhttp_metabolite_data.status == 200) {
             var request = JSON.parse(xmlhttp_metabolite_data.responseText);
-            if ("name" in request) document.getElementById("add_manage_metabolites_name").value = request["name"];
-            if ("formula" in request) document.getElementById("add_manage_metabolites_formula").value = request["formula"];
-            if ("exact_mass" in request) document.getElementById("add_manage_metabolites_exact_mass").value = request["exact_mass"];
-            if ("smiles" in request) document.getElementById("add_manage_metabolites_smiles").value = request["smiles"];
+            if (request != -1) {
+                if ("name" in request) document.getElementById("add_manage_metabolites_name").value = request["name"];
+                if ("formula" in request) document.getElementById("add_manage_metabolites_formula").value = request["formula"];
+                if ("exact_mass" in request) document.getElementById("add_manage_metabolites_exact_mass").value = request["exact_mass"];
+                if ("smiles" in request) document.getElementById("add_manage_metabolites_smiles").value = request["smiles"];
+            }
         }
     }
     xmlhttp_metabolite_data.open("GET", request, false);
@@ -3029,37 +3033,39 @@ function request_protein_data(){
     xmlhttp_protein_data.onreadystatechange = function() {
         if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
             var request = JSON.parse(xmlhttp_protein_data.responseText);
-            if ("name" in request) document.getElementById("add_manage_proteins_name").value = request["name"];
-            if ("definition" in request) document.getElementById("add_manage_proteins_definition").value = request["definition"];
-            if ("fasta" in request) document.getElementById("add_manage_proteins_fasta").value = request["fasta"];
-            if ("ec_number" in request) document.getElementById("add_manage_proteins_ec_number").value = request["ec_number"];
-            if ("kegg_id" in request) document.getElementById("add_manage_proteins_kegg").value = request["kegg_id"];
-            if ("chr_start" in request) document.getElementById("add_manage_proteins_chr_start").value = request["chr_start"];
-            if ("chr_end" in request) document.getElementById("add_manage_proteins_chr_end").value = request["chr_end"];
-            if ("unreviewed" in request) document.getElementById("add_manage_proteins_unreviewed").checked = request["unreviewed"];
-            else document.getElementById("add_manage_proteins_unreviewed").checked = false;
-            if ("chromosome" in request){
-                var dom_chromosome_select = document.getElementById("add_manage_proteins_chromosome");
-                var selected_index = 0;
-                for (var i = 1; i < dom_chromosome_select.length; ++i){
-                    if (dom_chromosome_select[i].innerHTML == request["chromosome"]){
-                        selected_index = i;
-                        break;
+            if (request != -1) {
+                if ("name" in request) document.getElementById("add_manage_proteins_name").value = request["name"];
+                if ("definition" in request) document.getElementById("add_manage_proteins_definition").value = request["definition"];
+                if ("fasta" in request) document.getElementById("add_manage_proteins_fasta").value = request["fasta"];
+                if ("ec_number" in request) document.getElementById("add_manage_proteins_ec_number").value = request["ec_number"];
+                if ("kegg_id" in request) document.getElementById("add_manage_proteins_kegg").value = request["kegg_id"];
+                if ("chr_start" in request) document.getElementById("add_manage_proteins_chr_start").value = request["chr_start"];
+                if ("chr_end" in request) document.getElementById("add_manage_proteins_chr_end").value = request["chr_end"];
+                if ("unreviewed" in request) document.getElementById("add_manage_proteins_unreviewed").checked = request["unreviewed"];
+                else document.getElementById("add_manage_proteins_unreviewed").checked = false;
+                if ("chromosome" in request){
+                    var dom_chromosome_select = document.getElementById("add_manage_proteins_chromosome");
+                    var selected_index = 0;
+                    for (var i = 1; i < dom_chromosome_select.length; ++i){
+                        if (dom_chromosome_select[i].innerHTML == request["chromosome"]){
+                            selected_index = i;
+                            break;
+                        }
                     }
+                    dom_chromosome_select.selectedIndex = selected_index;
                 }
-                dom_chromosome_select.selectedIndex = selected_index;
-            }
-            if ("species" in request){
-                var dom_species_select = document.getElementById("add_manage_proteins_species");
-                var selected_index = -1;
-                for (var i = 0; i < dom_species_select.length; ++i){
-                    if (dom_species_select[i].value == request["species"]){
-                        selected_index = i;
-                        break;
+                if ("species" in request){
+                    var dom_species_select = document.getElementById("add_manage_proteins_species");
+                    var selected_index = -1;
+                    for (var i = 0; i < dom_species_select.length; ++i){
+                        if (dom_species_select[i].value == request["species"]){
+                            selected_index = i;
+                            break;
+                        }
                     }
+                    if (selected_index >= 0) dom_species_select.selectedIndex = selected_index;
+                    else alert("Warning: species '" + request["species"] + "' not registered in database!");
                 }
-                if (selected_index >= 0) dom_species_select.selectedIndex = selected_index;
-                else alert("Warning: species '" + request["species"] + "' not registered in database!");
             }
         }
     }
@@ -3148,10 +3154,11 @@ function add_manage_metabolites_add(){
     
     
     var request = "name:" + document.getElementById("add_manage_metabolites_name").value;
-    request += ",c_number:" + document.getElementById("add_manage_metabolites_c_number").value;
-    request += ",formula:" + document.getElementById("add_manage_metabolites_formula").value;
-    request += ",exact_mass:" + document.getElementById("add_manage_metabolites_exact_mass").value;
-    request += ",smiles:" + document.getElementById("add_manage_metabolites_smiles").value;
+    request += "|short_name:" + document.getElementById("add_manage_metabolites_name").value;
+    request += "|c_number:" + document.getElementById("add_manage_metabolites_c_number").value;
+    request += "|formula:" + document.getElementById("add_manage_metabolites_formula").value;
+    request += "|exact_mass:" + document.getElementById("add_manage_metabolites_exact_mass").value;
+    request += "|smiles:" + document.getElementById("add_manage_metabolites_smiles").value;
     
     request = "/stamp/admin/cgi-bin/manage-entries.bin?action=insert&type=metabolites&data=" + encodeURL(request);
     
@@ -3166,6 +3173,7 @@ function add_manage_metabolites_add(){
             manage_fill_table();
         }
     }
+    console.log(request);
     xmlhttp_add_metabolite.open("GET", request, false);
     xmlhttp_add_metabolite.send();
 }

@@ -247,6 +247,7 @@ int main(int argc, char** argv) {
                 for (int i = 2; i <= num_cols; ++i){
                     string content = res->getString(i);
                     replaceAll(content, "\n", "\\n");
+                    replaceAll(content, "\\C", "\\\\C");
                     data += ",\"" + content + "\"";
                 }
                 data += "]";
@@ -308,7 +309,7 @@ int main(int argc, char** argv) {
         }
       
       
-        vector<string> data_token = split(data, ',');
+        vector<string> data_token = split(data, '|');
         string smiles_data = "";
         vector< vector<string> > insert_data;
         
@@ -347,6 +348,7 @@ int main(int argc, char** argv) {
         }
         sql_query += "');";
         stmt->execute(sql_query);
+        
         
         if (!action_type.compare("metabolites")){
             sql_query = "SELECT max(id) max_id FROM metabolites;";

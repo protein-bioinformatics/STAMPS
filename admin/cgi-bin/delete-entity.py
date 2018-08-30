@@ -167,7 +167,7 @@ elif entity_type == "pathway":
     my_cur.execute(sql_query, (entity_id))
     conn.commit()
     
-    sql_query = "DELETE FROM nodeproteincorrelations npc INNER JOIN nodes n on npc.node_id = n.id WHERE n.pathway_id = %s;"
+    sql_query = "DELETE npc FROM nodeproteincorrelations npc INNER JOIN nodes n on npc.node_id = n.id WHERE n.pathway_id = %s;"
     my_cur.execute(sql_query, (entity_id))
     conn.commit()
     
