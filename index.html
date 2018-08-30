@@ -695,6 +695,7 @@ function update_nsaf_pathway_select(){
     var pw_list = [];
     for (pw_id in pathways_to_proteins){
         if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        if (pathways_to_proteins[pw_id][1].size == 0) continue;
         pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
     }
     pw_list.sort();
@@ -723,6 +724,7 @@ function update_absolute_pathway_select(){
     var pw_list = [];
     for (pw_id in pathways_to_proteins){
         if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        if (pathways_to_proteins[pw_id][1].size == 0) continue;
         pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
     }
     pw_list.sort();
@@ -751,6 +753,7 @@ function update_tissue_pathway_select(){
     var pw_list = [];
     for (pw_id in pathways_to_proteins){
         if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        if (pathways_to_proteins[pw_id][1].size == 0) continue;
         pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
     }
     pw_list.sort();
@@ -782,6 +785,7 @@ function update_correlation_pathway_select(){
     var pw_list = [];
     for (pw_id in pathways_to_proteins){
         if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        if (pathways_to_proteins[pw_id][1].size == 0) continue;
         pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
     }
     pw_list.sort();
@@ -886,6 +890,7 @@ function update_tissue(ctx){
                 pathway_nsafs[pw_id] += Math.pow(10, protein.nsaf[tissue_id]);
             }
         }
+        pathway_nsafs[pw_id] /= protein_ids.size;
     }
     
     for (pw_id in pathway_nsafs){
@@ -1076,6 +1081,8 @@ function update_correlation_tissues(ctx){
     var h_offset = 50;
     ctx.clearRect(0, 0, w_box, h_box + h_offset);
     
+    ctx.fillStyle = "black";
+    
     ctx.font="14px Arial";
     ctx.textAlign = 'center';
     ctx.save();
@@ -1151,38 +1158,45 @@ function update_correlation_tissues(ctx){
         ctx.fillText(h, x, h_box + 20);
     }
     
-    var nsaf_points = [];
-    for (var prot_id in protein_dictionary){
-        var protein = protein_dictionary[prot_id];
-        if (tissue1_id in protein.nsaf && tissue2_id in protein.nsaf){
-            nsaf_points.push([protein.nsaf[tissue2_id], protein.nsaf[tissue1_id]]);
+    var nsaf_set = new Set();
+    for (var pathway_index in pathways_to_proteins){
+        
+        ctx.fillStyle = tissues[1 + (pathway_index % 10)][4];
+        
+        var nsaf_points = [];
+        for (prot_id of pathways_to_proteins[pathway_index][1]){
+            var protein = protein_dictionary[prot_id];
+            if (tissue1_id in protein.nsaf && tissue2_id in protein.nsaf){
+                nsaf_points.push([protein.nsaf[tissue2_id], protein.nsaf[tissue1_id]]);
+            }
         }
-    }
         
-    
-    var nsaf_set = new Set();    
-    for (var i = 0; i < nsaf_points.length; ++i){
-        var x = nsaf_points[i][0];
-        var y = nsaf_points[i][1];
         
-        // transform from nsaf to percentage [0, 1]
-        x = (x - min_NSAF) / (max_NSAF - min_NSAF);
-        y = (y - min_NSAF) / (max_NSAF - min_NSAF);
+            
         
-        // transform to axes pixels
-        x = Math.floor(w_offset + 2 + (w_box - w_offset) * x);
-        y = Math.floor(h_box - 2 - h_box * y);
-        
-        var hash = x * h_box + y;
-        
-        if (!nsaf_set.has(hash)){
-            ctx.beginPath();
-            ctx.arc(x, y, 1, 0, 2 * Math.PI);
-            ctx.fill();
-            nsaf_set.add(hash);
+        for (var i = 0; i < nsaf_points.length; ++i){
+            var x = nsaf_points[i][0];
+            var y = nsaf_points[i][1];
+            
+            // transform from nsaf to percentage [0, 1]
+            x = (x - min_NSAF) / (max_NSAF - min_NSAF);
+            y = (y - min_NSAF) / (max_NSAF - min_NSAF);
+            
+            // transform to axes pixels
+            x = Math.floor(w_offset + 2 + (w_box - w_offset) * x);
+            y = Math.floor(h_box - 2 - h_box * y);
+            
+            var hash = x * h_box + y;
+            
+            if (!nsaf_set.has(hash)){
+                ctx.beginPath();
+                ctx.arc(x, y, 1, 0, 2 * Math.PI);
+                ctx.fill();
+                nsaf_set.add(hash);
+            }
         }
+        
     }
-    
 }
 
 
@@ -1211,6 +1225,7 @@ function update_correlation_tissues_pathway(ctx){
     var h_box = 250;
     var h_offset = 50;
     ctx.clearRect(0, 0, w_box, h_box + h_offset);
+    ctx.fillStyle = "black";
     
     ctx.font="14px Arial";
     ctx.textAlign = 'center';
@@ -1320,7 +1335,8 @@ function update_correlation_tissues_pathway(ctx){
     
     
     
-    var nsaf_set = new Set();    
+    var nsaf_set = new Set(); 
+    ctx.fillStyle = tissues[1 + (pathway_index % 10)][4];   
     for (var i = 0; i < nsaf_points.length; ++i){
         var x = nsaf_points[i][0];
         var y = nsaf_points[i][1];
