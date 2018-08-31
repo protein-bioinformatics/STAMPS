@@ -5179,7 +5179,7 @@ function load_data(reload){
         }
     }
     
-    var request_nodes = "/stamp/cgi-bin/get-nodes.bin?pathway=" + current_pathway + "&species=" + current_species;
+    var request_nodes = "/stamp/cgi-bin/get-nodes.bin?pathway=" + current_pathway + "&species=" + current_species + specific_node_addition;
     var request_edges = "/stamp/cgi-bin/get-edges.bin?pathway=" + current_pathway;
     
     // get nodes information

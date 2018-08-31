@@ -25,6 +25,7 @@ point_suffix_length = 0;
 deletion_cypher = "39d29e917c6901adf84418992b9b3892d37b61aefbc0f1fb353996e1ff8a2958";
 spectrum_selection_color = "#80c8ff";
 data_separator = "~";
+specific_node_addition = "&unreviewed=true";
 
 global_manage_data = -1;
 global_protein_data = -1;
@@ -1010,7 +1011,7 @@ function editor_update_protein_node(){
             }
         }
     }
-    
+    console.log(request);
     xmlhttp_set.open("GET", request, false);
     xmlhttp_set.send();
     

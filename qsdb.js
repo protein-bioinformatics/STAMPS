@@ -1,4 +1,5 @@
 
+specific_node_addition = "";
 
 function init(){
     
