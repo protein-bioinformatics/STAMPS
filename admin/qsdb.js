@@ -495,6 +495,7 @@ function mouse_click_listener(e){
                     request = "type=edge&id=" + highlight_element.reagent_id;
                 }
             }
+            console.log(request);
             delete_entity(request);
             compute_edges();
             assemble_elements();

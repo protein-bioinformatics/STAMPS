@@ -43,11 +43,11 @@ if entity_type == "node":
     
     if entity_type == "pathway":
         sql_query = "DELETE FROM reactions_direct WHERE node_id_start = %s;"
-        my_cur.execute(sql_query, (entity_id, entity_id))
+        my_cur.execute(sql_query, (entity_id))
         conn.commit()
         
         sql_query = "DELETE FROM reactions_direct WHERE node_id_end = %s;"
-        my_cur.execute(sql_query, (entity_id, entity_id))
+        my_cur.execute(sql_query, (entity_id))
         conn.commit()
         
         sql_query = "DELETE FROM nodes WHERE id = %s;"
