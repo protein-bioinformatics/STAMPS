@@ -36,7 +36,12 @@ function init(){
                         var http_zoom = parseInt(HTTP_GET_VARS["zoom"]);
                         http_zoom = Math.max(min_zoom, http_zoom);
                         http_zoom = Math.min(max_zoom, http_zoom);
-                        for (var i = min_zoom + start_zoom_delta; i < http_zoom; ++i) zoom_in_out(0, 0);
+                        
+                        
+                        
+                        var st_zoom = min_zoom + start_zoom_delta;
+                        if (st_zoom < http_zoom) for (var i = st_zoom; i < http_zoom; ++i) zoom_in_out(0, 0);
+                        else  for (var i = st_zoom; i > http_zoom; --i) zoom_in_out(1, 0);
                             
                         if ("position" in HTTP_GET_VARS) {
                             var position = HTTP_GET_VARS["position"].split(":");
