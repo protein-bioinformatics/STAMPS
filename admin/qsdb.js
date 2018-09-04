@@ -2143,7 +2143,8 @@ function manage_change_entity(entity){
     var dom_th_nav_del = document.createElement("td");
     dom_tr.appendChild(dom_th_nav_del);
     dom_th_nav_del.innerHTML = "&nbsp;";
-    dom_th_nav_del.setAttribute("style", "cursor: pointer; min-width: 34px; max-width: 34px;");
+    dom_th_nav_del.setAttribute("style", "cursor: pointer; min-width: 66px; max-width: 66px;");
+    
     for (var i = 0; i < manage_columns[entity].length; ++i){
         var dom_td = document.createElement("td");
         dom_tr.appendChild(dom_td);
@@ -2163,6 +2164,28 @@ function manage_change_entity(entity){
 function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
+
+
+
+function update_protein_data(accession){
+    
+    
+    
+    var request = "type=protein&action=update&accession=" + accession;
+    request = "/stamp/admin/cgi-bin/request-entity-data.py?" + request;
+    
+    var xmlhttp_update_prot = new XMLHttpRequest();
+    xmlhttp_update_prot.onreadystatechange = function() {
+        if (xmlhttp_update_prot.readyState == 4 && xmlhttp_update_prot.status == 200) {
+            var responseText = xmlhttp_update_prot.responseText;
+        }
+    }
+    xmlhttp_update_prot.open("GET", request, false);
+    xmlhttp_update_prot.send();
+    manage_fill_table();
+}
+
+
 
 function manage_fill_table(){
     
@@ -2192,8 +2215,17 @@ function manage_fill_table(){
     dom_table_header.innerHTML = ""
     var dom_th_del = document.createElement("th");
     dom_table_header.appendChild(dom_th_del);
-    dom_th_del.innerHTML = "Del";
-    dom_th_del.setAttribute("width", "32");
+    
+    if (manage_current_entry == "proteins"){
+        dom_th_del.innerHTML = "Del/Up";
+        dom_th_del.setAttribute("width", "64");
+    }
+    else {
+        dom_th_del.innerHTML = "Del";
+        dom_th_del.setAttribute("width", "32");
+    }
+    
+    
     for (var i = 1; i <= manage_columns[manage_current_entry].length; ++i){
         var dom_th_name = document.createElement("th");
         dom_table_header.appendChild(dom_th_name);
@@ -2207,6 +2239,7 @@ function manage_fill_table(){
         else if (manage_current_entry == "pathway_groups" && i == 1) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 700px; max-width: 700px;");
         else dom_th_name.setAttribute("style", "cursor: pointer; min-width: 200px; max-width: 200px;");
     }
+    
     var dom_th_name_filler = document.createElement("th");
     dom_table_header.appendChild(dom_th_name_filler);
     dom_th_name_filler.setAttribute("style", "min-width: 100%; max-width: 100%;");
@@ -2329,12 +2362,29 @@ function manage_fill_table(){
                     var dom_td_del = document.createElement("td");
                     dom_tr.appendChild(dom_td_del);
                     dom_td_del.setAttribute("bgcolor", bg_color);
-                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
-                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px; float: left;");
+                    dom_td_del.setAttribute("title", "Delet protein entry");
                     var dom_image = document.createElement("img");
                     dom_td_del.appendChild(dom_image);
                     dom_image.setAttribute("src", "../images/delete-small.png");
+                    dom_image.setAttribute("style", "display: inline;");
                     dom_image.setAttribute("onclick", "document.getElementById('confirm_deletion_hidden').value = 'manage_delete_protein';  document.getElementById('confirm_deletion_hidden_id').value = " + row[0] + "; document.getElementById('confirm_deletion_input').value = ''; document.getElementById('confirm_deletion').style.display = 'inline';");
+                    
+                    if (manage_current_entry == "proteins"){
+                        dom_td_del.setAttribute("style", "cursor: pointer; min-width: 64px; max-width: 64px;");
+                        var dom_space = document.createElement("font");
+                        dom_td_del.appendChild(dom_space);
+                        dom_space.innerHTML = "&nbsp;&nbsp;";
+                        
+                        var dom_image_update = document.createElement("img");
+                        dom_td_del.appendChild(dom_image_update);
+                        dom_image_update.setAttribute("src", "../images/update-small.png");
+                        dom_image_update.setAttribute("title", "Update protein entry");
+                        dom_image_update.setAttribute("width", "16px");
+                        dom_image_update.setAttribute("onclick", "update_protein_data('" + row[5] + "');"); // accession passing
+                        //dom_image_update.setAttribute("style", "display: inline; float: left;");
+                    }
+                    
                     
                     for (var j = 1; j < row.length; ++j){
                         var dom_td = document.createElement("td");

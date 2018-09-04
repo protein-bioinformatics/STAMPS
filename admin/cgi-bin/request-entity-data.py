@@ -7,12 +7,29 @@ from urllib.request import urlopen
 import xml.etree.ElementTree as ET
 import re # regular expression module
 from cgi import FieldStorage
+from pymysql import connect, cursors
+
+
+
+conf = {}
+with open("../qsdb.conf", mode="rt") as fl:
+    for line in fl:
+        line = line.strip().strip(" ")
+        if len(line) < 1 or line[0] == "#": continue
+        token = line.split("=")
+        if len(token) < 2: continue
+        conf[token[0].strip(" ")] = token[1].strip(" ")
+        
+conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
+my_cur = conn.cursor(cursors.DictCursor)
+
         
 print("Content-Type: text/html")
 print()
 
 form = FieldStorage()
 entity_type = form.getvalue('type') if "type" in form else ""
+action = form.getvalue('action') if "type" in form else ""
 
 if len(entity_type) == 0:
     print(-1)
@@ -33,8 +50,8 @@ if entity_type == "protein":
     definition = ""
     ec_number = ""
     chromosome = ""
-    chr_start = ""
-    chr_end = ""
+    chr_start = 0
+    chr_end = 0
     unreviewed = True
 
 
@@ -67,7 +84,6 @@ if entity_type == "protein":
             
     except:
         pass
-
 
 
 
@@ -121,7 +137,18 @@ if entity_type == "protein":
             except:
                 pass
 
-    print(json.dumps({"kegg_id": kegg_id,
+
+    
+    if action == "update":
+        
+        sql_query = "UPDATE proteins SET name = '%s', definition = '%s', species = '%s', kegg_link = '%s', ec_number = '%s', fasta = '%s', unreviewed = %i, chromosome = '%s', chr_start = %i, chr_end = %i WHERE accession = '%s';" % (name, definition, species, kegg_id, ec_number, fasta, 1 if unreviewed else 0, chromosome, chr_start, chr_end, accession)
+        my_cur.execute(sql_query)
+        
+        conn.commit()
+        print(0)
+
+    else:
+        print(json.dumps({"kegg_id": kegg_id,
             "unreviewed": unreviewed,
             "species": species,
             "fasta": fasta,
