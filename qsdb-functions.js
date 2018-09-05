@@ -3684,35 +3684,39 @@ function compute_edges(){
             }
             var len_adjacent = diameter * (-1 / metabolite_len + 1);
             var correction_shift = metabolite_pos / (metabolite_len - 1);
-            switch (node_anchor){
-                case "top":
-                    var w = len_adjacent;
-                    start_x -= w * 0.5;
-                    if (metabolite_len > 1){
-                        start_x += w * correction_shift;
-                    }
-                    break;
-                case "bottom":
-                    var w = len_adjacent;
-                    start_x += w * 0.5;
-                    if (metabolite_len > 1){
-                        start_x -= w * correction_shift;
-                    }
-                    break;
-                case "left":
-                    var h = len_adjacent;
-                    start_y += h * 0.5;
-                    if (metabolite_len > 1){
-                        start_y -= h * correction_shift;
-                    }
-                    break;
-                case "right":
-                    var h = len_adjacent;
-                    start_y -= h * 0.5;
-                    if (metabolite_len > 1){
-                        start_y += h * correction_shift;
-                    }
-                    break;
+            
+            
+            if (data[metabolite_id].foreign_id != -1 || editor_mode){
+                switch (node_anchor){
+                    case "top":
+                        var w = len_adjacent;
+                        start_x -= w * 0.5;
+                        if (metabolite_len > 1){
+                            start_x += w * correction_shift;
+                        }
+                        break;
+                    case "bottom":
+                        var w = len_adjacent;
+                        start_x += w * 0.5;
+                        if (metabolite_len > 1){
+                            start_x -= w * correction_shift;
+                        }
+                        break;
+                    case "left":
+                        var h = len_adjacent;
+                        start_y += h * 0.5;
+                        if (metabolite_len > 1){
+                            start_y -= h * correction_shift;
+                        }
+                        break;
+                    case "right":
+                        var h = len_adjacent;
+                        start_y -= h * 0.5;
+                        if (metabolite_len > 1){
+                            start_y += h * correction_shift;
+                        }
+                        break;
+                }
             }
         }
         
