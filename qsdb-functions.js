@@ -3618,7 +3618,7 @@ function compute_edges(){
         var correction_shift = metabolite_pos / (metabolite_len - 1);
         
         
-        if (data[metabolite_id].type == "metabolite")
+        if (data[metabolite_id].type == "metabolite"){
             if (data[metabolite_id].foreign_id != -1 || editor_mode){
             
                 switch (metabolite_anchor){
