@@ -3675,18 +3675,20 @@ function compute_edges(){
         }
         
         if (data[node_id].type == "metabolite"){
-            var metabolite_len = nodes_anchors[node_id][node_anchor].length;
-            for (var j = 0; j < nodes_anchors[node_id][node_anchor].length; ++j){
-                var current_entry = nodes_anchors[node_id][node_anchor][j];
-                if (current_entry[0] == metabolite_id && current_entry[1] == i){
-                    metabolite_pos = j;
+            
+            if (data[node_id].foreign_id != -1 || editor_mode){
+                
+                var metabolite_len = nodes_anchors[node_id][node_anchor].length;
+                for (var j = 0; j < nodes_anchors[node_id][node_anchor].length; ++j){
+                    var current_entry = nodes_anchors[node_id][node_anchor][j];
+                    if (current_entry[0] == metabolite_id && current_entry[1] == i){
+                        metabolite_pos = j;
+                    }
                 }
-            }
-            var len_adjacent = diameter * (-1 / metabolite_len + 1);
-            var correction_shift = metabolite_pos / (metabolite_len - 1);
+                var len_adjacent = diameter * (-1 / metabolite_len + 1);
+                var correction_shift = metabolite_pos / (metabolite_len - 1);
             
             
-            if (data[metabolite_id].foreign_id != -1 || editor_mode){
                 switch (node_anchor){
                     case "top":
                         var w = len_adjacent;
@@ -3720,7 +3722,7 @@ function compute_edges(){
             }
         }
         
-        if (data[metabolite_id].type != "metabolite" || data[metabolite_id].foreign_id == -1 || editor_mode){
+        if (data[node_id].type != "metabolite" || data[node_id].foreign_id == -1 || editor_mode){
                 
                 
             if ((node_anchor == 'top') || (node_anchor == 'bottom')){
