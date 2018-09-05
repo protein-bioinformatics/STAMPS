@@ -1987,12 +1987,17 @@ function node(data){
             this.sort_order = 60;
             this.width = metabolite_radius * 2;
             this.height = metabolite_radius * 2;
+            
             this.img = new Image();
             if (this.foreign_id != -1){
                 var load_process = setInterval(function(nd){
                     nd.img.src = "/stamp/images/metabolites/C" + nd.foreign_id + ".png";
                     clearInterval(load_process);
                 }, 1, this);
+            }
+            else {
+                this.width = 0;
+                this.height = 0;
             }
             
             this.tipp = true;
@@ -2179,7 +2184,7 @@ function node(data){
                 
                 
             case "metabolite":
-                if (this.name == "undefined" && !editor_mode) break;
+                if (this.foreign_id == -1 && !editor_mode) break;
                 ctx.fillStyle = metabolite_fill_color;
                 ctx.strokeStyle = (this.selected) ? node_selected_color : metabolite_stroke_color;
                 ctx.lineWidth = (line_width + 2 * this.highlight) * factor;

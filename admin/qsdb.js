@@ -1011,7 +1011,7 @@ function editor_update_protein_node(){
             }
         }
     }
-    console.log(request);
+    
     xmlhttp_set.open("GET", request, false);
     xmlhttp_set.send();
     
