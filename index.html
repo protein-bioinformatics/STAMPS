@@ -1199,6 +1199,7 @@ function update_correlation_tissues(ctx){
         
         var nsaf_points = [];
         for (prot_id of pathways_to_proteins[pathway_index][1]){
+            if (!(prot_id in protein_dictionary)) continue;
             var protein = protein_dictionary[prot_id];
             if (tissue1_id in protein.nsaf && tissue2_id in protein.nsaf){
                 nsaf_points.push([protein.nsaf[tissue2_id], protein.nsaf[tissue1_id]]);
