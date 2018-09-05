@@ -3618,41 +3618,43 @@ function compute_edges(){
         var correction_shift = metabolite_pos / (metabolite_len - 1);
         
         
-        if (data[metabolite_id].type == "metabolite" && (data[metabolite_id].foreign_id != -1 || editor_mode)){
+        if (data[metabolite_id].type == "metabolite")
+            if (data[metabolite_id].foreign_id != -1 || editor_mode){
             
-            switch (metabolite_anchor){
-                case "top":
-                    end_y -= radius;
-                    var w = len_adjacent;
-                    end_x -= w * 0.5;
-                    if (metabolite_len > 1){
-                        end_x += w * correction_shift;
-                    }
-                    break;
-                case "bottom":
-                    end_y += radius;
-                    var w = len_adjacent;
-                    end_x += w * 0.5;
-                    if (metabolite_len > 1){
-                        end_x -= w * correction_shift;
-                    }
-                    break;
-                case "left":
-                    end_x -= radius;
-                    var h = len_adjacent;
-                    end_y += h * 0.5;
-                    if (metabolite_len > 1){
-                        end_y -= h * correction_shift;
-                    }
-                    break;
-                case "right":
-                    end_x += radius;
-                    var h = len_adjacent;
-                    end_y -= h * 0.5;
-                    if (metabolite_len > 1){
-                        end_y += h * correction_shift;
-                    }
-                    break;
+                switch (metabolite_anchor){
+                    case "top":
+                        end_y -= radius;
+                        var w = len_adjacent;
+                        end_x -= w * 0.5;
+                        if (metabolite_len > 1){
+                            end_x += w * correction_shift;
+                        }
+                        break;
+                    case "bottom":
+                        end_y += radius;
+                        var w = len_adjacent;
+                        end_x += w * 0.5;
+                        if (metabolite_len > 1){
+                            end_x -= w * correction_shift;
+                        }
+                        break;
+                    case "left":
+                        end_x -= radius;
+                        var h = len_adjacent;
+                        end_y += h * 0.5;
+                        if (metabolite_len > 1){
+                            end_y -= h * correction_shift;
+                        }
+                        break;
+                    case "right":
+                        end_x += radius;
+                        var h = len_adjacent;
+                        end_y -= h * 0.5;
+                        if (metabolite_len > 1){
+                            end_y += h * correction_shift;
+                        }
+                        break;
+                }
             }
         }
         else {
