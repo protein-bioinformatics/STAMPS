@@ -1995,7 +1995,7 @@ function node(data){
                     clearInterval(load_process);
                 }, 1, this);
             }
-            else {
+            else if (!editor_mode) {
                 this.width = 0;
                 this.height = 0;
             }
