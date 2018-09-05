@@ -3720,23 +3720,28 @@ function compute_edges(){
             }
         }
         
+        if (data[metabolite_id].type != "metabolite" || data[metabolite_id].foreign_id == -1 || editor_mode){
+                
+                
+            if ((node_anchor == 'top') || (node_anchor == 'bottom')){
+                if (node_anchor == 'top'){
+                    start_y -= node_height * 0.5;
+                }
+                else {
+                    start_y += node_height * 0.5;
+                }
+            }
+            if ((node_anchor == 'left') || (node_anchor == 'right')){
+                if (node_anchor == 'left'){
+                    start_x -= node_width * 0.5;
+                }
+                else {
+                    start_x += node_width * 0.5;
+                }
+            }
+        }
         
-        if ((node_anchor == 'top') || (node_anchor == 'bottom')){
-            if (node_anchor == 'top'){
-                start_y -= node_height * 0.5;
-            }
-            else {
-                start_y += node_height * 0.5;
-            }
-        }
-        if ((node_anchor == 'left') || (node_anchor == 'right')){
-            if (node_anchor == 'left'){
-                start_x -= node_width * 0.5;
-            }
-            else {
-                start_x += node_width * 0.5;
-            }
-        }
+        
         var l2_norm = Math.sqrt(Math.pow(start_x - end_x, 2) + Math.pow(start_y - end_y, 2));
         if (l2_norm > base_grid * factor) {
             edges.push(new edge(start_x, start_y, node_anchor, data[node_id], end_x, end_y, metabolite_anchor, data[metabolite_id], head, reaction_id, reagent_id));
