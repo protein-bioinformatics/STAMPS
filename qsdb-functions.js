@@ -5240,10 +5240,19 @@ function load_data(reload){
                 for (var i = 0; i < tmp_data.length; ++i){
                     var new_node = new node(tmp_data[i]);
                     data[new_node.id] = new_node;
-                    x_min = Math.min(x_min, new_node.x - new_node.width * 0.5);
-                    x_max = Math.max(x_max, new_node.x + new_node.width * 0.5);
-                    y_min = Math.min(y_min, new_node.y - new_node.height * 0.5);
-                    y_max = Math.max(y_max, new_node.y + new_node.height * 0.5);
+                    
+                    var node_width = new_node.width;
+                    var node_height = new_node.height;
+                    
+                    if (new_node.type == "membrane" && new_node.text_highlight) {
+                        node_width = new_node.height;
+                        node_height = new_node.width;
+                    }
+                    
+                    x_min = Math.min(x_min, new_node.x - node_width * 0.5);
+                    x_max = Math.max(x_max, new_node.x + node_width * 0.5);
+                    y_min = Math.min(y_min, new_node.y - node_height * 0.5);
+                    y_max = Math.max(y_max, new_node.y + node_height * 0.5);
                 }
                 x_min -= base_grid * 4;
                 y_min -= base_grid * 4;
@@ -5532,10 +5541,20 @@ function pathway_to_svg(){
     var min_x = 1e10, max_x = -1e10, min_y = 1e10, max_y = -1e10;
     for (var i = 0; i < elements.length; ++i){
         if(!(elements[i] instanceof node)) continue;
-        min_x = Math.min(min_x, elements[i].x - elements[i].width * 0.5);
-        max_x = Math.max(max_x, elements[i].x + elements[i].width * 0.5);
-        min_y = Math.min(min_y, elements[i].y - elements[i].height * 0.5);
-        max_y = Math.max(max_y, elements[i].y + elements[i].height * 0.5);
+        
+        var node_width = elements[i].width;
+        var node_height = elements[i].height;
+        
+        if (elements[i].type == "membrane" && elements[i].text_highlight) {
+            node_width = elements[i].height;
+            node_height = elements[i].width;
+        }
+        
+        
+        min_x = Math.min(min_x, elements[i].x - node_width * 0.5);
+        max_x = Math.max(max_x, elements[i].x + node_width * 0.5);
+        min_y = Math.min(min_y, elements[i].y - node_height * 0.5);
+        max_y = Math.max(max_y, elements[i].y + node_height * 0.5);
     }
     min_x -= 2 * base_grid;
     min_y -= 2 * base_grid;
