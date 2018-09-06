@@ -1455,7 +1455,7 @@ function mouse_up_listener(event){
         }
         if (target != -1){
             
-            if (data[-1].id != target.id){
+            if ((-1 in data) && (data[-1].id != target.id)){
                 var anchor = target.is_mouse_over_anchor(res);
                 if (anchor.length > 0){
                     draw_anchor_end = anchor;
