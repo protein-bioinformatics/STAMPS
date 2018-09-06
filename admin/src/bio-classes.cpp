@@ -266,8 +266,9 @@ protein::protein(string _id) : str_id(_id) {
     ec_number = "";
     kegg = "";
     fasta = "";
-    float pI = -1;
+    pI = -1;
     proteome_start_pos = -1;
+    unreviewed = "0";
 }
 
 string protein::to_string(){
@@ -288,6 +289,7 @@ string protein::to_string(){
     if (fasta.length() > 0) str += ",\"l\":" + string(fasta_length);
     if (accession.length() > 0) str += ",\"a\":\"" + accession + "\"";
     if (ec_number.length() > 0) str += ",\"e\":\"" + ec_number + "\"";
+    if (unreviewed != "0") str += ",\"u\":" + unreviewed;
     if (kegg.length() > 0) str += ",\"k\":\"" + kegg + "\"";
     if (pI > 0) str += ",\"pI\":" + string(pI_str);
     if (peptides.size() > 0){

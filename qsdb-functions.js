@@ -41,6 +41,7 @@ filter_parameters["validation_is"] = true;
 filter_parameters["protein_tissues_visible"] = true;
 filter_parameters["peptide_tissues_visible"] = false;
 filter_parameters["validadion_visible"] = true;
+filter_parameters["enable_unreviewed"] = false;
 last_opened_menu = "";
 navigation_content = [];
 pathway_groups = {};
@@ -214,7 +215,8 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
         <tr><td colspan=\"2\"><br>Validation:<br>\
         <input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment&nbsp;<font color='#ffbebe'>🌑</font><br> \
         <input type=\"checkbox\" id=\"validation_prm\" /> PRM&nbsp;<font color='#feff90'>🌑</font><br> \
-        <input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard&nbsp;<font color='#a0ff90'>🌑</font></td><td></tr> \
+        <input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard&nbsp;<font color='#a0ff90'>🌑</font><br> \
+        <input type=\"checkbox\" id=\"enable_unreviewed\" /> enable unreviewed proteins</td></tr> \
         <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
         document.getElementById('min_peptide_length').value = 8; \
         document.getElementById('max_peptide_length').value = 25; \
@@ -235,6 +237,7 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
         document.getElementById('validation_top_n').checked = true; \
         document.getElementById('validation_prm').checked = true; \
         document.getElementById('validation_is').checked = true; \
+        document.getElementById('enable_unreviewed').checked = false; \
         ;\">default settings</td></tr> \
     </table> \
 </div>";
@@ -267,6 +270,7 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
             document.getElementById('validation_top_n').checked = true; \
             document.getElementById('validation_prm').checked = true; \
             document.getElementById('validation_is').checked = true; \
+            document.getElementById('enable_unreviewed').checked = true; \
             ;\">default settings</td></tr> \
         </table></td> \
         <td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \
@@ -310,6 +314,7 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
                 <tr><td><input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment&nbsp;<font color='#ffbebe'>🌑</font></td><tr> \
                 <tr><td><input type=\"checkbox\" id=\"validation_prm\" /> PRM&nbsp;<font color='#feff90'>🌑</font></td><tr> \
                 <tr><td><input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard&nbsp;<font color='#a0ff90'>🌑</font></td><tr> \
+                <tr><td><input type=\"checkbox\" id=\"enable_unreviewed\" /> enable unreviewed proteins</td><tr> \
                 </tr> \
             </table> \
         </td> \
@@ -905,6 +910,9 @@ function Protein(data){
             this.peptides[i].filtering();
             this.filter_valid |= this.peptides[i].filter_valid;
         }
+        this.filter_valid &= filter_parameters["enable_unreviewed"] || (this.unreviewed != 1);
+        
+        
         if (this.filter_valid){
             this.fillStyle_rect = "white";
             this.fillStyle_text = text_color;
@@ -924,6 +932,7 @@ function Protein(data){
         this.accession = ('a' in data) ? data['a'] : "";
         this.ec_number = ('e' in data) ? data['e'] : "";
         this.mass = ('m' in data) ? data['m'] : "";
+        this.unreviewed = ('u' in data) ? data['u'] : 0;
         this.prm = 0;
         this.is = 0; // is = internal standard
         this.sequence_length = ('l' in data) ? data['l'] : "";
@@ -4803,6 +4812,7 @@ function adopt_filter_parameters(){
     filter_parameters["validation_top_n"] = document.getElementById("validation_top_n").checked;
     filter_parameters["validation_prm"] = document.getElementById("validation_prm").checked;
     filter_parameters["validation_is"] = document.getElementById("validation_is").checked;
+    filter_parameters["enable_unreviewed"] = document.getElementById("enable_unreviewed").checked;
 }
 
 
@@ -4830,6 +4840,7 @@ function load_filter_parameters(){
     document.getElementById("validation_top_n").checked = filter_parameters["validation_top_n"];
     document.getElementById("validation_prm").checked = filter_parameters["validation_prm"];
     document.getElementById("validation_is").checked = filter_parameters["validation_is"];
+    document.getElementById("enable_unreviewed").checked = filter_parameters["enable_unreviewed"];
 }
 
 
@@ -4861,6 +4872,7 @@ function hide_filter_panel(){
         if (filter_parameters["validation_top_n"] != document.getElementById("validation_top_n").checked) filter_changed = true;
         if (filter_parameters["validation_prm"] != document.getElementById("validation_prm").checked) filter_changed = true;
         if (filter_parameters["validation_is"] != document.getElementById("validation_is").checked) filter_changed = true;
+        if (filter_parameters["enable_unreviewed"] != document.getElementById("enable_unreviewed").checked) filter_changed = true;
         
         if (filter_changed){
             var proceed = true;

@@ -201,6 +201,7 @@ class protein {
         float pI;
         vector<peptide*> peptides;
         int proteome_start_pos;
+        string unreviewed;
         
         protein(string _id);
         string to_string();

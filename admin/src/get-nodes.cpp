@@ -118,7 +118,6 @@ int main(int argc, char** argv) {
     
     
     char* get_string_chr = getenv("QUERY_STRING");
-    bool with_unreviewed = false;
     
     if (!get_string_chr){
         cout << -1;
@@ -140,9 +139,6 @@ int main(int argc, char** argv) {
         }
         else if (get_values.size() && get_values.at(0) == "species"){
             species = get_values.at(1);
-        }
-        else if (get_values.size() && get_values.at(0) == "unreviewed"){
-            with_unreviewed = (get_values.size() > 1) && (get_values.at(1) == "true");
         }
     }
     if (pathway_id == "" || species == "" || !is_integer_number(pathway_id) || species.find("'") != string::npos){
@@ -203,7 +199,6 @@ int main(int argc, char** argv) {
     sql_query_proteins += pathway_id;
     sql_query_proteins += " and n.type = 'protein' and p.species = '";
     sql_query_proteins += species + "'";
-    if (!with_unreviewed) sql_query_proteins += " and unreviewed = 0";
     sql_query_proteins += ";";
     
     res = stmt->executeQuery(sql_query_proteins);

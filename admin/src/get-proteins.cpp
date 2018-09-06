@@ -118,6 +118,7 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
         last_protein->accession = res->getString("accession");
         last_protein->ec_number = res->getString("ec_number");
         last_protein->kegg = res->getString("kegg_link");
+        last_protein->unreviewed = res->getString("unreviewed");
         last_protein->fasta = cleanFasta(res->getString("fasta"));
         last_protein->pI = predict_isoelectric_point(last_protein->fasta);
         last_protein->mass = compute_mass(last_protein->fasta);
@@ -369,7 +370,7 @@ main(int argc, char** argv) {
         stmt->execute(sql_query);
         
         
-        sql_query = "SELECT distinct pw.id pathway_id, pw.name, GROUP_CONCAT(npc.protein_id) prot_id, pw.signaling_pathway FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id where p.unreviewed = 0 group by pw.id order by pw.name;";
+        sql_query = "SELECT distinct pw.id pathway_id, pw.name, GROUP_CONCAT(npc.protein_id) prot_id, pw.signaling_pathway FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id group by pw.id order by pw.name;";
         
         res = stmt->executeQuery(sql_query);
        
@@ -429,7 +430,7 @@ main(int argc, char** argv) {
         }    
         replaceAll(loci_ids, string(":"), string("','"));
         
-        sql_query_proteins = "select distinct p.* from proteins p inner join protein_loci pl on p.id = pl.protein_id where unreviewed = false and pl.locus_id in ('";
+        sql_query_proteins = "select distinct p.* from proteins p inner join protein_loci pl on p.id = pl.protein_id where pl.locus_id in ('";
         sql_query_proteins += loci_ids;
         sql_query_proteins += "') and p.species = '" + species + "';";
     }
@@ -440,15 +441,15 @@ main(int argc, char** argv) {
         }    
         replaceAll(function_ids, string(":"), string("','"));
         
-        sql_query_proteins = "select distinct p.* from proteins p inner join protein_functions pf on p.id = pf.protein_id where unreviewed = false and pf.function_id in ('";
+        sql_query_proteins = "select distinct p.* from proteins p inner join protein_functions pf on p.id = pf.protein_id where pf.function_id in ('";
         sql_query_proteins += function_ids;
         sql_query_proteins += "') and p.species = '" + species + "';";
     }
     else if (statistics) {
-        sql_query_proteins = "select * from proteins where unreviewed = false and species = '" + species + "';";
+        sql_query_proteins = "select * from proteins where species = '" + species + "';";
     }
     else if (via_pathway){
-        sql_query_proteins = "select distinct p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where p.unreviewed = false and n.pathway_id = ";
+        sql_query_proteins = "select distinct p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ";
         sql_query_proteins += pathway_id;
         sql_query_proteins += " and n.type = 'protein' and p.species = '";
         sql_query_proteins += species;
