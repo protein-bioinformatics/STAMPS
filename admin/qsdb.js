@@ -1728,6 +1728,7 @@ function key_down(event){
                 
             case 13:
             case 32:
+            case 39:
                 curate_spectra_checking(current_spectrum_selected);
                 break;
                 
