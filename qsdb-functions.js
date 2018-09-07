@@ -2004,10 +2004,6 @@ function node(data){
                     clearInterval(load_process);
                 }, 1, this);
             }
-            else if (!editor_mode) {
-                this.width = 0;
-                this.height = 0;
-            }
             
             this.tipp = true;
             break;
@@ -2026,6 +2022,18 @@ function node(data){
         case "label":
             this.sort_order = 120;
             this.setup_label_meta();
+            break;
+            
+        case "invisible":
+            if (editor_mode) {
+                this.sort_order = 500;
+                this.width = metabolite_radius * 2;
+                this.height = metabolite_radius * 2;
+            }
+            else {
+                this.width = 0;
+                this.height = 0;
+            }
             break;
     }
     
@@ -2189,6 +2197,16 @@ function node(data){
                 ctx.font = (pathway_font_size * factor).toString() + "px Arial";
                 ctx.fillStyle = "black";
                 wrapText(this.name, this.x, this.y, this.width, pathway_font_size * factor, ctx);
+                break;
+                
+            case "invisible":
+                if (!editor_mode) break;
+                ctx.fillStyle = pathway_disabled_stroke_color;
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, radius, 0, 1.999 * Math.PI);
+                ctx.closePath();
+                ctx.fill();
                 break;
                 
                 

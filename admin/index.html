@@ -15,17 +15,29 @@
 <body>
 
 <div id="toolbox" class="toolbox">
-    <table cellspacing="10px"><tr><td>
+    <table cellspacing="10px"><tr><td colspan=2>
     <b>Toolbox:</b><p><hr><p>
-    <i>Create entity:</i><br>
-    <div id="toolbox_button_create_pathway" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_PATHWAY);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_PATHWAY);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_PATHWAY);"><span>Create pathway node</span></div>
-    <div id="toolbox_button_create_protein" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_PROTEIN);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_PROTEIN);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_PROTEIN);"><span>Create protein node</span></div>
-    <div id="toolbox_button_create_metabolite" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_METABOLITE);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_METABOLITE);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_METABOLITE);"><span>Create metabolite node</span></div>
-    <div id="toolbox_button_create_label" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_LABEL);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_LABEL);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_LABEL);"><span>Create label node</span></div>
-    <div id="toolbox_button_create_membrane" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_MEMBRANE);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_MEMBRANE);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_MEMBRANE);"><span>Create membrane node</span></div>
-    <div id="toolbox_button_create_bg_image" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.CREATE_BG_IMAGE);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_BG_IMAGE);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_BG_IMAGE);"><span>Create image node</span></div>
-    <div id="toolbox_button_draw_edge" class="toolbox_button" onclick="toolbox_button_clicked(toolbox_states.DRAW_EDGE);" onmouseover="toolbox_button_mouseover(toolbox_states.DRAW_EDGE);" onmouseout="toolbox_button_mouseout(toolbox_states.DRAW_EDGE);"><span>Draw edge</span></div>
+    <i>Create entity:</i>
+    </td></tr>
+    <tr><td>
+    <div id="toolbox_button_create_pathway" class="toolbox_button_small" onclick="toolbox_button_clicked(toolbox_states.CREATE_PATHWAY);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_PATHWAY);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_PATHWAY);"><span>Pathway</span></div></td><td>
+    <div id="toolbox_button_create_protein" class="toolbox_button_small" onclick="toolbox_button_clicked(toolbox_states.CREATE_PROTEIN);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_PROTEIN);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_PROTEIN);"><span>Protein</span></div></td></tr>
     
+    <tr><td>
+    <div id="toolbox_button_create_metabolite" class="toolbox_button_small" onclick="toolbox_button_clicked(toolbox_states.CREATE_METABOLITE);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_METABOLITE);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_METABOLITE);"><span>Metabolite</span></div></td><td>
+    <div id="toolbox_button_create_label" class="toolbox_button_small" onclick="toolbox_button_clicked(toolbox_states.CREATE_LABEL);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_LABEL);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_LABEL);"><span>Label</span></div></td></tr>
+    
+    <tr><td>
+    <div id="toolbox_button_create_membrane" class="toolbox_button_small" onclick="toolbox_button_clicked(toolbox_states.CREATE_MEMBRANE);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_MEMBRANE);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_MEMBRANE);"><span>Membrane</span></div></td><td>
+    <div id="toolbox_button_create_bg_image" class="toolbox_button_small" onclick="toolbox_button_clicked(toolbox_states.CREATE_BG_IMAGE);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_BG_IMAGE);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_BG_IMAGE);"><span>Image</span></div>
+    </td></tr>
+    
+    <tr><td>
+    <div id="toolbox_button_create_invisible" class="toolbox_button_small" onclick="toolbox_button_clicked(toolbox_states.CREATE_INVISIBLE);" onmouseover="toolbox_button_mouseover(toolbox_states.CREATE_INVISIBLE);" onmouseout="toolbox_button_mouseout(toolbox_states.CREATE_INVISIBLE);"><span>Invisible</span></div></td><td>
+    <div id="toolbox_button_draw_edge" class="toolbox_button_small" onclick="toolbox_button_clicked(toolbox_states.DRAW_EDGE);" onmouseover="toolbox_button_mouseover(toolbox_states.DRAW_EDGE);" onmouseout="toolbox_button_mouseout(toolbox_states.DRAW_EDGE);"><span>Edge</span></div>
+    
+    </td></tr>
+    <tr><td colspan=2>
     <p><hr><p>
     
     <i>Alter entity:</i><br>
@@ -154,6 +166,12 @@ SELECT n1.*, n2.* FROM nodes n1 inner join nodes n2 on n1.type = n2.type and n1.
 SELECT n1.*, n2.* FROM nodes n1 inner join nodes n2 on n1.type = n2.type and n1.pathway_id = n2.pathway_id and n1.x = n2.x and n1.y = n2.y and n1.id <> n2.id WHERE n1.id NOT IN (SELECT node_id FROM reactions) AND n1.id NOT IN (SELECT node_id_start FROM reactions_direct) AND n1.id NOT IN (SELECT node_id_end FROM reactions_direct) AND n1.id NOT IN (SELECT node_id FROM reagents)
 
 DELETE n1 FROM nodes n1 inner join nodes n2 on n1.type = n2.type and n1.pathway_id = n2.pathway_id and n1.x = n2.x and n1.y = n2.y and n1.id > n2.id WHERE n1.id NOT IN (SELECT node_id FROM reactions) AND n1.id NOT IN (SELECT node_id_start FROM reactions_direct) AND n1.id NOT IN (SELECT node_id_end FROM reactions_direct) AND n1.id NOT IN (SELECT node_id FROM reagents) AND n2.id NOT IN (SELECT node_id FROM reactions) AND n2.id NOT IN (SELECT node_id_start FROM reactions_direct) AND n2.id NOT IN (SELECT node_id_end FROM reactions_direct) AND n2.id NOT IN (SELECT node_id FROM reagents)
+
+
+
+ALTER TABLE `nodes` CHANGE `type` `type` ENUM('pathway','protein','metabolite','membrane','label','image','invisible') CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL;
+
+UPDATE nodes SET type = 'invisible' where type = 'metabolite' and foreign_id = -1;
 -->
 
 <div id="manage_entries" class="global_search">

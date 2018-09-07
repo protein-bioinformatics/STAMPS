@@ -52,7 +52,7 @@ end_type = [row for row in my_cur][0]["type"]
 
 result = -1
 
-count_types = {"metabolite": 0, "label": 0,"membrane": 0,"protein": 0, "pathway": 0, "image": 0}
+count_types = {"metabolite": 0, "label": 0,"membrane": 0,"protein": 0, "pathway": 0, "image": 0, "invisible": 0}
 count_types[start_type] += 1
 count_types[end_type] += 1
 

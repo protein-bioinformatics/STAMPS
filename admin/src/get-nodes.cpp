@@ -266,6 +266,9 @@ int main(int argc, char** argv) {
     sql_query_rest += ") union ";
     sql_query_rest += "(select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass, position from nodes n where n.type = 'metabolite' and n.foreign_id = -1 and n.pathway_id = ";
     sql_query_rest += pathway_id;
+    sql_query_rest += ") union ";
+    sql_query_rest += "(select n.id, 'inv' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' smiles, '' formula, '' exact_mass, position from nodes n where n.type = 'invisible' and n.pathway_id = ";
+    sql_query_rest += pathway_id;
     sql_query_rest += ");";
     
     res = stmt->executeQuery(sql_query_rest);

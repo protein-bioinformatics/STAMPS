@@ -109,11 +109,19 @@ if entity_type == "node":
         conn.commit()
         
         
-    elif entity_type in ["label", "membrane", "image"]:
+    elif entity_type in ["label", "membrane", "image", "invisible"]:
         if entity_type == "label":
             sql_query = "DELETE FROM labels WHERE id IN (SELECT foreign_id from nodes WHERE id = %s);"
             my_cur.execute(sql_query, (entity_id))
             conn.commit()
+        
+        sql_query = "DELETE FROM reactions_direct WHERE node_id_start = %s;"
+        my_cur.execute(sql_query, (entity_id))
+        conn.commit()
+        
+        sql_query = "DELETE FROM reactions_direct WHERE node_id_end = %s;"
+        my_cur.execute(sql_query, (entity_id))
+        conn.commit()
         
         sql_query = "DELETE FROM nodes WHERE id = %s;"
         my_cur.execute(sql_query, (entity_id))

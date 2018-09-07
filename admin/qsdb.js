@@ -13,9 +13,22 @@ toolbox_states = {
     HIGHLIGHT_METABOLITE: 10,
     CHANGE_EDGE: 11,
     DELETE_ENTRY: 12,
-    CHANGE_IMAGE_SCALE: 13
+    CREATE_INVISIBLE: 13,
 };
-toolbox_buttons = ["toolbox_button_create_pathway", "toolbox_button_create_protein", "toolbox_button_create_metabolite", "toolbox_button_create_label", "toolbox_button_create_membrane", "toolbox_button_create_bg_image", "toolbox_button_draw_edge", "toolbox_button_move_entity", "toolbox_button_change_edge_anchor", "toolbox_button_rotate_metabolite_label", "toolbox_button_highlight_metabolite", "toolbox_button_change_edge", "toolbox_button_delete_entity"];
+toolbox_buttons = ["toolbox_button_create_pathway",
+                   "toolbox_button_create_protein",
+                   "toolbox_button_create_metabolite",
+                   "toolbox_button_create_label",
+                   "toolbox_button_create_membrane",
+                   "toolbox_button_create_bg_image",
+                   "toolbox_button_draw_edge",
+                   "toolbox_button_move_entity",
+                   "toolbox_button_change_edge_anchor",
+                   "toolbox_button_rotate_metabolite_label",
+                   "toolbox_button_highlight_metabolite",
+                   "toolbox_button_change_edge",
+                   "toolbox_button_delete_entity",
+                   "toolbox_button_create_invisible"];
 toolbox_button_selected = -1;
 entity_moving = -1;
 tmp_element = -1;
@@ -354,7 +367,7 @@ function mouse_click_listener(e){
     if (!pathway_is_loaded) return;
     
     
-    if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY || toolbox_button_selected == toolbox_states.CREATE_METABOLITE || toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE || toolbox_button_selected == toolbox_states.CREATE_BG_IMAGE){
+    if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY || toolbox_button_selected == toolbox_states.CREATE_METABOLITE || toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE || toolbox_button_selected == toolbox_states.CREATE_BG_IMAGE || toolbox_button_selected == toolbox_states.CREATE_INVISIBLE){
         var x = Math.round(Math.floor((tmp_element.x - null_x) / factor) / base_grid) * base_grid;
         var y = Math.round(Math.floor((tmp_element.y - null_y) / factor) / base_grid) * base_grid;
         var request = "";
@@ -381,6 +394,10 @@ function mouse_click_listener(e){
                 
             case toolbox_states.CREATE_BG_IMAGE:
                 request = "type=image&pathway=" + current_pathway + "&x=" + x + "&y=" + y;
+                break;
+                
+            case toolbox_states.CREATE_INVISIBLE:
+                request = "type=invisible&pathway=" + current_pathway + "&x=" + x + "&y=" + y;
                 break;
         }
         var result = create_node(request);
@@ -414,6 +431,11 @@ function mouse_click_listener(e){
                 case toolbox_states.CREATE_BG_IMAGE:
                     tmp_element = new node({"x": "0", "y": "0", "t": "image", "i": -1, "n": "-"});
                     break;
+                    
+                case toolbox_states.CREATE_INVISIBLE:
+                    tmp_element = new node({"x": "0", "y": "0", "t": "invisible", "i": -1, "n": "-"});
+                    break;
+                    
             }
             tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
@@ -426,14 +448,6 @@ function mouse_click_listener(e){
                 var node_id = highlight_element.id;
                 
                 switch (highlight_element.type){
-                    case "pathway":
-                        var del_directs = [];
-                        for (var direct_id in edge_data['direct']){
-                            if (edge_data['direct'][direct_id]['ns'] == node_id || edge_data['direct'][direct_id]['ne'] == node_id) del_directs.push(direct_id);
-                        }
-                        for (var i = 0; i < del_directs.length; ++i) delete edge_data['direct'][del_directs[i]];
-                        
-                        
                         
                     case "protein":
                         var del_reactions = [];
@@ -477,6 +491,11 @@ function mouse_click_listener(e){
                         break;
                     
                     default:
+                        var del_directs = [];
+                        for (var direct_id in edge_data['direct']){
+                            if (edge_data['direct'][direct_id]['ns'] == node_id || edge_data['direct'][direct_id]['ne'] == node_id) del_directs.push(direct_id);
+                        }
+                        for (var i = 0; i < del_directs.length; ++i) delete edge_data['direct'][del_directs[i]];
                         break;
                 }
                 
@@ -1360,7 +1379,7 @@ function mouse_move_listener(e){
         }
     }
     else {
-        if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY || toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_METABOLITE || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE || toolbox_button_selected == toolbox_states.CREATE_BG_IMAGE){
+        if (toolbox_button_selected == toolbox_states.CREATE_PATHWAY || toolbox_button_selected == toolbox_states.CREATE_PROTEIN || toolbox_button_selected == toolbox_states.CREATE_METABOLITE || toolbox_button_selected == toolbox_states.CREATE_LABEL || toolbox_button_selected == toolbox_states.CREATE_MEMBRANE || toolbox_button_selected == toolbox_states.CREATE_BG_IMAGE || toolbox_button_selected == toolbox_states.CREATE_INVISIBLE){
             
             
             var offset_move_x = null_x % (base_grid * factor);
@@ -1627,6 +1646,12 @@ function toolbox_button_clicked(button){
             
         case toolbox_states.CREATE_BG_IMAGE:
             tmp_element = new node({"x": "0", "y": "0", "t": "image", "i": -1, "n": "-", "r": 10000.});
+            tmp_element.scale(0, 0, factor);
+            elements.push(tmp_element);
+            break;
+            
+        case toolbox_states.CREATE_INVISIBLE:
+            tmp_element = new node({"x": "0", "y": "0", "t": "invisible", "i": -1, "n": "-"});
             tmp_element.scale(0, 0, factor);
             elements.push(tmp_element);
             break;

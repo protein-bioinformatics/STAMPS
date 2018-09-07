@@ -91,6 +91,24 @@ div.toolbox_button:hover {
     background-color: #e4e4e4;
 }
 
+div.toolbox_button_small {
+    width: 100px;
+    margin: 1px;
+    height: 40px;
+    background-color: #eeeeee;
+    border: #640000;
+    border-style: solid;
+    border-width: 1px;
+    text-align: center;
+    display: table;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+div.toolbox_button_small:hover {
+    background-color: #e4e4e4;
+}
+
 span {
   display: table-cell;
   vertical-align: middle;
