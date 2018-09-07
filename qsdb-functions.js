@@ -2201,7 +2201,7 @@ function node(data){
                 
             case "invisible":
                 if (!editor_mode) break;
-                ctx.fillStyle = pathway_disabled_stroke_color;
+                ctx.fillStyle = (this.selected) ? node_selected_color : pathway_disabled_stroke_color;
                 
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, radius, 0, 1.999 * Math.PI);

@@ -160,19 +160,6 @@
     </div>
 </div>
 
-<!--
-SELECT n1.*, n2.* FROM nodes n1 inner join nodes n2 on n1.type = n2.type and n1.pathway_id = n2.pathway_id and n1.x = n2.x and n1.y = n2.y where n1.id <> n2.id and n1.id NOT IN (SELECT node_id FROM reactions) AND n1.id NOT IN (SELECT node_id_start FROM reactions_direct) AND n1.id NOT IN (SELECT node_id_end FROM reactions_direct) AND n1.id NOT IN (SELECT node_id FROM reagents) AND (n2.id IN (SELECT node_id FROM reactions) OR n2.id IN (SELECT node_id_start FROM reactions_direct) OR n2.id IN (SELECT node_id_end FROM reactions_direct) OR n2.id IN (SELECT node_id FROM reagents))
-
-SELECT n1.*, n2.* FROM nodes n1 inner join nodes n2 on n1.type = n2.type and n1.pathway_id = n2.pathway_id and n1.x = n2.x and n1.y = n2.y and n1.id <> n2.id WHERE n1.id NOT IN (SELECT node_id FROM reactions) AND n1.id NOT IN (SELECT node_id_start FROM reactions_direct) AND n1.id NOT IN (SELECT node_id_end FROM reactions_direct) AND n1.id NOT IN (SELECT node_id FROM reagents)
-
-DELETE n1 FROM nodes n1 inner join nodes n2 on n1.type = n2.type and n1.pathway_id = n2.pathway_id and n1.x = n2.x and n1.y = n2.y and n1.id > n2.id WHERE n1.id NOT IN (SELECT node_id FROM reactions) AND n1.id NOT IN (SELECT node_id_start FROM reactions_direct) AND n1.id NOT IN (SELECT node_id_end FROM reactions_direct) AND n1.id NOT IN (SELECT node_id FROM reagents) AND n2.id NOT IN (SELECT node_id FROM reactions) AND n2.id NOT IN (SELECT node_id_start FROM reactions_direct) AND n2.id NOT IN (SELECT node_id_end FROM reactions_direct) AND n2.id NOT IN (SELECT node_id FROM reagents)
-
-
-
-ALTER TABLE `nodes` CHANGE `type` `type` ENUM('pathway','protein','metabolite','membrane','label','image','invisible') CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL;
-
-UPDATE nodes SET type = 'invisible' where type = 'metabolite' and foreign_id = -1;
--->
 
 <div id="manage_entries" class="global_search">
     <div id="editor_select_manage" class="global_search_content">
