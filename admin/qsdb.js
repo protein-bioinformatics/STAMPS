@@ -3329,6 +3329,7 @@ function manage_delete_metabolite(metabolite_id){
 
 
 function curate_spectra_change_selection(row_num){
+    if (current_spectrum_selected < 0) return;
     var dom_table = document.getElementById("curate_spectra_panel_table");
     var bg_color = (current_spectrum_selected & 1) ? "#DDDDDD" : "white";
     
@@ -3427,14 +3428,15 @@ function curate_spectra(){
     }
     
     
-    
-    var request = "action=select&limit=" + ((spectra_current_page - 1) * max_spectra_per_page) + "," + max_spectra_per_page + "&species=" + current_species;
+    var only_disabled = document.getElementById("curate_spectra_disabled_check").checked;
+    var request = "action=select&limit=" + (spectra_current_page * max_spectra_per_page) + "," + max_spectra_per_page + "&species=" + current_species;
+    if (only_disabled) request += "&onlyDisabled=true";
     var xmlhttp_spectra_meta = new XMLHttpRequest();
     xmlhttp_spectra_meta.onreadystatechange = function() {
         if (xmlhttp_spectra_meta.readyState == 4 && xmlhttp_spectra_meta.status == 200) {
             spectra_meta = JSON.parse(xmlhttp_spectra_meta.responseText);
             
-            current_spectrum_selected = 0;
+            current_spectrum_selected = -1;
             var spectra_panel = document.getElementById("spectra_panel");
             spectra_panel.innerHTML = "";
             var dom_table = document.createElement("table");
@@ -3447,6 +3449,7 @@ function curate_spectra(){
             
             var row_cnt = 0;
             for (var spectrum_meta of spectra_meta){
+                current_spectrum_selected = 0;
                 var bg_color = (row_cnt & 1) ? "#DDDDDD" : "white";
                 
                 var dom_tr = document.createElement("tr");

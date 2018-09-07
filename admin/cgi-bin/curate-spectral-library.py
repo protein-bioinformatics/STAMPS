@@ -50,6 +50,8 @@ if action == "count":
    
    
 elif action == "select":
+    only_disabled = "onlyDisabled" in form and form.getvalue("onlyDisabled") == "true"
+    
     limit = form.getvalue('limit')
     if type(limit) is not str:
         print(-3)
@@ -63,7 +65,7 @@ elif action == "select":
             print(-4)
             exit()
         
-    sql_query = "SELECT id, peptideModSeq, precursorCharge, scoreType FROM RefSpectra ORDER BY id LIMIT %s;" % limit
+    sql_query = "SELECT id, peptideModSeq, precursorCharge, scoreType FROM RefSpectra %s ORDER BY id LIMIT %s;" % ("WHERE scoreType = -1" if only_disabled else "", limit)
     cur.execute(sql_query)
     print(json.dumps([row for row in cur]))
     
