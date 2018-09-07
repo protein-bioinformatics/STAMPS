@@ -398,8 +398,25 @@ function draw_spectrum(ctx){
         ctx.closePath();
         ctx.stroke();
         
-        var txt = i.toString();
-        ctx.fillText(txt, left_border - 16, y);
+        
+        if (i != 0){
+            var exponent = Math.floor(Math.log10(i));
+            var mantissa = i / Math.pow(10, exponent);
+            
+            var abundance_label = mantissa.toFixed(2) + "×10";
+            ctx.fillText(abundance_label, left_border - 16, y);
+            
+            ctx.font="8px Arial";
+            ctx.textAlign = "left";
+            ctx.fillText(exponent.toString(), left_border - 16, y - 5);
+            ctx.font="10px Arial";
+            ctx.textAlign = "right";
+        }
+        else {
+            var abundance_label = "0";
+            ctx.fillText(abundance_label, left_border - 16, y);
+        }
+        
         
         ctx.setLineDash([10]);
         ctx.strokeStyle = grid_color;
