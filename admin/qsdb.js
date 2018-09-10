@@ -3344,7 +3344,15 @@ function curate_spectra_change_selection(row_num){
     current_spectrum_selected = row_num;
     load_spectrum(dom_table.children[current_spectrum_selected].getAttribute("value"));
     
-    document.getElementById("check_spectra_peptide_info").innerHTML = dom_table.children[current_spectrum_selected].children[0].innerHTML;
+    
+    var y_count = 0;
+    for (var peak of peaks){
+        if(peak.annotation.length > 0 && peak.annotation.charAt(0) == "y") y_count++;
+    }
+    var pep_percent = y_count / peptide_mod.length * 100;
+    
+    document.getElementById("check_spectra_peptide_info").innerHTML = dom_table.children[current_spectrum_selected].children[0].innerHTML + "&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;" + peptide_mod.length + "&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;" + pep_percent.toFixed(2) + "%";
+    
     
     var spectra_panel = document.getElementById("spectra_panel");
     
