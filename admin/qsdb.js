@@ -203,6 +203,8 @@ function init(){
     c.addEventListener("dblclick", mouse_dblclick_listener, false);
     c.addEventListener("mousewheel", mouse_wheel_listener, false);
     c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
+    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
+    document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
     
     c.oncontextmenu = right_mouse_click_listener;
     
@@ -1740,6 +1742,16 @@ function key_down(event){
             case 40:
                 var next_spectrum_selected = Math.min(max_spectra_per_page - 1, current_spectrum_selected + 1);
                 curate_spectra_change_selection(next_spectrum_selected);
+                break;
+                
+            case 33: // page up
+                spectra_current_page -= 1;
+                curate_spectra();
+                break;
+                
+            case 34: // page down
+                spectra_current_page += 1;
+                curate_spectra();
                 break;
                 
             default:
@@ -3344,14 +3356,16 @@ function curate_spectra_change_selection(row_num){
     current_spectrum_selected = row_num;
     load_spectrum(dom_table.children[current_spectrum_selected].getAttribute("value"));
     
-    
+    var b_count = 0;
     var y_count = 0;
     for (var peak of peaks){
         if(peak.annotation.length > 0 && peak.annotation.charAt(0) == "y") y_count++;
+        if(peak.annotation.length > 0 && peak.annotation.charAt(0) == "b") b_count++;
     }
-    var pep_percent = y_count / peptide_mod.length * 100;
+    var b_percent = b_count / peptide_mod.length * 100;
+    var y_percent = y_count / peptide_mod.length * 100;
     
-    document.getElementById("check_spectra_peptide_info").innerHTML = dom_table.children[current_spectrum_selected].children[0].innerHTML + "&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;" + peptide_mod.length + "&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;" + pep_percent.toFixed(2) + "%";
+    document.getElementById("check_spectra_peptide_info").innerHTML = dom_table.children[current_spectrum_selected].children[0].innerHTML + "&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;" + peptide_mod.length + "&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; B-ions(%): " + b_percent.toFixed(2) + "%&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; Y-ions(%): " + y_percent.toFixed(2) + "%";
     
     
     var spectra_panel = document.getElementById("spectra_panel");
@@ -3389,8 +3403,13 @@ function curate_spectra_checking(row_num){
 
 
 function curate_spectra(){
+    
     var dom_nav_cell = document.getElementById("curate_spectra_navigation");
     dom_nav_cell.innerHTML = "";
+    
+    if (spectra_current_page < 0) spectra_current_page = 0;
+    if (spectra_current_page >= spectra_max_pages - 1) spectra_current_page = spectra_max_pages - 1;
+    
     if (spectra_current_page > 0){
         var dom_b = document.createElement("b");
         dom_nav_cell.appendChild(dom_b);
