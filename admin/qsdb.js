@@ -79,7 +79,7 @@ manage_max_pages = -1;
 manage_current_page = 0;
 
 max_per_page = 30;
-max_spectra_per_page = 1000;
+max_spectra_per_page = 100;
 chromosomes = {};
 draw_anchor_start = "";
 draw_anchor_end = "";
