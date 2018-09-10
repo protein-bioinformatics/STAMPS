@@ -3344,6 +3344,8 @@ function curate_spectra_change_selection(row_num){
     current_spectrum_selected = row_num;
     load_spectrum(dom_table.children[current_spectrum_selected].getAttribute("value"));
     
+    document.getElementById("check_spectra_peptide_info").innerHTML = dom_table.children[current_spectrum_selected].children[0].innerHTML;
+    
     var spectra_panel = document.getElementById("spectra_panel");
     
     var unit = spectra_panel.scrollHeight / max_spectra_per_page;
