@@ -1203,17 +1203,19 @@ function mouse_down_listener(e){
         if (highlight_element){
             highlight_element.mouse_down(res, e.which);
             if (toolbox_button_selected == toolbox_states.MOVE_ENTITY && highlight_element.constructor.name != "preview"){
-                if (!multiple_selection.has(highlight_element.id)){
-                    
-                    for (var node_id in data){
-                        data[node_id].selected = false;
+                if (highlight_element instanceof node){
+                    if (!multiple_selection.has(highlight_element.id)){
+                        
+                        for (var node_id in data){
+                            data[node_id].selected = false;
+                        }
+                        multiple_selection = new Set();
                     }
-                    multiple_selection = new Set();
+                    
+                    entity_moving = highlight_element;
+                    node_move_x = entity_moving.x;
+                    node_move_y = entity_moving.y;
                 }
-                
-                entity_moving = highlight_element;
-                node_move_x = entity_moving.x;
-                node_move_y = entity_moving.y;
             }
             else if (toolbox_button_selected == toolbox_states.DRAW_EDGE && highlight_element.constructor.name == "node"){
                 
@@ -1475,7 +1477,6 @@ function mouse_up_listener(event){
             }
         }
         if (target != -1){
-            
             if ((-1 in data) && (data[-1].id != target.id)){
                 var anchor = target.is_mouse_over_anchor(res);
                 if (anchor.length > 0){
