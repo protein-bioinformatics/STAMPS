@@ -622,4 +622,4 @@ os.system("zip -j %s %s %s %s > /dev/null" % (zip_file, fasta_file, blib_file, s
 
 
 #send download link back
-print("/stamp/tmp/%s/assay.zip" % rnd)
+print("tmp/%s/assay.zip" % rnd)

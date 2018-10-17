@@ -4020,10 +4020,11 @@ function download_assay(){
     var xmlhttp = new XMLHttpRequest();
     var download_link = "";
     var request = file_pathname + "scripts/prepare-download.py?proteins=" + proteins_list + "&species=" + current_species;
+    console.log(request);
     
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            download_link = xmlhttp.responseText;
+            download_link = file_pathname + xmlhttp.responseText;
             html = "<table width=100% height=100%><tr><td align=\"center\">";
             html += "<a href=\"" + download_link + "\">download assay</a>";
             html += "<p>&nbsp;<p>";
