@@ -95,7 +95,7 @@ function init(){
             resize_pathway_view();
         }
     }
-    xmlhttp_pw.open("GET", file_pathname + "cgi-bin/get-pathways.bin", true);
+    xmlhttp_pw.open("GET", file_pathname + "scripts/get-pathways.bin", true);
     xmlhttp_pw.send();
     
     
@@ -108,7 +108,7 @@ function init(){
             search_data = JSON.parse(xmlhttp_search.responseText);
         }
     }
-    xmlhttp_search.open("GET", file_pathname + "cgi-bin/get-search-data.bin", true);
+    xmlhttp_search.open("GET", file_pathname + "scripts/get-search-data.bin", true);
     xmlhttp_search.send();
     
     for (var key in tissues){

@@ -1,8 +1,8 @@
-BIN_PATH = ../../cgi-bin
-ADMIN_PATH = ../cgi-bin
+BIN_PATH = ../../scripts
+ADMIN_PATH = ../scripts
 
 main: nodes proteins search edges pathways manage chromosomes
-	javac -cp ../cgi-bin/cdk-2.0.jar:. DrawChem.java && mv DrawChem.class ../cgi-bin/.
+	javac -cp ../scripts/cdk-2.0.jar:. DrawChem.java && mv DrawChem.class ../scripts/.
 
 nodes:
 	g++ -std=c++11 -O3 -I/usr/include/mysql -o $(BIN_PATH)/get-nodes.bin get-nodes.cpp bio-classes.cpp -L/usr/lib/x86_64-linux-gnu -lmysqlcppconn -lz
