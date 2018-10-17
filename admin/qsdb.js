@@ -89,6 +89,7 @@ multiple_selection = new Set();
 
 
 function init(){
+    file_pathname = get_pathname() + "../";
     editor_mode = true;
     preview_element = new preview();
     select_field_element = new select_field();
@@ -129,7 +130,7 @@ function init(){
             change_pathway();
         }
     }
-    xmlhttp_pathways.open("GET", "/stamp/cgi-bin/get-pathways.bin?all", true);
+    xmlhttp_pathways.open("GET", file_pathname + "cgi-bin/get-pathways.bin?all", true);
     xmlhttp_pathways.send();
     
     set_species_menu();
@@ -187,7 +188,7 @@ function init(){
                 
             }
         }
-        tmp_array[species_count].open("GET", "/stamp/cgi-bin/get-chromosomes.bin?species=" + curr_species, true);
+        tmp_array[species_count].open("GET", file_pathname + "cgi-bin/get-chromosomes.bin?species=" + curr_species, true);
         tmp_array[species_count].send();
         
         if (species_count++ == 0) species_option.setAttribute("checked", "true");
@@ -219,7 +220,7 @@ function init(){
             metabolite_max_pages = Math.floor(parseInt(xmlhttp_metabolites.responseText) / max_per_page) + 1;
         }
     }
-    xmlhttp_metabolites.open("GET", "/stamp/admin/cgi-bin/manage-entries.bin?action=get&type=metabolites_num", true);
+    xmlhttp_metabolites.open("GET", file_pathname + "admin/cgi-bin/manage-entries.bin?action=get&type=metabolites_num", true);
     xmlhttp_metabolites.send();
     
     
@@ -231,7 +232,7 @@ function init(){
             protein_max_pages = Math.floor(parseInt(xmlhttp_proteins.responseText) / max_per_page) + 1;
         }
     }
-    xmlhttp_proteins.open("GET", "/stamp/admin/cgi-bin/manage-entries.bin?action=get&type=proteins_num", true);
+    xmlhttp_proteins.open("GET", file_pathname + "admin/cgi-bin/manage-entries.bin?action=get&type=proteins_num", true);
     xmlhttp_proteins.send();
     
     
@@ -246,7 +247,7 @@ function init(){
             }
         }
     }
-    xmlhttp_prot_col.open("GET", "/stamp/admin/cgi-bin/manage-entries.bin?action=get&type=proteins_col", true);
+    xmlhttp_prot_col.open("GET", file_pathname + "admin/cgi-bin/manage-entries.bin?action=get&type=proteins_col", true);
     xmlhttp_prot_col.send();
     
     
@@ -257,7 +258,7 @@ function init(){
             spectra_max_pages = Math.floor(parseInt(xmlhttp_spectra.responseText) / max_spectra_per_page) + 1;
         }
     }
-    xmlhttp_spectra.open("GET", "/stamp/admin/cgi-bin/curate-spectral-library.py?action=count&species=" + current_species, false);
+    xmlhttp_spectra.open("GET", file_pathname + "admin/cgi-bin/curate-spectral-library.py?action=count&species=" + current_species, false);
     xmlhttp_spectra.send();
     
     
@@ -272,7 +273,7 @@ function init(){
             }
         }
     }
-    xmlhttp_meta_col.open("GET", "/stamp/admin/cgi-bin/manage-entries.bin?action=get&type=metabolites_col", true);
+    xmlhttp_meta_col.open("GET", file_pathname + "admin/cgi-bin/manage-entries.bin?action=get&type=metabolites_col", true);
     xmlhttp_meta_col.send();
     
     
@@ -289,7 +290,7 @@ function init(){
             resize_manage_view();
         }
     }
-    xmlhttp_pg_col.open("GET", "/stamp/admin/cgi-bin/manage-entries.bin?action=get&type=pathway_groups_col", true);
+    xmlhttp_pg_col.open("GET", file_pathname + "admin/cgi-bin/manage-entries.bin?action=get&type=pathway_groups_col", true);
     xmlhttp_pg_col.send();
     
     
@@ -304,7 +305,7 @@ function init(){
             }
         }
     }
-    xmlhttp_pw_col.open("GET", "/stamp/admin/cgi-bin/manage-entries.bin?action=get&type=pathways_col", true);
+    xmlhttp_pw_col.open("GET", file_pathname + "admin/cgi-bin/manage-entries.bin?action=get&type=pathways_col", true);
     xmlhttp_pw_col.send();
     
     
@@ -944,7 +945,7 @@ function editor_upload_image(){
                 }
             }
         }
-        xhttp.open("POST", "/stamp/admin/cgi-bin/upload-file.py", false);
+        xhttp.open("POST", file_pathname + "admin/cgi-bin/upload-file.py", false);
         xhttp.send("id=" + this.id + "&extension=" + xhttp.extension + "&content=" + encoded);
     }
 }
@@ -1021,7 +1022,7 @@ function editor_update_protein_node(){
     var continuing = true;
     
     // get proteins
-    var request = "/stamp/admin/cgi-bin/manage-entries.bin?action=set&table=nodeproteincorrelations&column=none&id=" + selected_protein_node + "&value=" +  encodeURL(prot.proteins.join(":"));
+    var request = file_pathname + "admin/cgi-bin/manage-entries.bin?action=set&table=nodeproteincorrelations&column=none&id=" + selected_protein_node + "&value=" +  encodeURL(prot.proteins.join(":"));
     var xmlhttp_set = new XMLHttpRequest();
     xmlhttp_set.onreadystatechange = function() {
         if (xmlhttp_set.readyState == 4 && xmlhttp_set.status == 200) {
@@ -1037,7 +1038,7 @@ function editor_update_protein_node(){
     xmlhttp_set.send();
     
     if (continuing){
-        var request_prot = "/stamp/cgi-bin/get-proteins.bin?ids=" + prot.proteins.join(":") + "&species=mouse";
+        var request_prot = file_pathname + "cgi-bin/get-proteins.bin?ids=" + prot.proteins.join(":") + "&species=mouse";
         // get proteins
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function() {
@@ -1082,7 +1083,7 @@ function editor_update_pathway_node(){
 
 function delete_entity(request){
     var xmlhttp = new XMLHttpRequest();
-    request = "/stamp/admin/cgi-bin/delete-entity.py?" + request;
+    request = file_pathname + "admin/cgi-bin/delete-entity.py?" + request;
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             response = xmlhttp.responseText;
@@ -1098,7 +1099,7 @@ function delete_entity(request){
 
 function update_entry(request){
     var xmlhttp = new XMLHttpRequest();
-    request = "/stamp/admin/cgi-bin/manage-entries.bin?" + request;
+    request = file_pathname + "admin/cgi-bin/manage-entries.bin?" + request;
     
     var successful_creation = false;
     xmlhttp.onreadystatechange = function() {
@@ -1121,7 +1122,7 @@ function update_entry(request){
 
 function repair_database(){
     var xmlhttp = new XMLHttpRequest();
-    request = "/stamp/admin/cgi-bin/inspect-database.py?mode=check_web";
+    request = file_pathname + "admin/cgi-bin/inspect-database.py?mode=check_web";
     
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -1134,7 +1135,7 @@ function repair_database(){
                     
                     
                     var xmlhttp_repair = new XMLHttpRequest();
-                    request_repair = "/stamp/admin/cgi-bin/inspect-database.py?mode=del_web";
+                    request_repair = file_pathname + "admin/cgi-bin/inspect-database.py?mode=del_web";
                     xmlhttp_repair.onreadystatechange = function() {
                         if (xmlhttp_repair.readyState == 4 && xmlhttp_repair.status == 200) {
                             if (xmlhttp_repair.responseText == 0){
@@ -1161,7 +1162,7 @@ function repair_database(){
 
 function create_node(request){
     var xmlhttp = new XMLHttpRequest();
-    request = "/stamp/admin/cgi-bin/create-node.py?" + request;
+    request = file_pathname + "admin/cgi-bin/create-node.py?" + request;
     
     
     var successful_creation = [false, -1];
@@ -1540,7 +1541,7 @@ function mouse_up_listener(event){
 
 function add_edge(start_id, end_id, anchor_start, anchor_end){
     var xmlhttp = new XMLHttpRequest();
-    var request = "/stamp/admin/cgi-bin/add-edge.py?start_id=" + start_id + "&end_id=" + end_id + "&anchor_start=" + anchor_start + "&anchor_end=" + anchor_end;
+    var request = file_pathname + "admin/cgi-bin/add-edge.py?start_id=" + start_id + "&end_id=" + end_id + "&anchor_start=" + anchor_start + "&anchor_end=" + anchor_end;
     var successful_creation = -1;
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -1820,7 +1821,7 @@ function editor_fill_metabolite_table(){
     if (filter_name != "" || filter_cnumber != "" || filter_formula != ""){
         request += "&filters=" + encodeURL("name:" + filter_name + ",c_number:" + filter_cnumber + ",formula:" + filter_formula);
     }
-    request = "/stamp/admin/cgi-bin/manage-entries.bin?" + request;
+    request = file_pathname + "admin/cgi-bin/manage-entries.bin?" + request;
     
     
     var sign_up = String.fromCharCode(9652);
@@ -2008,7 +2009,7 @@ function editor_fill_protein_table(){
         request += encodeURL(",name:" + filter_name + ",accession:" + filter_accession + ",definition:" + filter_description);
     }
     if (filter_node) request += "&checked=" + encodeURL(selected_protein_node);
-    request = "/stamp/admin/cgi-bin/manage-entries.bin?" + request;
+    request = file_pathname + "admin/cgi-bin/manage-entries.bin?" + request;
     
     var sign_up = String.fromCharCode(9652);
     var sign_down = String.fromCharCode(9662);
@@ -2173,7 +2174,7 @@ function manage_change_entity(entity){
             manage_max_pages = Math.floor(parseInt(xmlhttp_entity.responseText) / max_per_page) + 1;
         }
     }
-    xmlhttp_entity.open("GET", "/stamp/admin/cgi-bin/manage-entries.bin?action=get&type=" + entity + "_num", false);
+    xmlhttp_entity.open("GET", file_pathname + "admin/cgi-bin/manage-entries.bin?action=get&type=" + entity + "_num", false);
     xmlhttp_entity.send();
     manage_current_page = 0;
     
@@ -2211,7 +2212,7 @@ function update_protein_data(accession){
     
     
     var request = "type=protein&action=update&accession=" + accession;
-    request = "/stamp/admin/cgi-bin/request-entity-data.py?" + request;
+    request = file_pathname + "admin/cgi-bin/request-entity-data.py?" + request;
     
     var xmlhttp_update_prot = new XMLHttpRequest();
     xmlhttp_update_prot.onreadystatechange = function() {
@@ -2241,7 +2242,7 @@ function manage_fill_table(){
     request += "&column=" + encodeURL(manage_sort_columns[manage_current_entry][manage_sort_column]);
     request += "&limit=" + encodeURL((manage_current_page * max_per_page).toString() + ":" + max_per_page.toString());
     if (filters.length > 0) request += "&filters=" + encodeURL(filters);
-    request = "/stamp/admin/cgi-bin/manage-entries.bin?" + request;
+    request = file_pathname + "admin/cgi-bin/manage-entries.bin?" + request;
     
     
     var sign_up = String.fromCharCode(9652);
@@ -2724,7 +2725,7 @@ function manage_fill_table(){
 function manage_delete_protein(prot_id){
     
     var request = "type=protein&id=" + prot_id;
-    request = "/stamp/admin/cgi-bin/delete-entity.py?" + request
+    request = file_pathname + "admin/cgi-bin/delete-entity.py?" + request
     
     
     var xmlhttp_protein_data = new XMLHttpRequest();
@@ -2760,7 +2761,7 @@ function manage_delete_protein(prot_id){
 
 function manage_delete_pathway_group(entity_id){
     var request = "type=pathway_group&id=" + entity_id;
-    request = "/stamp/admin/cgi-bin/delete-entity.py?" + request;
+    request = file_pathname + "admin/cgi-bin/delete-entity.py?" + request;
     
     
     var xmlhttp_protein_data = new XMLHttpRequest();
@@ -2800,7 +2801,7 @@ function manage_delete_pathway(entity_id){
     }
     
     var request = "type=pathway&id=" + entity_id;
-    request = "/stamp/admin/cgi-bin/delete-entity.py?" + request;
+    request = file_pathname + "admin/cgi-bin/delete-entity.py?" + request;
     
     var xmlhttp_protein_data = new XMLHttpRequest();
     xmlhttp_protein_data.onreadystatechange = function() {
@@ -3106,7 +3107,7 @@ function request_metabolites_data(){
     var c_number = document.getElementById("add_manage_metabolites_c_number").value;
     if (c_number.length < 1) return;
     
-    var request = "/stamp/admin/cgi-bin/request-entity-data.py?type=metabolite&c_number=" + c_number;
+    var request = file_pathname + "admin/cgi-bin/request-entity-data.py?type=metabolite&c_number=" + c_number;
     
     var xmlhttp_metabolite_data = new XMLHttpRequest();
     xmlhttp_metabolite_data.onreadystatechange = function() {
@@ -3130,7 +3131,7 @@ function request_protein_data(){
     var accession = document.getElementById("add_manage_proteins_accession").value;
     if (accession.length < 1) return;
     
-    var request = "/stamp/admin/cgi-bin/request-entity-data.py?type=protein&accession=" + accession;
+    var request = file_pathname + "admin/cgi-bin/request-entity-data.py?type=protein&accession=" + accession;
     
     
     var xmlhttp_protein_data = new XMLHttpRequest();
@@ -3206,7 +3207,7 @@ function add_manage_proteins_add(){
     request += data_separator + "chromosome:" + document.getElementById("add_manage_proteins_chromosome")[document.getElementById("add_manage_proteins_chromosome").selectedIndex].value;
     request += data_separator + "species:" + document.getElementById("add_manage_proteins_species")[document.getElementById("add_manage_proteins_species").selectedIndex].value;
     
-    request = "/stamp/admin/cgi-bin/manage-entries.bin?action=insert&type=proteins&data=" + encodeURL(request);
+    request = file_pathname + "admin/cgi-bin/manage-entries.bin?action=insert&type=proteins&data=" + encodeURL(request);
     
     
     var xmlhttp_add_protein = new XMLHttpRequest();
@@ -3233,7 +3234,7 @@ function add_manage_pathways(){
     var signaling = document.getElementById("add_manage_pathways_signaling").checked;
     var request = "name:" + new_pathway_name + data_separator + "pathway_group_id:" + pathway_group + data_separator + "signaling_pathway:" + (signaling ? "1" : "0");
     
-    request = "/stamp/admin/cgi-bin/manage-entries.bin?action=insert&type=pathways&data=" + encodeURL(request);
+    request = file_pathname + "admin/cgi-bin/manage-entries.bin?action=insert&type=pathways&data=" + encodeURL(request);
     
     var xmlhttp_add_pathway = new XMLHttpRequest();
     xmlhttp_add_pathway.onreadystatechange = function() {
@@ -3265,7 +3266,7 @@ function add_manage_metabolites_add(){
     request += data_separator + "exact_mass:" + document.getElementById("add_manage_metabolites_exact_mass").value;
     request += data_separator + "smiles:" + document.getElementById("add_manage_metabolites_smiles").value;
     
-    request = "/stamp/admin/cgi-bin/manage-entries.bin?action=insert&type=metabolites&data=" + encodeURL(request);
+    request = file_pathname + "admin/cgi-bin/manage-entries.bin?action=insert&type=metabolites&data=" + encodeURL(request);
     
     var xmlhttp_add_metabolite = new XMLHttpRequest();
     xmlhttp_add_metabolite.onreadystatechange = function() {
@@ -3292,7 +3293,7 @@ function go_to_browser(){
 
 function manage_delete_metabolite(metabolite_id){
     var request = "type=metabolite&id=" + metabolite_id;
-    request = "/stamp/admin/cgi-bin/delete-entity.py?" + request
+    request = file_pathname + "admin/cgi-bin/delete-entity.py?" + request
     
     var xmlhttp_metabolite_data = new XMLHttpRequest();
     xmlhttp_metabolite_data.onreadystatechange = function() {
@@ -3394,7 +3395,7 @@ function curate_spectra_checking(row_num){
             response = xmlhttp_spectra_update.responseText;
         }
     }
-    xmlhttp_spectra_update.open("GET", "/stamp/admin/cgi-bin/curate-spectral-library.py?" + request, false);
+    xmlhttp_spectra_update.open("GET", file_pathname + "admin/cgi-bin/curate-spectral-library.py?" + request, false);
     xmlhttp_spectra_update.send();
     spectrum_active = spectra_checks[spec_id];
     draw_spectrum();
@@ -3525,7 +3526,7 @@ function curate_spectra(){
             
         }
     }
-    xmlhttp_spectra_meta.open("GET", "/stamp/admin/cgi-bin/curate-spectral-library.py?" + request, false);
+    xmlhttp_spectra_meta.open("GET", file_pathname + "admin/cgi-bin/curate-spectral-library.py?" + request, false);
     xmlhttp_spectra_meta.send();
     
     

@@ -1573,7 +1573,7 @@ function load_statistics(){
         }
     }
     
-    xmlhttp.open("GET", "/stamp/cgi-bin/get-proteins.bin?statistics&species=" + current_species, true);
+    xmlhttp.open("GET", file_pathname + "cgi-bin/get-proteins.bin?statistics&species=" + current_species, true);
     xmlhttp.send();
     
     
@@ -1620,7 +1620,7 @@ function load_statistics(){
             update_correlation_tissues_pathway();
         }
     }
-    xmlhttp_search.open("GET", "/stamp/cgi-bin/get-proteins.bin?statistics_pathways", true);
+    xmlhttp_search.open("GET", file_pathname + "cgi-bin/get-proteins.bin?statistics_pathways", true);
     xmlhttp_search.send();
 }
 
@@ -2754,7 +2754,7 @@ function load_all_data(){
             activateTree(document.getElementById("LinkedList1"));
         }
     }
-    xmlhttpfunctions.open("GET", "/stamp/cgi-bin/get-functions.py", true);
+    xmlhttpfunctions.open("GET", file_pathname + "cgi-bin/get-functions.py", true);
     xmlhttpfunctions.send();
     
     
@@ -2772,7 +2772,7 @@ function load_all_data(){
             }
         }
     }
-    xmlhttploci.open("GET", "/stamp/cgi-bin/get-loci.py", true);
+    xmlhttploci.open("GET", file_pathname + "cgi-bin/get-loci.py", true);
     xmlhttploci.send();
     
     
@@ -2783,7 +2783,7 @@ function load_all_data(){
             ideom_data = JSON.parse(xmlhttp_chr.responseText);
         }
     }
-    xmlhttp_chr.open("GET", "/stamp/cgi-bin/get-chromosomes.bin?species=" + current_species, true);
+    xmlhttp_chr.open("GET", file_pathname + "cgi-bin/get-chromosomes.bin?species=" + current_species, true);
     xmlhttp_chr.send();
     
     // load tissue images
@@ -2910,7 +2910,7 @@ function draw_chromosome_ideograms(){
                 chromosomes[this.chromosome_key].draw();
             }
         }
-        chromosome_requests[key].open("GET", "/stamp/cgi-bin/get-chromosome-data.py?chromosome=" + key + "&species=" + current_species, true);
+        chromosome_requests[key].open("GET", file_pathname + "cgi-bin/get-chromosome-data.py?chromosome=" + key + "&species=" + current_species, true);
         chromosome_requests[key].send();
     }
 }
@@ -3064,7 +3064,7 @@ function change_species(select){
                 ideom_data = JSON.parse(xmlhttp_chr.responseText);
             }
         }
-        xmlhttp_chr.open("GET", "/stamp/cgi-bin/get-chromosomes.bin?species=" + current_species, false);
+        xmlhttp_chr.open("GET", file_pathname + "cgi-bin/get-chromosomes.bin?species=" + current_species, false);
         xmlhttp_chr.send();
         draw_chromosome_ideograms();
         //chromosome_selection_changed(true);
@@ -3092,7 +3092,7 @@ function mobile_check() {
 };
 
 
-
+file_pathname = get_pathname();
 
 current_species = "mouse";
 var kr_keys = [];
