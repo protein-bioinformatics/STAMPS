@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
         
         else {
             if (!set_table.compare("metabolites") && !set_col.compare("smiles")){
-                string filepath = parameters["root_path"] + "/admin/cgi-bin";
+                string filepath = parameters["root_path"] + "/admin/scripts";
                 string command = "java -cp " + filepath + "/cdk-2.0.jar:" + filepath + " DrawChem '" + filepath + "' '" + set_id + "' '" + set_value + "'";
                 int result = system(command.c_str());
             } 
@@ -359,7 +359,7 @@ int main(int argc, char** argv) {
             
             delete res;
             
-            string filepath = parameters["root_path"] + "/admin/cgi-bin";
+            string filepath = parameters["root_path"] + "/admin/scripts";
             string command = "java -cp " + filepath + "/cdk-2.0.jar:" + filepath + " DrawChem '" + filepath + "' '" + metabolite_id + "' '" + smiles_data + "'";
             int result = system(command.c_str());
         }
