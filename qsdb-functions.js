@@ -102,6 +102,7 @@ radius = metabolite_radius * factor;
 last_keys = [];
 highlighting = 0;
 basket = {};
+file_pathname = "";
 filtered_basket = {};
 tissues = {1: ["images/brain.svg", "Brain", 0, "statistics_check_brain", "#f4e500"],
            2: ["images/liver.svg", "Liver", 0, "statistics_check_liver", "#fdc60b"],
@@ -1700,7 +1701,7 @@ function Infobox(ctx){
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Exact mass / Da:</b> " + data[this.node_id].exact_mass + "</div>";
             var c_number = data[this.node_id].c_number;
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>C number:</b> <a href='http://www.genome.jp/dbget-bin/www_bget?" + c_number + "' target=\"blank\">" + data[this.node_id].c_number + "</div><br>";
-            if (data[this.node_id].foreign_id != -1) html_content += "<img src='/stamp/images/metabolites/C" + data[this.node_id].foreign_id + ".png'>";
+            if (data[this.node_id].foreign_id != -1) html_content += "<img src='" + file_pathname + "images/metabolites/C" + data[this.node_id].foreign_id + ".png'>";
             
             html_content += "</div>";
             
@@ -1956,7 +1957,7 @@ function node(data){
             catch (e) {
                 
             }
-            nd.img.src = "/stamp/images/visual_images/I" + nd.id + "." + nd.pos + "?" + new Date().getTime();
+            nd.img.src = file_pathname + "images/visual_images/I" + nd.id + "." + nd.pos + "?" + new Date().getTime();
             clearInterval(load_process);
         }, 1, this);
     }
@@ -2001,7 +2002,7 @@ function node(data){
             this.img = new Image();
             if (this.foreign_id != -1){
                 var load_process = setInterval(function(nd){
-                    nd.img.src = "/stamp/images/metabolites/C" + nd.foreign_id + ".png";
+                    nd.img.src = file_pathname + "images/metabolites/C" + nd.foreign_id + ".png";
                     clearInterval(load_process);
                 }, 1, this);
             }
@@ -4012,13 +4013,13 @@ function download_assay(){
     }
     
     html = "<table width=100% height=100%><tr><td align=\"center\">";
-    html += "<img src=\"/stamp/images/ajax-loader.gif\"></td></tr></table>"
+    html += "<img src=\"" + file_pathname + "images/ajax-loader.gif\"></td></tr></table>"
     document.getElementById("download").innerHTML = html;
     
     
     var xmlhttp = new XMLHttpRequest();
     var download_link = "";
-    var request = "cgi-bin/prepare-download.py?proteins=" + proteins_list + "&species=" + current_species;
+    var request = file_pathname + "cgi-bin/prepare-download.py?proteins=" + proteins_list + "&species=" + current_species;
     
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -4558,7 +4559,7 @@ function get_pathway_groups(){
             set_pathway_menu();
         }
     }
-    xmlhttp_pg.open("GET", "/stamp/cgi-bin/get-pathway-groups.py", false);
+    xmlhttp_pg.open("GET", file_pathname + "cgi-bin/get-pathway-groups.py", false);
     xmlhttp_pg.send();
 }
 
@@ -4686,8 +4687,21 @@ function highlight_node(node_id, pathway_id){
 }
 
 
+
+function get_pathname(){
+    var pname = window.location.pathname;
+    var tokens = pname.split("/");
+    if (tokens[tokens.length - 1].indexOf(".") > -1){
+        pname = "";
+        for (var i = 0; i < tokens.length - 1; ++i){
+            pname += tokens[i] + "/";
+        }
+    }
+    return pname;
+}
+
+
 function highlight_node_inner(node_id){
-    
     var progress = 0;
     var steps = 30;
     var time = 3; // seconds
@@ -5228,8 +5242,8 @@ function load_data(reload){
         }
     }
     
-    var request_nodes = "/stamp/cgi-bin/get-nodes.bin?pathway=" + current_pathway + "&species=" + current_species + specific_node_addition;
-    var request_edges = "/stamp/cgi-bin/get-edges.bin?pathway=" + current_pathway;
+    var request_nodes = file_pathname + "cgi-bin/get-nodes.bin?pathway=" + current_pathway + "&species=" + current_species + specific_node_addition;
+    var request_edges = file_pathname + "cgi-bin/get-edges.bin?pathway=" + current_pathway;
     
     // get nodes information
     var xmlhttp_edge = new XMLHttpRequest();
@@ -5325,7 +5339,7 @@ function load_data(reload){
                 }
             }
             
-            xmlhttp_prot.open("GET", "/stamp/cgi-bin/get-proteins.bin?pathway=" + current_pathway + "&species=" + current_species, true);
+            xmlhttp_prot.open("GET", file_pathname + "cgi-bin/get-proteins.bin?pathway=" + current_pathway + "&species=" + current_species, true);
             xmlhttp_prot.send();
         }
     }, 1);
@@ -5390,7 +5404,7 @@ function accession_search_parse_accessions(accessions, synchronous){
         }
     }
     
-    xmlhttp.open("GET", "/stamp/cgi-bin/get-proteins.bin?accessions=" + accessions + "&species=" + current_species, synchronous);
+    xmlhttp.open("GET", file_pathname + "cgi-bin/get-proteins.bin?accessions=" + accessions + "&species=" + current_species, synchronous);
     xmlhttp.send();
 }
 
@@ -5434,7 +5448,7 @@ function locus_search_request_data(){
     }
     
     // request proteins
-    var request = "/stamp/cgi-bin/get-proteins.bin?loci=" + IDs + "&species=" + current_species;
+    var request = file_pathname + "cgi-bin/get-proteins.bin?loci=" + IDs + "&species=" + current_species;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -5471,7 +5485,7 @@ function function_search_request_data(){
         }
     }
     
-    xmlhttp.open("GET", "/stamp/cgi-bin/get-proteins.bin?functions=" + IDs + "&species=" + current_species, true);
+    xmlhttp.open("GET", file_pathname + "cgi-bin/get-proteins.bin?functions=" + IDs + "&species=" + current_species, true);
     xmlhttp.send();
 }
 
@@ -5492,7 +5506,7 @@ function chromosome_search_request_data(){
     }
     
     // request proteins
-    var request = "/stamp/cgi-bin/get-proteins.bin?accessions=" + accessionIDs + "&species=" + current_species;
+    var request = file_pathname + "cgi-bin/get-proteins.bin?accessions=" + accessionIDs + "&species=" + current_species;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
