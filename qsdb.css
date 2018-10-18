@@ -191,10 +191,19 @@ div.global_search {
     width: 100%;
     height: 100%;
     left: 0px;
-    background-color: rgba(0, 0, 0, 0.5);
 }
 
 
+
+
+div.global_search_background {
+    position: fixed;
+    z-index: 115;
+    width: 100%;
+    height: 100%;
+    left: 0px;
+    background-color: rgba(0, 0, 0, 0.5);
+}
 
     
 div.global_search_content {
