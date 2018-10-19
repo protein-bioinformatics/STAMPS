@@ -103,7 +103,7 @@
         Chromosome&nbsp;Search
     </td>
     
-    <td id="statistics_nav" class="navigation_cell_click" align="center" onclick="open_statistics();">
+    <td id="statistics_nav" class="navigation_cell_click" align="center" onclick="load_statistics(); open_statistics();">
         <img src="images/statistics.svg" class="navigation_cell_click_image"><br>
         Statistics
     </td>
@@ -414,7 +414,10 @@ div<div id="locus_search" class="global_search">
 <div id="statistics" class="global_search">
     <div id="statistics_background" class="global_search_background" onclick="this.parentElement.style.display = 'none';"></div>
     <div id="statistics_table" class="global_search_content" style="width: 1400px; overflow-y: scroll;">
-    <table width="100%" height="100%">
+    <table id="statistics_waiting" width="100%" height="100%">
+        <tr><td width="100%" align="center"><img src="images/ajax-loader.gif" /></td></tr>
+    </table>
+    <table id="statistics_content" width="100%" height="100%" style="display: none;">
     
         <tr><td width="50%" valign="top">
             <b>Normalized distribution of protein abundances per pathway</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('nsaf_pathway');" height="24" />
@@ -1510,6 +1513,7 @@ function open_statistics (){
 
 
 function load_statistics(){
+    if (statistics_loaded >= 2) return;
 
     var tissue_tissue_select = document.getElementById("tissue_tissue_select");
     for (t in tissues){
@@ -1527,7 +1531,21 @@ function load_statistics(){
             
             var parsed = JSON.parse(xmlhttp.responseText);
             
-            request_load_proteins(parsed, false);
+            
+            for (var entry of parsed){
+                var p_id = entry["i"];
+                var prot = 0;
+                if (p_id in protein_dictionary){
+                    prot = protein_dictionary[p_id];
+                    prot.update(entry);
+                }
+                else {
+                    prot = new Protein(entry);
+                    protein_dictionary[prot.id] = prot;
+                }
+                prot.filtering();
+            }
+            
             
             for (var t = 1; t <= 10; ++t){
                 var sum_NSAF = 0;
@@ -1574,6 +1592,9 @@ function load_statistics(){
             update_correlation_pathway_select();
             update_correlation_tissues();
             update_correlation_tissues_pathway();
+            
+            document.getElementById("statistics_waiting").style.display = "none";
+            document.getElementById("statistics_content").style.display = "";
         }
     }
     
@@ -3118,12 +3139,6 @@ load_all_data();
 
 if (mobile_check()){
     alert("We recognized, that you are browsing with a mobile device. We strongly recommend to browse STAMPS from a desktop computer or laptop. Some functionality may not work. Due to high data traffic, some information provision is turned off. We apologize for the inconvenience.");
-}
-else {
-    var process_stat_loading = setInterval(function(){
-        load_statistics();
-        clearInterval(process_stat_loading);
-    }, 1);
 }
 
 var xmlhttp_matomo = new XMLHttpRequest();
