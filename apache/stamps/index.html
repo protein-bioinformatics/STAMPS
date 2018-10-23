@@ -1,0 +1,3156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+<head>
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link rel="stylesheet" type="text/css" href="qsdb.css">
+<script src="canvas2svg.js"></script>
+<script src="qsdb-functions.js"></script>
+<script src="ms-view.js"></script>
+<script src="qsdb.js"></script>
+
+<title>STAMPS Home</title>
+</head>
+<body style="background: linear-gradient(8deg, #6babcd, #6babcd, #6babcd, #f3f8ff, #f3f8ff); background-attachment: fixed;">
+
+<div class="navigation">
+    <table width="100%" height=50><tr>
+        <td class="navigation_cell" style="min-height: 70px; font-size: 1.3vw; display: inline; border-width: 0px;">
+            <font style="font-size: 1.6vw;">S</font>imple
+            <font style="font-size: 1.6vw;">T</font>argeted
+            <font style="font-size: 1.6vw;">A</font>ssays for
+            <font style="font-size: 1.6vw;">M</font>etabolic
+            <font style="font-size: 1.6vw;">P</font>athways &amp;
+            <font style="font-size: 1.6vw;">S</font>ignaling
+        </td>
+    
+        <td class="navigation_cell_click" align="center" style="border-left: white; border-left-style: solid; border-left-width: 1px;"  onclick="document.getElementById('citation').style.display = 'inline';">Reference / Citation</td>
+        <td class="navigation_cell_click" align="center" onclick="location.href = 'mailto:robert.ahrends@isas.de';">Feedback / Contact</td>
+    </tr></table>
+</div>
+
+
+<div style="position:fixed; width:100%; height: 90%;">
+    <table width=100% height=70% cellspacing=0 cellpadding=0>
+        <tr>
+            <td colspan=3 height=40% valign="top" align="right">
+                <div style="position: fixed; width: 50%; right: 20px; top: 70px;">
+                    <img src="images/magnifier.svg" style="min-height: 200px; width: 50vw; height: 90vh;">
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td width=10% height=20 bgcolor="#68a4c9">&nbsp;</td>
+            <td width=20% style="margin: 0px;" valign="top">
+                <div style="width: auto; font-family: Arial, Helvetica Neue, Helvetica, sans-serif; font-weight: bold; font-size: 4vw; font-size-adjust: 1; color: #ffffff; display: inline-block; margin-top: -1.5vw; margin-bottom: -1.8vw;">STAMPS</div>
+            </td>
+            <td bgcolor="#68a4c9" valign="top">&nbsp;</td>
+        </tr>
+        <tr>
+            <td height=50%></td>
+            <td height=50% colspan=2 style="color: #ffffff;">
+            <p>
+            <font style="font-size: 1.5vw; text-shadow: 2px 2px #555555;"><b>Features</b></font><p>
+            <ul>
+                <li><font style="font-size: 1vw; text-shadow: 2px 2px #555555;"><b>&nbsp;• Pathway centric targeted database</b></font></li>
+                <li><font style="font-size: 1vw; text-shadow: 2px 2px #555555;"><b>&nbsp;• Tissue resolved protein annotations</b></font></li>
+                <li><font style="font-size: 1vw; text-shadow: 2px 2px #555555;"><b>&nbsp;• Statistical support for method development</b></font></li>
+                <li><font style="font-size: 1vw; text-shadow: 2px 2px #555555;"><b>&nbsp;• Direct integration with <a href="http://skyline.ms" target="_blank" style="color: white;">Skyline</a></b></font></li>
+                <li><font style="font-size: 1vw; text-shadow: 2px 2px #555555;"><b>&nbsp;• Several analytical levels of protein validations</b></font></li>
+                <li><font style="font-size: 1vw; text-shadow: 2px 2px #555555;"><b>&nbsp;• Pathway curation by domain experts</b></font></li>
+            </ul>
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+
+<div id="navigation_startpage" class="navigation_startpage">
+    <table>
+    <tr><td width="50%">
+    </td>
+    
+    <td style="border-left: white; border-left-style: solid; border-left-width: 1px;" id="how_to_nav" class="navigation_cell_click" align="center" onclick="document.getElementById('how_to').style.display = 'inline';">
+        <img src="images/how-to.svg" width="100%" class="navigation_cell_click_image"><br>
+        How&nbsp;To
+    </td>
+    
+    <td class="navigation_cell_click" id="pathway_browser_nav" align="center" onclick="location.href = 'browser.html';">
+        <img src="images/pathway-browser.svg" class="navigation_cell_click_image"><br>
+        Pathway&nbsp;Browser
+    </td>
+    
+    <td class="navigation_cell_click" id="subcellular_search_nav" align="center" onclick="advanced_search_init(); open_locus_search();">
+        <img src="images/cell.svg" class="navigation_cell_click_image"><br>
+        Subcellular&nbsp;Search
+    </td>
+    
+    <td class="navigation_cell_click" id="functional_search_nav" align="center" onclick="advanced_search_init(); open_function_search();">
+        <img src="images/gears.svg" class="navigation_cell_click_image"><br>
+        Functional&nbsp;Search
+    </td>
+    
+    <td class="navigation_cell_click" id="accession_search_nav" align="center" onclick="advanced_search_init(); open_accession_search();">
+        <img src="images/accession-search.svg" class="navigation_cell_click_image"><br>
+        Accession&nbsp;Search
+    </td>
+    
+    <td class="navigation_cell_click" id="chromosome_search_nav" align="center" onclick="advanced_search_init(); open_chromosome_search();">
+        <img src="images/chromosome.svg" class="navigation_cell_click_image"><br>
+        Chromosome&nbsp;Search
+    </td>
+    
+    <td id="statistics_nav" class="navigation_cell_click" align="center" onclick="load_statistics(); open_statistics();">
+        <img src="images/statistics.svg" class="navigation_cell_click_image"><br>
+        Statistics
+    </td>
+    
+    <td id="about_nav" class="navigation_cell_click" align="center" onclick="document.getElementById('disclaimer').style.display = 'inline';">
+        <img src="images/about.svg" class="navigation_cell_click_image"><br>
+        About
+    </td><td width="50%"></tr>
+    
+    </table>
+</div>
+
+
+
+
+
+
+
+<div id="how_to" class="global_search">
+    <div id="how_to_background" class="global_search_background" onclick="this.parentElement.style.display = 'none';"></div>
+    <div id="how_to_content" class="global_search_content" style="overflow-y: auto; height: 80%;">
+    <table width="100%" height="100%"><tr><td align="justify">
+            <h2><center><b>Creating Assay using Pathway Browser</b></center></h2><p>
+            
+            <h3>1) Select pathway browser</h3>
+            When opening the STAMPS website, the first page is leading to all main protein selection dialogs as visible in <a href="#stamp_main">Figure&nbsp;1</a>. Clicking on „Pathway Browser“ in the lower panel, the main pathway browser window will be opened, consider Figure&nbsp;2. The pathway browser is an interactive browser, the view can be shifted (right click), the zoom can be changed (mouse wheel or magnifier icons on bottom right position).
+            <figure>
+                <a name="stamp_main">
+                <img src="images/tutorial/stamp-1.png" alt="Main page of STAMPS providing easy accession to all functions and statistical summaries" style="width:100%">
+                <figcaption>Figure 1 | Main page of STAMPS providing easy accession to all functions and statistical summaries</figcaption>
+            </figure>
+            The metabolic pathways are plotted in a graph-based fashion. Metabolites are presented as circles; proteins which act in the same metabolic reaction are grouped in protein boxes. By directly clicking on metabolite or protein labels, additional information is presented. Pathway references are presented in round-corned boxes. By clicking on, the according pathway will be opened.
+            <figure>
+                <a name="stamp_browser">
+                <img src="images/tutorial/stamp-2.png" alt="The interactive pathway browser as the main protein selection window" style="width:100%">
+                <figcaption>Figure 2 | The interactive pathway browser as the main protein selection window</figcaption>
+            </figure>
+            <p>&nbsp;
+            
+
+            <h3>2) Select pathway(s)</h3>
+            In the upper panel, the pathway of interest can be chosen in a drop down menu by clicking the Metabolic Pathways” or “Signaling Pathways” button. The protein selection is preserved when switching back to a pathway where proteins were selected. Additional functions are (i) changing the placed over organism  (in the current version, only mouse data is available), (ii) various filters for viewing proteins and (iii) a case insensitive search function for key words like a protein/metabolite name, description, accession or even peptide sequence. When clicking on a found entry, the view is automatically centered and zoomed on the hit in the pathway map.<p>&nbsp;
+            
+            <h3>3) Select proteins</h3>
+            Proteins of choice can be (de)selected by clicking on their checkboxes. By double clicking on a protein group box, all proteins of the according box will be (de)selected. By clicking and holding down the left mouse button on a free space and moving the mouse, a protein selection area will be spanned. When releasing the button, all proteins within this selection window will be (de)selected.
+            <p>&nbsp;
+            
+            <h3>4) Pathway statistical overview</h3>
+            For each pathway the user has the possibility to get a statistical overview by clicking on the arrows in the upper corner on the right hand side. A window will appear giving information of the total protein number of the selected pathway, protein coverage, number of selected proteins and additional information regarding number of peptides, spectra and validation (see Figure S3).
+            <figure>
+                <a name="statistics">
+                <center>
+                    <img src="images/tutorial/stamp-6.png" alt="Statistics box displaying all relevant information for a certain pathway." style="width:40%">
+                </center>
+                <figcaption>Figure 3 | Statistics box displaying all relevant information for a certain pathway.</figcaption>
+            </figure>
+            <p>&nbsp;
+
+            <h3>5) Check your protein selection and review spectra</h3>
+            Having selected all proteins for an assay, the user can review the selection by clicking on “Check spectra” in the upper panel. A new window is opening as shown in Figure&nbsp;4. On the left-hand side, a table is showing all selected proteins. Here, the user has the possibility to expand each protein to show its corresponding peptides that are stored with an according spectrum in the database. By clicking on the shown precursor mass, the corresponding spectrum is displayed showing y and b ions.  The user has to take into consideration  that only proteins, peptides and precursors will be displayed, which were identified and stored in our database and in addition satisfy the adjusted filter criteria. All proteins, peptides or spectra can be (de)selected on this screen for the final assay by checking or unchecking the blue boxes. To refine the assay even more, specific filter criteria can be applied. For instance the user can filter for peptide length and precursor charge as well as choose between variable and fixed modification of the oxidation of methionine and/or the carbamidomethylation of cystein. In Addition there is the possibility to filter for specific tissues.
+            <figure>
+                <a name="spectra_review">
+                <center>
+                    <img src="images/tutorial/stamp-3.png" alt="Review dialog for (de)selecting proteins, peptides or single spectra in the assay" style="width:100%">
+                </center>
+                <figcaption>Figure 4 | Review dialog for (de)selecting proteins, peptides or single spectra in the assay.</figcaption>
+            </figure>
+            <p>&nbsp;
+
+            <h3>6) Download your assay</h3>
+            Once the selection is satisfying, the user can proceed to download by clicking on “Go to download” on bottom right side of the dialog. A spectral library in .blib format, a .fasta file containing all selected protein sequences and a Skyline project file are being created on the fly and packed as a .zip file offered for download. After downloading and unzipping, the Skyline project file can easily be opened in <a href="http://skyline.ms" target="_blank">Skyline</a> with the complete assay ready start the targeted analyses.<p>&nbsp;<p>&nbsp;
+            
+            
+            <h2><center><b>Creating Assay using Accession List</b></center></h2><p>
+            
+            <h3>1) Open protein selection dialog via accession IDs</h3>
+            For the next step, a list of Uniprot1 accession IDs is required. Click on main page (consider <a href="#stamp_main">Figure&nbsp;1</a>) on “Accession Search” in the lower panel.<p>&nbsp;
+
+
+            <h3>2) Paste your protein accession IDs</h3>
+            A dialog for inserting the accessions IDs is being opened (as seen in Figure&nbsp;5). Select the desired species with the upper combo box. Write down your accession IDs into the text field. If you have a longer list, copy and paste it into the text field. Click on “Next” to proceed.
+            <figure>
+                <a name="accession_field">
+                <center>
+                    <img src="images/tutorial/stamp-4.png" alt="Dialog for selecting proteins via a list of Uniprot accession IDs" style="width:40%">
+                </center>
+                <figcaption>Figure 5 | Dialog for selecting proteins via a list of Uniprot accession IDs.</figcaption>
+            </figure>
+            <p>&nbsp;
+
+            <h3>3) Check your protein selection and review spectra</h3>
+            The review dialog appears as it is known from previous instruction (consider <a>Figure&nbsp;4) at step 5. Continue with this step.<p>&nbsp;<p>&nbsp;
+            
+            
+            
+            <h2><center><b>Creating Assay using Chromosome Browser</b></center></h2><p>
+            
+            <h3>1) Open protein selection dialog via chromosome browser</h3>
+            Another way of selecting proteins and building assays for targeted LC-MS/MS analysis is according to their location within the chromosomes. On the main page (consider <a href="#stamp_main">Figure&nbsp;1</a>) click on “Chromosome Search” in the lower panel.
+
+            <h3>2) Paste your protein accession IDs</h3>
+            A dialog for selecting proteins within chromosomes appears (as illustrated in Figure&nbsp;6). Select your desired species with the upper panel. The user can select  different regions on each chromosome by clicking on a specific spot and adjust the size of the selection box by using the mouse wheel. Alternatively it is possible to drag and drop the box along the chromosome or by entering a specific chromosome location in the upper panel. 
+            On the right-hand side, a protein table lists all registered proteins available in the particular chromosome region including gene name and accession number. Proteins can be (de)selected with the checkboxes to the right. When the selection is complete, one can proceed by clicking on “Next”. Only proteins and peptides that were identified and stored in the background library will be displayed.
+            <figure>
+                <a name="chromosome_browser">
+                <center>
+                    <img src="images/tutorial/stamp-5.png" alt="Lightweight chromosome browser for selecting proteins within regions of chromosomes" style="width:100%">
+                </center>
+                <figcaption>Figure 6 | Lightweight chromosome browser for selecting proteins within regions of chromosomes.</figcaption>
+            </figure>
+
+            <h3>3) Check your protein selection and review spectra</h3>
+            The review dialog appears as it is known from first instruction (consider Figure&nbsp;4) at step 5. Continue with this step.<p>&nbsp;<p>&nbsp;<p>&nbsp;<p>&nbsp;
+        </td></tr></table>
+    </div>
+</div>
+
+
+
+
+<div id="citation" class="global_search">
+    <div id="citation_background" class="global_search_background" onclick="this.parentElement.style.display = 'none';"></div>
+    <div id="citation_content" class="global_search_content" style="overflow-y: auto;">
+    <table width="100%" height="100%"><tr><td valign="top" align="justify">
+            <center><b>Citation</b></center><p>
+            If you are using STAMPS in your publication, please include one of these references:<p>
+            <table cellspacing='5px'>
+            <tr><td valign='top'>⚫ </td><td>Hentschel et al., <i>#journal</i>, #year.<br></td></tr>
+            <tr><td valign='top'>⚫ </td><td>Hentschel, A., Kopczynski, D., Lorenz C., Sickmann, A.,  Ahrends, R. (2018). Simple Targeted Assays for Metabolic Pathways: a powerful kickoff tool for targeted proteomics. <i>#journal</i>, #number, #pages.<br></td></tr>
+            <tr><td valign='top'>⚫ </td><td>Andreas Hentschel, Dominik Kopczynski, Christina Lorenz, Albert Sickmann, and Robert Ahrends. "Simple Targeted Assays for Metabolic Pathways: a powerful kickoff tool for targeted proteomics." <i>#journal</i> #number (2018): #pages.<br></td></tr>
+            </table>
+            
+            <p>&nbsp;<p>&nbsp;<p>
+
+            <center><b>References</b></center><p>
+            
+        </td></tr></table>
+    </div>
+</div>
+
+
+
+<div id="disclaimer" class="global_search">
+    <div id="disclaimer_background" class="global_search_background" onclick="this.parentElement.style.display = 'none';"></div>
+    <div id="disclaimer_content" class="global_search_content" style="overflow-y: auto; height: 80%;">
+        <table width="100%" height="100%"><tr><td align="justify">
+            <center><b>About STAMPS</b></center><p>
+            The Simple Targeted Assays for Metabolic Pathways &amp; Signaling (STAMPS) database provides a pathway based approach to access proteomics assays for targeted proteomics.
+            Currently, we are acquiring mass spectra for all proteins within the mouse organism.
+            Our mass spetrometer is a QExactive Plus or HF, capable to produce high-resolution high-mass accuracy LC-MS/MS spectra.<p>
+            Responsible people for this database are:<br>
+            Dominik Kopczynski: Implementation of both front- and backend<br>
+            Andreas Hentschel: Acquisition and processing of the data<br>
+            Robert Ahrends: Coordination<p>
+            The ISAS team is supported by the German network of bioinformatics services (<a href="http://www.denbi.de" target="_blank">de.NBI</a>).
+            If you have questions, suggestions or other issues, please <a href="mailto:robert.ahrends@isas.de">contact</a> us.
+            <p>&nbsp;<p>&nbsp;<p>
+
+
+            <center><b>Disclaimer</b></center><p>
+            <b>1. Liability limitation</b><br>
+            Although we acquired our data with highest accurateness, we take no responsibility for the correctness, completeness or up-to-dateness of this data.
+            The usage of the downloadable data available on this web page takes place at the users own risk.
+            <p>
+            
+            <b>2. External links</b><br>
+            This web page contains links forwarding to external web pages.
+            For all external web pages we disclaim liability.
+            During the linking no statutory violation was evident.
+            As soon as a violation emerges, we delete these links.
+            <p>
+
+            <b>3. Copyright</b><br>
+            The content of this web page is subject to the German copyright law and ancillary copyright.
+            Every inadmissible utilization defined by the German copyright law and ancillary copyright is forbidden.
+            This includes the disposal of the downloadable data. 
+            Download and utilization of the available data for researching purposes is explicitly allowed.
+            <p>
+            
+            <b>4. Privacy</b><br>
+            For statistical purposes, we record the number of visits to this web page as well as the number of downloads.
+            To ensure an unbiased record, we store a hash value of your IP address for several minutes.
+            Since this method is not reversible, restoring your IP address is not possible, hence this value does not belong to personal-related data.
+            We do not sell or hand out our collected statistical data to third parties.
+            <p>
+            The usage, selling or handing of the contact data written in this imprint is not allowed.
+            <p>
+        </td></tr></table>
+    </div>
+</div>
+        
+
+
+div<div id="locus_search" class="global_search">
+    <div class="global_search_content">
+        <table width="100%" height="100%">
+            <tr>
+                <td>
+                    <div id="accession_search_field" style="display: inline;">
+                        Select species: <select id="locus_browser_species_select" onchange="change_species(this);"></select><br>
+                        Select subcellular compartment(s):<br>
+                        <select id="loci" size=20 style="width:400px; height:480px;" multiple></select><br>Hold <b>[ctrl]</b> for multiple selection.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td id="error_filter_text_locus" style="color: red; font-weight: bold;"></td>
+            </tr>
+            <tr>
+                <td align=right><button onclick="hide_locus_search(false);" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(1);">Next</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
+<div id="function_search" class="global_search">
+    <div class="global_search_content">
+        <table width="100%" height="100%">
+            <tr>
+                <td>
+                    Select species: <select id="function_browser_species_select" onchange="change_species(this);"></select><br>
+                    Select protein function(s):<br>
+                    <div id="function_search_field" style="min-width: 700px; width: 700px; border-width: 1px; border-color: gray; border-style: solid; overflow-y: scroll;">
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td id="error_filter_text_function" style="color: red; font-weight: bold;">
+            </tr>
+            <tr>
+                <td align=right><button onclick="hide_function_search(false);" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(2);">Next</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
+<div id="accession_search" class="global_search">
+    <div class="global_search_content">
+        <table width="100%" height="100%">
+            <tr>
+                <td>
+                    <div id="accession_search_field" style="display: inline;">
+                        Select species: <select id="accession_browser_species_select" onchange="change_species(this);"></select><br>
+                        Paste UniProt accession numbers:<br>
+                        <textarea id="accessions" style="width:400px; height:500px; font-size: 200%;" placeholder="e.g.&#10;P37238&#10;Q91ZP9&#10;P05064&#10;P15208"></textarea>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td id="error_filter_text_accession" style="color: red; font-weight: bold;">
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <button onclick="hide_accession_search();" style="display: inline;">Cancel</button>&nbsp;<button onclick="check_filter_valid(0);">Next</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
+<div id="chromosome_search" class="global_search">
+    <div class="global_search_content">
+        <table width="100%" height="100%">
+            <tr>
+                <td height="10%" id="chromosome_information" colspan="2" style="border-bottom: 1px solid #000;"><select id="chromosome_browser_species_select" onchange="change_species(this);"></select>, chromosome  <select onchange="change_chromosome_view_combo();" id="chromosome_selection_combo"></select>, bp: <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_start" value="0"></input> - <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_end" value="0"></input></td>
+            </tr><tr>
+                <td id="function_chromosome_field" style="position: relative; display: block-cell; overflow: hidden;"></td>
+                <td>
+                    <table id="chromosome_information_table_headers" width="100%" cellpadding="0" cellspacing="0" style="margin: 0px;"><tr><th width="20%">Accession</th><th width="20%">Gene name</th><th width="20%">Gene start</th><th width="20%">Gene end</th><th align="right"><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(true);">select all</font><font size="-2"> /<br></font><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(false);">deselect all</font></th></tr></table>
+                    <div style="overflow-y: auto;" id="chromosome_information_table_wrapper"><div id="chromosome_information_table"></div></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border-top: 1px solid #000;" >
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td width="70%" id="error_filter_text_chromosome" style="color: red; font-weight: bold;"></td>
+                            <td align="right" valign="bottom">
+                                <button onclick="hide_chromosome_search(false);" style="display: inline;">Cancel</button>&nbsp;
+                                <button onclick="check_filter_valid(3);">Next</button>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div id="download" class="download"></div>
+<div id="check_spectra" class="check_spectra"></div>
+<div id="click_background" class="click_background"></div>
+<div id="waiting_background" class="light_background"></div>
+
+
+
+
+
+
+
+
+<div id="statistics" class="global_search">
+    <div id="statistics_background" class="global_search_background" onclick="this.parentElement.style.display = 'none';"></div>
+    <div id="statistics_table" class="global_search_content" style="width: 1400px; overflow-y: scroll;">
+    <table id="statistics_waiting" width="100%" height="100%">
+        <tr><td width="100%" align="center"><img src="images/ajax-loader.gif" /></td></tr>
+    </table>
+    <table id="statistics_content" width="100%" height="100%" style="display: none;">
+    
+        <tr><td width="50%" valign="top">
+            <b>Normalized distribution of protein abundances per pathway</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('nsaf_pathway');" height="24" />
+        </td><td>
+            <b>Absolute number of proteins</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('absolute_pathway');" height="24" />
+        </td></tr>
+        
+        <tr><td width="50%" valign="bottom">
+            <input type="radio" id="nsaf_pathway_radio_metabolic" name="NSAF_Pathway_Type" onclick="update_nsaf_pathway_select();" checked />
+            <label> Metabolic</label>
+            <input type="radio" id="nsaf_pathway_radio_signaling" name="NSAF_Pathway_Type" onclick="update_nsaf_pathway_select();" />
+            <label> Signaling</label>&nbsp;&nbsp;&nbsp;
+            <select id="nsaf_pathway_figure_select" onchange="update_nsaf_pathway_figure();" style="width: 250px;"></select>
+        </td><td width="50%" valign="bottom">
+            <input type="radio" id="absolute_pathway_radio_metabolic" name="Absolute_Pathway_Type" onclick="update_absolute_pathway_select();" checked />
+            <label> Metabolic</label>
+            <input type="radio" id="absolute_pathway_radio_signaling" name="Absolute_Pathway_Type" onclick="update_absolute_pathway_select();" />
+            <label> Signaling</label>&nbsp;&nbsp;&nbsp;
+            <select id="absolute_pathway_figure_select" onchange="update_absolute_pathway_figure();" style="width: 250px;"></select>
+        </td></tr>
+        
+        <tr><td width="50%" valign="top">
+            <canvas id="nsaf_pathway_figure" width="600" height="300"></canvas>
+        </td><td width="50%" valign="top">
+            <canvas id="absolute_pathway_figure" width="600" height="300"></canvas>
+        </td></tr>
+            
+        <tr><td width="50%" valign="top">
+            <hr width="80%">  
+        </td><td width="50%" valign="top">
+            <hr width="80%">  
+        </td></tr>
+            
+            
+        <tr><td width="50%" valign="top">
+            &nbsp;
+        </td><td width="50%" valign="top">
+            &nbsp;
+        </td></tr>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr><td width="50%" valign="top">
+            <b>Normalized distribution of protein abundances per tissue</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('tissue_pathway');" height="24" />
+        </td><td width="50%" valign="top">
+            <b>Normalized spectrum abundance factor</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('nsaf');" height="24" />
+        </td></tr>
+            
+        <tr><td width="50%" valign="bottom">
+            <table width="100%"><tr><td valign="middle"><select id="tissue_tissue_select" onchange="update_tissue();"></select>&nbsp;&nbsp;</td>
+            <td valign="middle">
+                <table><tr><td><input type="radio" id="tissue_pathway_radio_metabolic" name="tissue_Pathway_Type" onclick="update_tissue_pathway_select();" checked /></td><td><label> Metabolic</label></td></tr></table>
+                <table><tr><td><input type="radio" id="tissue_pathway_radio_signaling" name="tissue_Pathway_Type" onclick="update_tissue_pathway_select();" /></td><td>                <label> Signaling</label></td></tr></table>
+            </td>
+            <td width="99%">&nbsp;&nbsp;<select id="tissue_pathway_select" multiple size="5" onchange="update_tissue();" style="width: 400px;"></select><br>&nbsp;&nbsp;<font size="-2">Multiple selection holding CTRL key</font>
+            </td></tr></table>
+        </td><td width="50%" valign="bottom">
+            <table>
+                <tr><td colspan="5">Tissues:</td><td></tr>
+                <tr><td><input type="checkbox" id="statistics_check_brain_nsaf" onchange="update_nsaf();" checked /> Brain</td>
+                    <td><input type="checkbox" id="statistics_check_liver_nsaf" onchange="update_nsaf();" /> Liver</td>
+                    <td><input type="checkbox" id="statistics_check_kidney_nsaf" onchange="update_nsaf();" /> Kidney</td>
+                    <td><input type="checkbox" id="statistics_check_spleen_nsaf" onchange="update_nsaf();" /> Spleen</td>
+                    <td><input type="checkbox" id="statistics_check_heart_nsaf" onchange="update_nsaf();" /> Heart</td>
+                </tr>
+                <tr><td><input type="checkbox" id="statistics_check_blood_nsaf" onchange="update_nsaf();" /> Platelet</td>
+                    <td><input type="checkbox" id="statistics_check_fat_nsaf" onchange="update_nsaf();" /> Fat</td>
+                    <td><input type="checkbox" id="statistics_check_lung_nsaf" onchange="update_nsaf();" /> Lung</td>
+                    <td><input type="checkbox" id="statistics_check_eye_nsaf" onchange="update_nsaf();" /> Eye</td>
+                    <td><input type="checkbox" id="statistics_check_gut_nsaf" onchange="update_nsaf();" /> Gut</td>
+                </tr>
+            </table>
+        </td></tr>
+        
+        <tr><td width="50%" valign="top" align="center">
+            <canvas id="tissue_figure" width="600" height="400"></canvas>
+        </td><td width="50%" valign="top">
+            <canvas id="nsaf_figure" width="600" height="300"></canvas>
+        </td></tr>
+            
+        
+        <tr><td width="50%" valign="top" colspan="2">
+            <hr width="90%"> 
+        </td></tr>
+            
+            
+        <tr><td width="50%" valign="top">
+            &nbsp;
+        </td><td width="50%" valign="top">
+            &nbsp;
+        </td></tr>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr><td width="50%" valign="top">
+            <b>Correlation between tissue abundances</b>
+        </td><td width="50%" valign="top">
+        
+        </td></tr>
+            
+        <tr><td width="50%" valign="bottom">
+            <select id="correlation_tissue1_select" onchange="update_correlation_tissues(); update_correlation_tissues_pathway();">
+                <option>Brain</option>
+                <option>Liver</option>
+                <option>Kidney</option>
+                <option>Spleen</option>
+                <option>Heart</option>
+                <option>Platelet</option>
+                <option>Fat</option>
+                <option>Lung</option>
+                <option>Eye</option>
+                <option>Gut</option>
+            </select> vs. 
+            <select id="correlation_tissue2_select" onchange="update_correlation_tissues(); update_correlation_tissues_pathway();">
+                <option>Brain</option>
+                <option>Liver</option>
+                <option>Kidney</option>
+                <option>Spleen</option>
+                <option>Heart</option>
+                <option>Platelet</option>
+                <option>Fat</option>
+                <option>Lung</option>
+                <option>Eye</option>
+                <option>Gut</option>
+            </select>
+        </td><td width="500%" valign="bottom">
+                <input type="radio" id="correlation_pathway_radio_metabolic" name="Pathway_Type" onclick="update_correlation_pathway_select();" checked />
+                <label> Metabolic</label>
+                <input type="radio" id="correlation_pathway_radio_signaling" name="Pathway_Type" onclick="update_correlation_pathway_select();" />
+                <label> Signaling</label>&nbsp;&nbsp;&nbsp;
+            <select id="correlation_pathway_select" onchange="update_correlation_tissues_pathway();" style="width: 300px;"></select>
+        </td></tr>
+        
+        <tr><td width="100%" valign="top" align="center" colspan="2">
+            <table width="100%"><tr><td width="33%">
+                <canvas id="correlation_tissue_tissue" width="300" height="300"></canvas>
+            </td><td width="33%" valign="top">
+                <canvas id="correlation_tissue_tissue_pathway" width="300" height="300"></canvas>
+            </td><td width="33%" valign="top">
+                <select id="correlation_tissue_tissue_pathway_proteins" size=20 style="width:100%; height: 250px;" multiple>
+            </td></tr></table>
+        </td></tr>
+            
+        <tr><td width="50%" valign="top" colspan="2">
+            <hr width="90%">  
+        </td></tr>
+            
+            
+        <tr><td width="50%" valign="top">
+            &nbsp;
+        </td><td width="50%" valign="top">
+            &nbsp;
+        </td></tr>
+        
+        
+        
+        
+        
+        
+            
+            
+        <tr><td width="50%" valign="top">
+            <b>Protein isoelectric point vs. mass</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('pI');" height="24" />
+        </td><td width="50%" valign="top">
+            <b>Mass accuracy residuals</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('ppm');" height="24" />
+        </td></tr>
+            
+        <tr><td width="50%" valign="bottom">
+            <table>
+                <tr><td colspan="5">Tissues:</td><td></tr>
+                <tr><td><input type="checkbox" id="statistics_check_brain_pI" onchange="update_pI();" checked /> Brain</td>
+                    <td><input type="checkbox" id="statistics_check_liver_pI" onchange="update_pI();" /> Liver</td>
+                    <td><input type="checkbox" id="statistics_check_kidney_pI" onchange="update_pI();" /> Kidney</td>
+                    <td><input type="checkbox" id="statistics_check_spleen_pI" onchange="update_pI();" /> Spleen</td>
+                    <td><input type="checkbox" id="statistics_check_heart_pI" onchange="update_pI();" /> Heart</td>
+                </tr>
+                <tr><td><input type="checkbox" id="statistics_check_blood_pI" onchange="update_pI();" /> Platelet</td>
+                    <td><input type="checkbox" id="statistics_check_fat_pI" onchange="update_pI();" /> Fat</td>
+                    <td><input type="checkbox" id="statistics_check_lung_pI" onchange="update_pI();" /> Lung</td>
+                    <td><input type="checkbox" id="statistics_check_eye_pI" onchange="update_pI();" /> Eye</td>
+                    <td><input type="checkbox" id="statistics_check_gut_pI" onchange="update_pI();" /> Gut</td>
+                </tr>
+            </table>
+        </td><td width="50%" valign="bottom">
+            <input type="radio" id="ppm_pw_radio_metabolic" name="ppm_pw_Type" onclick="update_ppm_pw_select();" checked />
+            <label> Metabolic</label>
+            <input type="radio" id="ppm_pw_radio_signaling" name="ppm_pw_Type" onclick="update_ppm_pw_select();" />
+            <label> Signaling</label>&nbsp;&nbsp;&nbsp;
+            <select id="ppm_pw_figure_select" onchange="update_ppm();" style="width: 250px;"></select>
+        </td></tr>
+        
+        <tr><td width="50%" valign="top">
+            <canvas id="pI_figure" width="600" height="300"></canvas>
+        </td><td width="50%" valign="top">
+            <canvas id="ppm_histogram" width="600" height="300"></canvas>
+        </td></tr>
+        
+        <tr><td width="50%" valign="top" colspan="2">
+            &nbsp;<p>&nbsp;
+        </td></tr>
+        
+        </table>
+        
+        
+    </div>
+</div>
+
+<audio style="display: none;"><source src="kns.mp3"></source>
+</body>
+<script>
+
+
+var chromosomes = {};
+var chromosome_keys = [];
+var chromosome_map = {};
+var chromosome_data = {};
+var chromosome_data_dict = {};
+var chromosome_selected = -1;
+var loaded_chromosomes = 0;
+var currently_visible_proteins = [];
+var pathways_to_proteins = {};
+
+
+function Band(data){
+    this.arm = data[0];
+    this.name = data[1];
+    this.start = data[2];
+    this.end = data[3];
+    this.positive = data[4];
+    this.color = data[5];
+    this.height = 0;
+    
+    this.is_mouse_over = function(mouse){
+        return false;
+    }
+    
+    this.mouse_click = function(mouse){
+        return false;
+    }
+}
+
+
+function isNumber(n) {
+  return !isNaN(parseInt(n)) && isFinite(n);
+}
+
+
+function change_chromosome_view_keydown(e){
+    if(e.keyCode == 13) {
+        change_chromosome_view();        
+    }
+}
+
+var statistics_loaded = 0;
+var max_NSAF = -1000000;
+var min_NSAF = 0;
+
+
+
+
+
+function update_ppm_pw_select(){
+    var signaling = document.getElementById("ppm_pw_radio_signaling").checked;
+    
+    var target_select = document.getElementById("ppm_pw_figure_select");
+    for(var i = target_select.options.length - 1 ; i >= 0 ; i--)
+    {
+        target_select.remove(i);
+    }
+    
+    var pw_list = [];
+    for (pw_id in pathways_to_proteins){
+        if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        if (pathways_to_proteins[pw_id][1].size == 0) continue;
+        pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
+    }
+    pw_list.sort();
+    
+    for (pw_row of pw_list){
+        var new_option = document.createElement("option");
+        new_option.text = pw_row[0];
+        new_option.value = pw_row[1];
+        target_select.add(new_option);
+    }
+    update_ppm();
+}
+
+
+
+
+
+function update_nsaf_pathway_select(){
+    var signaling = document.getElementById("nsaf_pathway_radio_signaling").checked;
+    
+    var target_select = document.getElementById("nsaf_pathway_figure_select");
+    for(var i = target_select.options.length - 1 ; i >= 0 ; i--)
+    {
+        target_select.remove(i);
+    }
+    
+    var pw_list = [];
+    for (pw_id in pathways_to_proteins){
+        if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        if (pathways_to_proteins[pw_id][1].size == 0) continue;
+        pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
+    }
+    pw_list.sort();
+    
+    for (pw_row of pw_list){
+        var new_option = document.createElement("option");
+        new_option.text = pw_row[0];
+        new_option.value = pw_row[1];
+        target_select.add(new_option);
+    }
+    update_nsaf_pathway_figure();
+}
+
+
+
+
+function update_absolute_pathway_select(){
+    var signaling = document.getElementById("absolute_pathway_radio_signaling").checked;
+    
+    var target_select = document.getElementById("absolute_pathway_figure_select");
+    for(var i = target_select.options.length - 1 ; i >= 0 ; i--)
+    {
+        target_select.remove(i);
+    }
+    
+    var pw_list = [];
+    for (pw_id in pathways_to_proteins){
+        if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        if (pathways_to_proteins[pw_id][1].size == 0) continue;
+        pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
+    }
+    pw_list.sort();
+    
+    for (pw_row of pw_list){
+        var new_option = document.createElement("option");
+        new_option.text = pw_row[0];
+        new_option.value = pw_row[1];
+        target_select.add(new_option);
+    }
+    update_absolute_pathway_figure();
+}
+
+
+
+
+function update_tissue_pathway_select(){
+    var signaling = document.getElementById("tissue_pathway_radio_signaling").checked;
+    
+    var target_select = document.getElementById("tissue_pathway_select");
+    for(var i = target_select.options.length - 1 ; i >= 0 ; i--)
+    {
+        target_select.remove(i);
+    }
+    
+    var pw_list = [];
+    for (pw_id in pathways_to_proteins){
+        if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        if (pathways_to_proteins[pw_id][1].size == 0) continue;
+        pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
+    }
+    pw_list.sort();
+    
+    for (pw_row of pw_list){
+        var new_option = document.createElement("option");
+        new_option.text = pw_row[0];
+        new_option.value = pw_row[1];
+        target_select.add(new_option);
+    }
+    update_tissue();
+}
+
+
+
+
+
+
+
+function update_correlation_pathway_select(){
+    var signaling = document.getElementById("correlation_pathway_radio_signaling").checked;
+    
+    var target_select = document.getElementById("correlation_pathway_select");
+    for(var i = target_select.options.length - 1 ; i >= 0 ; i--)
+    {
+        target_select.remove(i);
+    }
+    
+    var pw_list = [];
+    for (pw_id in pathways_to_proteins){
+        if (pathways_to_proteins[pw_id][2] != signaling) continue;
+        if (pathways_to_proteins[pw_id][1].size == 0) continue;
+        pw_list.push([pathways_to_proteins[pw_id][0], pw_id]);
+    }
+    pw_list.sort();
+    
+    for (pw_row of pw_list){
+        var new_option = document.createElement("option");
+        new_option.text = pw_row[0];
+        new_option.value = pw_row[1];
+        target_select.add(new_option);
+    }
+    update_correlation_tissues_pathway();
+}
+
+
+
+
+
+
+
+var selected_pathways = new Set();
+function update_tissue(ctx){
+    if (statistics_loaded < 2) return;
+    
+    
+    if (typeof(ctx) === 'undefined'){
+        var tissue_figure = document.getElementById("tissue_figure");
+        ctx = tissue_figure.getContext("2d");
+    }
+    
+    
+    
+    var max_items = 10;
+    var tissue_pathway_select = document.getElementById("tissue_pathway_select");
+    var tissue_id = document.getElementById("tissue_tissue_select").options[document.getElementById("tissue_tissue_select").selectedIndex].value;
+    var current_selected_pathways = new Set();
+    
+    for (var i = 0; i < tissue_pathway_select.options.length; ++i){
+        var opt = tissue_pathway_select.options[i];
+        if (opt.selected) current_selected_pathways.add(opt.value);
+    }
+    var diff_del = new Set([...selected_pathways].filter(x => !current_selected_pathways.has(x)));
+    var diff_add = new Set([...current_selected_pathways].filter(x => !selected_pathways.has(x)));
+    
+    for (var val of diff_del) selected_pathways.delete(val);
+    for (var val of diff_add){
+        if (selected_pathways.size >= max_items){
+            alert("Only " + max_items + " pathways at most can be selected!");
+            break;
+        }
+        selected_pathways.add(val);
+    }
+    
+    for (var i = 0; i < tissue_pathway_select.options.length; ++i){
+        tissue_pathway_select.options[i].selected = selected_pathways.has(tissue_pathway_select.options[i].value);
+    }
+    
+    
+    
+    
+            
+    var w_box = 600;
+    var w_offset = 70;
+    var w_bar = 30;
+    var h_box = 250;
+    var h_offset = 150;
+    ctx.clearRect(0, 0, w_box, h_box + h_offset);
+
+    ctx.beginPath();
+    ctx.moveTo(w_offset, 0);
+    ctx.lineTo(w_box, 0);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, 0);
+    ctx.lineTo(w_box, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, h_box);
+    ctx.lineTo(w_offset, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_offset, h_box);
+    ctx.lineTo(w_offset, 0);
+    ctx.stroke();
+    
+    
+    
+    
+    var pathway_nsafs = {};
+    var max_val = 0;
+    for (pw_id of selected_pathways) {
+        var protein_ids = pathways_to_proteins[pw_id][1];
+    
+        pathway_nsafs[pw_id] = 0;
+    
+        for (prot_id of protein_ids){
+            var protein = protein_dictionary[prot_id];
+            
+            if (tissue_id in protein.nsaf){
+                pathway_nsafs[pw_id] += Math.pow(10, protein.nsaf[tissue_id]);
+            }
+        }
+        pathway_nsafs[pw_id] /= protein_ids.size;
+    }
+    
+    for (pw_id in pathway_nsafs){
+        max_val = Math.max(max_val, pathway_nsafs[pw_id]);
+    }
+    
+    ctx.font="14px Arial";
+    ctx.textAlign = 'center';
+    ctx.save();
+    ctx.translate(20, h_box >> 1);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = "black";
+    ctx.fillText("relative protein abundance", 0, 0);
+    ctx.restore();
+    
+    
+    ctx.lineWidth = 1;
+    ctx.textAlign="right";
+    var v_factor = 0.94;
+    
+    var step = 20;
+    
+    
+    
+    // y-axis
+    ctx.font="14px Arial";
+    for (var h = step; h <= 100; h += step){
+        var y = h_box - (h / 100 * h_box) * v_factor;
+        ctx.strokeStyle = "#dddddd";
+        ctx.beginPath();
+        ctx.moveTo(w_offset, y);
+        ctx.lineTo(w_box, y);
+        ctx.stroke();
+        
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(w_offset - 5, y);
+        ctx.lineTo(w_offset + 5, y);
+        ctx.stroke();
+        
+        
+        ctx.fillStyle = "black";
+        ctx.fillText(h + "%", w_offset - 8, y + 5);
+    }
+    
+    if (selected_pathways.size == 0) return;
+    
+    
+    
+    // x-axis
+    var i = 0;
+    var w = (w_box - w_offset) / selected_pathways.size;
+    ctx.textAlign = 'right';
+    for (pw_id in pathway_nsafs){
+        var x = Math.floor(w_offset + (i + 0.5) * w - w_bar * 0.5);
+        var h = Math.floor(pathway_nsafs[pw_id] / max_val * h_box * v_factor);
+    
+        ctx.fillStyle = "red";
+        ctx.fillRect(x, h_box - 1 - h, w_bar, h);
+        ctx.fill();
+        ctx.stroke();
+        
+        
+        ctx.save();
+        ctx.translate(w_offset + (i + 0.5) * w, h_box + 2);
+        ctx.rotate(-Math.PI / 8);
+        ctx.fillStyle = "black";
+        ctx.fillText(pathways_to_proteins[pw_id][0], 0, 16);
+        ctx.restore();
+        ++i;
+    }
+}
+
+
+
+
+
+
+function update_nsaf(ctx){
+    if (statistics_loaded < 2) return;
+    
+    if (typeof(ctx) === 'undefined'){
+        var nsaf_figure = document.getElementById("nsaf_figure");
+        ctx = nsaf_figure.getContext("2d");
+    }
+    
+            
+    var w_box = 600;
+    var w_offset = 70;
+    var h_box = 250;
+    var h_offset = 50;
+    ctx.clearRect(0, 0, w_box, h_box + h_offset);
+
+    ctx.beginPath();
+    ctx.moveTo(w_offset, 0);
+    ctx.lineTo(w_box, 0);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, 0);
+    ctx.lineTo(w_box, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, h_box);
+    ctx.lineTo(w_offset, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_offset, h_box);
+    ctx.lineTo(w_offset, 0);
+    ctx.stroke();
+    
+    
+    ctx.font="14px Arial";
+    ctx.textAlign = 'center';
+    ctx.save();
+    ctx.translate(20, h_box >> 1);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = "black";
+    ctx.fillText("log10(NSAF)", 0, 0);
+    ctx.restore();
+    
+    
+    // y-scale
+    ctx.lineWidth = 1;
+    ctx.textAlign="right";
+    var h_factor = 0.97;            
+    var step = 1;
+    ctx.font="14px Arial";
+    
+    for (var h = max_NSAF; h > min_NSAF; h -= step){
+        var y = (h - max_NSAF) / (min_NSAF - max_NSAF) * h_box + h_box * (1 - h_factor);
+        ctx.strokeStyle = "#dddddd";
+        ctx.beginPath();
+        ctx.moveTo(w_offset, y);
+        ctx.lineTo(w_box, y);
+        ctx.stroke();
+        
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(w_offset - 5, y);
+        ctx.lineTo(w_offset + 5, y);
+        ctx.stroke();
+        
+        
+        ctx.fillStyle = "black";
+        ctx.fillText(h, w_offset - 8, y + 5);
+    }
+    
+    
+    var num_checked = 0;
+    for (var key in tissues){
+        if (document.getElementById(tissues[key][3] + "_nsaf").checked) ++num_checked;
+    }
+    
+    var j = 0;
+    for (var key in tissues){
+        if (document.getElementById(tissues[key][3] + "_nsaf").checked) add_nsaf(key, j++, num_checked, ctx);
+    }
+}
+
+
+
+
+
+
+function update_correlation_tissues(ctx){
+    if (statistics_loaded < 2) return;
+    
+    if (typeof(ctx) === 'undefined'){
+        var correlation_tissue_tissue = document.getElementById("correlation_tissue_tissue");
+        ctx = correlation_tissue_tissue.getContext("2d");
+    }
+    
+    
+    
+    var tissue1_name = document.getElementById("correlation_tissue1_select").options[document.getElementById("correlation_tissue1_select").selectedIndex].innerHTML;
+    var tissue2_name = document.getElementById("correlation_tissue2_select").options[document.getElementById("correlation_tissue2_select").selectedIndex].innerHTML;
+            
+            
+    var tissue1_id = tissue_name_to_id[tissue1_name];
+    var tissue2_id = tissue_name_to_id[tissue2_name];
+            
+    var w_box = 300;
+    var w_offset = 50;
+    var h_box = 250;
+    var h_offset = 50;
+    ctx.clearRect(0, 0, w_box, h_box + h_offset);
+    
+    ctx.fillStyle = "black";
+    
+    ctx.font="14px Arial";
+    ctx.textAlign = 'center';
+    ctx.save();
+    ctx.translate(10, h_box >> 1);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = "black";
+    ctx.fillText("log10(NSAF) " + tissue1_name, 0, 0);
+    ctx.restore();
+    
+    ctx.fillText("log10(NSAF) " + tissue2_name, (w_box + w_offset) / 2, h_box + 40);
+    
+    
+    
+    
+    
+    ctx.beginPath();
+    ctx.moveTo(w_offset, 0);
+    ctx.lineTo(w_box, 0);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, 0);
+    ctx.lineTo(w_box, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, h_box);
+    ctx.lineTo(w_offset, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_offset, h_box);
+    ctx.lineTo(w_offset, 0);
+    ctx.stroke();
+    
+    ctx.lineWidth = 1;
+    ctx.textAlign="right";
+    var h_factor = 0.97;            
+    var step = 1;
+    ctx.font="14px Arial";
+    
+    // y-scale
+    var h_factor = 0.97;          
+    var step = 1;
+    for (var h = max_NSAF; h > min_NSAF; h -= step){
+        var y = h_box - (h - max_NSAF) * h_factor / (min_NSAF - max_NSAF) * h_box - h_box * (1 - h_factor);
+        ctx.strokeStyle = "#dddddd";
+        ctx.beginPath();
+        ctx.moveTo(w_offset, y);
+        ctx.lineTo(w_box, y);
+        ctx.stroke();
+        
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(w_offset - 5, y);
+        ctx.lineTo(w_offset + 5, y);
+        ctx.stroke();
+        
+        
+        ctx.fillStyle = "black";
+        ctx.fillText(Math.floor(h), w_offset - 8, y + 5);
+    }
+    
+    // x-scale
+    for (var h = max_NSAF; h > min_NSAF; h -= step){
+        var x = (h - max_NSAF) * h_factor / (min_NSAF - max_NSAF) * (w_box - w_offset) + w_offset + w_box * (1 - h_factor);
+        ctx.beginPath();
+        ctx.moveTo(x, h_box - 5);
+        ctx.lineTo(x, h_box + 5);
+        ctx.stroke();
+        ctx.fillStyle = "black";
+        ctx.textAlign="center";
+        ctx.fillText(h, x, h_box + 20);
+    }
+    
+    var nsaf_set = new Set();
+    for (var pathway_index in pathways_to_proteins){
+        
+        ctx.fillStyle = tissues[1 + (pathway_index % 10)][4];
+        
+        var nsaf_points = [];
+        for (prot_id of pathways_to_proteins[pathway_index][1]){
+            if (!(prot_id in protein_dictionary)) continue;
+            var protein = protein_dictionary[prot_id];
+            if (tissue1_id in protein.nsaf && tissue2_id in protein.nsaf){
+                nsaf_points.push([protein.nsaf[tissue2_id], protein.nsaf[tissue1_id]]);
+            }
+        }
+        
+        
+            
+        
+        for (var i = 0; i < nsaf_points.length; ++i){
+            var x = nsaf_points[i][0];
+            var y = nsaf_points[i][1];
+            
+            // transform from nsaf to percentage [0, 1]
+            x = (x - min_NSAF) / (max_NSAF - min_NSAF);
+            y = (y - min_NSAF) / (max_NSAF - min_NSAF);
+            
+            // transform to axes pixels
+            x = Math.floor(w_offset + 2 + (w_box - w_offset) * x);
+            y = Math.floor(h_box - 2 - h_box * y);
+            
+            var hash = x * h_box + y;
+            
+            if (!nsaf_set.has(hash)){
+                ctx.beginPath();
+                ctx.arc(x, y, 1, 0, 2 * Math.PI);
+                ctx.fill();
+                nsaf_set.add(hash);
+            }
+        }
+        
+    }
+}
+
+
+
+
+
+
+function update_correlation_tissues_pathway(ctx){
+    if (statistics_loaded < 2) return;
+    
+    if (typeof(ctx) === 'undefined'){
+        var correlation_tissue_tissue_pathway = document.getElementById("correlation_tissue_tissue_pathway");
+        ctx = correlation_tissue_tissue_pathway.getContext("2d");
+    }
+    
+    var tissue1_name = document.getElementById("correlation_tissue1_select").options[document.getElementById("correlation_tissue1_select").selectedIndex].innerHTML;
+    var tissue2_name = document.getElementById("correlation_tissue2_select").options[document.getElementById("correlation_tissue2_select").selectedIndex].innerHTML;
+            
+    var pathway_index = document.getElementById("correlation_pathway_select").options[document.getElementById("correlation_pathway_select").selectedIndex].value;
+            
+    var tissue1_id = tissue_name_to_id[tissue1_name];
+    var tissue2_id = tissue_name_to_id[tissue2_name];
+            
+    var w_box = 300;
+    var w_offset = 50;
+    var h_box = 250;
+    var h_offset = 50;
+    ctx.clearRect(0, 0, w_box, h_box + h_offset);
+    ctx.fillStyle = "black";
+    
+    ctx.font="14px Arial";
+    ctx.textAlign = 'center';
+    ctx.save();
+    ctx.translate(10, h_box >> 1);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = "black";
+    ctx.fillText("log10(NSAF) " + tissue1_name, 0, 0);
+    ctx.restore();
+    
+    ctx.fillText("log10(NSAF) " + tissue2_name, (w_box + w_offset) / 2, h_box + 40);
+    
+    
+    
+    
+    
+    ctx.beginPath();
+    ctx.moveTo(w_offset, 0);
+    ctx.lineTo(w_box, 0);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, 0);
+    ctx.lineTo(w_box, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, h_box);
+    ctx.lineTo(w_offset, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_offset, h_box);
+    ctx.lineTo(w_offset, 0);
+    ctx.stroke();
+    
+    ctx.lineWidth = 1;
+    ctx.textAlign="right";
+    var h_factor = 0.97;            
+    var step = 1;
+    ctx.font="14px Arial";
+    
+    // y-scale
+    var h_factor = 0.97;          
+    var step = 1;
+    for (var h = max_NSAF; h > min_NSAF; h -= step){
+        var y = h_box - (h - max_NSAF) * h_factor / (min_NSAF - max_NSAF) * h_box - h_box * (1 - h_factor);
+        ctx.strokeStyle = "#dddddd";
+        ctx.beginPath();
+        ctx.moveTo(w_offset, y);
+        ctx.lineTo(w_box, y);
+        ctx.stroke();
+        
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(w_offset - 5, y);
+        ctx.lineTo(w_offset + 5, y);
+        ctx.stroke();
+        
+        
+        ctx.fillStyle = "black";
+        ctx.fillText(Math.floor(h), w_offset - 8, y + 5);
+    }
+    
+    // x-scale
+    for (var h = max_NSAF; h > min_NSAF; h -= step){
+        var x = (h - max_NSAF) * h_factor / (min_NSAF - max_NSAF) * (w_box - w_offset) + w_offset + w_box * (1 - h_factor);
+        ctx.beginPath();
+        ctx.moveTo(x, h_box - 5);
+        ctx.lineTo(x, h_box + 5);
+        ctx.stroke();
+        ctx.fillStyle = "black";
+        ctx.textAlign="center";
+        ctx.fillText(h, x, h_box + 20);
+    }
+    
+    
+    
+    var target_select = document.getElementById("correlation_tissue_tissue_pathway_proteins");
+    for(i = target_select.options.length - 1 ; i >= 0 ; i--)
+    {
+        target_select.remove(i);
+    }
+    
+    
+    
+    
+    var nsaf_points = [];
+    var prot_set = new Set();
+    for (prot_id of pathways_to_proteins[pathway_index][1]){
+        var protein = protein_dictionary[prot_id];
+        if (tissue1_id in protein.nsaf && tissue2_id in protein.nsaf){
+            nsaf_points.push([protein.nsaf[tissue2_id], protein.nsaf[tissue1_id]]);
+            prot_set.add(protein.name);
+        }
+    }
+    
+    var prot_list = [];
+    for (prot_name of prot_set) prot_list.push(prot_name);
+    prot_list.sort();
+    
+    for (prot_name of prot_list){
+        var new_option = document.createElement("option");
+        new_option.text = prot_name;
+        target_select.add(new_option);
+    }
+    
+    
+    
+    var nsaf_set = new Set(); 
+    ctx.fillStyle = tissues[1 + (pathway_index % 10)][4];   
+    for (var i = 0; i < nsaf_points.length; ++i){
+        var x = nsaf_points[i][0];
+        var y = nsaf_points[i][1];
+        
+        // transform from nsaf to percentage [0, 1]
+        x = (x - min_NSAF) / (max_NSAF - min_NSAF);
+        y = (y - min_NSAF) / (max_NSAF - min_NSAF);
+        
+        // transform to axes pixels
+        x = Math.floor(w_offset + 2 + (w_box - w_offset) * x);
+        y = Math.floor(h_box - 2 - h_box * y);
+        
+        var hash = x * h_box + y;
+        
+        if (!nsaf_set.has(hash)){
+            ctx.beginPath();
+            ctx.arc(x, y, 1, 0, 2 * Math.PI);
+            ctx.fill();
+            nsaf_set.add(hash);
+        }
+    }
+    
+}
+
+
+
+
+
+
+function resize_views(){
+
+    windowWidth = window.innerWidth;
+    windowHeight = window.innerHeight;
+    chromosome_height = window.innerHeight * 0.7;
+    
+    var close_again = document.getElementById("chromosome_search").style.display != "inline";
+    document.getElementById("chromosome_search").style.display = "inline";
+    
+    var chr_height = chromosome_height - document.getElementById("chromosome_information_table_headers").offsetHeight;
+    
+    //document.getElementById("function_chromosome_field").style.width = (windowWidth * 0.7).toString() + "px";
+    document.getElementById("chromosome_information_table_wrapper").style.width = (windowWidth * 0.4).toString() + "px";
+    document.getElementById("chromosome_information_table_wrapper").style.height = chr_height.toString() + "px";
+    if (close_again) document.getElementById("chromosome_search").style.display = "none";
+    
+    document.getElementById("loci").style.height = (windowHeight * 0.6).toString() + "px";
+    document.getElementById("accessions").style.height = (windowHeight * 0.6).toString() + "px";
+    document.getElementById("function_search_field").style.height = (windowHeight * 0.6).toString() + "px";
+    document.getElementById("statistics_table").style.height = (windowHeight * 0.8).toString() + "px";
+    document.getElementById("disclaimer_content").style.height = (windowHeight * 0.8).toString() + "px";
+    
+        
+    var max_bases = 0;
+    for (var key in chromosomes){
+        max_bases = Math.max(chromosomes[key].bases, max_bases);
+    }
+    
+    for (key in chromosomes){
+        chromosomes[key].offset = Math.min(chromosome_height * (1 - chromosomes[key].bases / max_bases), chromosome_height - chromosome_width);
+        chromosomes[key].inner_height = chromosomes[key].height - chromosomes[key].offset;
+        chromosomes[key].height = chromosome_height;
+        chromosomes[key].draw();
+    }
+}
+
+
+
+function add_nsaf(t, curr, total, ctx){
+    
+    var w_box = 600;
+    var w_offset = 70;
+    var h_box = 250;
+    
+    
+    var nsaf_list = [];
+    for (var prot_id in protein_dictionary){
+        var protein = protein_dictionary[prot_id];
+        if (t in protein.nsaf){
+            nsaf_list.push(protein.nsaf[t]);
+        }
+    }
+    nsaf_list.sort();
+    
+    var len = (w_box - 4 - w_offset) / total;
+    var len_nsaf = nsaf_list.length;
+    var start = curr * len;
+    var curr_pos = len / len_nsaf;
+    ctx.fillStyle = tissues[t][4];
+    
+    var nsaf_factor = (h_box - 4) / (max_NSAF - min_NSAF);
+     
+    var nsaf_set = new Set();
+    for (var i = 0; i < nsaf_list.length; ++i){
+        var nsaf = nsaf_list[i] - min_NSAF;
+        nsaf *= nsaf_factor;
+        nsaf = Math.floor(h_box - 2 - nsaf);
+        var pos = Math.floor(w_offset + 2 + start + i * curr_pos);
+        var hash = pos * h_box + nsaf;
+        if (!nsaf_set.has(hash)){
+            ctx.beginPath();
+            ctx.arc(pos, nsaf, 1, 0, 2 * Math.PI);
+            ctx.fill();
+            nsaf_set.add(hash);
+        }
+    }
+    
+        
+    ctx.font="14px Arial";
+    var w = (w_box - w_offset) / total;
+    ctx.save();
+    ctx.translate(w_offset + (curr + 0.5) * w, h_box + 2);
+    ctx.rotate(-Math.PI / 4);
+    ctx.fillStyle = "black";
+    ctx.textAlign="right";
+    ctx.fillText(tissues[t][1], 0, 16);
+    ctx.restore();
+}
+
+
+
+
+
+
+function open_statistics (){
+    document.getElementById("statistics").style.display = "inline";
+    background_hiding = hide_statistics;
+    basket = {};
+    spectra_exclude = [];
+}
+
+
+
+
+
+
+
+function load_statistics(){
+    if (statistics_loaded >= 2) return;
+
+    var tissue_tissue_select = document.getElementById("tissue_tissue_select");
+    for (t in tissues){
+        var tissue_option = document.createElement("option");
+        tissue_option.text = tissues[t][1];
+        tissue_option.value = t;
+        tissue_tissue_select.add(tissue_option);
+    }
+
+
+    // request proteins
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            
+            var parsed = JSON.parse(xmlhttp.responseText);
+            
+            
+            for (var entry of parsed){
+                var p_id = entry["i"];
+                var prot = 0;
+                if (p_id in protein_dictionary){
+                    prot = protein_dictionary[p_id];
+                    prot.update(entry);
+                }
+                else {
+                    prot = new Protein(entry);
+                    protein_dictionary[prot.id] = prot;
+                }
+                prot.filtering();
+            }
+            
+            
+            for (var t = 1; t <= 10; ++t){
+                var sum_NSAF = 0;
+                for (var prot_id in protein_dictionary){
+                    var NSAF = 0;
+                    var protein = protein_dictionary[prot_id];
+                    for (var i = 0; i < protein.peptides.length; ++i){
+                        var peptide = protein.peptides[i];
+                        for (var j = 0; j < peptide.spectra.length; ++j){
+                            var spectrum = peptide.spectra[j];
+                            if (t in spectrum.tissues) NSAF += spectrum.tissues[t];
+                        }
+                    }
+                    
+                    NSAF /= protein.sequence_length;
+                    if (NSAF > 0){
+                        protein.nsaf[t] = NSAF;
+                        sum_NSAF += NSAF;
+                    }
+                }
+                
+                for (var prot_id in protein_dictionary){
+                    var protein = protein_dictionary[prot_id];
+                    if (t in protein.nsaf){
+                        protein.nsaf[t] = Math.log10(protein.nsaf[t] / sum_NSAF);
+                        max_NSAF = Math.max(max_NSAF, protein.nsaf[t]);
+                        min_NSAF = Math.min(min_NSAF, protein.nsaf[t]);
+                    }
+                    
+                }
+            }
+            
+            max_NSAF = Math.ceil(max_NSAF);
+            
+            statistics_loaded++;
+            update_nsaf_pathway_select();
+            update_absolute_pathway_select();
+            update_nsaf();
+            update_nsaf_pathway_figure();
+            update_tissue();
+            update_absolute_pathway_figure();
+            update_pI();
+            update_ppm();
+            update_correlation_pathway_select();
+            update_correlation_tissues();
+            update_correlation_tissues_pathway();
+            
+            document.getElementById("statistics_waiting").style.display = "none";
+            document.getElementById("statistics_content").style.display = "";
+        }
+    }
+    
+    xmlhttp.open("GET", file_pathname + "scripts/get-proteins.bin?statistics&species=" + current_species, true);
+    xmlhttp.send();
+    
+    
+    var xmlhttp_search = new XMLHttpRequest();
+    xmlhttp_search.onreadystatechange = function() {
+        if (xmlhttp_search.readyState == 4 && xmlhttp_search.status == 200) {
+            var tmp_pw = JSON.parse(xmlhttp_search.responseText);
+            statistics_loaded++;
+            
+            var pw_select_metabolic = document.getElementById("nsaf_pathway_figure_select_metabolic");
+            var pw_select_signaling = document.getElementById("nsaf_pathway_figure_select_signaling");
+            var ppm_pw_select = document.getElementById("ppm_pw_figure_select");
+            var tissue_pathway_select = document.getElementById("tissue_pathway_select");
+            
+            for (var i = 0; i < tmp_pw.length; ++i){
+                var new_option_nsaf = document.createElement("option");
+                var new_option_ppm = document.createElement("option");
+                var new_option_tps = document.createElement("option");
+                new_option_nsaf.text = tmp_pw[i][1];
+                new_option_ppm.text = tmp_pw[i][1];
+                new_option_tps.text = tmp_pw[i][1];
+                new_option_nsaf.value = tmp_pw[i][0];
+                new_option_ppm.value = tmp_pw[i][0];
+                new_option_tps.value = tmp_pw[i][0];
+                
+                ppm_pw_select.add(new_option_ppm);
+                tissue_pathway_select.add(new_option_tps);
+                
+                var protein_ids = new Set();
+                for (prot_id of tmp_pw[i][2]) protein_ids.add(prot_id);
+                
+                pathways_to_proteins[tmp_pw[i][0]] = [tmp_pw[i][1], protein_ids, tmp_pw[i][3] == "1"];
+            }
+            update_nsaf_pathway_select();
+            update_absolute_pathway_select();
+            update_nsaf();
+            update_nsaf_pathway_figure();
+            update_tissue();
+            update_absolute_pathway_figure();
+            update_pI();
+            update_ppm();
+            update_correlation_pathway_select();
+            update_correlation_tissues();
+            update_correlation_tissues_pathway();
+        }
+    }
+    xmlhttp_search.open("GET", file_pathname + "scripts/get-proteins.bin?statistics_pathways", true);
+    xmlhttp_search.send();
+}
+
+
+
+
+
+
+
+function update_ppm(ppm_ctx){
+    if (statistics_loaded < 2) return;
+    
+    if (typeof(ppm_ctx) === 'undefined'){
+        var ppm_histogram_canvas = document.getElementById("ppm_histogram");
+        ppm_ctx = ppm_histogram_canvas.getContext("2d");
+    }
+    
+    var pw_option = document.getElementById("ppm_pw_figure_select").options[document.getElementById("ppm_pw_figure_select").selectedIndex];
+    
+    
+    var ppm_steps = 0.5;
+    var min_ppm = -6 - ppm_steps / 2;
+    var max_ppm = 6 + ppm_steps / 2;
+    var num_bars = Math.floor((max_ppm - min_ppm) / ppm_steps);
+            
+    var ppm_histogram = new Array(num_bars).fill(0);
+    var ppm_max_val = 0;
+    
+    
+    var protein_ids = pathways_to_proteins[pw_option.value][1];
+    var aaa = 0;
+    var ttt = 0;
+    for (prot_id of protein_ids){
+        var protein = protein_dictionary[prot_id];
+        for (var j = 0; j < protein.peptides.length; ++j){
+            var peptide = protein.peptides[j];
+            for (var k = 0; k < peptide.spectra.length; ++k){
+                ++aaa;
+                var spectrum = peptide.spectra[k];
+                if (min_ppm <= spectrum.ppm && spectrum.ppm < max_ppm){
+                    ppm_histogram[Math.floor((spectrum.ppm - min_ppm) / ppm_steps)]++;
+                }
+            }
+        }
+    }
+           
+    var sum_ppm = 0;
+    for (var i = 0; i < ppm_histogram.length; ++i){
+        ppm_max_val = Math.max(ppm_histogram[i], ppm_max_val);
+        sum_ppm += ppm_histogram[i];
+    }
+    
+    
+    ppm_ctx.clearRect(0, 0, ppm_ctx.canvas.width, ppm_ctx.canvas.height);
+            
+    var w_box = 600;
+    var w_offset = 70;
+    var h_box = 250;
+    var h_offset = 50;
+    ppm_ctx.clearRect(0, 0, w_box, h_box + h_offset);
+    
+    
+    
+    
+    
+    ppm_ctx.font="14px Arial";
+    ppm_ctx.textAlign = 'center';
+    ppm_ctx.save();
+    ppm_ctx.translate(20, h_box >> 1);
+    ppm_ctx.rotate(-Math.PI / 2);
+    ppm_ctx.fillStyle = "black";
+    ppm_ctx.fillText("relative a.u.", 0, 0);
+    ppm_ctx.restore();
+    
+    
+    //scales
+    // x-scale
+    ppm_ctx.font="14px Arial";
+    for (var i = Math.ceil(min_ppm); i < max_ppm; ++i){
+        var x = w_offset + (i - min_ppm) / num_bars / ppm_steps * (w_box - w_offset);
+        ppm_ctx.beginPath();
+        ppm_ctx.moveTo(x, h_box - 5);
+        ppm_ctx.lineTo(x, h_box + 5);
+        ppm_ctx.stroke();
+        ppm_ctx.fillStyle = "black";
+        ppm_ctx.textAlign="center";
+        ppm_ctx.fillText(i, x, h_box + 20);
+    }
+    // y-scale
+    ppm_ctx.lineWidth = 1;
+    ppm_ctx.textAlign="right";
+    var v_factor = 0.94;            
+    var step = (ppm_max_val / sum_ppm) < 0.2 ? 2.5 : 10;
+    ppm_ctx.font="14px Arial";
+    
+    var ppm_max_scale = ppm_max_val / sum_ppm * 100;
+    for (var h = step; h <= ppm_max_scale; h += step){
+        var y = h_box - (h / ppm_max_scale * h_box) * v_factor;
+        ppm_ctx.strokeStyle = "#dddddd";
+        ppm_ctx.beginPath();
+        ppm_ctx.moveTo(w_offset, y);
+        ppm_ctx.lineTo(w_box, y);
+        ppm_ctx.stroke();
+        
+        ppm_ctx.strokeStyle = "black";
+        ppm_ctx.beginPath();
+        ppm_ctx.moveTo(w_offset - 5, y);
+        ppm_ctx.lineTo(w_offset + 5, y);
+        ppm_ctx.stroke();
+        
+        
+        ppm_ctx.fillStyle = "black";
+        ppm_ctx.fillText(h + "%", w_offset - 8, y + 5);
+    }
+
+    ppm_ctx.beginPath();
+    ppm_ctx.moveTo(w_offset, 0);
+    ppm_ctx.lineTo(w_box, 0);
+    ppm_ctx.stroke();
+    
+    ppm_ctx.beginPath();
+    ppm_ctx.moveTo(w_box, 0);
+    ppm_ctx.lineTo(w_box, h_box);
+    ppm_ctx.stroke();
+    
+    ppm_ctx.beginPath();
+    ppm_ctx.moveTo(w_box, h_box);
+    ppm_ctx.lineTo(w_offset, h_box);
+    ppm_ctx.stroke();
+    
+    ppm_ctx.beginPath();
+    ppm_ctx.moveTo(w_offset, h_box);
+    ppm_ctx.lineTo(w_offset, 0);
+    ppm_ctx.stroke();
+    
+    
+    ppm_ctx.fillStyle = "red";
+    var bar_width = (w_box - w_offset - 2) / num_bars;
+    for (var i = 0; i < ppm_histogram.length; ++i){
+        var bar_y = h_box - 1 - (ppm_histogram[i] / ppm_max_val) * h_box * v_factor;
+        var bar_height = h_box - bar_y;
+        ppm_ctx.fillRect(w_offset + 1 + bar_width * i, bar_y, bar_width, bar_height);
+    }
+    ppm_ctx.fill();
+    ppm_ctx.stroke();
+    
+    // axes labels
+    ppm_ctx.fillStyle = "black";
+    ppm_ctx.textAlign="center";
+    ppm_ctx.fillText("Mass accuracy residual / ppm", (w_box + w_offset) / 2, h_box + 40);
+    
+}
+
+
+
+
+
+function update_pI(pI_ctx){
+    if (statistics_loaded < 2) return;
+    
+    if (typeof(pI_ctx) === 'undefined'){
+        var pI_figure = document.getElementById("pI_figure");
+        pI_ctx = pI_figure.getContext("2d");
+    }
+    pI_ctx.clearRect(0, 0, nsaf_figure.width, nsaf_figure.height);
+            
+    var w_box = 590;
+    var w_offset = 50;
+    var w_bar = 30;
+    var h_box = 250;
+    var h_offset = 50;
+    pI_ctx.clearRect(0, 0, w_box, h_box + h_offset);
+
+    pI_ctx.beginPath();
+    pI_ctx.moveTo(w_offset, 0);
+    pI_ctx.lineTo(w_box, 0);
+    pI_ctx.stroke();
+    
+    pI_ctx.beginPath();
+    pI_ctx.moveTo(w_box, 0);
+    pI_ctx.lineTo(w_box, h_box);
+    pI_ctx.stroke();
+    
+    pI_ctx.beginPath();
+    pI_ctx.moveTo(w_box, h_box);
+    pI_ctx.lineTo(w_offset, h_box);
+    pI_ctx.stroke();
+    
+    pI_ctx.beginPath();
+    pI_ctx.moveTo(w_offset, h_box);
+    pI_ctx.lineTo(w_offset, 0);
+    pI_ctx.stroke();
+    
+    var min_mass = 1000000;
+    var max_mass = 0;
+    
+    for (var prot_id in protein_dictionary){
+        var protein = protein_dictionary[prot_id];
+        min_mass = Math.min(min_mass, Math.log10(protein.mass));
+        max_mass = Math.max(max_mass, Math.log10(protein.mass));
+    }
+    
+    
+    var mass_factor = (h_box - 4) / (max_mass - min_mass);
+    for (t in tissues){
+        pI_ctx.fillStyle = tissues[t][4];
+        if (document.getElementById(tissues[t][3] + "_pI").checked){
+            for (var prot_id in protein_dictionary){
+                var protein = protein_dictionary[prot_id];
+                if (!(t in protein.nsaf)){
+                    var log_mass = Math.log10(protein.mass) - min_mass;
+                    log_mass *= mass_factor;
+                    log_mass = h_box - 2 - log_mass;
+                    
+                    var pos = Math.floor(w_offset + 2 + (protein.pI - 2) / 12 * (w_box - w_offset - 2));
+                    
+                    pI_ctx.beginPath();
+                    pI_ctx.arc(pos, log_mass, 1, 0, 2 * Math.PI);
+                    pI_ctx.fill();
+                }
+            }
+        }
+    }
+    
+    
+    pI_ctx.font="14px Arial";
+    pI_ctx.textAlign = 'center';
+    pI_ctx.fillStyle = "black";
+    pI_ctx.save();
+    pI_ctx.translate(20, h_box >> 1);
+    pI_ctx.rotate(-Math.PI / 2);
+    pI_ctx.fillText("log10(protein mass / Da)", 0, 0);
+    pI_ctx.restore();
+    pI_ctx.fillText("isoelectric point", w_offset + ((w_box - w_offset) >> 1), h_box + 40);
+    
+    // scale
+    // x-scale
+    pI_ctx.font="14px Arial";
+    for (var i = 2; i <= 14; i += 2){
+        var x = w_offset + (i - 2) / 12. * (w_box - w_offset);
+        pI_ctx.beginPath();
+        pI_ctx.moveTo(x, h_box - 5);
+        pI_ctx.lineTo(x, h_box + 5);
+        pI_ctx.stroke();
+        pI_ctx.fillStyle = "black";
+        pI_ctx.textAlign="center";
+        pI_ctx.fillText(i, x, h_box + 20);
+    }
+    
+    
+    // y-scale
+    for (var i = Math.floor(min_mass) + 1; i < max_mass; ++i){
+        var y = h_box - (i - min_mass) / (max_mass - min_mass) * h_box;
+        pI_ctx.beginPath();
+        pI_ctx.moveTo(w_offset - 5, y);
+        pI_ctx.lineTo(w_offset + 5, y);
+        pI_ctx.stroke();
+        pI_ctx.fillStyle = "black";
+        pI_ctx.textAlign="right";
+        pI_ctx.fillText(i, w_offset - 10, y + 5);
+    }
+}
+
+
+
+
+
+
+
+
+
+function update_absolute_pathway_figure(ctx){
+    if (statistics_loaded < 2) return;
+    
+    var pw_option = document.getElementById("absolute_pathway_figure_select").options[document.getElementById("absolute_pathway_figure_select").selectedIndex];
+    if (typeof(ctx) === "undefined"){
+        var nsaf_figure = document.getElementById("absolute_pathway_figure");
+        ctx = nsaf_figure.getContext("2d");
+    }
+            
+    var w_box = 600;
+    var w_offset = 70;
+    var w_bar = 30;
+    var h_box = 250;
+    var h_offset = 50;
+    ctx.clearRect(0, 0, w_box, h_box + h_offset);
+
+    ctx.beginPath();
+    ctx.moveTo(w_offset, 0);
+    ctx.lineTo(w_box, 0);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, 0);
+    ctx.lineTo(w_box, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, h_box);
+    ctx.lineTo(w_offset, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_offset, h_box);
+    ctx.lineTo(w_offset, 0);
+    ctx.stroke();    
+    
+    
+    var num_proteins = {};
+    var max_num = 0;
+    for (prot_id of pathways_to_proteins[pw_option.value][1]){
+        var protein = protein_dictionary[prot_id];
+        for (key in protein.nsaf){
+            if (!(key in num_proteins)) num_proteins[key] = 0;
+            num_proteins[key]++;
+            if (max_num < num_proteins[key]) max_num = num_proteins[key];
+        }
+    }
+    
+    
+    ctx.font="14px Arial";
+    ctx.textAlign = 'center';
+    ctx.save();
+    ctx.translate(20, h_box >> 1);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = "black";
+    ctx.fillText("absolute protein count", 0, 0);
+    ctx.restore();
+    
+    
+    // y-scale
+    ctx.lineWidth = 1;
+    ctx.textAlign="right";
+    var v_factor = 0.94;            
+    var step = max_num < 20 ? 5 : (max_num < 80 ? 10 : 20);
+    ctx.font="14px Arial";
+    max_num = Math.ceil(max_num / step) * step;
+    
+    
+    
+    for (var h = step; h <= max_num; h += step){
+        var y = h_box - (h / max_num * h_box) * v_factor;
+        ctx.strokeStyle = "#dddddd";
+        ctx.beginPath();
+        ctx.moveTo(w_offset, y);
+        ctx.lineTo(w_box, y);
+        ctx.stroke();
+        
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(w_offset - 5, y);
+        ctx.lineTo(w_offset + 5, y);
+        ctx.stroke();
+        
+        ctx.fillStyle = "black";
+        ctx.fillText(h, w_offset - 8, y + 5);
+    }
+    
+    
+    
+    
+    
+     // x-axis
+    var i = 0;
+    var w = (w_box - w_offset) / 10;
+    ctx.textAlign = 'right';
+    for (t in tissues){
+        var x = Math.floor(w_offset + (i + 0.5) * w - w_bar * 0.5);
+        var y = (num_proteins[t] / max_num * h_box) * v_factor;
+    
+        ctx.fillStyle = tissues[t][4];
+        ctx.fillRect(x, h_box - 1 - y, w_bar, y);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.save();
+        ctx.translate(w_offset + (i + 0.5) * w, h_box + 2);
+        ctx.rotate(-Math.PI / 4);
+        ctx.fillStyle = "black";
+        ctx.fillText(tissues[t][1], 0, 16);
+        ctx.restore();
+        ++i;
+    }
+}
+
+
+
+
+
+
+
+
+function update_nsaf_pathway_figure(ctx){
+    if (statistics_loaded < 2) return;
+    
+    var pw_option = document.getElementById("nsaf_pathway_figure_select").options[document.getElementById("nsaf_pathway_figure_select").selectedIndex];
+    if (typeof(ctx) === "undefined"){
+        var nsaf_figure = document.getElementById("nsaf_pathway_figure");
+        ctx = nsaf_figure.getContext("2d");
+    }
+            
+    var w_box = 600;
+    var w_offset = 70;
+    var w_bar = 30;
+    var h_box = 250;
+    var h_offset = 50;
+    ctx.clearRect(0, 0, w_box, h_box + h_offset);
+
+    ctx.beginPath();
+    ctx.moveTo(w_offset, 0);
+    ctx.lineTo(w_box, 0);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, 0);
+    ctx.lineTo(w_box, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_box, h_box);
+    ctx.lineTo(w_offset, h_box);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(w_offset, h_box);
+    ctx.lineTo(w_offset, 0);
+    ctx.stroke();
+    
+    var protein_ids = pathways_to_proteins[pw_option.value][1];
+    var tissue_nsafs = {};
+    for (key in tissues) tissue_nsafs[key] = 0;
+    var max_val = 0;
+    for (prot_id of pathways_to_proteins[pw_option.value][1]){
+        var protein = protein_dictionary[prot_id];
+        for (key in protein.nsaf){
+            tissue_nsafs[key] += Math.pow(10, protein.nsaf[key]);
+        }
+    }
+    
+    var total = 0;
+    for (t in tissue_nsafs){
+        total += tissue_nsafs[t];
+        max_val = Math.max(max_val, tissue_nsafs[t]);
+    }
+    
+    ctx.font="14px Arial";
+    ctx.textAlign = 'center';
+    ctx.save();
+    ctx.translate(20, h_box >> 1);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = "black";
+    ctx.fillText("relative protein abundance", 0, 0);
+    ctx.restore();
+    
+    
+    ctx.lineWidth = 1;
+    ctx.textAlign="right";
+    var v_factor = 0.94;
+    
+    var step = 20;
+    
+    
+    
+    // y-axis
+    ctx.font="14px Arial";
+    for (var h = step; h <= 100; h += step){
+        var y = h_box - (h / 100 * h_box) * v_factor;
+        ctx.strokeStyle = "#dddddd";
+        ctx.beginPath();
+        ctx.moveTo(w_offset, y);
+        ctx.lineTo(w_box, y);
+        ctx.stroke();
+        
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(w_offset - 5, y);
+        ctx.lineTo(w_offset + 5, y);
+        ctx.stroke();
+        
+        
+        ctx.fillStyle = "black";
+        ctx.fillText(h + "%", w_offset - 8, y + 5);
+    }
+    
+    
+    
+    
+    // x-axis
+    var i = 0;
+    var w = (w_box - w_offset) / 10;
+    ctx.textAlign = 'right';
+    for (t in tissue_nsafs){
+        var x = Math.floor(w_offset + (i + 0.5) * w - w_bar * 0.5);
+        var h = Math.floor(tissue_nsafs[t] / max_val * h_box * v_factor);
+    
+        ctx.fillStyle = tissues[t][4];
+        ctx.fillRect(x, h_box - 1 - h, w_bar, h);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.save();
+        ctx.translate(w_offset + (i + 0.5) * w, h_box + 2);
+        ctx.rotate(-Math.PI / 4);
+        ctx.fillStyle = "black";
+        ctx.fillText(tissues[t][1], 0, 16);
+        ctx.restore();
+        ++i;
+    }
+}
+
+
+
+
+
+
+
+
+function hide_statistics (){
+    document.getElementById("statistics").style.display = "none";
+    document.getElementById("waiting_background").style.display = "none";
+}
+
+
+
+
+
+
+
+function change_chromosome_view(){
+    var start_base = document.getElementById("chromosome_selection_start").value;
+    start_base = replaceAll(start_base, " ", "");
+    start_base = isNumber(start_base) ? parseInt(start_base) - 1 : 0;
+    var end_base = document.getElementById("chromosome_selection_end").value;
+    end_base = replaceAll(end_base, " ", "");
+    end_base = isNumber(end_base) ? parseInt(end_base) : chromosomes[chromosome_selected].bases - 1;
+    var diff_base = Math.max(1, end_base - start_base);
+    
+    start_base = Math.min(Math.max(0, start_base), chromosomes[chromosome_selected].bases - 1);
+    diff_base = Math.min(Math.max(1, diff_base), chromosomes[chromosome_selected].bases - start_base);
+    chromosomes[chromosome_selected].panel_base_start = start_base;
+    chromosomes[chromosome_selected].panel_height = diff_base;
+    
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        var key = chromosome_keys[i];
+        chromosomes[key].draw();
+    }
+    chromosome_selection_changed(true);
+}
+
+
+function change_chromosome_view_combo(){
+    var opt = document.getElementById("chromosome_selection_combo");
+    chromosome_selected = opt.options[opt.selectedIndex].value;
+    
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        var key = chromosome_keys[i];
+        chromosomes[key].draw();
+    }
+    chromosome_selection_changed(true);    
+}
+
+
+if (!String.prototype.splice) {
+    String.prototype.splice = function(start, newSubStr) {
+        return this.slice(0, start) + newSubStr + this.slice(start);
+    };
+}
+
+
+function add_numeric_separators(number){
+    number = number.toString();
+    if (number.length >= 16) number = number.splice(number.length - 15, " ");
+    if (number.length >= 13) number = number.splice(number.length - 12, " ");
+    if (number.length >= 10) number = number.splice(number.length - 9, " ");
+    if (number.length >= 7) number = number.splice(number.length - 6, " ");
+    if (number.length >= 4) number = number.splice(number.length - 3, " ");
+    return number;
+}
+
+
+function toggle_chromosome_protein(protein_id){
+    chromosome_data_dict[chromosome_selected][protein_id][9] = !chromosome_data_dict[chromosome_selected][protein_id][9];
+}
+
+
+function de_select_all_chromosome_proteins(to_select){
+    for (var i = 0; i < currently_visible_proteins.length; ++i){
+        currently_visible_proteins[i][9] = to_select;
+    }
+    chromosome_selection_changed(true);
+}
+
+
+function chromosome_selection_changed(content){
+    if (loaded_chromosomes < chromosome_keys.length) return;
+    
+    if (chromosome_selected != -1){   
+        currently_visible_proteins = [];
+        var chrom_start = chromosomes[chromosome_selected].panel_base_start;
+        var chrom_end = chrom_start + chromosomes[chromosome_selected].panel_height;
+        var strt = add_numeric_separators(chrom_start + 1);
+        var end = add_numeric_separators(chrom_end);
+        document.getElementById("chromosome_selection_start").value = strt;
+        document.getElementById("chromosome_selection_end").value = end;
+        
+        if (content){
+            var chrm_dat = chromosome_data[chromosome_selected];
+            var chr_tab_colors = ["#eeeeee", "#ffffff"];
+            var chr_content = "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"> \
+            <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">";
+            for (var i = 0, j = 0; i < chrm_dat.length; ++i){
+                var chr_strt = parseInt(chrm_dat[i][7]);
+                if (chr_strt >= chrom_end) break;
+                
+                // filtern
+                if (chr_strt >= chrom_start){
+                    var checked = chrm_dat[i][9] ? "checked" : "";
+                    chr_content += "<tr><td width=\"20%\" bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][4] + "</td><td width=\"20%\" bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][1] + "</td><td width=\"20%\" align=\"right\" bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][6] + "</td><td align=\"right\" width=\"20%\" bgcolor=\"" + chr_tab_colors[j & 1] + "\">" + chrm_dat[i][7] + "</td><td bgcolor=\"" + chr_tab_colors[j & 1] + "\" align=\"right\"><input type=\"checkbox\" " + checked + " onclick=\"toggle_chromosome_protein(" + chrm_dat[i][0] + ");\"></td></tr>";
+                    currently_visible_proteins.push(chrm_dat[i]);
+                    j += 1;
+                }
+            }
+            chr_content += "</table>";
+            document.getElementById("chromosome_information_table").innerHTML = chr_content;
+        }
+    }
+}
+
+
+function Chromosome(name, data, ctx, chromosome_width, chromosome_height){
+    this.name = name;
+    this.bands = [];
+    this.width = chromosome_width;
+    this.inner_width = chromosome_width * 2 / 3;
+    this.margin = (this.width - this.inner_width) / 2;
+    this.height = chromosome_height;
+    this.inner_height = this.height;
+    this.panel_base_start = 0;
+    this.panel_move = -1;
+    this.panel_move_start = -1;
+    this.offset = 0;
+    this.ctx = ctx;
+    this.bases = 0;
+    for (var i = 0; i < data.length; ++i) this.bands.push(new Band(data[i]));
+    this.bands.sort(function(a, b){return a.start - b.start});
+    for (var i = 0; i < this.bands.length; ++i) this.bases += this.bands[i].end - this.bands[i].start;
+    this.panel_height = Math.min(20000000, this.bases);
+    
+    
+    this.prepare_modification = function(){}
+    
+    this.draw = function(){
+        ctx.canvas.width  = this.width;
+        ctx.canvas.height = this.height;
+        ctx.beginPath();
+        var len = this.bands.length;
+
+
+        var grd_white = ctx.createLinearGradient(0, 0, this.width, 0);
+        grd_white.addColorStop(0, "#a09a85");
+        grd_white.addColorStop(0.3, "#fff6d5");
+        grd_white.addColorStop(1, "#a09a85");
+
+
+        var has_two_arms = -1;
+        var band_height = 0;
+        for (var i = 0; i < len; ++i){
+            var curr_height = (this.bands[i].end - this.bands[i].start) / this.bases * this.inner_height;
+            this.bands[i].height = curr_height;
+            band_height += curr_height;
+            if (i < len - 1 && this.bands[i].arm != this.bands[i + 1].arm) has_two_arms = band_height;
+        }
+        
+
+        
+        ctx.save();
+        band_height = 0;
+        // prepare clip
+        var l_1 = this.inner_width / 2
+        var l_2 = this.margin + l_1;
+        if (has_two_arms == -1){
+            ctx.beginPath();
+            ctx.arc(l_2, this.offset + l_1, l_1, Math.PI, 2 * Math.PI, false);
+            ctx.arc(l_2, this.height - l_1, l_1, 0, Math.PI, false);
+            ctx.closePath();
+        }
+        else {
+            ctx.beginPath();
+            ctx.arc(l_2, this.offset + l_1, l_1, Math.PI, 2 * Math.PI, false);
+            ctx.arc(l_2, this.offset + has_two_arms - l_1, l_1, 0, Math.PI, false);
+            ctx.arc(l_2, this.offset + has_two_arms + l_1, l_1, Math.PI, 2 * Math.PI, false);
+            ctx.arc(l_2, this.height - l_1, l_1, 0, Math.PI, false);
+            ctx.closePath();
+        }
+        ctx.clip();
+        ctx.fillRect(0, this.offset, this.width, this.inner_height);
+        ctx.restore();
+        
+        
+        ctx.shadowColor = '#666666';
+        ctx.shadowBlur = 5;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = -2;
+        ctx.fill();
+
+        
+       
+        ctx.save();
+        // prepare clip
+        band_height = 0;
+        var l_1 = this.inner_width / 2
+        var l_2 = this.margin + l_1;
+        if (has_two_arms == -1){
+            ctx.beginPath();
+            ctx.arc(l_2, this.offset + l_1, l_1, Math.PI, 2 * Math.PI, false);
+            ctx.arc(l_2, this.height - l_1, l_1, 0, Math.PI, false);
+            ctx.closePath();
+        }
+        else {
+            ctx.beginPath();
+            ctx.arc(l_2, this.offset + l_1, l_1, Math.PI, 2 * Math.PI, false);
+            ctx.arc(l_2, this.offset + has_two_arms - l_1, l_1, 0, Math.PI, false);
+            ctx.arc(l_2, this.offset + has_two_arms + l_1, l_1, Math.PI, 2 * Math.PI, false);
+            ctx.arc(l_2, this.height - l_1, l_1, 0, Math.PI, false);
+            ctx.closePath();
+        }
+        ctx.clip();
+
+        // draw bands
+        var band_height = 0;
+        for (var i = 0; i < len; ++i){
+            var curr_height = this.bands[i].height;
+            if (this.bands[i].positive == 1){
+                var grd = ctx.createLinearGradient(0, 0, this.width, 0);
+                grd.addColorStop(0, "rgb(" + Math.floor(64 + (255 - 150) * (1 - this.bands[i].color)).toString() + ", 0, 0)");
+                grd.addColorStop(0.3, "rgb(" + Math.floor(150 + (255 - 150) * (1 - this.bands[i].color)).toString() + ", 0, 0)");
+                grd.addColorStop(1, "rgb(" + Math.floor(20 + (255 - 150) * (1 - this.bands[i].color)).toString() + ", 0, 0)");
+                ctx.fillStyle = grd;
+            }
+            else {
+                ctx.fillStyle = grd_white;
+            }
+            ctx.fillRect(0, this.offset + band_height, this.width, this.offset + band_height + curr_height);
+            band_height += curr_height;
+        }
+        ctx.restore();
+        
+        
+    
+        // draw panel
+        if (chromosome_selected == this.name){
+            ctx.fillStyle = "rgba(100, 100, 100, 0.5)";
+            var h_start = Math.floor(this.offset + this.panel_base_start / this.bases * this.inner_height);
+            var h_base = Math.floor(this.panel_height / this.bases * this.inner_height);
+            ctx.fillRect(0, h_start, this.width, h_base);
+        }
+        
+    } 
+    
+    this.clicked = function(e, mouse_pos){
+        // check where the panel was clicked
+        if (mouse_pos.y < this.offset) return;
+        if (!(chromosome_selected == this.name) || !this.mouse_over_panel(e, mouse_pos)){
+            this.panel_base_start = Math.floor((mouse_pos.y - this.offset) / this.inner_height * this.bases - this.panel_height / 2);
+            this.panel_base_start = Math.max(0, this.panel_base_start);
+            this.panel_base_start = Math.min(this.panel_base_start, this.bases - this.panel_height);
+        }
+        
+        chromosome_selection_changed(true);
+        this.draw();
+    }
+    
+    this.mouse_over_panel = function(e, mouse_pos){
+        var h_start = Math.floor(this.offset + this.panel_base_start / this.bases * this.inner_height);
+        var h_base = Math.floor(this.panel_height / this.bases * this.inner_height);
+        return (h_start <= mouse_pos.y && mouse_pos.y <= h_start + h_base);
+    }
+
+    this.mouse_down = function(e, mouse_pos, rect){
+        if (!(chromosome_selected == this.name) || !this.mouse_over_panel(e, mouse_pos)) return;
+        var h_start = Math.floor(this.panel_base_start / this.bases * this.inner_height);
+        this.panel_move = mouse_pos.y + rect.top;
+        this.panel_move_start = h_start;
+    }
+
+    this.mouse_up = function(e){
+        if (this.panel_move != -1) chromosome_selection_changed(true);
+        this.panel_move = -1;
+    }
+
+    this.mouse_move = function(e, mouse_pos){
+        if (this.panel_move != -1){
+            this.panel_base_start = Math.floor((mouse_pos.y - this.panel_move + this.panel_move_start) / this.inner_height * this.bases);
+            this.panel_base_start = Math.max(0, this.panel_base_start);
+            this.panel_base_start = Math.min(this.panel_base_start, this.bases - this.panel_height);
+            chromosome_selection_changed(false);
+            this.draw();
+        }
+    }
+
+    this.mouse_wheel = function(e, mouse_pos, rect){
+        var ft = 5000000;
+        if (chromosome_selected == this.name){
+            var delta = Math.max(-1, Math.min(1, -e.wheelDelta || e.detail));
+            var diff = ft * (delta < 0 ? 1 : -1);
+            if (this.panel_height + diff >= 10000000){
+                this.panel_base_start -= Math.floor(ft / 2 * (delta < 0 ? 1 : -1));
+            }
+            this.panel_height += Math.floor(ft * (delta < 0 ? 1 : -1));
+            this.panel_height = Math.max(10000000, this.panel_height);
+            this.panel_height = Math.min(this.bases, this.panel_height);
+            
+            
+            if (this.panel_base_start < 0) this.panel_base_start = 0;
+            if (this.panel_base_start + this.panel_height >= this.bases) this.panel_base_start = Math.floor(this.bases - this.panel_height);
+            chromosome_selection_changed(true);
+            this.draw();
+        }
+    }
+}
+
+
+function chromosome_clicked(e){
+    var old_key = chromosome_selected;
+    chromosome_selected = e.target.id.replace("chromosome-", "");
+    
+    chromosomes[chromosome_selected].clicked(e, get_mouse_pos(e.target, e));
+    
+    var opt = document.getElementById("chromosome_selection_combo");
+    for (var i = 0; i < opt.options.length; ++i){
+        if (opt.options[i].value == chromosome_selected){
+            opt.options[i].selected = true;
+            break;
+        }
+    }
+    
+    chromosomes[old_key].draw();
+    chromosomes[chromosome_selected].draw();
+}
+
+
+function chromosome_mousedown(e){
+    var mouse_pos = get_mouse_pos(e.target, e);
+    var key = e.target.id.replace("chromosome-", "");
+    chromosomes[key].mouse_down(e, mouse_pos, e.target.getBoundingClientRect());
+}
+
+
+function chromosome_mousemove(e){
+    var mouse_pos = { x: e.clientX, y: e.clientY};
+    if (chromosome_selected in chromosomes) chromosomes[chromosome_selected].mouse_move(e, mouse_pos);
+}
+
+
+function chromosome_mouseup(e){
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        var key = chromosome_keys[i];
+        chromosomes[key].mouse_up(e);
+    }
+}
+
+function chromosome_mouse_wheel(e){
+    if(e.ctrlKey) e.preventDefault();
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        var key = chromosome_keys[i];
+        chromosomes[key].mouse_wheel(e);
+    }
+}
+
+
+var chromosome_width = 30;
+var chromosome_height = 500;
+var ideom_data = "";
+chroms = document.getElementById("function_chromosome_field");
+chroms.innerHTML = "";
+
+var species_select = document.getElementById("chromosome_browser_species_select");
+
+
+// tpyes 0: accession, 1: locus, 2: function, 3: chromosome
+function check_filter_valid(filter_type){
+
+    var selected_loci = false;
+    var selected_functions = false;
+    var chromosomes_selected_protein = false;
+    if (filter_type == 1){
+        var loci_select = document.getElementById("loci");
+        for (var i = 0; i < loci_select.options.length; ++i){
+            if (loci_select.options[i].selected){
+                selected_loci = true;
+                break;
+            }
+        }
+    }
+    else if (filter_type == 2){
+    
+    var function_select = document.getElementById("function_search_field").getElementsByTagName("li");
+        for (var i = 0; i < function_select.length; ++i){
+            if (function_select[i].style.backgroundColor != ""){
+                selected_functions = true;
+                break;
+            }
+        }
+    }
+    else if (filter_type == 3){
+        for (var chromosome_key in chromosome_data){
+            for (var i = 0; i < chromosome_data[chromosome_key].length; ++i){
+                if (chromosome_data[chromosome_key][i][9]){
+                    chromosomes_selected_protein = true;
+                    break;
+                }
+            }
+        }
+    }
+    
+    if (filter_type == 0 && document.getElementById("accessions").value.length == 0){
+        document.getElementById("error_filter_text_accession").innerHTML = "Error: no accession number provided!";
+    }
+    else if (filter_type == 1 && !selected_loci){
+        document.getElementById("error_filter_text_locus").innerHTML = "Error: no compartment selected!";
+    }
+    else if (filter_type == 2 && !selected_functions){
+        document.getElementById("error_filter_text_function").innerHTML = "Error: no function selected!";
+    }
+    else if (filter_type == 3 && !chromosomes_selected_protein){
+        document.getElementById("error_filter_text_chromosome").innerHTML = "Error: no protein selected!";
+    }
+    else {
+        document.getElementById("waiting_background").style.display = "inline";
+        switch (filter_type){
+            case 0:
+                back_function = open_accession_search;
+                hide_accession_search(true);
+                accession_search_parse_accessions();
+                break;
+                
+            case 1:
+                back_function = open_locus_search;
+                hide_locus_search(true);
+                locus_search_request_data();
+                break;
+                
+            case 2:
+                back_function = open_function_search;
+                hide_function_search(true);
+                function_search_request_data();
+                break;
+                
+            case 3:
+                back_function = open_chromosome_search;
+                hide_chromosome_search(true);
+                chromosome_search_request_data();
+                break;
+        }
+    }
+}
+
+
+function activateTree(oList) {
+    // Collapse the tree
+    /*
+    for (var i = 0; i < oList.getElementsByTagName("ul").length; ++i) {
+        oList.getElementsByTagName("ul")[i].style.display = "none";
+    }
+    */
+    for (var i = 0; i < oList.getElementsByTagName("li").length; ++i) {
+        if (oList.getElementsByTagName("li")[i].getElementsByTagName("ul").length > 0){
+            oList.getElementsByTagName("li")[i].style.fontWeight = "bold";
+            oList.getElementsByTagName("li")[i].className = "expanded";
+        }
+        else {
+            oList.getElementsByTagName("li")[i].style.fontWeight = "normal";
+            oList.getElementsByTagName("li")[i].className = "empty";
+        }
+    }
+    // Add the click-event handler to the list items
+    if (oList.addEventListener) {
+        oList.addEventListener("click", toggleBranch, false);
+    } else if (oList.attachEvent) { // For IE
+        oList.attachEvent("onclick", toggleBranch);
+    }
+}
+
+
+function toggleBranch(event) {
+    var oBranch, cSubBranches;
+    if (event.target) {
+        oBranch = event.target;
+    } else if (event.srcElement) { // For IE
+        oBranch = event.srcElement;
+    }
+    cSubBranches = oBranch.getElementsByTagName("ul");
+    if (cSubBranches.length > 0) {
+        if (cSubBranches[0].style.display == "block") {
+            cSubBranches[0].style.display = "none";
+            oBranch.className = "collapsed";
+            
+        } else {
+            cSubBranches[0].style.display = "block";
+            oBranch.className = "expanded";
+        }
+    }
+    else {
+        if (oBranch.style.backgroundColor == ""){
+            oBranch.style.backgroundColor = "#4a79ba";
+            oBranch.style.color = "#ffffff";
+        }
+        else {
+            oBranch.style.backgroundColor = "";
+            oBranch.style.color = "#000000";
+        }
+    }
+}
+
+
+function recursive_list_adding(function_tree){
+    var ret_text = "";
+    for (var i = 0; i < function_tree.length; ++i){
+        if (function_tree[i][3].length > 0 || function_tree[i][2] > 0){
+            ret_text += "<li id=\"" + function_tree[i][0] + "\" style=\"display: block;\">" + function_tree[i][1];
+            if (function_tree[i][3].length > 0) ret_text += "<ul style=\"display: block;\">" + recursive_list_adding(function_tree[i][3]) + "</ul>";
+            else ret_text += " (" + function_tree[i][2] + ")";
+            ret_text += "</li>";
+        }
+    }
+    return ret_text;
+}
+
+
+function advanced_search_init(){
+    window.addEventListener('resize', resize_ms_view, false);
+    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
+    document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
+}
+
+
+function key_down(event){
+    if (event.which === 17){ // CTRL
+        //pathway_to_svg();
+    }
+    else if (event.which === 27){ // ESC
+        document.getElementById("statistics").style.display = "none";
+        document.getElementById('disclaimer').style.display = "none";
+        document.getElementById('citation').style.display = "none";
+        hide_locus_search(false);
+        hide_function_search(false);
+        hide_chromosome_search(false);
+        hide_accession_search();
+        hide_check_spectra();
+        hide_download();
+    }   
+
+
+    // easter egg
+    var k_code = [75, 78, 73, 71, 72, 84, 82, 73, 68, 69, 82];
+    
+    kr_keys.push(event.which);
+    while (kr_keys.length > 11) kr_keys.shift();
+    if (kr_keys.length == 11){
+        var k_is_valid = true;
+        for (var i = 0; i < 11; ++i){
+            if (k_code[i] != kr_keys[i]){
+                k_is_valid = false;
+                break;
+            }
+        }
+        if (k_is_valid){
+            scanner_data = [1, 0, 0];
+            
+            var scanner_light = setInterval(function(scanner_data, nav_ids){
+                for (var i = 0; i < nav_ids.length; ++i){
+                    document.getElementById(nav_ids[i]).style.backgroundColor = "";
+                }
+                document.getElementById(nav_ids[scanner_data[1]]).style.backgroundColor = "#9fc2d4";
+                
+                if (scanner_data[0] == -1 && scanner_data[1] == 0) scanner_data[0] = 1;
+                if (scanner_data[0] == 1 && scanner_data[1] == 7) scanner_data[0] = -1;
+                scanner_data[1] += scanner_data[0];
+                
+                if (scanner_data[2] % 15 == 0){
+                    var audio = document.getElementsByTagName("audio")[0];
+                    audio.currentTime = 0;
+                    audio.play();
+                }
+                scanner_data[2] += 1;
+                
+                if (scanner_data[2] >= 43){
+                    for (var i = 0; i < nav_ids.length; ++i){
+                        document.getElementById(nav_ids[i]).style.backgroundColor = "";
+                    }
+                    clearInterval(scanner_light);
+                }
+            }, 80, scanner_data, nav_ids);
+        }
+    }    
+}
+
+
+// function for loading chromosome, loci, functions data
+function load_all_data(){
+    // get functions
+    var xmlhttpfunctions = new XMLHttpRequest();
+    xmlhttpfunctions.onreadystatechange = function() {
+        if (xmlhttpfunctions.readyState == 4 && xmlhttpfunctions.status == 200) {
+            var function_data = JSON.parse(xmlhttpfunctions.responseText);
+            var id_dict = {};
+            var function_tree = [];
+            
+            for (var i = 0; i < function_data.length; ++i){
+                var function_row = function_data[i];
+                if (function_row[2] == 0){
+                    function_tree = [function_row[0], function_row[1], function_row[3], []];
+                    id_dict[function_row[0]] = function_tree;
+                    continue;
+                }
+                if (function_row[2] in id_dict){
+                    var node = [function_row[0], function_row[1], function_row[3], []];
+                    id_dict[function_row[2]][3].push(node);
+                    id_dict[function_row[0]] = node;
+                }
+                else {
+                    console.log("Error while loading functions, index " + function_row[2] + " is missing!");
+                    return;
+                }
+            }
+            
+            var functions_tree_content = "<ul id=\"LinkedList1\" class=\"LinkedList\" style=\"padding-left:0;\">";
+            functions_tree_content += recursive_list_adding(function_tree[3]);
+            functions_tree_content += "</ul>";
+            document.getElementById("function_search_field").innerHTML = functions_tree_content;
+            activateTree(document.getElementById("LinkedList1"));
+        }
+    }
+    xmlhttpfunctions.open("GET", file_pathname + "scripts/get-functions.py", true);
+    xmlhttpfunctions.send();
+    
+    
+    // get loci
+    var xmlhttploci = new XMLHttpRequest();
+    xmlhttploci.onreadystatechange = function() {
+        if (xmlhttploci.readyState == 4 && xmlhttploci.status == 200) {
+            var locus_data = JSON.parse(xmlhttploci.responseText);
+            var locus_select = document.getElementById("loci");
+            for (var i = 0; i < locus_data.length; ++i){
+                var option = document.createElement("option");
+                option.text = locus_data[i][1];
+                option.id = locus_data[i][0];
+                locus_select.add(option);
+            }
+        }
+    }
+    xmlhttploci.open("GET", file_pathname + "scripts/get-loci.py", true);
+    xmlhttploci.send();
+    
+    
+    // get chromosome bands
+    var xmlhttp_chr = new XMLHttpRequest();
+    xmlhttp_chr.onreadystatechange = function() {
+        if (xmlhttp_chr.readyState == 4 && xmlhttp_chr.status == 200) {
+            ideom_data = JSON.parse(xmlhttp_chr.responseText);
+        }
+    }
+    xmlhttp_chr.open("GET", file_pathname + "scripts/get-chromosomes.bin?species=" + current_species, true);
+    xmlhttp_chr.send();
+    
+    // load tissue images
+    for (var key in tissues){
+        tissue = tissues[key];
+        tissue[2] = new Image();
+        tissue[2].src = tissue[0];
+    }
+    
+    var select = document.getElementById("chromosome_browser_species_select");
+    for (var c_species in supported_species){
+        var opt = document.createElement("option");
+        opt.id = c_species;
+        opt.innerHTML = supported_species[c_species];
+        select.add(opt);
+    }
+    
+    select = document.getElementById("accession_browser_species_select");
+    for (var c_species in supported_species){
+        var opt = document.createElement("option");
+        opt.id = c_species;
+        opt.innerHTML = supported_species[c_species];
+        select.add(opt);
+    }
+    
+    select = document.getElementById("function_browser_species_select");
+    for (var c_species in supported_species){
+        var opt = document.createElement("option");
+        opt.id = c_species;
+        opt.innerHTML = supported_species[c_species];
+        select.add(opt);
+    }
+    
+    select = document.getElementById("locus_browser_species_select");
+    for (var c_species in supported_species){
+        var opt = document.createElement("option");
+        opt.id = c_species;
+        opt.innerHTML = supported_species[c_species];
+        select.add(opt);
+    }
+}
+
+
+function draw_chromosome_ideograms(){
+    var max_bases = 0;
+    chromosome_keys = Object.keys(ideom_data);
+    var max_len = 0;
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        chromosome_keys[i] = [chromosome_keys[i], chromosome_keys[i]];
+        max_len = Math.max(chromosome_keys[i].length, max_len);
+    }
+    
+    
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        while (chromosome_keys[i][1].length < max_len && 48 <= chromosome_keys[i][1].charCodeAt(0) && chromosome_keys[i][1].charCodeAt(0) < 58){
+            chromosome_keys[i][1] = "0" + chromosome_keys[i][1];
+        }
+    }
+    
+    chromosome_keys.sort(function(a, b){return a[1].localeCompare(b[1]);});
+    var chr_tmp = chromosome_keys;
+    chromosome_keys = [];
+    for (var i = 0; i < chr_tmp.length; ++i) chromosome_keys.push(chr_tmp[i][0]);
+    
+
+    var chroms_innerHTML = "";
+    chroms_innerHTML += "<table width=\"100%\" border=0 cellspacing=0 cellpadding=0><tr>";
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        chroms_innerHTML += "<td align=\"center\"><canvas id=\"chromosome-" + chromosome_keys[i] + "\">Your browser does not support the HTML5 canvas tag.</canvas></td>";
+        chromosome_map["chromosome-" + chromosome_keys[i]] = i;
+    }
+    chroms_innerHTML += "</tr></table>";
+    chroms.innerHTML = chroms_innerHTML;
+    
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        var key = chromosome_keys[i];
+        var chrm = document.getElementById("chromosome-" + key);
+        var new_chromosome = new Chromosome(key, ideom_data[key], chrm.getContext("2d"), chromosome_width, chromosome_height);
+        chromosomes[key] = new_chromosome;
+        max_bases = Math.max(max_bases, new_chromosome.bases);
+        
+        chrm.addEventListener("click", chromosome_clicked, false);
+        chrm.addEventListener("mousedown", chromosome_mousedown, false);
+    }
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        var key = chromosome_keys[i];
+        chromosomes[key].offset = Math.min(chromosome_height * (1 - chromosomes[key].bases / max_bases), chromosome_height - chromosome_width);
+        chromosomes[key].inner_height = chromosomes[key].height - chromosomes[key].offset;
+    }
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        var key = chromosome_keys[i];
+        chromosomes[key].draw();
+        var option = document.createElement("option");
+        option.text = key;
+        document.getElementById("chromosome_selection_combo").add(option); 
+    }
+    
+    if (chromosome_selected == -1){
+        chromosome_selected = chromosome_keys[0];
+    }
+    
+    
+    // get chromosome data
+    var chromosome_requests = {};
+    for (var i = 0; i < chromosome_keys.length; ++i){
+        var key = chromosome_keys[i];
+        chromosome_requests[key] = new XMLHttpRequest();
+        chromosome_requests[key].chromosome_key = key;
+        chromosome_requests[key].onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var input_dat = JSON.parse(this.responseText);
+                chromosome_data[this.chromosome_key] = input_dat;
+                chromosome_data_dict[this.chromosome_key] = {};
+                var chrm_dat_dict = chromosome_data_dict[this.chromosome_key];
+                
+                for (var i = 0; i < input_dat.length; ++i){
+                    input_dat[i].push(false);
+                    chrm_dat_dict[input_dat[i][0]] = input_dat[i];
+                }
+                
+                
+                loaded_chromosomes += 1;
+                chromosome_selection_changed(true);
+                chromosomes[this.chromosome_key].draw();
+            }
+        }
+        chromosome_requests[key].open("GET", file_pathname + "scripts/get-chromosome-data.py?chromosome=" + key + "&species=" + current_species, true);
+        chromosome_requests[key].send();
+    }
+}
+
+
+
+function to_svg(figure){
+    if (statistics_loaded < 2) return;
+    
+    
+    var svg_ctx = 0;
+    var download_name = "";
+    switch (figure){
+        case "nsaf_pathway":
+            var svg_ctx = new C2S(600, 300);
+            update_nsaf_pathway_figure(svg_ctx);
+            download_name = "NormalizedDistributionOfProteinAbundancesPerPathway.svg";
+            break;
+            
+        case "absolute_pathway":
+            var svg_ctx = new C2S(600, 300);
+            update_absolute_pathway_figure(svg_ctx);
+            download_name = "AbsoluteNumberOfProteins.svg";
+            break;
+            
+        case "tissue_pathway":
+            var svg_ctx = new C2S(600, 300);
+            update_tissue(svg_ctx);
+            download_name = "NormalizedDistributionOfProteinAbundancesPerTissue.svg";
+            break;
+            
+        case "nsaf":
+            var svg_ctx = new C2S(600, 300);
+            update_nsaf(svg_ctx);
+            download_name = "NormalizedSpectrumAbundanceFactor.svg";
+            break;
+            
+        case "pI":
+            var svg_ctx = new C2S(600, 300);
+            update_pI(svg_ctx);
+            download_name = "ProteinIsoelectricPointVsMass.svg";
+            break;
+            
+        case "ppm":
+            var svg_ctx = new C2S(600, 300);
+            update_ppm(svg_ctx);
+            download_name = "MassAccuracyResiduals.svg";
+            break;
+            
+        default:
+            return;
+    }
+    
+    var svgCode = svg_ctx.getSerializedSvg(true);
+    var parts = svgCode.split("/>");
+    svgCode = parts.join("/>\n");
+    
+    
+    var parts = svgCode.split("/>");
+    svgCode = parts.join("/>\n");
+    
+    
+    var serializer = new XMLSerializer();
+    var svg_blob = new Blob([svgCode], {'type': "image/svg+xml"});
+    
+    
+    const tempLink = document.createElement('a');
+    tempLink.style.display = 'none';
+    tempLink.href = window.URL.createObjectURL(svg_blob);
+    tempLink.setAttribute('download', download_name);
+    tempLink.setAttribute('target', '_blank');
+    document.body.appendChild(tempLink);
+    tempLink.click();
+    document.body.removeChild(tempLink);
+}
+
+
+
+
+function open_accession_search(){
+    document.getElementById("accession_search").style.display = "inline";
+    document.getElementById("error_filter_text_accession").innerHTML = "";
+    select = document.getElementById("accession_browser_species_select");
+    var i = 0;
+    for (var child of select.children){
+        if (child.id == current_species){
+            select.selectedIndex = i;
+            break;
+        }
+        ++i;
+    }
+}
+
+function open_locus_search(){
+    document.getElementById("locus_search").style.display = "inline";
+    document.getElementById("error_filter_text_locus").innerHTML = "";
+    select = document.getElementById("locus_browser_species_select");
+    var i = 0;
+    for (var child of select.children){
+        if (child.id == current_species){
+            select.selectedIndex = i;
+            break;
+        }
+        ++i;
+    }
+}
+
+function open_function_search(){
+    document.getElementById("function_search").style.display = "inline";
+    document.getElementById("error_filter_text_function").innerHTML = "";
+    select = document.getElementById("function_browser_species_select");
+    var i = 0;
+    for (var child of select.children){
+        if (child.id == current_species){
+            select.selectedIndex = i;
+            break;
+        }
+        ++i;
+    }
+}
+
+
+function open_chromosome_search(){
+    
+    document.getElementById("chromosome_search").style.display = "inline";
+    if (chromosome_selected == -1) draw_chromosome_ideograms();
+    document.getElementById("error_filter_text_chromosome").innerHTML = "";
+    
+    select = document.getElementById("chromosome_browser_species_select");
+    var i = 0;
+    for (var child of select.children){
+        if (child.id == current_species){
+            select.selectedIndex = i;
+            break;
+        }
+        ++i;
+    }
+    draw_chromosome_ideograms();
+}
+
+
+
+function change_species(select){
+    current_species = select[select.selectedIndex].id;
+    
+    if (document.getElementById("chromosome_search").style.display == "inline"){
+        // get chromosome bands
+        var xmlhttp_chr = new XMLHttpRequest();
+        xmlhttp_chr.onreadystatechange = function() {
+            if (xmlhttp_chr.readyState == 4 && xmlhttp_chr.status == 200) {
+                ideom_data = JSON.parse(xmlhttp_chr.responseText);
+            }
+        }
+        xmlhttp_chr.open("GET", file_pathname + "scripts/get-chromosomes.bin?species=" + current_species, false);
+        xmlhttp_chr.send();
+        draw_chromosome_ideograms();
+        //chromosome_selection_changed(true);
+    }
+}
+
+
+
+
+function mobile_check() {
+
+    if( navigator.userAgent.match(/Android/i)
+    || navigator.userAgent.match(/webOS/i)
+    || navigator.userAgent.match(/iPhone/i)
+    || navigator.userAgent.match(/iPad/i)
+    || navigator.userAgent.match(/iPod/i)
+    || navigator.userAgent.match(/BlackBerry/i)
+    || navigator.userAgent.match(/Windows Phone/i)
+    ){
+        return true;
+    }
+    else {
+        return false;
+    }
+};
+
+
+file_pathname = get_pathname();
+
+current_species = "mouse";
+var kr_keys = [];
+var scanner_data = [1, 0, 0]; // scanner_up, scanner_index, scanner_count
+var nav_ids = ["how_to_nav", "pathway_browser_nav", "subcellular_search_nav", "functional_search_nav", "accession_search_nav", "chromosome_search_nav", "statistics_nav", "about_nav"];
+document.addEventListener('keydown', key_down, false);
+document.addEventListener("mousemove", chromosome_mousemove, false);
+document.addEventListener("mouseup", chromosome_mouseup, false);
+document.getElementById("function_chromosome_field").addEventListener('mousewheel', chromosome_mouse_wheel, false);
+document.getElementById("function_chromosome_field").addEventListener('DOMMouseScroll', chromosome_mouse_wheel, false);
+document.addEventListener('mousewheel', prevent_zooming, false);
+document.addEventListener('DOMMouseScroll', prevent_zooming, false);
+document.getElementById("click_background").addEventListener("click", hide_background, false);
+document.getElementById("check_spectra").innerHTML = get_check_spectra_content();
+document.getElementById("waiting_background").innerHTML = get_waiting_background_content();
+window.addEventListener('resize', resize_views, false);
+load_all_data();
+
+
+if (mobile_check()){
+    alert("We recognized, that you are browsing with a mobile device. We strongly recommend to browse STAMPS from a desktop computer or laptop. Some functionality may not work. Due to high data traffic, some information provision is turned off. We apologize for the inconvenience.");
+}
+
+var xmlhttp_matomo = new XMLHttpRequest();
+xmlhttp_matomo.onreadystatechange = function() {
+    if (xmlhttp_matomo.readyState == 4 && xmlhttp_matomo.status == 200) {
+        var matomo = xmlhttp_matomo.responseText;
+    }
+}
+xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=stamp&e_a=request", true);
+xmlhttp_matomo.send();
+
+resize_views();
+</script>
+</html> 

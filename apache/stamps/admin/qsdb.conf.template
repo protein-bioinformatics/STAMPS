@@ -1,0 +1,11 @@
+root_path = /var/www/qsdb
+mysql_host = localhost
+mysql_port = 3306
+mysql_user = qsdb_user
+mysql_passwd = qsdb_password
+mysql_db = qsdb
+#spectra_db_mouse = /scratch/spectral-library-mouse.blib
+spectra_db_mouse = /scratch/blibs/complete-mouse.blib
+
+# table for tissue origin
+#tissues = {1: brain, 2: liver, 3: kidney, 4: spleen, 5: heart, 6: blood, 7: fat, 8: lung, 9: eye, 10: gut}

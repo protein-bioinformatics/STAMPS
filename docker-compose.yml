@@ -1,0 +1,54 @@
+version: "3.6"
+services:
+  apache:
+    image: do1-aps-feris.isas.de:5000/isas/stamps-apache:1.0.0
+    depends_on:
+     - mysql
+    ports:
+     - "8088:80"
+     - "8943:443"
+    networks:
+     - proxy
+     - stamps
+    secrets:
+     - stamps-config
+    volumes:
+            #     - ./apache/stamps/:/var/www/html/stamps/
+     - /etc/ssl/:/etc/ssl/:ro
+  mysql:
+    image: mysql:5.7.23
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: always
+    ports: 
+     - "23306:3306"
+    networks:
+     - stamps
+    secrets:
+     - qsdb-mysql-root
+     - qsdb-mysql-user
+     - qsdb-mysql-password
+    environment:
+     - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/qsdb-mysql-root
+     - MYSQL_DATABASE=qsdb
+     - MYSQL_USER_FILE=/run/secrets/qsdb-mysql-user
+     - MYSQL_PASSWORD_FILE=/run/secrets/qsdb-mysql-password
+    volumes:
+     - ./mysql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+     - /var/data/stamps/mysql/:/var/lib/mysql/ 
+
+networks:
+  stamps:
+    external: true
+  proxy:
+    external: true
+secrets:
+  stamps-config:
+    external: true
+  qsdb-mysql-root:
+    external: true
+  qsdb-database:
+    external: true
+  qsdb-mysql-user:
+    external: true
+  qsdb-mysql-password:
+    external: true

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="qsdb.css">
+<script src="canvas2svg.js"></script>
+<script src="ms-view.js"></script>
+<script src="qsdb-functions.js"></script>
+<script src="qsdb.js"></script>
+<title>STAMPS Home</title>
+</head>
+
+<body>
+<div id="renderarea_wrapper" class="renderarea_wrapper"><canvas id="renderarea" class="renderarea">Your browser does not support the HTML5 canvas tag.</canvas></div>
+
+<div id="hint" style="position: fixed; top: 10px; left: 10px;">--</div>
+<div id="tooltip" class="tooltip"></div>
+
+
+<div id="navigation" class="navigation">
+    <table>
+    <tr>
+    <td width="50%"></td>
+    <td id="select_metabolic_pathway_nav" style="border-left: white; border-left-style: solid; border-left-width: 1px;" class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); select_metabolic_pathway();">
+        Metabolic&nbsp;Pathways
+    </td><td id="select_signaling_pathway_nav" class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); select_signaling_pathway();">
+        Signaling&nbsp;Pathways
+    </td><td id="select_species_nav" class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); select_species();">
+        Select&nbsp;Species
+    </td><td id="search_field_nav" class="navigation_cell" title="Search for name, definition, UniProt accession number, EC number or peptide amino sequence.">
+        <table><tr><td>Search: </td><td><input type="text" onkeyup="start_search();" onfocus="hide_infobox(); close_navigation(); start_search();" class="search_field" id="search_field" size=24></td></tr></table>
+    </td><td id="filter_panel_nav"  class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); open_filter_panel();" style="min-width: 100px; text-align: center;">
+        Filter
+    </td><td class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); back_function = hide_check_spectra; check_spectra();">
+        Check&nbsp;Spectra
+    </td><td class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); download_assay();">
+        Download&nbsp;Assay
+    </td><td class="navigation_cell_click" onclick="location.href = '.';" style="min-width: 100px; text-align: center;">
+        Back
+    </td>
+    <td width="50%"></td>
+    </tr>
+    </table>
+</div>
+
+<div id="filter_panel_wrapper" class="menu_extend_item"></div>
+<div id="menu_background" class="light_background" onclick="last_opened_menu = '';"></div>
+
+<div id="select_species" class="menu_extend_item">
+    <table id="select_species_table"></table>
+</div>
+
+<div id="select_metabolic_pathway" class="menu_extend_item"></div>
+<div id="select_signaling_pathway" class="menu_extend_item"></div>
+<div id="search_results" class="menu_extend_item"></div>
+<div id="animation_background" class="light_background"></div>
+
+
+
+
+<div id="download" class="download"></div>
+<div id="infobox_html" style="display: none; z-index: 120; position: fixed; padding: 25px;"></div>
+<div id="infobox_html_background" class="light_background"></div>
+
+<div id="statistics" class="statistics">
+    <table width="100%" height="100%" cellspacing="10px"><tr><td valign="top">
+        <font size="+2"><b>Statistics</b></font><p>
+        <table width="95%" cellpadding="5" cellspacing="0" style="border-top: 2px solid black; border-bottom: 2px solid black;">
+            <tr><td width="60%"><b>Pathway: </b></td><td id="stat_pathway"></td></td>
+            <tr><td><b>No. of total proteins: </b></td><td id="stat_num_prot"></td></td>
+            <tr><td><b>No. of filtered proteins: </b></td><td id="stat_filter_prot"></td></td>
+            <tr><td style="padding-bottom: 15px;"><b>No. of selected proteins: </b></td><td id="stat_sel_prot"></td></td>
+            <tr><td><b>No. of peptides: </b></td><td id="stat_num_pep"></td></td>
+            <tr><td><b>No. of filtered peptides: </b></td><td id="stat_filter_pep"></td></td>
+            <tr><td style="padding-bottom: 15px;"><b>No. of selected peptides: </b></td><td id="stat_sel_pep"></td></td>
+            <tr><td><b>No. of spectra: </b></td><td id="stat_num_spec"></td></td>
+            <tr><td><b>No. of filtered spectra: </b></td><td id="stat_filter_spec"></td></td>
+            <tr><td><b>No. of selected spectra: </b></td><td id="stat_sel_spec"></td></td>
+        </table><p />
+        &nbsp;<br>
+        <b>Validated proteins:</b><br>
+        <canvas id="piechart" width=160 height=160>Your browser does not support the HTML5 canvas tag.</canvas>
+        <table>
+            <tr><td bgcolor="#e5e5e5" width="25">&nbsp;</td><td>Not detected</td></tr>
+            <tr><td bgcolor="#ffbebe" width="25">&nbsp;</td><td>Top-<i>n</i> experiment</td></tr>
+            <tr><td bgcolor="#feff90" width="25">&nbsp;</td><td>PRM</td></tr>
+            <tr><td bgcolor="#a0ff90" width="25">&nbsp;</td><td>SRM + internal standard</td></tr>
+        </table><p />
+        &nbsp;<br>
+        <b>Browser view:</b><br>
+        <input type="text" size="30" id="browser_view" /><br>&nbsp;<br>
+        <b>Print version:</b><br>
+        <button onclick="pathway_to_svg();">Open pathway as svg</button>
+        &nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;<br>
+    </td></tr></table>
+</div>
+
+<div id="check_spectra" class="check_spectra"></div>
+<div id="waiting_background" class="light_background"></div>
+
+
+<div id="cookie_information" class="cookie_information">
+    <table width="100%" cellpadding="10" cellspacing="10">
+        <tr>
+            <td algin="left">
+                <b>Dear User,<br> <br>To provide you an optimal usage, we are using cookies. By using our web service, you are confirming the utilization of cookies. The cookie stores solely the current selection of your proteins for easy retrieval of your selected proteins when re-accessing the web site. No personal information are stored.<b>
+            </td>
+            <td>
+                <button onclick="read_cookie_information = true; setCookie(); document.getElementById('cookie_information').style.display = 'none';">Got&nbsp;it</button>
+            </td>
+        </tr>
+    </table>    
+</div>
+
+<div id="pathway_title_field" style="font-family: Arial; font-size: 20px; color: #aaaaaa; margin: 0px; position: absolute; z-index: 10; background-color: #f3f8ff; padding: 10px; border: 1px solid #aaaaaa;">
+    <b>Current pathway: <div style="display: inline;" id="pathway_title"></div></b>
+</div>
+
+
+<img src="images/zoom_in.png" id="zoom_in" style="display: none;">
+<img src="images/zoom_out.png" id="zoom_out" style="display: none;">
+<img src="images/expand.png" id="expand" style="display: none;">
+<img src="images/collapse.png" id="collapse" style="display: none;">
+
+</body>
+<script>
+    var qsdb_domain = true;
+    document.getElementById("check_spectra").innerHTML = get_check_spectra_content();
+    document.getElementById("waiting_background").innerHTML = get_waiting_background_content();
+    document.addEventListener('DOMContentLoaded', init, false);
+</script>
+</html> 
