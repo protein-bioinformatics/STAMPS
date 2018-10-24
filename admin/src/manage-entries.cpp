@@ -167,6 +167,7 @@ int main(int argc, char** argv) {
                 string filepath = parameters["root_path"] + "/admin/scripts";
                 string command = "java -cp " + filepath + "/cdk-2.0.jar:" + filepath + " DrawChem '" + filepath + "' '" + set_id + "' '" + set_value + "'";
                 int result = system(command.c_str());
+                replaceAll(set_value, "\\", "\\\\");
             } 
             
             string sql_query = "UPDATE " + set_table + " SET " + set_col + " = '" + set_value + "' WHERE id = " + set_id + ";";
@@ -247,7 +248,7 @@ int main(int argc, char** argv) {
                 for (int i = 2; i <= num_cols; ++i){
                     string content = res->getString(i);
                     replaceAll(content, "\n", "\\n");
-                    replaceAll(content, "\\C", "\\\\C");
+                    replaceAll(content, "\\", "\\\\");
                     data += ",\"" + content + "\"";
                 }
                 data += "]";

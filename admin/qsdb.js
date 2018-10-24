@@ -2258,12 +2258,13 @@ function manage_fill_table(){
     
     if (manage_current_entry == "proteins"){
         dom_th_del.innerHTML = "Del/Up";
-        dom_th_del.setAttribute("width", "64");
+        //dom_th_del.setAttribute("width", "64");
     }
     else {
         dom_th_del.innerHTML = "Del";
-        dom_th_del.setAttribute("width", "32");
+        //dom_th_del.setAttribute("width", "32");
     }
+    dom_th_del.setAttribute("width", "64");
     
     
     for (var i = 1; i <= manage_columns[manage_current_entry].length; ++i){
@@ -2273,7 +2274,7 @@ function manage_fill_table(){
         var col_name = manage_sort_columns[manage_current_entry][i].split(":")[0];
         dom_th_name.innerHTML = col_name + ((manage_sort_column == i) ? " " + sign_up : ((manage_sort_column == -i) ? " " + sign_down : ""));
         if (manage_current_entry == "proteins" && i == 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
-        else if (manage_current_entry == "metabolites" && i == 5) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
+        else if (manage_current_entry == "metabolites" && i == 6) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
         else if (manage_current_entry == "pathways" && i == 1) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 600px; max-width: 600px;");
         else if (manage_current_entry == "pathways" && i == 2) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 300px; max-width: 300px;");
         else if (manage_current_entry == "pathway_groups" && i == 1) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 700px; max-width: 700px;");
@@ -2549,8 +2550,7 @@ function manage_fill_table(){
                     var dom_td_del = document.createElement("td");
                     dom_tr.appendChild(dom_td_del);
                     dom_td_del.setAttribute("bgcolor", bg_color);
-                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
-                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 64px; max-width: 64px;");
                     var dom_image = document.createElement("img");
                     dom_td_del.appendChild(dom_image);
                     dom_image.setAttribute("src", "../images/delete-small.png");
@@ -2565,15 +2565,16 @@ function manage_fill_table(){
                             
                         var dom_div = document.createElement("div");
                         dom_td.appendChild(dom_div);
-                        if (j != 5) dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                        var smiles_col = 6;
+                        if (j != smiles_col) dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
                         else dom_td.setAttribute("style", "min-width: 1000px; max-width: 1000px;");
                         dom_div.setAttribute("onclick", "change_textfield_type(this, true);");
                         dom_div.setAttribute("style", "padding: 5px;");
-                        if (j != 5) dom_div.innerHTML = trim_text(row[j], 180);
+                        if (j != smiles_col) dom_div.innerHTML = trim_text(row[j], 180);
                         else dom_div.innerHTML = trim_text(row[j], 980);
                         dom_div.entity_id = row[0];
                         dom_div.col_id = j;
-                        dom_div.field_len = (j != 5) ? 200 : 1000;
+                        dom_div.field_len = (j != smiles_col) ? 200 : 1000;
                     }
                 }
                 
@@ -2590,8 +2591,7 @@ function manage_fill_table(){
                     var dom_td_del = document.createElement("td");
                     dom_tr.appendChild(dom_td_del);
                     dom_td_del.setAttribute("bgcolor", bg_color);
-                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
-                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 64px; max-width: 64px;");
                     var dom_image = document.createElement("img");
                     dom_td_del.appendChild(dom_image);
                     dom_image.setAttribute("src", "../images/delete-small.png");
@@ -2670,8 +2670,7 @@ function manage_fill_table(){
                     var dom_td_del = document.createElement("td");
                     dom_tr.appendChild(dom_td_del);
                     dom_td_del.setAttribute("bgcolor", bg_color);
-                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
-                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 32px; max-width: 32px;");
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 64px; max-width: 64px;");
                     var dom_image = document.createElement("img");
                     dom_td_del.appendChild(dom_image);
                     dom_image.setAttribute("src", "../images/delete-small.png");
@@ -2919,7 +2918,6 @@ function change_textfield_type(dom_obj, to_text){
         var field_len = dom_obj.field_len;
         
         var request = "action=set&table=" + manage_current_entry + "&id=" + entity_id + "&column=" + manage_columns[manage_current_entry][col_id - 1] + "&value=" + encodeURL(content);
-        
         
         var result = update_entry(request);
         if (!result){
