@@ -1665,10 +1665,10 @@ function update_ppm(ppm_ctx){
     
     var pw_option = document.getElementById("ppm_pw_figure_select").options[document.getElementById("ppm_pw_figure_select").selectedIndex];
     
-    
+    var boundaries = 10;
     var ppm_steps = 0.5;
-    var min_ppm = -6 - ppm_steps / 2;
-    var max_ppm = 6 + ppm_steps / 2;
+    var min_ppm = -1 * boundaries - ppm_steps / 2;
+    var max_ppm = boundaries + ppm_steps / 2;
     var num_bars = Math.floor((max_ppm - min_ppm) / ppm_steps);
             
     var ppm_histogram = new Array(num_bars).fill(0);

@@ -90,7 +90,7 @@ map < int, protein* >* all_proteins = 0;
 
 void print_out(string response, bool compress){
     replaceAll(response, "\n", "\\n");
-    replaceAll(response, "\\C", "\\\\C");
+    //replaceAll(response, "\\C", "\\\\C");
     if (compress){
         cout << compress_string(response);        
     }
@@ -139,6 +139,9 @@ int main(int argc, char** argv) {
         }
         else if (get_values.size() && get_values.at(0) == "species"){
             species = get_values.at(1);
+        }
+        else if (get_values.size() && get_values.at(0) == "compress"){
+            compress = get_values.at(1) != "false";
         }
     }
     if (pathway_id == "" || species == "" || !is_integer_number(pathway_id) || species.find("'") != string::npos){
@@ -253,6 +256,7 @@ int main(int argc, char** argv) {
         last_node->y = res->getString("y");
         last_node->c_number = res->getString("c_number");
         last_node->smiles = res->getString("smiles");
+        replaceAll(last_node->smiles, "\\", "\\\\");
         last_node->formula = res->getString("formula");
         last_node->exact_mass = res->getString("exact_mass");
         last_node->position = res->getString("position");
@@ -284,6 +288,7 @@ int main(int argc, char** argv) {
         last_node->y = res->getString("y");
         last_node->c_number = res->getString("c_number");
         last_node->smiles = res->getString("smiles");
+        replaceAll(last_node->smiles, "\\", "\\\\");
         last_node->formula = res->getString("formula");
         last_node->exact_mass = res->getString("exact_mass");
         last_node->position = res->getString("position");
