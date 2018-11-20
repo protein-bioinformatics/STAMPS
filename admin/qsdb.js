@@ -309,15 +309,7 @@ function init(){
     xmlhttp_pw_col.send();
     
     
-    var xmlhttp_matomo = new XMLHttpRequest();
-    xmlhttp_matomo.onreadystatechange = function() {
-        if (xmlhttp_matomo.readyState == 4 && xmlhttp_matomo.status == 200) {
-            var matomo = xmlhttp_matomo.responseText;
-        }
-    }
-    xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=stamp-editor&e_a=request", true);
-    xmlhttp_matomo.send();
-    
+    analytics("stamps-editor-request");
 }
 
 

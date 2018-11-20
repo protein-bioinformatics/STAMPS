@@ -4032,18 +4032,24 @@ function download_assay(){
             html += "<button onclick=\"hide_download();\">Close Window</button></td></tr></table>"
             document.getElementById("download").innerHTML = html;
             
-            var xmlhttp_matomo = new XMLHttpRequest();
-            xmlhttp_matomo.onreadystatechange = function() {
-                if (xmlhttp_matomo.readyState == 4 && xmlhttp_matomo.status == 200) {
-                    var matomo = xmlhttp_matomo.responseText;
-                }
-            }
-            xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=stamp=download", true);
-            xmlhttp_matomo.send();
+            analytics("stamps-download");
         }
     }
     xmlhttp.open("GET", request, true);
     xmlhttp.send();
+}
+
+
+
+function analytics(action){
+    var xmlhttp_matomo = new XMLHttpRequest();
+    xmlhttp_matomo.onreadystatechange = function() {
+        if (xmlhttp_matomo.readyState == 4 && xmlhttp_matomo.status == 200) {
+            var matomo = xmlhttp_matomo.responseText;
+        }
+    }
+    xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=BMBF Metrics&e_a=" + action, true);
+    xmlhttp_matomo.send();
 }
 
 

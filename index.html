@@ -3141,14 +3141,8 @@ if (mobile_check()){
     alert("We recognized, that you are browsing with a mobile device. We strongly recommend to browse STAMPS from a desktop computer or laptop. Some functionality may not work. Due to high data traffic, some information provision is turned off. We apologize for the inconvenience.");
 }
 
-var xmlhttp_matomo = new XMLHttpRequest();
-xmlhttp_matomo.onreadystatechange = function() {
-    if (xmlhttp_matomo.readyState == 4 && xmlhttp_matomo.status == 200) {
-        var matomo = xmlhttp_matomo.responseText;
-    }
-}
-xmlhttp_matomo.open("GET", "https://lifs.isas.de/piwik/piwik.php?idsite=1&rec=1&e_c=stamp&e_a=request", true);
-xmlhttp_matomo.send();
+
+analytics("stamps-request");
 
 resize_views();
 </script>
