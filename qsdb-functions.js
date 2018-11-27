@@ -137,8 +137,10 @@ protein_stroke_color = "#f69301";
 protein_unconnected_stroke_color = "#7eaddd";
 protein_fill_color = "#fff6d5";
 protein_disabled_stroke_color = "#cccccc";
-label_color = "#777777";
 protein_disabled_fill_color = "#eeeeee";
+membrane_fill_color = "#eeeeee";
+membrane_stroke_color = "#cccccc";
+label_color = "#777777";
 metabolite_stroke_color = "#f69301";
 metabolite_label_stroke_color = "#999999";
 metabolite_highlight_label_stroke_color = "#000000";
@@ -2344,8 +2346,8 @@ function node(data){
                 }
                 
                 
-                ctx.fillStyle = metabolite_fill_color;
-                ctx.strokeStyle = this.selected ? node_selected_color : metabolite_stroke_color;
+                ctx.fillStyle = membrane_fill_color;
+                ctx.strokeStyle = this.selected ? node_selected_color : membrane_stroke_color;
                 ctx.lineWidth = this.lw * factor;
                 
                 
