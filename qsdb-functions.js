@@ -4021,8 +4021,9 @@ function download_assay(){
     
     var xmlhttp = new XMLHttpRequest();
     var download_link = "";
-    var request = file_pathname + "scripts/prepare-download.py?proteins=" + proteins_list + "&species=" + current_species;
-    
+    var request = "proteins=" + proteins_list + "&species=" + current_species;
+    console.log(request);
+
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             download_link = file_pathname + xmlhttp.responseText;
@@ -4037,8 +4038,8 @@ function download_assay(){
             analytics("stamps-download");
         }
     }
-    xmlhttp.open("GET", request, true);
-    xmlhttp.send();
+    xmlhttp.open("POST", file_pathname + "scripts/prepare-download.py", true);
+    xmlhttp.send(request);
 }
 
 

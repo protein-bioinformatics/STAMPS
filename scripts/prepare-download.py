@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+
 from pymysql import connect, cursors
 import cgi, cgitb
 import sqlite3
@@ -8,6 +9,7 @@ import os
 import hashlib
 import zlib
 import struct
+
 
 
 acids = {}
@@ -241,18 +243,19 @@ with open("../admin/qsdb.conf", mode="rt") as fl:
         token = line.split("=")
         if len(token) < 2: continue
         conf[token[0].strip(" ")] = token[1].strip(" ")
-
 print("Content-Type: text/html")
 print()
 
 
 
-form = cgi.FieldStorage()
+
+form = cgi.FieldStorage(environ={'REQUEST_METHOD':'POST'})
+
+if "proteins" not in form:
+    print("ready")
+    exit()
+
 proteins = form.getvalue('proteins')
-
-
-
-
 
 spectra = []
 species = form.getvalue('species')
