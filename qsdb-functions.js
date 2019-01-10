@@ -3935,7 +3935,7 @@ function change_pathway(p){
         current_pathway = p;
         update_browser_link();
         var pw_name = replaceAll(replaceAll(pathways[p][0], "-\n", ""), "\n", " ");
-        document.title = "STAMP Home - " + pw_name;
+        document.title = "STAMPS Home - " + pw_name;
         document.getElementById('pathway_title').innerHTML = pw_name;
         
         var metabolic_pw_menu = document.getElementById('metabolic_pathway_menu');
