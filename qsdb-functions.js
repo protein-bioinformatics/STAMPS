@@ -4022,7 +4022,6 @@ function download_assay(){
     var xmlhttp = new XMLHttpRequest();
     var download_link = "";
     var request = "proteins=" + proteins_list + "&species=" + current_species;
-    console.log(request);
 
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -5007,22 +5006,24 @@ function compute_statistics(){
     var sel_proteins = 0;
     var sel_peptides = 0;
     var sel_spectra = 0;
-    num_validation = [0, 0, 0, 0, 0, 0, 0, 0]; // n, t, p, i, tp, ti, pi, tpi
+    num_validation = [0, 0, 0, 0, 0, 0, 0, 0]; // no validation, Top-n, PRM, SRM + internal standard, Top-n and PRM, Top-n and SRM + internal standard, PRM and SRM + internal standard, Top-n and PRM and SRM + internal standard
     proteins_content.forEach (prot_id => {
         var prot = protein_dictionary[prot_id];
         var tmp = prot.get_statistics();
         valid_proteins += prot.filter_valid;
         num_peptides += tmp[2];
-        valid_peptides += tmp[3];
+        if (prot.filter_valid) valid_peptides += tmp[3];
         num_spectra += tmp[4];
-        valid_spectra += tmp[5];
+        if (prot.filter_valid) valid_spectra += tmp[5];
         num_validation[prot.get_validation()] += 1;
+        
         if (prot_id in basket){
             sel_proteins += 1;
             sel_peptides += tmp[3];
             sel_spectra += tmp[5];
         }
     });
+    
     
     document.getElementById("stat_num_prot").innerHTML = num_proteins;
     document.getElementById("stat_filter_prot").innerHTML = valid_proteins + " / " + round10(valid_proteins / proteins_content.size * 100, 1) + "%";
@@ -5142,6 +5143,7 @@ function hide_statistics(){
 
 function close_navigation(){
     hide_filter_panel();
+    collapse_statistics();
     for (var i = 0; i < navigation_content.length; ++i){
         document.getElementById(navigation_content[i]).style.display = "none";
     }
