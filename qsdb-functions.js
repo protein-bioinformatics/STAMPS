@@ -5129,7 +5129,7 @@ function expand_statistics(){
 
 function collapse_statistics(){
     if (!pathway_is_loaded) return;
-    expand_collapse_obj.collapse();
+    if (expand_collapse_obj != 0) expand_collapse_obj.collapse();
 }    
     
 function hide_statistics(){
