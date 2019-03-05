@@ -217,7 +217,7 @@ def annotation(peaks, peptideModSeq):
                     pk[2] = i + 1
                     pk[3] = AA
                     pk[4] = "y"
-                    pk[5] = mass - (H - electron) * crg
+                    pk[5] = mass
                     pk[6] = crg
                     pk[7] = loss_modification
                     
