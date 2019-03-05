@@ -589,7 +589,7 @@ with open(skyline_file, mode = "wt") as out_skyline_file:
                     out_skyline_file.write("        <transition fragment_type=\"%s\" fragment_ordinal=\"%i\" calc_neutral_mass=\"%0.5f\" product_charge=\"%i\" cleavage_aa=\"%s\" loss_neutral_mass=\"0\">\n" % (f_type, ordinal, neutral_mass, charge, cleavage_AA))
                 
                     out_skyline_file.write("          <precursor_mz>%0.5f</precursor_mz>\n" % precursor_mz)
-                    out_skyline_file.write("          <product_mz>%0.5f</product_mz>\n" % ((neutral_mass + ((charge - 1) * H)) / charge))
+                    out_skyline_file.write("          <product_mz>%0.5f</product_mz>\n" % ((neutral_mass + charge * H) / charge))
                     out_skyline_file.write("          <collision_energy>0</collision_energy>\n")
                     if peaks[i][7]:
                         out_skyline_file.write("          <losses>\n")

@@ -5139,8 +5139,6 @@ function hide_statistics(){
 }
 
 
-
-
 function close_navigation(){
     hide_filter_panel();
     collapse_statistics();
