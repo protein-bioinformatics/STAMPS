@@ -39,6 +39,7 @@ acids['V'] =  99.068410
 H =       1.007276
 C12 =    12.000000
 O =      15.994914
+H2O =    18.009466
 H3O =    19.016742
 O2 =     31.989829
 acetyl = 43.016742
@@ -202,7 +203,7 @@ def annotation(peaks, peptideModSeq):
     """
     
     # annotate y-ions
-    mass = H3O
+    mass = H2O
     loss_modification = False
     for i, AA in enumerate(rev_peptide):
         if i + 1 == len(rev_peptide): break
@@ -210,14 +211,15 @@ def annotation(peaks, peptideModSeq):
         if AA == "m": loss_modification = True
         for crg in range(1, 4):
             if mass >= 800 * (crg - 1):
-                diff_mass = binary_search(peaks, (mass + H * (crg - 1)) / crg)
+                diff_mass = binary_search(peaks, (mass + (H - electron) * crg) / crg)
                 if diff_mass[0] < tolerance:
-                    peaks[diff_mass[1]][2] = i + 1
-                    peaks[diff_mass[1]][3] = AA
-                    peaks[diff_mass[1]][4] = "y"
-                    peaks[diff_mass[1]][5] = mass - (H - electron) * crg
-                    peaks[diff_mass[1]][6] = crg
-                    peaks[diff_mass[1]][7] = loss_modification
+                    pk = peaks[diff_mass[1]]
+                    pk[2] = i + 1
+                    pk[3] = AA
+                    pk[4] = "y"
+                    pk[5] = mass - (H - electron) * crg
+                    pk[6] = crg
+                    pk[7] = loss_modification
                     
                     
 
@@ -570,7 +572,7 @@ with open(skyline_file, mode = "wt") as out_skyline_file:
                 except: pass
                 intensities = struct.unpack("%if" % (len(intensities) / 4), intensities)
                 
-                peaks = [[m, i, -1, "-", "-", -1, -1, False] for m, i in zip(masses, intensities)] # mass, intensity, annotation, AA, b / y, mass, charge, loss modification
+                peaks = [[m, i, -1, "-", "-", -1, -1, False] for m, i in zip(masses, intensities)] # mass, intensity, annotation, AA, b / y, neutral_mass, charge, loss modification
                 
                 
                 
