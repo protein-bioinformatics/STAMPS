@@ -221,7 +221,7 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
                     <td><input type=\"checkbox\" id=\"check_gut\" /> Gut</td> \
                 </tr> \
         <tr><td colspan=\"2\">&nbsp;<br>Report:</td></tr> \
-        <tr><td>Max. precursor charge</td><td><select id=\"max_topn_fragments\"><option>3</option><option>6</option><option>all</option></select><td></tr> \
+        <tr><td>Top-n fragments</td><td><select id=\"max_topn_fragments\"><option>3</option><option>6</option><option>all</option></select><td></tr> \
         <tr><td>Ions</td><td><select id=\"ions\"><option>y</option><option>b</option><option>y, b</option></select><td></tr> \
         <tr><td colspan=\"2\"><br>Validation:<br>\
         <input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment&nbsp;<font color='#ffbebe'>●</font><br> \
@@ -326,7 +326,7 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
         <td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \
             <table> \
                 <tr><td colspan=\"2\">Report:</td><td></tr> \
-                <tr><td>Max. precursor charge</td><td><select id=\"max_topn_fragments\"><option>3</option><option>6</option><option>all</option></select><td></tr> \
+                <tr><td>Top-n fragments</td><td><select id=\"max_topn_fragments\"><option>3</option><option>6</option><option>all</option></select><td></tr> \
                 <tr><td>Ions</td><td><select id=\"ions\"><option>y</option><option>b</option><option>y, b</option></select><td></tr> \
             </table> \
         </td> \

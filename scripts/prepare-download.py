@@ -261,7 +261,7 @@ proteins = form.getvalue('proteins')
 
 spectra = []
 species = form.getvalue('species')
-top_n_fragments = form.getvalue('topnfragments') if "topnfragments" in form else 3
+top_n_fragments = int(form.getvalue('topnfragments')) if "topnfragments" in form else 3
 ions = set(form.getvalue('ions').split("|")) if "ions" in form else set("y")
 
 proteins = proteins.replace("'", "")
