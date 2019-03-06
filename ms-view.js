@@ -17,8 +17,10 @@ tolerance_absolute = 0.02;
 H =       1.007276;
 C12 =    12.000000;
 O =      15.994914;
+H2O =    18.009466
 H3O =    19.016742;
 O2 =     31.989829;
+electron = 0.00054857990946;
 acetyl = 43.016742;
 peptide = "";
 peptide_mod = "";
@@ -29,7 +31,7 @@ grid_color = "#DDDDDD";
 label_color = "black";
 var ion_type = {no_type: 0, a_type: 1, b_type: 2, c_type: 3, x_type: 4, y_type: 5, z_type: 6, precursor: 7, immonium: 8};
 var ion_type_colors = ["#888888", "#888888", "#0056af", "#888888", "#888888", "#D40000", "#888888", "#c89200", "#ff9600"];
-
+var current_loaded_spectrum = -1;
 
 
 
@@ -113,7 +115,7 @@ function subscripting(x){
 
 
 
-function annotation(){
+function annotation(ions){
     // annotate y-ions
     var tolerance = (document.getElementById("radio_ppm").checked ? tolerance_relative : tolerance_absolute);
     var rev_peptide = peptide_mod.split("").reverse().join("");
@@ -126,6 +128,7 @@ function annotation(){
     }
     
     // annotate immonium ions
+    /*
     for (var i = 0; i < peptide_mod.length; ++i){
         mass = acids[peptide_mod[i]] - C12 - O + H;
         var diff_mass = binary_search(mass);
@@ -135,36 +138,41 @@ function annotation(){
             peaks[diff_mass[1]].annotation = peptide_mod[i];
         }
     }
+    */
     
     
     // annotate b-ions
-    mass = H;
-    for (var i = 0; i < peptide_mod.length; ++i){
-        mass += acids[peptide_mod[i]];
-        
-        for (var crg = 1; crg <= charge; ++crg){
-            if (mass >= 800 * (crg - 1)){
-                var diff_mass = binary_search((mass + (crg - 1)) / crg);
-                if (diff_mass[0] < tolerance){
-                    peaks[diff_mass[1]].highlight = true;
-                    peaks[diff_mass[1]].type = ion_type.b_type;
-                    peaks[diff_mass[1]].annotation = "b" + subscripting(i + 1) + (crg > 1 ? charge_plus(crg) : "");
+    if (ions.has("b")){
+        mass = 0;
+        for (var i = 0; i < peptide_mod.length; ++i){
+            mass += acids[peptide_mod[i]];
+            
+            for (var crg = 1; crg <= charge; ++crg){
+                if (mass >= 800 * (crg - 1)){
+                    var diff_mass = binary_search((mass + (H - electron) * crg) / crg);
+                    if (diff_mass[0] < tolerance){
+                        peaks[diff_mass[1]].highlight = true;
+                        peaks[diff_mass[1]].type = ion_type.b_type;
+                        peaks[diff_mass[1]].annotation = "b" + subscripting(i + 1) + (crg > 1 ? charge_plus(crg) : "");
+                    }
                 }
             }
         }
     }
     
     // annotate y-ions
-    mass = H3O;
-    for (var i = 0; i < rev_peptide.length; ++i){
-        mass += acids[rev_peptide[i]];
-        for (var crg = 1; crg <= charge; ++crg){
-            if (mass >= 800 * (crg - 1)){
-            var diff_mass = binary_search((mass + (crg - 1)) / crg);
-                if (diff_mass[0] < tolerance){
-                    peaks[diff_mass[1]].highlight = true;
-                    peaks[diff_mass[1]].type = ion_type.y_type;
-                    peaks[diff_mass[1]].annotation = "y" + subscripting(i + 1) + (crg > 1 ? charge_plus(crg) : "");
+    if (ions.has("y")){
+        mass = H2O;
+        for (var i = 0; i < rev_peptide.length; ++i){
+            mass += acids[rev_peptide[i]];
+            for (var crg = 1; crg <= charge; ++crg){
+                if (mass >= 800 * (crg - 1)){
+                var diff_mass = binary_search((mass + (H - electron) * crg) / crg);
+                    if (diff_mass[0] < tolerance){
+                        peaks[diff_mass[1]].highlight = true;
+                        peaks[diff_mass[1]].type = ion_type.y_type;
+                        peaks[diff_mass[1]].annotation = "y" + subscripting(i + 1) + (crg > 1 ? charge_plus(crg) : "");
+                    }
                 }
             }
         }
@@ -239,7 +247,8 @@ function change_match_error_value(){
             tolerance_absolute = parseFloat(n);
         }
         if (spectrum_loaded){
-            annotation();
+            ions = new Set(ion_types[filter_parameters["ions"]].split("|"));
+            annotation(ions);
             draw_spectrum();
         }
     }
@@ -259,7 +268,8 @@ function change_match_error(){
         document.getElementById("error_value").value = tolerance_absolute;
     }
     if (spectrum_loaded){
-        annotation();
+        ions = new Set(ion_types[filter_parameters["ions"]].split("|"));
+        annotation(ions);
         draw_spectrum();
     }
 }
@@ -271,6 +281,7 @@ function load_spectrum(spectrum_id){
     var ctx = c.getContext("2d");
     ms_zoom = 0;
     peaks = [];
+    current_loaded_spectrum = spectrum_id;
     
     var spectrum_data = 0;
     var xmlhttp = new XMLHttpRequest();
@@ -320,7 +331,8 @@ function load_spectrum(spectrum_id){
     }
     spectrum_loaded = true;
     
-    annotation();
+    ions = new Set(ion_types[filter_parameters["ions"]].split("|"));
+    annotation(ions);
     draw_spectrum();
 }
 
@@ -449,28 +461,34 @@ function draw_spectrum(ctx){
                 ctx.stroke();
             }
             else {
-                annotated.push(i);
+                annotated.push(peaks[i]);
             }
         }
     }
     
+    
+    annotated.sort(function(a, b) {
+        return b.intensity - a.intensity;
+    });
+    
+    
     // draw annotated peaks
     ctx.lineWidth = 2;
     ctx.font="16px Arial";
-    for (var i = 0; i < annotated.length; ++i) {
-        ctx.strokeStyle = ion_type_colors[peaks[annotated[i]].type];
+    for (var i = 0; i < Math.min(top_n_fragments[filter_parameters["max_topn_fragments"]], annotated.length); ++i) {
+        ctx.strokeStyle = ion_type_colors[annotated[i].type];
         ctx.beginPath();
-        ctx.moveTo(peaks[annotated[i]].x, zero_y);
-        ctx.lineTo(peaks[annotated[i]].x, zero_y - peaks[annotated[i]].intensity * y_factor);    
+        ctx.moveTo(annotated[i].x, zero_y);
+        ctx.lineTo(annotated[i].x, zero_y - annotated[i].intensity * y_factor);    
         ctx.closePath();
         ctx.stroke();
     }
     
     // draw annotations
-    for (var i = 0; i < annotated.length; ++i) {
+    for (var i = 0; i < Math.min(top_n_fragments[filter_parameters["max_topn_fragments"]], annotated.length); ++i) {
         ctx.textAlign = "center";
         ctx.textBaseline = 'bottom';
-        ctx.fillText(peaks[annotated[i]].annotation, peaks[annotated[i]].x, zero_y - peaks[annotated[i]].intensity * y_factor - y_offset);
+        ctx.fillText(annotated[i].annotation, annotated[i].x, zero_y - annotated[i].intensity * y_factor - y_offset);
     }
     
     

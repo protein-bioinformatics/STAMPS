@@ -175,7 +175,7 @@ def binary_search(peaks, key):
 
 
 
-def annotation(peaks, peptideModSeq):
+def annotation(peaks, peptideModSeq, ions):
     # annotate y-ions
     tolerance = 0.02 # dalton
     peptideModSeq = peptideModSeq.replace("C[+57.0]", "c")
@@ -185,41 +185,41 @@ def annotation(peaks, peptideModSeq):
     
     
     # annotate b-ions
-    """
-    mass = H
-    for i, AA in enumerate(peptideModSeq):
-        if i + 1 == len(rev_peptide): break
-        mass += acids[AA]
-        
-        for crg in range(1, 4):
-            if mass >= 800 * (crg - 1):
-                diff_mass = binary_search(peaks, (mass + H * (crg - 1)) / crg)
-                if diff_mass[0] < tolerance:
-                    peaks[diff_mass[1]][2] = i + 1
-                    peaks[diff_mass[1]][3] = AA
-                    peaks[diff_mass[1]][4] = "b"
-                    peaks[diff_mass[1]][5] = mass - (H - electron) * crg
-                    peaks[diff_mass[1]][6] = crg
-    """
+    if "b" in ions:
+        mass = 0
+        for i, AA in enumerate(peptideModSeq):
+            if i + 1 == len(rev_peptide): break
+            mass += acids[AA]
+            
+            for crg in range(1, 4):
+                if mass >= 800 * (crg - 1):
+                    diff_mass = binary_search(peaks, (mass + (H - electron) * crg) / crg)
+                    if diff_mass[0] < tolerance:
+                        peaks[diff_mass[1]][2] = i + 1
+                        peaks[diff_mass[1]][3] = AA
+                        peaks[diff_mass[1]][4] = "b"
+                        peaks[diff_mass[1]][5] = mass
+                        peaks[diff_mass[1]][6] = crg
     
     # annotate y-ions
-    mass = H2O
-    loss_modification = False
-    for i, AA in enumerate(rev_peptide):
-        if i + 1 == len(rev_peptide): break
-        mass += acids[AA]
-        if AA == "m": loss_modification = True
-        for crg in range(1, 4):
-            if mass >= 800 * (crg - 1):
-                diff_mass = binary_search(peaks, (mass + (H - electron) * crg) / crg)
-                if diff_mass[0] < tolerance:
-                    pk = peaks[diff_mass[1]]
-                    pk[2] = i + 1
-                    pk[3] = AA
-                    pk[4] = "y"
-                    pk[5] = mass
-                    pk[6] = crg
-                    pk[7] = loss_modification
+    if "y" in ions:
+        mass = H2O
+        loss_modification = False
+        for i, AA in enumerate(rev_peptide):
+            if i + 1 == len(rev_peptide): break
+            mass += acids[AA]
+            if AA == "m": loss_modification = True
+            for crg in range(1, 4):
+                if mass >= 800 * (crg - 1):
+                    diff_mass = binary_search(peaks, (mass + (H - electron) * crg) / crg)
+                    if diff_mass[0] < tolerance:
+                        pk = peaks[diff_mass[1]]
+                        pk[2] = i + 1
+                        pk[3] = AA
+                        pk[4] = "y"
+                        pk[5] = mass
+                        pk[6] = crg
+                        pk[7] = loss_modification
                     
                     
 
@@ -261,6 +261,8 @@ proteins = form.getvalue('proteins')
 
 spectra = []
 species = form.getvalue('species')
+top_n_fragments = form.getvalue('topnfragments') if "topnfragments" in form else 3
+ions = set(form.getvalue('ions').split("|")) if "ions" in form else set("y")
 
 proteins = proteins.replace("'", "")
 proteins = proteins.replace(" ", "")
@@ -576,12 +578,12 @@ with open(skyline_file, mode = "wt") as out_skyline_file:
                 
                 
                 
-                annotation(peaks, peptideModSeq)                    # peak annotation
+                annotation(peaks, peptideModSeq, ions)              # peak annotation
                 peaks = [t for t in peaks if t[2] > -1]             # removing unannotated peaks
                 peaks.sort(key = lambda x: x[1], reverse = True)    # desc sorting according to intensity
                 
                 # for top three
-                for i in range(min(3, len(peaks))):
+                for i in range(min(top_n_fragments, len(peaks))):
                     f_type = peaks[i][4]
                     ordinal = peaks[i][2]
                     neutral_mass = peaks[i][5]

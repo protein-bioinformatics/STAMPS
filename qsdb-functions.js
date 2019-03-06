@@ -15,10 +15,14 @@ filter_parameters = {};
 supported_species = {"mouse": "Mouse"};
 //supported_species = {"mouse": "Mouse", "human": "Human", "rat": "Rat"};
 current_species = "";
+top_n_fragments = [3, 6, 1000];
+ion_types = ["y", "b", "b|y"];
 filter_parameters["min_peptide_length"] = 8;
 filter_parameters["max_peptide_length"] = 25;
 filter_parameters["min_precursor_charge"] = 2;
 filter_parameters["max_precursor_charge"] = 3;
+filter_parameters["max_topn_fragments"] = 2;
+filter_parameters["ions"] = 0;
 filter_parameters["oxy_m_off"] = true;
 filter_parameters["oxy_m_var"] = false;
 filter_parameters["oxy_m_fix"] = false;
@@ -216,6 +220,9 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
                 <tr><td><input type=\"checkbox\" id=\"check_eye\" /> Eye</td> \
                     <td><input type=\"checkbox\" id=\"check_gut\" /> Gut</td> \
                 </tr> \
+        <tr><td colspan=\"2\">&nbsp;<br>Report:</td></tr> \
+        <tr><td>Max. precursor charge</td><td><select id=\"max_topn_fragments\"><option>3</option><option>6</option><option>all</option></select><td></tr> \
+        <tr><td>Ions</td><td><select id=\"ions\"><option>y</option><option>b</option><option>y, b</option></select><td></tr> \
         <tr><td colspan=\"2\"><br>Validation:<br>\
         <input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment&nbsp;<font color='#ffbebe'>🌑</font><br> \
         <input type=\"checkbox\" id=\"validation_prm\" /> PRM&nbsp;<font color='#feff90'>🌑</font><br> \
@@ -226,6 +233,8 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
         document.getElementById('max_peptide_length').value = 25; \
         document.getElementById('min_precursor_charge').value = 2; \
         document.getElementById('max_precursor_charge').value = 3; \
+        document.getElementById('max_topn_fragments').selectedIndex = 2; \
+        document.getElementById('ions').selectedIndex = 0; \
         document.getElementById('oxy_m_off').checked = true; \
         document.getElementById('carba_c_off').checked = true; \
         document.getElementById('check_brain').checked = true; \
@@ -259,6 +268,8 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
             document.getElementById('max_peptide_length').value = 25; \
             document.getElementById('min_precursor_charge').value = 2; \
             document.getElementById('max_precursor_charge').value = 3; \
+            document.getElementById('max_topn_fragments').selectedIndex = 2; \
+            document.getElementById('ions').selectedIndex = 0; \
             document.getElementById('oxy_m_off').checked = true; \
             document.getElementById('carba_c_off').checked = true; \
             document.getElementById('check_brain').checked = true; \
@@ -310,6 +321,13 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
                 <tr><td><input type=\"checkbox\" id=\"check_eye\" /> Eye</td> \
                     <td><input type=\"checkbox\" id=\"check_gut\" /> Gut</td> \
                 </tr> \
+            </table> \
+        </td> \
+        <td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \
+            <table> \
+                <tr><td colspan=\"2\">Report:</td><td></tr> \
+                <tr><td>Max. precursor charge</td><td><select id=\"max_topn_fragments\"><option>3</option><option>6</option><option>all</option></select><td></tr> \
+                <tr><td>Ions</td><td><select id=\"ions\"><option>y</option><option>b</option><option>y, b</option></select><td></tr> \
             </table> \
         </td> \
         <td valign=\"top\"> \
@@ -4021,7 +4039,7 @@ function download_assay(){
     
     var xmlhttp = new XMLHttpRequest();
     var download_link = "";
-    var request = "proteins=" + proteins_list + "&species=" + current_species;
+    var request = "proteins=" + proteins_list + "&species=" + current_species + "&topnfragments=" + top_n_fragments[filter_parameters['max_topn_fragments']] + "&ions=" + ion_types[filter_parameters['ions']];
 
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -4834,6 +4852,8 @@ function adopt_filter_parameters(){
     filter_parameters["max_peptide_length"] = document.getElementById("max_peptide_length").value;
     filter_parameters["min_precursor_charge"] = document.getElementById("min_precursor_charge").value;
     filter_parameters["max_precursor_charge"] = document.getElementById("max_precursor_charge").value;
+    filter_parameters["max_topn_fragments"] = document.getElementById("max_topn_fragments").selectedIndex;
+    filter_parameters["ions"] = document.getElementById("ions").selectedIndex;
     filter_parameters["oxy_m_off"] = document.getElementById("oxy_m_off").checked;
     filter_parameters["oxy_m_var"] = document.getElementById("oxy_m_var").checked;
     filter_parameters["oxy_m_fix"] = document.getElementById("oxy_m_fix").checked;
@@ -4862,6 +4882,8 @@ function load_filter_parameters(){
     document.getElementById("max_peptide_length").value = filter_parameters["max_peptide_length"];
     document.getElementById("min_precursor_charge").value = filter_parameters["min_precursor_charge"];
     document.getElementById("max_precursor_charge").value = filter_parameters["max_precursor_charge"];
+    document.getElementById("max_topn_fragments").selectedIndex = filter_parameters["max_topn_fragments"];
+    document.getElementById("ions").selectedIndex = filter_parameters["ions"];
     document.getElementById("oxy_m_off").checked = filter_parameters["oxy_m_off"];
     document.getElementById("oxy_m_var").checked = filter_parameters["oxy_m_var"];
     document.getElementById("oxy_m_fix").checked = filter_parameters["oxy_m_fix"];
@@ -4894,6 +4916,8 @@ function hide_filter_panel(){
         if (filter_parameters["max_peptide_length"] != document.getElementById("max_peptide_length").value) filter_changed = true;
         if (filter_parameters["min_precursor_charge"] != document.getElementById("min_precursor_charge").value) filter_changed = true;
         if (filter_parameters["max_precursor_charge"] != document.getElementById("max_precursor_charge").value) filter_changed = true;
+        if (filter_parameters["max_topn_fragments"] != document.getElementById("max_topn_fragments").selectedIndex) filter_changed = true;
+        if (filter_parameters["ions"] != document.getElementById("ions").selectedIndex) filter_changed = true;
         if (filter_parameters["oxy_m_off"] != document.getElementById("oxy_m_off").checked) filter_changed = true;
         if (filter_parameters["oxy_m_var"] != document.getElementById("oxy_m_var").checked) filter_changed = true;
         if (filter_parameters["oxy_m_fix"] != document.getElementById("oxy_m_fix").checked) filter_changed = true;
@@ -5548,6 +5572,7 @@ function filter_settings_clicked(){
             protein_dictionary[key].filtering();
         }
         check_spectra();
+        if (current_loaded_spectrum != -1) load_spectrum(current_loaded_spectrum);
     }
 }
 
