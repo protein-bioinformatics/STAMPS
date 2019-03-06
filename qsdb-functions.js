@@ -285,7 +285,7 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
             document.getElementById('validation_top_n').checked = true; \
             document.getElementById('validation_prm').checked = true; \
             document.getElementById('validation_is').checked = true; \
-            document.getElementById('enable_unreviewed').checked = true; \
+            document.getElementById('enable_unreviewed').checked = false; \
             ;\">default settings</td></tr> \
         </table></td> \
         <td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \

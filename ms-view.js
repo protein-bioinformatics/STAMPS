@@ -128,7 +128,6 @@ function annotation(ions){
     }
     
     // annotate immonium ions
-    /*
     for (var i = 0; i < peptide_mod.length; ++i){
         mass = acids[peptide_mod[i]] - C12 - O + H;
         var diff_mass = binary_search(mass);
@@ -138,7 +137,6 @@ function annotation(ions){
             peaks[diff_mass[1]].annotation = peptide_mod[i];
         }
     }
-    */
     
     
     // annotate b-ions
@@ -451,6 +449,7 @@ function draw_spectrum(ctx){
     var y_factor = (bottom_border - top_border) / max_intensity;
     var y_offset = 5;
     var annotated = [];
+    var annotated_rest = [];
     for (var i = 0; i < peaks.length; ++i) {
         if (left_border <= peaks[i].x && peaks[i].x <= right_border){
             if (peaks[i].type == ion_type.no_type){
@@ -461,10 +460,38 @@ function draw_spectrum(ctx){
                 ctx.stroke();
             }
             else {
-                annotated.push(peaks[i]);
+                if (peaks[i].type == ion_type.y_type || peaks[i].type == ion_type.b_type){
+                    annotated.push(peaks[i]);
+                }
+                else {
+                    annotated_rest.push(peaks[i]);
+                }
+                
             }
         }
     }
+    
+    
+    // draw annotated immoniums and precursors
+    ctx.lineWidth = 2;
+    ctx.font="16px Arial";
+    for (var i = 0; i < annotated_rest.length; ++i) {
+        ctx.strokeStyle = ion_type_colors[annotated_rest[i].type];
+        ctx.beginPath();
+        ctx.moveTo(annotated_rest[i].x, zero_y);
+        ctx.lineTo(annotated_rest[i].x, zero_y - annotated_rest[i].intensity * y_factor);    
+        ctx.closePath();
+        ctx.stroke();
+    }
+    // draw annotations
+    for (var i = 0; i < annotated_rest.length; ++i) {
+        ctx.textAlign = "center";
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(annotated_rest[i].annotation, annotated_rest[i].x, zero_y - annotated_rest[i].intensity * y_factor - y_offset);
+    }
+    
+    
+    
     
     
     annotated.sort(function(a, b) {
