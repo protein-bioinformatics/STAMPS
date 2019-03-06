@@ -224,9 +224,9 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
         <tr><td>Max. precursor charge</td><td><select id=\"max_topn_fragments\"><option>3</option><option>6</option><option>all</option></select><td></tr> \
         <tr><td>Ions</td><td><select id=\"ions\"><option>y</option><option>b</option><option>y, b</option></select><td></tr> \
         <tr><td colspan=\"2\"><br>Validation:<br>\
-        <input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment&nbsp;<font color='#ffbebe'>🌑</font><br> \
-        <input type=\"checkbox\" id=\"validation_prm\" /> PRM&nbsp;<font color='#feff90'>🌑</font><br> \
-        <input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard&nbsp;<font color='#a0ff90'>🌑</font><br> \
+        <input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment&nbsp;<font color='#ffbebe'>●</font><br> \
+        <input type=\"checkbox\" id=\"validation_prm\" /> PRM&nbsp;<font color='#feff90'>●</font><br> \
+        <input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard&nbsp;<font color='#a0ff90'>●</font><br> \
         <input type=\"checkbox\" id=\"enable_unreviewed\" /> enable unreviewed proteins</td></tr> \
         <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
         document.getElementById('min_peptide_length').value = 8; \
@@ -333,9 +333,9 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
         <td valign=\"top\"> \
             <table> \
                 <tr><td colspan=\"2\">Validation:</td><td></tr> \
-                <tr><td><input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment&nbsp;<font color='#ffbebe'>🌑</font></td><tr> \
-                <tr><td><input type=\"checkbox\" id=\"validation_prm\" /> PRM&nbsp;<font color='#feff90'>🌑</font></td><tr> \
-                <tr><td><input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard&nbsp;<font color='#a0ff90'>🌑</font></td><tr> \
+                <tr><td><input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment&nbsp;<font color='#ffbebe'>●</font></td><tr> \
+                <tr><td><input type=\"checkbox\" id=\"validation_prm\" /> PRM&nbsp;<font color='#feff90'>●</font></td><tr> \
+                <tr><td><input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard&nbsp;<font color='#a0ff90'>●</font></td><tr> \
                 <tr><td><input type=\"checkbox\" id=\"enable_unreviewed\" /> enable unreviewed proteins</td><tr> \
                 </tr> \
             </table> \
@@ -4679,7 +4679,7 @@ function start_search(){
                 
                 var t3 = "<font color=\"" + disabled_text_color + "\">" + results[i][0].substring(results[i][1] + len_p, results[i][0].length);
                 
-                var foreign_pw = (results[i][3] != current_pathway && (results[i][3] in pathways)) ? " (" + pathways[results[i][3]] + ")" : "";
+                var foreign_pw = (results[i][3] != current_pathway && (results[i][3] in pathways)) ? " (" + pathways[results[i][3]][0] + ")" : "";
                 inner_html += "<tr><td class=\"single_search_result\" onclick=\"highlight_node(" + results[i][2] + ", " + results[i][3] + ");\">" + t1 + t2 + t3 + foreign_pw + "<font></td></tr>";
             }
             inner_html += "</table>";
