@@ -1405,10 +1405,10 @@ function preview(){
         for (var element of elements){
             if (element instanceof node && element.include_preview){
                 this.visible = true;
-                x_min = Math.min(x_min, element.x - element.width * 0.5);
-                x_max = Math.max(x_max, element.x + element.width * 0.5);
-                y_min = Math.min(y_min, element.y - element.height * 0.5);
-                y_max = Math.max(y_max, element.y + element.height * 0.5);
+                x_min = Math.min(x_min, element.x - (element.width >> 1));
+                x_max = Math.max(x_max, element.x + (element.width >> 1));
+                y_min = Math.min(y_min, element.y - (element.height >> 1));
+                y_max = Math.max(y_max, element.y + (element.height >> 1));
             }
         }
         
@@ -4161,10 +4161,12 @@ function check_spectra_expand_collapse_spectra(pep_id, do_collapse){
 
 function check_spectra_uncheck_peptides(prot_id, check){
     var curr_prot = protein_dictionary[prot_id];
+    var num_pep = 0;
     for (var i = 0; i < curr_prot.peptides.length; ++i){
         var curr_pep = curr_prot.peptides[i];
         if (!curr_pep.filter_valid) continue;
         curr_pep.user_selected = check;
+        num_pep += check ? 1 : 0;
         document.getElementById("cb-" + prot_id + "-" + i).checked = check;
         for (var j = 0; j < curr_pep.spectra.length; ++j){
             var curr_spec = curr_pep.spectra[j];
@@ -4173,6 +4175,7 @@ function check_spectra_uncheck_peptides(prot_id, check){
             document.getElementById("cb-" + prot_id + "-" + i + "-" + curr_spec.id).checked = check;
         }
     }
+    document.getElementById("prot-" + prot_id + "-num_pep").innerHTML = num_pep;
 }
 
 
