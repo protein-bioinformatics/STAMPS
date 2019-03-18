@@ -212,7 +212,7 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
                     <td><input type=\"checkbox\" id=\"check_spleen\" /> Spleen</td> \
                 </tr> \
                 <tr><td><input type=\"checkbox\" id=\"check_heart\" /> Heart</td> \
-                    <td><input type=\"checkbox\" id=\"check_blood\" /> Blood</td> \
+                    <td><input type=\"checkbox\" id=\"check_blood\" /> Platelet</td> \
                 </tr> \
                 <tr><td><input type=\"checkbox\" id=\"check_fat\" /> Fat</td> \
                     <td><input type=\"checkbox\" id=\"check_lung\" /> Lung</td> \
@@ -313,7 +313,7 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
                     <td><input type=\"checkbox\" id=\"check_spleen\" /> Spleen</td> \
                 </tr> \
                 <tr><td><input type=\"checkbox\" id=\"check_heart\" /> Heart</td> \
-                    <td><input type=\"checkbox\" id=\"check_blood\" /> Blood</td> \
+                    <td><input type=\"checkbox\" id=\"check_blood\" /> Platelet</td> \
                 </tr> \
                 <tr><td><input type=\"checkbox\" id=\"check_fat\" /> Fat</td> \
                     <td><input type=\"checkbox\" id=\"check_lung\" /> Lung</td> \

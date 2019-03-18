@@ -385,7 +385,7 @@ db.commit()
 lite_cur.execute("INSERT INTO blib.RefSpectraPeaks SELECT tt.id, rsp.peakMZ, rsp.peakIntensity FROM RefSpectraPeaks rsp INNER JOIN blib.tmp tt ON rsp.RefSpectraID = tt.sid ORDER BY tt.id;")
 db.commit()
 
-lite_cur.execute("INSERT INTO blib.SpectrumSourceFiles (fileName, cutoffScore) VALUES ('C:\\Users\\Stamp.MGF', 0);")
+lite_cur.execute("INSERT INTO blib.SpectrumSourceFiles (fileName, cutoffScore) VALUES ('C:\\Users\\STAMPS.MGF', 0);")
 db.commit()
 
 lite_cur.execute("INSERT INTO blib.RetentionTimes SELECT tt.id, rt.RedundantRefSpectraID, rt.SpectrumSourceID, 0, rt.collisionalCrossSectionSqA, 0, 0, rt.retentionTime, rt.bestSpectrum FROM RetentionTimes rt INNER JOIN blib.tmp tt ON rt.RefSpectraID = tt.sid ORDER BY tt.id;")
@@ -479,7 +479,7 @@ with open(skyline_file, mode = "wt") as out_skyline_file:
         <peptide_exclusions />\n \
       </peptide_filter>\n \
       <peptide_libraries pick=\"library\">\n \
-        <bibliospec_lite_library name=\"stamp_spectra\" file_name_hint=\"spectra.blib\" lsid=\"urn:lsid:proteome.gs.washington.edu:spectral_library:bibliospec:nr:spectra\" revision=\"1\" />\n \
+        <bibliospec_lite_library name=\"STAMPS_spectra\" file_name_hint=\"spectra.blib\" lsid=\"urn:lsid:proteome.gs.washington.edu:spectral_library:bibliospec:nr:spectra\" revision=\"1\" />\n \
       </peptide_libraries>\n \
       <peptide_modifications max_variable_mods=\"3\" max_neutral_losses=\"1\">\n \
         <static_modifications>\n \
@@ -563,7 +563,7 @@ with open(skyline_file, mode = "wt") as out_skyline_file:
                 out_skyline_file.write("      <precursor charge=\"%i\" calc_neutral_mass=\"%0.5f\" precursor_mz=\"%0.5f\" collision_energy=\"0\" modified_sequence=\"%s\">\n" % (charge, calc_neutral_pep_mass, precursor_mz, peptideModSeq))
                 
                 
-                out_skyline_file.write("        <bibliospec_spectrum_info library_name=\"stamp_spectra\" count_measured=\"1\" />\n")
+                out_skyline_file.write("        <bibliospec_spectrum_info library_name=\"STAMPS_spectra\" count_measured=\"1\" />\n")
                 
                 try: masses = zlib.decompress(masses)
                 except: pass
