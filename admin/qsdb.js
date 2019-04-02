@@ -2225,7 +2225,7 @@ function manage_fill_table(){
     for (var i = 0; i < manage_columns[manage_current_entry].length; ++i){
         var filter_field = document.getElementById("editor_select_manage_table_filter_" + i.toString());
         if (filter_field.value.length > 0){
-            if (filters.length > 0) filters += ",";
+            if (filters.length > 0) filters += String.fromCharCode(6);
             filters += manage_columns[manage_current_entry][i] + ":" + filter_field.value;
         }
     }
@@ -2235,6 +2235,7 @@ function manage_fill_table(){
     request += "&limit=" + encodeURL((manage_current_page * max_per_page).toString() + ":" + max_per_page.toString());
     if (filters.length > 0) request += "&filters=" + encodeURL(filters);
     request = file_pathname + "admin/scripts/manage-entries.bin?" + request;
+    console.log(request);
     
     
     var sign_up = String.fromCharCode(9652);

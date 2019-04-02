@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
             if (filters.length()){
                 replaceAll(filters, "\"", "");
                 replaceAll(filters, "'", "");
-                vector<string> tokens = split(filters, ',');
+                vector<string> tokens = split(filters, 6);
                         
                 for (int i = 0; i < tokens.size(); ++i){
                     string token = tokens[i];
@@ -234,8 +234,6 @@ int main(int argc, char** argv) {
                 sql_query += " LIMIT " + limit;
             }
                 
-                
-            
             res = stmt->executeQuery(sql_query);
             sql::ResultSetMetaData *res_meta;
             res_meta = res->getMetaData();
