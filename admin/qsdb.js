@@ -2235,7 +2235,6 @@ function manage_fill_table(){
     request += "&limit=" + encodeURL((manage_current_page * max_per_page).toString() + ":" + max_per_page.toString());
     if (filters.length > 0) request += "&filters=" + encodeURL(filters);
     request = file_pathname + "admin/scripts/manage-entries.bin?" + request;
-    console.log(request);
     
     
     var sign_up = String.fromCharCode(9652);
@@ -3250,12 +3249,12 @@ function add_manage_pathways(){
 function add_manage_metabolites_add(){
     
     
-    var request = "name:" + document.getElementById("add_manage_metabolites_name").value;
-    request += data_separator + "short_name:" + document.getElementById("add_manage_metabolites_name").value;
-    request += data_separator + "c_number:" + document.getElementById("add_manage_metabolites_c_number").value;
-    request += data_separator + "formula:" + document.getElementById("add_manage_metabolites_formula").value;
-    request += data_separator + "exact_mass:" + document.getElementById("add_manage_metabolites_exact_mass").value;
-    request += data_separator + "smiles:" + document.getElementById("add_manage_metabolites_smiles").value;
+    var request = "name:" + replaceAll(document.getElementById("add_manage_metabolites_name").value, "\n", "");
+    request += data_separator + "short_name:" + replaceAll(document.getElementById("add_manage_metabolites_name").value, "\n", "");
+    request += data_separator + "c_number:" + replaceAll(document.getElementById("add_manage_metabolites_c_number").value, "\n", "");
+    request += data_separator + "formula:" + replaceAll(document.getElementById("add_manage_metabolites_formula").value, "\n", "");
+    request += data_separator + "exact_mass:" + replaceAll(document.getElementById("add_manage_metabolites_exact_mass").value, "\n", "");
+    request += data_separator + "smiles:" + replaceAll(document.getElementById("add_manage_metabolites_smiles").value, "\n", "");
     
     request = file_pathname + "admin/scripts/manage-entries.bin?action=insert&type=metabolites&data=" + encodeURL(request);
     
