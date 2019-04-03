@@ -163,47 +163,64 @@ if entity_type == "protein":
     
 elif entity_type == "metabolite":
     c_number = form.getvalue('c_number') if "c_number" in form else ""
+    lm_id = form.getvalue('lm_id') if "lm_id" in form else ""
     name = ""
     formula = ""
     exact_mass = ""
     smiles = ""
     
-    try:
-        response = urlopen('http://rest.kegg.jp/get/%s' % c_number)
-        lines = response.read().decode("utf8").split("\n")
-        
-        for line in lines:
-            if line[:4] == "NAME":
-                name = line[4:].split(";")[0].strip(" ")
-                
-            elif line[:7] == "FORMULA":
-                formula = line[7:].strip(" ")
-                
-            elif line[:10] == "EXACT_MASS":
-                exact_mass = line[10:].strip(" ")
-                
-            elif line.find("ChEBI: ") > -1:
-                pubnum = line.split(":")[1].strip(" ")
-                if pubnum.find(" ") > -1: pubnum = pubnum.split(" ")[0]
-                
-                response2 = urlopen("http://www.ebi.ac.uk/webservices/chebi/2.0/test/getCompleteEntity?chebiId=%s" % pubnum)
-                xml = "".join(chr(c) for c in response2.read()).split("\n")[0]
-                
-                st = xml.find("<smiles>")
-                if st > 0:
-                    st += 8
-                    en = xml.find("</smiles>", st)
-                    smiles = xml[st:en]
+    if len(c_number) > 0:
+        try:
+            response = urlopen('http://rest.kegg.jp/get/%s' % c_number)
+            lines = response.read().decode("utf8").split("\n")
+            
+            for line in lines:
+                if line[:4] == "NAME":
+                    name = line[4:].split(";")[0].strip(" ")
+                    
+                elif line[:7] == "FORMULA":
+                    formula = line[7:].strip(" ")
+                    
+                elif line[:10] == "EXACT_MASS":
+                    exact_mass = line[10:].strip(" ")
+                    
+                elif line.find("ChEBI: ") > -1:
+                    pubnum = line.split(":")[1].strip(" ")
+                    if pubnum.find(" ") > -1: pubnum = pubnum.split(" ")[0]
+                    
+                    response2 = urlopen("http://www.ebi.ac.uk/webservices/chebi/2.0/test/getCompleteEntity?chebiId=%s" % pubnum)
+                    xml = "".join(chr(c) for c in response2.read()).split("\n")[0]
+                    
+                    st = xml.find("<smiles>")
+                    if st > 0:
+                        st += 8
+                        en = xml.find("</smiles>", st)
+                        smiles = xml[st:en]
 
-        print(json.dumps({"name": name,
-                "formula": formula,
-                "exact_mass": exact_mass,
-                "smiles": smiles
-                }))
-        
-    except:
-        print(-1)
+            print(json.dumps({"name": name,
+                    "formula": formula,
+                    "exact_mass": exact_mass,
+                    "smiles": smiles
+                    }))
+            
+        except:
+            print(-1)
     
+    elif len(lm_id) > 0:
+        response = urlopen('https://www.lipidmaps.org/rest/compound/lm_id/%s/all/' % lm_id)
+        response = response.read().decode("utf8")
+        in_data = json.loads(response)
+        out_data = {}
+        if "lm_id" in in_data: out_data["lm_id"] = in_data["lm_id"]
+        if "name" in in_data: out_data["name"] = in_data["name"]
+        if "synonyms" in in_data: out_data["short_name"] = in_data["synonyms"].split(";")[0]
+        if "exactmass" in in_data: out_data["exact_mass"] = in_data["exactmass"]
+        if "formula" in in_data: out_data["formula"] = in_data["formula"]
+        if "kegg_id" in in_data: out_data["c_number"] = in_data["kegg_id"]
+        if "smiles" in in_data: out_data["smiles"] = in_data["smiles"]
+        print(json.dumps(out_data))
+    else:
+        print(-1)
     
     
     

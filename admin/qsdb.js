@@ -3111,7 +3111,7 @@ function resize_manage_view(){
     if (close_add_protein_window) document.getElementById("add_manage_proteins").style.display = "none";
     
     // set height of metabolites adding window
-    document.getElementById("add_manage_metabolites_window").style.height = "230px";
+    document.getElementById("add_manage_metabolites_window").style.height = "380px";
     
     // set height of pathways adding window
     document.getElementById("add_manage_pathways_window").style.height = "130px";
@@ -3144,10 +3144,12 @@ function change_add_manage_proteins_chromosome(){
 
 
 function request_metabolites_data(){
-    var c_number = document.getElementById("add_manage_metabolites_c_number").value;
-    if (c_number.length < 1) return;
+    var request = file_pathname + "admin/scripts/request-entity-data.py?type=metabolite&";
+    var search_id = document.getElementById("add_manage_metabolite_ident_val").value;
+    if (search_id.length < 1) return;
     
-    var request = file_pathname + "admin/scripts/request-entity-data.py?type=metabolite&c_number=" + c_number;
+    if (document.getElementById("add_manage_metabolite_ident_kegg").checked) request += "c_number=" + search_id;
+    else request += "lm_id=" + search_id;
     
     var xmlhttp_metabolite_data = new XMLHttpRequest();
     xmlhttp_metabolite_data.onreadystatechange = function() {
@@ -3155,7 +3157,10 @@ function request_metabolites_data(){
             var request = JSON.parse(xmlhttp_metabolite_data.responseText);
             if (request != -1) {
                 if ("name" in request) document.getElementById("add_manage_metabolites_name").value = request["name"];
+                if ("short_name" in request) document.getElementById("add_manage_metabolites_short_name").value = request["short_name"];
                 if ("formula" in request) document.getElementById("add_manage_metabolites_formula").value = request["formula"];
+                if ("c_number" in request) document.getElementById("add_manage_metabolites_c_number").value = request["c_number"];
+                if ("lm_id" in request) document.getElementById("add_manage_metabolites_lmid").value = request["lm_id"];
                 if ("exact_mass" in request) document.getElementById("add_manage_metabolites_exact_mass").value = request["exact_mass"];
                 if ("smiles" in request) document.getElementById("add_manage_metabolites_smiles").value = request["smiles"];
             }
@@ -3297,11 +3302,10 @@ function add_manage_pathways(){
 
 
 function add_manage_metabolites_add(){
-    
-    
     var request = "name:" + replaceAll(document.getElementById("add_manage_metabolites_name").value, "\n", "");
-    request += data_separator + "short_name:" + replaceAll(document.getElementById("add_manage_metabolites_name").value, "\n", "");
+    request += data_separator + "short_name:" + replaceAll(document.getElementById("add_manage_metabolites_short_name").value, "\n", "");
     request += data_separator + "c_number:" + replaceAll(document.getElementById("add_manage_metabolites_c_number").value, "\n", "");
+    request += data_separator + "lm_id:" + replaceAll(document.getElementById("add_manage_metabolites_lmid").value, "\n", "");
     request += data_separator + "formula:" + replaceAll(document.getElementById("add_manage_metabolites_formula").value, "\n", "");
     request += data_separator + "exact_mass:" + replaceAll(document.getElementById("add_manage_metabolites_exact_mass").value, "\n", "");
     request += data_separator + "smiles:" + replaceAll(document.getElementById("add_manage_metabolites_smiles").value, "\n", "");

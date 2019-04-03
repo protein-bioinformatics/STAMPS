@@ -355,14 +355,25 @@
     <div id="add_manage_metabolites_window" class="global_search_content" style="width: 1000px;">
         <table width="100%" height="100%">
             <tr>
+                <td valign="top" height="10%">
+                    Prefill list with identifier:<br />
+                    <input type="radio" name="add_manage_metabolite_ident" id="add_manage_metabolite_ident_kegg" checked /> Kegg 
+                    <input type="radio" name="add_manage_metabolite_ident" id="add_manage_metabolite_ident_lm" /> Lipid Maps&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    identifier<input type="text" id="add_manage_metabolite_ident_val">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <button onclick="request_metabolites_data();">Fill</button><p>
+                </td>
+            </tr>
+            <tr>
                 <td id="add_manage_metabolites_cell" valign="top" height="100%">
                     <div id="add_manage_metabolites_wrapper" style="position: fixed; display: inline; overflow-y: auto; width: 1000px;">
                         <table id="add_manage_metabolites_table" cellspacing="0" size=20 style="border-width: 1px; width: 100%; border-style: solid;">
-                            <tr><th width="30%">KEGG C-number</th><td><input id="add_manage_metabolites_c_number" type="text" style="min-width: 90%; max-width: 90%;" onkeyup="if (event.which == '13') this.blur();" onblur="request_metabolites_data();"></td></tr>
+                            <tr><th width="30%">KEGG C-number</th><td><input id="add_manage_metabolites_c_number" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>LM-ID</th><td><input type="text" id="add_manage_metabolites_lmid" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>Name</th><td><input type="text" id="add_manage_metabolites_name" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>Short name</th><td><input type="text" id="add_manage_metabolites_short_name" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>Formula</th><td><input id="add_manage_metabolites_formula" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>Exact Mass</th><td><input id="add_manage_metabolites_exact_mass" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
-                            <tr><th>Smiles</th><td><input id="add_manage_metabolites_smiles" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>SMILES</th><td><input id="add_manage_metabolites_smiles" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
                         </table>
                     </div>
                 </td>
