@@ -1641,15 +1641,17 @@ function Infobox(ctx){
             this.width = data[this.node_id].img.width + 40;
             this.height = data[this.node_id].img.height + 60;
             
+            var with_lmid = data[this.node_id].lm_id.length > 0;
+            
             ctx.font = "bold " + line_height.toString() + "px Arial";
             this.width = Math.max(this.width, ctx.measureText(data[this.node_id].name).width + 40);
-            this.height += 3 * line_height + 20;
+            this.height += (3 + (with_lmid ? 1 : 0)) * line_height + 20;
             
             ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
             this.width = Math.max(this.width, ctx.measureText("Formula:  " + data[this.node_id].formula).width + 40);
             this.width = Math.max(this.width, ctx.measureText("Exact Mass / Da: " + data[this.node_id].exact_mass).width + 40);
             this.width = Math.max(this.width, ctx.measureText("C number: " + data[this.node_id].c_number).width + 40);
-            
+            if (with_lmid) this.width = Math.max(this.width, ctx.measureText("LM-ID: " + data[this.node_id].lm_id).width + 40);
         }
         else {
             this.width = 40;
@@ -1715,12 +1717,17 @@ function Infobox(ctx){
         
         
         if (data[this.node_id].type == "metabolite"){
+            var with_lmid = data[this.node_id].lm_id.length > 0;
+            
             var html_content = "<div style=\"font-family: arial;\"><b>" + data[this.node_id].name + "</b>";
             html_content += "<hr>";
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Formula:</b> " + data[this.node_id].formula + "</div>";
             html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Exact mass / Da:</b> " + data[this.node_id].exact_mass + "</div>";
             var c_number = data[this.node_id].c_number;
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>C number:</b> <a href='http://www.genome.jp/dbget-bin/www_bget?" + c_number + "' target=\"blank\">" + data[this.node_id].c_number + "</div><br>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>C number:</b> <a href='http://www.genome.jp/dbget-bin/www_bget?" + c_number + "' target=\"blank\">" + data[this.node_id].c_number + "</a></div>";
+            var lm_id = data[this.node_id].lm_id;
+            if (with_lmid) html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>LM-ID:</b> <a href='https://www.lipidmaps.org/data/LMSDRecord.php?LMID=" + lm_id + "' target=\"blank\">" + data[this.node_id].lm_id + "</a></div>";
+            html_content += "<br>";
             if (data[this.node_id].foreign_id != -1) html_content += "<img src='" + file_pathname + "images/metabolites/C" + data[this.node_id].foreign_id + ".png'>";
             
             html_content += "</div>";
@@ -1836,6 +1843,7 @@ function node(data){
     this.short_name = ('sn' in data) ? data['sn'] : "";
     //this.name += " (" + this.id + ")";  // TODO: delete this line
     this.c_number = ('c' in data) ? data['c'] : "";
+    this.lm_id = ('l' in data) ? data['l'] : "";
     this.smiles = ('s' in data) ? data['s'] : "";
     this.formula = ('f' in data) ? data['f'] : "";
     this.exact_mass = ('e' in data) ? data['e'] : "";

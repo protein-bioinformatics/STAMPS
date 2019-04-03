@@ -59,7 +59,7 @@ protein_max_pages = -1;
 protein_current_page = 0;
 current_protein_set = -1;
 
-metabolite_sort_columns = {'-3': "formula:DESC", '-2': "c_number:DESC", '-1': "name:DESC", 1: "name:ASC", 2: "c_number:ASC", 3: "formula:ASC"};
+metabolite_sort_columns = {'-5': "formula:DESC", '-3': "lm_id:DESC", '-3': "c_number:DESC", '-2': "short_name:DESC", '-1': "name:DESC", 1: "name:ASC", 2: "short_name:ASC", 3: "c_number:ASC", 4: "lm_id:ASC", 5: "formula:ASC"};
 metabolite_sort_column = 1;
 metabolite_max_pages = -1;
 metabolite_current_page = 0;
@@ -627,7 +627,9 @@ function mouse_click_listener(e){
                 case "metabolite":
                     
                     document.getElementById("editor_select_metabolite_table_filter_name").value = "";
+                    document.getElementById("editor_select_metabolite_table_filter_short_name").value = "";
                     document.getElementById("editor_select_metabolite_table_filter_cnumber").value = "";
+                    document.getElementById("editor_select_metabolite_table_filter_lmid").value = "";
                     document.getElementById("editor_select_metabolite_table_filter_formula").value = "";
                     metabolite_create_action = false;
                     selected_metabolite_node = highlight_element.id;
@@ -1804,17 +1806,19 @@ function close_manage_entries(){
 
 function editor_fill_metabolite_table(){
     var filter_name = document.getElementById("editor_select_metabolite_table_filter_name").value;
+    var filter_short_name = document.getElementById("editor_select_metabolite_table_filter_short_name").value;
     var filter_cnumber = document.getElementById("editor_select_metabolite_table_filter_cnumber").value;
+    var filter_lmid = document.getElementById("editor_select_metabolite_table_filter_lmid").value;
     var filter_formula = document.getElementById("editor_select_metabolite_table_filter_formula").value;
     
     var request = "action=get&type=metabolites";
     request += "&column=" + encodeURL(metabolite_sort_columns[metabolite_sort_column]);
     request += "&limit=" + encodeURL((metabolite_current_page * max_per_page).toString() + ":" + max_per_page.toString());
-    if (filter_name != "" || filter_cnumber != "" || filter_formula != ""){
-        request += "&filters=" + encodeURL("name:" + filter_name + ",c_number:" + filter_cnumber + ",formula:" + filter_formula);
+    var sep = String.fromCharCode(6);
+    if (filter_name != "" || filter_short_name != "" || filter_cnumber != "" || filter_formula != "" || filter_lmid != ""){
+        request += "&filters=" + encodeURL("name:" + filter_name + sep + "short_name:" + filter_short_name + sep + "c_number:" + filter_cnumber + sep + "lm_id:" + filter_lmid + sep + "formula:" + filter_formula);
     }
     request = file_pathname + "admin/scripts/manage-entries.bin?" + request;
-    
     
     var sign_up = String.fromCharCode(9652);
     var sign_down = String.fromCharCode(9662);
@@ -1828,23 +1832,47 @@ function editor_fill_metabolite_table(){
     dom_th_name.setAttribute("onclick", "metabolite_sort_column = " + ((metabolite_sort_column == 1) ? " -1;" : "1;") + "; editor_fill_metabolite_table();");
     dom_th_name.setAttribute("style", "cursor: pointer;");
     dom_th_name.innerHTML = "Name" + ((metabolite_sort_column == 1) ? " " + sign_up : ((metabolite_sort_column == -1) ? " " + sign_down : ""));
+    dom_th_name.setAttribute("width", "100%");
+    
+    var dom_th_short_name = document.createElement("th");
+    dom_table_header.appendChild(dom_th_short_name);
+    dom_th_short_name.setAttribute("onclick", "metabolite_sort_column = " + ((metabolite_sort_column == 2) ? " -2;" : "2;") + "; editor_fill_metabolite_table();");
+    dom_th_short_name.setAttribute("style", "cursor: pointer;");
+    dom_th_short_name.innerHTML = "Short name" + ((metabolite_sort_column == 2) ? " " + sign_up : ((metabolite_sort_column == -1) ? " " + sign_down : ""));
+    dom_th_short_name.setAttribute("width", "250px");
+    dom_th_short_name.setAttribute("style", "cursor: pointer; min-width: 250px; max-width: 250px;");
     
     
     var dom_th_cnumber = document.createElement("th");
     dom_table_header.appendChild(dom_th_cnumber);
-    dom_th_cnumber.setAttribute("onclick", "metabolite_sort_column = " + ((metabolite_sort_column == 2) ? " -2;" : "2;") + "; editor_fill_metabolite_table();");
-    dom_th_cnumber.innerHTML = "C&nbsp;number" + ((metabolite_sort_column == 2) ? " " + sign_up : ((metabolite_sort_column == -2) ? " " + sign_down : ""));
+    dom_th_cnumber.setAttribute("onclick", "metabolite_sort_column = " + ((metabolite_sort_column == 3) ? " -3;" : "3;") + "; editor_fill_metabolite_table();");
+    dom_th_cnumber.innerHTML = "C&nbsp;number" + ((metabolite_sort_column == 3) ? " " + sign_up : ((metabolite_sort_column == -3) ? " " + sign_down : ""));
     dom_th_cnumber.setAttribute("width", "150px");
     dom_th_cnumber.setAttribute("style", "cursor: pointer; min-width: 150px; max-width: 150px;");
     
     
+    var dom_th_lmid = document.createElement("th");
+    dom_table_header.appendChild(dom_th_lmid);
+    dom_th_lmid.setAttribute("onclick", "metabolite_sort_column = " + ((metabolite_sort_column == 4) ? " -4;" : "4;") + "; editor_fill_metabolite_table();");
+    dom_th_lmid.innerHTML = "LM-ID" + ((metabolite_sort_column == 4) ? " " + sign_up : ((metabolite_sort_column == -4) ? " " + sign_down : ""));
+    dom_th_lmid.setAttribute("width", "150px");
+    dom_th_lmid.setAttribute("style", "cursor: pointer; min-width: 150px; max-width: 150px;");
+    
+    
     var dom_th_formula = document.createElement("th");
     dom_table_header.appendChild(dom_th_formula);
-    dom_th_formula.setAttribute("onclick", "metabolite_sort_column = " + ((metabolite_sort_column == 3) ? " -3;" : "3;") + "; editor_fill_metabolite_table();");
+    dom_th_formula.setAttribute("onclick", "metabolite_sort_column = " + ((metabolite_sort_column == 5) ? " -5;" : "5;") + "; editor_fill_metabolite_table();");
     dom_th_formula.setAttribute("style", "cursor: pointer;");
-    dom_th_formula.innerHTML = "Chemical formula" + ((metabolite_sort_column == 3) ? " " + sign_up : ((metabolite_sort_column == -3) ? " " + sign_down : ""));
+    dom_th_formula.innerHTML = "Chemical formula" + ((metabolite_sort_column == 5) ? " " + sign_up : ((metabolite_sort_column == -5) ? " " + sign_down : ""));
     dom_th_formula.setAttribute("width", "250px");
     dom_th_formula.setAttribute("style", "cursor: pointer; min-width: 250px; max-width: 250px;");
+    
+    
+    var dom_th_radio = document.createElement("th");
+    dom_table_header.appendChild(dom_th_radio);
+    dom_th_radio.innerHTML = "&nbsp;&nbsp;&nbsp;";
+    dom_th_radio.setAttribute("width", "40px");
+    dom_th_radio.setAttribute("style", "min-width: 40px; max-width: 40px;");
     
     
     
@@ -1928,6 +1956,14 @@ function editor_fill_metabolite_table(){
                         return a[3].localeCompare(b[3]);
                     case -3:
                         return b[3].localeCompare(a[3]);
+                    case 4:
+                        return a[4].localeCompare(b[4]);
+                    case -4:
+                        return b[4].localeCompare(a[4]);
+                    case 5:
+                        return a[5].localeCompare(b[5]);
+                    case -5:
+                        return b[5].localeCompare(a[5]);
                 }
             });
             
@@ -1951,21 +1987,35 @@ function editor_fill_metabolite_table(){
                 dom_tr.appendChild(dom_td2);
                 dom_td2.innerHTML = row[2];
                 dom_td2.setAttribute("bgcolor", bg_color);
-                dom_td2.setAttribute("width", "150px");
-                dom_td2.setAttribute("style", "min-width: 150px; max-width: 150px;");
+                dom_td2.setAttribute("width", "250px");
+                dom_td2.setAttribute("style", "min-width: 250px; max-width: 250px;");
                 
                 var dom_td3 = document.createElement("td");
                 dom_tr.appendChild(dom_td3);
                 dom_td3.innerHTML = row[3];
                 dom_td3.setAttribute("bgcolor", bg_color);
-                dom_td3.setAttribute("width", "250px");
-                dom_td3.setAttribute("style", "min-width: 250px; max-width: 250px;");
+                dom_td3.setAttribute("width", "150px");
+                dom_td3.setAttribute("style", "min-width: 150px; max-width: 150px;");
                 
                 var dom_td4 = document.createElement("td");
                 dom_tr.appendChild(dom_td4);
-                var dom_input = document.createElement("input");
-                dom_td4.appendChild(dom_input);
+                dom_td4.innerHTML = row[4];
                 dom_td4.setAttribute("bgcolor", bg_color);
+                dom_td4.setAttribute("width", "150px");
+                dom_td4.setAttribute("style", "min-width: 150px; max-width: 150px;");
+                
+                var dom_td5 = document.createElement("td");
+                dom_tr.appendChild(dom_td5);
+                dom_td5.innerHTML = row[5];
+                dom_td5.setAttribute("bgcolor", bg_color);
+                dom_td5.setAttribute("width", "250px");
+                dom_td5.setAttribute("style", "min-width: 250px; max-width: 250px;");
+                
+                var dom_td6 = document.createElement("td");
+                dom_tr.appendChild(dom_td6);
+                var dom_input = document.createElement("input");
+                dom_td6.appendChild(dom_input);
+                dom_td6.setAttribute("bgcolor", bg_color);
                 dom_input.setAttribute("id", row[0]);
                 dom_input.setAttribute("type", "radio");
                 dom_input.setAttribute("name", "foo");
@@ -2266,7 +2316,7 @@ function manage_fill_table(){
         var col_name = manage_sort_columns[manage_current_entry][i].split(":")[0];
         dom_th_name.innerHTML = col_name + ((manage_sort_column == i) ? " " + sign_up : ((manage_sort_column == -i) ? " " + sign_down : ""));
         if (manage_current_entry == "proteins" && i == 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
-        else if (manage_current_entry == "metabolites" && i == 6) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
+        else if (manage_current_entry == "metabolites" && i == 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
         else if (manage_current_entry == "pathways" && i == 1) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 600px; max-width: 600px;");
         else if (manage_current_entry == "pathways" && i == 2) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 300px; max-width: 300px;");
         else if (manage_current_entry == "pathway_groups" && i == 1) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 700px; max-width: 700px;");
@@ -2557,7 +2607,7 @@ function manage_fill_table(){
                             
                         var dom_div = document.createElement("div");
                         dom_td.appendChild(dom_div);
-                        var smiles_col = 6;
+                        var smiles_col = 7;
                         if (j != smiles_col) dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
                         else dom_td.setAttribute("style", "min-width: 1000px; max-width: 1000px;");
                         dom_div.setAttribute("onclick", "change_textfield_type(this, true);");
@@ -2933,7 +2983,7 @@ function change_textfield_type(dom_obj, to_text){
         dom_obj.col_id = col_id;
         dom_obj.field_len = field_len;
         dom_obj.innerHTML = trim_text(content, field_len - 20);
-        global_manage_data[entity_id][col_id] = content;
+        if (entity_id in global_manage_data && col_id in global_manage_data[entity_id]) global_manage_data[entity_id][col_id] = content;
     }
 }
 

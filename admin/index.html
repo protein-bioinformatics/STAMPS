@@ -105,18 +105,20 @@
         <table width="100%" height="100%">
             <tr><td colspan="2" valign="top">
                 Select a metabolite:<br>
-                <table cellpadding="0" cellspacing="0" size=20 style="width:900px;">
-                    <tr id="editor_select_metabolite_table_header" cellpadding="0" cellspacing="0" size=20 style="width:900px;"></tr>                        
+                <table cellpadding="0" cellspacing="0" size=20 style="width:1200px;">
+                    <tr id="editor_select_metabolite_table_header" cellpadding="0" cellspacing="0" size=20 style="width:1200px;"></tr>                        
                     <tr id="editor_select_metabolite_table_filters">
-                        <td><input type='text' id="editor_select_metabolite_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
-                        <td><input type='text' id="editor_select_metabolite_table_filter_cnumber" style="width: 100%; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
-                        <td><input type='text' id="editor_select_metabolite_table_filter_formula" style="width: 100%; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;<td>
+                        <td width="100%"><input type='text' id="editor_select_metabolite_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
+                        <td><input type='text' id="editor_select_metabolite_table_filter_short_name" style="width: 250px; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
+                        <td><input type='text' id="editor_select_metabolite_table_filter_cnumber" style="width: 150px; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
+                        <td><input type='text' id="editor_select_metabolite_table_filter_lmid" style="width: 150px; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
+                        <td><input type='text' id="editor_select_metabolite_table_filter_formula" style="width: 250px; box-sizing: border-box;" onkeyup="metabolite_current_page = 0; editor_fill_metabolite_table();"></td>
+                        <td>&nbsp;<td>
                     </tr>
                 </table>
             </td></tr>
             <tr><td colspan="2" id="editor_select_metabolite_cell" height="100%" valign="top">
-                <div id="editor_select_metabolite_table_wrapper" style="position: fixed; display: inline; overflow-y: scroll; width:900px;">
+                <div id="editor_select_metabolite_table_wrapper" style="position: fixed; display: inline; overflow-y: scroll; width:1200px;">
                     <table id="editor_select_metabolite_table" cellspacing="0" style="border-width: 1px; border-style: solid;"></table>
                 </div>
             </td></tr>
