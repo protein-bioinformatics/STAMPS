@@ -52,6 +52,7 @@ selected_label_node = -1;
 edge_change_selected = -1;
 scaling_element = -1;
 rescaling = -1;
+filtes_separation_char = String.fromCharCode(6);
 
 protein_sort_columns = {'-3': "definition:DESC", '-2': "accession:DESC", '-1': "name:DESC", 1: "name:ASC", 2: "accession:ASC", 3: "definition:ASC"};
 protein_sort_column = 1;
@@ -1814,9 +1815,8 @@ function editor_fill_metabolite_table(){
     var request = "action=get&type=metabolites";
     request += "&column=" + encodeURL(metabolite_sort_columns[metabolite_sort_column]);
     request += "&limit=" + encodeURL((metabolite_current_page * max_per_page).toString() + ":" + max_per_page.toString());
-    var sep = String.fromCharCode(6);
     if (filter_name != "" || filter_short_name != "" || filter_cnumber != "" || filter_formula != "" || filter_lmid != ""){
-        request += "&filters=" + encodeURL("name:" + filter_name + sep + "short_name:" + filter_short_name + sep + "c_number:" + filter_cnumber + sep + "lm_id:" + filter_lmid + sep + "formula:" + filter_formula);
+        request += "&filters=" + encodeURL("name:" + filter_name + filtes_separation_char + "short_name:" + filter_short_name + filtes_separation_char + "c_number:" + filter_cnumber + filtes_separation_char + "lm_id:" + filter_lmid + filtes_separation_char + "formula:" + filter_formula);
     }
     request = file_pathname + "admin/scripts/manage-entries.bin?" + request;
     
@@ -2048,7 +2048,7 @@ function editor_fill_protein_table(){
     request += "&limit=" + encodeURL((protein_current_page * max_per_page).toString() + ":" + max_per_page.toString());
     request += "&filters=species:" + current_species;
     if (filter_name != "" || filter_accession != "" || filter_description != ""){
-        request += encodeURL(",name:" + filter_name + ",accession:" + filter_accession + ",definition:" + filter_description);
+        request += encodeURL(filtes_separation_char + "name:" + filter_name + filtes_separation_char + "accession:" + filter_accession + filtes_separation_char + "definition:" + filter_description);
     }
     if (filter_node) request += "&checked=" + encodeURL(selected_protein_node);
     request = file_pathname + "admin/scripts/manage-entries.bin?" + request;
