@@ -2346,11 +2346,11 @@ function node(data){
                 }
                 
                 if (this.show_scale){
-                    ctx.lineWidth = line_width * factor;
+                    ctx.lineWidth = line_width;
                     ctx.strokeStyle = slide_color;
                     
                     ctx.beginPath();
-                    ctx.arc(this.x + hw, this.y + hh, 2 * anchor_size * factor, 0, 1.999 * Math.PI);
+                    ctx.arc(this.x + hw * 0.9, this.y + hh * 0.9, 2 * anchor_size, 0, 1.999 * Math.PI);
                     ctx.closePath();
                     ctx.stroke();
                 }
@@ -2524,9 +2524,9 @@ function node(data){
         var hh = this.height * 0.5;
         var hw = this.width * 0.5;
         
-        var anchor_x = this.x + hw;
-        var anchor_y = this.y + hh;
-        return (Math.sqrt(Math.pow(anchor_x - mouse.x, 2) + Math.pow(anchor_y - mouse.y, 2)) < 2 * (anchor_size + line_width) * factor);
+        var anchor_x = this.x + hw * 0.9;
+        var anchor_y = this.y + hh * 0.9;
+        return (Math.sqrt(Math.pow(anchor_x - mouse.x, 2) + Math.pow(anchor_y - mouse.y, 2)) < 2 * (anchor_size + line_width));
     }
     
     this.mouse_pointer_cursor = function (res){
