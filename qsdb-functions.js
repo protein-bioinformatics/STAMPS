@@ -356,6 +356,7 @@ function get_check_spectra_content(){
         <input type=\"radio\" onchange=\"change_match_error();\" id=\"radio_ppm\" name=\"select_error\" value=\"ppm\" style=\"border: 0px; margin: 0px; top: 0px; padding: 0px;\" \ checked><label for=\"radio_ppm\">Relative</label> \
         <input type=\"radio\" onchange=\"change_match_error();\" id=\"radio_da\" name=\"select_error\" value=\"Da\" style=\"border: 0px; margin: 0px; top: 0px; padding: 0px;\"><label for=\"radio_da\">Absolute</label> \
         <input type=\"text\" onchange=\"change_match_error_value();\" id=\"error_value\" value=\"-\" size=1 style=\"text-align: right;\"><label id=\"unit\">ppm</label> \
+        <img src=\"images/svg-icon.svg\" style=\"cursor: pointer;\" onclick=\"spectrum_to_svg();\" height=\"24\" /> \
     </fieldset> \
     <div id=\"spectra_panel\" class=\"spectra_panel\"></div> \
     <div id=\"check_spectra_functions\" style=\"margin: 0px; position: fixed;\"> \
@@ -722,11 +723,6 @@ function set_pathway_menu(){
     document.getElementById("select_signaling_pathway").appendChild(signaling_pathway_menu);
     
 }
-
-
-
-
-
 
 
 
@@ -2050,10 +2046,6 @@ function node(data){
                 metabolite_dictionary[this.foreign_id] = new Metabolite(data);
             }
             this.metabolite = metabolite_dictionary[this.foreign_id];
-            
-            
-            
-            this.tipp = true;
             break;
             
         case "image":
@@ -4003,7 +3995,10 @@ function mouse_dblclick_listener(e){
 
 
 function change_pathway(p){
+    
+    var initial_load = false;
     if (typeof p === "undefined"){
+        initial_load = true;
         var highest_group = -1;
         var highest_group_val = 0;
         for (var pg_id in pathway_groups){
@@ -4068,12 +4063,15 @@ function change_pathway(p){
         if (pw_group != 0) pw_group.className = 'selected_menu_cell';
         pw_pathway.className = 'selected_menu_cell';
         load_data();
+        if (initial_load) {
+            expand_collapse_obj.expand();
+        }
     }
 }
 
 
 
-
+/*
 function Tip(e, name) {      
     var wmtt = document.getElementById('tooltip');
     if (wmtt != null && wmtt.style.display != 'block') {
@@ -4087,6 +4085,7 @@ function Tip(e, name) {
 function unTip() {
     document.getElementById('tooltip').style.display = "none";
 }
+*/
 
 
 function download_assay(){
@@ -5172,19 +5171,7 @@ function compute_statistics(){
     document.getElementById("stat_num_spec").innerHTML = num_spectra;
     document.getElementById("stat_filter_spec").innerHTML = valid_spectra;
     document.getElementById("stat_sel_spec").innerHTML = sel_spectra;
-}
-
-
-function expand_statistics(){
-    var wdth = window.innerWidth * (1 - expanding_percentage);
-    var rect = document.getElementById('select_metabolic_pathway_nav').getBoundingClientRect();
-    document.getElementById("statistics").style.top = (rect.top + document.getElementById('select_metabolic_pathway_nav').offsetHeight).toString() + "px";
-    resize_renderarea_width(window.innerWidth - wdth);
-    document.getElementById("statistics").style.left = (wdth).toString() + "px";
-    document.getElementById("statistics").style.width = (window.innerWidth * expanding_percentage).toString() + "px";
-    document.getElementById("statistics").style.height = "100%";
-    document.getElementById("statistics").style.display = "inline";
-    compute_statistics();
+    
     var canvas_pie = document.getElementById('piechart');
     var context_pie = canvas_pie.getContext('2d');
     
@@ -5258,6 +5245,20 @@ function expand_statistics(){
     context_pie.fillText(num_validation[5], canvas_pie.width * 0.25, canvas_pie.height * 0.62);
     context_pie.fillText(num_validation[6], canvas_pie.width * 0.75, canvas_pie.height * 0.62);
     context_pie.fillText(num_validation[0], canvas_pie.width * 0.92, canvas_pie.height * 0.9);
+}
+
+
+function expand_statistics(){
+    var wdth = window.innerWidth * (1 - expanding_percentage);
+    var rect = document.getElementById('select_metabolic_pathway_nav').getBoundingClientRect();
+    document.getElementById("statistics").style.top = (rect.top + document.getElementById('select_metabolic_pathway_nav').offsetHeight).toString() + "px";
+    resize_renderarea_width(window.innerWidth - wdth);
+    document.getElementById("statistics").style.left = (wdth).toString() + "px";
+    document.getElementById("statistics").style.width = (window.innerWidth * expanding_percentage).toString() + "px";
+    document.getElementById("statistics").style.height = "100%";
+    document.getElementById("statistics").style.display = "inline";
+    compute_statistics();
+    
     
     if (pathway_is_loaded) draw();
 }
@@ -5289,7 +5290,7 @@ function prepare_infobox(prot){
     var steps = 24;
     var time = 1; // seconds
     
-    unTip();
+    //unTip();
     var he = highlight_element;
     var xy = he.get_position(prot);
     var x = xy[0];
@@ -5481,6 +5482,7 @@ function load_data(reload){
             xmlhttp_prot.onreadystatechange = function() {
                 if (xmlhttp_prot.readyState == 4 && xmlhttp_prot.status == 200) {
                     request_load_proteins(JSON.parse(xmlhttp_prot.responseText), false, true);
+                    compute_statistics();
                 }
             }
             

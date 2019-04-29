@@ -163,9 +163,6 @@ function init(){
         }
     }
     if (!read_cookie_information) document.getElementById('cookie_information').style.display = "inline";
-    
-    
-    
 }
 
 
@@ -384,8 +381,11 @@ function mouse_move_listener(e){
         }
         
     }
+    
+    /*
     if(highlight_element && highlight_element.tipp) Tip(e, highlight_element.name);
     else unTip();
+    */
     
     var set_mouse_pointer = -1;
     if(highlight_element instanceof node){

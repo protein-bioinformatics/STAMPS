@@ -567,6 +567,8 @@ function get_mouse_pos(canvas, evt){
 }
 
 
+
+
 function view_mouse_wheel_listener(e){
     if(e.ctrlKey) e.preventDefault();
     var delta = Math.max(-1, Math.min(1, -e.wheelDelta || e.detail));
@@ -608,6 +610,8 @@ function view_mouse_wheel_listener(e){
 }
 
 
+
+
 function spectrum_to_svg(){
     if (!spectrum_loaded) return;
     
@@ -616,9 +620,31 @@ function spectrum_to_svg(){
     var svg_ctx = new C2S(ctx.canvas.width, ctx.canvas.height);
     draw_spectrum(svg_ctx);
     
+    
+    
+    
     var svgCode = svg_ctx.getSerializedSvg(true);
     var parts = svgCode.split("/>");
     svgCode = parts.join("/>\n");
     
-    window.open("data:application/txt," + encodeURIComponent(svgCode), "_self");
+    
+    var parts = svgCode.split("/>");
+    svgCode = parts.join("/>\n");
+    
+    
+    var serializer = new XMLSerializer();
+    var svg_blob = new Blob([svgCode], {'type': "image/svg+xml"});
+    
+    
+    
+    
+    const tempLink = document.createElement('a');
+    tempLink.style.display = 'none';
+    tempLink.href = window.URL.createObjectURL(svg_blob);
+    tempLink.setAttribute('download', "spectrum.svg");
+    tempLink.setAttribute('target', '_blank');
+    document.body.appendChild(tempLink);
+    tempLink.click();
+    document.body.removeChild(tempLink);
+    
 }
