@@ -268,19 +268,29 @@ function mouse_up_listener(event){
         var sy = Math.min(select_field_element.start_position.y, select_field_element.end_position.y);
         var ey = Math.max(select_field_element.start_position.y, select_field_element.end_position.y);
         
-        var toggled = new Set();
+        var toggled_proteins = new Set();
+        var toggled_metabolites = new Set();
         for (var node_id in data){
             var current_node = data[node_id];
             current_node.highlight = false;
-            if (current_node.type == "protein" && sx <= current_node.x && sy <= current_node.y && current_node.x <= ex && current_node.y <= ey){
-                for (var j = 0; j < current_node.proteins.length; ++j){
-                    var prot = protein_dictionary[current_node.proteins[j]];
-                    if (!toggled.has(prot.id)){
-                        prot.toggle_marked();
-                        toggled.add(prot.id);
+            if (sx <= current_node.x && sy <= current_node.y && current_node.x <= ex && current_node.y <= ey){
+                if (current_node.type == "protein"){
+                    for (var j = 0; j < current_node.proteins.length; ++j){
+                        var prot = protein_dictionary[current_node.proteins[j]];
+                        if (!toggled_proteins.has(prot.id)){
+                            prot.toggle_marked();
+                            toggled_proteins.add(prot.id);
+                        }
+                    }
+                }
+                else if (current_node.type == "metabolite"){
+                    if (!(toggled_metabolites.has(current_node.foreign_id))){
+                        current_node.metabolite.toggle();
+                        toggled_metabolites.add(current_node.foreign_id);
                     }
                 }
             }
+            
         }
         
         draw();

@@ -67,6 +67,7 @@ edge_count = 0;
 draw_code = 0;
 process_edges_semaphore = false;
 protein_dictionary = {};
+metabolite_dictionary = {};
 toggled_proteins = new Set();
 spectra_exclude = [];
 back_function = 0;
@@ -919,11 +920,34 @@ function Peptide(data){
 
 
 
+function Metabolite(data){
+    this.id = ('r' in data) ? data['r'] : 0;
+    this.name = ('n' in data) ? data['n'] : "";
+    this.c_number = ('c' in data) ? data['c'] : "";
+    this.lm_id = ('l' in data) ? data['l'] : "";
+    this.smiles = ('s' in data) ? data['s'] : "";
+    this.formula = ('f' in data) ? data['f'] : "";
+    this.exact_mass = ('e' in data) ? data['e'] : "";
+    this.user_selected = false;
+    this.img = new Image();
+    
+    if (this.id != -1){
+        var load_process = setInterval(function(nd){
+            nd.img.src = file_pathname + "images/metabolites/C" + nd.id + ".png";
+            clearInterval(load_process);
+        }, 1, this);
+    }
+    
+    this.toggle = function(){
+        this.user_selected = !this.user_selected;
+        this.user_selected &= (this.id != -1);
+    }
+}
+
+
 
 function Protein(data){
     this.id = ('i' in data) ? data['i'] : 0;
-    
-    
     
     this.filtering = function(){
         
@@ -1638,20 +1662,21 @@ function Infobox(ctx){
         this.node_id = node_id;
         this.protein_id = protein_id;
         if (data[node_id].type == "metabolite"){
-            this.width = data[this.node_id].img.width + 40;
-            this.height = data[this.node_id].img.height + 60;
+            var met = data[this.node_id].metabolite;
+            this.width = met.img.width + 40;
+            this.height = met.img.height + 60;
             
-            var with_lmid = data[this.node_id].lm_id.length > 0;
+            var with_lmid = met.lm_id.length > 0;
             
             ctx.font = "bold " + line_height.toString() + "px Arial";
-            this.width = Math.max(this.width, ctx.measureText(data[this.node_id].name).width + 40);
+            this.width = Math.max(this.width, ctx.measureText(met.name).width + 40);
             this.height += (3 + (with_lmid ? 1 : 0)) * line_height + 20;
             
             ctx.font = "bold " + (line_height - 5).toString() + "px Arial";
-            this.width = Math.max(this.width, ctx.measureText("Formula:  " + data[this.node_id].formula).width + 40);
-            this.width = Math.max(this.width, ctx.measureText("Exact Mass / Da: " + data[this.node_id].exact_mass).width + 40);
-            this.width = Math.max(this.width, ctx.measureText("C number: " + data[this.node_id].c_number).width + 40);
-            if (with_lmid) this.width = Math.max(this.width, ctx.measureText("LM-ID: " + data[this.node_id].lm_id).width + 40);
+            this.width = Math.max(this.width, ctx.measureText("Formula:  " + met.formula).width + 40);
+            this.width = Math.max(this.width, ctx.measureText("Exact Mass / Da: " + met.exact_mass).width + 40);
+            this.width = Math.max(this.width, ctx.measureText("C number: " + met.c_number).width + 40);
+            if (with_lmid) this.width = Math.max(this.width, ctx.measureText("LM-ID: " + met.lm_id).width + 40);
         }
         else {
             this.width = 40;
@@ -1717,18 +1742,19 @@ function Infobox(ctx){
         
         
         if (data[this.node_id].type == "metabolite"){
-            var with_lmid = data[this.node_id].lm_id.length > 0;
+            var met = data[this.node_id].metabolite;
+            var with_lmid = met.lm_id.length > 0;
             
-            var html_content = "<div style=\"font-family: arial;\"><b>" + data[this.node_id].name + "</b>";
+            var html_content = "<div style=\"font-family: arial;\"><b>" + met.name + "</b>";
             html_content += "<hr>";
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Formula:</b> " + data[this.node_id].formula + "</div>";
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Exact mass / Da:</b> " + data[this.node_id].exact_mass + "</div>";
-            var c_number = data[this.node_id].c_number;
-            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>C number:</b> <a href='http://www.genome.jp/dbget-bin/www_bget?" + c_number + "' target=\"blank\">" + data[this.node_id].c_number + "</a></div>";
-            var lm_id = data[this.node_id].lm_id;
-            if (with_lmid) html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>LM-ID:</b> <a href='https://www.lipidmaps.org/data/LMSDRecord.php?LMID=" + lm_id + "' target=\"blank\">" + data[this.node_id].lm_id + "</a></div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Formula:</b> " + met.formula + "</div>";
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>Exact mass / Da:</b> " + met.exact_mass + "</div>";
+            var c_number = met.c_number;
+            html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>C number:</b> <a href='http://www.genome.jp/dbget-bin/www_bget?" + c_number + "' target=\"blank\">" + met.c_number + "</a></div>";
+            var lm_id = met.lm_id;
+            if (with_lmid) html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>LM-ID:</b> <a href='https://www.lipidmaps.org/data/LMSDRecord.php?LMID=" + lm_id + "' target=\"blank\">" + met.lm_id + "</a></div>";
             html_content += "<br>";
-            if (data[this.node_id].foreign_id != -1) html_content += "<img src='" + file_pathname + "images/metabolites/C" + data[this.node_id].foreign_id + ".png'>";
+            if (met.id != -1) html_content += "<img src='" + file_pathname + "images/metabolites/C" + met.id + ".png'>";
             
             html_content += "</div>";
             
@@ -1842,18 +1868,14 @@ function node(data){
     this.name = ('n' in data) ? data['n'] : "";
     this.short_name = ('sn' in data) ? data['sn'] : "";
     //this.name += " (" + this.id + ")";  // TODO: delete this line
-    this.c_number = ('c' in data) ? data['c'] : "";
-    this.lm_id = ('l' in data) ? data['l'] : "";
-    this.smiles = ('s' in data) ? data['s'] : "";
-    this.formula = ('f' in data) ? data['f'] : "";
-    this.exact_mass = ('e' in data) ? data['e'] : "";
+    
     this.pos = ('pos' in data) ? data['pos'] : "";
-    this.img = 0;
     this.text_highlight = ('h' in data) ? data['h'] == "1" : false;
     this.highlight = false;
     this.foreign_id = data['r'];
     this.pathway_enabled = false;
     this.proteins = [];
+    this.metabolite = null;
     this.lines = -1;
     this.width = -1;
     this.height = -1;
@@ -2024,16 +2046,12 @@ function node(data){
             
         case "metabolite":
             this.sort_order = 60;
-            this.width = metabolite_radius * 2;
-            this.height = metabolite_radius * 2;
-            
-            this.img = new Image();
-            if (this.foreign_id != -1){
-                var load_process = setInterval(function(nd){
-                    nd.img.src = file_pathname + "images/metabolites/C" + nd.foreign_id + ".png";
-                    clearInterval(load_process);
-                }, 1, this);
+            if (!(this.foreign_id in metabolite_dictionary)){
+                metabolite_dictionary[this.foreign_id] = new Metabolite(data);
             }
+            this.metabolite = metabolite_dictionary[this.foreign_id];
+            
+            
             
             this.tipp = true;
             break;
@@ -2251,10 +2269,19 @@ function node(data){
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
+                
+                if (this.metabolite.user_selected){
+                    ctx.fillStyle = "black";
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, radius * 0.5, 0, 1.999 * Math.PI);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                
                 ctx.font = (this.text_highlight ? "bold " : "") + ((text_size - (this.text_highlight ? 0 : 3)) * factor).toString() + "px Arial";
                 ctx.fillStyle = this.text_highlight ? metabolite_highlight_label_stroke_color : metabolite_label_stroke_color;
                 var x = this.x;
-                var y = this.y + this.height * 0.15;
+                var y = this.y + radius * 0.3;
                 
                 
                 var selected_name = (this.short_name.length > 0 && this.short_name.length < this.name.length) ? this.short_name : this.name;
@@ -2295,6 +2322,10 @@ function node(data){
                     y += 2 * radius;
                     ctx.textAlign = "left";
                 }
+                
+                var measuredText = ctx.measureText(selected_name);
+                this.width = measuredText.width;
+                this.height = text_size * factor;
                 
                 ctx.fillText(selected_name, x, y);
                 break;
@@ -2543,11 +2574,55 @@ function node(data){
         }
     }
     
+    
+    this.is_mouse_over_metabolite = function (mouse){
+        var lw = line_width * factor;
+        return (Math.sqrt(Math.pow(this.x - mouse.x, 2) + Math.pow(this.y - mouse.y, 2)) < radius + lw);
+    }
+    
+    this.is_mouse_over_metabolite_label = function (mouse){
+        
+        var x = this.x;
+        var y = this.y;
+        
+        if (this.pos == "tl"){
+            x -= 1.5 * radius + (this.width >> 1);
+            y -= 2 * radius;
+        }
+        else if (this.pos == "tc"){
+            y -= 2 * radius;
+        }
+        else if (this.pos == "tr"){
+            x += 1.5 * radius + (this.width >> 1);
+            y -= 2 * radius;
+        }
+        else if (this.pos == "ml"){
+            x -= 1.5 * radius + (this.width >> 1);
+        }
+        else if (this.pos == "mr"){
+            x += 1.5 * radius + (this.width >> 1);
+        }
+        else if (this.pos == "bl"){
+            x -= 1.5 * radius + (this.width >> 1);
+            y += 2 * radius;
+        }
+        else if (this.pos == "bc"){
+            y += 2 * radius;
+        }
+        else if (this.pos == "br"){
+            x += 1.5 * radius + (this.width >> 1);
+            y += 2 * radius;
+        }
+        
+        return (x - (this.width >> 1) <= mouse.x && mouse.x <= x + (this.width >> 1) && y - (this.height >> 1) <= mouse.y && mouse.y <= y + (this.height >> 1));
+    }
+    
+    
     this.is_mouse_over = function (mouse){
         var lw = line_width * factor;
         switch (this.type){
             case "metabolite":
-                return (Math.sqrt(Math.pow(this.x - mouse.x, 2) + Math.pow(this.y - mouse.y, 2)) < radius + lw);
+                return this.is_mouse_over_metabolite(mouse) || this.is_mouse_over_metabolite_label(mouse);
                 
             case "membrane":
                 var this_width = this.width;
@@ -2624,7 +2699,13 @@ function node(data){
             }
         }
         else if (this.type == 'metabolite'){
-            prepare_infobox(this.is_mouse_over(mouse) - 1);
+            if (this.is_mouse_over_metabolite(mouse)){
+                this.metabolite.toggle();
+                draw();
+            }
+            else {
+                prepare_infobox(this.is_mouse_over(mouse) - 1);
+            }
         }
         else if (this.type == 'pathway'){
             if (this.pathway_enabled){
@@ -5293,7 +5374,7 @@ function load_data(reload){
     var ctx = c.getContext("2d");
     
     
-    
+    metabolite_dictionary = {};
     protein_dictionary = {};
     for (prot_id in basket) protein_dictionary[prot_id] = basket[prot_id];
     
@@ -5395,7 +5476,7 @@ function load_data(reload){
             process_edges_semaphore = true;
             clearInterval(process_nodes);
             
-            // get nodes information
+            // get protein information
             var xmlhttp_prot = new XMLHttpRequest();
             xmlhttp_prot.onreadystatechange = function() {
                 if (xmlhttp_prot.readyState == 4 && xmlhttp_prot.status == 200) {
