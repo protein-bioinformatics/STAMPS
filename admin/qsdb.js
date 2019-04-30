@@ -1418,8 +1418,10 @@ function mouse_move_listener(e){
         else c.style.cursor = "default";
         
     }
+    /*
     if(highlight_element && highlight_element.tipp && entity_moving == -1) Tip(e, highlight_element.name);
     else unTip();
+    */
 }
 
 

@@ -74,6 +74,7 @@ back_function = 0;
 num_validation = [0, 0, 0, 0, 0, 0, 0, 0];
 search_data = [];
 read_cookie_information = false;
+open_class_tab = "proteins";
 
 windowWidth = 0;
 windowHeight = 0;
@@ -4063,7 +4064,7 @@ function change_pathway(p){
         if (pw_group != 0) pw_group.className = 'selected_menu_cell';
         pw_pathway.className = 'selected_menu_cell';
         load_data();
-        if (initial_load) {
+        if (initial_load && expand_collapse_obj != 0) {
             expand_collapse_obj.expand();
         }
     }
@@ -4488,14 +4489,13 @@ function check_spectra_expand_collapse_peptide(prot_id, do_collapse){
 
 
 
-
 function check_spectra(){
     var expanded_proteins = [];
     var expanded_peptides = [];
     last_opened_menu = "";
     if (document.getElementById("filter_panel_wrapper") != null) document.getElementById("filter_panel_wrapper").innerHTML = "";
     if (document.getElementById("spectra_panel").innerHTML != ""){
-        var table_children = document.getElementById("spectra_panel").children[0].children;
+        var table_children = document.getElementById("spectra_panel").children[1].children;
         for (var i = 0; i < table_children.length; ++i){
             if (table_children[i].hasAttribute("id")){
                 var prot_id = table_children[i].getAttribute("id");
@@ -4535,6 +4535,46 @@ function check_spectra(){
     draw_spectrum();
     
     document.getElementById("error_value").value = (document.getElementById("radio_ppm").checked ? tolerance_relative : tolerance_absolute);
+    
+    
+    var dom_table_tabs = document.createElement("table");
+    document.getElementById("spectra_panel").appendChild(dom_table_tabs);
+    dom_table_tabs.setAttribute("width", "100%");
+    dom_table_tabs.setAttribute("border", "0"); 
+    dom_table_tabs.setAttribute("cellspacing", "3"); 
+    
+    var dom_tabs_tr = document.createElement("tr");
+    dom_table_tabs.appendChild(dom_tabs_tr);
+    
+    var dom_tabs_td_proteins = document.createElement("td");
+    dom_tabs_tr.appendChild(dom_tabs_td_proteins);
+    dom_tabs_td_proteins.setAttribute("width", "33%");
+    dom_tabs_td_proteins.setAttribute("align", "center");
+    var style_proteins = "border-right: 1px solid #d3d3d3; cursor: pointer;" + (open_class_tab == "proteins" ? "font-weight: bold;" : " border-bottom: 1px solid #d3d3d3;");
+    dom_tabs_td_proteins.setAttribute("style", style_proteins);
+    dom_tabs_td_proteins.setAttribute("onclick", "open_class_tab = \"proteins\"; check_spectra();");
+    dom_tabs_td_proteins.innerHTML = "Proteins";
+    
+    
+    
+    var dom_tabs_td_lipids = document.createElement("td");
+    dom_tabs_tr.appendChild(dom_tabs_td_lipids);
+    dom_tabs_td_lipids.setAttribute("width", "33%"); 
+    dom_tabs_td_lipids.setAttribute("align", "center");
+    var style_lipids = "border-right: 1px solid #d3d3d3; cursor: pointer;" + (open_class_tab == "lipids" ? "font-weight: bold;" : " border-bottom: 1px solid #d3d3d3;");
+    dom_tabs_td_lipids.setAttribute("style", style_lipids);
+    dom_tabs_td_lipids.setAttribute("onclick", "open_class_tab = \"lipids\"; check_spectra();");
+    dom_tabs_td_lipids.innerHTML = "Lipids";
+    
+    var dom_tabs_td_metabolites = document.createElement("td");
+    dom_tabs_tr.appendChild(dom_tabs_td_metabolites);
+    dom_tabs_td_metabolites.setAttribute("align", "center");
+    var style_metabolites = "cursor: pointer;" + (open_class_tab == "metabolites" ? "font-weight: bold;" : " border-bottom: 1px solid #d3d3d3;");
+    dom_tabs_td_metabolites.setAttribute("style", style_metabolites);
+    dom_tabs_td_metabolites.setAttribute("onclick", "open_class_tab = \"metabolites\"; check_spectra();");
+    dom_tabs_td_metabolites.innerHTML = "Metabolites";
+    
+    
     
     var dom_table = document.createElement("table");
     document.getElementById("spectra_panel").appendChild(dom_table);
@@ -5173,78 +5213,80 @@ function compute_statistics(){
     document.getElementById("stat_sel_spec").innerHTML = sel_spectra;
     
     var canvas_pie = document.getElementById('piechart');
-    var context_pie = canvas_pie.getContext('2d');
-    
-    context_pie.clearRect(0, 0, canvas_pie.width, canvas_pie.height);
-    
-    // fill the venn diagram
-    context_pie.globalAlpha = .1;
-    var centerX = canvas_pie.width / 3;
-    var centerY = canvas_pie.height / 3;
-    var radius = centerY + 5;
-    
-    
-    
-    roundRect(0, 0, canvas_pie.width, canvas_pie.height, 25, context_pie);
-    context_pie.globalAlpha = .4;
-    
-    
-    centerX += 5;
-    centerY += 5;
-    context_pie.beginPath();
-    context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    context_pie.fillStyle = '#ff4d4d';
-    context_pie.fill();
-    
-    centerX += canvas_pie.width / 3 - 10;
-    context_pie.beginPath();
-    context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    context_pie.fillStyle = '#fdff38';
-    context_pie.fill();
-    
-    centerX = canvas_pie.width / 2;
-    centerY += canvas_pie.height / 3 - 10;
-    context_pie.beginPath();
-    context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    context_pie.fillStyle = '#55ff38';
-    context_pie.fill();
-    context_pie.globalAlpha = 1;
-    
-    
-    
-    // create stroke around the circles
-    context_pie.lineWidth = 1;
-    context_pie.strokeStyle = '#000000';
-    centerX = canvas_pie.width / 3 + 5;
-    centerY = canvas_pie.height / 3 + 5;
-    context_pie.beginPath();
-    context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    context_pie.stroke();
-    
-    centerX += canvas_pie.width / 3 - 10;
-    context_pie.beginPath();
-    context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    context_pie.stroke();
-    
-    centerX = canvas_pie.width / 2;
-    centerY += canvas_pie.height / 3 - 10;
-    context_pie.beginPath();
-    context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    context_pie.stroke();
-    
-    
-    context_pie.textAlign = "center";
-    context_pie.font = "16px Arial";
-    context_pie.fillStyle = "black";
-    
-    context_pie.fillText(num_validation[3], canvas_pie.width / 2, canvas_pie.height * 0.2);
-    context_pie.fillText(num_validation[7], canvas_pie.width / 2, canvas_pie.height * 0.5);
-    context_pie.fillText(num_validation[4], canvas_pie.width / 2, canvas_pie.height * 0.89);
-    context_pie.fillText(num_validation[1], canvas_pie.width / 7, canvas_pie.height * 0.32);
-    context_pie.fillText(num_validation[2], canvas_pie.width * 6 / 7, canvas_pie.height * 0.32);
-    context_pie.fillText(num_validation[5], canvas_pie.width * 0.25, canvas_pie.height * 0.62);
-    context_pie.fillText(num_validation[6], canvas_pie.width * 0.75, canvas_pie.height * 0.62);
-    context_pie.fillText(num_validation[0], canvas_pie.width * 0.92, canvas_pie.height * 0.9);
+    if (canvas_pie != null){
+        var context_pie = canvas_pie.getContext('2d');
+        
+        context_pie.clearRect(0, 0, canvas_pie.width, canvas_pie.height);
+        
+        // fill the venn diagram
+        context_pie.globalAlpha = .1;
+        var centerX = canvas_pie.width / 3;
+        var centerY = canvas_pie.height / 3;
+        var radius = centerY + 5;
+        
+        
+        
+        roundRect(0, 0, canvas_pie.width, canvas_pie.height, 25, context_pie);
+        context_pie.globalAlpha = .4;
+        
+        
+        centerX += 5;
+        centerY += 5;
+        context_pie.beginPath();
+        context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        context_pie.fillStyle = '#ff4d4d';
+        context_pie.fill();
+        
+        centerX += canvas_pie.width / 3 - 10;
+        context_pie.beginPath();
+        context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        context_pie.fillStyle = '#fdff38';
+        context_pie.fill();
+        
+        centerX = canvas_pie.width / 2;
+        centerY += canvas_pie.height / 3 - 10;
+        context_pie.beginPath();
+        context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        context_pie.fillStyle = '#55ff38';
+        context_pie.fill();
+        context_pie.globalAlpha = 1;
+        
+        
+        
+        // create stroke around the circles
+        context_pie.lineWidth = 1;
+        context_pie.strokeStyle = '#000000';
+        centerX = canvas_pie.width / 3 + 5;
+        centerY = canvas_pie.height / 3 + 5;
+        context_pie.beginPath();
+        context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        context_pie.stroke();
+        
+        centerX += canvas_pie.width / 3 - 10;
+        context_pie.beginPath();
+        context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        context_pie.stroke();
+        
+        centerX = canvas_pie.width / 2;
+        centerY += canvas_pie.height / 3 - 10;
+        context_pie.beginPath();
+        context_pie.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        context_pie.stroke();
+        
+        
+        context_pie.textAlign = "center";
+        context_pie.font = "16px Arial";
+        context_pie.fillStyle = "black";
+        
+        context_pie.fillText(num_validation[3], canvas_pie.width / 2, canvas_pie.height * 0.2);
+        context_pie.fillText(num_validation[7], canvas_pie.width / 2, canvas_pie.height * 0.5);
+        context_pie.fillText(num_validation[4], canvas_pie.width / 2, canvas_pie.height * 0.89);
+        context_pie.fillText(num_validation[1], canvas_pie.width / 7, canvas_pie.height * 0.32);
+        context_pie.fillText(num_validation[2], canvas_pie.width * 6 / 7, canvas_pie.height * 0.32);
+        context_pie.fillText(num_validation[5], canvas_pie.width * 0.25, canvas_pie.height * 0.62);
+        context_pie.fillText(num_validation[6], canvas_pie.width * 0.75, canvas_pie.height * 0.62);
+        context_pie.fillText(num_validation[0], canvas_pie.width * 0.92, canvas_pie.height * 0.9);
+    }
 }
 
 
