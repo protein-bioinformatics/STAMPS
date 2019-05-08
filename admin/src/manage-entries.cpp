@@ -39,6 +39,8 @@ string urlDecode(string &SRC) {
 
 
 void print_out(string response, bool compress){
+    replaceAll(response, "\n", "");
+    replaceAll(response, "\t", "");
     if (compress){
         cout << compress_string(response);        
     }

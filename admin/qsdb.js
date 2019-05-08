@@ -2286,7 +2286,6 @@ function manage_fill_table(){
     if (filters.length > 0) request += "&filters=" + encodeURL(filters);
     request = file_pathname + "admin/scripts/manage-entries.bin?" + request;
     
-    
     var sign_up = String.fromCharCode(9652);
     var sign_down = String.fromCharCode(9662);
     
@@ -2405,6 +2404,8 @@ function manage_fill_table(){
     var xmlhttp_manage = new XMLHttpRequest();
     xmlhttp_manage.onreadystatechange = function() {
         if (xmlhttp_manage.readyState == 4 && xmlhttp_manage.status == 200) {
+            
+            
             global_manage_data = JSON.parse(xmlhttp_manage.responseText);
             var global_manage_data_sorted = [];
             for (var manage_id in global_manage_data) global_manage_data_sorted.push(global_manage_data[manage_id]);
