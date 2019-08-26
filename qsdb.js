@@ -412,7 +412,7 @@ function key_down(event){// canvas to svg
             }
         }
         if (k_is_valid){
-            alert("You broke the master code - you sneaky hacker. We'll flood your mailbox with yellow bananas. Your database will be dropped, your client destroyed. All your base are belong to us. Resistance is futile!!!");
+            alert("You broke the master code - you sneaky hacker. We'll flood your mailbox with yellow bananas. Your database will be dropped, your client destroyed. All your base are belong to us. Resistance is futile! May the force live long and prosper!!!");
         }
     }    
     if (!pathway_is_loaded) return;
