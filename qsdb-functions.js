@@ -12,7 +12,7 @@ mouse_x = 0;
 mouse_y = 0;
 zoom_options = [0, 0, 0];
 filter_parameters = {};
-supported_species = {"mouse": "Mouse"};
+supported_species = {"10090": "Mouse", "9606": "Human"};
 //supported_species = {"mouse": "Mouse", "human": "Human", "rat": "Rat"};
 current_species = "";
 top_n_fragments = [3, 6, 1000];
@@ -108,27 +108,27 @@ highlighting = 0;
 basket = {};
 file_pathname = "";
 filtered_basket = {};
-tissues = {1: ["images/brain.svg", "Brain", 0, "statistics_check_brain", "#f4e500"],
-           2: ["images/liver.svg", "Liver", 0, "statistics_check_liver", "#fdc60b"],
-           3: ["images/kidney.svg", "Kidney", 0, "statistics_check_kidney", "#f18e1c"],
-           4: ["images/spleen.svg", "Spleen", 0, "statistics_check_spleen", "#ea621f"],
-           5: ["images/heart.svg", "Heart", 0, "statistics_check_heart", "#e32322"],
-           6: ["images/blood.svg", "Platelet", 0, "statistics_check_blood", "#c4037d"],
-           7: ["images/fat.svg", "Fat", 0, "statistics_check_fat", "#6d398b"],
-           8: ["images/lung.svg", "Lung", 0, "statistics_check_lung", "#444e99"],
-           9: ["images/eye.svg", "Eye", 0, "statistics_check_eye", "#2a71b0"],
-           10: ["images/gut.svg", "Gut", 0, "statistics_check_gut", "#0696bb"]}
+tissues = {142: ["images/brain.svg", "Brain", 0, "statistics_check_brain", "#f4e500"],
+           759: ["images/liver.svg", "Liver", 0, "statistics_check_liver", "#fdc60b"],
+           671: ["images/kidney.svg", "Kidney", 0, "statistics_check_kidney", "#f18e1c"],
+           1281: ["images/spleen.svg", "Spleen", 0, "statistics_check_spleen", "#ea621f"],
+           562: ["images/heart.svg", "Heart", 0, "statistics_check_heart", "#e32322"],
+           89: ["images/blood.svg", "Platelet", 0, "statistics_check_blood", "#c4037d"],
+           442: ["images/fat.svg", "Fat", 0, "statistics_check_fat", "#6d398b"],
+           763: ["images/lung.svg", "Lung", 0, "statistics_check_lung", "#444e99"],
+           439: ["images/eye.svg", "Eye", 0, "statistics_check_eye", "#2a71b0"],
+           545: ["images/gut.svg", "Gut", 0, "statistics_check_gut", "#0696bb"]}
            
-tissue_name_to_id = {"Brain": 1,
-                     "Liver": 2,
-                     "Kidney": 3,
-                     "Spleen": 4,
-                     "Heart": 5,
-                     "Platelet": 6,
-                     "Fat": 7,
-                     "Lung": 8,
-                     "Eye": 9,
-                     "Gut": 10}
+tissue_name_to_id = {"Brain": 142,
+                     "Liver": 759,
+                     "Kidney": 671,
+                     "Spleen": 1281,
+                     "Heart": 562,
+                     "Platelet": 89,
+                     "Fat": 442,
+                     "Lung": 763,
+                     "Eye": 439,
+                     "Gut": 545}
                      
 line_width = 5;
 disabled_text_color = "#bbbbbb";
@@ -846,18 +846,21 @@ function Spectrum(data){
         
         this.filter_valid &= filter_parameters["min_precursor_charge"] <= this.charge && this.charge <= filter_parameters["max_precursor_charge"];
         
+        
+        
+        
         if (this.filter_valid && Object.keys(this.tissues).length > 0){
             var tissue_set = new Set(Object.keys(this.tissues).map(Number));
-            if (!filter_parameters["tissue_brain"] && tissue_set.has(1)) tissue_set.delete(1);
-            if (!filter_parameters["tissue_liver"] && tissue_set.has(2)) tissue_set.delete(2);
-            if (!filter_parameters["tissue_kidney"] && tissue_set.has(3)) tissue_set.delete(3);
-            if (!filter_parameters["tissue_spleen"] && tissue_set.has(4)) tissue_set.delete(4);
-            if (!filter_parameters["tissue_heart"] && tissue_set.has(5)) tissue_set.delete(5);
-            if (!filter_parameters["tissue_blood"] && tissue_set.has(6)) tissue_set.delete(6);
-            if (!filter_parameters["tissue_fat"] && tissue_set.has(7)) tissue_set.delete(7);
-            if (!filter_parameters["tissue_lung"] && tissue_set.has(8)) tissue_set.delete(8);
-            if (!filter_parameters["tissue_eye"] && tissue_set.has(9)) tissue_set.delete(9);
-            if (!filter_parameters["tissue_gut"] && tissue_set.has(10)) tissue_set.delete(10);
+            if (!filter_parameters["tissue_brain"] && tissue_set.has(tissue_name_to_id["Brain"])) tissue_set.delete(tissue_name_to_id["Brain"]);
+            if (!filter_parameters["tissue_liver"] && tissue_set.has(tissue_name_to_id["Liver"])) tissue_set.delete(tissue_name_to_id["Liver"]);
+            if (!filter_parameters["tissue_kidney"] && tissue_set.has(tissue_name_to_id["Kidney"])) tissue_set.delete(tissue_name_to_id["Kidney"]);
+            if (!filter_parameters["tissue_spleen"] && tissue_set.has(tissue_name_to_id["Spleen"])) tissue_set.delete(tissue_name_to_id["Spleen"]);
+            if (!filter_parameters["tissue_heart"] && tissue_set.has(tissue_name_to_id["Heart"])) tissue_set.delete(tissue_name_to_id["Heart"]);
+            if (!filter_parameters["tissue_blood"] && tissue_set.has(tissue_name_to_id["Platelet"])) tissue_set.delete(tissue_name_to_id["Platelet"]);
+            if (!filter_parameters["tissue_fat"] && tissue_set.has(tissue_name_to_id["Fat"])) tissue_set.delete(tissue_name_to_id["Fat"]);
+            if (!filter_parameters["tissue_lung"] && tissue_set.has(tissue_name_to_id["Lung"])) tissue_set.delete(tissue_name_to_id["Lung"]);
+            if (!filter_parameters["tissue_eye"] && tissue_set.has(tissue_name_to_id["Eye"])) tissue_set.delete(tissue_name_to_id["Eye"]);
+            if (!filter_parameters["tissue_gut"] && tissue_set.has(tissue_name_to_id["Gut"])) tissue_set.delete(tissue_name_to_id["Gut"]);
             this.filter_valid &= (tissue_set.size != 0);
         }
         

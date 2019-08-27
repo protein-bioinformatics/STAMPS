@@ -655,6 +655,7 @@ var chromosome_selected = -1;
 var loaded_chromosomes = 0;
 var currently_visible_proteins = [];
 var pathways_to_proteins = {};
+var pathway_colors = ["#f4e500", "#fdc60b", "#f18e1c", "#ea621f", "#e32322", "#c4037d", "#6d398b", "#444e99", "#2a71b0", "#0696bb"];
 
 
 function Band(data){
@@ -1203,7 +1204,7 @@ function update_correlation_tissues(ctx){
     var nsaf_set = new Set();
     for (var pathway_index in pathways_to_proteins){
         
-        ctx.fillStyle = tissues[1 + (pathway_index % 10)][4];
+        ctx.fillStyle = pathway_colors[(pathway_index % 10)];
         
         var nsaf_points = [];
         for (prot_id of pathways_to_proteins[pathway_index][1]){
@@ -1377,9 +1378,8 @@ function update_correlation_tissues_pathway(ctx){
     }
     
     
-    
     var nsaf_set = new Set(); 
-    ctx.fillStyle = tissues[1 + (pathway_index % 10)][4];   
+    ctx.fillStyle = pathway_colors[(pathway_index % 10)];
     for (var i = 0; i < nsaf_points.length; ++i){
         var x = nsaf_points[i][0];
         var y = nsaf_points[i][1];
@@ -1551,7 +1551,7 @@ function load_statistics(){
             }
             
             
-            for (var t = 1; t <= 10; ++t){
+            for (var t in tissues){
                 var sum_NSAF = 0;
                 for (var prot_id in protein_dictionary){
                     var NSAF = 0;
@@ -2902,6 +2902,9 @@ function draw_chromosome_ideograms(){
         chromosomes[key].offset = Math.min(chromosome_height * (1 - chromosomes[key].bases / max_bases), chromosome_height - chromosome_width);
         chromosomes[key].inner_height = chromosomes[key].height - chromosomes[key].offset;
     }
+    
+    
+    document.getElementById("chromosome_selection_combo").innerHTML = '';
     for (var i = 0; i < chromosome_keys.length; ++i){
         var key = chromosome_keys[i];
         chromosomes[key].draw();
@@ -3083,6 +3086,9 @@ function open_chromosome_search(){
 
 
 function change_species(select){
+    loaded_chromosomes = 0;
+    chromosome_data = {};
+    chromosome_data_dict = {};
     current_species = select[select.selectedIndex].id;
     
     if (document.getElementById("chromosome_search").style.display == "inline"){
@@ -3123,7 +3129,7 @@ function mobile_check() {
 
 file_pathname = get_pathname();
 
-current_species = "mouse";
+current_species = "10090";
 var kr_keys = [];
 var scanner_data = [1, 0, 0]; // scanner_up, scanner_index, scanner_count
 var nav_ids = ["how_to_nav", "pathway_browser_nav", "subcellular_search_nav", "functional_search_nav", "accession_search_nav", "chromosome_search_nav", "statistics_nav", "about_nav"];
