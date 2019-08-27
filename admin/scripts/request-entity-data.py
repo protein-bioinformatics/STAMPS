@@ -73,7 +73,7 @@ if entity_type == "protein":
                     
             elif child.tag == "organism":
                 for spec_child in child:
-                    if spec_child.tag == "name" and "type" in spec_child.attrib and spec_child.attrib["type"] == "common": species = spec_child.text.lower()
+                    if spec_child.tag == "dbReference" and "type" in spec_child.attrib and spec_child.attrib["type"] == "NCBI Taxonomy" and "id" in spec_child.attrib: species = spec_child.attrib["id"]
                     
             elif child.tag == "protein":
                 for def_child in child:
@@ -142,6 +142,14 @@ if entity_type == "protein":
     if action == "update":
         
         sql_query = "UPDATE proteins SET name = '%s', definition = '%s', species = '%s', kegg_link = '%s', ec_number = '%s', fasta = '%s', unreviewed = %i, chromosome = '%s', chr_start = %i, chr_end = %i WHERE accession = '%s';" % (name, definition, species, kegg_id, ec_number, fasta, 1 if unreviewed else 0, chromosome, chr_start, chr_end, accession)
+        my_cur.execute(sql_query)
+        
+        conn.commit()
+        print(0)
+
+
+    elif action == "insert":
+        sql_query = "INSERT INTO proteins (name, accession, definition, species, kegg_link, ec_number, fasta, unreviewed, chromosome, chr_start, chr_end) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', %s, '%s', %s, %s);" % (name, accession, definition, species, kegg_id, ec_number, fasta, 1 if unreviewed else 0, chromosome, chr_start, chr_end)
         my_cur.execute(sql_query)
         
         conn.commit()

@@ -2902,6 +2902,9 @@ function draw_chromosome_ideograms(){
         chromosomes[key].offset = Math.min(chromosome_height * (1 - chromosomes[key].bases / max_bases), chromosome_height - chromosome_width);
         chromosomes[key].inner_height = chromosomes[key].height - chromosomes[key].offset;
     }
+    
+    
+    document.getElementById("chromosome_selection_combo").innerHTML = '';
     for (var i = 0; i < chromosome_keys.length; ++i){
         var key = chromosome_keys[i];
         chromosomes[key].draw();
@@ -3083,6 +3086,9 @@ function open_chromosome_search(){
 
 
 function change_species(select){
+    loaded_chromosomes = 0;
+    chromosome_data = {};
+    chromosome_data_dict = {};
     current_species = select[select.selectedIndex].id;
     
     if (document.getElementById("chromosome_search").style.display == "inline"){
@@ -3123,7 +3129,7 @@ function mobile_check() {
 
 file_pathname = get_pathname();
 
-current_species = "mouse";
+current_species = "10090";
 var kr_keys = [];
 var scanner_data = [1, 0, 0]; // scanner_up, scanner_index, scanner_count
 var nav_ids = ["how_to_nav", "pathway_browser_nav", "subcellular_search_nav", "functional_search_nav", "accession_search_nav", "chromosome_search_nav", "statistics_nav", "about_nav"];
