@@ -29,6 +29,7 @@ toolbox_buttons = ["toolbox_button_create_pathway",
                    "toolbox_button_change_edge",
                    "toolbox_button_delete_entity",
                    "toolbox_button_create_invisible"];
+                   
 toolbox_button_selected = -1;
 entity_moving = -1;
 tmp_element = -1;
@@ -72,8 +73,8 @@ spectra_current_page = 0;
 current_spectrum_selected = 0;
 spectra_checks = {};
 
-manage_sort_columns = {"pathway_groups": {}, "proteins": {}, "pathways": {}, "metabolites": {}};
-manage_columns = {"pathway_groups": [], "proteins": [], "pathways": [], "metabolites": []};
+manage_sort_columns = {"pathway_groups": {}, "proteins": {}, "pathways": {}, "metabolites": {}, "species": {}};
+manage_columns = {"pathway_groups": [], "proteins": [], "pathways": [], "metabolites": [], "species": []};
 manage_current_entry = "proteins";
 manage_sort_column = 1;
 manage_max_pages = -1;
@@ -84,6 +85,7 @@ max_spectra_per_page = 100;
 chromosomes = {};
 draw_anchor_start = "";
 draw_anchor_end = "";
+del_species_ncbi = "";
 
 multiple_selection = new Set();
 
@@ -96,6 +98,7 @@ function init(){
     select_field_element = new select_field();
     select_field_element.visible = false;
     get_pathway_groups();
+    set_species_menu();
     
     infobox = new Infobox();
     zoom_sign_in = new zoom_sign(1);
@@ -134,7 +137,6 @@ function init(){
     xmlhttp_pathways.open("GET", file_pathname + "scripts/get-pathways.bin?all", true);
     xmlhttp_pathways.send();
     
-    set_species_menu();
     
     var ctx = document.getElementById("renderarea").getContext("2d");
     ctx.font = "17px serif";
@@ -308,6 +310,21 @@ function init(){
     }
     xmlhttp_pw_col.open("GET", file_pathname + "admin/scripts/manage-entries.bin?action=get&type=pathways_col", true);
     xmlhttp_pw_col.send();
+    
+    
+    var xmlhttp_species_col = new XMLHttpRequest();
+    xmlhttp_species_col.onreadystatechange = function() {
+        if (xmlhttp_species_col.readyState == 4 && xmlhttp_species_col.status == 200) {
+            var request = JSON.parse(xmlhttp_species_col.responseText);
+            for (var i = 1; i < request.length; ++i){
+                manage_sort_columns["species"][i.toString()] = request[i] + ":ASC";
+                manage_sort_columns["species"][(-i).toString()] = request[i] + ":DESC";
+                manage_columns["species"].push(request[i]);
+            }
+        }
+    }
+    xmlhttp_species_col.open("GET", file_pathname + "admin/scripts/manage-entries.bin?action=get&type=species_col", true);
+    xmlhttp_species_col.send();
     
     
     analytics("stamps-editor-request");
@@ -1763,6 +1780,10 @@ function key_down(event){
         close_editor_select_protein();
         close_editor_select_metabolite();
         close_navigation();
+        document.getElementById('add_manage_species').style.display = 'none';
+        document.getElementById('add_manage_proteins').style.display = 'none';
+        document.getElementById('add_manage_metabolites').style.display = 'none';
+        document.getElementById('add_manage_pathways').style.display = 'none';
         hide_check_spectra();
         last_opened_menu = "";
     }
@@ -2269,6 +2290,36 @@ function update_protein_data(accession){
 
 
 
+
+function open_add_species(){
+    // get species list
+    var xmlhttp_species_list = new XMLHttpRequest();
+    xmlhttp_species_list.onreadystatechange = function() {
+        if (xmlhttp_species_list.readyState == 4 && xmlhttp_species_list.status == 200) {
+            var possible_species = JSON.parse(xmlhttp_species_list.responseText);
+            
+            var add_manage_species_select_dom = document.getElementById("add_manage_species_select");
+            add_manage_species_select_dom.innerHTML = "";
+            
+            for (var i = 0; i < possible_species.length; ++i){
+                if (!(possible_species[i][0] in supported_species)){
+                    var dom_option = document.createElement("option");
+                    add_manage_species_select_dom.appendChild(dom_option);
+                    dom_option.id = possible_species[i][0];
+                    dom_option.text = possible_species[i][1];
+                }
+                
+            }
+            document.getElementById('add_manage_species').style.display = 'inline';
+        }
+    }
+    xmlhttp_species_list.open("GET", file_pathname + "admin/scripts/get-species-list.py", true);
+    xmlhttp_species_list.send();
+}
+
+
+
+
 function manage_fill_table(){
     
     var filters = "";
@@ -2315,6 +2366,7 @@ function manage_fill_table(){
         var col_name = manage_sort_columns[manage_current_entry][i].split(":")[0];
         dom_th_name.innerHTML = col_name + ((manage_sort_column == i) ? " " + sign_up : ((manage_sort_column == -i) ? " " + sign_down : ""));
         if (manage_current_entry == "proteins" && i == 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
+        else if (manage_current_entry == "species") dom_th_name.setAttribute("style", "cursor: pointer; min-width: 325px; max-width: 325px;");
         else if (manage_current_entry == "metabolites" && i == 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
         else if (manage_current_entry == "pathways" && i == 1) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 600px; max-width: 600px;");
         else if (manage_current_entry == "pathways" && i == 2) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 300px; max-width: 300px;");
@@ -2386,6 +2438,12 @@ function manage_fill_table(){
         dom_nav_cell.appendChild(dom_new_protein);
         dom_new_protein.innerHTML = "New protein";
         dom_new_protein.setAttribute("onclick", "document.getElementById('add_manage_proteins').style.display = 'inline';");
+    }
+    else if (manage_current_entry == "species"){
+        var dom_add_species = document.createElement("button");
+        dom_nav_cell.appendChild(dom_add_species);
+        dom_add_species.innerHTML = "Add species";
+        dom_add_species.setAttribute("onclick", "open_add_species();");
     }
     else if (manage_current_entry == "metabolites"){
         var dom_new_metabolite = document.createElement("button");
@@ -2623,6 +2681,43 @@ function manage_fill_table(){
                 
             }
             
+            else if (manage_current_entry == "species"){
+                
+                for (var i = 0; i < global_manage_data_sorted.length; ++i){
+                    var bg_color = (i & 1) ? "#DDDDDD" : "white";
+                    var row = global_manage_data_sorted[i];
+                    
+                    var dom_tr = document.createElement("tr");
+                    dom_table.appendChild(dom_tr);
+                    var dom_td_del = document.createElement("td");
+                    dom_tr.appendChild(dom_td_del);
+                    dom_td_del.setAttribute("bgcolor", bg_color);
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 64px; max-width: 64px;");
+                    var dom_image = document.createElement("img");
+                    dom_td_del.appendChild(dom_image);
+                    dom_image.setAttribute("src", "../images/delete-small.png");
+                    
+                    dom_image.setAttribute("onclick", "del_species_ncbi = '" + row[1] + "'; document.getElementById('confirm_deletion_hidden').value = 'manage_delete_species';  document.getElementById('confirm_deletion_hidden_id').value = " + row[0] + "; document.getElementById('confirm_deletion_input').value = ''; document.getElementById('confirm_deletion').style.display = 'inline';");
+                    
+                    for (var j = 1; j < row.length; ++j){
+                        var dom_td = document.createElement("td");
+                        dom_tr.appendChild(dom_td);
+                        dom_td.setAttribute("bgcolor", bg_color);
+                        
+                            
+                        var dom_div = document.createElement("div");
+                        dom_td.appendChild(dom_div);
+                        dom_td.setAttribute("style", "min-width: 325px; max-width: 325px;");
+                        dom_div.setAttribute("style", "padding: 5px;");
+                        dom_div.entity_id = row[0];
+                        dom_div.innerHTML = trim_text(row[j], 300);
+                        dom_div.col_id = j;
+                        dom_div.field_len = 325;
+                    }
+                }
+                
+            }
+            
             else if (manage_current_entry == "pathways"){
     
                 for (var i = 0; i < global_manage_data_sorted.length; ++i){
@@ -2758,6 +2853,7 @@ function manage_fill_table(){
             }
         }
     }
+    
     xmlhttp_manage.open("GET", request, false);
     xmlhttp_manage.send();
     document.getElementById("editor_select_manage_content_wrapper").style.width = (document.getElementById("editor_select_manage_table_header").offsetWidth).toString() + "px";
@@ -3067,7 +3163,9 @@ function change_textarea_type(dom_obj, to_text){
 
 
 function resize_manage_view(){
-    var window_width_factor = (manage_current_entry == "pathways" || manage_current_entry == "pathway_groups") ? 0.5 : 0.9;
+    var window_width_factor = 0.9;
+    if (manage_current_entry == "pathways" || manage_current_entry == "pathway_groups") window_width_factor = 0.5;
+    else if (manage_current_entry == "species") window_width_factor = 0.4;
     
     
     // set height of manage selection window
@@ -3116,6 +3214,9 @@ function resize_manage_view(){
     
     // set height of pathways adding window
     document.getElementById("add_manage_pathways_window").style.height = "130px";
+    
+    // set height of pathways adding window
+    document.getElementById("add_manage_species_window").style.height = "130px";
 }
 
 
@@ -3302,6 +3403,34 @@ function add_manage_pathways(){
 
 
 
+function add_manage_species_add(){
+    var opt = document.getElementById("add_manage_species_select");
+    opt = opt[opt.selectedIndex];
+    
+    
+    var request = "name:" + opt.text;
+    request += data_separator + "ncbi:" + opt.id;
+    
+    request = file_pathname + "admin/scripts/manage-entries.bin?action=insert&type=species&data=" + encodeURL(request);
+    
+    var xmlhttp_add_species = new XMLHttpRequest();
+    xmlhttp_add_species.onreadystatechange = function() {
+        if (xmlhttp_add_species.readyState == 4 && xmlhttp_add_species.status == 200) {
+            var request = xmlhttp_add_species.responseText;
+            if (request < 0){
+                alert("An error has occured while adding the species to the database. Please contact the administrator.");
+            }
+            document.getElementById('add_manage_species').style.display = 'none';
+            manage_fill_table();
+            set_species_menu(true);
+        }
+    }
+    xmlhttp_add_species.open("GET", request, false);
+    xmlhttp_add_species.send();
+}
+
+
+
 function add_manage_metabolites_add(){
     var request = "name:" + replaceAll(document.getElementById("add_manage_metabolites_name").value, "\n", "");
     request += data_separator + "short_name:" + replaceAll(document.getElementById("add_manage_metabolites_short_name").value, "\n", "");
@@ -3384,6 +3513,41 @@ function manage_delete_metabolite(metabolite_id){
 }
 
 
+
+function manage_delete_species(species_id){
+    if (Object.keys(supported_species).length <= 1){
+        alert("At least one species must be registered in the system.");
+        return;
+    }
+    
+    
+    var request = "type=species&id=" + species_id;
+    request = file_pathname + "admin/scripts/delete-entity.py?" + request
+    
+    var xmlhttp_metabolite_data = new XMLHttpRequest();
+    xmlhttp_metabolite_data.onreadystatechange = function() {
+        if (xmlhttp_metabolite_data.readyState == 4 && xmlhttp_metabolite_data.status == 200) {
+            var request = xmlhttp_metabolite_data.responseText;
+            if (request < 0){
+                alert("Error: protein could not be deleted from database.");
+            }
+            delete supported_species[del_species_ncbi];
+            
+            if (current_species == del_species_ncbi){
+                for (var species_ncbi in supported_species){
+                    current_species = species_ncbi;
+                    break;
+                }
+                load_data(true);
+            }
+            del_species_ncbi = "";
+            manage_fill_table();
+            set_species_menu(true);
+        }
+    }
+    xmlhttp_metabolite_data.open("GET", request, false);
+    xmlhttp_metabolite_data.send();
+}
 
 
 

@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
             return -9;
         }
         
-        if (!action_type.compare("pathway_groups") || !action_type.compare("pathways") || !action_type.compare("proteins") || !action_type.compare("metabolites")){
+        if (!action_type.compare("pathway_groups") || !action_type.compare("pathways") || !action_type.compare("proteins") || !action_type.compare("species") || !action_type.compare("metabolites")){
             string order_col = (form.find("column") != form.end()) ? form["column"] : "";
             string limit = (form.find("limit") != form.end()) ? form["limit"] : "";
             string filters = (form.find("filters") != form.end()) ? form["filters"] : "";
@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
             delete res;
         }
             
-        else if (!action_type.compare("pathway_groups_num") || !action_type.compare("proteins_num") || !action_type.compare("metabolites_num") || !action_type.compare("pathways_num")){
+        else if (!action_type.compare("pathway_groups_num") || !action_type.compare("proteins_num") || !action_type.compare("metabolites_num") || !action_type.compare("species_num") || !action_type.compare("pathways_num")){
             replaceAll(action_type, "_num", "");
             string sql_query = "SELECT count(*) from " + action_type + ";";
             res = stmt->executeQuery(sql_query);
@@ -269,7 +269,7 @@ int main(int argc, char** argv) {
             delete res;
         }
             
-        else if (!action_type.compare("pathway_groups_col") || !action_type.compare("proteins_col") || !action_type.compare("metabolites_col") || !action_type.compare("pathways_col")){
+        else if (!action_type.compare("pathway_groups_col") || !action_type.compare("proteins_col") || !action_type.compare("metabolites_col") || !action_type.compare("species_col") || !action_type.compare("pathways_col")){
             replaceAll(action_type, "_col", "");
             string sql_query = "SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = '" + parameters["mysql_db"] + "' AND `TABLE_NAME` = '" + action_type + "';";
             res = stmt->executeQuery(sql_query);
@@ -295,7 +295,7 @@ int main(int argc, char** argv) {
             return -4;
         }
         
-        if (action_type.compare("pathway_groups") != 0 && action_type.compare("pathways") != 0 && action_type.compare("proteins") != 0 && action_type.compare("metabolites") != 0){
+        if (action_type.compare("pathway_groups") != 0 && action_type.compare("pathways") != 0 && action_type.compare("proteins") != 0 && action_type.compare("metabolites") != 0 && action_type.compare("species") != 0){
             response += "-5";
             print_out(response, compress);
             return -5;

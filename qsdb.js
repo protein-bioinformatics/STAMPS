@@ -12,6 +12,7 @@ function init(){
     }
     
     get_pathway_groups();
+    set_species_menu();
     infobox = new Infobox();
     zoom_sign_in = new zoom_sign(1);
     zoom_sign_out = new zoom_sign(0);
@@ -19,7 +20,6 @@ function init(){
     preview_element = new preview();
     select_field_element = new select_field();
     select_field_element.visible = false;
-    current_species = "mouse";
     
     var xmlhttp_pw = new XMLHttpRequest();
     xmlhttp_pw.onreadystatechange = function() {
@@ -97,9 +97,6 @@ function init(){
     }
     xmlhttp_pw.open("GET", file_pathname + "scripts/get-pathways.bin", true);
     xmlhttp_pw.send();
-    
-    
-    set_species_menu();
     
     
     var xmlhttp_search = new XMLHttpRequest();

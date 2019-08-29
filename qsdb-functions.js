@@ -551,33 +551,68 @@ function draw(sync){
 }
 
 
-function set_species_menu(){
+function set_species_menu(reload){
     
-    var ss_table = document.getElementById("select_species_table");
-    var species_counter = 0;
-    for (var species_name in supported_species){
-        var dom_species_tr = document.createElement("tr");
-        ss_table.appendChild(dom_species_tr);
-        
-        var dom_species_td = document.createElement("td");
-        dom_species_tr.appendChild(dom_species_td);
-        dom_species_td.setAttribute("onclick", "var species_menu = document.getElementById('select_species_table'); \
-            for (var child of species_menu.children){ \
-                child.children[0].className = 'select_menu_cell'; \
-            } \
-            this.className = 'selected_menu_cell'; \
-            last_opened_menu = ''; current_species = '" + species_name + "'; load_data(true);");        
-        dom_species_td.setAttribute("type", "radio");
-        dom_species_td.setAttribute("value", species_name);
-        dom_species_td.setAttribute("name", "species");
-        dom_species_td.setAttribute("id", "species_" + species_name);
-        dom_species_td.setAttribute("class", "select_menu_cell");
-        if (species_counter++ == 0) {
-            current_species = species_name;
-            dom_species_td.setAttribute("class", "selected_menu_cell");
+    if (typeof reload === 'undefined') reload = false;
+    
+    // get species
+    var xmlhttp_pg = new XMLHttpRequest();
+    xmlhttp_pg.onreadystatechange = function() {
+        if (xmlhttp_pg.readyState == 4 && xmlhttp_pg.status == 200) {
+            supported_species = JSON.parse(xmlhttp_pg.responseText);
+            
+            
+            var ss_table = document.getElementById("select_species_table");
+            ss_table.innerHTML = "";
+            var species_counter = 0;
+            
+            var sorted_species = [];
+            for (var ncbi in supported_species) sorted_species.push([supported_species[ncbi], ncbi]);
+            sorted_species.sort(function(a, b){
+                return a[0] > b[0];
+            });
+            
+            for (var ncbi of sorted_species){
+                var dom_species_tr = document.createElement("tr");
+                ss_table.appendChild(dom_species_tr);
+                
+                var dom_species_td = document.createElement("td");
+                dom_species_tr.appendChild(dom_species_td);
+                dom_species_td.setAttribute("onclick", "var species_menu = document.getElementById('select_species_table'); \
+                    for (var child of species_menu.children){ \
+                        child.children[0].className = 'select_menu_cell'; \
+                    } \
+                    this.className = 'selected_menu_cell'; \
+                    last_opened_menu = ''; current_species = '" + ncbi[1] + "'; load_data(true);");   
+                dom_species_td.innerHTML = ncbi[0];
+                dom_species_td.setAttribute("type", "radio");
+                dom_species_td.setAttribute("value", ncbi[1]);
+                dom_species_td.setAttribute("name", "species");
+                dom_species_td.setAttribute("id", "species_" + ncbi[1]);
+                dom_species_td.setAttribute("class", "select_menu_cell");
+                if (reload){
+                    if (current_species == ncbi[1]){
+                        dom_species_td.setAttribute("class", "selected_menu_cell");
+                    }
+                }
+                else {
+                    if (species_counter == 0) {
+                        current_species = ncbi[1];
+                        dom_species_td.setAttribute("class", "selected_menu_cell");
+                    }
+                }
+                ++species_counter;
+            }
+            
         }
-        dom_species_td.innerHTML = supported_species[species_name];
     }
+    xmlhttp_pg.open("GET", file_pathname + "scripts/get-species.py", false);
+    xmlhttp_pg.send();
+    
+    
+    
+    
+    
 }
 
 
@@ -4621,6 +4656,7 @@ function get_pathway_groups(){
     }
     xmlhttp_pg.open("GET", file_pathname + "scripts/get-pathway-groups.py", false);
     xmlhttp_pg.send();
+    
 }
 
 

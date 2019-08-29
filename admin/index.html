@@ -176,7 +176,9 @@
                     <button onclick="manage_change_entity('pathway_groups'); manage_fill_table();">Pathway groups</button>&nbsp;&nbsp;
                     <button onclick="manage_change_entity('pathways'); manage_fill_table();">Pathways</button>&nbsp;&nbsp;
                     <button onclick="manage_change_entity('proteins'); manage_fill_table();">Proteins</button>&nbsp;&nbsp;
-                    <button onclick="manage_change_entity('metabolites'); manage_fill_table();">Metabolites</button><p>
+                    <button onclick="manage_change_entity('metabolites'); manage_fill_table();">Metabolites</button>&nbsp;&nbsp;
+                    <button onclick="manage_change_entity('species'); manage_fill_table();">Species</button>&nbsp;&nbsp;
+                    <button onclick="">Tissues</button><p>
                 </td>
             </tr>
             <tr>
@@ -348,6 +350,31 @@
         </table>
     </div>
 </div>
+
+
+
+
+<div id="add_manage_species" class="global_search">
+    <div id="add_manage_species_background" class="global_search_background"></div>
+    <div id="add_manage_species_window" class="global_search_content" style="width: 1000px;">
+        <table width="100%" height="100%">
+            <tr>
+                <td id="add_manage_species_cell" valign="top" height="100%">
+                    <div id="add_manage_species_wrapper" style="position: fixed; display: inline; overflow-y: none; min-width:300px; width: 1000px;">
+                        <table id="add_manage_species_table" cellspacing="0" size=20 style="border-width: 1px; width: 100%; border-style: solid;">
+                            <tr><th width="30%">Select species</th><td><select id="add_manage_species_select" style="min-width: 90%; max-width: 90%;" ></select></td></tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right" valign="bottom"><button onclick="document.getElementById('add_manage_species').style.display = 'none';" style="display: inline;">Cancel</button>&nbsp;<button onclick="add_manage_species_add();">Add species</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
 
 
 <div id="add_manage_metabolites" class="global_search">
