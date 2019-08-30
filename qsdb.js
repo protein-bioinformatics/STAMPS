@@ -11,6 +11,15 @@ function init(){
         HTTP_GET_VARS[pair[0]] = pair[1];
     }
     
+    
+    
+    load_css();
+    
+    
+    
+    
+    
+    
     get_pathway_groups();
     set_species_menu();
     infobox = new Infobox();

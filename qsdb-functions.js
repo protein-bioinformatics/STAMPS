@@ -108,16 +108,16 @@ highlighting = 0;
 basket = {};
 file_pathname = "";
 filtered_basket = {};
-tissues = {142: ["images/brain.svg", "Brain", 0, "statistics_check_brain", "#f4e500"],
-           759: ["images/liver.svg", "Liver", 0, "statistics_check_liver", "#fdc60b"],
-           671: ["images/kidney.svg", "Kidney", 0, "statistics_check_kidney", "#f18e1c"],
-           1281: ["images/spleen.svg", "Spleen", 0, "statistics_check_spleen", "#ea621f"],
-           562: ["images/heart.svg", "Heart", 0, "statistics_check_heart", "#e32322"],
-           89: ["images/blood.svg", "Platelet", 0, "statistics_check_blood", "#c4037d"],
-           442: ["images/fat.svg", "Fat", 0, "statistics_check_fat", "#6d398b"],
-           763: ["images/lung.svg", "Lung", 0, "statistics_check_lung", "#444e99"],
-           439: ["images/eye.svg", "Eye", 0, "statistics_check_eye", "#2a71b0"],
-           545: ["images/gut.svg", "Gut", 0, "statistics_check_gut", "#0696bb"]}
+tissues = {142: ["images/brain.png", "Brain", 0, "statistics_check_brain", "#f4e500"],
+           759: ["images/liver.png", "Liver", 0, "statistics_check_liver", "#fdc60b"],
+           671: ["images/kidney.png", "Kidney", 0, "statistics_check_kidney", "#f18e1c"],
+           1281: ["images/spleen.png", "Spleen", 0, "statistics_check_spleen", "#ea621f"],
+           562: ["images/heart.png", "Heart", 0, "statistics_check_heart", "#e32322"],
+           89: ["images/blood.png", "Platelet", 0, "statistics_check_blood", "#c4037d"],
+           442: ["images/fat.png", "Fat", 0, "statistics_check_fat", "#6d398b"],
+           763: ["images/lung.png", "Lung", 0, "statistics_check_lung", "#444e99"],
+           439: ["images/eye.png", "Eye", 0, "statistics_check_eye", "#2a71b0"],
+           545: ["images/gut.png", "Gut", 0, "statistics_check_gut", "#0696bb"]}
            
 tissue_name_to_id = {"Brain": 142,
                      "Liver": 759,
@@ -396,6 +396,29 @@ function get_waiting_background_content(){
 function debug(text){
     document.getElementById("hint").innerHTML = text;
 }
+
+
+
+
+function load_css(){
+    
+    for (var tissue_key in tissues){
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        document.getElementsByTagName('head')[0].appendChild(style);
+        style.innerHTML = "div." + tissues[tissue_key][1] + " { \
+        background-image: url('" + file_pathname + tissues[tissue_key][0] + "'); \
+        background-repeat: no-repeat; \
+        width: 12px; \
+        height: 12px; \
+        margin-right: 2px; \
+        float: left; \
+        display: inline; \
+        }";
+    }
+}
+
+
 
 
 function change_zoom(){
