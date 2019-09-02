@@ -98,30 +98,7 @@ highlighting = 0;
 basket = {};
 file_pathname = "";
 filtered_basket = {};
-/*
-tissues = {142: ["images/brain.png", "Brain", 0, "statistics_check_brain", "#f4e500"],
-           759: ["images/liver.png", "Liver", 0, "statistics_check_liver", "#fdc60b"],
-           671: ["images/kidney.png", "Kidney", 0, "statistics_check_kidney", "#f18e1c"],
-           1281: ["images/spleen.png", "Spleen", 0, "statistics_check_spleen", "#ea621f"],
-           562: ["images/heart.png", "Heart", 0, "statistics_check_heart", "#e32322"],
-           89: ["images/blood.png", "Platelet", 0, "statistics_check_blood", "#c4037d"],
-           442: ["images/fat.png", "Fat", 0, "statistics_check_fat", "#6d398b"],
-           763: ["images/lung.png", "Lung", 0, "statistics_check_lung", "#444e99"],
-           439: ["images/eye.png", "Eye", 0, "statistics_check_eye", "#2a71b0"],
-           545: ["images/gut.png", "Gut", 0, "statistics_check_gut", "#0696bb"]}
-           
-           
-tissue_name_to_id = {"Brain": 142,
-                     "Liver": 759,
-                     "Kidney": 671,
-                     "Spleen": 1281,
-                     "Heart": 562,
-                     "Platelet": 89,
-                     "Fat": 442,
-                     "Lung": 763,
-                     "Eye": 439,
-                     "Gut": 545}
-*/
+
 tissues = {};
 tissue_name_to_id = {};
                      
@@ -229,80 +206,12 @@ filter_panel_meta_data[2] = "document.getElementById('validation_top_n').checked
 </div>";
 
 var filter_panel_data = "";
-/*
-
-var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
-    <table> \
-        <tr><td>Min. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"min_peptide_length\" /><td></tr> \
-        <tr><td>Max. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"max_peptide_length\" /><td></tr> \
-        <tr><td>Min. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"min_precursor_charge\" /><td></tr> \
-        <tr><td>Max. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"max_precursor_charge\" /><td></tr> \
-        <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td></tr> \
-        <tr><td>Oxydation of M</td><td> \
-        <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" /> off \
-        <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
-        <input type=\"radio\" id=\"oxy_m_fix\" name=\"oxy_m\" /> fixed \
-        <td></tr> \
-        <tr><td>Carbamidomethylation of C</td><td> \
-        <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" /> off \
-        <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
-        <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
-        <td></tr> \
-        <tr><td colspan=\"2\"><br>Tissues:</td></tr> \
-                <tr><td><input type=\"checkbox\" id=\"check_brain\" /> Brain</td> \
-                    <td><input type=\"checkbox\" id=\"check_liver\" /> Liver</td> \
-                </tr> \
-                <tr><td><input type=\"checkbox\" id=\"check_kidney\" /> Kidney</td> \
-                    <td><input type=\"checkbox\" id=\"check_spleen\" /> Spleen</td> \
-                </tr> \
-                <tr><td><input type=\"checkbox\" id=\"check_heart\" /> Heart</td> \
-                    <td><input type=\"checkbox\" id=\"check_blood\" /> Platelet</td> \
-                </tr> \
-                <tr><td><input type=\"checkbox\" id=\"check_fat\" /> Fat</td> \
-                    <td><input type=\"checkbox\" id=\"check_lung\" /> Lung</td> \
-                </tr> \
-                <tr><td><input type=\"checkbox\" id=\"check_eye\" /> Eye</td> \
-                    <td><input type=\"checkbox\" id=\"check_gut\" /> Gut</td> \
-                </tr> \
-        <tr><td colspan=\"2\">&nbsp;<br>Report:</td></tr> \
-        <tr><td>Top-n fragments</td><td><select id=\"max_topn_fragments\"><option>3</option><option>6</option><option>all</option></select><td></tr> \
-        <tr><td>Ions</td><td><select id=\"ions\"><option>y</option><option>b</option><option>y, b</option></select><td></tr> \
-        <tr><td colspan=\"2\"><br>Validation:<br>\
-        <input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment&nbsp;<font color='#ffbebe'>●</font><br> \
-        <input type=\"checkbox\" id=\"validation_prm\" /> PRM&nbsp;<font color='#feff90'>●</font><br> \
-        <input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard&nbsp;<font color='#a0ff90'>●</font><br> \
-        <input type=\"checkbox\" id=\"enable_unreviewed\" /> enable unreviewed proteins</td></tr> \
-        <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
-        document.getElementById('min_peptide_length').value = 8; \
-        document.getElementById('max_peptide_length').value = 25; \
-        document.getElementById('min_precursor_charge').value = 2; \
-        document.getElementById('max_precursor_charge').value = 3; \
-        document.getElementById('max_topn_fragments').selectedIndex = 2; \
-        document.getElementById('ions').selectedIndex = 0; \
-        document.getElementById('oxy_m_off').checked = true; \
-        document.getElementById('carba_c_off').checked = true; \
-        document.getElementById('check_brain').checked = true; \
-        document.getElementById('check_liver').checked = true; \
-        document.getElementById('check_kidney').checked = true; \
-        document.getElementById('check_spleen').checked = true; \
-        document.getElementById('check_heart').checked = true; \
-        document.getElementById('check_blood').checked = true; \ \
-        document.getElementById('check_fat').checked = true; \
-        document.getElementById('check_lung').checked = true; \
-        document.getElementById('check_eye').checked = true; \
-        document.getElementById('check_gut').checked = true; \
-        document.getElementById('validation_top_n').checked = true; \
-        document.getElementById('validation_prm').checked = true; \
-        document.getElementById('validation_is').checked = true; \
-        document.getElementById('enable_unreviewed').checked = false; \
-        ;\">default settings</td></tr> \
-    </table> \
-</div>";
 
 
-*/
 
-var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
+var filter_panel_meta_data_landscape = [0, 0, 0];
+
+filter_panel_meta_data_landscape[0] = "<div id=\"filter_panel\"> \
     <table><tr><td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \
         <table> \
             <tr><td>Min. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"min_peptide_length\" /><td></tr> \
@@ -317,18 +226,10 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
             document.getElementById('max_topn_fragments').selectedIndex = 2; \
             document.getElementById('ions').selectedIndex = 0; \
             document.getElementById('oxy_m_off').checked = true; \
-            document.getElementById('carba_c_off').checked = true; \
-            document.getElementById('check_brain').checked = true; \
-            document.getElementById('check_liver').checked = true; \
-            document.getElementById('check_kidney').checked = true; \
-            document.getElementById('check_spleen').checked = true; \
-            document.getElementById('check_heart').checked = true; \
-            document.getElementById('check_blood').checked = true; \ \
-            document.getElementById('check_fat').checked = true; \
-            document.getElementById('check_lung').checked = true; \
-            document.getElementById('check_eye').checked = true; \
-            document.getElementById('check_gut').checked = true; \
-            document.getElementById('validation_top_n').checked = true; \
+            document.getElementById('carba_c_off').checked = true;";
+
+
+filter_panel_meta_data_landscape[1] = "document.getElementById('validation_top_n').checked = true; \
             document.getElementById('validation_prm').checked = true; \
             document.getElementById('validation_is').checked = true; \
             document.getElementById('enable_unreviewed').checked = false; \
@@ -351,23 +252,9 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
         </td> \
         <td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \
             <table> \
-                <tr><td colspan=\"2\">Tissues:</td><td></tr> \
-                <tr><td><input type=\"checkbox\" id=\"check_brain\" /> Brain</td> \
-                    <td><input type=\"checkbox\" id=\"check_liver\" /> Liver</td> \
-                </tr> \
-                <tr><td><input type=\"checkbox\" id=\"check_kidney\" /> Kidney</td> \
-                    <td><input type=\"checkbox\" id=\"check_spleen\" /> Spleen</td> \
-                </tr> \
-                <tr><td><input type=\"checkbox\" id=\"check_heart\" /> Heart</td> \
-                    <td><input type=\"checkbox\" id=\"check_blood\" /> Platelet</td> \
-                </tr> \
-                <tr><td><input type=\"checkbox\" id=\"check_fat\" /> Fat</td> \
-                    <td><input type=\"checkbox\" id=\"check_lung\" /> Lung</td> \
-                </tr> \
-                <tr><td><input type=\"checkbox\" id=\"check_eye\" /> Eye</td> \
-                    <td><input type=\"checkbox\" id=\"check_gut\" /> Gut</td> \
-                </tr> \
-            </table> \
+                <tr><td colspan=\"2\">Tissues:</td><td></tr>";
+
+filter_panel_meta_data_landscape[2] = "</table> \
         </td> \
         <td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \
             <table> \
@@ -388,6 +275,11 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
         </td> \
     </td></tr></table> \
 </div>";
+
+
+
+
+var filter_panel_data_landscape = "";
 
 
 
@@ -464,20 +356,43 @@ function load_tissues(){
             
             load_css();
             
+            // create portrait filter panel
             sorted_tissues.sort();
-            filter_panel_data = filter_panel_meta_data[0];
             var i = 0;
+            filter_panel_data = filter_panel_meta_data[0];
             for (var tissue of sorted_tissues){
                 if (i % 2 == 0) filter_panel_data += "<tr>";
                 filter_panel_data += "<td><input type=\"checkbox\" id=\"check_" + tissue.toLowerCase() + "\" /> " + tissue + "</td>";
                 if (i % 2 == 1) filter_panel_data += "</tr>";
                 ++i;
             }
+            if (i % 2 == 1) filter_panel_data_landscape += "</tr>";
             filter_panel_data += filter_panel_meta_data[1];
             for (var tissue of sorted_tissues){
                 filter_panel_data += "document.getElementById('check_" + tissue.toLowerCase() + "').checked = true;";
             }
             filter_panel_data += filter_panel_meta_data[2];
+            
+            
+            
+            
+            // create landscape filter panel
+            filter_panel_data_landscape = filter_panel_meta_data_landscape[0];
+            for (var tissue of sorted_tissues){
+                filter_panel_data_landscape += "document.getElementById('check_" + tissue.toLowerCase() + "').checked = true;";
+            }
+            filter_panel_data_landscape += filter_panel_meta_data_landscape[1];
+            i = 0;
+            for (var tissue of sorted_tissues){
+                if (i % 2 == 0) filter_panel_data_landscape += "<tr>";
+                filter_panel_data_landscape += "<td><input type=\"checkbox\" id=\"check_" + tissue.toLowerCase() + "\" /> " + tissue + "</td>";
+                if (i % 2 == 1) filter_panel_data_landscape += "</tr>";
+                ++i;
+            }
+            if (i % 2 == 1) filter_panel_data_landscape += "</tr>";
+            filter_panel_data_landscape += filter_panel_meta_data_landscape[2];
+            
+            return true;
         }
     }
     xmlhttp_tissues.open("GET", file_pathname + "scripts/get-tissues.py", false);
@@ -661,15 +576,32 @@ function draw(sync){
 }
 
 
+
+
+function load_species_data(){
+    
+    // get species
+    var xmlhttp_species = new XMLHttpRequest();
+    xmlhttp_species.onreadystatechange = function() {
+        if (xmlhttp_species.readyState == 4 && xmlhttp_species.status == 200) {
+            supported_species = JSON.parse(xmlhttp_species.responseText);
+        }
+    }
+    xmlhttp_species.open("GET", file_pathname + "scripts/get-species.py", false);
+    xmlhttp_species.send();
+}
+
+
+
 function set_species_menu(reload){
     
     if (typeof reload === 'undefined') reload = false;
     
     // get species
-    var xmlhttp_pg = new XMLHttpRequest();
-    xmlhttp_pg.onreadystatechange = function() {
-        if (xmlhttp_pg.readyState == 4 && xmlhttp_pg.status == 200) {
-            supported_species = JSON.parse(xmlhttp_pg.responseText);
+    var xmlhttp_species = new XMLHttpRequest();
+    xmlhttp_species.onreadystatechange = function() {
+        if (xmlhttp_species.readyState == 4 && xmlhttp_species.status == 200) {
+            supported_species = JSON.parse(xmlhttp_species.responseText);
             
             
             var ss_table = document.getElementById("select_species_table");
@@ -716,12 +648,8 @@ function set_species_menu(reload){
             
         }
     }
-    xmlhttp_pg.open("GET", file_pathname + "scripts/get-species.py", false);
-    xmlhttp_pg.send();
-    
-    
-    
-    
+    xmlhttp_species.open("GET", file_pathname + "scripts/get-species.py", false);
+    xmlhttp_species.send();
     
 }
 
