@@ -3,6 +3,9 @@ specific_node_addition = "";
 
 function init(){
     file_pathname = get_pathname();
+    load_tissues();
+    get_pathway_groups();
+    set_species_menu();
     
     // read GET request
     var pairs = location.search.substring(1).split('&');
@@ -12,9 +15,6 @@ function init(){
     }
     
     
-    load_tissues();
-    get_pathway_groups();
-    set_species_menu();
     
     infobox = new Infobox();
     zoom_sign_in = new zoom_sign(1);

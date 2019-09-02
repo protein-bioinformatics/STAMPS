@@ -3561,7 +3561,6 @@ function add_manage_tissues_add(){
     
     reader.onload = function(){
         var encoded_image = btoa(this.result);
-        console.log(encoded_image);
         encoded_image = encoded_image.replace(/\+/g, '-').replace(/\//g, '_').replace(/\=+$/, '');
         var opt = document.getElementById("add_manage_tissues_select");
         opt = opt[opt.selectedIndex];

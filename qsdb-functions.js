@@ -30,16 +30,6 @@ filter_parameters["carba_c_off"] = true;
 filter_parameters["carba_c_var"] = false;
 filter_parameters["carba_c_fix"] = false;
 filter_parameters["filte_panel_visible"] = false;
-filter_parameters["tissue_brain"] = true;
-filter_parameters["tissue_liver"] = true;
-filter_parameters["tissue_kidney"] = true;
-filter_parameters["tissue_spleen"] = true;
-filter_parameters["tissue_heart"] = true;
-filter_parameters["tissue_blood"] = true;
-filter_parameters["tissue_fat"] = true;
-filter_parameters["tissue_lung"] = true;
-filter_parameters["tissue_eye"] = true;
-filter_parameters["tissue_gut"] = true;
 filter_parameters["validation_top_n"] = true;
 filter_parameters["validation_prm"] = true;
 filter_parameters["validation_is"] = true;
@@ -191,6 +181,55 @@ background_hiding = 0;
 
 pathways = {15: "Alanine, aspartate and glutamate metabolism"};
 
+var filter_panel_meta_data = [0, 0, 0];
+
+filter_panel_meta_data[0] = "<div id=\"filter_panel\" class=\"filter_panel\"> \
+    <table> \
+        <tr><td>Min. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"min_peptide_length\" /><td></tr> \
+        <tr><td>Max. peptide length</td><td><input type=\"number\" min=\"8\" max=\"25\" id=\"max_peptide_length\" /><td></tr> \
+        <tr><td>Min. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"min_precursor_charge\" /><td></tr> \
+        <tr><td>Max. precursor charge</td><td><input type=\"number\" min=\"2\" max=\"6\" id=\"max_precursor_charge\" /><td></tr> \
+        <tr><td colspan=\"2\">&nbsp;<br>Modifications:</td></tr> \
+        <tr><td>Oxydation of M</td><td> \
+        <input type=\"radio\" id=\"oxy_m_off\" name=\"oxy_m\" /> off \
+        <input type=\"radio\" id=\"oxy_m_var\" name=\"oxy_m\" /> variable \
+        <input type=\"radio\" id=\"oxy_m_fix\" name=\"oxy_m\" /> fixed \
+        <td></tr> \
+        <tr><td>Carbamidomethylation of C</td><td> \
+        <input type=\"radio\" id=\"carba_c_off\" name=\"carba_c\" /> off \
+        <input type=\"radio\" id=\"carba_c_var\" name=\"carba_c\" /> variable \
+        <input type=\"radio\" id=\"carba_c_fix\" name=\"carba_c\" /> fixed \
+        <td></tr> \
+        <tr><td colspan=\"2\"><br>Tissues:</td></tr>";
+
+filter_panel_meta_data[1] = "<tr><td colspan=\"2\">&nbsp;<br>Report:</td></tr> \
+        <tr><td>Top-n fragments</td><td><select id=\"max_topn_fragments\"><option>3</option><option>6</option><option>all</option></select><td></tr> \
+        <tr><td>Ions</td><td><select id=\"ions\"><option>y</option><option>b</option><option>y, b</option></select><td></tr> \
+        <tr><td colspan=\"2\"><br>Validation:<br>\
+        <input type=\"checkbox\" id=\"validation_top_n\" /> Top-n experiment&nbsp;<font color='#ffbebe'>●</font><br> \
+        <input type=\"checkbox\" id=\"validation_prm\" /> PRM&nbsp;<font color='#feff90'>●</font><br> \
+        <input type=\"checkbox\" id=\"validation_is\" /> SRM + internal standard&nbsp;<font color='#a0ff90'>●</font><br> \
+        <input type=\"checkbox\" id=\"enable_unreviewed\" /> enable unreviewed proteins</td></tr> \
+        <tr><td colspan=\"2\">&nbsp;<br><font size=\"1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\" \
+        document.getElementById('min_peptide_length').value = 8; \
+        document.getElementById('max_peptide_length').value = 25; \
+        document.getElementById('min_precursor_charge').value = 2; \
+        document.getElementById('max_precursor_charge').value = 3; \
+        document.getElementById('max_topn_fragments').selectedIndex = 2; \
+        document.getElementById('ions').selectedIndex = 0; \
+        document.getElementById('oxy_m_off').checked = true; \
+        document.getElementById('carba_c_off').checked = true;";
+
+filter_panel_meta_data[2] = "document.getElementById('validation_top_n').checked = true; \
+        document.getElementById('validation_prm').checked = true; \
+        document.getElementById('validation_is').checked = true; \
+        document.getElementById('enable_unreviewed').checked = false; \
+        ;\">default settings</td></tr> \
+    </table> \
+</div>";
+
+var filter_panel_data = "";
+/*
 
 var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
     <table> \
@@ -260,6 +299,8 @@ var filter_panel_data = "<div id=\"filter_panel\" class=\"filter_panel\"> \
     </table> \
 </div>";
 
+
+*/
 
 var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
     <table><tr><td valign=\"top\" style=\"border-right: 1px solid #d3d3d3;\"> \
@@ -412,13 +453,31 @@ function load_tissues(){
             supported_tissues = JSON.parse(xmlhttp_tissues.responseText);
             tissue_name_to_id = {};
             tissues = {};
+            var sorted_tissues = [];
             
             for (var tissue of supported_tissues){
+                filter_parameters["tissue_" + tissue[1].toLowerCase()] = true;
                 tissues[tissue[0]] = [tissue[2], tissue[1], 0, "statistics_check_" + tissue[1].toLowerCase(), tissue[3]];
                 tissue_name_to_id[tissue[1]] = tissue[0];
+                sorted_tissues.push(tissue[1]);
             }
             
             load_css();
+            
+            sorted_tissues.sort();
+            filter_panel_data = filter_panel_meta_data[0];
+            var i = 0;
+            for (var tissue of sorted_tissues){
+                if (i % 2 == 0) filter_panel_data += "<tr>";
+                filter_panel_data += "<td><input type=\"checkbox\" id=\"check_" + tissue.toLowerCase() + "\" /> " + tissue + "</td>";
+                if (i % 2 == 1) filter_panel_data += "</tr>";
+                ++i;
+            }
+            filter_panel_data += filter_panel_meta_data[1];
+            for (var tissue of sorted_tissues){
+                filter_panel_data += "document.getElementById('check_" + tissue.toLowerCase() + "').checked = true;";
+            }
+            filter_panel_data += filter_panel_meta_data[2];
         }
     }
     xmlhttp_tissues.open("GET", file_pathname + "scripts/get-tissues.py", false);
@@ -937,7 +996,9 @@ function Spectrum(data){
         
         if (this.filter_valid && Object.keys(this.tissues).length > 0){
             var tissue_set = new Set(Object.keys(this.tissues).map(Number));
-            if (!filter_parameters["tissue_brain"] && tissue_set.has(tissue_name_to_id["Brain"])) tissue_set.delete(tissue_name_to_id["Brain"]);
+            for (var tissue_key in tissues){
+                if (!filter_parameters["tissue_" + tissues[tissue_key][1].toLowerCase()] && tissue_set.has(tissue_name_to_id[tissues[tissue_key][1]])) tissue_set.delete(tissue_name_to_id[tissues[tissue_key][1]]);
+            }/*
             if (!filter_parameters["tissue_liver"] && tissue_set.has(tissue_name_to_id["Liver"])) tissue_set.delete(tissue_name_to_id["Liver"]);
             if (!filter_parameters["tissue_kidney"] && tissue_set.has(tissue_name_to_id["Kidney"])) tissue_set.delete(tissue_name_to_id["Kidney"]);
             if (!filter_parameters["tissue_spleen"] && tissue_set.has(tissue_name_to_id["Spleen"])) tissue_set.delete(tissue_name_to_id["Spleen"]);
@@ -947,6 +1008,7 @@ function Spectrum(data){
             if (!filter_parameters["tissue_lung"] && tissue_set.has(tissue_name_to_id["Lung"])) tissue_set.delete(tissue_name_to_id["Lung"]);
             if (!filter_parameters["tissue_eye"] && tissue_set.has(tissue_name_to_id["Eye"])) tissue_set.delete(tissue_name_to_id["Eye"]);
             if (!filter_parameters["tissue_gut"] && tissue_set.has(tissue_name_to_id["Gut"])) tissue_set.delete(tissue_name_to_id["Gut"]);
+            */
             this.filter_valid &= (tissue_set.size != 0);
         }
         
@@ -4981,16 +5043,9 @@ function adopt_filter_parameters(){
     filter_parameters["carba_c_off"] = document.getElementById("carba_c_off").checked;
     filter_parameters["carba_c_var"] = document.getElementById("carba_c_var").checked;
     filter_parameters["carba_c_fix"] = document.getElementById("carba_c_fix").checked;
-    filter_parameters["tissue_brain"] = document.getElementById("check_brain").checked;
-    filter_parameters["tissue_liver"] = document.getElementById("check_liver").checked;
-    filter_parameters["tissue_kidney"] = document.getElementById("check_kidney").checked;
-    filter_parameters["tissue_spleen"] = document.getElementById("check_spleen").checked;
-    filter_parameters["tissue_heart"] = document.getElementById("check_heart").checked;
-    filter_parameters["tissue_blood"] = document.getElementById("check_blood").checked;
-    filter_parameters["tissue_fat"] = document.getElementById("check_fat").checked;
-    filter_parameters["tissue_lung"] = document.getElementById("check_lung").checked;
-    filter_parameters["tissue_eye"] = document.getElementById("check_eye").checked;
-    filter_parameters["tissue_gut"] = document.getElementById("check_gut").checked;
+    for (tissue_key in tissues){
+        filter_parameters["tissue_" + tissues[tissue_key][1].toLowerCase()] = document.getElementById("check_" + tissues[tissue_key][1].toLowerCase()).checked;
+    }
     filter_parameters["validation_top_n"] = document.getElementById("validation_top_n").checked;
     filter_parameters["validation_prm"] = document.getElementById("validation_prm").checked;
     filter_parameters["validation_is"] = document.getElementById("validation_is").checked;
@@ -5011,16 +5066,9 @@ function load_filter_parameters(){
     document.getElementById("carba_c_off").checked = filter_parameters["carba_c_off"];
     document.getElementById("carba_c_var").checked = filter_parameters["carba_c_var"];
     document.getElementById("carba_c_fix").checked = filter_parameters["carba_c_fix"];
-    document.getElementById("check_brain").checked = filter_parameters["tissue_brain"];
-    document.getElementById("check_liver").checked = filter_parameters["tissue_liver"];
-    document.getElementById("check_kidney").checked = filter_parameters["tissue_kidney"];
-    document.getElementById("check_spleen").checked = filter_parameters["tissue_spleen"];
-    document.getElementById("check_heart").checked = filter_parameters["tissue_heart"];
-    document.getElementById("check_blood").checked = filter_parameters["tissue_blood"];
-    document.getElementById("check_fat").checked = filter_parameters["tissue_fat"];
-    document.getElementById("check_lung").checked = filter_parameters["tissue_lung"];
-    document.getElementById("check_eye").checked = filter_parameters["tissue_eye"];
-    document.getElementById("check_gut").checked = filter_parameters["tissue_gut"];
+    for (tissue_key in tissues){
+        document.getElementById("check_" + tissues[tissue_key][1].toLowerCase()).checked = filter_parameters["tissue_" + tissues[tissue_key][1].toLowerCase()];
+    }
     document.getElementById("validation_top_n").checked = filter_parameters["validation_top_n"];
     document.getElementById("validation_prm").checked = filter_parameters["validation_prm"];
     document.getElementById("validation_is").checked = filter_parameters["validation_is"];
@@ -5045,16 +5093,9 @@ function hide_filter_panel(){
         if (filter_parameters["carba_c_off"] != document.getElementById("carba_c_off").checked) filter_changed = true;
         if (filter_parameters["carba_c_var"] != document.getElementById("carba_c_var").checked) filter_changed = true;
         if (filter_parameters["carba_c_fix"] != document.getElementById("carba_c_fix").checked) filter_changed = true;
-        if (filter_parameters["tissue_brain"] != document.getElementById("check_brain").checked) filter_changed = true;
-        if (filter_parameters["tissue_liver"] != document.getElementById("check_liver").checked) filter_changed = true;
-        if (filter_parameters["tissue_kidney"] != document.getElementById("check_kidney").checked) filter_changed = true;
-        if (filter_parameters["tissue_spleen"] != document.getElementById("check_spleen").checked) filter_changed = true;
-        if (filter_parameters["tissue_heart"] != document.getElementById("check_heart").checked) filter_changed = true;
-        if (filter_parameters["tissue_blood"] != document.getElementById("check_blood").checked) filter_changed = true;
-        if (filter_parameters["tissue_fat"] != document.getElementById("check_fat").checked) filter_changed = true;
-        if (filter_parameters["tissue_lung"] != document.getElementById("check_lung").checked) filter_changed = true;
-        if (filter_parameters["tissue_eye"] != document.getElementById("check_eye").checked) filter_changed = true;
-        if (filter_parameters["tissue_gut"] != document.getElementById("check_gut").checked) filter_changed = true;
+        for (tissue_key in tissues){
+            if (filter_parameters["tissue_" + tissues[tissue_key][1].toLowerCase()] != document.getElementById("check_" + tissues[tissue_key][1].toLowerCase()).checked) filter_changed = true;
+        }
         if (filter_parameters["validation_top_n"] != document.getElementById("validation_top_n").checked) filter_changed = true;
         if (filter_parameters["validation_prm"] != document.getElementById("validation_prm").checked) filter_changed = true;
         if (filter_parameters["validation_is"] != document.getElementById("validation_is").checked) filter_changed = true;
