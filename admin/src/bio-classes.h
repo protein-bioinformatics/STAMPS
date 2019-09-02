@@ -22,6 +22,12 @@ string compress_string(const string& str, int compressionlevel = Z_BEST_COMPRESS
 float compute_mass(string protein_seq);
 float predict_isoelectric_point(string protein_seq);
 static timeval start_timeval, end_timeval;
+string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len);
+
+static const std::string base64_chars = 
+             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+             "abcdefghijklmnopqrstuvwxyz"
+             "0123456789+/";
 
 static void start_time(){gettimeofday(&start_timeval, 0);}
 static void stop_time(){gettimeofday(&end_timeval, 0);}

@@ -12,16 +12,10 @@ function init(){
     }
     
     
-    
-    load_css();
-    
-    
-    
-    
-    
-    
+    load_tissues();
     get_pathway_groups();
     set_species_menu();
+    
     infobox = new Infobox();
     zoom_sign_in = new zoom_sign(1);
     zoom_sign_out = new zoom_sign(0);

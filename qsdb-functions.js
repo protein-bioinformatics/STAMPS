@@ -108,6 +108,7 @@ highlighting = 0;
 basket = {};
 file_pathname = "";
 filtered_basket = {};
+/*
 tissues = {142: ["images/brain.png", "Brain", 0, "statistics_check_brain", "#f4e500"],
            759: ["images/liver.png", "Liver", 0, "statistics_check_liver", "#fdc60b"],
            671: ["images/kidney.png", "Kidney", 0, "statistics_check_kidney", "#f18e1c"],
@@ -119,6 +120,7 @@ tissues = {142: ["images/brain.png", "Brain", 0, "statistics_check_brain", "#f4e
            439: ["images/eye.png", "Eye", 0, "statistics_check_eye", "#2a71b0"],
            545: ["images/gut.png", "Gut", 0, "statistics_check_gut", "#0696bb"]}
            
+           
 tissue_name_to_id = {"Brain": 142,
                      "Liver": 759,
                      "Kidney": 671,
@@ -129,6 +131,9 @@ tissue_name_to_id = {"Brain": 142,
                      "Lung": 763,
                      "Eye": 439,
                      "Gut": 545}
+*/
+tissues = {};
+tissue_name_to_id = {};
                      
 line_width = 5;
 disabled_text_color = "#bbbbbb";
@@ -346,6 +351,7 @@ var filter_panel_data_landscape = "<div id=\"filter_panel\"> \
 
 
 
+
 function get_check_spectra_content(){
     var proteins_checked = filter_parameters["protein_tissues_visible"] ? "checked" : "";
     var peptides_checked = filter_parameters["peptide_tissues_visible"] ? "checked" : "";
@@ -398,16 +404,38 @@ function debug(text){
 }
 
 
+function load_tissues(){
+    // get tissues
+    var xmlhttp_tissues = new XMLHttpRequest();
+    xmlhttp_tissues.onreadystatechange = function() {
+        if (xmlhttp_tissues.readyState == 4 && xmlhttp_tissues.status == 200) {
+            supported_tissues = JSON.parse(xmlhttp_tissues.responseText);
+            tissue_name_to_id = {};
+            tissues = {};
+            
+            for (var tissue of supported_tissues){
+                tissues[tissue[0]] = [tissue[2], tissue[1], 0, "statistics_check_" + tissue[1].toLowerCase(), tissue[3]];
+                tissue_name_to_id[tissue[1]] = tissue[0];
+            }
+            
+            load_css();
+        }
+    }
+    xmlhttp_tissues.open("GET", file_pathname + "scripts/get-tissues.py", false);
+    xmlhttp_tissues.send();
+    
+}
+
+
 
 
 function load_css(){
-    
     for (var tissue_key in tissues){
         var style = document.createElement('style');
         style.type = 'text/css';
         document.getElementsByTagName('head')[0].appendChild(style);
         style.innerHTML = "div." + tissues[tissue_key][1] + " { \
-        background-image: url('" + file_pathname + tissues[tissue_key][0] + "'); \
+        background-image: url(\"data:image/png;base64," + tissues[tissue_key][0] + "\"); \
         background-repeat: no-repeat; \
         width: 12px; \
         height: 12px; \

@@ -82,8 +82,8 @@ spectra_current_page = 0;
 current_spectrum_selected = 0;
 spectra_checks = {};
 
-manage_sort_columns = {"pathway_groups": {}, "proteins": {}, "pathways": {}, "metabolites": {}, "species": {}};
-manage_columns = {"pathway_groups": [], "proteins": [], "pathways": [], "metabolites": [], "species": []};
+manage_sort_columns = {"pathway_groups": {}, "proteins": {}, "pathways": {}, "metabolites": {}, "species": {}, "tissues": {}};
+manage_columns = {"pathway_groups": [], "proteins": [], "pathways": [], "metabolites": [], "species": [], "tissues": []};
 manage_current_entry = "proteins";
 manage_sort_column = 1;
 manage_max_pages = -1;
@@ -95,6 +95,7 @@ chromosomes = {};
 draw_anchor_start = "";
 draw_anchor_end = "";
 del_species_ncbi = "";
+del_tissue_brenda = "";
 
 multiple_selection = new Set();
 
@@ -106,6 +107,7 @@ function init(){
     preview_element = new preview();
     select_field_element = new select_field();
     select_field_element.visible = false;
+    load_tissues();
     get_pathway_groups();
     set_species_menu();
     
@@ -334,6 +336,21 @@ function init(){
     }
     xmlhttp_species_col.open("GET", file_pathname + "admin/scripts/manage-entries.bin?action=get&type=species_col", true);
     xmlhttp_species_col.send();
+    
+    
+    var xmlhttp_tissues_col = new XMLHttpRequest();
+    xmlhttp_tissues_col.onreadystatechange = function() {
+        if (xmlhttp_tissues_col.readyState == 4 && xmlhttp_tissues_col.status == 200) {
+            var request = JSON.parse(xmlhttp_tissues_col.responseText);
+            for (var i = 1; i < request.length; ++i){
+                manage_sort_columns["tissues"][i.toString()] = request[i] + ":ASC";
+                manage_sort_columns["tissues"][(-i).toString()] = request[i] + ":DESC";
+                manage_columns["tissues"].push(request[i]);
+            }
+        }
+    }
+    xmlhttp_tissues_col.open("GET", file_pathname + "admin/scripts/manage-entries.bin?action=get&type=tissues_col", true);
+    xmlhttp_tissues_col.send();
     
     
     analytics("stamps-editor-request");
@@ -2328,6 +2345,33 @@ function open_add_species(){
 
 
 
+function open_add_tissues(){
+    // get species list
+    var xmlhttp_tissues_list = new XMLHttpRequest();
+    xmlhttp_tissues_list.onreadystatechange = function() {
+        if (xmlhttp_tissues_list.readyState == 4 && xmlhttp_tissues_list.status == 200) {
+            var possible_species = JSON.parse(xmlhttp_tissues_list.responseText);
+            
+            var add_manage_tissues_select_dom = document.getElementById("add_manage_tissues_select");
+            add_manage_tissues_select_dom.innerHTML = "";
+            
+            for (var i = 0; i < possible_species.length; ++i){
+                if (!(possible_species[i][0] in supported_species)){
+                    var dom_option = document.createElement("option");
+                    add_manage_tissues_select_dom.appendChild(dom_option);
+                    dom_option.id = possible_species[i][0];
+                    dom_option.text = possible_species[i][1];
+                }
+                
+            }
+            document.getElementById('add_manage_tissues').style.display = 'inline';
+        }
+    }
+    xmlhttp_tissues_list.open("GET", file_pathname + "admin/scripts/get-tissue-list.py", true);
+    xmlhttp_tissues_list.send();
+}
+
+
 
 function manage_fill_table(){
     
@@ -2453,6 +2497,12 @@ function manage_fill_table(){
         dom_nav_cell.appendChild(dom_add_species);
         dom_add_species.innerHTML = "Add species";
         dom_add_species.setAttribute("onclick", "open_add_species();");
+    }
+    else if (manage_current_entry == "tissues"){
+        var dom_add_tissues = document.createElement("button");
+        dom_nav_cell.appendChild(dom_add_tissues);
+        dom_add_tissues.innerHTML = "Add tissue";
+        dom_add_tissues.setAttribute("onclick", "open_add_tissues();");
     }
     else if (manage_current_entry == "metabolites"){
         var dom_new_metabolite = document.createElement("button");
@@ -2722,6 +2772,65 @@ function manage_fill_table(){
                         dom_div.innerHTML = trim_text(row[j], 300);
                         dom_div.col_id = j;
                         dom_div.field_len = 325;
+                    }
+                }
+                
+            }
+            
+            else if (manage_current_entry == "tissues"){
+                
+                for (var i = 0; i < global_manage_data_sorted.length; ++i){
+                    var bg_color = (i & 1) ? "#DDDDDD" : "white";
+                    var row = global_manage_data_sorted[i];
+                    
+                    var dom_tr = document.createElement("tr");
+                    dom_table.appendChild(dom_tr);
+                    var dom_td_del = document.createElement("td");
+                    dom_tr.appendChild(dom_td_del);
+                    dom_td_del.setAttribute("bgcolor", bg_color);
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 64px; max-width: 64px;");
+                    var dom_image = document.createElement("img");
+                    dom_td_del.appendChild(dom_image);
+                    dom_image.setAttribute("src", "../images/delete-small.png");
+                    
+                    dom_image.setAttribute("onclick", "del_tissue_brenda = '" + row[1] + "'; document.getElementById('confirm_deletion_hidden').value = 'manage_delete_tissues';  document.getElementById('confirm_deletion_hidden_id').value = " + row[0] + "; document.getElementById('confirm_deletion_input').value = ''; document.getElementById('confirm_deletion').style.display = 'inline';");
+                    
+                    for (var j = 1; j < row.length; ++j){
+                        var dom_td = document.createElement("td");
+                        dom_tr.appendChild(dom_td);
+                        dom_td.setAttribute("bgcolor", bg_color);
+                        dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                        
+                        if (j == 3){
+                            var dom_img = document.createElement("img");
+                            dom_td.setAttribute("align", "center");
+                            dom_td.appendChild(dom_img);
+                            dom_img.setAttribute("style", "padding: 5px;");
+                            dom_img.setAttribute("width", "12");
+                            dom_img.setAttribute("height", "12");
+                            dom_img.entity_id = row[0];
+                            dom_img.col_id = j;
+                            dom_img.src = 'data:image/jpeg;base64,' + row[j];
+                        }
+                        else if (j == 4){
+                            
+                            var dom_div = document.createElement("div");
+                            dom_td.appendChild(dom_div);
+                            dom_div.setAttribute("style", "background-color: " + row[j] + "; width: 80%;");
+                            dom_div.entity_id = row[0];
+                            dom_div.col_id = j;
+                            dom_div.innerHTML = "&nbsp;";
+                        }
+                        else {
+                            
+                            var dom_div = document.createElement("div");
+                            dom_td.appendChild(dom_div);
+                            dom_div.setAttribute("style", "padding: 5px;");
+                            dom_div.entity_id = row[0];
+                            dom_div.innerHTML = trim_text(row[j], 180);
+                            dom_div.col_id = j;
+                            dom_div.field_len = 200;
+                        }
                     }
                 }
                 
@@ -3173,7 +3282,7 @@ function change_textarea_type(dom_obj, to_text){
 
 function resize_manage_view(){
     var window_width_factor = 0.9;
-    if (manage_current_entry == "pathways" || manage_current_entry == "pathway_groups") window_width_factor = 0.5;
+    if (manage_current_entry == "pathways" || manage_current_entry == "pathway_groups" || manage_current_entry == "tissues") window_width_factor = 0.5;
     else if (manage_current_entry == "species") window_width_factor = 0.4;
     
     
@@ -3226,6 +3335,9 @@ function resize_manage_view(){
     
     // set height of pathways adding window
     document.getElementById("add_manage_species_window").style.height = "130px";
+    
+    // set height of pathways adding window
+    document.getElementById("add_manage_tissues_window").style.height = "130px";
 }
 
 
@@ -3440,6 +3552,52 @@ function add_manage_species_add(){
 
 
 
+function add_manage_tissues_add(){
+    if (document.getElementById('add_manage_tissues_file').files.length == 0) return;
+    var file = document.getElementById('add_manage_tissues_file').files[0];
+    var reader = new FileReader();
+    reader.filename = file.name;
+    reader.readAsBinaryString(file);
+    
+    reader.onload = function(){
+        var encoded_image = btoa(this.result);
+        console.log(encoded_image);
+        encoded_image = encoded_image.replace(/\+/g, '-').replace(/\//g, '_').replace(/\=+$/, '');
+        var opt = document.getElementById("add_manage_tissues_select");
+        opt = opt[opt.selectedIndex];
+        
+        
+        var request = "name:" + opt.text;
+        request += data_separator + "brenda:" + opt.id;
+        request += data_separator + "color:" + document.getElementById("add_manage_tissues_color").value.replace(/\#/g, '');
+        request += data_separator + "icon:" + encoded_image;
+        
+        request = file_pathname + "admin/scripts/manage-entries.bin?action=insert&type=tissues&data=" + encodeURL(request);
+        
+        var xmlhttp_add_tissues = new XMLHttpRequest();
+        xmlhttp_add_tissues.onreadystatechange = function() {
+            if (xmlhttp_add_tissues.readyState == 4 && xmlhttp_add_tissues.status == 200) {
+                var request = xmlhttp_add_tissues.responseText;
+                if (request < 0){
+                    alert("An error has occured while adding the tissue to the database. Please contact the administrator.");
+                }
+                document.getElementById('add_manage_tissues').style.display = 'none';
+                manage_fill_table();
+            }
+        }
+        xmlhttp_add_tissues.open("GET", request, false);
+        xmlhttp_add_tissues.send();
+    }
+    
+    
+    
+    
+    
+    
+}
+
+
+
 function add_manage_metabolites_add(){
     var request = "name:" + replaceAll(document.getElementById("add_manage_metabolites_name").value, "\n", "");
     request += data_separator + "short_name:" + replaceAll(document.getElementById("add_manage_metabolites_short_name").value, "\n", "");
@@ -3533,12 +3691,12 @@ function manage_delete_species(species_id){
     var request = "type=species&id=" + species_id;
     request = file_pathname + "admin/scripts/delete-entity.py?" + request
     
-    var xmlhttp_metabolite_data = new XMLHttpRequest();
-    xmlhttp_metabolite_data.onreadystatechange = function() {
-        if (xmlhttp_metabolite_data.readyState == 4 && xmlhttp_metabolite_data.status == 200) {
-            var request = xmlhttp_metabolite_data.responseText;
+    var xmlhttp_species_data = new XMLHttpRequest();
+    xmlhttp_species_data.onreadystatechange = function() {
+        if (xmlhttp_species_data.readyState == 4 && xmlhttp_species_data.status == 200) {
+            var request = xmlhttp_species_data.responseText;
             if (request < 0){
-                alert("Error: protein could not be deleted from database.");
+                alert("Error: species could not be deleted from database.");
             }
             delete supported_species[del_species_ncbi];
             
@@ -3554,8 +3712,36 @@ function manage_delete_species(species_id){
             set_species_menu(true);
         }
     }
-    xmlhttp_metabolite_data.open("GET", request, false);
-    xmlhttp_metabolite_data.send();
+    xmlhttp_species_data.open("GET", request, false);
+    xmlhttp_species_data.send();
+}
+
+
+
+function manage_delete_tissues(tissues_id){
+    if (Object.keys(tissues).length <= 1){
+        alert("At least one tissue must be registered in the system.");
+        return;
+    }
+    
+    
+    var request = "type=tissues&id=" + tissues_id;
+    request = file_pathname + "admin/scripts/delete-entity.py?" + request
+    
+    var xmlhttp_tissues_data = new XMLHttpRequest();
+    xmlhttp_tissues_data.onreadystatechange = function() {
+        if (xmlhttp_tissues_data.readyState == 4 && xmlhttp_tissues_data.status == 200) {
+            var request = xmlhttp_tissues_data.responseText;
+            if (request < 0){
+                alert("Error: tissue could not be deleted from database.");
+            }
+            delete tissues[del_tissue_brenda];
+            del_tissue_brenda = "";
+            manage_fill_table();
+        }
+    }
+    xmlhttp_tissues_data.open("GET", request, false);
+    xmlhttp_tissues_data.send();
 }
 
 
