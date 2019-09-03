@@ -373,6 +373,8 @@ div<div id="locus_search" class="global_search">
 </div>
 
 
+
+
 <div id="chromosome_search" class="global_search">
     <div id="chromosome_background" class="global_search_background"></div>
     <div class="global_search_content">
@@ -422,6 +424,10 @@ div<div id="locus_search" class="global_search">
         <tr><td width="100%" align="center"><img src="images/ajax-loader.gif" /></td></tr>
     </table>
     <table id="statistics_content" width="100%" height="100%" style="display: none;">
+        <tr><td width="100%" colspan="2">
+            Select species: <select id="statistics_species_select" onchange="change_species(this);"></select>
+        </td>
+        </td></tr>
     
         <tr><td width="50%" valign="top">
             <b>Normalized distribution of protein abundances per pathway</b>&nbsp;&nbsp;<image src="images/svg-icon.svg" style="cursor: pointer;" onclick="to_svg('nsaf_pathway');" height="24" />
@@ -1483,7 +1489,6 @@ function load_statistics(){
         tissue_tissue_select.add(tissue_option);
     }
 
-
     // request proteins
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -1491,50 +1496,51 @@ function load_statistics(){
             
             var parsed = JSON.parse(xmlhttp.responseText);
             
-            
-            for (var entry of parsed){
-                var p_id = entry["i"];
-                var prot = 0;
-                if (p_id in protein_dictionary){
-                    prot = protein_dictionary[p_id];
-                    prot.update(entry);
+            if (parsed.length > 0) {
+                for (var entry of parsed){
+                    var p_id = entry["i"];
+                    var prot = 0;
+                    if (p_id in protein_dictionary){
+                        prot = protein_dictionary[p_id];
+                        prot.update(entry);
+                    }
+                    else {
+                        prot = new Protein(entry);
+                        protein_dictionary[prot.id] = prot;
+                    }
+                    prot.filtering();
                 }
-                else {
-                    prot = new Protein(entry);
-                    protein_dictionary[prot.id] = prot;
-                }
-                prot.filtering();
-            }
-            
-            
-            for (var t in tissues){
-                var sum_NSAF = 0;
-                for (var prot_id in protein_dictionary){
-                    var NSAF = 0;
-                    var protein = protein_dictionary[prot_id];
-                    for (var i = 0; i < protein.peptides.length; ++i){
-                        var peptide = protein.peptides[i];
-                        for (var j = 0; j < peptide.spectra.length; ++j){
-                            var spectrum = peptide.spectra[j];
-                            if (t in spectrum.tissues) NSAF += spectrum.tissues[t];
+                
+                
+                for (var t in tissues){
+                    var sum_NSAF = 0;
+                    for (var prot_id in protein_dictionary){
+                        var NSAF = 0;
+                        var protein = protein_dictionary[prot_id];
+                        for (var i = 0; i < protein.peptides.length; ++i){
+                            var peptide = protein.peptides[i];
+                            for (var j = 0; j < peptide.spectra.length; ++j){
+                                var spectrum = peptide.spectra[j];
+                                if (t in spectrum.tissues) NSAF += spectrum.tissues[t];
+                            }
+                        }
+                        
+                        NSAF /= protein.sequence_length;
+                        if (NSAF > 0){
+                            protein.nsaf[t] = NSAF;
+                            sum_NSAF += NSAF;
                         }
                     }
                     
-                    NSAF /= protein.sequence_length;
-                    if (NSAF > 0){
-                        protein.nsaf[t] = NSAF;
-                        sum_NSAF += NSAF;
+                    for (var prot_id in protein_dictionary){
+                        var protein = protein_dictionary[prot_id];
+                        if (t in protein.nsaf){
+                            protein.nsaf[t] = Math.log10(protein.nsaf[t] / sum_NSAF);
+                            max_NSAF = Math.max(max_NSAF, protein.nsaf[t]);
+                            min_NSAF = Math.min(min_NSAF, protein.nsaf[t]);
+                        }
+                        
                     }
-                }
-                
-                for (var prot_id in protein_dictionary){
-                    var protein = protein_dictionary[prot_id];
-                    if (t in protein.nsaf){
-                        protein.nsaf[t] = Math.log10(protein.nsaf[t] / sum_NSAF);
-                        max_NSAF = Math.max(max_NSAF, protein.nsaf[t]);
-                        min_NSAF = Math.min(min_NSAF, protein.nsaf[t]);
-                    }
-                    
                 }
             }
             
@@ -2824,7 +2830,7 @@ function load_all_data(){
             activateTree(document.getElementById("LinkedList1"));
         }
     }
-    xmlhttpfunctions.open("GET", file_pathname + "scripts/get-functions.py", true);
+    xmlhttpfunctions.open("GET", file_pathname + "scripts/get-functions.py?species=" + current_species, true);
     xmlhttpfunctions.send();
     
     
@@ -2834,6 +2840,7 @@ function load_all_data(){
         if (xmlhttploci.readyState == 4 && xmlhttploci.status == 200) {
             var locus_data = JSON.parse(xmlhttploci.responseText);
             var locus_select = document.getElementById("loci");
+            locus_select.innerHTML = "";
             for (var i = 0; i < locus_data.length; ++i){
                 var option = document.createElement("option");
                 option.text = locus_data[i][1];
@@ -2842,7 +2849,7 @@ function load_all_data(){
             }
         }
     }
-    xmlhttploci.open("GET", file_pathname + "scripts/get-loci.py", true);
+    xmlhttploci.open("GET", file_pathname + "scripts/get-loci.py?species=" + current_species, true);
     xmlhttploci.send();
     
     
@@ -2863,37 +2870,7 @@ function load_all_data(){
         tissue[2].src = tissue[0];
     }
     
-    var select = document.getElementById("chromosome_browser_species_select");
-    for (var c_species in supported_species){
-        var opt = document.createElement("option");
-        opt.id = c_species;
-        opt.innerHTML = supported_species[c_species];
-        select.add(opt);
-    }
     
-    select = document.getElementById("accession_browser_species_select");
-    for (var c_species in supported_species){
-        var opt = document.createElement("option");
-        opt.id = c_species;
-        opt.innerHTML = supported_species[c_species];
-        select.add(opt);
-    }
-    
-    select = document.getElementById("function_browser_species_select");
-    for (var c_species in supported_species){
-        var opt = document.createElement("option");
-        opt.id = c_species;
-        opt.innerHTML = supported_species[c_species];
-        select.add(opt);
-    }
-    
-    select = document.getElementById("locus_browser_species_select");
-    for (var c_species in supported_species){
-        var opt = document.createElement("option");
-        opt.id = c_species;
-        opt.innerHTML = supported_species[c_species];
-        select.add(opt);
-    }
 }
 
 
@@ -3156,8 +3133,11 @@ function change_species(select){
     chromosome_data_dict = {};
     current_species = select[select.selectedIndex].id;
     
-    if (document.getElementById("chromosome_search").style.display == "inline"){
+    load_all_data();
+    
+    if (document.getElementById("chromosome_browser_species_select") == select){
         // get chromosome bands
+        /*
         var xmlhttp_chr = new XMLHttpRequest();
         xmlhttp_chr.onreadystatechange = function() {
             if (xmlhttp_chr.readyState == 4 && xmlhttp_chr.status == 200) {
@@ -3165,9 +3145,28 @@ function change_species(select){
             }
         }
         xmlhttp_chr.open("GET", file_pathname + "scripts/get-chromosomes.bin?species=" + current_species, false);
-        xmlhttp_chr.send();
+        xmlhttp_chr.send();*/
         draw_chromosome_ideograms();
-        //chromosome_selection_changed(true);
+    }
+    
+    
+    else if (document.getElementById("locus_browser_species_select") == select){
+        advanced_search_init();
+        open_locus_search();
+    }
+    
+    else if (document.getElementById("function_browser_species_select") == select){
+        advanced_search_init();
+        open_function_search();
+    }
+    
+    else if (document.getElementById("statistics_species_select") == select){
+        statistics_loaded = 1;
+        
+        document.getElementById("statistics_waiting").style.display = "";
+        document.getElementById("statistics_content").style.display = "none";
+        load_statistics();
+        open_statistics();
     }
 }
 
@@ -3300,6 +3299,46 @@ file_pathname = get_pathname();
 load_tissues();
 load_species_data();
 append_tissues();
+
+var select = document.getElementById("chromosome_browser_species_select");
+for (var c_species in supported_species){
+    var opt = document.createElement("option");
+    opt.id = c_species;
+    opt.innerHTML = supported_species[c_species];
+    select.add(opt);
+}
+
+select = document.getElementById("accession_browser_species_select");
+for (var c_species in supported_species){
+    var opt = document.createElement("option");
+    opt.id = c_species;
+    opt.innerHTML = supported_species[c_species];
+    select.add(opt);
+}
+
+select = document.getElementById("function_browser_species_select");
+for (var c_species in supported_species){
+    var opt = document.createElement("option");
+    opt.id = c_species;
+    opt.innerHTML = supported_species[c_species];
+    select.add(opt);
+}
+
+select = document.getElementById("locus_browser_species_select");
+for (var c_species in supported_species){
+    var opt = document.createElement("option");
+    opt.id = c_species;
+    opt.innerHTML = supported_species[c_species];
+    select.add(opt);
+}
+
+select = document.getElementById("statistics_species_select");
+for (var c_species in supported_species){
+    var opt = document.createElement("option");
+    opt.id = c_species;
+    opt.innerHTML = supported_species[c_species];
+    select.add(opt);
+}
 
 for (var species_key in supported_species){
     current_species = species_key;

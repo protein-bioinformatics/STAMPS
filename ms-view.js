@@ -336,8 +336,6 @@ function load_spectrum(spectrum_id){
 
 
 function draw_spectrum(ctx){
-    if (!spectrum_loaded) return;
-    
     if (typeof(ctx) === 'undefined'){
         var c = document.getElementById("msarea");
         ctx = c.getContext("2d");
@@ -345,8 +343,7 @@ function draw_spectrum(ctx){
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.font="10px Arial";
     
-    
-    
+    if (!spectrum_loaded) return;
     
     ctx.fillStyle = "black";
     // Add x-axis tics, values and grid

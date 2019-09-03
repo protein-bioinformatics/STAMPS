@@ -20,7 +20,7 @@ entity_id = form.getvalue('id')
 print("Content-Type: text/html")
 print()
 
-if type(entity_type) is not str or type(entity_id) is not str or entity_type not in ["node", "edge", "edge_direct", "protein", "metabolite", "pathway", "pathway_group", "species", "tissues"]:
+if type(entity_type) is not str or type(entity_id) is not str or entity_type not in ["node", "edge", "edge_direct", "protein", "metabolite", "pathway", "pathway_group", "species", "tissues", "loci_names"]:
     print(-1)
     exit()
    
@@ -145,6 +145,14 @@ elif entity_type == "species":
         
 elif entity_type == "tissues":
     sql_query = "DELETE FROM tissues WHERE id = %s;"
+    my_cur.execute(sql_query, (entity_id))
+    conn.commit()
+        
+elif entity_type == "loci_names":
+    sql_query = "DELETE FROM loci_names WHERE id = %s;"
+    my_cur.execute(sql_query, (entity_id))
+    
+    sql_query = "DELETE FROM protein_loci WHERE locus_id = %s;"
     my_cur.execute(sql_query, (entity_id))
     conn.commit()
     

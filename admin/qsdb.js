@@ -82,8 +82,8 @@ spectra_current_page = 0;
 current_spectrum_selected = 0;
 spectra_checks = {};
 
-manage_sort_columns = {"pathway_groups": {}, "proteins": {}, "pathways": {}, "metabolites": {}, "species": {}, "tissues": {}};
-manage_columns = {"pathway_groups": [], "proteins": [], "pathways": [], "metabolites": [], "species": [], "tissues": []};
+manage_sort_columns = {"pathway_groups": {}, "proteins": {}, "pathways": {}, "metabolites": {}, "species": {}, "tissues": {}, "loci_names": {}};
+manage_columns = {"pathway_groups": [], "proteins": [], "pathways": [], "metabolites": [], "species": [], "tissues": [], "loci_names": []};
 manage_current_entry = "proteins";
 manage_sort_column = 1;
 manage_max_pages = -1;
@@ -110,6 +110,7 @@ function init(){
     load_tissues();
     get_pathway_groups();
     set_species_menu();
+    add_species_events();
     
     infobox = new Infobox();
     zoom_sign_in = new zoom_sign(1);
@@ -353,8 +354,53 @@ function init(){
     xmlhttp_tissues_col.send();
     
     
+    var xmlhttp_loci_names_col = new XMLHttpRequest();
+    xmlhttp_loci_names_col.onreadystatechange = function() {
+        if (xmlhttp_loci_names_col.readyState == 4 && xmlhttp_loci_names_col.status == 200) {
+            var request = JSON.parse(xmlhttp_loci_names_col.responseText);
+            for (var i = 1; i < request.length; ++i){
+                manage_sort_columns["loci_names"][i.toString()] = request[i] + ":ASC";
+                manage_sort_columns["loci_names"][(-i).toString()] = request[i] + ":DESC";
+                manage_columns["loci_names"].push(request[i]);
+            }
+        }
+    }
+    xmlhttp_loci_names_col.open("GET", file_pathname + "admin/scripts/manage-entries.bin?action=get&type=loci_names_col", true);
+    xmlhttp_loci_names_col.send();
+    
+    
+    
     analytics("stamps-editor-request");
 }
+
+
+function add_species_events(){
+    var species_table = document.getElementById("select_species_table");
+    for (var st_tr of species_table.children){
+        var events = st_tr.children[0].attributes["onclick"].value;
+        st_tr.children[0].setAttribute("onclick", events + " load_species_data();");
+    }
+}
+
+
+
+
+
+function load_species_data(){
+    // get number of spectra
+    var xmlhttp_spectra = new XMLHttpRequest();
+    xmlhttp_spectra.onreadystatechange = function() {
+        if (xmlhttp_spectra.readyState == 4 && xmlhttp_spectra.status == 200) {
+            spectra_max_pages = Math.floor(parseInt(xmlhttp_spectra.responseText) / max_spectra_per_page) + 1;
+        }
+    }
+    xmlhttp_spectra.open("GET", file_pathname + "admin/scripts/curate-spectral-library.py?action=count&species=" + current_species, false);
+    xmlhttp_spectra.send();
+}
+
+
+
+
 
 
 function resize_pathway_view(){
@@ -376,11 +422,17 @@ function resize_pathway_view(){
 }
 
 
+
+
+
 function resize_renderarea_width(subtract){
     var c = document.getElementById("renderarea");
     var ctx = c.getContext("2d");
     ctx.canvas.width  = window.innerWidth - toolbox_width - subtract;
 }
+
+
+
 
 
 
@@ -399,6 +451,9 @@ function right_mouse_click_listener(e){
     }
     return false;
 }
+
+
+
 
 
 
@@ -2419,7 +2474,7 @@ function manage_fill_table(){
         var col_name = manage_sort_columns[manage_current_entry][i].split(":")[0];
         dom_th_name.innerHTML = col_name + ((manage_sort_column == i) ? " " + sign_up : ((manage_sort_column == -i) ? " " + sign_down : ""));
         if (manage_current_entry == "proteins" && i == 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
-        else if (manage_current_entry == "species") dom_th_name.setAttribute("style", "cursor: pointer; min-width: 325px; max-width: 325px;");
+        else if (manage_current_entry == "species" || manage_current_entry == "loci_names") dom_th_name.setAttribute("style", "cursor: pointer; min-width: 325px; max-width: 325px;");
         else if (manage_current_entry == "metabolites" && i == 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
         else if (manage_current_entry == "pathways" && i == 1) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 600px; max-width: 600px;");
         else if (manage_current_entry == "pathways" && i == 2) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 300px; max-width: 300px;");
@@ -2503,6 +2558,12 @@ function manage_fill_table(){
         dom_nav_cell.appendChild(dom_add_tissues);
         dom_add_tissues.innerHTML = "Add tissue";
         dom_add_tissues.setAttribute("onclick", "open_add_tissues();");
+    }
+    else if (manage_current_entry == "loci_names"){
+        var dom_add_loci_names = document.createElement("button");
+        dom_nav_cell.appendChild(dom_add_loci_names);
+        dom_add_loci_names.innerHTML = "Add compartment";
+        dom_add_loci_names.setAttribute("onclick", "document.getElementById('add_manage_loci_names').style.display = 'inline';");
     }
     else if (manage_current_entry == "metabolites"){
         var dom_new_metabolite = document.createElement("button");
@@ -2768,6 +2829,44 @@ function manage_fill_table(){
                         dom_td.appendChild(dom_div);
                         dom_td.setAttribute("style", "min-width: 325px; max-width: 325px;");
                         dom_div.setAttribute("style", "padding: 5px;");
+                        dom_div.entity_id = row[0];
+                        dom_div.innerHTML = trim_text(row[j], 300);
+                        dom_div.col_id = j;
+                        dom_div.field_len = 325;
+                    }
+                }
+                
+            }
+            
+            else if (manage_current_entry == "loci_names"){
+                
+                for (var i = 0; i < global_manage_data_sorted.length; ++i){
+                    var bg_color = (i & 1) ? "#DDDDDD" : "white";
+                    var row = global_manage_data_sorted[i];
+                    
+                    var dom_tr = document.createElement("tr");
+                    dom_table.appendChild(dom_tr);
+                    var dom_td_del = document.createElement("td");
+                    dom_tr.appendChild(dom_td_del);
+                    dom_td_del.setAttribute("bgcolor", bg_color);
+                    dom_td_del.setAttribute("style", "cursor: pointer; min-width: 64px; max-width: 64px;");
+                    var dom_image = document.createElement("img");
+                    dom_td_del.appendChild(dom_image);
+                    dom_image.setAttribute("src", "../images/delete-small.png");
+                    
+                    dom_image.setAttribute("onclick", "document.getElementById('confirm_deletion_hidden').value = 'manage_delete_loci_names';  document.getElementById('confirm_deletion_hidden_id').value = " + row[0] + "; document.getElementById('confirm_deletion_input').value = ''; document.getElementById('confirm_deletion').style.display = 'inline';");
+                    
+                    for (var j = 1; j < row.length; ++j){
+                        var dom_td = document.createElement("td");
+                        dom_tr.appendChild(dom_td);
+                        dom_td.setAttribute("bgcolor", bg_color);
+                        
+                            
+                        var dom_div = document.createElement("div");
+                        dom_td.appendChild(dom_div);
+                        dom_td.setAttribute("style", "min-width: 325px; max-width: 325px;");
+                        dom_div.setAttribute("style", "padding: 5px;");
+                        dom_div.setAttribute("onclick", "change_textfield_type(this, true);");
                         dom_div.entity_id = row[0];
                         dom_div.innerHTML = trim_text(row[j], 300);
                         dom_div.col_id = j;
@@ -3283,7 +3382,7 @@ function change_textarea_type(dom_obj, to_text){
 function resize_manage_view(){
     var window_width_factor = 0.9;
     if (manage_current_entry == "pathways" || manage_current_entry == "pathway_groups" || manage_current_entry == "tissues") window_width_factor = 0.5;
-    else if (manage_current_entry == "species") window_width_factor = 0.4;
+    else if (manage_current_entry == "species" || manage_current_entry == "loci_names") window_width_factor = 0.4;
     
     
     // set height of manage selection window
@@ -3338,7 +3437,13 @@ function resize_manage_view(){
     
     // set height of pathways adding window
     document.getElementById("add_manage_tissues_window").style.height = "130px";
+    
+    // set height of pathways adding window
+    document.getElementById("add_manage_loci_names_window").style.height = "130px";
 }
+
+
+
 
 
 
@@ -3531,9 +3636,8 @@ function add_manage_species_add(){
     
     var request = "name:" + opt.text;
     request += data_separator + "ncbi:" + opt.id;
-    
     request = file_pathname + "admin/scripts/manage-entries.bin?action=insert&type=species&data=" + encodeURL(request);
-    console.log(request);
+    
     var xmlhttp_add_species = new XMLHttpRequest();
     xmlhttp_add_species.onreadystatechange = function() {
         if (xmlhttp_add_species.readyState == 4 && xmlhttp_add_species.status == 200) {
@@ -3544,11 +3648,44 @@ function add_manage_species_add(){
             document.getElementById('add_manage_species').style.display = 'none';
             manage_fill_table();
             set_species_menu(true);
+            add_species_events();
         }
     }
     xmlhttp_add_species.open("GET", request, false);
     xmlhttp_add_species.send();
 }
+
+
+
+
+
+function add_manage_loci_names_add(){
+    
+    if (document.getElementById("add_manage_loci_names_compartment").value == ""){
+        alert("Warning: please type in a compartment name");
+        return;
+    }
+    
+    var request = "name:" + document.getElementById("add_manage_loci_names_compartment").value;
+    
+    request = file_pathname + "admin/scripts/manage-entries.bin?action=insert&type=loci_names&data=" + encodeURL(request);
+    
+    var xmlhttp_add_loci_names = new XMLHttpRequest();
+    xmlhttp_add_loci_names.onreadystatechange = function() {
+        if (xmlhttp_add_loci_names.readyState == 4 && xmlhttp_add_loci_names.status == 200) {
+            var request = xmlhttp_add_loci_names.responseText;
+            if (request < 0){
+                alert("An error has occured while adding the compartment to the database. Please contact the administrator.");
+            }
+            manage_fill_table();
+            document.getElementById('add_manage_loci_names').style.display = 'none';
+        }
+    }
+    xmlhttp_add_loci_names.open("GET", request, false);
+    xmlhttp_add_loci_names.send();
+}
+
+
 
 
 
@@ -3587,11 +3724,6 @@ function add_manage_tissues_add(){
         xmlhttp_add_tissues.open("GET", request, false);
         xmlhttp_add_tissues.send();
     }
-    
-    
-    
-    
-    
     
 }
 
@@ -3709,6 +3841,7 @@ function manage_delete_species(species_id){
             del_species_ncbi = "";
             manage_fill_table();
             set_species_menu(true);
+            add_species_events();
         }
     }
     xmlhttp_species_data.open("GET", request, false);
@@ -3741,6 +3874,27 @@ function manage_delete_tissues(tissues_id){
     }
     xmlhttp_tissues_data.open("GET", request, false);
     xmlhttp_tissues_data.send();
+}
+
+
+
+function manage_delete_loci_names(loci_names_id){
+    
+    var request = "type=loci_names&id=" + loci_names_id;
+    request = file_pathname + "admin/scripts/delete-entity.py?" + request
+    
+    var xmlhttp_loci_names_data = new XMLHttpRequest();
+    xmlhttp_loci_names_data.onreadystatechange = function() {
+        if (xmlhttp_loci_names_data.readyState == 4 && xmlhttp_loci_names_data.status == 200) {
+            var request = xmlhttp_loci_names_data.responseText;
+            if (request < 0){
+                alert("Error: tissue could not be deleted from database.");
+            }
+            manage_fill_table();
+        }
+    }
+    xmlhttp_loci_names_data.open("GET", request, false);
+    xmlhttp_loci_names_data.send();
 }
 
 
@@ -3811,6 +3965,7 @@ function curate_spectra(){
     
     var dom_nav_cell = document.getElementById("curate_spectra_navigation");
     dom_nav_cell.innerHTML = "";
+    document.getElementById("check_spectra_peptide_info").innerHTML = "";
     
     if (spectra_current_page < 0) spectra_current_page = 0;
     if (spectra_current_page >= spectra_max_pages - 1) spectra_current_page = spectra_max_pages - 1;
