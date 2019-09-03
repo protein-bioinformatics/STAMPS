@@ -3533,7 +3533,7 @@ function add_manage_species_add(){
     request += data_separator + "ncbi:" + opt.id;
     
     request = file_pathname + "admin/scripts/manage-entries.bin?action=insert&type=species&data=" + encodeURL(request);
-    
+    console.log(request);
     var xmlhttp_add_species = new XMLHttpRequest();
     xmlhttp_add_species.onreadystatechange = function() {
         if (xmlhttp_add_species.readyState == 4 && xmlhttp_add_species.status == 200) {

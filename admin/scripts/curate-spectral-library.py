@@ -33,12 +33,9 @@ if type(action) is not str or action not in ["count", "select", "update"]:
     exit()
 
     
-spectra_db = "spectra_db_" + species
-if spectra_db not in conf:
-    print(-1)
-    exit()
+spectral_lib = "../../data/spectral_library_%s.blib" % species 
    
-db = sqlite3.connect(conf[spectra_db])
+db = sqlite3.connect(spectral_lib)
 cur = db.cursor()
 
 

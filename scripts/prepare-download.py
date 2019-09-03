@@ -248,7 +248,9 @@ with open("../admin/qsdb.conf", mode="rt") as fl:
 print("Content-Type: text/html")
 print()
 
-
+if "root_path" not in conf:
+    print(-1)
+    exit()
 
 
 form = cgi.FieldStorage(environ={'REQUEST_METHOD':'POST'})
@@ -281,14 +283,14 @@ proteins = ",".join(str(pid) for pid in proteins_to_spectra)
 rnd = hashlib.md5(str(int(random() * 1000000000)).encode('utf-8')).hexdigest()
 
 # create folder
-os.system("mkdir ../tmp/%s" % rnd)
+os.system("mkdir %s/tmp/%s" % (conf["root_path"], rnd))
 
 
 # open mysql connection & create fasta file
 conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
 my_cur = conn.cursor()
 
-fasta_file = "../tmp/%s/proteins.fasta" % rnd
+fasta_file = "%s/tmp/%s/proteins.fasta" % (conf["root_path"], rnd)
 sql_query = "SELECT id, accession, fasta FROM proteins WHERE id IN (%s);" % proteins
 
 proteome = {}
@@ -310,14 +312,10 @@ with open(fasta_file, mode="wt") as fl:
 
 
 # create blib file
-blib_file = "../tmp/%s/spectra.blib" % rnd
-spectra_db = "spectra_db_" + species
-
-if spectra_db not in conf:
-    print(-1)
-    exit()
+blib_file = "%s/tmp/%s/spectra.blib" % (conf["root_path"], rnd)
+spectral_lib =  "%s/data/spectral_library_%s.blib" % (conf["root_path"], species)
     
-db = sqlite3.connect(conf[spectra_db])
+db = sqlite3.connect(spectral_lib)
 lite_cur = db.cursor()
 lite_cur.execute("ATTACH DATABASE '%s' As blib;" % blib_file)
 lite_cur.execute("CREATE TABLE blib.tmp (id INTEGER PRIMARY KEY, sid INTEGER);")
@@ -402,7 +400,7 @@ db.commit()
 
 
 
-view_file = "../tmp/%s/experiment.sky.view" % rnd
+view_file = "%s/tmp/%s/experiment.sky.view" % (conf["root_path"], rnd)
 with open(view_file, mode = "wt") as out_view_file:
     out_view_file.write("<?xml version=\"1.0\" encoding=\"utf-16\"?> \n \
 <!--DigitalRune Docking Windows configuration file.--> \n \
@@ -466,7 +464,7 @@ for accession in proteins_to_spectra:
 
 
 
-skyline_file = "../tmp/%s/experiment.sky" % rnd
+skyline_file = "%s/tmp/%s/experiment.sky" % (conf["root_path"], rnd)
 with open(skyline_file, mode = "wt") as out_skyline_file:
     out_skyline_file.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n \
 <srm_settings format_version=\"3.73\" software_version=\"Skyline (64-bit) 4.1.0.18169\">\n \
@@ -615,14 +613,13 @@ with open(skyline_file, mode = "wt") as out_skyline_file:
 
 
 
-skyline_zip_file = "../tmp/%s/experiment.sky.zip" % rnd
-#os.system("zip -j %s %s %s %s > /dev/null" % (skyline_zip_file, view_file, blib_file, skyline_file))
+skyline_zip_file = "%s/tmp/%s/experiment.sky.zip" % (conf["root_path"], rnd)
 os.system("zip -j %s %s %s > /dev/null" % (skyline_zip_file, blib_file, skyline_file))
 
 
 
 # merge into zip file
-zip_file = "../tmp/%s/assay.zip" % rnd
+zip_file = "%s/tmp/%s/assay.zip" % (conf["root_path"], rnd)
 os.system("zip -j %s %s %s %s > /dev/null" % (zip_file, fasta_file, blib_file, skyline_zip_file))
 
 

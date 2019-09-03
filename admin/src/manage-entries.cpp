@@ -14,6 +14,7 @@
 #include <cppconn/exception.h>
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
+#include <sqlite3.h> 
 
 using namespace std;
 
@@ -287,6 +288,7 @@ int main(int argc, char** argv) {
     }
     
     else if (!action.compare("insert")){
+        string species_id = "";
         
         string action_type = (form.find("type") != form.end()) ? form["type"] : "";
         if (!action_type.length()){
@@ -357,6 +359,12 @@ int main(int argc, char** argv) {
             else if (insert_data[i][0].compare("color") == 0 && action_type.compare("tissues") == 0){
                 sql_query += "#" + insert_data[i][1];
             }
+            
+            else if (insert_data[i][0].compare("ncbi") == 0 && action_type.compare("species") == 0){
+                species_id = insert_data[i][1];
+                sql_query += insert_data[i][1];
+            }
+            
             else {
                 sql_query += insert_data[i][1];
             }
@@ -365,7 +373,92 @@ int main(int argc, char** argv) {
         stmt->execute(sql_query);
         
         
-        if (!action_type.compare("metabolites")){
+        
+        
+        // create new spectral library if not present
+        if (!action_type.compare("species")){
+            string filepath = parameters["root_path"] + "/data/spectral_library_" + species_id + ".blib";
+            ifstream f(filepath.c_str());
+            if (!f.good()){
+                f.close();
+                
+                sqlite3 *db;
+                char *zErrMsg = 0;
+                int rc;
+                rc = sqlite3_open(filepath.c_str(), &db);
+                if( rc ){
+                    print_out("-10", compress);
+                    exit(-10);
+                }
+                
+                
+                
+                sqlite3_exec(db, "CREATE TABLE SpectrumSourceFiles (id INTEGER PRIMARY KEY autoincrement not null, fileName VARCHAR(512), cutoffScore REAL);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE TABLE ScoreTypes (id INTEGER PRIMARY KEY, scoreType VARCHAR(128), probabilityType VARCHAR(128));", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "INSERT INTO `ScoreTypes` (id,scoreType,probabilityType) VALUES (0,'UNKNOWN','NOT_A_PROBABILITY_VALUE'), \
+                (1,'PERCOLATOR QVALUE','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT'), \
+                (2,'PEPTIDE PROPHET SOMETHING','PROBABILITY_THAT_IDENTIFICATION_IS_CORRECT'), \
+                (3,'SPECTRUM MILL','NOT_A_PROBABILITY_VALUE'), \
+                (4,'IDPICKER FDR','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT'), \
+                (5,'MASCOT IONS SCORE','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT'), \
+                (6,'TANDEM EXPECTATION VALUE','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT'), \
+                (7,'PROTEIN PILOT CONFIDENCE','PROBABILITY_THAT_IDENTIFICATION_IS_CORRECT'), \
+                (8,'SCAFFOLD SOMETHING','PROBABILITY_THAT_IDENTIFICATION_IS_CORRECT'), \
+                (9,'WATERS MSE PEPTIDE SCORE','NOT_A_PROBABILITY_VALUE'), \
+                (10,'OMSSA EXPECTATION SCORE','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT'), \
+                (11,'PROTEIN PROSPECTOR EXPECTATION SCORE','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT'), \
+                (12,'SEQUEST XCORR','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT'), \
+                (13,'MAXQUANT SCORE','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT'), \
+                (14,'MORPHEUS SCORE','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT'), \
+                (15,'MSGF+ SCORE','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT'), \
+                (16,'PEAKS CONFIDENCE SCORE','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT'), \
+                (17,'BYONIC SCORE','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT'), \
+                (18,'PEPTIDE SHAKER CONFIDENCE','PROBABILITY_THAT_IDENTIFICATION_IS_CORRECT'), \
+                (19,'GENERIC Q-VALUE','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT');", NULL, NULL, &zErrMsg);
+                
+                sqlite3_exec(db, "CREATE TABLE Tissues(RefSpectraID INTEGER, tissue INTEGER, number INTEGER, PRIMARY KEY (RefSpectraID, tissue))", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE TABLE RetentionTimes (RefSpectraID INTEGER, RedundantRefSpectraID INTEGER, SpectrumSourceID INTEGER, ionMobility REAL,  collisionalCrossSectionSqA REAL, ionMobilityHighEnergyOffset REAL, ionMobilityType TINYINT, retentionTime REAL, bestSpectrum INTEGER, FOREIGN KEY(RefSpectraID)  REFERENCES RefSpectra(id) );", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE TABLE RefSpectraPeaks(RefSpectraID INTEGER, peakMZ BLOB, peakIntensity BLOB);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE TABLE RefSpectraPeakAnnotations (id INTEGER primary key autoincrement not null, RefSpectraID INTEGER not null, peakIndex INTEGER not null, name VARCHAR(256), formula VARCHAR(256),inchiKey VARCHAR(256), otherKeys VARCHAR(256), charge INTEGER, adduct VARCHAR(256), comment VARCHAR(256), mzTheoretical REAL not null,mzObserved REAL not null);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE TABLE RefSpectra (id INTEGER primary key autoincrement not null, peptideSeq VARCHAR(150), precursorMZ REAL, precursorCharge INTEGER, peptideModSeq VARCHAR(200), prevAA CHAR(1), nextAA CHAR(1), copies INTEGER, numPeaks INTEGER, ionMobility REAL, collisionalCrossSectionSqA REAL, ionMobilityHighEnergyOffset REAL, ionMobilityType TINYINT, retentionTime REAL, moleculeName VARCHAR(128), chemicalFormula VARCHAR(128), precursorAdduct VARCHAR(128), inchiKey VARCHAR(128), otherKeys VARCHAR(128), fileID INTEGER, SpecIDinFile VARCHAR(256), score REAL, scoreType TINYINT, confidence INTEGER);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE TABLE Modifications (id INTEGER primary key autoincrement not null, RefSpectraID INTEGER, position INTEGER, mass REAL);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE TABLE LibInfo(libLSID TEXT, createTime TEXT, numSpecs INTEGER, majorVersion INTEGER, minorVersion INTEGER);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "INSERT INTO `LibInfo` (libLSID,createTime,numSpecs,majorVersion,minorVersion) VALUES ('urn:lsid:stamps.isas.de:spectral_library:stamps:nr:spectra','Tue Jul 03 10:43:40 2018',4248,1,7);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE TABLE IonMobilityTypes (id INTEGER PRIMARY KEY, ionMobilityType VARCHAR(128) );", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "INSERT INTO `IonMobilityTypes` (id,ionMobilityType) VALUES (0,'none'), \
+                (1,'driftTime(msec)'), \
+                (2,'inverseK0(Vsec/cm^2)');", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE INDEX idxRefIdPeaks ON RefSpectraPeaks (RefSpectraID);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE INDEX idxRefIdPeakAnnotations ON RefSpectraPeakAnnotations (RefSpectraID);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE INDEX idxPeptideMod ON RefSpectra (peptideModSeq, precursorCharge);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE INDEX idxPeptide ON RefSpectra (peptideSeq, precursorCharge);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE INDEX idxMoleculeName ON RefSpectra (moleculeName, precursorAdduct);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "CREATE INDEX idxInChiKey ON RefSpectra (inchiKey, precursorAdduct);", NULL, NULL, &zErrMsg);
+                
+
+                
+                
+                
+                sqlite3_mutex_enter(sqlite3_db_mutex(db));
+                sqlite3_exec(db, "PRAGMA synchronous=OFF", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "PRAGMA count_changes=OFF", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "PRAGMA journal_mode=MEMORY", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db, "PRAGMA temp_store=MEMORY", NULL, NULL, &zErrMsg);
+                sqlite3_mutex_leave(sqlite3_db_mutex(db));
+                sqlite3_close(db);
+                
+                
+            }
+            else {
+                f.close();
+            }
+        }
+        
+        
+        
+        
+        
+        else if (!action_type.compare("metabolites")){
             sql_query = "SELECT max(id) max_id FROM metabolites;";
             res = stmt->executeQuery(sql_query);
             res->next();

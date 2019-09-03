@@ -174,7 +174,8 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     sqlite3 *db;
     char *zErrMsg = 0;
     int rc;
-    rc = sqlite3_open((char*)parameters["spectra_db_" + species].c_str(), &db);
+    string spectral_lib = parameters["root_path"] + "/data/spectral_library_" + species + ".blib";
+    rc = sqlite3_open((char*)spectral_lib.c_str(), &db);
     if( rc ){
         print_out("-3", compress);
         exit(-3);
@@ -394,7 +395,7 @@ main(int argc, char** argv) {
         return -7;
     }
     
-    if (parameters.find("spectra_db_" + species) == parameters.end()){
+    if (parameters.find("root_path") == parameters.end()){
         print_out("-8", compress);
         return -8;
     }
@@ -463,12 +464,12 @@ main(int argc, char** argv) {
         struct stat date_sqlite_db;
         struct stat date_sqlite_json;
         
-        vector<string> sqlite_path = split((parameters["spectra_db_" + species]), folder_delim[0]);
-        string statistics_json_filename = ".." + folder_delim + "data" + folder_delim + sqlite_path.back() + statistics_json_suffix;
+        string spectral_lib = parameters["root_path"] + "/data/spectral_library_" + species + ".blib";
+        string statistics_json_filename = parameters["root_path"] + "/data/spectral_library_" + species + ".blib" + statistics_json_suffix;
         
         
         // reading the protein data from a cached file only if cached file exists and sqlite_db last modification date is older than cached json file date
-        if (caching && !rewrite_cache && !stat((char*)parameters["spectra_db_" + species].c_str(), &date_sqlite_db) && !stat((char*)statistics_json_filename.c_str(), &date_sqlite_json) && date_sqlite_db.st_ctime < date_sqlite_json.st_ctime){
+        if (caching && !rewrite_cache && !stat((char*)spectral_lib.c_str(), &date_sqlite_db) && !stat((char*)statistics_json_filename.c_str(), &date_sqlite_json) && date_sqlite_db.st_ctime < date_sqlite_json.st_ctime){
             
             
             ifstream t;

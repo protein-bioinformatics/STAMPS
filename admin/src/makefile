@@ -20,7 +20,7 @@ pathways:
 	g++ -std=c++11 -O3 -I/usr/include/mysql -o $(BIN_PATH)/get-pathways.bin get-pathways.cpp bio-classes.cpp -L/usr/lib/x86_64-linux-gnu -lmysqlcppconn -lz
 
 manage:
-	g++ -std=c++11 -O3 -I/usr/include/mysql -o $(ADMIN_PATH)/manage-entries.bin manage-entries.cpp bio-classes.cpp -L/usr/lib/x86_64-linux-gnu -lmysqlcppconn -lz
+	g++ -std=c++11 -O3 -I/usr/include/mysql -o $(ADMIN_PATH)/manage-entries.bin manage-entries.cpp bio-classes.cpp -L/usr/lib/x86_64-linux-gnu -lsqlite3 -lmysqlcppconn -lz
 
 chromosomes:
 	g++ -std=c++11 -O3 -I/usr/include/mysql -o $(BIN_PATH)/get-chromosomes.bin get-chromosomes.cpp bio-classes.cpp -L/usr/lib/x86_64-linux-gnu -lmysqlcppconn -lz

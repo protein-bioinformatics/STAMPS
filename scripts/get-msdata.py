@@ -28,12 +28,16 @@ form = cgi.FieldStorage()
 spectrum_id = int(form.getvalue('spectrum_id'))
 species = form.getvalue('species')
 
-spectra_db = "spectra_db_" + species
-if spectra_db not in conf:
+
+if "root_path" not in conf:
     print(-1)
     exit()
+
+
+
+spectral_lib =  "%s/data/spectral_library_%s.blib" % (conf["root_path"], species)
    
-db = sqlite3.connect(conf[spectra_db])
+db = sqlite3.connect(spectral_lib)
 cur = db.cursor()
 cur.execute('SELECT * FROM RefSpectra r INNER JOIN RefSpectraPeaks p ON r.id = p.RefSpectraID WHERE r.id = %i;' % spectrum_id)
 result = make_dict(cur)
