@@ -2697,15 +2697,14 @@ function toggleBranch(event) {
 
 
 
-function recursive_list_adding(function_tree){
+function recursive_list_adding(function_data){
+
     var ret_text = "";
-    for (var i = 0; i < function_tree.length; ++i){
-        if (function_tree[i][3].length > 0 || function_tree[i][2] > 0){
-            ret_text += "<li id=\"" + function_tree[i][0] + "\" style=\"display: block;\">" + function_tree[i][1];
-            if (function_tree[i][3].length > 0) ret_text += "<ul style=\"display: block;\">" + recursive_list_adding(function_tree[i][3]) + "</ul>";
-            else ret_text += " (" + function_tree[i][2] + ")";
-            ret_text += "</li>";
-        }
+    for (var i = 0; i < function_data[5].length; ++i){
+        ret_text += "<li id=\"" + function_data[5][i][0] + "\" style=\"display: block;\">" + function_data[5][i][1];
+        if (function_data[5][i][5].length > 0) ret_text += "<ul style=\"display: block;\">" + recursive_list_adding(function_data[5][i]) + "</ul>";
+        else ret_text += " (" + function_data[5][i][4] + ")";
+        ret_text += "</li>";
     }
     return ret_text;
 }
@@ -2802,6 +2801,8 @@ function load_all_data(){
     xmlhttpfunctions.onreadystatechange = function() {
         if (xmlhttpfunctions.readyState == 4 && xmlhttpfunctions.status == 200) {
             var function_data = JSON.parse(xmlhttpfunctions.responseText);
+            /*
+            console.log(function_data);
             var id_dict = {};
             var function_tree = [];
             
@@ -2821,10 +2822,10 @@ function load_all_data(){
                     console.log("Error while loading functions, index " + function_row[2] + " is missing!");
                     return;
                 }
-            }
+            }*/
             
             var functions_tree_content = "<ul id=\"LinkedList1\" class=\"LinkedList\" style=\"padding-left:0;\">";
-            functions_tree_content += recursive_list_adding(function_tree[3]);
+            if (function_data.length > 0) functions_tree_content += recursive_list_adding(function_data);
             functions_tree_content += "</ul>";
             document.getElementById("function_search_field").innerHTML = functions_tree_content;
             activateTree(document.getElementById("LinkedList1"));

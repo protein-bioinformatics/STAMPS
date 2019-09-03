@@ -97,6 +97,8 @@ draw_anchor_end = "";
 del_species_ncbi = "";
 del_tissue_brenda = "";
 
+function_names = [];
+
 multiple_selection = new Set();
 
 
@@ -368,6 +370,21 @@ function init(){
     xmlhttp_loci_names_col.open("GET", file_pathname + "admin/scripts/manage-entries.bin?action=get&type=loci_names_col", true);
     xmlhttp_loci_names_col.send();
     
+    
+    
+    var xmlhttp_function_names = new XMLHttpRequest();
+    xmlhttp_function_names.onreadystatechange = function() {
+        if (xmlhttp_function_names.readyState == 4 && xmlhttp_function_names.status == 200) {
+            var request = JSON.parse(xmlhttp_function_names.responseText);
+            for (var key in request){
+                if (request[key][2] != 0 && request[key][2] != 1){
+                    function_names.push([request[key][0], request[key][1] + " (EC: " + request[key][3] + ".)"]);
+                }
+            }
+        }
+    }
+    xmlhttp_function_names.open("GET", file_pathname + "admin/scripts/manage-entries.bin?action=get&type=function_names", true);
+    xmlhttp_function_names.send();
     
     
     analytics("stamps-editor-request");
@@ -1899,6 +1916,13 @@ function manage_entries(){
 
 
 
+function manage_loci_functions(){
+    
+}
+
+
+
+
 function close_manage_entries(){
     document.getElementById("manage_entries").style.display = "none";
     document.getElementById("renderarea").style.filter = "";
@@ -2474,6 +2498,7 @@ function manage_fill_table(){
         var col_name = manage_sort_columns[manage_current_entry][i].split(":")[0];
         dom_th_name.innerHTML = col_name + ((manage_sort_column == i) ? " " + sign_up : ((manage_sort_column == -i) ? " " + sign_down : ""));
         if (manage_current_entry == "proteins" && i == 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
+        else if (manage_current_entry == "proteins" && i == 12) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 500px; max-width: 500px;");
         else if (manage_current_entry == "species" || manage_current_entry == "loci_names") dom_th_name.setAttribute("style", "cursor: pointer; min-width: 325px; max-width: 325px;");
         else if (manage_current_entry == "metabolites" && i == 7) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 1000px; max-width: 1000px;");
         else if (manage_current_entry == "pathways" && i == 1) dom_th_name.setAttribute("style", "cursor: pointer; min-width: 600px; max-width: 600px;");
@@ -2654,34 +2679,31 @@ function manage_fill_table(){
                         dom_td.setAttribute("bgcolor", bg_color);
                         
                         if (j == 12){
-                            dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
+                            dom_td.setAttribute("style", "min-width: 500px; max-width: 500px;");
                             var dom_select = document.createElement("select");
                             dom_td.appendChild(dom_select);
                             
                             var selected_option = 0;
-                            var dom_option1 = document.createElement("option");
-                            dom_select.appendChild(dom_option1);
-                            dom_option1.innerHTML = "is";
-                            dom_option1.value = "is";
-                            if (row[j] == "is") selected_option = 0;
+                            var dom_option_no_func = document.createElement("option");
+                            dom_select.appendChild(dom_option_no_func);
+                            dom_option_no_func.innerHTML = "no function";
+                            dom_option_no_func.value = 0;
                             
-                            var dom_option2 = document.createElement("option");
-                            dom_select.appendChild(dom_option2);
-                            dom_option2.innerHTML = "prm";
-                            dom_option2.value = "prm";
-                            if (row[j] == "prm") selected_option = 1;
-                            
-                            var dom_option3 = document.createElement("option");
-                            dom_select.appendChild(dom_option3);
-                            dom_option3.innerHTML = "topn";
-                            dom_option3.value = "topn";
-                            if (row[j] == "topn") selected_option = 2;
+                            var ii = 1;
+                            for (var f_name of function_names){
+                                var dom_option_func = document.createElement("option");
+                                dom_select.appendChild(dom_option_func);
+                                dom_option_func.innerHTML = f_name[1];
+                                dom_option_func.value = f_name[0];
+                                if (row[j] == f_name[0]) selected_option = ii;
+                                ++ii;
+                            }
                             
                             dom_select.selectedIndex = selected_option;
                             dom_select.setAttribute("onchange", "change_select_type(this);");
                             dom_select.entity_id = row[0];
                             dom_select.col_id = j;
-                            dom_select.field_len = 200;
+                            dom_select.field_len = 500;
                         }
                         else if (j == 9){
                             dom_td.setAttribute("style", "min-width: 200px; max-width: 200px;");
@@ -3554,6 +3576,16 @@ function request_protein_data(){
 
 function add_manage_proteins_add(){
     
+    if (document.getElementById("add_manage_proteins_accession").value.length == 0){
+        alert("Warning: please type in a uniprot accession number");
+        return;
+    }
+    
+    if (document.getElementById("add_manage_proteins_name").value.length == 0){
+        alert("Warning: please type in a protein name");
+        return;
+    }
+    
     var a = parseInt(document.getElementById("add_manage_proteins_chr_start").value);
     if (isNaN(a) && document.getElementById("add_manage_proteins_chr_start").value.length > 0){
         alert("Warning: 'Chromosome start' must be an integer.");
@@ -3568,6 +3600,7 @@ function add_manage_proteins_add(){
     
     var request = "name:" + document.getElementById("add_manage_proteins_name").value;
     request += data_separator + "accession:" + document.getElementById("add_manage_proteins_accession").value;
+    
     request += data_separator + "definition:" + document.getElementById("add_manage_proteins_definition").value;
     request += data_separator + "fasta:" + document.getElementById("add_manage_proteins_fasta").value;
     request += data_separator + "ec_number:" + document.getElementById("add_manage_proteins_ec_number").value;
@@ -3603,6 +3636,11 @@ function add_manage_proteins_add(){
 function add_manage_pathways(){
     
     var new_pathway_name = document.getElementById("add_manage_pathways_name").value;
+    
+    if (new_pathway_name.length == 0){
+        alert("Warning: please type in a pathway name");
+        return;
+    }
     var pathway_group = document.getElementById("add_manage_pathways_group")[document.getElementById("add_manage_pathways_group").selectedIndex].value;
     var signaling = document.getElementById("add_manage_pathways_signaling").checked;
     var request = "name:" + new_pathway_name + data_separator + "pathway_group_id:" + pathway_group + data_separator + "signaling_pathway:" + (signaling ? "1" : "0");
@@ -3730,6 +3768,12 @@ function add_manage_tissues_add(){
 
 
 function add_manage_metabolites_add(){
+    
+    if (document.getElementById("add_manage_metabolites_name").value.length == 0){
+        alert("Warning: please type in a metabolite name");
+        return;
+    }
+    
     var request = "name:" + replaceAll(document.getElementById("add_manage_metabolites_name").value, "\n", "");
     request += data_separator + "short_name:" + replaceAll(document.getElementById("add_manage_metabolites_short_name").value, "\n", "");
     request += data_separator + "c_number:" + replaceAll(document.getElementById("add_manage_metabolites_c_number").value, "\n", "");

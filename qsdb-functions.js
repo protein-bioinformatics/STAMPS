@@ -12,8 +12,7 @@ mouse_x = 0;
 mouse_y = 0;
 zoom_options = [0, 0, 0];
 filter_parameters = {};
-supported_species = {"10090": "Mouse"};
-//supported_species = {"10090": "Mouse", "9606": "Human", "10116": "Rat"};
+supported_species = {};
 current_species = "";
 top_n_fragments = [3, 6, 1000];
 ion_types = ["y", "b", "b|y"];
@@ -625,7 +624,7 @@ function set_species_menu(reload){
                         child.children[0].className = 'select_menu_cell'; \
                     } \
                     this.className = 'selected_menu_cell'; \
-                    last_opened_menu = ''; current_species = '" + ncbi[1] + "'; load_data(true);");   
+                    last_opened_menu = ''; document.getElementById('select_species').style.display = 'none'; current_species = '" + ncbi[1] + "'; load_data(true);");   
                 dom_species_td.innerHTML = ncbi[0];
                 dom_species_td.setAttribute("type", "radio");
                 dom_species_td.setAttribute("value", ncbi[1]);
