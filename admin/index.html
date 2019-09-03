@@ -167,6 +167,53 @@
 </div>
 
 
+
+
+
+
+
+
+
+<div id="editor_select_loci" class="global_search">
+    <div id="editor_select_loci_background" class="global_search_background"></div>
+    <div id="editor_select_loci_window" class="global_search_content">
+        <table width="100%" height="100%">
+            <tr>
+                <td valign="top" colspan="2">
+                    Select compartment: <select id="editor_select_loci_select"></select>
+                </td>
+            </tr>
+            <tr><td valign="top" colspan="2">
+                Select proteins:<p>
+                <table cellpadding="0" cellspacing="0" size=20 style="width:900px;">
+                    <tr id="editor_select_loci_table_header"></tr>
+                    <tr id="editor_select_loci_table_filters">
+                        <td><input type='text' id="editor_select_loci_table_filter_name" style="width: 100%; box-sizing: border-box;" onkeyup="loci_current_page = 0; editor_fill_loci_table();"></td>
+                        <td><input type='text' id="editor_select_loci_table_filter_accession" style="width: 100%; box-sizing: border-box;" onkeyup="loci_current_page = 0; editor_fill_loci_table();"></td>
+                        <td><input type='text' id="editor_select_loci_table_filter_description" style="width: 100%; box-sizing: border-box;" onkeyup="loci_current_page = 0; editor_fill_loci_table();"></td>
+                        <td width="1"><input type="checkbox" style="display: inline; margin-right: 25px;" onchange="loci_current_page = 0; editor_fill_loci_table();" id="editor_select_loci_table_filter_node"><td>
+                    </tr>
+                </table>
+            </td></tr>
+            <tr><td colspan="2" id="editor_select_loci_cell" height="100%" valign="top">
+                <div id="editor_select_loci_table_wrapper" style="position: fixed; display: inline; overflow-y: scroll; width:900px;">
+                    <table id="editor_select_loci_table" cellspacing="0" style="border-width: 1px; border-style: solid;"></table>
+                </div>
+            </td></tr>
+            <tr>
+                <td align="left" width="50%" valign="bottom" id="editor_loci_page_navigation"></td>
+                <td align="right" valign="bottom"><button onclick="close_editor_select_loci();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_update_loci_node(); close_editor_select_loci();">Update</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
+
+
+
+
 <div id="manage_entries" class="global_search">
     <div id="manage_entries_background" class="global_search_background"></div>
     <div id="editor_select_manage" class="global_search_content">
@@ -271,6 +318,9 @@
 
 
 
+
+
+
 <div id="waiting_background" class="light_background">
     <div id="waiting_black" style="top: 0px; left: 0px; width: 100%; height: 100%; position: fixed; z-index: 10; background-color: black; opacity: 0.4;"> 
     </div> 
@@ -285,6 +335,8 @@
         </table> 
     </div>
 </div>
+
+
 
 
 
@@ -306,9 +358,12 @@
     
     <table width="100%" height="100%"><tr>
         <td valign="bottom" align="right" width="80%"><div style="display: inline;" id="check_spectra_peptide_info"></div><br>&nbsp;</td>
-        <td valign="bottom" align="right"><button onclick="hide_check_spectra();">Back</button></td>
+        <td valign="bottom" align="right"><button onclick="editor_hide_check_spectra();">Back</button></td>
     </tr></table>
 </div>
+
+
+
 
 
 
@@ -336,6 +391,9 @@
         <tr><td bgcolor="#a0ff90" width="25">&nbsp;</td><td>PRM + internal standard</td></tr>
     </table>
 </div>
+
+
+
 
 <div id="label_text_field_background" class="light_background">
     <textarea id="label_text_field" size="30" style="display: none; position: absolute; z-index: 110; width: 300px; height: 200px;" onkeypress="label_text_field_listener(event);" onblur="update_label();"></textarea>
@@ -491,6 +549,11 @@
     </div>
 </div>
 
+
+
+
+
+
 <div id="add_manage_pathways" class="global_search">
     <div id="add_manage_pathways_background" class="global_search_background"></div>
     <div id="add_manage_pathways_window" class="global_search_content" style="width: 1000px;">
@@ -515,6 +578,8 @@
 </div>
 
 
+
+
 <div id="confirm_deletion" class="global_search">
     <div id="confirm_deletion_background" class="global_search_background"></div>
     <div id="editor_select_manage" class="global_search_content" width="500" height="180">
@@ -531,6 +596,9 @@
         </table>
     </div>
 </div>
+
+
+
 
 <div id="pathway_title_field" style="font-family: Arial; font-size: 20px; color: #aaaaaa; margin: 0px; position: absolute; z-index: 10; background-color: #f3f8ff; padding: 10px; border: 1px solid #aaaaaa;">
     <b>Current pathway: <div style="display: inline;" id="pathway_title"></div></b>

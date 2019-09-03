@@ -1837,7 +1837,7 @@ function key_down(event){
         event.preventDefault();
         switch(event.which){
             case 27:
-                hide_check_spectra();
+                editor_hide_check_spectra();
                 break;
                 
             case 13:
@@ -1877,12 +1877,13 @@ function key_down(event){
         close_editor_select_pathway();
         close_editor_select_protein();
         close_editor_select_metabolite();
+        close_editor_select_loci();
         close_navigation();
         document.getElementById('add_manage_species').style.display = 'none';
         document.getElementById('add_manage_proteins').style.display = 'none';
         document.getElementById('add_manage_metabolites').style.display = 'none';
         document.getElementById('add_manage_pathways').style.display = 'none';
-        hide_check_spectra();
+        editor_hide_check_spectra();
         last_opened_menu = "";
     }
     
@@ -1901,6 +1902,16 @@ function key_down(event){
 
 
 
+function editor_hide_check_spectra(){
+    console.log("uhuhu");
+    document.getElementById("renderarea").style.filter = "";
+    document.getElementById("navigation").style.filter = "";
+    document.getElementById("toolbox").style.filter = "";
+    hide_check_spectra();
+}
+
+
+
 
 
 
@@ -1909,6 +1920,7 @@ function manage_entries(){
     if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
         document.getElementById("renderarea").style.filter = "blur(5px)";
         document.getElementById("navigation").style.filter = "blur(5px)";
+        document.getElementById("toolbox").style.filter = "blur(5px)";
     }
     manage_fill_table();
 }
@@ -1917,7 +1929,44 @@ function manage_entries(){
 
 
 function manage_loci_functions(){
+    document.getElementById("editor_select_loci").style.display = "inline";
+    document.getElementById("renderarea").style.filter = "blur(5px)";
+    document.getElementById("toolbox").style.filter = "blur(5px)";
     
+    var xmlhttp_get_loci = new XMLHttpRequest();
+    xmlhttp_get_loci.onreadystatechange = function() {
+        if (xmlhttp_get_loci.readyState == 4 && xmlhttp_get_loci.status == 200) {
+            var request = JSON.parse(xmlhttp_get_loci.responseText);
+            var loci_list = [];
+            for (var key in request){
+                loci_list.push(request[key]);
+            }
+            
+            var loci_select = document.getElementById("editor_select_loci_select");
+            loci_list.sort(function(a, b){
+                    return a[1] > b[1];
+                }
+            );
+            
+            for (var row of loci_list){
+                var dom_option = document.createElement("option");
+                loci_select.appendChild(dom_option);
+                dom_option.id = row[0];
+                dom_option.innerHTML = row[1];
+            }
+        }
+    }
+    xmlhttp_get_loci.open("GET", file_pathname + "admin/scripts/manage-entries.bin?action=get&type=loci_names", true);
+    xmlhttp_get_loci.send();
+}
+
+
+
+function close_editor_select_loci(){
+    document.getElementById("editor_select_loci").style.display = "none";
+    document.getElementById("renderarea").style.filter = "";
+    document.getElementById("navigation").style.filter = "";
+    document.getElementById("toolbox").style.filter = "";
 }
 
 
@@ -1927,7 +1976,10 @@ function close_manage_entries(){
     document.getElementById("manage_entries").style.display = "none";
     document.getElementById("renderarea").style.filter = "";
     document.getElementById("navigation").style.filter = "";
+    document.getElementById("toolbox").style.filter = "";
 }
+
+
 
 
 
@@ -3432,13 +3484,23 @@ function resize_manage_view(){
     // set height of pathway selection window
     document.getElementById("editor_select_pathway_window").style.height = (window.innerHeight * 0.7).toString() + "px";
     
-    // set height of metabolite selection window
+    // set height of protein selection window
     document.getElementById("editor_select_protein_window").style.height = (window.innerHeight * 0.85).toString() + "px";
     var close_protein_window = document.getElementById("editor_select_protein").style.display != "inline";
     document.getElementById("editor_select_protein").style.display = "inline";
     var hgt_prot = document.getElementById("editor_select_protein_cell").offsetHeight * 0.95;
     document.getElementById("editor_select_protein_table_wrapper").style.height = hgt_prot.toString() + "px";
     if (close_protein_window) document.getElementById("editor_select_protein").style.display = "none";
+    
+    
+    // set height of loci selection window
+    document.getElementById("editor_select_loci_window").style.height = (window.innerHeight * 0.85).toString() + "px";
+    var close_protein_window = document.getElementById("editor_select_loci").style.display != "inline";
+    document.getElementById("editor_select_loci").style.display = "inline";
+    var hgt_prot = document.getElementById("editor_select_loci_cell").offsetHeight * 0.95;
+    document.getElementById("editor_select_loci_table_wrapper").style.height = hgt_prot.toString() + "px";
+    if (close_protein_window) document.getElementById("editor_select_loci").style.display = "none";
+    
     
     // set height of protein adding window
     document.getElementById("add_manage_proteins_window").style.height = (window.innerHeight * 0.7).toString() + "px";
@@ -4136,6 +4198,7 @@ function curate_spectra(){
     document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("renderarea").style.filter = "blur(5px)";
     document.getElementById("navigation").style.filter = "blur(5px)";
+    document.getElementById("toolbox").style.filter = "blur(5px)";
     change_match_error();
     resize_ms_view();
     spectrum_loaded = false;

@@ -194,7 +194,7 @@ int main(int argc, char** argv) {
             return -9;
         }
         
-        if (!action_type.compare("pathway_groups") || !action_type.compare("pathways") || !action_type.compare("proteins") || !action_type.compare("tissues") || !action_type.compare("loci_names") || !action_type.compare("function_names") || !action_type.compare("species") || !action_type.compare("metabolites")){
+        if (!action_type.compare("pathway_groups") || !action_type.compare("pathways") || !action_type.compare("proteins") || !action_type.compare("tissues") || !action_type.compare("loci_names") || !action_type.compare("function_names") || !action_type.compare("loci_names") || !action_type.compare("species") || !action_type.compare("metabolites")){
             string order_col = (form.find("column") != form.end()) ? form["column"] : "";
             string limit = (form.find("limit") != form.end()) ? form["limit"] : "";
             string filters = (form.find("filters") != form.end()) ? form["filters"] : "";

@@ -4732,10 +4732,6 @@ function hide_chromosome_search (forward){
 function hide_check_spectra (){
     document.getElementById("waiting_background").style.display = "none";
     document.getElementById("check_spectra").style.display = "none";
-    if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
-        document.getElementById("renderarea").style.filter = "none";
-        document.getElementById("navigation").style.filter = "none";
-    }
 }
 
 
