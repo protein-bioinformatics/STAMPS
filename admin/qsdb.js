@@ -3929,6 +3929,10 @@ function request_metabolites_data(){
 
 
 
+
+
+
+
 function request_protein_data(){
     var accession = document.getElementById("add_manage_proteins_accession").value;
     if (accession.length < 1) return;
