@@ -62,13 +62,21 @@ selected_label_node = -1;
 edge_change_selected = -1;
 scaling_element = -1;
 rescaling = -1;
-filtes_separation_char = String.fromCharCode(6);
+filter_separation_char = String.fromCharCode(6);
 
 protein_sort_columns = {'-3': "definition:DESC", '-2': "accession:DESC", '-1': "name:DESC", 1: "name:ASC", 2: "accession:ASC", 3: "definition:ASC"};
 protein_sort_column = 1;
 protein_max_pages = -1;
 protein_current_page = 0;
 current_protein_set = -1;
+
+loci_sort_columns = {'-3': "definition:DESC", '-2': "accession:DESC", '-1': "name:DESC", 1: "name:ASC", 2: "accession:ASC", 3: "definition:ASC"};
+loci_sort_column = 1;
+loci_max_pages = -1;
+loci_current_page = 0;
+current_loci_set = new Set();
+edited_loci_set = new Set();
+editor_select_loci_select_index = -1;
 
 metabolite_sort_columns = {'-5': "formula:DESC", '-3': "lm_id:DESC", '-3': "c_number:DESC", '-2': "short_name:DESC", '-1': "name:DESC", 1: "name:ASC", 2: "short_name:ASC", 3: "c_number:ASC", 4: "lm_id:ASC", 5: "formula:ASC"};
 metabolite_sort_column = 1;
@@ -247,6 +255,7 @@ function init(){
     xmlhttp_proteins.onreadystatechange = function() {
         if (xmlhttp_proteins.readyState == 4 && xmlhttp_proteins.status == 200) {
             protein_max_pages = Math.floor(parseInt(xmlhttp_proteins.responseText) / max_per_page) + 1;
+            loci_max_pages = Math.floor(parseInt(xmlhttp_proteins.responseText) / max_per_page) + 1;
         }
     }
     xmlhttp_proteins.open("GET", file_pathname + "admin/scripts/manage-entries.bin?action=get&type=proteins_num", true);
@@ -1122,6 +1131,43 @@ function editor_update_metabolite_node(){
 }
 
 
+
+
+
+function editor_update_loci(){
+    var locus_id = document.getElementById("editor_select_loci_select")[document.getElementById("editor_select_loci_select").selectedIndex].id;
+    var prot_id_list = Array.from(edited_loci_set);
+    
+    var request = file_pathname + "admin/scripts/manage-entries.bin?action=set&table=protein_loci&column=none&id=" + locus_id + "&value=" +  encodeURL(prot_id_list.join(":"));
+    
+    var xmlhttp_set = new XMLHttpRequest();
+    xmlhttp_set.onreadystatechange = function() {
+        if (xmlhttp_set.readyState == 4 && xmlhttp_set.status == 200) {
+            response = xmlhttp_set.responseText;
+            if (response < 0){
+                alert("An error has occured, the entities could not be deleted from the database. Please contact the administrator.");
+            }
+            else {
+                current_loci_set = new Set();
+                for (var key of edited_loci_set){
+                    current_loci_set.add(key);
+                }
+                editor_fill_loci_table();
+            }
+        }
+    }
+    
+    xmlhttp_set.open("GET", request, false);
+    xmlhttp_set.send();
+}
+
+
+
+
+
+
+
+
 function editor_update_protein_node(){
     var obj = document.getElementById("editor_select_protein_table");
     var dom_table = document.getElementById("editor_select_protein_table");
@@ -1148,7 +1194,7 @@ function editor_update_protein_node(){
     xmlhttp_set.send();
     
     if (continuing){
-        var request_prot = file_pathname + "scripts/get-proteins.bin?ids=" + prot.proteins.join(":") + "&species=mouse";
+        var request_prot = file_pathname + "scripts/get-proteins.bin?ids=" + prot.proteins.join(":") + "&species=" + current_species;
         // get proteins
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function() {
@@ -1903,7 +1949,6 @@ function key_down(event){
 
 
 function editor_hide_check_spectra(){
-    console.log("uhuhu");
     document.getElementById("renderarea").style.filter = "";
     document.getElementById("navigation").style.filter = "";
     document.getElementById("toolbox").style.filter = "";
@@ -1933,6 +1978,7 @@ function manage_loci_functions(){
     document.getElementById("renderarea").style.filter = "blur(5px)";
     document.getElementById("toolbox").style.filter = "blur(5px)";
     
+    // load all compartment names and put them into the select object
     var xmlhttp_get_loci = new XMLHttpRequest();
     xmlhttp_get_loci.onreadystatechange = function() {
         if (xmlhttp_get_loci.readyState == 4 && xmlhttp_get_loci.status == 200) {
@@ -1943,6 +1989,7 @@ function manage_loci_functions(){
             }
             
             var loci_select = document.getElementById("editor_select_loci_select");
+            loci_select.innerHTML = "";
             loci_list.sort(function(a, b){
                     return a[1] > b[1];
                 }
@@ -1954,11 +2001,91 @@ function manage_loci_functions(){
                 dom_option.id = row[0];
                 dom_option.innerHTML = row[1];
             }
+            editor_select_loci_select_change();
         }
+        
     }
     xmlhttp_get_loci.open("GET", file_pathname + "admin/scripts/manage-entries.bin?action=get&type=loci_names", true);
     xmlhttp_get_loci.send();
 }
+
+
+Set.prototype.subSet = function(otherSet) 
+{ 
+    // if size of this set is greater 
+    // than otherSet then it can'nt be  
+    //  a subset 
+    if(this.size > otherSet.size) 
+        return false; 
+    else
+    { 
+        for(var elem of this) 
+        { 
+            // if any of the element of  
+            // this is not present in the 
+            // otherset then return false 
+            if(!otherSet.has(elem)) 
+                return false; 
+        } 
+        return true; 
+    } 
+} 
+
+
+function editor_select_loci_select_change(){
+    if (editor_select_loci_select_index == document.getElementById("editor_select_loci_select").selectedIndex) return;
+    
+    if (current_loci_set.size > 0 && (!current_loci_set.subSet(edited_loci_set) || !edited_loci_set.subSet(current_loci_set)))
+    {
+        alert("Warning: You have changed your proetein set. Please update or discard your changes first.");
+        document.getElementById("editor_select_loci_select").selectedIndex = editor_select_loci_select_index;
+        return;
+    }
+    // load all protein ids assigned to a certain compartment
+    var locus_id = document.getElementById("editor_select_loci_select")[document.getElementById("editor_select_loci_select").selectedIndex].id;
+    editor_select_loci_select_index = document.getElementById("editor_select_loci_select").selectedIndex;
+    
+    
+    var request = "action=get&type=protein_loci";
+    request += "&column=protein_id";
+    request += "&filters=locus_id:" + locus_id;
+    request += filter_separation_char + "species:" + current_species;
+    request = file_pathname + "admin/scripts/manage-entries.bin?" + request;
+    
+    var xmlhttp_get_loci = new XMLHttpRequest();
+    xmlhttp_get_loci.onreadystatechange = function() {
+        if (xmlhttp_get_loci.readyState == 4 && xmlhttp_get_loci.status == 200) {
+            var request = JSON.parse(xmlhttp_get_loci.responseText);
+            current_loci_set = new Set();
+            edited_loci_set = new Set();
+            for (var key in request){
+                current_loci_set.add(parseInt(request[key][1]));
+                edited_loci_set.add(parseInt(request[key][1]));
+            }
+            editor_fill_loci_table();
+        }
+        
+    }
+    xmlhttp_get_loci.open("GET", request, true);
+    xmlhttp_get_loci.send();
+}
+
+
+
+
+
+function editor_select_loci_discard(){
+    if (confirm("Do you want to discard your changes?")){
+        edited_loci_set = new Set();
+        for (var key of current_loci_set){
+            edited_loci_set.add(key);
+        }
+        editor_fill_loci_table();
+    }
+}
+
+
+
 
 
 
@@ -1994,7 +2121,7 @@ function editor_fill_metabolite_table(){
     request += "&column=" + encodeURL(metabolite_sort_columns[metabolite_sort_column]);
     request += "&limit=" + encodeURL((metabolite_current_page * max_per_page).toString() + ":" + max_per_page.toString());
     if (filter_name != "" || filter_short_name != "" || filter_cnumber != "" || filter_formula != "" || filter_lmid != ""){
-        request += "&filters=" + encodeURL("name:" + filter_name + filtes_separation_char + "short_name:" + filter_short_name + filtes_separation_char + "c_number:" + filter_cnumber + filtes_separation_char + "lm_id:" + filter_lmid + filtes_separation_char + "formula:" + filter_formula);
+        request += "&filters=" + encodeURL("name:" + filter_name + filter_separation_char + "short_name:" + filter_short_name + filter_separation_char + "c_number:" + filter_cnumber + filter_separation_char + "lm_id:" + filter_lmid + filter_separation_char + "formula:" + filter_formula);
     }
     request = file_pathname + "admin/scripts/manage-entries.bin?" + request;
     
@@ -2215,6 +2342,189 @@ function editor_fill_metabolite_table(){
 
 
 
+
+
+
+
+function editor_fill_loci_table(){
+    var filter_name = document.getElementById("editor_select_loci_table_filter_name").value;
+    var filter_accession = document.getElementById("editor_select_loci_table_filter_accession").value;
+    var filter_description = document.getElementById("editor_select_loci_table_filter_description").value;
+    var filter_node = document.getElementById("editor_select_loci_table_filter_node").checked;
+    
+    var request = "action=get&type=proteins";
+    request += "&column=" + encodeURL(loci_sort_columns[loci_sort_column]);
+    request += "&limit=" + encodeURL((loci_current_page * max_per_page).toString() + ":" + max_per_page.toString());
+    request += "&filters=species:" + current_species;
+    if (filter_name != "" || filter_accession != "" || filter_description != ""){
+        request += encodeURL(filter_separation_char + "name:" + filter_name + filter_separation_char + "accession:" + filter_accession + filter_separation_char + "definition:" + filter_description);
+    }
+    if (filter_node) request += "&checked=" + encodeURL(selected_loci_node);
+    request = file_pathname + "admin/scripts/manage-entries.bin?" + request;
+    
+    var sign_up = String.fromCharCode(9652);
+    var sign_down = String.fromCharCode(9662);
+    
+    var dom_table_header = document.getElementById("editor_select_loci_table_header");
+    dom_table_header.innerHTML = ""
+    var dom_th_name = document.createElement("th");
+    dom_table_header.appendChild(dom_th_name);
+    dom_th_name.setAttribute("onclick", "loci_sort_column = " + ((loci_sort_column == 1) ? " -1;" : "1;") + "; editor_fill_loci_table();");
+    dom_th_name.innerHTML = "Name" + ((loci_sort_column == 1) ? " " + sign_up : ((loci_sort_column == -1) ? " " + sign_down : ""));
+    dom_th_name.setAttribute("width", "150px");
+    dom_th_name.setAttribute("style", "cursor: pointer; min-width: 150px; max-width: 150px;");
+    
+    
+    var dom_th_uniprot = document.createElement("th");
+    dom_table_header.appendChild(dom_th_uniprot);
+    dom_th_uniprot.setAttribute("onclick", "loci_sort_column = " + ((loci_sort_column == 2) ? " -2;" : "2;") + "; editor_fill_loci_table();");
+    dom_th_uniprot.innerHTML = "Uniprot" + ((loci_sort_column == 2) ? " " + sign_up : ((loci_sort_column == -2) ? " " + sign_down : ""));
+    dom_th_uniprot.setAttribute("width", "120px");
+    dom_th_uniprot.setAttribute("style", "cursor: pointer; min-width: 120px; max-width: 120px;");
+    
+    
+    var dom_th_description = document.createElement("th");
+    dom_table_header.appendChild(dom_th_description);
+    dom_th_description.setAttribute("onclick", "loci_sort_column = " + ((loci_sort_column == 3) ? " -3;" : "3;") + "; editor_fill_loci_table();");
+    dom_th_description.setAttribute("style", "cursor: pointer;");
+    dom_th_description.innerHTML = "Description" + ((loci_sort_column == 3) ? " " + sign_up : ((loci_sort_column == -3) ? " " + sign_down : ""));
+    
+    
+    
+    
+    
+    
+    
+    var dom_nav_cell = document.getElementById("editor_loci_page_navigation");
+    dom_nav_cell.innerHTML = "";
+    if (loci_current_page > 0){
+        var dom_b = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b);
+        dom_b.setAttribute("onclick", "loci_current_page = 0; editor_fill_loci_table();");
+        dom_b.setAttribute("style", "cursor: pointer;");
+        dom_b.innerHTML = "&nbsp;«&nbsp;";
+        
+        var dom_b2 = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b2);
+        dom_b2.setAttribute("onclick", "loci_current_page -= 1; editor_fill_loci_table();");
+        dom_b2.setAttribute("style", "cursor: pointer;");
+        dom_b2.innerHTML = "&nbsp;‹&nbsp;&nbsp;";
+    }
+    
+        
+    var dom_page = document.createElement("select");
+    dom_nav_cell.appendChild(dom_page);
+    dom_page.setAttribute("style", "display: inline;");
+    dom_page.setAttribute("onchange", "loci_current_page = this.selectedIndex; editor_fill_loci_table();");
+    for (var i = 0; i < loci_max_pages; ++i){
+        var dom_option = document.createElement("option");
+        dom_page.appendChild(dom_option);
+        dom_option.innerHTML = (i + 1).toString();
+    }
+    dom_page.selectedIndex = loci_current_page;
+    
+    var dom_div_max_pages = document.createElement("div");
+    dom_nav_cell.appendChild(dom_div_max_pages);
+    dom_div_max_pages.setAttribute("style", "display: inline;");
+    dom_div_max_pages.innerHTML = "&nbsp;&nbsp;/&nbsp;&nbsp;" + loci_max_pages;
+    
+    if (loci_current_page + 1 < loci_max_pages){
+        
+        var dom_b2 = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b2);
+        dom_b2.setAttribute("onclick", "loci_current_page += 1; editor_fill_loci_table();");
+        dom_b2.setAttribute("style", "cursor: pointer;");
+        dom_b2.innerHTML = "&nbsp;&nbsp;›&nbsp;";
+        
+        var dom_b = document.createElement("b");
+        dom_nav_cell.appendChild(dom_b);
+        dom_b.setAttribute("onclick", "loci_current_page = loci_max_pages - 1; editor_fill_loci_table();");
+        dom_b.setAttribute("style", "cursor: pointer;");
+        dom_b.innerHTML = "&nbsp;»&nbsp;";
+    }
+    
+    
+    var xmlhttp_loci = new XMLHttpRequest();
+    xmlhttp_loci.onreadystatechange = function() {
+        if (xmlhttp_loci.readyState == 4 && xmlhttp_loci.status == 200) {
+            var global_loci_data = JSON.parse(xmlhttp_loci.responseText);
+            var global_loci_data_sorted = [];
+            for (var protein_id in global_loci_data) global_loci_data_sorted.push(global_loci_data[protein_id]);
+            global_loci_data_sorted = global_loci_data_sorted.sort(function(a, b) {
+                switch (loci_sort_column){
+                    case 1:
+                        return a[1].localeCompare(b[1]);
+                    case -1:
+                        return b[1].localeCompare(a[1]);
+                    case 2:
+                        return a[5].localeCompare(b[5]);
+                    case -2:
+                        return b[5].localeCompare(a[5]);
+                    case 3:
+                        return a[2].localeCompare(b[2]);
+                    case -3:
+                        return b[2].localeCompare(a[2]);
+                }
+            });
+            
+            
+            var dom_table = document.getElementById("editor_select_loci_table");
+            dom_table.innerHTML = "";
+    
+            for (var i = 0; i < global_loci_data_sorted.length; ++i){
+                var bg_color = (i & 1) ? "#DDDDDD" : "white";
+                var row = global_loci_data_sorted[i];
+                
+                var dom_tr = document.createElement("tr");
+                dom_table.appendChild(dom_tr);
+                var dom_td1 = document.createElement("td");
+                dom_tr.appendChild(dom_td1);
+                dom_td1.innerHTML = row[1];
+                dom_td1.setAttribute("bgcolor", bg_color);
+                dom_td1.setAttribute("width", "150px");
+                dom_td1.setAttribute("style", "min-width: 150px; max-width: 150px;");
+                
+                var dom_td2 = document.createElement("td");
+                dom_tr.appendChild(dom_td2);
+                dom_td2.innerHTML = row[5];
+                dom_td2.setAttribute("bgcolor", bg_color);
+                dom_td2.setAttribute("width", "120px");
+                dom_td2.setAttribute("style", "min-width: 120px; max-width: 120px;");
+                
+                var dom_td3 = document.createElement("td");
+                dom_tr.appendChild(dom_td3);
+                dom_td3.innerHTML = row[2];
+                dom_td3.setAttribute("bgcolor", bg_color);
+                dom_td3.setAttribute("width", "100%");
+                
+                var dom_td4 = document.createElement("td");
+                dom_tr.appendChild(dom_td4);
+                var dom_input = document.createElement("input");
+                dom_td4.appendChild(dom_input);
+                dom_td4.setAttribute("bgcolor", bg_color);
+                dom_input.setAttribute("id", row[0]);
+                dom_input.setAttribute("type", "checkbox");
+                
+                
+                if (current_loci_set.has(row[0])) dom_input.setAttribute("checked", "true");
+                dom_input.setAttribute("onchange", "if(this.checked) edited_loci_set.add(parseInt(this.id)); else edited_loci_set.delete(parseInt(this.id));");
+            }
+            
+            
+        }
+    }
+    xmlhttp_loci.open("GET", request, false);
+    xmlhttp_loci.send();
+    
+}
+
+
+
+
+
+
+
+
 function editor_fill_protein_table(){
     var filter_name = document.getElementById("editor_select_protein_table_filter_name").value;
     var filter_accession = document.getElementById("editor_select_protein_table_filter_accession").value;
@@ -2226,7 +2536,7 @@ function editor_fill_protein_table(){
     request += "&limit=" + encodeURL((protein_current_page * max_per_page).toString() + ":" + max_per_page.toString());
     request += "&filters=species:" + current_species;
     if (filter_name != "" || filter_accession != "" || filter_description != ""){
-        request += encodeURL(filtes_separation_char + "name:" + filter_name + filtes_separation_char + "accession:" + filter_accession + filtes_separation_char + "definition:" + filter_description);
+        request += encodeURL(filter_separation_char + "name:" + filter_name + filter_separation_char + "accession:" + filter_accession + filter_separation_char + "definition:" + filter_description);
     }
     if (filter_node) request += "&checked=" + encodeURL(selected_protein_node);
     request = file_pathname + "admin/scripts/manage-entries.bin?" + request;
@@ -2386,6 +2696,9 @@ function editor_fill_protein_table(){
 
 
 
+
+
+
 function manage_change_entity(entity){
     manage_current_entry = entity;
     var xmlhttp_entity = new XMLHttpRequest();
@@ -2428,9 +2741,6 @@ function isNumeric(n) {
 
 
 function update_protein_data(accession){
-    
-    
-    
     var request = "type=protein&action=update&accession=" + accession;
     request = file_pathname + "admin/scripts/request-entity-data.py?" + request;
     
@@ -2501,6 +2811,30 @@ function open_add_tissues(){
     xmlhttp_tissues_list.open("GET", file_pathname + "admin/scripts/get-tissue-list.py", true);
     xmlhttp_tissues_list.send();
 }
+
+
+
+
+
+function open_add_protein(){
+    var function_select = document.getElementById("add_manage_proteins_function");
+    function_select.innerHTML = "";
+    
+    var dom_option_no_func = document.createElement("option");
+    function_select.appendChild(dom_option_no_func);
+    dom_option_no_func.innerHTML = "no function";
+    dom_option_no_func.value = 0;
+    
+    for (var f_name of function_names){
+        var dom_option_func = document.createElement("option");
+        function_select.appendChild(dom_option_func);
+        dom_option_func.innerHTML = f_name[1];
+        dom_option_func.value = f_name[0];
+    }
+    document.getElementById('add_manage_proteins').style.display = 'inline';
+}
+
+
 
 
 
@@ -2622,7 +2956,7 @@ function manage_fill_table(){
         var dom_new_protein = document.createElement("button");
         dom_nav_cell.appendChild(dom_new_protein);
         dom_new_protein.innerHTML = "New protein";
-        dom_new_protein.setAttribute("onclick", "document.getElementById('add_manage_proteins').style.display = 'inline';");
+        dom_new_protein.setAttribute("onclick", "open_add_protein();");
     }
     else if (manage_current_entry == "species"){
         var dom_add_species = document.createElement("button");
@@ -3200,7 +3534,18 @@ function manage_delete_pathway_group(entity_id){
             if (request < 0){
                 alert("Error: pathway group could not be deleted from database.");
             }
-            manage_fill_table();
+            
+            // get number of proteins
+            var xmlhttp_proteins = new XMLHttpRequest();
+            xmlhttp_proteins.onreadystatechange = function() {
+                if (xmlhttp_proteins.readyState == 4 && xmlhttp_proteins.status == 200) {
+                    protein_max_pages = Math.floor(parseInt(xmlhttp_proteins.responseText) / max_per_page) + 1;
+                    loci_max_pages = Math.floor(parseInt(xmlhttp_proteins.responseText) / max_per_page) + 1;
+                    manage_fill_table();
+                }
+            }
+            xmlhttp_proteins.open("GET", file_pathname + "admin/scripts/manage-entries.bin?action=get&type=proteins_num", true);
+            xmlhttp_proteins.send();
         }
     }
     xmlhttp_protein_data.open("GET", request, false);
@@ -3590,7 +3935,6 @@ function request_protein_data(){
     
     var request = file_pathname + "admin/scripts/request-entity-data.py?type=protein&accession=" + accession;
     
-    
     var xmlhttp_protein_data = new XMLHttpRequest();
     xmlhttp_protein_data.onreadystatechange = function() {
         if (xmlhttp_protein_data.readyState == 4 && xmlhttp_protein_data.status == 200) {
@@ -3627,6 +3971,17 @@ function request_protein_data(){
                     }
                     if (selected_index >= 0) dom_species_select.selectedIndex = selected_index;
                     else alert("Warning: species '" + request["species"] + "' not registered in database!");
+                }
+                if ("function_id" in request){
+                    var dom_function_select = document.getElementById("add_manage_proteins_function");
+                    var selected_index = 0;
+                    for (var i = 0; i < dom_function_select.length; ++i){
+                        if (dom_function_select[i].value == request["function_id"]){
+                            dom_function_select.selectedIndex = i;
+                            break;
+                        }
+                    }
+                    
                 }
             }
         }
@@ -3672,21 +4027,34 @@ function add_manage_proteins_add(){
     val = document.getElementById("add_manage_proteins_chr_end").value;
     request += data_separator + "chr_end:" + (val.length > 0 ? val : "-1");
     request += data_separator + "unreviewed:" + (document.getElementById("add_manage_proteins_unreviewed").checked ? "1" : "0");
+    request += data_separator + "function_id:" + document.getElementById("add_manage_proteins_function")[document.getElementById("add_manage_proteins_function").selectedIndex].value;
     request += data_separator + "chromosome:" + document.getElementById("add_manage_proteins_chromosome")[document.getElementById("add_manage_proteins_chromosome").selectedIndex].value;
     request += data_separator + "species:" + document.getElementById("add_manage_proteins_species")[document.getElementById("add_manage_proteins_species").selectedIndex].value;
     
     request = file_pathname + "admin/scripts/manage-entries.bin?action=insert&type=proteins&data=" + encodeURL(request);
     
-    
     var xmlhttp_add_protein = new XMLHttpRequest();
     xmlhttp_add_protein.onreadystatechange = function() {
         if (xmlhttp_add_protein.readyState == 4 && xmlhttp_add_protein.status == 200) {
             var request = xmlhttp_add_protein.responseText;
+            
             if (request < 0){
                 alert("An error has occured while adding the protein to the database. Please contact the administrator.");
             }
             document.getElementById('add_manage_proteins').style.display = 'none';
-            manage_fill_table();
+            
+            // get number of proteins
+            var xmlhttp_proteins = new XMLHttpRequest();
+            xmlhttp_proteins.onreadystatechange = function() {
+                if (xmlhttp_proteins.readyState == 4 && xmlhttp_proteins.status == 200) {
+                    protein_max_pages = Math.floor(parseInt(xmlhttp_proteins.responseText) / max_per_page) + 1;
+                    loci_max_pages = Math.floor(parseInt(xmlhttp_proteins.responseText) / max_per_page) + 1;
+                    manage_fill_table();
+                }
+            }
+            xmlhttp_proteins.open("GET", file_pathname + "admin/scripts/manage-entries.bin?action=get&type=proteins_num", true);
+            xmlhttp_proteins.send();
+            
         }
     }
     xmlhttp_add_protein.open("GET", request, false);

@@ -165,6 +165,16 @@ int main(int argc, char** argv) {
             }
         }
         
+        else if (!set_table.compare("protein_loci")){
+            string sql_query = "DELETE FROM " + set_table + " WHERE locus_id = " + set_id + ";";
+            stmt->execute(sql_query);
+            
+            for(string protein_id : split(set_value, ':')){
+                sql_query = "INSERT INTO " + set_table + "(locus_id, protein_id) VALUES(" + set_id + ", " + protein_id + ");";
+                stmt->execute(sql_query);
+            }
+        }
+        
         else {
             if (!set_table.compare("metabolites") && !set_col.compare("smiles")){
                 string filepath = parameters["root_path"] + "/admin/scripts";
@@ -194,7 +204,7 @@ int main(int argc, char** argv) {
             return -9;
         }
         
-        if (!action_type.compare("pathway_groups") || !action_type.compare("pathways") || !action_type.compare("proteins") || !action_type.compare("tissues") || !action_type.compare("loci_names") || !action_type.compare("function_names") || !action_type.compare("loci_names") || !action_type.compare("species") || !action_type.compare("metabolites")){
+        if (!action_type.compare("pathway_groups") || !action_type.compare("pathways") || !action_type.compare("proteins") || !action_type.compare("tissues") || !action_type.compare("loci_names") || !action_type.compare("function_names") || !action_type.compare("protein_loci") || !action_type.compare("loci_names") || !action_type.compare("species") || !action_type.compare("metabolites")){
             string order_col = (form.find("column") != form.end()) ? form["column"] : "";
             string limit = (form.find("limit") != form.end()) ? form["limit"] : "";
             string filters = (form.find("filters") != form.end()) ? form["filters"] : "";
@@ -208,6 +218,11 @@ int main(int argc, char** argv) {
                 replaceAll(checked, "'", "");
                 sql_query += " INNER JOIN nodeproteincorrelations ON id = protein_id WHERE node_id = " + checked;
             }
+            
+            if (!action_type.compare("protein_loci")){
+                sql_query += " INNER JOIN proteins ON id = protein_id ";
+            }
+            
             
             if (filters.length()){
                 replaceAll(filters, "\"", "");
@@ -242,19 +257,40 @@ int main(int argc, char** argv) {
             res_meta = res->getMetaData();
             int num_cols = res_meta->getColumnCount();
             
-            string data = "{";
-            while (res->next()){
-                if (data.length() > 1) data += ",";
-                data += "\"" + res->getString(1) + "\":[" + res->getString(1);
-                for (int i = 2; i <= num_cols; ++i){
-                    string content = res->getString(i);
-                    replaceAll(content, "\n", "\\n");
-                    replaceAll(content, "\\", "\\\\");
-                    data += ",\"" + content + "\"";
+            string data = "";
+            
+            if (action_type.compare("protein_loci")){
+                data = "{";
+                while (res->next()){
+                    if (data.length() > 1) data += ",";
+                    data += "\"" + res->getString(1) + "\":[" + res->getString(1);
+                    for (int i = 2; i <= num_cols; ++i){
+                        string content = res->getString(i);
+                        replaceAll(content, "\n", "\\n");
+                        replaceAll(content, "\\", "\\\\");
+                        data += ",\"" + content + "\"";
+                    }
+                    data += "]";
+                }
+                data += "}";
+            }
+            else {
+                data = "[";
+                while (res->next()){
+                    if (data.length() > 1) data += ",";
+                    data += "[" + res->getString(1);
+                    for (int i = 2; i <= num_cols; ++i){
+                        string content = res->getString(i);
+                        replaceAll(content, "\n", "\\n");
+                        replaceAll(content, "\\", "\\\\");
+                        data += ",\"" + content + "\"";
+                    }
+                    data += "]";
                 }
                 data += "]";
             }
-            data += "}";
+            
+            
             response += data;
             print_out(response, compress);
             delete res;

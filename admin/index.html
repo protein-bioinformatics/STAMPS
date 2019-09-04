@@ -180,7 +180,7 @@
         <table width="100%" height="100%">
             <tr>
                 <td valign="top" colspan="2">
-                    Select compartment: <select id="editor_select_loci_select"></select>
+                    Select compartment: <select id="editor_select_loci_select" onchange="editor_select_loci_select_change();"></select>
                 </td>
             </tr>
             <tr><td valign="top" colspan="2">
@@ -202,7 +202,10 @@
             </td></tr>
             <tr>
                 <td align="left" width="50%" valign="bottom" id="editor_loci_page_navigation"></td>
-                <td align="right" valign="bottom"><button onclick="close_editor_select_loci();" style="display: inline;">Cancel</button>&nbsp;<button onclick="editor_update_loci_node(); close_editor_select_loci();">Update</button>
+                <td align="right" valign="bottom">
+                    <button onclick="close_editor_select_loci();" style="display: inline;">Cancel</button>&nbsp;&nbsp;
+                    <button onclick="editor_select_loci_discard();" style="display: inline;">Discard changes</button>&nbsp;&nbsp;
+                    <button onclick="editor_update_loci();">Update</button>
                 </td>
             </tr>
         </table>
@@ -410,12 +413,13 @@
                 <td id="add_manage_proteins_cell" valign="top" height="100%">
                     <div id="add_manage_proteins_wrapper" style="position: fixed; display: inline; overflow-y: auto; width: 1000px;">
                         <table id="add_manage_proteins_table" cellspacing="0" size=20 style="border-width: 1px; width: 100%; border-style: solid;">
-                            <tr><th width="30%">Accession</th><td><input id="add_manage_proteins_accession" type="text" style="min-width: 90%; max-width: 90%;" onkeyup="if (event.which == '13') this.blur();" onblur="request_protein_data();"></td></tr>
+                            <tr><th width="30%">Accession</th><td><input id="add_manage_proteins_accession" type="text" style="min-width: 70%; max-width: 90%;">&nbsp;<button onclick="request_protein_data();">Fill</button></td></tr>
                             <tr><th>Name</th><td><input type="text" id="add_manage_proteins_name" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>Definition</th><td><input id="add_manage_proteins_definition" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>Species</th><td><select id="add_manage_proteins_species" onchange="change_add_manage_proteins_chromosome();"></select></td></tr>
                             <tr><th>KEGG ID</th><td><input id="add_manage_proteins_kegg" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>EC number</th><td><input id="add_manage_proteins_ec_number" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>
+                            <tr><th>Enzymatic function</th><td><select id="add_manage_proteins_function" style="min-width: 90%; max-width: 90%;"></td></tr>
                             <tr><th>Unreviewed</th><td><input id="add_manage_proteins_unreviewed" type="checkbox"></td></tr>
                             <tr><th>Chromosome</th><td><select id="add_manage_proteins_chromosome"></td></tr>
                             <tr><th>Chromosome start</th><td><input id="add_manage_proteins_chr_start" type="text" style="min-width: 90%; max-width: 90%;"></td></tr>

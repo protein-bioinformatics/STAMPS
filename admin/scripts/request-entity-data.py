@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+#-*- coding: utf-8 -*-
 
 from cgi import FieldStorage
 import json
@@ -52,15 +53,18 @@ if entity_type == "protein":
     chromosome = ""
     chr_start = 0
     chr_end = 0
+    function_id = 0
+    gene_id = -1
     unreviewed = True
 
 
-
+    my_cur.execute("SELECT * FROM function_names;")
+    ec_to_function_id = {row["ec_prefix"]: row["id"] for row in my_cur if row["parent"] not in [0, 1]}
 
 
     # retrieve fasta
     try:
-        xmlstring = urlopen("http://www.uniprot.org/uniprot/%s.xml" % accession).read().decode("utf8")
+        xmlstring = urlopen("http://www.uniprot.org/uniprot/%s.xml" % accession, timeout = 2).read().decode("utf8")
         xmlstring = re.sub('\\sxmlns="[^"]+"', '', xmlstring, count=1)
         root = ET.fromstring(xmlstring)
         
@@ -74,6 +78,10 @@ if entity_type == "protein":
             elif child.tag == "organism":
                 for spec_child in child:
                     if spec_child.tag == "dbReference" and "type" in spec_child.attrib and spec_child.attrib["type"] == "NCBI Taxonomy" and "id" in spec_child.attrib: species = spec_child.attrib["id"]
+                    
+            elif child.tag == "dbReference":
+                if "type" in child.attrib and child.attrib["type"] == "GeneID" and "id" in child.attrib: gene_id = child.attrib["id"]
+                elif "type" in child.attrib and child.attrib["type"] == "KEGG" and "id" in child.attrib: kegg_id = child.attrib["id"]
                     
             elif child.tag == "protein":
                 for def_child in child:
@@ -89,53 +97,45 @@ if entity_type == "protein":
 
     # retrieve fasta
     try:
-        fasta = urlopen("http://www.uniprot.org/uniprot/%s.fasta" % accession).read().decode("utf8")
+        fasta = urlopen("http://www.uniprot.org/uniprot/%s.fasta" % accession, timeout = 2).read().decode("utf8")
         if fasta[-1] == "\n": fasta = fasta[:-1]
     except:
         pass
 
 
+    if ec_number != "":
+        for ec in ec_to_function_id:
+            if ec_number[:len(ec)] == ec:
+                function_id = ec_to_function_id[ec]
+                break
 
-    #retrieve kegg id and chromosome data
-    params = {
-    'from':'ACC',
-    'to':'KEGG_ID',
-    'format':'tab',
-    'query':accession
-    }
-    data = urlencode(params)
-    data = data.encode('ascii')
-    response = urlopen('http://www.uniprot.org/uploadlists/', data)
-    pages = response.read().decode("utf8").split("\n")
-    if len(pages) >= 2:
-        pages = pages[1].split("\t")
-        if len(pages) >= 2:
-            kegg_id = pages[1]
-            gene_id = kegg_id.split(":")[1]
-            response = urlopen("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&id=%s&retmode=xml" % gene_id)
-            html = "".join(chr(c) for c in response.read())
-            root = ET.fromstring(html)
-            
-            try:
-                for child in root[0]:
-                    if child.tag == "Entrezgene_source":
-                        for c_child in child[0]:
-                            if c_child.tag == "BioSource_subtype":
-                                for cc_child in c_child[0]:
-                                    if cc_child.tag == "SubSource_name":
-                                        chromosome = cc_child.text
-                                
-                    elif child.tag == "Entrezgene_locus":
-                        for c_child in child[0]:
-                            if c_child.tag == "Gene-commentary_seqs":
-                                for cc_child in c_child[0][0][0]:
-                                    if cc_child.tag == "Seq-interval_from":
-                                        chr_start = int(cc_child.text)
-                                        
-                                    elif cc_child.tag == "Seq-interval_to":
-                                        chr_end = int(cc_child.text)
-            except:
-                pass
+
+    # retrieve chromosome data
+    if kegg_id != "":
+        response = urlopen("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&id=%s&retmode=xml" % gene_id, timeout = 2)
+        html = "".join(chr(c) for c in response.read())
+        root = ET.fromstring(html)
+        
+        try:
+            for child in root[0]:
+                if child.tag == "Entrezgene_source":
+                    for c_child in child[0]:
+                        if c_child.tag == "BioSource_subtype":
+                            for cc_child in c_child[0]:
+                                if cc_child.tag == "SubSource_name":
+                                    chromosome = cc_child.text
+                            
+                elif child.tag == "Entrezgene_locus":
+                    for c_child in child[0]:
+                        if c_child.tag == "Gene-commentary_seqs":
+                            for cc_child in c_child[0][0][0]:
+                                if cc_child.tag == "Seq-interval_from":
+                                    chr_start = int(cc_child.text)
+                                    
+                                elif cc_child.tag == "Seq-interval_to":
+                                    chr_end = int(cc_child.text)
+        except:
+            pass
 
 
     
@@ -164,6 +164,7 @@ if entity_type == "protein":
             "definition": definition,
             "ec_number": ec_number,
             "chromosome": chromosome,
+            "function_id": function_id,
             "chr_start": chr_start,
             "chr_end": chr_end
             }))
@@ -179,7 +180,7 @@ elif entity_type == "metabolite":
     
     if len(c_number) > 0:
         try:
-            response = urlopen('http://rest.kegg.jp/get/%s' % c_number)
+            response = urlopen('http://rest.kegg.jp/get/%s' % c_number, timeout = 2)
             lines = response.read().decode("utf8").split("\n")
             
             for line in lines:
@@ -196,7 +197,7 @@ elif entity_type == "metabolite":
                     pubnum = line.split(":")[1].strip(" ")
                     if pubnum.find(" ") > -1: pubnum = pubnum.split(" ")[0]
                     
-                    response2 = urlopen("http://www.ebi.ac.uk/webservices/chebi/2.0/test/getCompleteEntity?chebiId=%s" % pubnum)
+                    response2 = urlopen("http://www.ebi.ac.uk/webservices/chebi/2.0/test/getCompleteEntity?chebiId=%s" % pubnum, timeout = 2)
                     xml = "".join(chr(c) for c in response2.read()).split("\n")[0]
                     
                     st = xml.find("<smiles>")
@@ -215,7 +216,7 @@ elif entity_type == "metabolite":
             print(-1)
     
     elif len(lm_id) > 0:
-        response = urlopen('https://www.lipidmaps.org/rest/compound/lm_id/%s/all/' % lm_id)
+        response = urlopen('https://www.lipidmaps.org/rest/compound/lm_id/%s/all/' % lm_id, timeout = 2)
         response = response.read().decode("utf8")
         in_data = json.loads(response)
         out_data = {}
