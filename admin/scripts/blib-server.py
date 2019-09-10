@@ -8,10 +8,10 @@ from cgi import FieldStorage
 from json import dumps
 from random import random
 from base64 import b64decode
+import subprocess
 import os
 alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345678901234567890123456789012345678901234567890123456789"
 hash_len = 32
-data_dir = "/var/www/stamps/tmp/upload"
 
 
 
@@ -33,6 +33,7 @@ with open("../qsdb.conf", mode="rt") as fl:
 
 
 
+data_dir = "%s/tmp/upload" % conf["root_path"]
 
 
 
@@ -127,6 +128,7 @@ def send_file():
     chunk_type = form.getvalue('type')
     checksum = form.getvalue('checksum')
     content = form.getvalue('content')
+    
     try: int(file_id), len(chunk_num), len(chunk_type), len(checksum), len(content)
     except: return "#send_file: send parameters not valid"
     
@@ -152,7 +154,7 @@ def send_file():
             conn.commit()
         
         else:
-            sql_query = "insert into chunks (file_id, checksum, chunk_num, type) values (%s, %s, %s, %s);"
+            sql_query = "insert into chunks (file_id, checksum, chunk_num, type, filename) values (%s, %s, %s, %s, '');"
             my_cur.execute(sql_query, (file_id, checksum, chunk_num, chunk_type))
             conn.commit()
         
@@ -163,6 +165,10 @@ def send_file():
             os.system("cat %s > %s/%s" % (joined_chunks, data_dir, filename))
             os.system("rm -f %s" % joined_chunks)
         
+            data_path = "%s/%s" % (data_dir, filename)
+            prep_blib = "%s/admin/scripts/prepare-blib.bin" % conf["root_path"]
+            command = "%s %s %s" % (prep_blib, data_path, file_id)
+            subprocess.call([command], shell = True)
         return 0
         
     return "#send_file: corresponding file not found"
@@ -179,7 +185,7 @@ def check_ident():
         data = {key: row[key] for key in row}
         
         
-        sql_query = "SELECT * FROM chunks WHERE file_id = %s;"
+        sql_query = "SELECT * FROM chunks WHERE file_id = %s AND type='chunk';"
         my_cur.execute(sql_query, file_id)
         data["uploaded"] = my_cur.rowcount
         
@@ -197,6 +203,19 @@ def delete_file():
     except: return "#delete_file: delete file parameters not valid"
         
     try:
+        
+        sql_query = "SELECT * FROM files WHERE id = %s;"
+        my_cur.execute(sql_query, file_id)
+        if my_cur.rowcount:
+            row = my_cur.fetchone()
+            
+            if row["type"] == "ident":
+                os.system("rm -f %s/data.dat" % (data_dir))
+                
+        else:
+            return "#No such file in database registered"
+        
+        
         # delete chunks from file system
         sql_query = "SELECT * from chunks c INNER JOIN files f ON file_id = f.id where f.id = %s;"
         my_cur.execute(sql_query, file_id)
@@ -204,6 +223,7 @@ def delete_file():
         
         for row in my_cur:
             os.system("rm -f %s/%s.%s" % (data_dir, row['filename'], row["chunk_num"]))
+           
         
         # delete chunks from datebase
         sql_query = "delete c from chunks c WHERE c.file_id = %s;"
@@ -224,7 +244,28 @@ def delete_file():
         return 0
     
     except Exception as e:
-        return str(e)
+        return "#" + str(e)
+
+
+
+
+
+def load_dependencies():
+    sql_query = "SELECT * FROM files WHERE type = 'ident';"
+    my_cur.execute(sql_query)
+    if my_cur.rowcount:
+        row = my_cur.fetchone()
+        file_id = row["id"]
+        
+        
+        sql_query = "SELECT * FROM chunks WHERE file_id = %s AND type='depend';"
+        my_cur.execute(sql_query, file_id)
+        data = [{key: row[key] for key in row} for row in my_cur]
+        
+        return dumps(data)
+    
+    else:
+        return "{}"
 
 """
 
@@ -467,7 +508,8 @@ commands = {"get_check_sum": get_check_sum,
             "register_file": register_file,
             "send_file": send_file,
             "check_ident": check_ident,
-            "delete_file": delete_file
+            "delete_file": delete_file,
+            "load_dependencies": load_dependencies
             }
 
 if command not in commands:

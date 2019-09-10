@@ -348,3 +348,398 @@ string protein::to_string(){
     str += "}";
     return str;
 }
+    
+int binary_search(double* array, int length, double key, double& mass_diff) {
+    int low = 0;
+    int mid = 0;
+    int high = length - 1;
+    int best_index = low;
+    while (low <= high) {
+        mid = (low + high) >> 1;
+        if (array[mid] < key)  low = mid + 1;
+        else if (array[mid] > key) high = mid - 1;
+        else {
+            best_index = mid;
+            break;
+        }
+        if (fabs(array[mid] - key) < fabs(array[best_index] - key)) best_index = mid;
+    }
+    if (mid > 0 && key < array[mid]) {
+        mid -= 1;
+    }
+    mass_diff = fabs(array[best_index] - key);
+    return best_index;
+}
+
+void read_config_file(string filename, map<string, string> &m){
+    string line;
+    ifstream myfile (filename);
+    if (myfile.is_open()){
+        while ( getline (myfile,line) ){
+            strip(line);
+            if (line[0] == '#') continue;
+            vector< string > tokens = split(line, '=');
+            if (tokens.size() < 2) continue;
+            strip(tokens.at(0));
+            strip(tokens.at(1));
+            m.insert(pair< string, string >(tokens.at(0), tokens.at(1)));
+        }
+        myfile.close();
+    }
+}
+
+
+
+
+
+
+
+outputstreamer::outputstreamer(string filename) : ofile(filename, ios::binary){
+}
+
+
+outputstreamer::~outputstreamer(){
+    ofile.flush();
+    ofile.close();
+}
+
+
+void outputstreamer::write_bool(bool b){
+    //int DS = DS_BOOL;
+    //ofile.write((char*) &DS, 1);
+    ofile.write((char*) &b, 1);
+}
+
+void outputstreamer::write_int(int i){
+    //int DS = DS_INT;
+    //ofile.write((char*) &DS, 1);
+    ofile.write((char*) &i, 4);
+}
+
+void outputstreamer::write_float(float f){
+    //int DS = DS_FLOAT;
+    //ofile.write((char*) &DS, 1);
+    ofile.write((char*) &f, 4);
+}
+
+void outputstreamer::write_double(double d){
+    //int DS = DS_DOUBLE;
+    //ofile.write((char*) &DS, 1);
+    ofile.write((char*) &d, 8);
+}
+
+void outputstreamer::write_char(char c){
+    //int DS = DS_CHAR;
+    //ofile.write((char*) &DS, 1);
+    ofile.write((char*) &c, 1);
+}
+
+void outputstreamer::write_string(string s){
+    //int DS = DS_STRING;
+    //ofile.write((char*) &DS, 1);
+    int len = s.length() + 1;
+    ofile.write((char*) &len, 4);
+    ofile.write((char*) s.data(), (s.length() + 1));
+}
+
+
+void outputstreamer::write_vector_pair_int_string(vector<pair<int, string>*> v){
+    //int DS = DS_PAIR_INT_STRING;
+    //ofile.write((char*) &DS, 1);
+    int l = v.size();
+    write_int(l);
+    for (pair<int, string>* p : v){
+        write_int(p->first);
+        write_string(p->second);
+    }
+}
+
+void outputstreamer::write_PSM(PSM* psm){
+    write_string(psm->ref_file);
+    write_string(psm->spectrum_id);
+    write_string(psm->peptideEv);
+    write_bool(psm->passThreshold);
+    write_int(psm->charge);
+    write_double(psm->precursor_mz);
+    write_double(psm->score);
+    write_double(psm->retention_time);
+    write_int(psm->score_type);
+}
+
+
+void outputstreamer::write_vector_PSM(vector<PSM*> v){
+    int l = v.size();
+    write_int(l);
+    for (PSM* psm : v){
+        write_PSM(psm);
+    }
+}
+        
+void outputstreamer::write_vector_string(vector<string> v){
+    int l = v.size();
+    write_int(l);
+    for (string s : v){
+        write_string(s);
+    }
+}
+        
+        
+
+void outputstreamer::write_set_int(set<int> s){
+    int l = s.size();
+    write_int(l);
+    for (int i : s){
+        write_int(i);
+    }
+}
+        
+        
+
+void outputstreamer::write_set_string(set<string> s){
+    int l = s.size();
+    write_int(l);
+    for (string st : s){
+        write_string(st);
+    }
+}
+
+void outputstreamer::write_evidence(evidence* e){
+    write_string(e->pep_ref);
+    write_string(e->accession);
+    
+    write_vector_PSM(e->all_PSMs);
+}
+
+void outputstreamer::write_map_string_evidence(map<string, evidence*> m){
+    int l = m.size();
+    write_int(l);
+    for (auto const& x : m){
+        write_string(x.first);
+        write_evidence(x.second);
+    }
+}
+
+void outputstreamer::write_map_int_PSM(map<int, PSM*> m){
+    int l = m.size();
+    write_int(l);
+    for (auto const& x : m){
+        write_int(x.first);
+        write_PSM(x.second);
+    }
+}
+
+void outputstreamer::write_mzid_peptide(mzid_peptide* p){
+    write_string(p->sequence);
+    write_string(p->sequence_mod);
+    write_bool(p->passThreshold);
+    write_vector_pair_int_string(p->modifications);
+}
+
+void outputstreamer::write_map_string_mzid_peptide(map<string, mzid_peptide*> m){
+    int l = m.size();
+    write_int(l);
+    for (auto const& x : m){
+        write_string(x.first);
+        write_mzid_peptide(x.second);
+    }
+}
+
+
+void outputstreamer::write_map_string_int(map<string, int> m){
+    int l = m.size();
+    write_int(l);
+    for (auto const& x : m){
+        write_string(x.first);
+        write_int(x.second);
+    }
+}
+
+
+
+
+
+
+
+
+inputstreamer::inputstreamer(string filename) : ifile(filename, ios::binary){
+    
+}
+
+inputstreamer::~inputstreamer(){
+    ifile.close();
+}
+
+
+bool inputstreamer::read_bool(){
+    char b;
+    ifile.read (&b, 1);
+    return b != 0;
+}
+
+int inputstreamer::read_int(){
+    int i;
+    ifile.read ((char*)(&i), 4);
+    return i;
+}
+
+float inputstreamer::read_float(){
+    float f;
+    ifile.read ((char*)(&f), 4);
+    return f;
+    
+}
+
+double inputstreamer::read_double(){
+    double d;
+    ifile.read ((char*)(&d), 8);
+    return d;
+    
+}
+
+char inputstreamer::read_char(){
+    char c;
+    ifile.read (&c, 1);
+    return c;
+    
+}
+
+
+string inputstreamer::read_string(){
+    int l;
+    ifile.read ((char*)(&l), 4);
+    
+    char buffer[l];
+    ifile.read ((char*)buffer, l);
+    
+    return string(buffer);
+}
+
+
+
+
+PSM* inputstreamer::read_PSM(){
+    PSM* psm = new PSM();
+    psm->ref_file = read_string();
+    psm->spectrum_id = read_string();
+    psm->peptideEv = read_string();
+    psm->passThreshold = read_bool();
+    psm->charge = read_int();
+    psm->precursor_mz = read_double();
+    psm->score = read_double();
+    psm->retention_time = read_double();
+    psm->score_type = read_int();
+    return psm;
+}
+
+evidence* inputstreamer::read_evidence(){
+    evidence* e = new evidence();
+    e->pep_ref = read_string();
+    e->accession = read_string();
+    
+    read_vector_PSM(e->all_PSMs);
+    
+    return e;
+}
+
+
+
+
+mzid_peptide* inputstreamer::read_mzid_peptide(){
+    mzid_peptide* p = new mzid_peptide();
+    p->sequence = read_string();
+    p->sequence_mod = read_string();
+    p->passThreshold = read_bool();
+    read_vector_pair_int_string(p->modifications);
+    
+    return p;
+}
+
+
+void inputstreamer::read_vector_pair_int_string(vector<pair<int, string>*> &m){
+    int l = read_int();
+    for (int i = 0; i < l; ++i){
+        int ii = read_int();
+        string s = read_string();
+        m.push_back(new pair<int, string>{ii, s});
+    }
+}
+
+
+void inputstreamer::read_vector_PSM(vector<PSM*> &PSMs){
+    int l = read_int();
+    for (int i = 0; i < l; ++i){
+        PSMs.push_back(read_PSM());
+    }
+    
+}
+
+
+void inputstreamer::read_vector_string(vector<string> &v){
+    int l = read_int();
+    for (int i = 0; i < l; ++i){
+        v.push_back(read_string());
+    }
+    
+}
+
+
+void inputstreamer::read_set_int(set<int> &s){
+    int l = read_int();
+    for (int i = 0; i < l; ++i){
+        s.insert(read_int());
+    }
+    
+}
+
+
+void inputstreamer::read_set_string(set<string> &s){
+    int l = read_int();
+    for (int i = 0; i < l; ++i){
+        s.insert(read_string());
+    }
+    
+}
+
+void inputstreamer::read_map_string_evidence(map<string, evidence*> &m){
+    int l = read_int();
+    for (int i = 0; i < l; ++i){
+        string s = read_string();
+        evidence* e = read_evidence();
+        m.insert({s, e});
+    }
+    
+}
+
+void inputstreamer::read_map_string_mzid_peptide(map<string, mzid_peptide*> &m){
+    int l = read_int();
+    for (int i = 0; i < l; ++i){
+        string s = read_string();
+        mzid_peptide* p = read_mzid_peptide();
+        m.insert({s, p});
+    }
+    
+}
+
+void inputstreamer::read_map_string_int(map<string, int> &m){
+    int l = read_int();
+    for (int i = 0; i < l; ++i){
+        string s = read_string();
+        int ii = read_int();
+        m.insert({s, ii});
+    }
+    
+}
+
+void inputstreamer::read_map_int_PSM(map<int, PSM*> &m){
+    int l = read_int();
+    for (int i = 0; i < l; ++i){
+        int ii = read_int();
+        PSM* psm = read_PSM();
+        m.insert({ii, psm});
+    }
+    
+}
+
+
+
+    

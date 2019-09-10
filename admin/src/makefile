@@ -25,3 +25,8 @@ manage:
 chromosomes:
 	g++ -std=c++11 -O3 -I/usr/include/mysql -o $(BIN_PATH)/get-chromosomes.bin get-chromosomes.cpp bio-classes.cpp -L/usr/lib/x86_64-linux-gnu -lmysqlcppconn -lz
 
+prep_blib:
+	g++ -std=c++11 -O3 -I/usr/include/mysql -o $(ADMIN_PATH)/prepare-blib.bin prepare-blib.cpp bio-classes.cpp -L/usr/lib/x86_64-linux-gnu -lmysqlcppconn -lpthread -lz -lsqlite3
+	
+create_blib:
+	g++ -std=c++11 -O3 -I/usr/include/mysql -o $(ADMIN_PATH)/create-blib.bin create-blib.cpp bio-classes.cpp -L/usr/lib/x86_64-linux-gnu -lmysqlcppconn -lpthread -lz -lsqlite3

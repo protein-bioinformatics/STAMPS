@@ -3,11 +3,19 @@
 #include <zlib.h>
 #include <vector>
 #include <set>
+#include <map>
+#include <vector>
 #include <sstream>
 #include <cstring>
 #include <math.h>
+#include <fstream>
 #include <sys/time.h>
 #include "rank.h"
+#include "mysql_connection.h"
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
 
 using namespace std;
 
@@ -17,12 +25,22 @@ void strip(string &str);
 bool is_integer_number(const string& string);
 string cleanFasta(string str);
 int binarySearch(int* array, int length, int key);
+int binary_search(double* array, int length, double key, double& mass_diff);
 string remove_newline(string str);
 string compress_string(const string& str, int compressionlevel = Z_BEST_COMPRESSION);
 float compute_mass(string protein_seq);
 float predict_isoelectric_point(string protein_seq);
 static timeval start_timeval, end_timeval;
 string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len);
+void read_config_file(string filename, map<string, string> &m);
+
+static double H = 1.007276;
+static double C12 =    12.000000;
+static double O =      15.994914;
+static double H2O =    18.009466;
+static double H3O =    19.016742;
+static double O2 =     31.989829;
+static double electron = 0.00054857990946;
 
 static const std::string base64_chars = 
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -212,3 +230,156 @@ class protein {
         protein(string _id);
         string to_string();
 };
+
+
+
+
+
+
+
+
+class mzid_peptide {
+    public:
+        string sequence;
+        string sequence_mod;
+        bool passThreshold;
+        vector<pair<int, string>*> modifications;
+        
+        mzid_peptide(){
+            sequence = "";
+            passThreshold = true;
+        }
+        
+        mzid_peptide(string _sequence){
+            sequence = _sequence;
+            passThreshold = true;
+        }
+};
+
+struct c_array{
+    unsigned char* c;
+    int len;
+};
+
+
+
+class PSM {
+    public:
+        string ref_file;
+        string spectrum_id;
+        string peptideEv;
+        bool passThreshold;
+        int charge;
+        double precursor_mz;
+        double score;
+        double retention_time;
+        int score_type;
+        
+        vector<double>* mz;
+        c_array mz_c;
+        vector<float>* intens;
+        c_array intens_c;
+        
+        PSM(){
+            ref_file = "";
+            spectrum_id = "";
+            peptideEv = "";
+            passThreshold = false;
+            mz = 0;
+            charge = 0;
+            retention_time = 0;
+            precursor_mz = 0;
+            intens = 0;
+            score = 0;
+            score_type = 0;
+        }
+};
+
+
+class evidence {
+    public:
+        string pep_ref;
+        string accession;
+        
+        vector<PSM*> all_PSMs;
+        PSM* best_PSM;
+        
+        evidence(string _pep_ref, string _accession){
+            pep_ref = _pep_ref;
+            accession = _accession;
+            best_PSM = 0;
+        }
+        
+        evidence(){
+            pep_ref = "";
+            accession = "";
+            best_PSM = 0;
+        }
+};
+
+
+
+
+
+class outputstreamer {
+    public:
+        ofstream ofile;
+        outputstreamer(string filename);
+        ~outputstreamer();
+            
+        void write_bool(bool b);
+        void write_int(int i);
+        void write_float(float f);
+        void write_double(double d);
+        void write_char(char c);
+        void write_string(string s);
+        
+        void write_PSM(PSM* psm);
+        void write_evidence(evidence* e);
+        void write_mzid_peptide(mzid_peptide* p);
+        
+        void write_vector_pair_int_string(vector< pair<int, string>*> v);
+        void write_vector_PSM(vector<PSM*> v);
+        void write_vector_string(vector<string> v);
+        void write_set_int(set<int> s);
+        void write_set_string(set<string> s);
+        void write_map_string_evidence(map<string, evidence*> m);
+        void write_map_string_mzid_peptide(map<string, mzid_peptide*> m);
+        void write_map_string_int(map<string, int> m);
+        void write_map_int_PSM(map<int, PSM*> m);
+        
+};
+
+
+
+
+class inputstreamer {
+    public:
+        ifstream ifile;
+        inputstreamer(string filename);
+        ~inputstreamer();
+            
+        bool read_bool();
+        int read_int();
+        float read_float();
+        double read_double();
+        char read_char();
+        string read_string();
+        
+        PSM* read_PSM();
+        evidence* read_evidence();
+        mzid_peptide* read_mzid_peptide();
+        
+        void read_vector_pair_int_string(vector<pair<int, string>*> &modifications);
+        void read_vector_PSM(vector<PSM*> &PSMs);
+        void read_vector_string(vector<string> &v);
+        void read_set_int(set<int> &s);
+        void read_set_string(set<string> &s);
+        void read_map_string_evidence(map<string, evidence*> &m);
+        void read_map_string_mzid_peptide(map<string, mzid_peptide*> &m);
+        void read_map_string_int(map<string, int> &m);
+        void read_map_int_PSM(map<int, PSM*> &m);
+};
+
+
+

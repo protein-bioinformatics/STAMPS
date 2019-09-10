@@ -96,21 +96,8 @@ int main(int argc, char** argv) {
     
     
     // load parameters from config file
-    string line;
     map< string, string > parameters;
-    ifstream myfile ("../qsdb.conf");
-    if (myfile.is_open()){
-        while ( getline (myfile,line) ){
-            strip(line);
-            if (line[0] == '#') continue;
-            vector< string > tokens = split(line, '=');
-            if (tokens.size() < 2) continue;
-            strip(tokens.at(0));
-            strip(tokens.at(1));
-            parameters.insert(pair< string, string >(tokens.at(0), tokens.at(1)));
-        }
-        myfile.close();
-    }
+    read_config_file("../qsdb.conf", parameters);
     
     
     // Create a connection and connect to database
