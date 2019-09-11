@@ -217,67 +217,83 @@ def delete_file():
         if my_cur.rowcount:
             row = my_cur.fetchone()
             
+            
+            # delete dependant spectrum files
             if row["type"] == "ident":
                 os.system("rm -f %s/data.dat" % data_dir)
+                
+                
+                sql_query = "SELECT f.id, f.filename FROM chunks c INNER JOIN files f ON f.filename = c.filename WHERE c.file_id = %s AND c.type = 'depend';"
+                my_cur.execute(sql_query, file_id)
+                
+                depends = [row for row in my_cur]
+                
+                
+                for depend in depends:
+                    # delete chunks from file system
+                    sql_query = "SELECT * FROM chunks WHERE file_id = %s;"
+                    my_cur.execute(sql_query, depend["id"])
+                    
+            
+                    for row in my_cur:
+                        command = "rm -f %s/%s.%s" % (data_dir, depend['filename'], row["chunk_num"])
+                        os.system(command)
+                        
+                    # delete chunks from datebase
+                    sql_query = "DELETE FROM chunks WHERE file_id = %s;"
+                    my_cur.execute(sql_query, depend["id"])
+                    
+                    # delete files from file system
+                    sql_query = "select * from files WHERE id = %s;"
+                    my_cur.execute(sql_query, depend["id"])
+                    for row in my_cur:
+                        os.system("rm -f %s/%s" %(data_dir, row["filename"]))
+                    
+                    # delete files from database
+                    sql_query = "delete f from files f WHERE f.id = %s;"
+                    my_cur.execute(sql_query, depend["id"])
+                    
+                conn.commit()              
+              
+              
+            filename = row["filename"]  
+              
+              
+            # delete chunks from file system
+            sql_query = "SELECT * FROM chunks WHERE file_id = %s;"
+            my_cur.execute(sql_query, file_id)
+            
+        
+            for row in my_cur:
+                command = "rm -f %s/%s.%s" % (data_dir, filename, row["chunk_num"])
+                os.system(command)
+            
+            
+            # delete chunks from datebase
+            sql_query = "DELETE FROM chunks WHERE file_id = %s;"
+            my_cur.execute(sql_query, file_id)
+            conn.commit()
+            
+            # delete files from file system
+            sql_query = "SELECT * FROM files WHERE id = %s;"
+            my_cur.execute(sql_query, file_id)
+            for row in my_cur:
+                os.system("rm -f %s/%s" %(data_dir, row["filename"]))
+            
+            
+            # delete files from database
+            sql_query = "DELETE FROM files WHERE id = %s;"
+            my_cur.execute(sql_query, file_id)
+            conn.commit()
+            return 0
+              
                 
         else:
             return "#No such file in database registered"
         
         
-        # delete dependant spectrum files
-        sql_query = "SELECT f.id FROM chunks c INNER JOIN files f ON f.filename = c.filename WHERE c.file_id = %s AND c.type = 'depend';"
-        my_cur.execute(sql_query, file_id)
+
         
-        depend_ids = [row["id"] for row in my_cur]
-        for depend_id in depend_ids:
-            # delete chunks from file system
-            sql_query = "SELECT * FROM chunks WHERE file_id = %s;"
-            my_cur.execute(sql_query, depend_id)
-            
-            for row in my_cur:
-                os.system("rm -f %s/%s.%s" % (data_dir, row['filename'], row["chunk_num"]))
-                
-            # delete chunks from datebase
-            sql_query = "DELETE FROM chunks WHERE file_id = %s;"
-            my_cur.execute(sql_query, depend_id)
-            
-            # delete files from file system
-            sql_query = "select * from files WHERE id = %s;"
-            my_cur.execute(sql_query, depend_ids)
-            for row in my_cur:
-                os.system("rm -f %s/%s" %(data_dir, row["filename"]))
-            
-            # delete files from database
-            sql_query = "delete f from files f WHERE f.id = %s;"
-            my_cur.execute(sql_query, file_id)
-            
-        conn.commit()
-        
-        # delete chunks from file system
-        sql_query = "SELECT * from chunks c INNER JOIN files f ON file_id = f.id where f.id = %s;"
-        my_cur.execute(sql_query, file_id)
-        
-        for row in my_cur:
-            os.system("rm -f %s/%s.%s" % (data_dir, row['filename'], row["chunk_num"]))
-           
-        
-        # delete chunks from datebase
-        sql_query = "delete c from chunks c WHERE c.file_id = %s;"
-        my_cur.execute(sql_query, file_id)
-        conn.commit()
-        
-        # delete files from file system
-        sql_query = "select * from files WHERE id = %s;"
-        my_cur.execute(sql_query, file_id)
-        for row in my_cur:
-            os.system("rm -f %s/%s" %(data_dir, row["filename"]))
-        
-        
-        # delete files from database
-        sql_query = "delete f from files f WHERE f.id = %s;"
-        my_cur.execute(sql_query, file_id)
-        conn.commit()
-        return 0
     
     except Exception as e:
         return "#" + str(e)
@@ -294,7 +310,7 @@ def load_dependencies():
         file_id = row["id"]
         
         
-        sql_query = "SELECT c2.file_id, c.filename, count(c2.id) as uploaded, f.chunk_num FROM chunks c LEFT JOIN files f on c.filename = f.filename LEFT JOIN chunks c2 ON f.id = c2.file_id WHERE c.file_id = %s AND c.type='depend' GROUP BY c2.file_id, c.filename, f.chunk_num ;"
+        sql_query = "SELECT c2.file_id, c.filename, count(c2.id) as uploaded, f.chunk_num, f.tissue FROM chunks c LEFT JOIN files f on c.filename = f.filename LEFT JOIN chunks c2 ON f.id = c2.file_id WHERE c.file_id = %s AND c.type='depend' GROUP BY c2.file_id, c.filename, f.chunk_num, f.tissue;"
         my_cur.execute(sql_query, file_id)
         data = [{key: row[key] for key in row} for row in my_cur]
         
