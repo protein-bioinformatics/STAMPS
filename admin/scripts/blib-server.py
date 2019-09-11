@@ -166,9 +166,17 @@ def send_file():
             os.system("rm -f %s" % joined_chunks)
         
             data_path = "%s/%s" % (data_dir, filename)
-            prep_blib = "%s/admin/scripts/prepare-blib.bin" % conf["root_path"]
-            command = "%s %s %s" % (prep_blib, data_path, file_id)
-            subprocess.call([command], shell = True)
+            cwd = "%s/admin/scripts" % conf["root_path"]
+            prep_blib = "%s/prepare-blib.bin" % cwd
+            
+            #command = ["%s %s %s" % (prep_blib, data_path, file_id)]
+            #subprocess.call([command], shell = True)
+            
+            command = [prep_blib, data_path, file_id]
+            os.setsid() 
+            os.umask(0) 
+            p = subprocess.Popen(command, cwd = cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            
         return 0
         
     return "#send_file: corresponding file not found"
@@ -210,16 +218,44 @@ def delete_file():
             row = my_cur.fetchone()
             
             if row["type"] == "ident":
-                os.system("rm -f %s/data.dat" % (data_dir))
+                os.system("rm -f %s/data.dat" % data_dir)
                 
         else:
             return "#No such file in database registered"
         
         
+        # delete dependant spectrum files
+        sql_query = "SELECT f.id FROM chunks c INNER JOIN files f ON f.filename = c.filename WHERE c.file_id = %s AND c.type = 'depend';"
+        my_cur.execute(sql_query, file_id)
+        
+        depend_ids = [row["id"] for row in my_cur]
+        for depend_id in depend_ids:
+            # delete chunks from file system
+            sql_query = "SELECT * FROM chunks WHERE file_id = %s;"
+            my_cur.execute(sql_query, depend_id)
+            
+            for row in my_cur:
+                os.system("rm -f %s/%s.%s" % (data_dir, row['filename'], row["chunk_num"]))
+                
+            # delete chunks from datebase
+            sql_query = "DELETE FROM chunks WHERE file_id = %s;"
+            my_cur.execute(sql_query, depend_id)
+            
+            # delete files from file system
+            sql_query = "select * from files WHERE id = %s;"
+            my_cur.execute(sql_query, depend_ids)
+            for row in my_cur:
+                os.system("rm -f %s/%s" %(data_dir, row["filename"]))
+            
+            # delete files from database
+            sql_query = "delete f from files f WHERE f.id = %s;"
+            my_cur.execute(sql_query, file_id)
+            
+        conn.commit()
+        
         # delete chunks from file system
         sql_query = "SELECT * from chunks c INNER JOIN files f ON file_id = f.id where f.id = %s;"
         my_cur.execute(sql_query, file_id)
-        
         
         for row in my_cur:
             os.system("rm -f %s/%s.%s" % (data_dir, row['filename'], row["chunk_num"]))
@@ -258,7 +294,7 @@ def load_dependencies():
         file_id = row["id"]
         
         
-        sql_query = "SELECT * FROM chunks WHERE file_id = %s AND type='depend';"
+        sql_query = "SELECT c2.file_id, c.filename, count(c2.id) as uploaded, f.chunk_num FROM chunks c LEFT JOIN files f on c.filename = f.filename LEFT JOIN chunks c2 ON f.id = c2.file_id WHERE c.file_id = %s AND c.type='depend' GROUP BY c2.file_id, c.filename, f.chunk_num ;"
         my_cur.execute(sql_query, file_id)
         data = [{key: row[key] for key in row} for row in my_cur]
         

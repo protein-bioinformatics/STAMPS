@@ -7,6 +7,8 @@ file_pathname = "";
 thread = -1;
 wait_fill = 0;
 reader = [];
+dependant_files = {};
+upload_loop = 0;
 
 uploaded_file_id = -1;
 uploaded_filename = "";
@@ -30,24 +32,53 @@ function template(strings, ...keys) {
 
 
 
-function get_dependence_template(id, filename){
+function get_dependence_template(id, row){
+    var dependence_template = 0;
     
-    var dependence_template = template`<div width=\"100%\" id=\"step2-${0}-unloaded\"> \
+    
+    
+    if (row["file_id"] == null){
+        dependence_template = template`<div width=\"100%\" id=\"step2-${0}-unloaded\"> \
                 <div id=\"step2-${0}-infotext\">Select '${1}' file for upload.</div><p /> \
                 <div width=\"100%\" align=\"center\"> \
                     <input type=\"file\" id=\"step2-${0}-file\" accept=\".mgf\"></input>&nbsp;&nbsp; \
                     <select id=\"step2-${0}-tissue\">${2}</select>&nbsp;&nbsp; \
-                    <img src=\"../images/upload-small.png\" width=\"20\" id=\"step2-${0}-upload-button\" title=\"upload file\" alt=\"upload file\" onclick=\"prepare_upload('spectra');\" style=\"cursor: pointer;\"> \
-                    <img src=\"../images/delete-small.png\" width=\"20\" id=\"step2-${0}-stop-button\" title=\"stop upload\" alt=\"stop upload\" onclick=\"stop_upload();\" style=\"cursor: pointer; display: none;\"> \
+                    <img src=\"../images/upload-small.png\" width=\"20\" id=\"step2-${0}-upload-button\" title=\"upload file\" alt=\"upload file\" onclick=\"prepare_spectra_upload('spectra', 'step2-${0}');\" style=\"cursor: pointer;\"> \
+                    <img src=\"../images/delete-small.png\" width=\"20\" id=\"step2-${0}-stop-button\" title=\"stop upload\" alt=\"stop upload\" onclick=\"stop_upload('step2-${0}');\" style=\"cursor: pointer; display: none;\"> \
+                    <img src=\"../images/delete-small.png\" width=\"20\" id=\"step2-${0}-stop-delete-button\" title=\"delete file\" alt=\"delete file\" onclick=\"delete_ident();\" style=\"cursor: pointer; display: none;\"> \
                     <p /> \
                     <progress-bar id=\"step2-${0}-progress\" width=\"400px\" height=\"5px\" bar-color=\"#84b818\" style=\"display: none;\"></progress-bar> \
                 </div> \
             </div>`;
-    
+    }
+    else if (row["uploaded"] < row["chunk_num"]){
+        dependence_template = template`<div width=\"100%\" id=\"step2-${0}-unloaded\"> \
+                <div id=\"step2-${0}-infotext\">"Please select \""${1}\" file and continue upload or delete it.</div><p /> \
+                <div width=\"100%\" align=\"center\"> \
+                    <input type=\"file\" id=\"step2-${0}-file\" accept=\".mgf\"></input>&nbsp;&nbsp; \
+                    <select id=\"step2-${0}-tissue\">${2}</select>&nbsp;&nbsp; \
+                    <img src=\"../images/upload-small.png\" width=\"20\" id=\"step2-${0}-upload-button\" title=\"upload file\" alt=\"upload file\" onclick=\"prepare_spectra_upload('spectra', 'step2-${0}');\" style=\"cursor: pointer;\"> \
+                    <img src=\"../images/delete-small.png\" width=\"20\" id=\"step2-${0}-stop-button\" title=\"stop upload\" alt=\"stop upload\" onclick=\"stop_upload('step2-${0}');\" style=\"cursor: pointer; display: none;\"> \
+                    <img src=\"../images/delete-small.png\" width=\"20\" id=\"step2-${0}-stop-delete-button\" title=\"delete file\" alt=\"delete file\" onclick=\"delete_ident();\" style=\"cursor: pointer; display: inline;\"> \
+                    <p /> \
+                    <progress-bar id=\"step2-${0}-progress\" width=\"400px\" height=\"5px\" bar-color=\"#84b818\" style=\"display: none;\"></progress-bar> \
+                </div> \
+            </div>`;
+    }
+    else {
+        dependence_template = template`<div width=\"100%\" id=\"step2-${0}-loaded\" style=\"display: inline;\"> \
+                Selected spectrum file: \
+                <div width=\"100%\" align=\"center\"> \
+                    <div id=\"step2-${0}-file-name\" style=\"display: inline;\">${1}</div>&nbsp;&nbsp;&nbsp;&nbsp; \
+                    <img src=\"../images/delete-small.png\" width=\"20\" id=\"step2-${0}-delete-button\" title=\"delete file\" alt=\"delete file\" onclick=\"delete_spectrum(${0});\" style=\"cursor: pointer;\"> \
+                </div> \
+            </div>`;
+        
+    }
             
     var tissue_options = "<option id=\"12\">Heart</option><option id=\"14\">Brain</option>"        
     
-    return dependence_template(id, filename, tissue_options);
+    return dependence_template(id, row["filename"], tissue_options);
 }
 
 
@@ -57,11 +88,13 @@ function get_dependence_template(id, filename){
 function init_manage_blib(){
     uploaded_file_id = -1;
     uploaded_filename = "";
+    dependant_files = {};
     file_pathname = get_pathname() + "../";
     document.getElementById("step1-file").removeAttribute("disabled");
     document.getElementById("step1-species").removeAttribute("disabled");
     document.getElementById("step1-wait").style.display = "inline";
     document.getElementById("step2").style.display = "none";
+    document.getElementById("step2-container").innerHTML = "none";
     document.getElementById("step1-unloaded").style.display = "none";
     document.getElementById("step1-loaded").style.display = "none";
     document.getElementById("step1-upload-button").style.display = "inline";
@@ -155,9 +188,17 @@ function step1_transition_step2(){
                 document.getElementById("step2-wait").style.display = "none";
                 var step2_container = document.getElementById("step2-container");
                 step2_container.innerHTML = "";
+                dependant_files = {};
+                var all_depends_up = true;
                 for (var i = 0; i < response.length; ++i){
-                    step2_container.innerHTML += get_dependence_template(i, response[i]["filename"]);
+                    var row = response[i];
+                    
+                    if (row["chunk_num"] != null) row["chunk_num"] = parseInt(row["chunk_num"]);
+                    dependant_files["step2-" + i.toString()] = [row["file_id"], row["filename"]];
+                    all_depends_up &= (row["uploaded"] != null) & (row["uploaded"] >= row["chunk_num"]);
+                    step2_container.innerHTML += get_dependence_template(i, row);
                 }
+                console.log();
             }
         }
     }
@@ -181,6 +222,7 @@ function check_response(response){
         return 0;
     }
     else if (response.length == 0){
+        console.log("'" + response + "'");
         alert("incorrect response");
         return 0;
     }
@@ -205,25 +247,72 @@ function urlEncode(unencoded) {
 
 
   
-  
-function prepare_upload(file_type, step){
-    
-    
-    var step1_ident_file = document.getElementById(step + "-file");
-    if (step1_ident_file.files.length == 0){
+
+function prepare_spectra_upload(file_type, step){
+    var step_file = document.getElementById(step + "-file");
+    if (step_file.files.length == 0){
         alert("Warning: no ident file selected for upload!");
         return;
     }
     
-    var valid_types = 0;
-    if (file_type == "ident") valid_types = valid_extention_ident_types;
-    else if (file_type == "spectrum") valid_types = valid_extention_spectra_types;
-    else {
-        alert("Unknown file type.");
+    var valid_types = valid_extention_spectra_types;
+    
+    var file = step_file.files[0];
+    var filename = file.name;
+    var chunk_size = 2 * 1024 * 1024;  // 2MiB
+    var chunk_num = Math.ceil(file.size / chunk_size);
+    
+    var valid_extention_type = 0;
+    for (var valid_extention in valid_types){
+        if (filename.toLowerCase().ends_with(valid_extention)){
+            valid_extention_type = valid_types[valid_extention];
+            break;
+        }
+    }
+    
+    if (!valid_extention_type){
+        var message = "File has no valid extention. Valid extentions are:";
+        for (var valid_extention in valid_types) message += "\n" + valid_extention;
+        alert(message);
         return;
     }
     
-    var file = step1_ident_file.files[0];
+    if (filename != dependant_files[step][1]){
+        alert("Error: file names don't match");
+        return;
+    }
+    else {
+        var tissue = document.getElementById(step + "-tissue")[document.getElementById(step + "-tissue").selectedIndex].id;
+        
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && check_response(xmlhttp.responseText)) {
+                var file_id = xmlhttp.responseText;
+                
+                thread = [];
+                send_file(file_id, step);
+            }
+        }
+        xmlhttp.open("POST", file_pathname + "admin/scripts/blib-server.py", true);
+        xmlhttp.send("command=register_file&filename=" + filename + "&chunk_num=" + chunk_num + "&file_type=" + valid_extention_type + "&tissue=" + tissue);
+    }
+}
+
+
+
+
+
+
+function prepare_ident_upload(file_type, step){
+    var step_file = document.getElementById("step1-file");
+    if (step_file.files.length == 0){
+        alert("Warning: no ident file selected for upload!");
+        return;
+    }
+    
+    var valid_types = valid_extention_ident_types;
+    
+    var file = step_file.files[0];
     var filename = file.name;
     var chunk_size = 2 * 1024 * 1024;  // 2MiB
     var chunk_num = Math.ceil(file.size / chunk_size);
@@ -249,29 +338,28 @@ function prepare_upload(file_type, step){
             return;
         }
         else {
-            send_file(uploaded_file_id, step);
+            thread = [];
+            send_file(uploaded_file_id, "step1");
         }
     }
     else {
-        var species_tissue = "";
-        if (file_type == "ident") {
-            species_tissue = "&species=" + document.getElementById(step + "-species")[document.getElementById(step + "-species").selectedIndex].id;
-        }
-        else {
-            species_tissue = "&tissue=" + document.getElementById(step + "-tissue")[document.getElementById(step + "-tissue").selectedIndex].id;
-        }
+        var species = document.getElementById("step1-species")[document.getElementById("step1-species").selectedIndex].id;
         
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && check_response(xmlhttp.responseText)) {
                 var file_id = xmlhttp.responseText;
-                send_file(file_id, step);
+                thread = [];
+                send_file(file_id, "step1");
             }
         }
         xmlhttp.open("POST", file_pathname + "admin/scripts/blib-server.py", true);
-        xmlhttp.send("command=register_file&filename=" + filename + "&chunk_num=" + chunk_num + "&file_type=" + valid_extention_type + species_tissue);
+        xmlhttp.send("command=register_file&filename=" + filename + "&chunk_num=" + chunk_num + "&file_type=" + valid_extention_type + "&species=" + species);
     }
 }
+
+
+
 
 
 
@@ -286,14 +374,13 @@ function send_file(registered_file_id, step){
     document.getElementById(step + "-file").setAttribute("disabled", "true");
     document.getElementById(step + "-progress").setAttribute("curr-val", 0);
     
-    var step1_ident_file = document.getElementById('step1-file');
-    var file = step1_ident_file.files[0];
+    var step_file = document.getElementById(step + "-file");
+    var file = step_file.files[0];
     var filename = file.name;
     var chunk_size = 2 * 1024 * 1024;  // 2MiB
     var chunk_max_num = Math.ceil(file.size / chunk_size);
     
-    thread = 0;
-    thread = setInterval(function(cmz, cn, step){
+    upload_loop = function(cmz, cn, step){
         
         if (typeof this.thread_data === "undefined"){
             this.thread_data = [0, cmz, cn, false];  // curr_chunk, chunk_size, chunk_max_num, busy
@@ -306,6 +393,7 @@ function send_file(registered_file_id, step){
             alert("File is uploaded");
             init_manage_blib();
             reader = 0;
+            this.thread_data = undefined;
         }
         else if (!this.thread_data[3]) {
             this.thread_data[3] = true;
@@ -338,6 +426,7 @@ function send_file(registered_file_id, step){
                             xhttp.chunk_data = this.chunk_data;
                             xhttp.upload.chunk_data = this.chunk_data;
                             xhttp.upload.step = this.step;
+                            xhttp.step = this.step;
                             
                             xhttp.upload.onprogress = function(evt){
                                 var l = this.chunk_data[0] / this.chunk_data[1] + (evt.loaded / evt.total) * (this.chunk_data[2] - this.chunk_data[0]) / this.chunk_data[1];
@@ -372,7 +461,9 @@ function send_file(registered_file_id, step){
             }
             reader.readAsBinaryString(file.slice(start, end));
         }
-    }, 100, chunk_size, chunk_max_num, step);
+    };
+    
+    thread = setInterval(upload_loop, 100, chunk_size, chunk_max_num, step);
 }
 
 
@@ -404,6 +495,24 @@ function delete_ident(){
         }
         xmlhttp.open("POST", file_pathname + "admin/scripts/blib-server.py", true);
         xmlhttp.send("command=delete_file&file_id=" + uploaded_file_id);
+    }
+}
+
+
+
+
+
+function delete_spectrum(spec_id){
+    if (confirm("Do you really want to delete the spectrum file?")){
+        
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && check_response(xmlhttp.responseText)) {
+                init_manage_blib();
+            }
+        }
+        xmlhttp.open("POST", file_pathname + "admin/scripts/blib-server.py", true);
+        xmlhttp.send("command=delete_file&file_id=" + dependant_files["step2-" + spec_id][0]);
     }
 }
 
