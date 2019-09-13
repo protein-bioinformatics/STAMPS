@@ -269,6 +269,7 @@ struct c_array{
 class PSM {
     public:
         string ref_file;
+        int file_id;
         string spectrum_id;
         string peptideEv;
         bool passThreshold;
@@ -285,6 +286,7 @@ class PSM {
         
         PSM(){
             ref_file = "";
+            file_id = -1;
             spectrum_id = "";
             peptideEv = "";
             passThreshold = false;

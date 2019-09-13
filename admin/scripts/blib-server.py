@@ -227,6 +227,7 @@ def check_blib_progress():
 
 def start_convertion():
     os.system("rm -f '%s/progress.dat'" % data_dir)
+    os.system("rm -f '%s/spectra.blib'" % data_dir)
     os.system("rm -f '%s/tmp.blib'" % data_dir)
     
     
@@ -252,7 +253,8 @@ def delete_file():
             row = my_cur.fetchone()
             
             
-            # no matter which file will be deleted, tmp.blib must be deleted, too
+            # no matter which file will be deleted, spectra.blib must be deleted, too
+            os.system("rm -f '%s/spectra.blib'" % data_dir)
             os.system("rm -f '%s/tmp.blib'" % data_dir)
             os.system("rm -f '%s/progress.dat'" % data_dir)
             
@@ -362,7 +364,7 @@ def load_dependencies():
 
 
 def select_spectra():
-    db = sqlite3.connect("%s/tmp.blib" % data_dir)
+    db = sqlite3.connect("%s/spectra.blib" % data_dir)
     cur = db.cursor()
     
     limit = form.getvalue('limit')
@@ -384,7 +386,7 @@ def select_spectra():
 
 
 def get_num_spectra():
-    db = sqlite3.connect("%s/tmp.blib" % data_dir)
+    db = sqlite3.connect("%s/spectra.blib" % data_dir)
     cur = db.cursor()
     
     sql_query = "SELECT count(*) cnt FROM RefSpectra;"
@@ -399,7 +401,7 @@ def get_spectrum():
     
     def make_dict(cur): return {key[0]: value for key, value in zip(cur.description, cur.fetchall()[0])}
     
-    db = sqlite3.connect("%s/tmp.blib" % data_dir)
+    db = sqlite3.connect("%s/spectra.blib" % data_dir)
     cur = db.cursor()
     cur.execute('SELECT * FROM RefSpectra r INNER JOIN RefSpectraPeaks p ON r.id = p.RefSpectraID WHERE r.id = %i;' % spectrum_id)
     result = make_dict(cur)
@@ -419,7 +421,7 @@ def get_spectrum():
 
 def set_unset_spectrum():
     
-    db = sqlite3.connect("%s/tmp.blib" % data_dir)
+    db = sqlite3.connect("%s/spectra.blib" % data_dir)
     cur = db.cursor()
     
     spectrum_id = int(form.getvalue('spectrum_id'))
