@@ -1,12 +1,4 @@
-#include "XmlInspector.hpp"
-#include <iostream>
-#include <cstdlib>
 #include "bio-classes.h"
-#include <bits/stdc++.h> 
-#include <sqlite3.h> 
-
-
-
 
 
 bool contains_tryptic_miscleavages(string pep){
@@ -375,14 +367,19 @@ int main(int argc, char** argv)
         ops.write_map_string_evidence(peptideEvidences);
         ops.write_map_int_PSM(PSMs);
         
-        
-        for (string sp : input_spectra){
-            string sql_query = "INSERT INTO chunks (file_id, checksum, chunk_num, type, filename) values (" + file_id + ", '', 0, 'depend', '" + sp + "');";
+        if (input_spectra.size()){
+            for (string sp : input_spectra){
+                string sql_query = "INSERT INTO chunks (file_id, checksum, chunk_num, type, filename) values (" + file_id + ", '', 0, 'depend', '" + sp + "');";
+                stmt->execute(sql_query);
+            }
+        }
+        else {
+            string sql_query = "INSERT INTO chunks (file_id, checksum, chunk_num, type, filename) values (" + file_id + ", '', -1, 'depend', '~');";
             stmt->execute(sql_query);
         }
     }
     catch (...){
-        string sql_query = "INSERT INTO chunks (file_id, checksum, chunk_num, type, filename) values (" + file_id + ", '', -1, 'depend', '');";
+        string sql_query = "INSERT INTO chunks (file_id, checksum, chunk_num, type, filename) values (" + file_id + ", '', -1, 'depend', '~');";
         stmt->execute(sql_query);
     }
 

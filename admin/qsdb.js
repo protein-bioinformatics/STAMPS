@@ -1,10 +1,3 @@
-/*
- 
- 
-
-
-*/
-
 
 
 toolbox_width = 300;
@@ -4562,6 +4555,7 @@ function curate_spectra(){
             
         }
     }
+    console.log(request);
     xmlhttp_spectra_meta.open("GET", file_pathname + "admin/scripts/curate-spectral-library.py?" + request, false);
     xmlhttp_spectra_meta.send();
     

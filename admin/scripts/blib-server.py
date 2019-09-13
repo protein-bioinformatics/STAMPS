@@ -6,9 +6,11 @@
 from pymysql import connect, cursors
 from cgi import FieldStorage
 from json import dumps
-from random import random
 from base64 import b64decode
 import subprocess
+import sqlite3
+import zlib
+import struct
 import os
 alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345678901234567890123456789012345678901234567890123456789"
 hash_len = 32
@@ -161,21 +163,23 @@ def send_file():
         sql_query = "select * from chunks where file_id = %s ORDER BY chunk_num;"
         my_cur.execute(sql_query, file_id)
         if my_cur.rowcount == chunk_max:
-            joined_chunks = " ".join("%s/%s.%i" % (data_dir, filename, row["chunk_num"]) for row in my_cur)
-            os.system("cat %s > %s/%s" % (joined_chunks, data_dir, filename))
-            os.system("rm -f %s" % joined_chunks)
-        
-            data_path = "%s/%s" % (data_dir, filename)
             cwd = "%s/admin/scripts" % conf["root_path"]
-            prep_blib = "%s/prepare-blib.bin" % cwd
             
-            #command = ["%s %s %s" % (prep_blib, data_path, file_id)]
-            #subprocess.call([command], shell = True)
+            with open("%s/run-prepare-blib.sh" % data_dir, mode = "wt") as script_file:
             
-            command = [prep_blib, data_path, file_id]
-            os.setsid() 
-            os.umask(0) 
-            p = subprocess.Popen(command, cwd = cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                joined_chunks = " ".join("'%s/%s.%i'" % (data_dir, filename, row["chunk_num"]) for row in my_cur)
+                script_file.write("cat %s > '%s/%s'\n" % (joined_chunks, data_dir, filename))
+                script_file.write("rm -f %s\n" % joined_chunks)
+            
+                data_path = "'%s/%s'" % (data_dir, filename)
+                prep_blib = "%s/prepare-blib.bin" % cwd
+                
+                script_file.write("%s %s %s &\n" % (prep_blib, data_path, file_id))
+                #script_file.write("echo 0 > %s/progress.dat \n" % data_dir)
+                
+            
+            os.system("/bin/chmod 777 %s/run-prepare-blib.sh" % data_dir)
+            pid = subprocess.Popen(["%s/run-prepare-blib.sh &" % data_dir], cwd = cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
             
         return 0
         
@@ -202,7 +206,37 @@ def check_ident():
     else:
         return "{}"
     
+ 
+ 
+def check_blib_progress():
     
+    fname = "%s/progress.dat" % data_dir
+    if not os.path.isfile(fname):
+        return 0
+    
+    else:
+        with open(fname, mode = "rt") as content_file:
+            content = content_file.read().strip().strip(" ")
+            if len(content) == 0:
+                return 0
+            
+            return content
+        
+        
+
+
+def start_convertion():
+    os.system("rm -f '%s/progress.dat'" % data_dir)
+    os.system("rm -f '%s/tmp.blib'" % data_dir)
+    
+    
+    cwd = "%s/admin/scripts" % conf["root_path"]
+    command = "%s/create-blib.bin &" % cwd
+    pid = subprocess.Popen([command], cwd = cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    return 0
+
+
+
 
 
 def delete_file():
@@ -218,9 +252,14 @@ def delete_file():
             row = my_cur.fetchone()
             
             
+            # no matter which file will be deleted, tmp.blib must be deleted, too
+            os.system("rm -f '%s/tmp.blib'" % data_dir)
+            os.system("rm -f '%s/progress.dat'" % data_dir)
+            
+            
             # delete dependant spectrum files
             if row["type"] == "ident":
-                os.system("rm -f %s/data.dat" % data_dir)
+                os.system("rm -f '%s/data.dat'" % data_dir)
                 
                 
                 sql_query = "SELECT f.id, f.filename FROM chunks c INNER JOIN files f ON f.filename = c.filename WHERE c.file_id = %s AND c.type = 'depend';"
@@ -236,7 +275,7 @@ def delete_file():
                     
             
                     for row in my_cur:
-                        command = "rm -f %s/%s.%s" % (data_dir, depend['filename'], row["chunk_num"])
+                        command = "rm -f '%s/%s.%s'" % (data_dir, depend['filename'], row["chunk_num"])
                         os.system(command)
                         
                     # delete chunks from datebase
@@ -247,7 +286,7 @@ def delete_file():
                     sql_query = "select * from files WHERE id = %s;"
                     my_cur.execute(sql_query, depend["id"])
                     for row in my_cur:
-                        os.system("rm -f %s/%s" %(data_dir, row["filename"]))
+                        os.system("rm -f '%s/%s'" %(data_dir, row["filename"]))
                     
                     # delete files from database
                     sql_query = "delete f from files f WHERE f.id = %s;"
@@ -265,7 +304,7 @@ def delete_file():
             
         
             for row in my_cur:
-                command = "rm -f %s/%s.%s" % (data_dir, filename, row["chunk_num"])
+                command = "rm -f '%s/%s.%s'" % (data_dir, filename, row["chunk_num"])
                 os.system(command)
             
             
@@ -278,7 +317,7 @@ def delete_file():
             sql_query = "SELECT * FROM files WHERE id = %s;"
             my_cur.execute(sql_query, file_id)
             for row in my_cur:
-                os.system("rm -f %s/%s" %(data_dir, row["filename"]))
+                os.system("rm -f '%s/%s'" %(data_dir, row["filename"]))
             
             
             # delete files from database
@@ -319,241 +358,77 @@ def load_dependencies():
     else:
         return "{}"
 
-"""
 
-def new_job():
-    client_hash = form.getvalue('client_hash')
-    try: len(client_hash)
-    except: return "#new_job: parameters not valid"
 
-    job_hash = ''.join(alphabet[int(random() * 1615499) % len(alphabet)] for i in range(hash_len))
-    conn, my_cur = open_db()
+
+def select_spectra():
+    db = sqlite3.connect("%s/tmp.blib" % data_dir)
+    cur = db.cursor()
     
-    insert_new = True
-    sql_query = "select t.curr_time - j.timestamp diff_time from jobs j, (select now() curr_time) t where j.client_hash = %s order by timestamp desc;"
-    my_cur.execute(sql_query, client_hash)
-    if my_cur.rowcount and int(my_cur.fetchone()["diff_time"]) < 300:
-        return "#Please wait at least 5 minutes before creating a new job"
+    limit = form.getvalue('limit')
+    if type(limit) is not str:
+        return "#-3"
     
-    
-    sql_query = "insert into jobs (user_id, hash_id, state, timestamp, client_hash) values (-1, %s, 'idle', now(), %s);"
-    my_cur.execute(sql_query, (job_hash, client_hash))
-    conn.commit()
-    os.system("mkdir %s/%s" % (data_dir, job_hash))
-    return job_hash
-
-
-
-
-
-
-def job_existing():
-    job_hash = form.getvalue('job_hash')
-    try: len(job_hash)
-    except: return "#job_existing: parameters not valid"
-    
-    if len(job_hash) != hash_len: return "#job_existing: job_hash not valid"
+    limits = limit.split(",")
+    for l in limits:
+        try:
+            a = int(l)
+        except:
+            return "#-4"
         
-    conn, my_cur = open_db()
-    sql_query = "select count(*) cnt from jobs j where hash_id = %s;"
-    my_cur.execute(sql_query, job_hash)
-    num = 0
-    for row in my_cur:
-        num = int(row['cnt'])
-    return num
+    sql_query = "SELECT id, peptideModSeq, precursorCharge, scoreType FROM RefSpectra ORDER BY id LIMIT %s;" % limit
+    cur.execute(sql_query)
+    return dumps([row for row in cur])
 
 
 
-def get_file_list():
-    job_hash = form.getvalue('job_hash')
-    file_types = form.getvalue('file_types')
-    try: len(job_hash), len(file_types)
-    except: return "#get_file_list: parameters not valid"
+
+def get_num_spectra():
+    db = sqlite3.connect("%s/tmp.blib" % data_dir)
+    cur = db.cursor()
     
-    if len(job_hash) != hash_len: return "#get_file_list: job_hash not valid"
-        
-    conn, my_cur = open_db()
-    file_types = file_types.split(":")
-    type_list = ", ".join("%s" for f in file_types)
-    response = []
-    sql_query = "select tb.file_name, tb.id, tb.type, count(tb.id) = tb.chunks valid from (select f.file_name, f.id, f.type, f.chunks from files f inner join jobs j on f.job_id = j.id where j.hash_id = %s and f.type in (" + type_list + ")) tb left join chunks c on tb.id = c.file_id group by tb.file_name, tb.id, tb.type;"
-    my_cur.execute(sql_query, (job_hash, *file_types))
-    for row in my_cur:
-        response.append(row)
-    return dumps(response)
+    sql_query = "SELECT count(*) cnt FROM RefSpectra;"
+    cur.execute(sql_query)
+    return cur.fetchone()[0]
 
 
 
 
-
-
-
-def get_state():
-    job_hash = form.getvalue('job_hash')
-    try: len(job_hash)
-    except: return "#get_state: parameters not valid"
-
-    if len(job_hash) != hash_len: return "#get_state: job_hash not valid"
+def get_spectrum():
+    spectrum_id = int(form.getvalue('spectrum_id'))
     
-    conn, my_cur = open_db()
-    sql_query = "select * from jobs j where hash_id = %s;"
-    my_cur.execute(sql_query, job_hash)
-    row = my_cur.fetchone()
-    state = row["state"]
-    progress = row["replicate"]
+    def make_dict(cur): return {key[0]: value for key, value in zip(cur.description, cur.fetchall()[0])}
     
-    # TODO: for test purpuse, please delete
-    if state == "processing":
-        if int(progress) == 100:
-            state = "idle"
-            sql_query = "select * from parameters p inner join jobs j on p.job_id = j.id where p.parameter_name = 'experiment' and j.hash_id = %s;"
-            my_cur.execute(sql_query, job_hash)
-            experiment = my_cur.fetchone()["parameter_value"]
-            
-            result = "result_%s.txt" % experiment
-            path = "%s/%s" % (data_dir, job_hash)
-            os.system("echo result > %s/%s" % (path, result))
-            
-            sql_query = "select * from files f inner join jobs j on f.job_id = j.id where f.file_name = %s and f.path = %s and j.hash_id = %s;"
-            my_cur.execute(sql_query, (result, path, job_hash))
-            
-            if not my_cur.rowcount:
-                sql_query = "insert into files (job_id, type, chunks, file_name, path) values ((select id from jobs where hash_id = %s), 'result', 0, %s, %s);"
-                my_cur.execute(sql_query, (job_hash, result, path))
-                conn.commit()
-            
-            sql_query = "update jobs set state = 'idle' where hash_id = %s;"
-            my_cur.execute(sql_query, job_hash)
-            conn.commit()
-            
-        else:
-            sql_query = "update jobs set replicate = replicate + 10 where hash_id = %s;"
-            my_cur.execute(sql_query, job_hash)
-            conn.commit()
+    db = sqlite3.connect("%s/tmp.blib" % data_dir)
+    cur = db.cursor()
+    cur.execute('SELECT * FROM RefSpectra r INNER JOIN RefSpectraPeaks p ON r.id = p.RefSpectraID WHERE r.id = %i;' % spectrum_id)
+    result = make_dict(cur)
+
+    try: result["peakMZ"] = zlib.decompress(result["peakMZ"])
+    except: pass
+    result["peakMZ"] = struct.unpack("%id" % (len(result["peakMZ"]) / 8), result["peakMZ"])
+
+    try: result["peakIntensity"] = zlib.decompress(result["peakIntensity"])
+    except: pass
+    result["peakIntensity"] = struct.unpack("%if" % (len(result["peakIntensity"]) / 4), result["peakIntensity"])
+
+    return dumps(result)
+
+
+
+
+def set_unset_spectrum():
     
-    return dumps({"state": state, "progress": progress})
-
-
-def get_parameters():
-    job_hash = form.getvalue('job_hash')
-    try: len(job_hash)
-    except: return "#get_parameters: parameters not valid"
-
-    if len(job_hash) != hash_len: return "#get_parameters: job_hash not valid"
-
-    conn, my_cur = open_db()
-    response = {}
-    sql_query = "select p.* from parameters p inner join jobs j on p.job_id = j.id and j.hash_id = %s;"
-    my_cur.execute(sql_query, job_hash)
-    for row in my_cur:
-        response[row["parameter_name"]] = row["parameter_value"]
-    return dumps(response)
-
-
-
-def set_parameter():
-    job_hash = form.getvalue('job_hash')
-    parameter_name = form.getvalue('parameter_name')
-    parameter_value = form.getvalue('parameter_value')
-    try: len(job_hash), len(parameter_name), len(parameter_value)
-    except: return "#set_parameter: parameters not valid"
-
-    if len(job_hash) != hash_len: return "#set_parameter: job_hash not valid"
-
-    conn, my_cur = open_db()
-    sql_query = "select p.* from parameters p inner join jobs j on p.job_id = j.id where p.parameter_name = %s and j.hash_id = %s;"
-    my_cur.execute(sql_query, (parameter_name, job_hash))
-    if my_cur.rowcount:
-        sql_query = "update parameters p set p.parameter_value = %s where p.parameter_name = %s and p.job_id = (select id from jobs where hash_id = %s);"
-        my_cur.execute(sql_query, (parameter_value, parameter_name, job_hash))
-        conn.commit()
-    else:
-        sql_query = "insert into parameters (job_id, parameter_name, parameter_value) values ((select id from jobs where hash_id = %s), %s, %s);"
-        my_cur.execute(sql_query, (job_hash, parameter_name, parameter_value))
-        conn.commit()
-    return 1
-
-
-def start_analysis():
-    job_hash = form.getvalue('job_hash')
-    try: len(job_hash)
-    except: return "#start_analysis: parameters not valid"
-
-    if len(job_hash) != hash_len: return "#start_analysis: job_hash not valid"
-
-    # add decoys to fasta
-    os.system("")
+    db = sqlite3.connect("%s/tmp.blib" % data_dir)
+    cur = db.cursor()
     
-    # create parameter file
+    spectrum_id = int(form.getvalue('spectrum_id'))
+    value = int(form.getvalue('value'))
     
-    # create run on pladipus with autostart
-    
-    # update state
-    conn, my_cur = open_db()
-    sql_query = "update jobs set state = 'processing' where hash_id = %s;"
-    my_cur.execute(sql_query, job_hash)
-    conn.commit()
-    
-    '''
-    # TODO: for test purpuse, please delete
-    sql_query = "update jobs set replicate = 0 where hash_id = %s;"
-    my_cur.execute(sql_query, job_hash)
-    conn.commit()
-    '''
-    
-    return 1
-
-
-def stop_analysis():
-    job_hash = form.getvalue('job_hash')
-    try: len(job_hash)
-    except: return "#stop_analysis: parameters not valid"
-
-    if len(job_hash) != hash_len: return "#stop_analysis: job_hash not valid"
-
-    conn, my_cur = open_db()
-    sql_query = "update jobs set state = 'idle' where hash_id = %s;"
-    my_cur.execute(sql_query, job_hash)
-    conn.commit()
-    return 1
-
-
-
-def download_file():
-    job_hash = form.getvalue('job_hash')
-    file_id = form.getvalue('file_id')
-    try: len(job_hash), int(file_id)
-    except: return "#download_file: parameters not valid"
-    
-    if len(job_hash) != hash_len: return "#download_file: job_hash not valid"
-        
-    conn, my_cur = open_db()
-    sql_query = "select f.path, f.file_name from files f inner join jobs j on f.job_id = j.id where f.id = %s and j.hash_id = %s;"
-    my_cur.execute(sql_query, (file_id, job_hash))
-    row = my_cur.fetchone()
-    link = row['path'] + "/" + row['file_name']
-    return link
- 
- 
- 
- 
- 
-
-commands = {"delete_file": delete_file,
-            "download_file": download_file,
-            "get_check_sum": get_check_sum,
-            "get_file_list": get_file_list,
-            "get_parameters": get_parameters,
-            "get_state": get_state,
-            "job_existing": job_existing,
-            "new_job": new_job,
-            "register_file": register_file,
-            "send_file": send_file,
-            "set_parameter": set_parameter,
-            "start_analysis": start_analysis,
-            "stop_analysis": stop_analysis
-            }
-""" 
+    sql_query = "UPDATE RefSpectra SET scoreType = %s WHERE id = %s;" % (value, spectrum_id)
+    cur.execute(sql_query)
+    db.commit()
+    return 0
 
 
 commands = {"get_check_sum": get_check_sum,
@@ -561,7 +436,13 @@ commands = {"get_check_sum": get_check_sum,
             "send_file": send_file,
             "check_ident": check_ident,
             "delete_file": delete_file,
-            "load_dependencies": load_dependencies
+            "load_dependencies": load_dependencies,
+            "start_convertion": start_convertion,
+            "check_blib_progress": check_blib_progress,
+            "select_spectra": select_spectra,
+            "get_spectrum": get_spectrum,
+            "get_num_spectra": get_num_spectra,
+            "set_unset_spectrum": set_unset_spectrum
             }
 
 if command not in commands:

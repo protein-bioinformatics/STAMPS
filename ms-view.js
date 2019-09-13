@@ -210,6 +210,7 @@ function resize_ms_view(){
     document.getElementById("spectra_options").style.top = (rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
     document.getElementById("spectra_options").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
     
+    
     if (filter_parameters["filter_panel_visible"]){
         document.getElementById("filter_panel_check_spectra").style.left = (rect.left + (rect.right - rect.left) * 0.005).toString() + "px";
         document.getElementById("filter_panel_check_spectra").style.top = (rect.top + (rect.bottom - rect.top) * t_top + document.getElementById("msarea").height + 5).toString() + "px";
@@ -274,22 +275,23 @@ function change_match_error(){
 
 
 
-function load_spectrum(spectrum_id){
+function load_spectrum(spectrum_id, spectrum_data){
     var c = document.getElementById("msarea");
     var ctx = c.getContext("2d");
     ms_zoom = 0;
     peaks = [];
     current_loaded_spectrum = spectrum_id;
     
-    var spectrum_data = 0;
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            spectrum_data = JSON.parse(xmlhttp.responseText);
+    if (typeof spectrum_data === "undefined"){
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                spectrum_data = JSON.parse(xmlhttp.responseText);
+            }
         }
+        xmlhttp.open("GET", file_pathname + "scripts/get-msdata.py?spectrum_id=" + spectrum_id + "&species=" + current_species, false);
+        xmlhttp.send();
     }
-    xmlhttp.open("GET", file_pathname + "scripts/get-msdata.py?spectrum_id=" + spectrum_id + "&species=" + current_species, false);
-    xmlhttp.send();
     
     
     peptide = spectrum_data["peptideSeq"];

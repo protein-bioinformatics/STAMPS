@@ -4,7 +4,6 @@
 #include <vector>
 #include <set>
 #include <map>
-#include <vector>
 #include <sstream>
 #include <cstring>
 #include <math.h>
@@ -16,6 +15,10 @@
 #include <cppconn/exception.h>
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
+#include "XmlInspector.hpp"
+#include <iostream>
+#include <bits/stdc++.h> 
+#include <sqlite3.h> 
 
 using namespace std;
 
