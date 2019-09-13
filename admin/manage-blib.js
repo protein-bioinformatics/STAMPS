@@ -103,6 +103,7 @@ function init_manage_blib(){
     document.getElementById("step2").style.display = "none";
     document.getElementById("step3").style.display = "none";
     document.getElementById("step4").style.display = "none";
+    document.getElementById("step5").style.display = "none";
     document.getElementById("step2-container").innerHTML = "none";
     document.getElementById("step1-unloaded").style.display = "none";
     document.getElementById("step1-loaded").style.display = "none";
@@ -259,6 +260,9 @@ function step3_transition_step4(){
     document.getElementById("check_spectra").style.display = "none";
     document.getElementById("step4-wait").style.display = "inline";
     document.getElementById("step3-button").setAttribute("disabled", "true");
+    document.getElementById("step5").style.display = "none";
+    document.getElementById("step5-wait").style.display = "inline";
+    document.getElementById("step5-confirm").style.display = "none";
     
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -273,6 +277,7 @@ function step3_transition_step4(){
             else {
                 document.getElementById("step4-wait").style.display = "none";
                 document.getElementById("check_spectra").style.display = "inline";
+                document.getElementById("step4-button").removeAttribute("disabled");
                 
                 var xmlhttp_num = new XMLHttpRequest();
                 xmlhttp_num.onreadystatechange = function() {
@@ -591,6 +596,29 @@ function inspect_spectra(){
 
 
 
+function insert_spectra(){
+    var species_db = "Human"
+    if (confirm("Do you want to insert the '" + species_db + "' database? The process is reversible.")){
+        step4_transition_step5();
+        document.getElementById("step4-button").setAttribute("disabled", "true");
+    }
+}
+
+
+function step4_transition_step5(){
+    
+    var rect_cs = document.getElementById('check_spectra').getBoundingClientRect();
+    var cs_top = parseInt(document.getElementById('check_spectra').style.top.split("px")[0]);
+    
+    document.getElementById("step5").style.top = (cs_top + rect_cs.height + 40).toString() + "px";
+    document.getElementById("step5").style.position = "fixed";
+    
+    document.getElementById("step5").style.display = "inline";
+    document.getElementById("step5-wait").style.display = "inline";
+    document.getElementById("step5-confirm").style.display = "none";
+}
+
+
 
 function inspect_spectra_checking(spectrum_id){
     
@@ -618,8 +646,8 @@ function custom_resize_ms_view(){
     var t_top = 0.02;
     document.getElementById("step4-wait").style.display = "inline";
     var rect_s4 = document.getElementById('step4-wait').getBoundingClientRect();
-    document.getElementById("step4-wait").style.display = "none";
     document.getElementById("check_spectra").style.top = (rect_s4.top).toString() + "px";
+    document.getElementById("step4-wait").style.display = "none";
     
     rect_s4 = document.getElementById('step-container').getBoundingClientRect();
     var sp_height = document.getElementById('check_spectra').offsetHeight * 0.87;
