@@ -264,6 +264,7 @@ function step3_transition_step4(){
     document.getElementById("step5-wait").style.display = "inline";
     document.getElementById("step5-confirm").style.display = "none";
     
+    
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && check_response(xmlhttp.responseText)) {
@@ -277,7 +278,7 @@ function step3_transition_step4(){
             else {
                 document.getElementById("step4-wait").style.display = "none";
                 document.getElementById("check_spectra").style.display = "inline";
-                document.getElementById("step4-button").removeAttribute("disabled");
+                document.getElementById("check_spectra_button").removeAttribute("disabled");
                 
                 var xmlhttp_num = new XMLHttpRequest();
                 xmlhttp_num.onreadystatechange = function() {
@@ -554,7 +555,6 @@ function inspect_spectra(){
                 dom_td2_input.setAttribute("id", "spec-checkbox-" + spectrum_meta[0]);
                 if (spectrum_meta[3] != -1) dom_td2_input.setAttribute("checked", "true");
                 dom_td2_input.setAttribute("onclick", "inspect_spectra_checking(" + spectrum_meta[0] + ");");
-                
                 spectra_checks[spectrum_meta[0]] = (spectrum_meta[3] != -1);
                 
                 
@@ -579,15 +579,12 @@ function inspect_spectra(){
             
         }
     }
-    
     xmlhttp_spectra_meta.open("POST", file_pathname + "admin/scripts/blib-server.py", false);
     xmlhttp_spectra_meta.send("command=select_spectra&limit=" + (inspect_spectra_current_page * inspect_max_spectra_per_page) + "," + inspect_max_spectra_per_page);
     
-    document.getElementById("check_spectra").style.display = "inline";
-    change_match_error();
     
+    change_match_error();
     custom_resize_ms_view();
-    spectrum_loaded = false;
     inspect_spectra_change_selection(0);
     draw_spectrum();
 }
@@ -598,9 +595,21 @@ function inspect_spectra(){
 
 function insert_spectra(){
     var species_db = "Human"
-    if (confirm("Do you want to insert the '" + species_db + "' database? The process is reversible.")){
-        step4_transition_step5();
-        document.getElementById("step4-button").setAttribute("disabled", "true");
+    if (confirm("Do you want to insert the '" + species_db + "' database? The process is NOT reversible.")){
+        
+        var xmlhttp_insert = new XMLHttpRequest();
+        xmlhttp_insert.onreadystatechange = function() {
+            if (xmlhttp_insert.readyState == 4 && xmlhttp_insert.status == 200) {
+                step4_transition_step5();
+                document.getElementById("check_spectra_button").setAttribute("disabled", "true");
+            }
+        }
+        xmlhttp_insert.open("POST", file_pathname + "admin/scripts/blib-server.py", false);
+        xmlhttp_insert.send("command=merge_blibs");
+        
+        
+        
+        
     }
 }
 
@@ -616,6 +625,25 @@ function step4_transition_step5(){
     document.getElementById("step5").style.display = "inline";
     document.getElementById("step5-wait").style.display = "inline";
     document.getElementById("step5-confirm").style.display = "none";
+    
+    var xmlhttp_insert_spectra = new XMLHttpRequest();
+    xmlhttp_insert_spectra.onreadystatechange = function() {
+        if (xmlhttp_insert_spectra.readyState == 4 && xmlhttp_insert_spectra.status == 200) {
+            var response = parseInt(xmlhttp_insert_spectra.responseText);
+            if (response < 0){
+                // TODO error
+            }
+            else if (response > 0){
+                document.getElementById("step5-wait").style.display = "none";
+                document.getElementById("step5-confirm").style.display = "inline";
+            }
+            else {
+                step4_transition_step5();
+            }
+        }
+    }
+    xmlhttp_insert_spectra.open("POST", file_pathname + "admin/scripts/blib-server.py", true);
+    xmlhttp_insert_spectra.send("command=check_insert_progress");
 }
 
 
@@ -642,7 +670,8 @@ function inspect_spectra_checking(spectrum_id){
 
 
 function custom_resize_ms_view(){
-    if (spectrum_loaded) return;
+    //if (spectrum_loaded) return;
+    console.log("custom_resize_manage_view");
     var t_top = 0.02;
     document.getElementById("step4-wait").style.display = "inline";
     var rect_s4 = document.getElementById('step4-wait').getBoundingClientRect();

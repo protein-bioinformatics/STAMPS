@@ -227,6 +227,7 @@ def check_blib_progress():
 
 def start_convertion():
     os.system("rm -f '%s/progress.dat'" % data_dir)
+    os.system("rm -f '%s/inserting.dat'" % data_dir)
     os.system("rm -f '%s/spectra.blib'" % data_dir)
     os.system("rm -f '%s/tmp.blib'" % data_dir)
     
@@ -257,6 +258,8 @@ def delete_file():
             os.system("rm -f '%s/spectra.blib'" % data_dir)
             os.system("rm -f '%s/tmp.blib'" % data_dir)
             os.system("rm -f '%s/progress.dat'" % data_dir)
+            os.system("rm -f '%s/inserting.dat'" % data_dir)
+            os.system("rm -f '%s/run-prepare-blib.sh'" % data_dir)
             
             
             # delete dependant spectrum files
@@ -333,9 +336,6 @@ def delete_file():
             return "#No such file in database registered"
         
         
-
-        
-    
     except Exception as e:
         return "#" + str(e)
 
@@ -363,6 +363,9 @@ def load_dependencies():
 
 
 
+
+
+
 def select_spectra():
     db = sqlite3.connect("%s/spectra.blib" % data_dir)
     cur = db.cursor()
@@ -385,6 +388,9 @@ def select_spectra():
 
 
 
+
+
+
 def get_num_spectra():
     db = sqlite3.connect("%s/spectra.blib" % data_dir)
     cur = db.cursor()
@@ -392,6 +398,9 @@ def get_num_spectra():
     sql_query = "SELECT count(*) cnt FROM RefSpectra;"
     cur.execute(sql_query)
     return cur.fetchone()[0]
+
+
+
 
 
 
@@ -433,6 +442,48 @@ def set_unset_spectrum():
     return 0
 
 
+
+
+
+
+def merge_blibs():
+    os.system("rm -f '%s/inserting.dat'" % data_dir)
+    
+    sql_query = "SELECT * FROM files WHERE type = 'ident';"
+    my_cur.execute(sql_query)
+    if my_cur.rowcount:
+        row = my_cur.fetchone()
+        species_id = row["species"]
+        
+        spectral_library = "%s/data/spectral_library_%s.blib" % (conf["root_path"], species_id)
+        new_library = "%s/spectra.blib" % data_dir
+        
+        cwd = "%s/admin/scripts" % conf["root_path"]
+        command = "%s/merge-blibs.py %s %s &" % (cwd, spectral_library, new_library)
+        pid = subprocess.Popen([command], cwd = cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        
+        return 0
+    
+    return "#An error during merging occurred."
+
+
+
+def check_insert_progress():
+    
+    fname = "%s/inserting.dat" % data_dir
+    if not os.path.isfile(fname):
+        return 0
+    
+    else:
+        with open(fname, mode = "rt") as content_file:
+            content = content_file.read().strip().strip(" ")
+            if len(content) == 0:
+                return 0
+            
+            return content
+
+
+
 commands = {"get_check_sum": get_check_sum,
             "register_file": register_file,
             "send_file": send_file,
@@ -444,7 +495,9 @@ commands = {"get_check_sum": get_check_sum,
             "select_spectra": select_spectra,
             "get_spectrum": get_spectrum,
             "get_num_spectra": get_num_spectra,
-            "set_unset_spectrum": set_unset_spectrum
+            "set_unset_spectrum": set_unset_spectrum,
+            "merge_blibs": merge_blibs,
+            "check_insert_progress": check_insert_progress
             }
 
 if command not in commands:

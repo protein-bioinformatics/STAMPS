@@ -8,6 +8,7 @@
 <script src="../qsdb-functions.js"></script>
 <script src="../canvas2svg.js"></script>
 <script src="../sha-256.js"></script>
+<script src="manage-blib.js" ></script>
 <script src="qsdb.js"></script>
 <title>QSDB Home</title>
 </head>
@@ -342,29 +343,30 @@
 
 
 
-
-<div id="check_spectra" class="check_spectra" style="display: none;">
-    <canvas id="msarea" class="msarea"></canvas> 
-    <fieldset id="spectra_options" class="spectra_options" style="position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;"> 
-        <input type="radio" onchange="change_match_error();" id="radio_ppm" name="select_error" value="ppm" style="border: 0px; margin: 0px; top: 0px; padding: 0px;"  checked><label for="radio_ppm">Relative</label> 
-        <input type="radio" onchange="change_match_error();" id="radio_da" name="select_error" value="Da" style="border: 0px; margin: 0px; top: 0px; padding: 0px;"><label for="radio_da">Absolute</label> 
-        <input type="text" onchange="change_match_error_value();" id="error_value" value="-" size=3 style="text-align: right;"><label id="unit">ppm</label> 
-    </fieldset> 
-    
-    <div id="spectra_panel" class="spectra_panel"></div> 
-    
-    <div id="check_spectra_functions" style="margin: 0px; position: fixed;"> 
-        <table width="100%"><tr><td id="curate_spectra_navigation"></td><td id="curate_spectra_disabled" align="right">
-            Only disabled spectra <input type="checkbox" id="curate_spectra_disabled_check" onchange="curate_spectra();" />
-        </td></tr></table> 
-    </div> 
-    
-    <table width="100%" height="100%"><tr>
-        <td valign="bottom" align="right" width="80%"><div style="display: inline;" id="check_spectra_peptide_info"></div><br>&nbsp;</td>
-        <td valign="bottom" align="right"><button onclick="editor_hide_check_spectra();">Back</button></td>
-    </tr></table>
+<div id="check_spectra_wrapper">
+    <div id="check_spectra" class="check_spectra" style="display: none;">
+        <canvas id="msarea" class="msarea"></canvas> 
+        <fieldset id="spectra_options" class="spectra_options" style="position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;"> 
+            <input type="radio" onchange="change_match_error();" id="radio_ppm" name="select_error" value="ppm" style="border: 0px; margin: 0px; top: 0px; padding: 0px;"  checked><label for="radio_ppm">Relative</label> 
+            <input type="radio" onchange="change_match_error();" id="radio_da" name="select_error" value="Da" style="border: 0px; margin: 0px; top: 0px; padding: 0px;"><label for="radio_da">Absolute</label> 
+            <input type="text" onchange="change_match_error_value();" id="error_value" value="-" size=3 style="text-align: right;"><label id="unit">ppm</label> 
+        </fieldset> 
+        
+        <div id="spectra_panel" class="spectra_panel"></div> 
+        
+        <div id="check_spectra_functions" style="margin: 0px; position: fixed;"> 
+            <table width="100%"><tr><td id="curate_spectra_navigation"></td><td id="curate_spectra_disabled" align="right">
+                Only disabled spectra <input type="checkbox" id="curate_spectra_disabled_check" onchange="curate_spectra();" />
+            </td></tr></table> 
+        </div> 
+        
+        <table width="100%" height="100%"><tr>
+            <td valign="bottom" align="left"><button id="open_insert_spectra_button" onclick="open_insert_spectra();">Insert spectra</button></td>
+            <td valign="bottom" align="right" width="80%"><div style="display: inline;" id="check_spectra_peptide_info"></div><br>&nbsp;</td>
+            <td valign="bottom" align="right"><button id="check_spectra_button" onclick="editor_hide_check_spectra();">Back</button></td>
+        </tr></table>
+    </div>
 </div>
-
 
 
 
@@ -600,6 +602,105 @@
         </table>
     </div>
 </div>
+
+
+
+
+
+<div id="insert_spectra" class="global_search">
+    <div id="insert_spectra_background" class="global_search_background"></div>
+        <div id="step-back-panel" style="border-bottom: 1px black solid; z-index: 130; display: inline; padding: 20px; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white;">
+            <button onclick="hide_every_window();">Back</button>
+        </div>
+        <div id="step-container" style="border: 2px black solid; z-index: 120; display: inline; padding: 20px; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; overflow-y: scroll;">
+            
+            <div id="step-inner-container" style="display: inline; position: fixed; top: 40px; left: 0px; width: 100%; background-color: white;">
+                <h2>Step 1) Select identification file</h2>
+                    
+                <div id="step1" style="display: block;">
+                    <p />
+                    <div id="step1-wait" style="width: 100%; position: fixed; text-align: center;">
+                        <img src="../images/ajax-loader.gif">&nbsp;
+                    </div>
+                    
+                    <div width="100%" id="step1-unloaded" style="display: none;">
+                        <div id="step1-infotext">Select file in mzidentml format (.mzid extention)</div><p />
+                        <div width="100%" align="center">
+                            <input type="file" id="step1-file" accept=".mzid"></input>&nbsp;&nbsp;
+                            <select id="step1-select"></select>&nbsp;&nbsp;
+                            <img src="../images/upload-small.png" width="20" id="step1-upload-button" title="upload file" alt="upload file" onclick="prepare_ident_upload('ident');" style="cursor: pointer;">
+                            <img src="../images/delete-small.png" width="20" id="step1-stop-button" title="stop upload" alt="stop upload" onclick="stop_upload();" style="cursor: pointer; display: none;">
+                            <img src="../images/trash-bin.png" width="20" id="step1-stop-delete-button" title="delete file" alt="delete file" onclick="delete_ident();" style="cursor: pointer; display: none;">
+                            <p />
+                            <progress-bar id="step1-progress" width="400px" height="5px" bar-color="#84b818" style="display: none;"></progress-bar>
+                        </div>
+                    </div>
+                    
+                    <div width="100%" id="step1-loaded" style="display: none;">
+                        Selected identification file:
+                        <div width="100%" align="center">
+                            <div id="step1-file-name" style="display: inline;">File-name-request-not-yet-implemented.mzid</div>&nbsp;&nbsp;&nbsp;&nbsp;
+                            <img src="../images/trash-bin.png" width="20" id="step1-delete-button" title="delete file" alt="delete file" onclick="delete_ident();" style="cursor: pointer;">
+                        </div>
+                    </div>
+                    <p />&nbsp;
+                </div>
+                
+                <div id="step2" style="display: none;">
+                    <hr width="90%" />
+                    <h2>Step 2) Load dependencies</h2>
+                    
+                    <div id="step2-wait" style="width: 100%; position: fixed; text-align: center;">
+                        <img src="../images/ajax-loader.gif">&nbsp;
+                    </div>
+                    
+                    <div id="step2-container"></div>
+                    <p />&nbsp;
+                </div>
+                
+                <div id="step3" style="display: none;">
+                    <hr width="90%" />
+                    <h2>Step 3) Start convertion</h2>
+                    
+                    
+                    <div id="step3-container">
+                        <center>Start the convertion of the spectra (data will not yet be inserted).<p />
+                            <button id="step3-button" onclick="start_convertion();">Start convertion</button>
+                        </center>
+                    </div>
+                    <p />&nbsp;
+                </div>
+                
+                <div id="step4" style="display: none; z-index: 10000;">
+                    <hr width="90%" />
+                    <h2>Step 4) Inspect spectra</h2>
+                    
+                    <div id="step4-wait" style="width: 100%; position: fixed; text-align: center;">
+                        <img src="../images/ajax-loader.gif">&nbsp;
+                    </div>
+                    <div id="step4-wait-check-spectra"></div>
+                </div>
+                
+                
+                <div id="step5" style="display: none; width: 95%">
+                    <hr width="90%" />
+                    <h2>Step 5) Inserting spectra</h2>
+                    
+                    <div id="step5-wait" style="width: 95%; position: fixed; text-align: center;">
+                        <img src="../images/ajax-loader.gif">&nbsp;
+                        <p />&nbsp;
+                    </div>
+                    
+                    <div id="step5-confirm" style="display: none; width: 95%; position: fixed; text-align: center;">
+                        <b>All spectra were successfully inserted.</b>
+                    </div>
+                    <p />&nbsp;
+                </div>
+            </div>
+        </div>
+    </div>
+<div>
+
 
 
 
