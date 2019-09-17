@@ -11,6 +11,7 @@ dependant_files = {};
 chunk_size = 10 * 1024 * 1024;  // 10 MiB
 upload_loop = 0;
 uploaded_file_id = -1;
+uploaded_species_id = -1;
 uploaded_filename = "";
 inspect_spectra_max_pages = -1;
 inspect_spectra_current_page = 0;
@@ -81,10 +82,19 @@ function get_dependence_template(id, row){
             </div>`;
         
     }
-            
-    var tissue_options = "<option id=\"12\">Heart</option><option id=\"14\">Brain</option>"        
     
-    return dependence_template(id, row["filename"], tissue_options, row["tissue"]);
+    
+    var tissue_options = "";
+    for (var tissue_key in tissues){
+        tissue_options += "<option id=\"" + tissue_key + "\">" + tissues[tissue_key][1] + "</option>";
+    }
+    
+    var used_tissue = "unknown tissue";
+    if (parseInt(row["tissue"]) in tissues){
+        used_tissue = tissues[row["tissue"]][1];
+    }
+    
+    return dependence_template(id, row["filename"], tissue_options, used_tissue);
 }
 
 
@@ -103,7 +113,7 @@ function init_manage_blib(){
     document.getElementById("step2").style.display = "none";
     document.getElementById("step3").style.display = "none";
     document.getElementById("step4").style.display = "none";
-    document.getElementById("step5").style.display = "none";
+    //document.getElementById("step5").style.display = "none";
     document.getElementById("step2-container").innerHTML = "none";
     document.getElementById("step1-unloaded").style.display = "none";
     document.getElementById("step1-loaded").style.display = "none";
@@ -119,14 +129,12 @@ function init_manage_blib(){
     
     var species_select = document.getElementById("step1-select");
     species_select.innerHTML = "";
-    var opt1 = document.createElement("option");
-    species_select.appendChild(opt1);
-    opt1.innerHTML = "Human (homo sapiens)";
-    opt1.id = "9606";
-    var opt2 = document.createElement("option");
-    species_select.appendChild(opt2);
-    opt2.innerHTML = "Mouse (mus musculus)";
-    opt2.id = "10090";
+    for (var species_key in supported_species){
+        var dom_opt = document.createElement("option");
+        species_select.appendChild(dom_opt);
+        dom_opt.innerHTML = supported_species[species_key];
+        dom_opt.id = species_key;
+    }
     
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -140,16 +148,18 @@ function init_manage_blib(){
             // file already registered
             if (Object.keys(response).length > 0){
                 var species = "unknown species";
+                var valid_species = true;
                 
-                file_id = response["id"];
-                for (var opt of species_select.children){
-                    if (opt.id == response["species"]){
-                        species = opt.innerHTML;
-                        break;
-                    }
+                if (parseInt(response["species"]) in supported_species){
+                    species = supported_species[response["species"]];
+                }
+                else {
+                    alert("Warning: selected species is not supported any more. Please reload the identification file with a supported species.");
+                    valid_species = false;
                 }
                 
                 uploaded_file_id = response["id"];
+                uploaded_species_id = response["species"];
                 uploaded_filename = response["filename"];
                 
                 
@@ -163,7 +173,7 @@ function init_manage_blib(){
                     document.getElementById("step1-file-name").innerHTML = response["filename"] + " / " + species;
                     document.getElementById("step1-unloaded").style.display = "none";
                     document.getElementById("step1-loaded").style.display = "inline";
-                    step1_transition_step2();
+                    if (valid_species); step1_transition_step2();
                 }
             }
         }
@@ -260,7 +270,7 @@ function step3_transition_step4(){
     document.getElementById("check_spectra").style.display = "none";
     document.getElementById("step4-wait").style.display = "inline";
     document.getElementById("step3-button").setAttribute("disabled", "true");
-    document.getElementById("step5").style.display = "none";
+    //document.getElementById("step5").style.display = "none";
     document.getElementById("step5-wait").style.display = "inline";
     document.getElementById("step5-confirm").style.display = "none";
     
@@ -273,12 +283,12 @@ function step3_transition_step4(){
                 step3_transition_step4();
             }
             else if (response < 0) {
-                
+                alert("The identification file and the spectra files could not be converted into a spectral library. Please check all files.");
             }
             else {
                 document.getElementById("step4-wait").style.display = "none";
-                document.getElementById("check_spectra").style.display = "inline";
                 document.getElementById("check_spectra_button").removeAttribute("disabled");
+                custom_resize_ms_view();
                 
                 var xmlhttp_num = new XMLHttpRequest();
                 xmlhttp_num.onreadystatechange = function() {
@@ -295,6 +305,9 @@ function step3_transition_step4(){
     xmlhttp.open("POST", file_pathname + "admin/scripts/blib-server.py", true);
     xmlhttp.send("command=check_blib_progress");
 }
+
+
+
 
 
 
@@ -594,7 +607,14 @@ function inspect_spectra(){
 
 
 function insert_spectra(){
-    var species_db = "Human"
+    var usi = parseInt(uploaded_species_id);
+    
+    if (!(usi in supported_species)){
+        alert("Warning: species is unknown, spectra cannot be added.");
+        return;
+    }
+    
+    var species_db = supported_species[usi];
     if (confirm("Do you want to insert the '" + species_db + "' database? The process is NOT reversible.")){
         
         var xmlhttp_insert = new XMLHttpRequest();
@@ -616,11 +636,11 @@ function insert_spectra(){
 
 function step4_transition_step5(){
     
-    var rect_cs = document.getElementById('check_spectra').getBoundingClientRect();
-    var cs_top = parseInt(document.getElementById('check_spectra').style.top.split("px")[0]);
+    //var rect_cs = document.getElementById('check_spectra').getBoundingClientRect();
+    //var cs_top = parseInt(document.getElementById('check_spectra').style.top.split("px")[0]);
     
-    document.getElementById("step5").style.top = (cs_top + rect_cs.height + 40).toString() + "px";
-    document.getElementById("step5").style.position = "fixed";
+    //document.getElementById("step5").style.top = (cs_top + rect_cs.height + 40).toString() + "px";
+    //document.getElementById("step5").style.position = "fixed";
     
     document.getElementById("step5").style.display = "inline";
     document.getElementById("step5-wait").style.display = "inline";
@@ -632,6 +652,7 @@ function step4_transition_step5(){
             var response = parseInt(xmlhttp_insert_spectra.responseText);
             if (response < 0){
                 // TODO error
+                alert("An error occurred, spectra could not be added to spectral library.");
             }
             else if (response > 0){
                 document.getElementById("step5-wait").style.display = "none";
@@ -645,6 +666,9 @@ function step4_transition_step5(){
     xmlhttp_insert_spectra.open("POST", file_pathname + "admin/scripts/blib-server.py", true);
     xmlhttp_insert_spectra.send("command=check_insert_progress");
 }
+
+
+
 
 
 
@@ -670,33 +694,46 @@ function inspect_spectra_checking(spectrum_id){
 
 
 function custom_resize_ms_view(){
-    //if (spectrum_loaded) return;
-    console.log("custom_resize_manage_view");
-    var t_top = 0.02;
-    document.getElementById("step4-wait").style.display = "inline";
-    var rect_s4 = document.getElementById('step4-wait').getBoundingClientRect();
-    document.getElementById("check_spectra").style.top = (rect_s4.top).toString() + "px";
-    document.getElementById("step4-wait").style.display = "none";
+    if (document.getElementById('step-container').style.display == "none") return;
     
-    rect_s4 = document.getElementById('step-container').getBoundingClientRect();
+    document.getElementById("check_spectra").style.setProperty("z-index", "120");
+    document.getElementById("check_spectra").style.setProperty("position", "fixed");
+    document.getElementById("check_spectra").style.setProperty("top", "");
+    document.getElementById("check_spectra").style.setProperty("left", "");
+    document.getElementById("check_spectra").style.setProperty("width", "95%");
+    document.getElementById("check_spectra").style.setProperty("height", "95%");
+    document.getElementById("check_spectra").style.setProperty("background-color", "white");
+    document.getElementById("check_spectra").style.setProperty("border-color", "black");
+    document.getElementById("check_spectra").style.setProperty("border-width", "1px");
+    document.getElementById("check_spectra").style.setProperty("border-style", "solid");
+    
+    
+    var t_top = 0.02;
+    
+    var rect_s4 = document.getElementById('step-container').getBoundingClientRect();
     var sp_height = document.getElementById('check_spectra').offsetHeight * 0.87;
+    var scroll_t = document.getElementById('step-container').scrollTop;
     
     resize_ms_view();
     
     var rect = document.getElementById('check_spectra').getBoundingClientRect();
     
-    document.getElementById("spectra_panel").style.top = (rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top).toString() + "px";
+    document.getElementById("spectra_panel").style.top = (rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top + scroll_t).toString() + "px";
     document.getElementById("spectra_panel").style.left = (rect.left + (rect.right - rect.left) * 0.005 - rect_s4.left).toString() + "px";
     
-    document.getElementById("msarea").style.top = (rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top).toString() + "px";
+    document.getElementById("msarea").style.top = (rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top + scroll_t).toString() + "px";
     document.getElementById("msarea").style.left = (rect.left + (rect.right - rect.left) * 0.3 - rect_s4.left).toString() + "px";
     
-    document.getElementById("check_spectra_functions").style.top = (sp_height + rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top).toString() + "px";
+    document.getElementById("check_spectra_functions").style.top = (sp_height + rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top + scroll_t).toString() + "px";
     document.getElementById("check_spectra_functions").style.left = (rect.left + (rect.right - rect.left) * 0.005 - rect_s4.left).toString() + "px";
     
-    document.getElementById("spectra_options").style.top = (rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top).toString() + "px";
+    document.getElementById("spectra_options").style.top = (rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top + scroll_t).toString() + "px";
     document.getElementById("spectra_options").style.left = (rect.left + (rect.right - rect.left) * 0.3 - rect_s4.left).toString() + "px";
+    
+    document.getElementById("check_spectra").style.display = "inline";
 }
+
+
 
 
 
@@ -734,8 +771,6 @@ function inspect_spectra_change_selection(row_num){
     if (row_pos < spectra_panel.scrollTop) spectra_panel.scrollTop = row_pos - 1;
     if (spectra_panel.scrollTop + spectra_panel.clientHeight - unit < row_pos) spectra_panel.scrollTop = row_pos + 1 + unit - spectra_panel.clientHeight;
 }
-
-
 
 
 
@@ -825,7 +860,7 @@ function send_file(registered_file_id, step){
                             }
                             
                             
-                            this.xhttp.open("POST", file_pathname + "admin/scripts/blib-server.py", false);
+                            this.xhttp.open("POST", file_pathname + "admin/scripts/blib-server.py", true);
                             this.xhttp.send("command=send_file&chunk_num=" + this.thread_data[0] + "&type=chunk&file_id=" + this.file_id + "&checksum=" + md5_chunk + "&content=" + urlEncode(this.result));
                         }
                         else {
@@ -840,7 +875,7 @@ function send_file(registered_file_id, step){
                         }
                     }
                 }
-                this.http_checksum.open("POST", file_pathname + "admin/scripts/blib-server.py", false);
+                this.http_checksum.open("POST", file_pathname + "admin/scripts/blib-server.py", true);
                 this.http_checksum.send("command=get_check_sum&file_id=" + this.file_id + "&chunk_num=" + this.thread_data[0]);
                 
                     
@@ -872,6 +907,27 @@ function stop_upload(){
 
 function delete_ident(){
     if (confirm("Do you really want to delete the identification file?")){
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && check_response(xmlhttp.responseText)) {
+                uploaded_file_id = -1;
+                uploaded_filename = "";
+                init_manage_blib();
+            }
+        }
+        xmlhttp.open("POST", file_pathname + "admin/scripts/blib-server.py", false);
+        xmlhttp.send("command=delete_file&file_id=" + uploaded_file_id);
+    }
+}
+
+
+
+function reset_insertion(){
+    if (uploaded_file_id == -1){
+        alert("Nothing to reset");
+        return;
+    }
+    if (confirm("Do you really want to reset the insertion form?")){
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && check_response(xmlhttp.responseText)) {

@@ -61,6 +61,8 @@ acids['V'] =  99.068410;
 
 
 
+
+
 function peptide_seq_mass(peptide_seq){
     var mass = 0;
     for (var i = 0; i < peptide_seq.length; ++i){
@@ -68,6 +70,8 @@ function peptide_seq_mass(peptide_seq){
     }
     return mass;
 }
+
+
 
 
 function binary_search(key){
@@ -91,6 +95,9 @@ function binary_search(key){
 
 
 
+
+
+
 function peak(ms, xx, int){
     this.mass = ms;
     this.x = xx;
@@ -99,6 +106,9 @@ function peak(ms, xx, int){
     this.annotation = "";
     this.highlight = false;
 }
+
+
+
 
 
 
@@ -112,6 +122,9 @@ function subscripting(x){
     }
     return str;
 }
+
+
+
 
 
 
@@ -186,6 +199,10 @@ function annotation(ions){
 }
 
 
+
+
+
+
 function resize_ms_view(){
     var t_top = 0.02;
     
@@ -235,6 +252,9 @@ function resize_ms_view(){
 
 
 
+
+
+
 function change_match_error_value(){
     // check if new value is a number
     var n = document.getElementById("error_value").value;
@@ -257,6 +277,10 @@ function change_match_error_value(){
 }
 
 
+
+
+
+
 function change_match_error(){
     if (document.getElementById("radio_ppm").checked){
         document.getElementById("unit").innerHTML = document.getElementById("radio_ppm").value;
@@ -272,6 +296,9 @@ function change_match_error(){
         draw_spectrum();
     }
 }
+
+
+
 
 
 
@@ -335,6 +362,10 @@ function load_spectrum(spectrum_id, spectrum_data){
     annotation(ions);
     draw_spectrum();
 }
+
+
+
+
 
 
 function draw_spectrum(ctx){

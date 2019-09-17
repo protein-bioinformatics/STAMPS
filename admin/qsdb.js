@@ -169,6 +169,7 @@ function init(){
     window.addEventListener('resize', resize_pathway_view, false);
     window.addEventListener('resize', resize_manage_view, false);
     window.addEventListener('resize', resize_ms_view, false);
+    window.addEventListener('resize', custom_resize_ms_view, false);
     
     navigation_content = ["select_species", "select_signaling_pathway", "select_metabolic_pathway", "menu_background"];
     
@@ -4453,6 +4454,8 @@ function curate_spectra_checking(row_num){
 
 function open_insert_spectra(){
     hide_check_spectra();
+    document.getElementById("check_spectra").setAttribute("class", "");
+    
     document.getElementById("check_spectra").style.display = "none";
     document.getElementById("insert_spectra").style.display = "inline";
     
@@ -4475,7 +4478,23 @@ function open_insert_spectra(){
 
 
 
+
+
 function curate_spectra(){
+    document.getElementById("check_spectra").style.setProperty("top", "5%");
+    document.getElementById("check_spectra").style.setProperty("left", "5%");
+    document.getElementById("check_spectra").style.setProperty("z-index", "120");
+    document.getElementById("check_spectra").style.setProperty("position", "fixed");
+    document.getElementById("check_spectra").style.setProperty("width", "90%");
+    document.getElementById("check_spectra").style.setProperty("height", "90%");
+    document.getElementById("check_spectra").style.setProperty("background-color", "white");
+    document.getElementById("check_spectra").style.setProperty("border-color", "black");
+    document.getElementById("check_spectra").style.setProperty("border-width", "1px");
+    document.getElementById("check_spectra").style.setProperty("border-style", "solid");
+    
+    document.getElementById("check_spectra").setAttribute("class", "check_spectra");
+    
+    
     var child = document.getElementById("check_spectra");
     var parentNode = child.parentNode;
     parentNode.removeChild(child);
