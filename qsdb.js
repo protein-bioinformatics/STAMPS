@@ -129,8 +129,8 @@ function init(){
     
     window.addEventListener('resize', resize_ms_view, false);
     window.addEventListener('resize', resize_pathway_view, false);
-    document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
-    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
+    document.getElementById("check_spectra_msarea").addEventListener('DOMMouseScroll', function(event){view_mouse_wheel_listener(event, "check_spectra");}, false);
+    document.getElementById("check_spectra_msarea").addEventListener("mousewheel", function(event){view_mouse_wheel_listener(event, "check_spectra");}, false);
     document.addEventListener('DOMMouseScroll', prevent_zooming, false);
     document.addEventListener("mousewheel", prevent_zooming, false);
     

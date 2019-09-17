@@ -168,7 +168,7 @@ function init(){
     document.getElementById("menu_background").addEventListener("click", close_navigation, false);
     window.addEventListener('resize', resize_pathway_view, false);
     window.addEventListener('resize', resize_manage_view, false);
-    window.addEventListener('resize', resize_ms_view, false);
+    window.addEventListener('resize', function(event){resize_ms_view("curate_spectra");}, false);
     window.addEventListener('resize', custom_resize_ms_view, false);
     
     navigation_content = ["select_species", "select_signaling_pathway", "select_metabolic_pathway", "menu_background"];
@@ -223,8 +223,8 @@ function init(){
     c.addEventListener("dblclick", mouse_dblclick_listener, false);
     c.addEventListener("mousewheel", mouse_wheel_listener, false);
     c.addEventListener('DOMMouseScroll', mouse_wheel_listener, false);
-    document.getElementById("msarea").addEventListener("mousewheel", view_mouse_wheel_listener, false);
-    document.getElementById("msarea").addEventListener('DOMMouseScroll', view_mouse_wheel_listener, false);
+    document.getElementById("curate_spectra_msarea").addEventListener("mousewheel", function(event){view_mouse_wheel_listener(event, "curate_spectra");}, false);
+    document.getElementById("curate_spectra_msarea").addEventListener('DOMMouseScroll', function(event){view_mouse_wheel_listener(event, "curate_spectra");}, false);
     
     c.oncontextmenu = right_mouse_click_listener;
     
@@ -1873,7 +1873,7 @@ function update_node(event) {
 
 
 function key_down(event){
-    if (document.getElementById("check_spectra").style.display != "none"){
+    if (document.getElementById("curate_spectra").style.display != "none"){
         event.preventDefault();
         switch(event.which){
             case 27:
@@ -1955,7 +1955,8 @@ function editor_hide_check_spectra(){
     document.getElementById("renderarea").style.filter = "";
     document.getElementById("navigation").style.filter = "";
     document.getElementById("toolbox").style.filter = "";
-    hide_check_spectra();
+    document.getElementById("waiting_background").style.display = "none";
+    document.getElementById("curate_spectra").style.display = "none";
 }
 
 
@@ -4403,7 +4404,7 @@ function curate_spectra_change_selection(row_num){
     }
          
     current_spectrum_selected = row_num;
-    load_spectrum(dom_table.children[current_spectrum_selected].getAttribute("value"));
+    load_spectrum(dom_table.children[current_spectrum_selected].getAttribute("value"), null, "curate_spectra");
     
     var b_count = 0;
     var y_count = 0;
@@ -4414,10 +4415,10 @@ function curate_spectra_change_selection(row_num){
     var b_percent = b_count / peptide_mod.length * 100;
     var y_percent = y_count / peptide_mod.length * 100;
     
-    document.getElementById("check_spectra_peptide_info").innerHTML = dom_table.children[current_spectrum_selected].children[0].innerHTML + "&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;" + peptide_mod.length + "&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; B-ions(%): " + b_percent.toFixed(2) + "%&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; Y-ions(%): " + y_percent.toFixed(2) + "%";
+    document.getElementById("curate_spectra_peptide_info").innerHTML = dom_table.children[current_spectrum_selected].children[0].innerHTML + "&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;" + peptide_mod.length + "&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; B-ions(%): " + b_percent.toFixed(2) + "%&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; Y-ions(%): " + y_percent.toFixed(2) + "%";
     
     
-    var spectra_panel = document.getElementById("spectra_panel");
+    var spectra_panel = document.getElementById("curate_spectra_panel");
     
     var unit = spectra_panel.scrollHeight / max_spectra_per_page;
     var row_pos = unit * row_num;
@@ -4453,23 +4454,12 @@ function curate_spectra_checking(row_num){
 
 
 function open_insert_spectra(){
-    hide_check_spectra();
-    document.getElementById("check_spectra").setAttribute("class", "");
+    document.getElementById("waiting_background").style.display = "none";
+    document.getElementById("curate_spectra").style.display = "none";
+    document.getElementById('insert_spectra').style.display = 'inline';
     
-    document.getElementById("check_spectra").style.display = "none";
-    document.getElementById("insert_spectra").style.display = "inline";
     
-    document.getElementById("open_insert_spectra_button").style.display = "none";
-    document.getElementById("check_spectra_peptide_info").style.display = "none";
-    document.getElementById("check_spectra_button").innerHTML = "Insert spectra";
-    document.getElementById("check_spectra_button").setAttribute("onclick", "insert_spectra();");
-    
-    document.getElementById("step4-wait-check-spectra").innerHTML = "";
-    
-    var child = document.getElementById("check_spectra");
-    var parentNode = child.parentNode;
-    parentNode.removeChild(child);
-    document.getElementById("step4-wait-check-spectra").appendChild(child);
+    //document.getElementById('insert_spectra').getBoundingClientRect();
     
     init_manage_blib();
 }
@@ -4481,36 +4471,9 @@ function open_insert_spectra(){
 
 
 function curate_spectra(){
-    document.getElementById("check_spectra").style.setProperty("top", "5%");
-    document.getElementById("check_spectra").style.setProperty("left", "5%");
-    document.getElementById("check_spectra").style.setProperty("z-index", "120");
-    document.getElementById("check_spectra").style.setProperty("position", "fixed");
-    document.getElementById("check_spectra").style.setProperty("width", "90%");
-    document.getElementById("check_spectra").style.setProperty("height", "90%");
-    document.getElementById("check_spectra").style.setProperty("background-color", "white");
-    document.getElementById("check_spectra").style.setProperty("border-color", "black");
-    document.getElementById("check_spectra").style.setProperty("border-width", "1px");
-    document.getElementById("check_spectra").style.setProperty("border-style", "solid");
-    
-    document.getElementById("check_spectra").setAttribute("class", "check_spectra");
-    
-    
-    var child = document.getElementById("check_spectra");
-    var parentNode = child.parentNode;
-    parentNode.removeChild(child);
-    document.getElementById("check_spectra_wrapper").appendChild(child);
-    document.getElementById("check_spectra").style.top = "";
-    
-    
-    document.getElementById("open_insert_spectra_button").style.display = "inline";
-    document.getElementById("check_spectra_peptide_info").style.display = "inline";
-    document.getElementById("check_spectra_button").innerHTML = "Back";
-    document.getElementById("check_spectra_button").setAttribute("onclick", "editor_hide_check_spectra();");
-    
-    
     var dom_nav_cell = document.getElementById("curate_spectra_navigation");
     dom_nav_cell.innerHTML = "";
-    document.getElementById("check_spectra_peptide_info").innerHTML = "";
+    document.getElementById("curate_spectra_peptide_info").innerHTML = "";
     
     if (spectra_current_page < 0) spectra_current_page = 0;
     if (spectra_current_page >= spectra_max_pages - 1) spectra_current_page = spectra_max_pages - 1;
@@ -4571,7 +4534,7 @@ function curate_spectra(){
             spectra_meta = JSON.parse(xmlhttp_spectra_meta.responseText);
             
             current_spectrum_selected = -1;
-            var spectra_panel = document.getElementById("spectra_panel");
+            var spectra_panel = document.getElementById("curate_spectra_panel");
             spectra_panel.innerHTML = "";
             var dom_table = document.createElement("table");
             spectra_panel.appendChild(dom_table);
@@ -4633,14 +4596,14 @@ function curate_spectra(){
     xmlhttp_spectra_meta.send();
     
     
-    document.getElementById("check_spectra").style.display = "inline";
+    document.getElementById("curate_spectra").style.display = "inline";
     document.getElementById("waiting_background").style.display = "inline";
     document.getElementById("renderarea").style.filter = "blur(5px)";
     document.getElementById("navigation").style.filter = "blur(5px)";
     document.getElementById("toolbox").style.filter = "blur(5px)";
-    change_match_error();
-    resize_ms_view();
+    change_match_error("curate_spectra");
+    resize_ms_view("curate_spectra");
     spectrum_loaded = false;
-    draw_spectrum();
+    draw_spectrum("curate_spectra");
     curate_spectra_change_selection(0);
 }

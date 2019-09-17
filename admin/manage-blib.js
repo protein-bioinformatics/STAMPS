@@ -267,10 +267,10 @@ function step2_transition_step3(){
 
 function step3_transition_step4(){
     document.getElementById("step4").style.display = "inline";
-    document.getElementById("check_spectra").style.display = "none";
+    document.getElementById("inspect_spectra").style.display = "none";
     document.getElementById("step4-wait").style.display = "inline";
     document.getElementById("step3-button").setAttribute("disabled", "true");
-    //document.getElementById("step5").style.display = "none";
+    document.getElementById("step5").style.display = "none";
     document.getElementById("step5-wait").style.display = "inline";
     document.getElementById("step5-confirm").style.display = "none";
     
@@ -287,8 +287,8 @@ function step3_transition_step4(){
             }
             else {
                 document.getElementById("step4-wait").style.display = "none";
-                document.getElementById("check_spectra_button").removeAttribute("disabled");
-                custom_resize_ms_view();
+                document.getElementById("inspect_spectra").style.display = "";
+                custom_resize_ms_view("inspect_spectra");
                 
                 var xmlhttp_num = new XMLHttpRequest();
                 xmlhttp_num.onreadystatechange = function() {
@@ -474,7 +474,7 @@ function prepare_ident_upload(file_type, step){
 
 
 function inspect_spectra(){
-    var dom_nav_cell = document.getElementById("curate_spectra_navigation");
+    var dom_nav_cell = document.getElementById("inspect_spectra_navigation");
     dom_nav_cell.innerHTML = "";
     
     if (inspect_spectra_current_page < 0) inspect_spectra_current_page = 0;
@@ -534,14 +534,14 @@ function inspect_spectra(){
             spectra_meta = JSON.parse(xmlhttp_spectra_meta.responseText);
             
             
-            var spectra_panel = document.getElementById("spectra_panel");
+            var spectra_panel = document.getElementById("inspect_spectra_panel");
             spectra_panel.innerHTML = "";
             var dom_table = document.createElement("table");
             spectra_panel.appendChild(dom_table);
             dom_table.setAttribute("width", "100%"); 
             dom_table.setAttribute("cellspacing", "0"); 
             dom_table.setAttribute("border", "0"); 
-            dom_table.setAttribute("id", "curate_spectra_panel_table");
+            dom_table.setAttribute("id", "inspect_spectra_panel_table");
             
             spectra_checks = {};
             
@@ -596,10 +596,10 @@ function inspect_spectra(){
     xmlhttp_spectra_meta.send("command=select_spectra&limit=" + (inspect_spectra_current_page * inspect_max_spectra_per_page) + "," + inspect_max_spectra_per_page);
     
     
-    change_match_error();
-    custom_resize_ms_view();
+    change_match_error("inspect_spectra");
+    custom_resize_ms_view("inspect_spectra");
     inspect_spectra_change_selection(0);
-    draw_spectrum();
+    draw_spectrum("inspect_spectra");
 }
 
 
@@ -621,7 +621,7 @@ function insert_spectra(){
         xmlhttp_insert.onreadystatechange = function() {
             if (xmlhttp_insert.readyState == 4 && xmlhttp_insert.status == 200) {
                 step4_transition_step5();
-                document.getElementById("check_spectra_button").setAttribute("disabled", "true");
+                document.getElementById("inspect_spectra_button").setAttribute("disabled", "true");
             }
         }
         xmlhttp_insert.open("POST", file_pathname + "admin/scripts/blib-server.py", false);
@@ -635,13 +635,6 @@ function insert_spectra(){
 
 
 function step4_transition_step5(){
-    
-    //var rect_cs = document.getElementById('check_spectra').getBoundingClientRect();
-    //var cs_top = parseInt(document.getElementById('check_spectra').style.top.split("px")[0]);
-    
-    //document.getElementById("step5").style.top = (cs_top + rect_cs.height + 40).toString() + "px";
-    //document.getElementById("step5").style.position = "fixed";
-    
     document.getElementById("step5").style.display = "inline";
     document.getElementById("step5-wait").style.display = "inline";
     document.getElementById("step5-confirm").style.display = "none";
@@ -651,7 +644,6 @@ function step4_transition_step5(){
         if (xmlhttp_insert_spectra.readyState == 4 && xmlhttp_insert_spectra.status == 200) {
             var response = parseInt(xmlhttp_insert_spectra.responseText);
             if (response < 0){
-                // TODO error
                 alert("An error occurred, spectra could not be added to spectral library.");
             }
             else if (response > 0){
@@ -696,41 +688,36 @@ function inspect_spectra_checking(spectrum_id){
 function custom_resize_ms_view(){
     if (document.getElementById('step-container').style.display == "none") return;
     
-    document.getElementById("check_spectra").style.setProperty("z-index", "120");
-    document.getElementById("check_spectra").style.setProperty("position", "fixed");
-    document.getElementById("check_spectra").style.setProperty("top", "");
-    document.getElementById("check_spectra").style.setProperty("left", "");
-    document.getElementById("check_spectra").style.setProperty("width", "95%");
-    document.getElementById("check_spectra").style.setProperty("height", "95%");
-    document.getElementById("check_spectra").style.setProperty("background-color", "white");
-    document.getElementById("check_spectra").style.setProperty("border-color", "black");
-    document.getElementById("check_spectra").style.setProperty("border-width", "1px");
-    document.getElementById("check_spectra").style.setProperty("border-style", "solid");
+    
+    var h_ms = document.getElementById('step-container').getBoundingClientRect().height;
+    document.getElementById('inspect_spectra').style.height = (h_ms * 0.8).toString() + "px";
+    
+    
     
     
     var t_top = 0.02;
     
     var rect_s4 = document.getElementById('step-container').getBoundingClientRect();
-    var sp_height = document.getElementById('check_spectra').offsetHeight * 0.87;
+    var sp_height = document.getElementById('inspect_spectra').offsetHeight * 0.87;
     var scroll_t = document.getElementById('step-container').scrollTop;
     
-    resize_ms_view();
+    resize_ms_view("inspect_spectra");
     
-    var rect = document.getElementById('check_spectra').getBoundingClientRect();
+    var rect = document.getElementById('inspect_spectra').getBoundingClientRect();
     
-    document.getElementById("spectra_panel").style.top = (rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top + scroll_t).toString() + "px";
-    document.getElementById("spectra_panel").style.left = (rect.left + (rect.right - rect.left) * 0.005 - rect_s4.left).toString() + "px";
+    document.getElementById("inspect_spectra_panel").style.top = (rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top + scroll_t).toString() + "px";
+    document.getElementById("inspect_spectra_panel").style.left = (rect.left + (rect.right - rect.left) * 0.005 - rect_s4.left).toString() + "px";
     
-    document.getElementById("msarea").style.top = (rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top + scroll_t).toString() + "px";
-    document.getElementById("msarea").style.left = (rect.left + (rect.right - rect.left) * 0.3 - rect_s4.left).toString() + "px";
+    document.getElementById("inspect_spectra_msarea").style.top = (rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top + scroll_t).toString() + "px";
+    document.getElementById("inspect_spectra_msarea").style.left = (rect.left + (rect.right - rect.left) * 0.3 - rect_s4.left).toString() + "px";
     
-    document.getElementById("check_spectra_functions").style.top = (sp_height + rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top + scroll_t).toString() + "px";
-    document.getElementById("check_spectra_functions").style.left = (rect.left + (rect.right - rect.left) * 0.005 - rect_s4.left).toString() + "px";
+    document.getElementById("inspect_spectra_functions").style.top = (sp_height + rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top + scroll_t).toString() + "px";
+    document.getElementById("inspect_spectra_functions").style.left = (rect.left + (rect.right - rect.left) * 0.005 - rect_s4.left).toString() + "px";
     
-    document.getElementById("spectra_options").style.top = (rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top + scroll_t).toString() + "px";
-    document.getElementById("spectra_options").style.left = (rect.left + (rect.right - rect.left) * 0.3 - rect_s4.left).toString() + "px";
+    document.getElementById("inspect_spectra_options").style.top = (rect.top + (rect.bottom - rect.top) * t_top - rect_s4.top + scroll_t).toString() + "px";
+    document.getElementById("inspect_spectra_options").style.left = (rect.left + (rect.right - rect.left) * 0.3 - rect_s4.left).toString() + "px";
     
-    document.getElementById("check_spectra").style.display = "inline";
+    document.getElementById("inspect_spectra").style.display = "";
 }
 
 
@@ -758,13 +745,13 @@ function inspect_spectra_change_selection(row_num){
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             spectrum_data = JSON.parse(xmlhttp.responseText);
-            load_spectrum(spectrum_id, spectrum_data);
+            load_spectrum(spectrum_id, spectrum_data, "inspect_spectra");
         }
     }
     xmlhttp.open("POST", file_pathname + "admin/scripts/blib-server.py", false);
     xmlhttp.send("command=get_spectrum&spectrum_id=" + spectrum_id);
     
-    var spectra_panel = document.getElementById("spectra_panel");
+    var spectra_panel = document.getElementById("inspect_spectra_panel");
     
     var unit = spectra_panel.scrollHeight / inspect_max_spectra_per_page;
     var row_pos = unit * row_num;

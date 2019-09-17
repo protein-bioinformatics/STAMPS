@@ -236,6 +236,16 @@ div.check_spectra {
 }
 
 
+
+div.inspect_spectra {
+    z-index: 120;
+    background-color: white;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+}
+
+
 div.check_spectra_background {
     top: 0px;
     display: none;

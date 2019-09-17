@@ -74,7 +74,7 @@ function peptide_seq_mass(peptide_seq){
 
 
 
-function binary_search(key){
+function binary_search(key, ppm){
     var low = 0;
     var high = peaks.length - 1;
     best_index = low;
@@ -90,7 +90,7 @@ function binary_search(key){
     }
     
     var mass_diff = Math.abs(peaks[best_index].mass - key);
-    return [document.getElementById("radio_ppm").checked ? mass_diff / key * 1000000 : mass_diff, best_index];
+    return [ppm ? mass_diff / key * 1000000 : mass_diff, best_index];
 }
 
 
@@ -128,9 +128,9 @@ function subscripting(x){
 
 
 
-function annotation(ions){
+function annotation(ions, ms_panel){
     // annotate y-ions
-    var tolerance = (document.getElementById("radio_ppm").checked ? tolerance_relative : tolerance_absolute);
+    var tolerance = (document.getElementById(ms_panel + "_radio_ppm").checked ? tolerance_relative : tolerance_absolute);
     var rev_peptide = peptide_mod.split("").reverse().join("");
     var mass = 0;
     
@@ -143,7 +143,7 @@ function annotation(ions){
     // annotate immonium ions
     for (var i = 0; i < peptide_mod.length; ++i){
         mass = acids[peptide_mod[i]] - C12 - O + H;
-        var diff_mass = binary_search(mass);
+        var diff_mass = binary_search(mass, document.getElementById(ms_panel + "_radio_ppm").checked);
         if (diff_mass[0] < tolerance){
             peaks[diff_mass[1]].highlight = true;
             peaks[diff_mass[1]].type = ion_type.immonium;
@@ -160,7 +160,7 @@ function annotation(ions){
             
             for (var crg = 1; crg <= charge; ++crg){
                 if (mass >= 800 * (crg - 1)){
-                    var diff_mass = binary_search((mass + (H - electron) * crg) / crg);
+                    var diff_mass = binary_search((mass + (H - electron) * crg) / crg, document.getElementById(ms_panel + "_radio_ppm").checked);
                     if (diff_mass[0] < tolerance){
                         peaks[diff_mass[1]].highlight = true;
                         peaks[diff_mass[1]].type = ion_type.b_type;
@@ -178,7 +178,7 @@ function annotation(ions){
             mass += acids[rev_peptide[i]];
             for (var crg = 1; crg <= charge; ++crg){
                 if (mass >= 800 * (crg - 1)){
-                var diff_mass = binary_search((mass + (H - electron) * crg) / crg);
+                var diff_mass = binary_search((mass + (H - electron) * crg) / crg, document.getElementById(ms_panel + "_radio_ppm").checked);
                     if (diff_mass[0] < tolerance){
                         peaks[diff_mass[1]].highlight = true;
                         peaks[diff_mass[1]].type = ion_type.y_type;
@@ -190,7 +190,7 @@ function annotation(ions){
     }
     
     // annotate precursor
-    var diff_mass = binary_search(precursor_mass);
+    var diff_mass = binary_search(precursor_mass, document.getElementById(ms_panel + "_radio_ppm").checked);
     if (diff_mass[0] < tolerance){
         peaks[diff_mass[1]].highlight = true;
         peaks[diff_mass[1]].type = ion_type.precursor;
@@ -203,51 +203,54 @@ function annotation(ions){
 
 
 
-function resize_ms_view(){
+function resize_ms_view(ms_panel){
     var t_top = 0.02;
     
     var filter_height = filter_parameters["filter_panel_visible"] ? 0.3 : 0;
     
-    document.getElementById("msarea").width = document.getElementById('check_spectra').offsetWidth * 0.695;
-    document.getElementById("msarea").height = document.getElementById('check_spectra').offsetHeight * (0.9 - filter_height);
-    document.getElementById("spectra_panel").style.width = (document.getElementById('check_spectra').offsetWidth * 0.29).toString() + "px";
-    var sp_height = document.getElementById('check_spectra').offsetHeight * (0.87 - filter_height);
-    document.getElementById("spectra_panel").style.height = (sp_height).toString() + "px";
-    document.getElementById("check_spectra_functions").style.width = (document.getElementById('check_spectra').offsetWidth * 0.29).toString() + "px";
-    document.getElementById("check_spectra_functions").style.height = (document.getElementById('check_spectra').offsetHeight * (0.05)).toString() + "px";
+    document.getElementById(ms_panel + "_msarea").width = document.getElementById(ms_panel).offsetWidth * 0.695;
+    document.getElementById(ms_panel + "_msarea").height = document.getElementById(ms_panel).offsetHeight * (0.9 - filter_height);
+    document.getElementById(ms_panel + "_panel").style.width = (document.getElementById(ms_panel).offsetWidth * 0.29).toString() + "px";
+    var sp_height = document.getElementById(ms_panel).offsetHeight * (0.87 - filter_height);
+    document.getElementById(ms_panel + "_panel").style.height = (sp_height).toString() + "px";
+    document.getElementById(ms_panel + "_functions").style.width = (document.getElementById(ms_panel).offsetWidth * 0.29).toString() + "px";
+    document.getElementById(ms_panel + "_functions").style.height = (document.getElementById(ms_panel).offsetHeight * (0.05)).toString() + "px";
     
     
-    var rect = document.getElementById('check_spectra').getBoundingClientRect();
-    document.getElementById("msarea").style.top = (rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
-    document.getElementById("msarea").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
-    document.getElementById("spectra_panel").style.top = (rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
-    document.getElementById("spectra_panel").style.left = (rect.left + (rect.right - rect.left) * 0.005).toString() + "px";
-    document.getElementById("check_spectra_functions").style.top = (sp_height + rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
-    document.getElementById("check_spectra_functions").style.left = (rect.left + (rect.right - rect.left) * 0.005).toString() + "px";
-    document.getElementById("spectra_options").style.top = (rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
-    document.getElementById("spectra_options").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
+    var rect = document.getElementById(ms_panel).getBoundingClientRect();
+    document.getElementById(ms_panel + "_msarea").style.top = (rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
+    document.getElementById(ms_panel + "_msarea").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
+    document.getElementById(ms_panel + "_panel").style.top = (rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
+    document.getElementById(ms_panel + "_panel").style.left = (rect.left + (rect.right - rect.left) * 0.005).toString() + "px";
+    document.getElementById(ms_panel + "_functions").style.top = (sp_height + rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
+    document.getElementById(ms_panel + "_functions").style.left = (rect.left + (rect.right - rect.left) * 0.005).toString() + "px";
+    
+    if (document.getElementById(ms_panel + "_options") != null){
+        document.getElementById(ms_panel + "_options").style.top = (rect.top + (rect.bottom - rect.top) * t_top).toString() + "px";
+        document.getElementById(ms_panel + "_options").style.left = (rect.left + (rect.right - rect.left) * 0.3).toString() + "px";
+    }
     
     
     if (filter_parameters["filter_panel_visible"]){
         document.getElementById("filter_panel_check_spectra").style.left = (rect.left + (rect.right - rect.left) * 0.005).toString() + "px";
         document.getElementById("filter_panel_check_spectra").style.top = (rect.top + (rect.bottom - rect.top) * t_top + document.getElementById("msarea").height + 5).toString() + "px";
-        document.getElementById("filter_panel_check_spectra").style.width = ((document.getElementById('check_spectra').offsetWidth * 0.695) + (rect.left + (rect.right - rect.left) * 0.3) - (rect.left + (rect.right - rect.left) * 0.005)).toString() + "px";
-        document.getElementById("filter_panel_check_spectra").style.height = (document.getElementById('check_spectra').offsetHeight * filter_height).toString() + "px";
+        document.getElementById("filter_panel_check_spectra").style.width = ((document.getElementById(ms_panel).offsetWidth * 0.695) + (rect.left + (rect.right - rect.left) * 0.3) - (rect.left + (rect.right - rect.left) * 0.005)).toString() + "px";
+        document.getElementById("filter_panel_check_spectra").style.height = (document.getElementById(ms_panel).offsetHeight * filter_height).toString() + "px";
     }
     
     
-    var scl_w = (document.getElementById("msarea").width - 40 - 70) / (right_border - left_border);
+    var scl_w = (document.getElementById(ms_panel + "_msarea").width - 40 - 70) / (right_border - left_border);
     origin_x *= scl_w;
     last_x *= scl_w;
     for (var i = 0; i < peaks.length; ++i) {
         peaks[i].x *= scl_w;
     }
     left_border = 70;
-    right_border = document.getElementById("msarea").width - 40;
+    right_border = document.getElementById(ms_panel + "_msarea").width - 40;
     top_border = 40;
-    bottom_border = document.getElementById("msarea").height - 25;
+    bottom_border = document.getElementById(ms_panel + "_msarea").height - 25;
     
-    if (spectrum_loaded) draw_spectrum();
+    if (spectrum_loaded) draw_spectrum(ms_panel);
 }
 
 
@@ -255,11 +258,11 @@ function resize_ms_view(){
 
 
 
-function change_match_error_value(){
+function change_match_error_value(ms_panel){
     // check if new value is a number
-    var n = document.getElementById("error_value").value;
+    var n = document.getElementById(ms_panel + "_error_value").value;
     if (!isNaN(parseFloat(n)) && isFinite(n)){
-        if (document.getElementById("radio_ppm").checked){
+        if (document.getElementById(ms_panel + "_radio_ppm").checked){
             tolerance_relative = parseFloat(n);
         }
         else {
@@ -267,12 +270,12 @@ function change_match_error_value(){
         }
         if (spectrum_loaded){
             ions = new Set(ion_types[filter_parameters["ions"]].split("|"));
-            annotation(ions);
-            draw_spectrum();
+            annotation(ions, ms_panel);
+            draw_spectrum(ms_panel);
         }
     }
     else {
-        document.getElementById("error_value").value = (document.getElementById("radio_ppm").checked ? tolerance_relative : tolerance_absolute);
+        document.getElementById(ms_panel + "_error_value").value = (document.getElementById(ms_panel + "_radio_ppm").checked ? tolerance_relative : tolerance_absolute);
     }
 }
 
@@ -281,19 +284,19 @@ function change_match_error_value(){
 
 
 
-function change_match_error(){
-    if (document.getElementById("radio_ppm").checked){
-        document.getElementById("unit").innerHTML = document.getElementById("radio_ppm").value;
-        document.getElementById("error_value").value = tolerance_relative;
+function change_match_error(ms_panel){
+    if (document.getElementById(ms_panel + "_radio_ppm").checked){
+        document.getElementById(ms_panel + "_unit").innerHTML = document.getElementById(ms_panel + "_radio_ppm").value;
+        document.getElementById(ms_panel + "_error_value").value = tolerance_relative;
     }
     else {
-        document.getElementById("unit").innerHTML = document.getElementById("radio_da").value;
-        document.getElementById("error_value").value = tolerance_absolute;
+        document.getElementById(ms_panel + "_unit").innerHTML = document.getElementById(ms_panel + "_radio_da").value;
+        document.getElementById(ms_panel + "_error_value").value = tolerance_absolute;
     }
     if (spectrum_loaded){
         ions = new Set(ion_types[filter_parameters["ions"]].split("|"));
-        annotation(ions);
-        draw_spectrum();
+        annotation(ions, ms_panel);
+        draw_spectrum(ms_panel);
     }
 }
 
@@ -302,14 +305,14 @@ function change_match_error(){
 
 
 
-function load_spectrum(spectrum_id, spectrum_data){
-    var c = document.getElementById("msarea");
+function load_spectrum(spectrum_id, spectrum_data, ms_panel){
+    var c = document.getElementById(ms_panel + "_msarea");
     var ctx = c.getContext("2d");
     ms_zoom = 0;
     peaks = [];
     current_loaded_spectrum = spectrum_id;
     
-    if (typeof spectrum_data === "undefined"){
+    if (typeof spectrum_data === "undefined" || spectrum_data == null){
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -359,8 +362,8 @@ function load_spectrum(spectrum_id, spectrum_data){
     spectrum_loaded = true;
     
     ions = new Set(ion_types[filter_parameters["ions"]].split("|"));
-    annotation(ions);
-    draw_spectrum();
+    annotation(ions, ms_panel);
+    draw_spectrum(ms_panel);
 }
 
 
@@ -368,9 +371,11 @@ function load_spectrum(spectrum_id, spectrum_data){
 
 
 
-function draw_spectrum(ctx){
-    if (typeof(ctx) === 'undefined'){
-        var c = document.getElementById("msarea");
+function draw_spectrum(ms_panel, ctx){
+    if (typeof(ms_panel) === 'undefined') ms_panel = "check_spectra";
+    
+    if (typeof(ctx) === 'undefined') {
+        var c = document.getElementById(ms_panel + "_msarea");
         ctx = c.getContext("2d");
     }
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -588,6 +593,9 @@ function draw_spectrum(ctx){
 }
 
 
+
+
+
 function get_mouse_pos(canvas, evt){
     var rect = canvas.getBoundingClientRect();
     return {
@@ -597,8 +605,13 @@ function get_mouse_pos(canvas, evt){
 }
 
 
-function view_mouse_wheel_listener(e){
+
+
+
+function view_mouse_wheel_listener(e, ms_panel){
     if(e.ctrlKey) e.preventDefault();
+    
+    
     var delta = Math.max(-1, Math.min(1, -e.wheelDelta || e.detail));
     var direction = (1 - 2 *(delta >= 0));
     if (ms_zoom + direction < 0 || max_ms_zoom <= ms_zoom + direction)
@@ -607,7 +620,8 @@ function view_mouse_wheel_listener(e){
     ms_zoom += direction;
     var scale = ms_scaling;
     if (delta >= 0) scale = 1. / scale;
-    var c = document.getElementById("msarea");
+    
+    var c = document.getElementById(ms_panel + "_msarea");
     var ctx = c.getContext("2d");
     
     res = get_mouse_pos(c, e);
@@ -634,17 +648,20 @@ function view_mouse_wheel_listener(e){
         }
     }
     
-    draw_spectrum();
+    draw_spectrum(ms_panel);
 }
 
 
-function spectrum_to_svg(){
-    if (!spectrum_loaded) return;
+
+
+
+function spectrum_to_svg(ms_panel){
+    if (!spectrum_loaded || typeof(ms_panel) === "undefined") return;
     
-    var c = document.getElementById("msarea");
+    var c = document.getElementById(ms_panel + "_msarea");
     var ctx = c.getContext("2d");
     var svg_ctx = new C2S(ctx.canvas.width, ctx.canvas.height);
-    draw_spectrum(svg_ctx);
+    draw_spectrum(ms_panel, svg_ctx);
     
     var svgCode = svg_ctx.getSerializedSvg(true);
     var parts = svgCode.split("/>");
