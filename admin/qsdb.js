@@ -79,6 +79,7 @@ metabolite_create_action = true;
 
 
 spectra_max_pages = -1;
+spectra_max = -1;
 spectra_current_page = 0;
 current_spectrum_selected = 0;
 spectra_checks = {};
@@ -1883,7 +1884,7 @@ function key_down(event){
             case 13:
             case 32:
             case 39:
-                curate_spectra_checking(current_spectrum_selected);
+                curate_spectra_checking();
                 break;
                 
             case 38:
@@ -1904,6 +1905,45 @@ function key_down(event){
             case 34: // page down
                 spectra_current_page += 1;
                 curate_spectra();
+                break;
+                
+            default:
+                break;
+        }
+    }
+    
+    
+    else if (document.getElementById("inspect_spectra").style.display != "none"){
+        event.preventDefault();
+        switch(event.which){
+            case 27:
+                document.getElementById('insert_spectra').style.display = 'none';
+                break;
+                
+            case 13:
+            case 32:
+            case 39:
+                inspect_spectra_checking();
+                break;
+                
+            case 38:
+                var previous_spectrum_selected = Math.max(0, inspect_current_spectrum - 1);
+                inspect_spectra_change_selection(previous_spectrum_selected);
+                break;
+                
+            case 40:
+                var next_spectrum_selected = Math.min(max_spectra_per_page - 1, inspect_current_spectrum + 1);
+                inspect_spectra_change_selection(next_spectrum_selected);
+                break;
+                
+            case 33: // page up
+                inspect_spectra_current_page -= 1;
+                inspect_spectra();
+                break;
+                
+            case 34: // page down
+                inspect_spectra_current_page += 1;
+                inspect_spectra();
                 break;
                 
             default:
@@ -4391,7 +4431,9 @@ function manage_delete_loci_names(loci_names_id){
 
 
 function curate_spectra_change_selection(row_num){
-    if (current_spectrum_selected < 0) return;
+    if (row_num < 0 || spectra_max <= row_num) return;
+    
+    
     var dom_table = document.getElementById("curate_spectra_panel_table");
     var bg_color = (current_spectrum_selected & 1) ? "#DDDDDD" : "white";
     
@@ -4420,7 +4462,7 @@ function curate_spectra_change_selection(row_num){
     
     var spectra_panel = document.getElementById("curate_spectra_panel");
     
-    var unit = spectra_panel.scrollHeight / max_spectra_per_page;
+    var unit = spectra_panel.scrollHeight / spectra_max;
     var row_pos = unit * row_num;
     if (row_pos < spectra_panel.scrollTop) spectra_panel.scrollTop = row_pos - 1;
     if (spectra_panel.scrollTop + spectra_panel.clientHeight - unit < row_pos) spectra_panel.scrollTop = row_pos + 1 + unit - spectra_panel.clientHeight;
@@ -4430,9 +4472,9 @@ function curate_spectra_change_selection(row_num){
 
 
 
-function curate_spectra_checking(row_num){
+function curate_spectra_checking(){
     var dom_table = document.getElementById("curate_spectra_panel_table");
-    var spec_id = dom_table.children[row_num].getAttribute("value");
+    var spec_id = dom_table.children[current_spectrum_selected].getAttribute("value");
     spectra_checks[spec_id] = !spectra_checks[spec_id];
     document.getElementById("spec-checkbox-"+ spec_id).checked = spectra_checks[spec_id];
     
@@ -4545,6 +4587,7 @@ function curate_spectra(){
             spectra_checks = {};
             
             var row_cnt = 0;
+            spectra_max = spectra_meta.length;
             for (var spectrum_meta of spectra_meta){
                 current_spectrum_selected = 0;
                 var bg_color = (row_cnt & 1) ? "#DDDDDD" : "white";
@@ -4583,7 +4626,7 @@ function curate_spectra(){
                 dom_td2_input.setAttribute("type", "checkbox");
                 dom_td2_input.setAttribute("id", "spec-checkbox-" + spectrum_meta[0]);
                 if (spectrum_meta[3] != -1) dom_td2_input.setAttribute("checked", "true");
-                dom_td2_input.setAttribute("onclick", "curate_spectra_checking(" + row_cnt + ");");
+                dom_td2_input.setAttribute("onclick", "curate_spectra_checking();");
                 
                 spectra_checks[spectrum_meta[0]] = spectrum_meta[3] != -1;
                 

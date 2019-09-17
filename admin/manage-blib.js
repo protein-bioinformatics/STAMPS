@@ -14,6 +14,7 @@ uploaded_file_id = -1;
 uploaded_species_id = -1;
 uploaded_filename = "";
 inspect_spectra_max_pages = -1;
+inspect_spectra_max = -1;
 inspect_spectra_current_page = 0;
 inspect_current_spectrum = 0;
 inspect_max_spectra_per_page = 100;
@@ -546,6 +547,7 @@ function inspect_spectra(){
             spectra_checks = {};
             
             var row_cnt = 0;
+            inspect_spectra_max = spectra_meta.length;
             for (var spectrum_meta of spectra_meta){
                 var bg_color = (row_cnt & 1) ? "#DDDDDD" : "white";
                 
@@ -567,7 +569,7 @@ function inspect_spectra(){
                 dom_td2_input.setAttribute("type", "checkbox");
                 dom_td2_input.setAttribute("id", "spec-checkbox-" + spectrum_meta[0]);
                 if (spectrum_meta[3] != -1) dom_td2_input.setAttribute("checked", "true");
-                dom_td2_input.setAttribute("onclick", "inspect_spectra_checking(" + spectrum_meta[0] + ");");
+                dom_td2_input.setAttribute("onclick", "inspect_spectra_checking();");
                 spectra_checks[spectrum_meta[0]] = (spectrum_meta[3] != -1);
                 
                 
@@ -664,7 +666,12 @@ function step4_transition_step5(){
 
 
 
-function inspect_spectra_checking(spectrum_id){
+function inspect_spectra_checking(){
+    
+    
+    var dom_table = document.getElementById("inspect_spectra_panel_table");
+    var spectrum_id = dom_table.children[inspect_current_spectrum].getAttribute("value");
+    
     
     spectra_checks[spectrum_id] = !spectra_checks[spectrum_id];
     var value = spectra_checks[spectrum_id] ? "18" : "-1";
@@ -672,7 +679,7 @@ function inspect_spectra_checking(spectrum_id){
     var xmlhttp_spectra_meta = new XMLHttpRequest();
     xmlhttp_spectra_meta.onreadystatechange = function() {
         if (xmlhttp_spectra_meta.readyState == 4 && xmlhttp_spectra_meta.status == 200) {
-            draw_spectrum();
+            draw_spectrum("inspect_spectra");
         }
     }
     xmlhttp_spectra_meta.open("POST", file_pathname + "admin/scripts/blib-server.py", false);
@@ -726,8 +733,10 @@ function custom_resize_ms_view(){
 
 
 function inspect_spectra_change_selection(row_num){
-    if (inspect_current_spectrum < 0) return;
-    var dom_table = document.getElementById("curate_spectra_panel_table");
+    if (row_num < 0 || inspect_spectra_max <= row_num) return;
+    
+    
+    var dom_table = document.getElementById("inspect_spectra_panel_table");
     var bg_color = (inspect_current_spectrum & 1) ? "#DDDDDD" : "white";
     
     for (dom_td of dom_table.children[inspect_current_spectrum].children){
@@ -737,8 +746,9 @@ function inspect_spectra_change_selection(row_num){
     for (dom_td of dom_table.children[row_num].children){
         dom_td.setAttribute("bgcolor", spectrum_selection_color);
     }
-         
+    
     inspect_current_spectrum = row_num;
+         
     
     var spectrum_id = dom_table.children[inspect_current_spectrum].getAttribute("value");
     var xmlhttp = new XMLHttpRequest();
@@ -753,7 +763,7 @@ function inspect_spectra_change_selection(row_num){
     
     var spectra_panel = document.getElementById("inspect_spectra_panel");
     
-    var unit = spectra_panel.scrollHeight / inspect_max_spectra_per_page;
+    var unit = spectra_panel.scrollHeight / inspect_spectra_max;
     var row_pos = unit * row_num;
     if (row_pos < spectra_panel.scrollTop) spectra_panel.scrollTop = row_pos - 1;
     if (spectra_panel.scrollTop + spectra_panel.clientHeight - unit < row_pos) spectra_panel.scrollTop = row_pos + 1 + unit - spectra_panel.clientHeight;
