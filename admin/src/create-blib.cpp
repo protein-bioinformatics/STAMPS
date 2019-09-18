@@ -3,7 +3,7 @@
 
 
 double get_annotated_intensity(string peptide_mod, PSM* psm){
-    if (psm->mz == 0 || psm -> mz == 0) return 0;
+    if (psm->mz == 0 || psm->intens == 0) return -1;
     
     double tolerance = 0.02;
     replaceAll(peptide_mod, "M[+16.0]", "m");
@@ -132,15 +132,13 @@ int main(int argc, char** argv)
                         mgf_files_sorted.push_back(psm->ref_file);
                         
                         if (spectra_to_tissues.find(psm->ref_file) == spectra_to_tissues.end()){
-                            cerr << "Error: '" << psm->ref_file << "' not found in database." << endl;
-                            return -1;
+                            progress << "-2" << endl;
+                            return -2;
                         }
                     }
                 }
             }
         }
-        
-        
         
         
         for (pair<string, int> ref_file_pair : mgf_files){
@@ -197,13 +195,10 @@ int main(int argc, char** argv)
         
         
         // select best spectrum per evidence
-        int jj = 0;
         for (pair<string, evidence*> pepEv : peptideEvidences){
             evidence* ev = pepEv.second;
             
-            
             if (ev->all_PSMs.size() == 0) continue;
-            
                 
             string pep_mod_seq = peptides.at(ev->pep_ref)->sequence_mod;
             ev->best_PSM = ev->all_PSMs.at(0);
@@ -219,11 +214,19 @@ int main(int argc, char** argv)
             }
             
             
+            if (best_intens < 0){
+                ev->best_PSM = 0;
+                continue;
+            }
+            
+            
             // compress mz values
             z_stream defstream_mz;
             defstream_mz.zalloc = Z_NULL;
             defstream_mz.zfree = Z_NULL;
             defstream_mz.opaque = Z_NULL;
+            
+            if (ev->best_PSM->mz == 0) continue;
             
             int uncompressed_mz_size = ev->best_PSM->mz->size() * 8;
             unsigned char* compressed_mz = new unsigned char[uncompressed_mz_size * 2];
@@ -277,9 +280,7 @@ int main(int argc, char** argv)
             else {
                 ev->best_PSM->intens_c.c = (unsigned char *)ev->best_PSM->intens->data();
                 ev->best_PSM->intens_c.len = compressed_intens_size;
-            }
-            
-            
+            }   
         }
         
         
@@ -293,7 +294,6 @@ int main(int argc, char** argv)
             cout << -3 << endl;
             return -3;
         }
-        
         
         
         sqlite3_exec(db, "CREATE TABLE SpectrumSourceFiles(id INTEGER primary key autoincrement not null, fileName TEXT);", NULL, NULL, &zErrMsg);
@@ -375,10 +375,8 @@ int main(int argc, char** argv)
         sqlite3_prepare_v2(db, sql_prepare.c_str(), -1, &stmt_Tissues, 0);
         
         
+        
         int spectrum_index = 1;
-        int tissue = 567;
-        
-        
         multimap<string, string> ordered_evidences;
         for (pair<string, evidence*> ev_pair : peptideEvidences) ordered_evidences.insert({peptides.at(ev_pair.second->pep_ref)->sequence, ev_pair.first});
         
@@ -390,6 +388,7 @@ int main(int argc, char** argv)
             
             if (ev->best_PSM == 0) continue;
             PSM* psm = ev->best_PSM;
+            
             
             
             sqlite3_bind_text(stmt_refSpectra, 1, pep->sequence.c_str(), pep->sequence.length(), SQLITE_STATIC);
@@ -414,18 +413,26 @@ int main(int argc, char** argv)
             sqlite3_bind_int(stmt_refSpectra, 17, 0);
             
             int retVal = sqlite3_step(stmt_refSpectra);
-            if (retVal != SQLITE_DONE) cout << "Commit Failed! " << retVal << endl;
+            if (retVal != SQLITE_DONE){
+                progress << "-2" << endl;
+                sqlite3_close(db);
+                return -2;
+            }
             sqlite3_reset(stmt_refSpectra);
             
             
             
             // inserting tissue information
             sqlite3_bind_int(stmt_Tissues, 1, spectrum_index);
-            sqlite3_bind_int(stmt_Tissues, 2, tissue);
+            sqlite3_bind_int(stmt_Tissues, 2, spectra_to_tissues.at(psm->ref_file));
             sqlite3_bind_int(stmt_Tissues, 3, ev->all_PSMs.size());
             
             retVal = sqlite3_step(stmt_Tissues);
-            if (retVal != SQLITE_DONE) cout << "Commit Failed! " << retVal << endl;
+            if (retVal != SQLITE_DONE){
+                progress << "-3" << endl;
+                sqlite3_close(db);
+                return -3;
+            }
             sqlite3_reset(stmt_Tissues);
             
             
@@ -436,7 +443,11 @@ int main(int argc, char** argv)
             rc = sqlite3_bind_blob(stmt_RefSpectraPeaks, 2, psm->mz_c.c, psm->mz_c.len, SQLITE_TRANSIENT);
             rc = sqlite3_bind_blob(stmt_RefSpectraPeaks, 3, psm->intens_c.c, psm->intens_c.len, SQLITE_TRANSIENT);
             retVal = sqlite3_step(stmt_RefSpectraPeaks);
-            if (retVal != SQLITE_DONE) cout << "Commit Failed! " << retVal << endl;
+            if (retVal != SQLITE_DONE){
+                progress << "-4" << endl;
+                sqlite3_close(db);
+                return -4;
+            }
             sqlite3_reset(stmt_RefSpectraPeaks);
             
             // Modifications
@@ -447,7 +458,11 @@ int main(int argc, char** argv)
                 sqlite3_bind_double(stmt_Modifications, 3, atof(mod_pair->second.c_str()));
                 
                 retVal = sqlite3_step(stmt_Modifications);
-                if (retVal != SQLITE_DONE) cout << "Commit Failed! " << retVal << endl;
+                if (retVal != SQLITE_DONE){
+                    progress << "-5" << endl;
+                    sqlite3_close(db);
+                    return -5;
+                }
                 sqlite3_reset(stmt_Modifications);
             }
             
@@ -457,14 +472,21 @@ int main(int argc, char** argv)
             ++spectrum_index;
         }
         
+        
+        
         // Insert all files
         for (string file_ref : mgf_files_sorted){
             sqlite3_bind_text(stmt_SpectrumSourceFiles, 1, file_ref.c_str(), file_ref.length(), SQLITE_STATIC);
                 
             int retVal = sqlite3_step(stmt_SpectrumSourceFiles);
-            if (retVal != SQLITE_DONE) cout << "Commit Failed! " << retVal << endl;
+            if (retVal != SQLITE_DONE){
+                progress << "-6" << endl;
+                sqlite3_close(db);
+                return -6;
+            }
             sqlite3_reset(stmt_SpectrumSourceFiles);
         }
+        
         
         ostringstream stringStream;
         stringStream << "UPDATE LibInfo SET numSpecs = " << (spectrum_index - 1) << ";";
@@ -483,12 +505,12 @@ int main(int argc, char** argv)
         sqlite3_mutex_leave(sqlite3_db_mutex(db));
         sqlite3_close(db);
         progress << "1" << endl;
+        return 0;
     }
     catch (...){
-        ofstream progress(parameters["root_path"] + "/tmp/upload/progress.dat");
         progress << "-1" << endl;
+        return -1;
     }
     
-    return EXIT_SUCCESS;
 
 }

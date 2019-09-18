@@ -13,13 +13,14 @@ upload_loop = 0;
 uploaded_file_id = -1;
 uploaded_species_id = -1;
 uploaded_filename = "";
+num_all_spectra = -1;
 inspect_spectra_max_pages = -1;
 inspect_spectra_max = -1;
 inspect_spectra_current_page = 0;
 inspect_current_spectrum = 0;
 inspect_max_spectra_per_page = 100;
 spectrum_selection_color = "#80c8ff";
-spectra_checks = {};
+inspect_spectra_checks = {};
 
 String.prototype.ends_with = function(suffix) {
     return this.indexOf(suffix.toLowerCase(), this.length - suffix.length) !== -1;
@@ -114,7 +115,7 @@ function init_manage_blib(){
     document.getElementById("step2").style.display = "none";
     document.getElementById("step3").style.display = "none";
     document.getElementById("step4").style.display = "none";
-    //document.getElementById("step5").style.display = "none";
+    document.getElementById("step5").style.display = "none";
     document.getElementById("step2-container").innerHTML = "none";
     document.getElementById("step1-unloaded").style.display = "none";
     document.getElementById("step1-loaded").style.display = "none";
@@ -274,6 +275,7 @@ function step3_transition_step4(){
     document.getElementById("step5").style.display = "none";
     document.getElementById("step5-wait").style.display = "inline";
     document.getElementById("step5-confirm").style.display = "none";
+    reset_spectrum();
     
     
     var xmlhttp = new XMLHttpRequest();
@@ -294,7 +296,8 @@ function step3_transition_step4(){
                 var xmlhttp_num = new XMLHttpRequest();
                 xmlhttp_num.onreadystatechange = function() {
                     if (xmlhttp_num.readyState == 4 && xmlhttp_num.status == 200 && check_response(xmlhttp_num.responseText)) {
-                        inspect_spectra_max_pages = Math.floor(parseInt(xmlhttp_num.responseText) / inspect_max_spectra_per_page) + 1;
+                        num_all_spectra = parseInt(xmlhttp_num.responseText);
+                        inspect_spectra_max_pages = Math.floor(num_all_spectra / inspect_max_spectra_per_page) + 1;
                         inspect_spectra();
                     }
                 }
@@ -478,6 +481,14 @@ function inspect_spectra(){
     var dom_nav_cell = document.getElementById("inspect_spectra_navigation");
     dom_nav_cell.innerHTML = "";
     
+    
+    if (num_all_spectra > 0){
+        document.getElementById("inspect_spectra_button").removeAttribute("disabled");
+    }
+    else {
+        document.getElementById("inspect_spectra_button").setAttribute("disabled", "true");
+    }
+    
     if (inspect_spectra_current_page < 0) inspect_spectra_current_page = 0;
     if (inspect_spectra_current_page >= inspect_spectra_max_pages - 1) inspect_spectra_current_page = inspect_spectra_max_pages - 1;
     
@@ -544,7 +555,7 @@ function inspect_spectra(){
             dom_table.setAttribute("border", "0"); 
             dom_table.setAttribute("id", "inspect_spectra_panel_table");
             
-            spectra_checks = {};
+            inspect_spectra_checks = {};
             
             var row_cnt = 0;
             inspect_spectra_max = spectra_meta.length;
@@ -567,10 +578,10 @@ function inspect_spectra(){
                 dom_td2.appendChild(dom_td2_input);
                 dom_td2_input.setAttribute("style", "display: inline;");
                 dom_td2_input.setAttribute("type", "checkbox");
-                dom_td2_input.setAttribute("id", "spec-checkbox-" + spectrum_meta[0]);
+                dom_td2_input.setAttribute("id", "inspect_spectra-checkbox-" + spectrum_meta[0]);
                 if (spectrum_meta[3] != -1) dom_td2_input.setAttribute("checked", "true");
                 dom_td2_input.setAttribute("onclick", "inspect_spectra_checking();");
-                spectra_checks[spectrum_meta[0]] = (spectrum_meta[3] != -1);
+                inspect_spectra_checks[spectrum_meta[0]] = (spectrum_meta[3] != -1);
                 
                 
                 var dom_td1 = document.createElement("td");
@@ -667,23 +678,24 @@ function step4_transition_step5(){
 
 
 function inspect_spectra_checking(){
-    
-    
     var dom_table = document.getElementById("inspect_spectra_panel_table");
     var spectrum_id = dom_table.children[inspect_current_spectrum].getAttribute("value");
     
     
-    spectra_checks[spectrum_id] = !spectra_checks[spectrum_id];
-    var value = spectra_checks[spectrum_id] ? "18" : "-1";
+    inspect_spectra_checks[spectrum_id] = !inspect_spectra_checks[spectrum_id];
+    var value = inspect_spectra_checks[spectrum_id] ? "18" : "-1";
+    document.getElementById("inspect_spectra-checkbox-"+ spectrum_id).checked = inspect_spectra_checks[spectrum_id];
     
     var xmlhttp_spectra_meta = new XMLHttpRequest();
     xmlhttp_spectra_meta.onreadystatechange = function() {
         if (xmlhttp_spectra_meta.readyState == 4 && xmlhttp_spectra_meta.status == 200) {
-            draw_spectrum("inspect_spectra");
+            response = xmlhttp_spectra_meta.responseText;
         }
     }
     xmlhttp_spectra_meta.open("POST", file_pathname + "admin/scripts/blib-server.py", false);
     xmlhttp_spectra_meta.send("command=set_unset_spectrum&spectrum_id=" + spectrum_id + "&value=" + value);
+    spectrum_active = inspect_spectra_checks[spectrum_id];
+    draw_spectrum("inspect_spectra");
 }
 
 

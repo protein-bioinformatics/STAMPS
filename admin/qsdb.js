@@ -82,7 +82,7 @@ spectra_max_pages = -1;
 spectra_max = -1;
 spectra_current_page = 0;
 current_spectrum_selected = 0;
-spectra_checks = {};
+curate_spectra_checks = {};
 
 manage_sort_columns = {"pathway_groups": {}, "proteins": {}, "pathways": {}, "metabolites": {}, "species": {}, "tissues": {}, "loci_names": {}};
 manage_columns = {"pathway_groups": [], "proteins": [], "pathways": [], "metabolites": [], "species": [], "tissues": [], "loci_names": []};
@@ -1878,7 +1878,7 @@ function key_down(event){
         event.preventDefault();
         switch(event.which){
             case 27:
-                editor_hide_check_spectra();
+                editor_hide_curate_spectra();
                 break;
                 
             case 13:
@@ -1983,7 +1983,7 @@ function hide_every_window(){
     document.getElementById('add_manage_metabolites').style.display = 'none';
     document.getElementById('add_manage_pathways').style.display = 'none';
     document.getElementById('insert_spectra').style.display = 'none';
-    editor_hide_check_spectra();
+    editor_hide_curate_spectra();
     last_opened_menu = "";
 }
 
@@ -1991,7 +1991,9 @@ function hide_every_window(){
 
 
 
-function editor_hide_check_spectra(){
+
+
+function editor_hide_curate_spectra(){
     document.getElementById("renderarea").style.filter = "";
     document.getElementById("navigation").style.filter = "";
     document.getElementById("toolbox").style.filter = "";
@@ -4475,10 +4477,10 @@ function curate_spectra_change_selection(row_num){
 function curate_spectra_checking(){
     var dom_table = document.getElementById("curate_spectra_panel_table");
     var spec_id = dom_table.children[current_spectrum_selected].getAttribute("value");
-    spectra_checks[spec_id] = !spectra_checks[spec_id];
-    document.getElementById("spec-checkbox-"+ spec_id).checked = spectra_checks[spec_id];
+    curate_spectra_checks[spec_id] = !curate_spectra_checks[spec_id];
+    document.getElementById("curate_spectra-checkbox-"+ spec_id).checked = curate_spectra_checks[spec_id];
     
-    var request = "action=update&id=" + spec_id + "&value=" + (spectra_checks[spec_id] ? "18" : "-1") + "&species=" + current_species;
+    var request = "action=update&id=" + spec_id + "&value=" + (curate_spectra_checks[spec_id] ? "18" : "-1") + "&species=" + current_species;
     var xmlhttp_spectra_update = new XMLHttpRequest();
     xmlhttp_spectra_update.onreadystatechange = function() {
         if (xmlhttp_spectra_update.readyState == 4 && xmlhttp_spectra_update.status == 200) {
@@ -4487,8 +4489,8 @@ function curate_spectra_checking(){
     }
     xmlhttp_spectra_update.open("GET", file_pathname + "admin/scripts/curate-spectral-library.py?" + request, false);
     xmlhttp_spectra_update.send();
-    spectrum_active = spectra_checks[spec_id];
-    draw_spectrum();
+    spectrum_active = curate_spectra_checks[spec_id];
+    draw_spectrum("curate_spectra");
 }
 
 
@@ -4584,7 +4586,7 @@ function curate_spectra(){
             dom_table.setAttribute("cellspacing", "0"); 
             dom_table.setAttribute("border", "0"); 
             dom_table.setAttribute("id", "curate_spectra_panel_table");
-            spectra_checks = {};
+            curate_spectra_checks = {};
             
             var row_cnt = 0;
             spectra_max = spectra_meta.length;
@@ -4624,11 +4626,11 @@ function curate_spectra(){
                 dom_td2.appendChild(dom_td2_input);
                 dom_td2_input.setAttribute("style", "display: inline;");
                 dom_td2_input.setAttribute("type", "checkbox");
-                dom_td2_input.setAttribute("id", "spec-checkbox-" + spectrum_meta[0]);
+                dom_td2_input.setAttribute("id", "curate_spectra-checkbox-" + spectrum_meta[0]);
                 if (spectrum_meta[3] != -1) dom_td2_input.setAttribute("checked", "true");
                 dom_td2_input.setAttribute("onclick", "curate_spectra_checking();");
                 
-                spectra_checks[spectrum_meta[0]] = spectrum_meta[3] != -1;
+                curate_spectra_checks[spectrum_meta[0]] = spectrum_meta[3] != -1;
                 
                 ++row_cnt;
             }

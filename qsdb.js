@@ -127,7 +127,7 @@ function init(){
     
     document.getElementById("infobox_html_background").addEventListener("click", hide_infobox, false);
     
-    window.addEventListener('resize', resize_ms_view, false);
+    window.addEventListener('resize', function(event){ resize_ms_view("check_spectra");}, false);
     window.addEventListener('resize', resize_pathway_view, false);
     document.getElementById("check_spectra_msarea").addEventListener('DOMMouseScroll', function(event){view_mouse_wheel_listener(event, "check_spectra");}, false);
     document.getElementById("check_spectra_msarea").addEventListener("mousewheel", function(event){view_mouse_wheel_listener(event, "check_spectra");}, false);
@@ -233,6 +233,7 @@ function mouse_down_listener(e){
     if (!pathway_is_loaded) return;
     var c = document.getElementById("renderarea");
     res = get_mouse_pos(c, e);
+    
     if (e.buttons & 2){
         
         

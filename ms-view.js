@@ -129,6 +129,8 @@ function subscripting(x){
 
 
 function annotation(ions, ms_panel){
+    if (peaks.length == 0) return;
+    
     // annotate y-ions
     var tolerance = (document.getElementById(ms_panel + "_radio_ppm").checked ? tolerance_relative : tolerance_absolute);
     var rev_peptide = peptide_mod.split("").reverse().join("");
@@ -304,6 +306,14 @@ function change_match_error(ms_panel){
 
 
 
+function reset_spectrum(){
+    
+    peaks = [];
+    spectrum_loaded = true;
+}
+
+
+
 
 function load_spectrum(spectrum_id, spectrum_data, ms_panel){
     var c = document.getElementById(ms_panel + "_msarea");
@@ -381,7 +391,7 @@ function draw_spectrum(ms_panel, ctx){
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.font="10px Arial";
     
-    if (!spectrum_loaded) return;
+    if (!spectrum_loaded || peaks.length == 0) return;
     
     ctx.fillStyle = "black";
     // Add x-axis tics, values and grid

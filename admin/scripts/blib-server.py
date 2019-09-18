@@ -256,6 +256,7 @@ def delete_file():
             
             # no matter which file will be deleted, spectra.blib must be deleted, too
             os.system("rm -f '%s/spectra.blib'" % data_dir)
+            os.system("rm -f '%s/merged.blib'" % data_dir)
             os.system("rm -f '%s/tmp.blib'" % data_dir)
             os.system("rm -f '%s/progress.dat'" % data_dir)
             os.system("rm -f '%s/inserting.dat'" % data_dir)

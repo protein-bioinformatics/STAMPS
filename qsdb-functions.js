@@ -288,20 +288,20 @@ function get_check_spectra_content(){
     var proteins_checked = filter_parameters["protein_tissues_visible"] ? "checked" : "";
     var peptides_checked = filter_parameters["peptide_tissues_visible"] ? "checked" : "";
     var validation_visible = filter_parameters["validation_visible"] ? "checked" : "";
-    var return_text = "<canvas id=\"msarea\" class=\"msarea\"></canvas> \
-    <fieldset id=\"spectra_options\" class=\"spectra_options\" style=\"position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;\"> \
-        <input type=\"radio\" onchange=\"change_match_error();\" id=\"radio_ppm\" name=\"select_error\" value=\"ppm\" style=\"border: 0px; margin: 0px; top: 0px; padding: 0px;\" \ checked><label for=\"radio_ppm\">Relative</label> \
-        <input type=\"radio\" onchange=\"change_match_error();\" id=\"radio_da\" name=\"select_error\" value=\"Da\" style=\"border: 0px; margin: 0px; top: 0px; padding: 0px;\"><label for=\"radio_da\">Absolute</label> \
-        <input type=\"text\" onchange=\"change_match_error_value();\" id=\"error_value\" value=\"-\" size=1 style=\"text-align: right;\"><label id=\"unit\">ppm</label> \
+    var return_text = "<canvas id=\"check_spectra_msarea\" class=\"msarea\"></canvas> \
+    <fieldset id=\"check_spectra_options\" class=\"spectra_options\" style=\"position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;\"> \
+        <input type=\"radio\" onchange=\"change_match_error();\" id=\"check_spectra_radio_ppm\" name=\"select_error\" value=\"ppm\" style=\"border: 0px; margin: 0px; top: 0px; padding: 0px;\" \ checked><label for=\"radio_ppm\">Relative</label> \
+        <input type=\"radio\" onchange=\"change_match_error();\" id=\"check_spectra_radio_da\" name=\"select_error\" value=\"Da\" style=\"border: 0px; margin: 0px; top: 0px; padding: 0px;\"><label for=\"radio_da\">Absolute</label> \
+        <input type=\"text\" onchange=\"change_match_error_value();\" id=\"check_spectra_error_value\" value=\"-\" size=1 style=\"text-align: right;\"><label id=\"check_spectra_unit\">ppm</label> \
     </fieldset> \
-    <div id=\"spectra_panel\" class=\"spectra_panel\"></div> \
+    <div id=\"check_spectra_panel\" class=\"spectra_panel\"></div> \
     <div id=\"check_spectra_functions\" style=\"margin: 0px; position: fixed;\"> \
         <table width=\"100%\"><tr><td><font size=\"-1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\"check_spectra_expand_collapse_all(false);\">Expand</font> / \
         <font size=\"-1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\"check_spectra_expand_collapse_all(true);\">Collapse</font></td> \
         <td align=\"right\"> <font size=\"-1\" color=\"blue\" style=\"cursor: pointer;\" onclick=\"clean_basket();\">Delete all proteins</font></td></tr></table> \
     </div> \
-    <div id=\"filter_panel_check_spectra\" class=\"filter_panel_check_spectra\"></div> \
-    <table width=\"100%\" height=\"100%\"><tr><td valign=\"bottom\"><font color=\"blue\" style=\"cursor: pointer;\" onclick=\"filter_settings_clicked();\" id=\"filter_label\">Show \ filter settings</font>&nbsp;&nbsp;&nbsp; \
+    <div id=\"check_spectra_filter_panel_check_spectra\" class=\"filter_panel_check_spectra\"></div> \
+    <table width=\"100%\" height=\"100%\"><tr><td valign=\"bottom\"><font color=\"blue\" style=\"cursor: pointer;\" onclick=\"filter_settings_clicked();\" id=\"check_spectra_filter_label\">Show \ filter settings</font>&nbsp;&nbsp;&nbsp; \
     <input type=\"checkbox\" onchange=\"filter_parameters['protein_tissues_visible'] = !filter_parameters['protein_tissues_visible']; show_hide_protein_tissues();\" " + proteins_checked + "> Show protein tissues \
     &nbsp;&nbsp;&nbsp;<input type=\"checkbox\" onchange=\"filter_parameters['peptide_tissues_visible'] = !filter_parameters['peptide_tissues_visible']; show_hide_peptide_tissues();\" " + peptides_checked + "> Show peptide tissues \
     &nbsp;&nbsp;&nbsp;<input type=\"checkbox\" onchange=\"filter_parameters['validation_visible'] = !filter_parameters['validation_visible']; show_hide_peptide_validation();\" " + validation_visible + "> Show validation \
@@ -4458,7 +4458,7 @@ function check_spectra_expand_collapse_peptide(prot_id, do_collapse){
                 var dom_spec_td1 = document.createElement("td");
                 dom_spec_tr.appendChild(dom_spec_td1);
                 dom_spec_td1.setAttribute("width", "100%");
-                dom_spec_td1.setAttribute("onclick", "load_spectrum(" + curr_spec.id + ");");
+                dom_spec_td1.setAttribute("onclick", "load_spectrum(" + curr_spec.id + ", null, 'check_spectra');");
                 dom_spec_td1.setAttribute("style", "border-bottom: 1px solid #d3d3d3; cursor: pointer;");
                 
                 var dom_spec_td1_txt = document.createTextNode("\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0" + curr_spec['mass'] + charge_plus(curr_spec['charge']));
@@ -4492,8 +4492,8 @@ function check_spectra(){
     var expanded_peptides = [];
     last_opened_menu = "";
     if (document.getElementById("filter_panel_wrapper") != null) document.getElementById("filter_panel_wrapper").innerHTML = "";
-    if (document.getElementById("spectra_panel").innerHTML != ""){
-        var table_children = document.getElementById("spectra_panel").children[0].children;
+    if (document.getElementById("check_spectra_panel").innerHTML != ""){
+        var table_children = document.getElementById("check_spectra_panel").children[0].children;
         for (var i = 0; i < table_children.length; ++i){
             if (table_children[i].hasAttribute("id")){
                 var prot_id = table_children[i].getAttribute("id");
@@ -4514,11 +4514,11 @@ function check_spectra(){
     
     
     filter_basket();
-    document.getElementById("spectra_panel").innerHTML = "";
+    document.getElementById("check_spectra_panel").innerHTML = "";
     
-    document.getElementById("filter_label").innerHTML = "Show filter settings";
-    document.getElementById("filter_panel_check_spectra").innerHTML = "";
-    document.getElementById("filter_panel_check_spectra").style.display = "none";
+    document.getElementById("check_spectra_filter_label").innerHTML = "Show filter settings";
+    document.getElementById("check_spectra_filter_panel_check_spectra").innerHTML = "";
+    document.getElementById("check_spectra_filter_panel_check_spectra").style.display = "none";
     filter_parameters["filter_panel_visible"] = false;
     
     
@@ -4528,14 +4528,14 @@ function check_spectra(){
         document.getElementById("renderarea").style.filter = "blur(5px)";
         document.getElementById("navigation").style.filter = "blur(5px)";
     }
-    resize_ms_view();
+    resize_ms_view("check_spectra");
     spectrum_loaded = false;
-    draw_spectrum();
+    draw_spectrum("check_spectra");
     
-    document.getElementById("error_value").value = (document.getElementById("radio_ppm").checked ? tolerance_relative : tolerance_absolute);
+    document.getElementById("check_spectra_error_value").value = (document.getElementById("check_spectra_radio_ppm").checked ? tolerance_relative : tolerance_absolute);
     
     var dom_table = document.createElement("table");
-    document.getElementById("spectra_panel").appendChild(dom_table);
+    document.getElementById("check_spectra_panel").appendChild(dom_table);
     dom_table.setAttribute("id", "review_proteins_table");
     dom_table.setAttribute("width", "100%"); 
     dom_table.setAttribute("cellspacing", "0"); 
@@ -4732,6 +4732,10 @@ function hide_chromosome_search (forward){
 function hide_check_spectra (){
     document.getElementById("waiting_background").style.display = "none";
     document.getElementById("check_spectra").style.display = "none";
+    if (typeof qsdb_domain !== 'undefined' && qsdb_domain !== null){
+        document.getElementById("renderarea").style.filter = "";
+        document.getElementById("navigation").style.filter = "";
+    }
 }
 
 
@@ -4938,7 +4942,7 @@ function select_species(){
 
 function open_filter_panel(){
     if (last_opened_menu != "filter_panel_wrapper"){
-        document.getElementById("filter_panel_check_spectra").innerHTML = "";
+        document.getElementById("check_spectra_filter_panel_check_spectra").innerHTML = "";
         document.getElementById("filter_panel_wrapper").innerHTML = filter_panel_data;
         document.getElementById("filter_panel_wrapper").style.display = "inline";
         var rect = document.getElementById('filter_panel_nav').getBoundingClientRect();
@@ -5481,8 +5485,8 @@ function load_data(reload){
             for (var i = 0; i < (t_zoom - zoom_options[0] + start_zoom_delta); ++i) zoom_in_out(0, 0);
             min_zoom = zoom_options[1];
             
-            //draw(1);
             pathway_is_loaded = true;
+            document.getElementById("menu_background").style.display = "none";
             c.style.display = "inline";
             clearInterval(process_edges);
         }
@@ -5659,7 +5663,7 @@ function filter_settings_clicked(){
             protein_dictionary[key].filtering();
         }
         check_spectra();
-        if (current_loaded_spectrum != -1) load_spectrum(current_loaded_spectrum);
+        if (current_loaded_spectrum != -1) load_spectrum(current_loaded_spectrum, null, "check_spectra");
     }
 }
 
