@@ -1,7 +1,7 @@
 BIN_PATH = ../../scripts
 ADMIN_PATH = ../scripts
 
-main: nodes proteins search edges pathways manage chromosomes
+main: nodes proteins search edges pathways manage chromosomes prep_blib create_blib
 	javac -cp ../scripts/cdk-2.0.jar:. DrawChem.java && mv DrawChem.class ../scripts/.
 
 nodes:

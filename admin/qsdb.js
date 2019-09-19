@@ -2078,6 +2078,8 @@ Set.prototype.subSet = function(otherSet)
 } 
 
 
+
+
 function editor_select_loci_select_change(reload){
     if (typeof(reload) === "undefined") reload = false;
     
