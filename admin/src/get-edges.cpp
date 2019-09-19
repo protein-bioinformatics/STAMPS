@@ -1,4 +1,3 @@
-/* Simple C program that connects to MySQL Database server*/
 #include <mysql.h>
 #include <stdio.h>
 #include <iostream>
@@ -14,6 +13,8 @@
 #include <cppconn/exception.h>
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
+
+#include <libsoup/soup.h>
 
 
 using namespace std;
@@ -165,11 +166,39 @@ main() {
     
     
     string pathway_id = (form.find("pathway") != form.end()) ? form["pathway"] : "";
+    string host = (form.find("host") != form.end()) ? form["host"] : "";
+    
     if (!pathway_id.length() || !is_integer_number(pathway_id)){
         response += "-3";
         print_out(response, compress);
         return -3;
     }
+    
+    
+    
+    
+    
+    // if it is a remote request
+    if (host.length() > 1){
+        string get_vars = "";
+        for (uint i = 0; i < get_entries.size(); ++i){
+            vector<string> get_values = split(get_entries.at(i), '=');
+            if (get_vars.length() > 0) get_vars += "&";
+            if (get_values.size() && get_values.at(0) == "host"){
+                get_vars += get_entries.at(i);
+            }
+        }
+        string remote_request = host + "/scripts/get-edges.bin?" + get_vars;
+        
+        SoupSession *session = soup_session_sync_new();
+        SoupMessage *msg = soup_message_new ("GET", remote_request.c_str());
+        soup_session_send_message (session, msg);
+        fwrite (msg->response_body->data, 1, msg->response_body->length, stdout);
+        return 0;
+    }
+    
+    
+    
     
     
     

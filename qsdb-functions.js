@@ -14,6 +14,7 @@ zoom_options = [0, 0, 0];
 filter_parameters = {};
 supported_species = {};
 current_species = "";
+current_host = "";
 top_n_fragments = [3, 6, 1000];
 ion_types = ["y", "b", "b|y"];
 filter_parameters["min_peptide_length"] = 8;
@@ -586,7 +587,7 @@ function load_species_data(){
             supported_species = JSON.parse(xmlhttp_species.responseText);
         }
     }
-    xmlhttp_species.open("GET", file_pathname + "scripts/get-species.py", false);
+    xmlhttp_species.open("GET", file_pathname + "scripts/get-species.py?request_all=true", false);
     xmlhttp_species.send();
 }
 
@@ -619,12 +620,17 @@ function set_species_menu(reload){
                 
                 var dom_species_td = document.createElement("td");
                 dom_species_tr.appendChild(dom_species_td);
+                
+                var toks = ncbi[1].split("|")
+                var host = toks.length > 1 ? toks[0] : "";
+                var species_id = toks.length > 1 ? toks[1] : toks[0];
+                
                 dom_species_td.setAttribute("onclick", "var species_menu = document.getElementById('select_species_table'); \
                     for (var child of species_menu.children){ \
                         child.children[0].className = 'select_menu_cell'; \
                     } \
                     this.className = 'selected_menu_cell'; \
-                    last_opened_menu = ''; document.getElementById('select_species').style.display = 'none'; current_species = '" + ncbi[1] + "'; load_data(true);");   
+                    last_opened_menu = ''; document.getElementById('select_species').style.display = 'none'; current_host = '" + host + "'; current_species = '" + species_id + "'; load_data();");   
                 dom_species_td.innerHTML = ncbi[0];
                 dom_species_td.setAttribute("type", "radio");
                 dom_species_td.setAttribute("value", ncbi[1]);
@@ -647,7 +653,7 @@ function set_species_menu(reload){
             
         }
     }
-    xmlhttp_species.open("GET", file_pathname + "scripts/get-species.py", false);
+    xmlhttp_species.open("GET", file_pathname + "scripts/get-species.py?request_all=true", false);
     xmlhttp_species.send();
     
 }
@@ -5366,8 +5372,8 @@ function load_data(reload){
         }
     }
     
-    var request_nodes = file_pathname + "scripts/get-nodes.bin?pathway=" + current_pathway + "&species=" + encodeURL(current_species + specific_node_addition);
-    var request_edges = file_pathname + "scripts/get-edges.bin?pathway=" + current_pathway;
+    var request_nodes = file_pathname + "scripts/get-nodes.bin?pathway=" + current_pathway + "&host=" + encodeURL(current_host) + "&species=" + encodeURL(current_species + specific_node_addition);
+    var request_edges = file_pathname + "scripts/get-edges.bin?pathway=" + current_pathway + "&host=" + encodeURL(current_host);
     
     // get nodes information
     var xmlhttp_edge = new XMLHttpRequest();
@@ -5376,7 +5382,6 @@ function load_data(reload){
             edge_data = JSON.parse(xmlhttp_edge.responseText);
         }
     }
-    console.log(request_nodes);
     xmlhttp.open("GET", request_nodes, true);
     xmlhttp.send();
     
@@ -5463,7 +5468,8 @@ function load_data(reload){
                 }
             }
             
-            xmlhttp_prot.open("GET", file_pathname + "scripts/get-proteins.bin?pathway=" + current_pathway + "&species=" + current_species, true);
+            console.log(file_pathname + "scripts/get-proteins.bin?pathway=" + current_pathway + "&species=" + current_species + "&host=" + encodeURL(current_host));
+            xmlhttp_prot.open("GET", file_pathname + "scripts/get-proteins.bin?pathway=" + current_pathway + "&species=" + current_species + "&host=" + encodeURL(current_host), true);
             xmlhttp_prot.send();
         }
     }, 1);
@@ -5528,7 +5534,7 @@ function accession_search_parse_accessions(accessions, synchronous){
         }
     }
     
-    xmlhttp.open("GET", file_pathname + "scripts/get-proteins.bin?accessions=" + accessions + "&species=" + current_species, synchronous);
+    xmlhttp.open("GET", file_pathname + "scripts/get-proteins.bin?accessions=" + accessions + "&species=" + current_species + "&host=" + encodeURL(current_host), synchronous);
     xmlhttp.send();
 }
 
@@ -5572,7 +5578,7 @@ function locus_search_request_data(){
     }
     
     // request proteins
-    var request = file_pathname + "scripts/get-proteins.bin?loci=" + IDs + "&species=" + current_species;
+    var request = file_pathname + "scripts/get-proteins.bin?loci=" + IDs + "&species=" + current_species + "&host=" + encodeURL(current_host);
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -5608,7 +5614,7 @@ function function_search_request_data(){
         }
     }
     
-    xmlhttp.open("GET", file_pathname + "scripts/get-proteins.bin?functions=" + IDs + "&species=" + current_species, true);
+    xmlhttp.open("GET", file_pathname + "scripts/get-proteins.bin?functions=" + IDs + "&species=" + current_species + "&host=" + encodeURL(current_host), true);
     xmlhttp.send();
 }
 
@@ -5629,7 +5635,7 @@ function chromosome_search_request_data(){
     }
     
     // request proteins
-    var request = file_pathname + "scripts/get-proteins.bin?accessions=" + accessionIDs + "&species=" + current_species;
+    var request = file_pathname + "scripts/get-proteins.bin?accessions=" + accessionIDs + "&species=" + current_species + "&host=" + encodeURL(current_host);
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {

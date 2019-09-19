@@ -23,21 +23,20 @@ with open("../admin/qsdb.conf", mode="rt") as fl:
 
 
 form = cgi.FieldStorage()
-server = "server-request" in form
+request_all = "request_all" in form
 
-if server and "public" in conf and conf["public"] != "1":
+if os.environ["REMOTE_ADDR"] not in ["localhost", "127.0.0.1"] and "public" in conf and conf["public"] != "1":
     print("{}")
     exit()
     
-
+    
 species_data = {}
 conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
 my_cur = conn.cursor()
 my_cur.execute('SELECT ncbi, name FROM species;')
 species_data = {row[0]: row[1] for row in my_cur}
 
-    
-if not server:
+if request_all:
     response = urlopen("%s/get-all-species.py" % conf["server"], timeout = 1)
     response = json.loads("".join(chr(c) for c in response.read()))
     

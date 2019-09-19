@@ -24,6 +24,8 @@
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
 
+#include <libsoup/soup.h>
+
 using namespace std;
 
 
@@ -252,6 +254,7 @@ main(int argc, char** argv) {
     bool via_pathway = false;
     
     string accessions = "";
+    string host = "";
     string ids = "";
     string loci_ids = "";
     string function_ids = "";
@@ -322,6 +325,9 @@ main(int argc, char** argv) {
             else if (get_values.at(0) == "species"){
                 species = get_values.at(1);
             }
+            else if (get_values.size() && get_values.at(0) == "host"){
+                if (get_values.size() > 1) host = get_values.at(1);
+            }
         }
     }
     
@@ -329,6 +335,8 @@ main(int argc, char** argv) {
         print_out("-5", compress);
         return -5;
     }
+    
+    
     
     
     
@@ -356,6 +364,37 @@ main(int argc, char** argv) {
         }
         myfile.close();
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // if it is a remote request
+    if (host.length() > 0 && (host != "localhost" || host != "127.0.0.1")){
+        string get_vars = "";
+        for (uint i = 0; i < get_entries.size(); ++i){
+            vector<string> get_values = split(get_entries.at(i), '=');
+            if (get_vars.length() > 0) get_vars += "&";
+            if (get_values.size() && get_values.at(0) == "host"){
+                get_vars += get_entries.at(i);
+            }
+        }
+        string remote_request = host + "/scripts/get-proteins.bin?" + get_vars;
+        
+        SoupSession *session = soup_session_sync_new();
+        SoupMessage *msg = soup_message_new ("GET", remote_request.c_str());
+        soup_session_send_message (session, msg);
+        fwrite (msg->response_body->data, 1, msg->response_body->length, stdout);
+        return 0;
+    }
+    
+    
+    
+    
     
     
     
