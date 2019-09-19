@@ -36,6 +36,7 @@ float predict_isoelectric_point(string protein_seq);
 static timeval start_timeval, end_timeval;
 string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len);
 void read_config_file(string filename, map<string, string> &m);
+string urlDecode(string &SRC);
 
 static double H = 1.007276;
 static double C12 =    12.000000;

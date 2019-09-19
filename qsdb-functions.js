@@ -5366,7 +5366,7 @@ function load_data(reload){
         }
     }
     
-    var request_nodes = file_pathname + "scripts/get-nodes.bin?pathway=" + current_pathway + "&species=" + current_species + specific_node_addition;
+    var request_nodes = file_pathname + "scripts/get-nodes.bin?pathway=" + current_pathway + "&species=" + encodeURL(current_species + specific_node_addition);
     var request_edges = file_pathname + "scripts/get-edges.bin?pathway=" + current_pathway;
     
     // get nodes information
@@ -5376,6 +5376,7 @@ function load_data(reload){
             edge_data = JSON.parse(xmlhttp_edge.responseText);
         }
     }
+    console.log(request_nodes);
     xmlhttp.open("GET", request_nodes, true);
     xmlhttp.send();
     

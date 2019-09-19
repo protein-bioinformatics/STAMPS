@@ -14,6 +14,8 @@
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
 
+#include <libsoup/soup.h>
+
 using namespace std;
 
 
@@ -169,6 +171,40 @@ int main(int argc, char** argv) {
         }
         myfile.close();
     }
+    
+    
+    
+    
+    
+    
+    
+    // if it is a remote request
+    vector< string > species_token = split(species, '|');
+    if (species_token.size() > 1){
+        
+        
+        string host = urlDecode(species_token.at(0));
+        
+        string remote_request = host + "/scripts/get-nodes.bin?";
+        remote_request += "pathway=" + pathway_id;
+        remote_request += "&species=" + species;
+        remote_request += string("&compress=") + (compress ? string("true") : string("false"));
+        
+        
+        
+        //g_type_init();
+        SoupSession *session = soup_session_sync_new();
+        SoupMessage *msg = soup_message_new ("GET", remote_request.c_str());
+        soup_session_send_message (session, msg);
+        fwrite (msg->response_body->data, 1, msg->response_body->length, stdout);
+        //cout << msg->response_body->data << endl;
+        //print_out(string(msg->response_body->data), false);
+        return 0;
+    }
+    
+    
+    
+    
     
     
     
