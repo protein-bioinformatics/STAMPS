@@ -4,9 +4,11 @@ import json
 from pymysql import connect, cursors
 import cgi, cgitb
 from urllib.request import urlopen
+import os
 
 print("Content-Type: text/html")
 print()
+
 
 
 conf = {}

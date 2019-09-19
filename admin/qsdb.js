@@ -4012,17 +4012,6 @@ function request_protein_data(){
                 if ("chr_end" in request) document.getElementById("add_manage_proteins_chr_end").value = request["chr_end"];
                 if ("unreviewed" in request) document.getElementById("add_manage_proteins_unreviewed").checked = request["unreviewed"];
                 else document.getElementById("add_manage_proteins_unreviewed").checked = false;
-                if ("chromosome" in request){
-                    var dom_chromosome_select = document.getElementById("add_manage_proteins_chromosome");
-                    var selected_index = 0;
-                    for (var i = 1; i < dom_chromosome_select.length; ++i){
-                        if (dom_chromosome_select[i].innerHTML == request["chromosome"]){
-                            selected_index = i;
-                            break;
-                        }
-                    }
-                    dom_chromosome_select.selectedIndex = selected_index;
-                }
                 if ("species" in request){
                     var dom_species_select = document.getElementById("add_manage_proteins_species");
                     var selected_index = -1;
@@ -4032,7 +4021,10 @@ function request_protein_data(){
                             break;
                         }
                     }
-                    if (selected_index >= 0) dom_species_select.selectedIndex = selected_index;
+                    if (selected_index >= 0){
+                        dom_species_select.selectedIndex = selected_index;
+                        change_add_manage_proteins_chromosome();
+                    }
                     else alert("Warning: species '" + request["species"] + "' not registered in database!");
                 }
                 if ("function_id" in request){
@@ -4045,6 +4037,17 @@ function request_protein_data(){
                         }
                     }
                     
+                }
+                if ("chromosome" in request){
+                    var dom_chromosome_select = document.getElementById("add_manage_proteins_chromosome");
+                    var selected_index = 0;
+                    for (var i = 1; i < dom_chromosome_select.length; ++i){
+                        if (dom_chromosome_select[i].innerHTML == request["chromosome"]){
+                            selected_index = i;
+                            break;
+                        }
+                    }
+                    dom_chromosome_select.selectedIndex = selected_index;
                 }
             }
         }
