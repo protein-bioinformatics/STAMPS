@@ -23,8 +23,8 @@ with open("../admin/qsdb.conf", mode="rt") as fl:
 form = cgi.FieldStorage()
 server = "server-request" in form
 
-if server and conf["public"] == 0:
-    print "{}"
+if server and "public" in conf and conf["public"] == 0:
+    print("{}")
     exit()
     
 
