@@ -5376,7 +5376,6 @@ function load_data(reload){
             edge_data = JSON.parse(xmlhttp_edge.responseText);
         }
     }
-    
     xmlhttp.open("GET", request_nodes, true);
     xmlhttp.send();
     

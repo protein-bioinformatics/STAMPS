@@ -1,6 +1,10 @@
-root_path = /var/www/qsdb
+server = http://do2-bpx-as7d4/stamps-server
+root_path = /var/www/stamps
 mysql_host = localhost
 mysql_port = 3306
 mysql_user = qsdb_user
 mysql_passwd = qsdb_password
 mysql_db = qsdb
+host = http://do2-blx-armf8/stamps/
+hostname = Kopczynski Laptop
+public = 0
