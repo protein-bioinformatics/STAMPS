@@ -2047,7 +2047,7 @@ function manage_loci_functions(){
                 dom_option.id = row[0];
                 dom_option.innerHTML = row[1];
             }
-            editor_select_loci_select_change();
+            editor_select_loci_select_change(true);
         }
         
     }
@@ -2078,8 +2078,10 @@ Set.prototype.subSet = function(otherSet)
 } 
 
 
-function editor_select_loci_select_change(){
-    if (editor_select_loci_select_index == document.getElementById("editor_select_loci_select").selectedIndex) return;
+function editor_select_loci_select_change(reload){
+    if (typeof(reload) === "undefined") reload = false;
+    
+    if (editor_select_loci_select_index == document.getElementById("editor_select_loci_select").selectedIndex && !reload) return;
     
     if (current_loci_set.size > 0 && (!current_loci_set.subSet(edited_loci_set) || !edited_loci_set.subSet(current_loci_set)))
     {
