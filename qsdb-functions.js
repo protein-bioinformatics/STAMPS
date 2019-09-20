@@ -5371,8 +5371,11 @@ function load_data(reload){
             tmp_data = JSON.parse(xmlhttp.responseText);
         }
     }
-    
     var request_nodes = file_pathname + "scripts/get-nodes.bin?pathway=" + current_pathway + "&host=" + encodeURL(current_host) + "&species=" + encodeURL(current_species + specific_node_addition);
+    xmlhttp.open("GET", request_nodes, true);
+    xmlhttp.send();
+    
+    
     var request_edges = file_pathname + "scripts/get-edges.bin?pathway=" + current_pathway + "&host=" + encodeURL(current_host);
     
     // get nodes information
@@ -5382,10 +5385,6 @@ function load_data(reload){
             edge_data = JSON.parse(xmlhttp_edge.responseText);
         }
     }
-    xmlhttp.open("GET", request_nodes, true);
-    xmlhttp.send();
-    
-    
     xmlhttp_edge.open("GET", request_edges, true);
     xmlhttp_edge.send();
     
@@ -5468,7 +5467,6 @@ function load_data(reload){
                 }
             }
             
-            console.log(file_pathname + "scripts/get-proteins.bin?pathway=" + current_pathway + "&species=" + current_species + "&host=" + encodeURL(current_host));
             xmlhttp_prot.open("GET", file_pathname + "scripts/get-proteins.bin?pathway=" + current_pathway + "&species=" + current_species + "&host=" + encodeURL(current_host), true);
             xmlhttp_prot.send();
         }

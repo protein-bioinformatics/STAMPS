@@ -1,18 +1,14 @@
 #ifndef RANK_H
 #define RANK_H
 
-#include <string>
-#include <iostream>
-#include <string.h>
-using namespace std;
+typedef unsigned long ulong;
+typedef unsigned int uint;
 
 const int shift = 6;
 const int mask = 63ull;
 const ulong one = 1ull;
 const ulong zero = 0ull;
 
-typedef unsigned long ulong;
-typedef unsigned int uint;
 
 class ranking {
     public:

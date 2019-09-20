@@ -1,4 +1,3 @@
-
 #include <string>
 #include <zlib.h>
 #include <vector>
@@ -7,6 +6,7 @@
 #include <sstream>
 #include <cstring>
 #include <math.h>
+#include <sys/stat.h>
 #include <fstream>
 #include <sys/time.h>
 #include "rank.h"
@@ -18,7 +18,11 @@
 #include "XmlInspector.hpp"
 #include <iostream>
 #include <bits/stdc++.h> 
-#include <sqlite3.h> 
+#include <sqlite3.h>
+#include "sais.h"
+#include "wavelet.h"
+#include <curl/curl.h>
+
 
 using namespace std;
 
@@ -37,6 +41,7 @@ static timeval start_timeval, end_timeval;
 string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len);
 void read_config_file(string filename, map<string, string> &m);
 string urlDecode(string &SRC);
+string web_request(string address);
 
 static double H = 1.007276;
 static double C12 =    12.000000;

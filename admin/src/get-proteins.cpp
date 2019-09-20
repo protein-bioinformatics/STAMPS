@@ -1,32 +1,5 @@
-#include <stdio.h>
-#include <cstring>
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <map>
-#include <set>
-#include <list>
-#include <string>
-#include <sstream>
-#include <sqlite3.h> 
-#include <math.h>
-#include <zlib.h>
-#include <time.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include "sais.h"
-#include "wavelet.h"
 #include "bio-classes.h"
 
-#include "mysql_connection.h"
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
-
-#include <libsoup/soup.h>
-
-using namespace std;
 
 
 #ifdef _WIN32
@@ -36,7 +9,6 @@ using namespace std;
 #elif defined __APPLE__
     string folder_delim = "/";
 #endif
-
 
 
 vector< protein* > proteins;
@@ -58,7 +30,7 @@ string statistics_json_suffix = ".json";
 void print_out(string response, bool compress){
     replaceAll(response, "\n", "\\n");
     if (compress){
-        cout << compress_string(response);        
+        cout << compress_string(response);
     }
     else {
         cout << response;
@@ -130,6 +102,7 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     }
     len_text += 1; // plus sentinal
     
+    
     delete res;
     delete my_stmt;
     
@@ -185,6 +158,7 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     
     
     
+    
     // retrieve all additional information from spectral library
     string sql_query_lite2 = "SELECT id i, peptideSeq p FROM RefSpectra WHERE scoreType <> -1 ORDER BY p;";
     char tmp_data;
@@ -227,6 +201,7 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     delete occ;
     delete index_rank;
     delete SA;
+    delete less_table;
 
     
     string response = "[";
@@ -239,7 +214,6 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     replaceAll(response, "\n", "\\n");
     return response;
 }
-
 
 
 
@@ -280,6 +254,7 @@ main(int argc, char** argv) {
         print_out("-2", compress);
         return -2;
     }
+    
     
     
     string species = "";
@@ -350,7 +325,7 @@ main(int argc, char** argv) {
     
     
     string sql_query_proteins = "";
-    string line;
+    string line = "";
     ifstream myfile ("../admin/qsdb.conf");
     if (myfile.is_open()){
         while ( getline (myfile,line) ){
@@ -369,26 +344,20 @@ main(int argc, char** argv) {
     
     
     
-    
-    
-    
-    
     // if it is a remote request
     if (host.length() > 0 && (host != "localhost" || host != "127.0.0.1")){
+        
         string get_vars = "";
         for (uint i = 0; i < get_entries.size(); ++i){
             vector<string> get_values = split(get_entries.at(i), '=');
-            if (get_vars.length() > 0) get_vars += "&";
-            if (get_values.size() && get_values.at(0) == "host"){
+            if (get_values.size() && get_values.at(0) != "host"){
+                if (get_vars.length() > 0) get_vars += "&";
                 get_vars += get_entries.at(i);
             }
         }
         string remote_request = host + "/scripts/get-proteins.bin?" + get_vars;
-        
-        SoupSession *session = soup_session_sync_new();
-        SoupMessage *msg = soup_message_new ("GET", remote_request.c_str());
-        soup_session_send_message (session, msg);
-        fwrite (msg->response_body->data, 1, msg->response_body->length, stdout);
+        string response = web_request(remote_request);
+        cout << response << flush;
         return 0;
     }
     
@@ -396,10 +365,8 @@ main(int argc, char** argv) {
     
     
     
-    
-    
      // Create a connection and connect to database
-    sql::ResultSet *res;
+    
     sql::Driver *driver = get_driver_instance();
     sql::Connection *con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
     con->setSchema(parameters["mysql_db"]);
@@ -412,7 +379,7 @@ main(int argc, char** argv) {
         
         sql_query = "SELECT distinct pw.id pathway_id, pw.name, GROUP_CONCAT(npc.protein_id) prot_id, pw.signaling_pathway FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id group by pw.id order by pw.name;";
         
-        res = stmt->executeQuery(sql_query);
+        sql::ResultSet *res = stmt->executeQuery(sql_query);
        
         
         string response = "[";
@@ -425,23 +392,32 @@ main(int argc, char** argv) {
         replaceAll(response, "\n", "\\n");
         
         print_out(response, compress);
+        delete res;
+        delete stmt;
+        delete con;
         return 0;
     }
     
     
     if (!species.length()){
         print_out("-7", compress);
+        delete stmt;
+        delete con;
         return -7;
     }
     
     if (parameters.find("root_path") == parameters.end()){
         print_out("-8", compress);
+        delete stmt;
+        delete con;
         return -8;
     }
     
     if (via_accessions){
         if (accessions == "" || accessions.find("'") != string::npos){
             print_out("-9", compress);
+            delete stmt;
+            delete con;
             return -9;
         }    
         replaceAll(accessions, string(":"), string("','"));
@@ -455,6 +431,8 @@ main(int argc, char** argv) {
     
         if (ids == "" || ids.find("'") != string::npos){
             print_out("-10", compress);
+            delete stmt;
+            delete con;
             return -10;
         }    
         replaceAll(ids, string(":"), string("','"));
@@ -466,6 +444,8 @@ main(int argc, char** argv) {
     else if (via_loci) {
         if (loci_ids == "" || loci_ids.find("'") != string::npos){
             print_out("-11", compress);
+            delete stmt;
+            delete con;
             return -11;
         }    
         replaceAll(loci_ids, string(":"), string("','"));
@@ -477,6 +457,8 @@ main(int argc, char** argv) {
     else if (via_functions) {
         if (function_ids == "" || function_ids.find("'") != string::npos){
             print_out("-12", compress);
+            delete stmt;
+            delete con;
             return -12;
         }    
         replaceAll(function_ids, string(":"), string("','"));
@@ -522,6 +504,8 @@ main(int argc, char** argv) {
             t.close();
             
             cout << result;
+            delete stmt;
+            delete con;
             return 0;
         }
         // otherwise retrieve the protein data the normal way and store in 'data' folder
@@ -539,15 +523,16 @@ main(int argc, char** argv) {
         }
     }
     else {
+    
         result = get_protein_data(sql_query_proteins, species, con, statistics);
     }
     
     print_out(result, compress);
     
     
-    delete res;
     delete stmt;
     delete con;
+    
     
     return 0;
 }

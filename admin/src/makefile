@@ -1,8 +1,8 @@
 BIN_PATH = ../../scripts
 ADMIN_PATH = ../scripts
 
-INC = -pthread -I/usr/include/libsoup-2.4 -I/usr/include/libxml2 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/mysql
-LIBS = -lsqlite3 -lmysqlcppconn -lz -lpthread -lsoup-2.4 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+INC = -I/usr/include/mysql
+LIBS = -lsqlite3 -lmysqlcppconn -lz -lpthread -lcurl
 
 main: nodes proteins search edges pathways manage chromosomes prep_blib create_blib
 	javac -cp ../scripts/cdk-2.0.jar:. DrawChem.java && mv DrawChem.class ../scripts/.

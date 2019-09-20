@@ -153,6 +153,7 @@ int binarySearch(int* array, int length, int key) {
 
 
 
+
 string remove_newline(string str) {
     size_t start_pos = 0;
     while((start_pos = str.find("\n", start_pos)) != string::npos) {
@@ -169,11 +170,16 @@ string remove_newline(string str) {
 }
 
 
+
+
+
 float compute_mass(string protein_seq){
     float mass = 20.024018;
     for (int i = 0; i < protein_seq.length(); ++i) mass += acids[protein_seq[i]];        
     return mass;
 }
+
+
 
 
 string compress_string(const string& str, int compressionlevel){
@@ -190,6 +196,7 @@ string compress_string(const string& str, int compressionlevel){
     char outbuffer[32768];
     string outstring;
  
+    
     // retrieve the compressed bytes blockwise
     do {
         zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
@@ -214,6 +221,50 @@ string compress_string(const string& str, int compressionlevel){
  
     return outstring;
 }
+
+
+
+
+
+
+size_t writefunc(void *ptr, size_t size, size_t nmemb, string &s)
+{
+    string t = string(size * nmemb, 'x');
+    for (int i = 0; i< size * nmemb; ++i){
+        t[i] = ((const char*)ptr)[i];
+    }
+    s += t;
+    return size * nmemb;
+}
+
+
+
+
+string web_request(string address){
+    CURL *curl;
+    CURLcode res;
+    string s = "";
+    
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    
+    curl = curl_easy_init();
+    if(curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, address.c_str());
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); 
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, s);
+        
+        res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+    }
+    curl_global_cleanup();
+    
+    return s;
+}
+
+
+
 
 
 float predict_isoelectric_point(string protein_seq){
