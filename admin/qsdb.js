@@ -1173,7 +1173,7 @@ function editor_update_protein_node(){
     var continuing = true;
     
     // get proteins
-    var request = file_pathname + "admin/scripts/manage-entries.bin?action=set&table=nodeproteincorrelations&column=none&id=" + selected_protein_node + "&value=" +  encodeURL(prot.proteins.join(":"));
+    var request = file_pathname + "admin/scripts/manage-entries.bin?action=set&table=nodeproteincorrelations&column=" + current_species + "&id=" + selected_protein_node + "&value=" +  encodeURL(prot.proteins.join(":"));
     var xmlhttp_set = new XMLHttpRequest();
     xmlhttp_set.onreadystatechange = function() {
         if (xmlhttp_set.readyState == 4 && xmlhttp_set.status == 200) {

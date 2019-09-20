@@ -395,7 +395,7 @@ function load_tissues(){
             return true;
         }
     }
-    xmlhttp_tissues.open("GET", file_pathname + "scripts/get-tissues.py", false);
+    xmlhttp_tissues.open("GET", file_pathname + "scripts/get-tissues.py?host=" + current_host, false);
     xmlhttp_tissues.send();
     
 }
@@ -404,9 +404,22 @@ function load_tissues(){
 
 
 function load_css(){
+    var the_head = document.getElementsByTagName('head')[0];
+    var to_remove = [];
+    for (var style of the_head.children){
+        if (typeof(style.idtype) !== "undefined" && style.idtype == "css_tissue_style"){
+            to_remove.push(style);
+        }
+    }
+    
+    for (var style of to_remove){
+        the_head.removeChild(style);
+    }
+    
     for (var tissue_key in tissues){
         var style = document.createElement('style');
         style.type = 'text/css';
+        style.idtype = "css_tissue_style";
         document.getElementsByTagName('head')[0].appendChild(style);
         style.innerHTML = "div." + tissues[tissue_key][1] + " { \
         background-image: url(\"data:image/png;base64," + tissues[tissue_key][0] + "\"); \
@@ -646,6 +659,7 @@ function set_species_menu(reload, request_all){
                 else {
                     if (species_counter == 0) {
                         current_species = ncbi[1];
+                        current_host = host;
                         dom_species_td.setAttribute("class", "selected_menu_cell");
                     }
                 }
@@ -5333,6 +5347,7 @@ function load_data(reload){
         reset_view();
     }
     
+    load_tissues();
     
     // reset current information
     if(!reload){

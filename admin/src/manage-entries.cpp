@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
         
         
         if (!set_table.compare("nodeproteincorrelations")){
-            string sql_query = "DELETE FROM " + set_table + " WHERE node_id = " + set_id + ";";
+            string sql_query = "DELETE npc FROM " + set_table + " npc INNER JOIN proteins p ON p.id = npc.protein_id WHERE npc.node_id = " + set_id + " AND p.species = " + set_col + ";";
             stmt->execute(sql_query);
             
             for(string protein_id : split(set_value, ':')){
