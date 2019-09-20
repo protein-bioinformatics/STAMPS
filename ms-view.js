@@ -329,7 +329,8 @@ function load_spectrum(spectrum_id, spectrum_data, ms_panel){
                 spectrum_data = JSON.parse(xmlhttp.responseText);
             }
         }
-        xmlhttp.open("GET", file_pathname + "scripts/get-msdata.py?spectrum_id=" + spectrum_id + "&species=" + current_species, false);
+        console.log(file_pathname + "scripts/get-msdata.py?spectrum_id=" + spectrum_id + "&species=" + current_species + "&host=" + current_host);
+        xmlhttp.open("GET", file_pathname + "scripts/get-msdata.py?spectrum_id=" + spectrum_id + "&species=" + current_species + "&host=" + current_host, false);
         xmlhttp.send();
     }
     

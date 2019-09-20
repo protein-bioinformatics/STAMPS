@@ -5,6 +5,7 @@ import zlib
 import struct
 import json
 import cgi, cgitb
+from urllib.request import urlopen
 
 print("Content-Type: text/html")
 print()
@@ -27,12 +28,18 @@ def make_dict(cur):
 form = cgi.FieldStorage()
 spectrum_id = int(form.getvalue('spectrum_id'))
 species = form.getvalue('species')
-
+hostname = form.getvalue('host') if "host" in form else ""
 
 if "root_path" not in conf:
     print(-1)
     exit()
 
+
+if hostname != "":
+    request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
+    print(urlopen("%s/scripts/get-msdata.py?%s" % (hostname, request), timeout = 2).read().decode("utf8"))
+    
+    exit()
 
 
 spectral_lib =  "%s/data/spectral_library_%s.blib" % (conf["root_path"], species)

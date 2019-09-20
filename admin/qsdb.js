@@ -4492,8 +4492,10 @@ function curate_spectra_checking(){
     xmlhttp_spectra_update.onreadystatechange = function() {
         if (xmlhttp_spectra_update.readyState == 4 && xmlhttp_spectra_update.status == 200) {
             response = xmlhttp_spectra_update.responseText;
+            console.log(response);
         }
     }
+    console.log(request);
     xmlhttp_spectra_update.open("GET", file_pathname + "admin/scripts/curate-spectral-library.py?" + request, false);
     xmlhttp_spectra_update.send();
     spectrum_active = curate_spectra_checks[spec_id];
