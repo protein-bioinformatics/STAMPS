@@ -593,8 +593,9 @@ function load_species_data(){
 
 
 
-function set_species_menu(reload){
+function set_species_menu(reload, request_all){
     
+    if (typeof request_all === 'undefined') request_all = true;
     if (typeof reload === 'undefined') reload = false;
     
     // get species
@@ -653,7 +654,7 @@ function set_species_menu(reload){
             
         }
     }
-    xmlhttp_species.open("GET", file_pathname + "scripts/get-species.py?request_all=true", false);
+    xmlhttp_species.open("GET", file_pathname + "scripts/get-species.py" + (request_all ? "?request_all=true" : ""), false);
     xmlhttp_species.send();
     
 }

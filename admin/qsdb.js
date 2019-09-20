@@ -113,7 +113,7 @@ function init(){
     select_field_element.visible = false;
     load_tissues();
     get_pathway_groups();
-    set_species_menu();
+    set_species_menu(false, false);
     add_species_events();
     
     infobox = new Infobox();
@@ -399,7 +399,7 @@ function add_species_events(){
     var species_table = document.getElementById("select_species_table");
     for (var st_tr of species_table.children){
         var events = st_tr.children[0].attributes["onclick"].value;
-        st_tr.children[0].setAttribute("onclick", events + " load_species_data();");
+        st_tr.children[0].setAttribute("onclick", events + " load_species_additional_data();");
     }
 }
 
@@ -407,7 +407,7 @@ function add_species_events(){
 
 
 
-function load_species_data(){
+function load_species_additional_data(){
     // get number of spectra
     var xmlhttp_spectra = new XMLHttpRequest();
     xmlhttp_spectra.onreadystatechange = function() {
