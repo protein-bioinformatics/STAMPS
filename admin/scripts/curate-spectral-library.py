@@ -33,7 +33,7 @@ if type(action) is not str or action not in ["count", "select", "update"]:
     exit()
 
     
-spectral_lib = "../../data/spectral_library_%s.blib" % species 
+spectral_lib = "%s/data/spectral_library_%s.blib" % (conf["root_path"], species)
    
 db = sqlite3.connect(spectral_lib)
 cur = db.cursor()
@@ -73,7 +73,7 @@ elif action == "update":
     try:
         a = int(e_id)
         a = int(value)
-    except:
+    except Exception as e:
         print(-5)
         exit()
         
@@ -81,8 +81,8 @@ elif action == "update":
     try:
         sql_query = "UPDATE RefSpectra SET scoreType = %s WHERE id = %s;" % (value, e_id)
         cur.execute(sql_query)
-    except:
+        db.commit()
+    except Exception as e:
         print(-6)
         exit()
-    db.commit()
     print(0)

@@ -37,15 +37,18 @@ my_cur.execute('SELECT ncbi, name FROM species;')
 species_data = {row[0]: row[1] for row in my_cur}
 
 if request_all:
-    response = urlopen("%s/get-all-species.py" % conf["server"], timeout = 1)
-    response = json.loads("".join(chr(c) for c in response.read()))
-    
-    for row in response:
-        #print("%s %s %s<br>" % (row[0], conf["host"], row[0] != conf["host"]))
-        if row[0] != conf["host"]:
-            for species_row in row[2]:
-                key = "%s|%s" % (row[0], species_row)
-                value = "%s | (%s)" % (row[2][species_row], row[1])
-                species_data[key] = value
+    try:
+        response = urlopen("%s/get-all-species.py" % conf["server"], timeout = 1)
+        response = json.loads("".join(chr(c) for c in response.read()))
+        
+        for row in response:
+            #print("%s %s %s<br>" % (row[0], conf["host"], row[0] != conf["host"]))
+            if row[0] != conf["host"]:
+                for species_row in row[2]:
+                    key = "%s|%s" % (row[0], species_row)
+                    value = "%s | (%s)" % (row[2][species_row], row[1])
+                    species_data[key] = value
+    except Exception as e:
+        pass
     
 print(json.dumps(species_data))
