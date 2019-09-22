@@ -1827,7 +1827,8 @@ function Infobox(ctx){
             var lm_id = data[this.node_id].lm_id;
             if (with_lmid) html_content += "<div style=\"font-size: " + (line_height - 5) + "px;\"><b>LM-ID:</b> <a href='https://www.lipidmaps.org/data/LMSDRecord.php?LMID=" + lm_id + "' target=\"blank\">" + data[this.node_id].lm_id + "</a></div>";
             html_content += "<br>";
-            if (data[this.node_id].foreign_id != -1) html_content += "<img src='" + file_pathname + "images/metabolites/C" + data[this.node_id].foreign_id + ".png'>";
+            //if (data[this.node_id].foreign_id != -1) html_content += "<img src='" + file_pathname + "images/metabolites/C" + data[this.node_id].foreign_id + ".png'>";
+            if (data[this.node_id].foreign_id != -1) html_content += "<img src='data:image/jpeg;base64," + data[this.node_id].image + "'>";
             
             html_content += "</div>";
             
@@ -1948,6 +1949,7 @@ function node(data){
     this.exact_mass = ('e' in data) ? data['e'] : "";
     this.pos = ('pos' in data) ? data['pos'] : "";
     this.img = 0;
+    this.image = data['img'];
     this.text_highlight = ('h' in data) ? data['h'] == "1" : false;
     this.highlight = false;
     this.foreign_id = data['r'];
@@ -2129,7 +2131,8 @@ function node(data){
             this.img = new Image();
             if (this.foreign_id != -1){
                 var load_process = setInterval(function(nd){
-                    nd.img.src = file_pathname + "images/metabolites/C" + nd.foreign_id + ".png";
+                    //nd.img.src = file_pathname + "images/metabolites/C" + nd.foreign_id + ".png";
+                    nd.img.src = 'data:image/jpeg;base64,' + nd.image;
                     clearInterval(load_process);
                 }, 1, this);
             }
