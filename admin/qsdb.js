@@ -1264,6 +1264,7 @@ function update_entry(request){
             }
         }
     }
+    console.log(request);
     xmlhttp.open("GET", request, false);
     xmlhttp.send();
     return successful_creation;
@@ -1874,7 +1875,7 @@ function update_node(event) {
 
 
 function key_down(event){
-    if (document.getElementById("curate_spectra").style.display != "none"){
+    if (document.getElementById("curate_spectra").style.display == "inline"){
         event.preventDefault();
         switch(event.which){
             case 27:
@@ -1913,7 +1914,7 @@ function key_down(event){
     }
     
     
-    else if (document.getElementById("inspect_spectra").style.display != "none"){
+    else if (document.getElementById("inspect_spectra").style.display == "inline"){
         event.preventDefault();
         switch(event.which){
             case 27:

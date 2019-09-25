@@ -4,7 +4,10 @@ ADMIN_PATH = ../scripts
 INC = -I/usr/include/mysql
 LIBS = -lsqlite3 -lmysqlcppconn -lz -lpthread -lcurl
 
-main: nodes proteins search edges pathways manage chromosomes prep_blib create_blib
+main: nodes proteins search edges pathways manage chromosomes prep_blib create_blib cdk
+	echo "done"
+	
+cdk:
 	javac -cp ../scripts/cdk-2.0.jar:. DrawChem.java && mv DrawChem.class ../scripts/.
 
 nodes:
