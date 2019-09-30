@@ -2054,39 +2054,50 @@ function node(data){
         this.slide = false;
         this.img = new Image();
         var load_process = setInterval(function(nd){
-            try {
-                nd.img.onload = function () {
-                    nd.width = nd.img.width;
-                    nd.height = nd.img.height;
+            
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.nd = nd;
+            
+            var request = file_pathname + "scripts/get-image.py?node_id=" + nd.id + "&host=" + encodeURL(current_host);
+            xmlhttp.onreadystatechange = function() {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    
+                    this.nd.img.src = "data:image/" + this.nd.pos + ";charset=utf-8;base64," + this.responseText;
+                        
+                    //this.nd.width = this.nd.img.width;
+                    //this.nd.height = this.nd.img.height;
                     
                     // must be done when svg contains no decent information about width and height
-                    if (nd.pos.toLowerCase() == "svg" && (nd.width == 0 || nd.height == 0)){
-                        var svgrequest = new XMLHttpRequest();
-                        svgrequest.onload = function() {
-                            try {
-                                var xmlDoc = new DOMParser().parseFromString(svgrequest.responseText,'text/xml');
-                                nd.width = xmlDoc.children[0].viewBox.baseVal.width;
-                                nd.height = xmlDoc.children[0].viewBox.baseVal.height;
-                            }
-                            catch(e){
-                            }
+                    /*
+                    if (this.nd.pos.toLowerCase() == "svg" && (this.nd.width == 0 || this.nd.height == 0)){
+                        try {
+                            var decoded = atob(this.responseText);
+                            var xmlDoc = new DOMParser().parseFromString(decoded,'text/xml');
+                            this.nd.width = xmlDoc.children[0].viewBox.baseVal.width;
+                            this.nd.height = xmlDoc.children[0].viewBox.baseVal.height;
                         }
-                        svgrequest.open("GET", nd.img.src, false);
-                        svgrequest.send();
-                        
-                    }
+                        catch(e){
+                        }
+                    }*/
+                    this.nd.height *= factor * this.nd.foreign_id / 10000.;
+                    this.nd.width *= factor * this.nd.foreign_id / 10000.;
                     
-                    nd.height *= factor * nd.foreign_id / 10000.;
-                    nd.width *= factor * nd.foreign_id / 10000.;
-                    nd.slide = true;
+                    this.nd.height = 100;
+                    this.nd.width = 100;
+                    
+                    if (this.nd.id == 127181) this.nd.slide = true;
+                    
+                    //console.log(this.nd.img);
                     
                     draw();
                 }
             }
-            catch (e) {
-                
-            }
-            nd.img.src = file_pathname + "images/visual_images/I" + nd.id + "." + nd.pos + "?" + new Date().getTime();
+            console.log("1: " + nd.id);
+            xmlhttp.open("GET", request, false);
+            xmlhttp.send();
+            
+            console.log("2: " + nd.width);
+            
             clearInterval(load_process);
         }, 1, this);
     }
