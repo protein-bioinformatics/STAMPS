@@ -2051,52 +2051,59 @@ function node(data){
     this.setup_image = function(){
         this.width = 100;
         this.height = 100;
+        this.foreign_id = 10000.;
         this.slide = false;
         this.img = new Image();
+        
         var load_process = setInterval(function(nd){
             
             var xmlhttp = new XMLHttpRequest();
-            xmlhttp.nd = nd;
+            xmlhttp.node = nd;
             
             var request = file_pathname + "scripts/get-image.py?node_id=" + nd.id + "&host=" + encodeURL(current_host);
             xmlhttp.onreadystatechange = function() {
                 if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    var image_meta = JSON.parse(this.responseText);
                     
-                    this.nd.img.src = "data:image/" + this.nd.pos + ";charset=utf-8;base64," + this.responseText;
+                    if (Object.keys(image_meta).length == 0) return;
+                    
+                    var data_type = image_meta["image_type"];
+                    
+                    data_type = "jpg";
+                    
+                    if (data_type == "svg") data_type = "svg+xml";
+                    this.node.pos = data_type;
+                    this.node.foreign_id = image_meta["factor"];
+                    this.node.img.src = "data:image/" + this.node.pos + ";charset=utf-8;base64," + image_meta["image"];
+                    this.node.img.node = this.node;
                         
-                    //this.nd.width = this.nd.img.width;
-                    //this.nd.height = this.nd.img.height;
+                    this.node.img.onload = function(){
+                        this.node.width = this.node.img.width;
+                        this.node.height = this.node.img.height;
                     
-                    // must be done when svg contains no decent information about width and height
-                    /*
-                    if (this.nd.pos.toLowerCase() == "svg" && (this.nd.width == 0 || this.nd.height == 0)){
-                        try {
-                            var decoded = atob(this.responseText);
-                            var xmlDoc = new DOMParser().parseFromString(decoded,'text/xml');
-                            this.nd.width = xmlDoc.children[0].viewBox.baseVal.width;
-                            this.nd.height = xmlDoc.children[0].viewBox.baseVal.height;
+                        // must be done when svg contains no decent information about width and height
+                        if (this.node.pos.toLowerCase() == "svg" && (this.node.width == 0 || this.node.height == 0)){
+                            try {
+                                var decoded = atob(this.responseText);
+                                var xmlDoc = new DOMParser().parseFromString(decoded,'text/xml');
+                                this.node.width = xmlDoc.children[0].viewBox.baseVal.width;
+                                this.node.height = xmlDoc.children[0].viewBox.baseVal.height;
+                            }
+                            catch(e){
+                                return;
+                            }
                         }
-                        catch(e){
-                        }
-                    }*/
-                    this.nd.height *= factor * this.nd.foreign_id / 10000.;
-                    this.nd.width *= factor * this.nd.foreign_id / 10000.;
+                        this.node.height *= factor * this.node.foreign_id / 10000.;
+                        this.node.width *= factor * this.node.foreign_id / 10000.;
+                        
+                        this.node.slide = true;
                     
-                    this.nd.height = 100;
-                    this.nd.width = 100;
-                    
-                    if (this.nd.id == 127181) this.nd.slide = true;
-                    
-                    //console.log(this.nd.img);
-                    
-                    draw();
+                        draw();
+                    }
                 }
             }
-            console.log("1: " + nd.id);
             xmlhttp.open("GET", request, false);
             xmlhttp.send();
-            
-            console.log("2: " + nd.width);
             
             clearInterval(load_process);
         }, 1, this);
@@ -2428,11 +2435,17 @@ function node(data){
                 break;
                 
             case "image":
+                
                 if (this.slide){
-                    ctx.drawImage(this.img, this.x - (this.width >> 1), this.y - (this.height >> 1), this.width, this.height);
+                    try {
+                        ctx.drawImage(this.img, this.x - (this.width >> 1), this.y - (this.height >> 1), this.width, this.height);
+                    }
+                    catch (e){
+                        this.slide = false;
+                        draw();
+                    }
                 }
                 else {
-                    
                     
                     ctx.lineWidth = 5 * factor;
                     ctx.strokeStyle = "red";

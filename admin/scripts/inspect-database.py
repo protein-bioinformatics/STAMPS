@@ -142,6 +142,12 @@ if len(node_foreign_label_ids - label_ids) > 0:
 
 
 
+
+
+
+
+
+
 sql_query = "SELECT foreign_id FROM nodes WHERE type = 'label';"
 my_cur.execute(sql_query)
 node_foreign_label_ids = set([entry[0] for entry in my_cur])
@@ -164,6 +170,28 @@ if len(label_ids - node_foreign_label_ids) > 0:
 sql_query = "SELECT id FROM nodes;"
 my_cur.execute(sql_query)
 node_ids = set([entry[0] for entry in my_cur])
+
+
+
+
+
+sql_query = "SELECT node_id FROM images;"
+my_cur.execute(sql_query)
+images_foreign_node_ids = set([entry[0] for entry in my_cur])
+if len(images_foreign_node_ids - node_ids) > 0:  
+    if mode in ["del", "del_web"]:
+        sql_query = "DELETE FROM images WHERE node_id NOT IN (SELECT id FROM nodes);"
+        my_cur.execute(sql_query)
+        conn.commit()
+    elif mode == "check_web":
+        print(-1)
+        exit()
+    else:
+        print("inconsistency: node_id in images ->", (images_foreign_node_ids - node_ids))
+
+
+
+
 
 
 

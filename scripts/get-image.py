@@ -2,6 +2,7 @@
 
 from pymysql import connect, cursors
 import cgi, cgitb
+import json
 
 print("Content-Type: text/html")
 print()
@@ -17,7 +18,8 @@ with open("../admin/qsdb.conf", mode="rt") as fl:
         conf[token[0].strip(" ")] = token[1].strip(" ")
 
 
-
+def make_dict(cur):
+    return {key[0]: value for key, value in zip(cur.description, cur.fetchall()[0])}
 
 form = cgi.FieldStorage()
 try:
@@ -41,10 +43,12 @@ if hostname != "":
 conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
 my_cur = conn.cursor()
    
-my_cur.execute('SELECT image FROM images WHERE node_id = %i;' % node_id)
-result = [row for row in my_cur]
-if len(result) == 0:
+my_cur.execute('SELECT * FROM images WHERE node_id = %i;' % node_id)
+
+if my_cur.rowcount == 0:
     print("{}")
     exit()
     
-print(result[0][0])
+result = make_dict(my_cur)
+    
+print(json.dumps(result))

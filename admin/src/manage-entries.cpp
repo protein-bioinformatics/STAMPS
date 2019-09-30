@@ -136,6 +136,7 @@ int main(int argc, char** argv) {
             }
         }
         
+        
         else if (!set_table.compare("protein_loci")){
             string sql_query = "DELETE FROM " + set_table + " WHERE locus_id = " + set_id + ";";
             stmt->execute(sql_query);
@@ -145,6 +146,15 @@ int main(int argc, char** argv) {
                 stmt->execute(sql_query);
             }
         }
+        
+        
+        else if (!set_table.compare("images")){
+            string sql_query = "UPDATE " + set_table + " SET " + set_col + " = '" + set_value + "' WHERE node_id = " + set_id + ";";
+            stmt->execute(sql_query);
+        }
+        
+        
+        
         
         else {
             if (!set_table.compare("metabolites") && !set_col.compare("smiles")){

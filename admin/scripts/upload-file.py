@@ -30,35 +30,21 @@ if type(node_id) is not str or len(content) == 0:
     
 
 
-filepath = os.path.dirname(os.path.abspath(__file__))
-filename = "%s/../../images/visual_images/I%s.%s" % (filepath, node_id, extension)
-content = (content + '===')[: len(content) + (len(content) % 4)]
+content = content + ('=' * (4 - (len(content) % 4)) if len(content) % 4 != 0 else "")
 content = content.replace('-', '+').replace('_', '/')
-content = b64decode(content)
 
-
-write = True
-if extension.lower() == "svg":
-    root = ET.fromstring(content)
-    if "width" not in root.attrib or "height" not in root.attrib:
-        write = False
-        if "viewBox" in root.attrib:
-            viewBox = root.attrib["viewBox"]
-            root.attrib["width"] = viewBox.split(" ")[2]
-            root.attrib["height"] = viewBox.split(" ")[3]
-        tree = ET.ElementTree(root)
-        tree.write(filename, encoding="UTF-8")
-        
-        
-if write:
-    with open(filename, mode="wb") as fl:
-        fl.write(content)
-    
 
 conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
 my_cur = conn.cursor(cursors.DictCursor)
 
-my_cur.execute("UPDATE nodes SET position = '%s' where id = %s" % (extension, node_id))
+my_cur.execute("SELECT * FROM images WHERE node_id = %s;" % node_id)
+if my_cur.rowcount > 0:
+    my_cur.execute("UPDATE images SET image = '%s' WHERE node_id = %s;" % (content, node_id))
+    my_cur.execute("UPDATE images SET image_type = '%s' WHERE node_id = %s;" % (extension.lower(), node_id))
+    my_cur.execute("UPDATE images SET factor = 10000 WHERE node_id = %s;" % node_id)
+    
+else:
+    my_cur.execute("INSERT INTO images (node_id, image, image_type, factor) VALUES (%s, '%s', '%s', 10000);" % (node_id, content, extension.lower()))
 conn.commit()
 
 print(0)

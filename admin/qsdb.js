@@ -1311,6 +1311,9 @@ function repair_database(){
 
 
 
+
+
+
 function create_node(request){
     var xmlhttp = new XMLHttpRequest();
     request = file_pathname + "admin/scripts/create-node.py?" + request;
@@ -1334,6 +1337,8 @@ function create_node(request){
     xmlhttp.send();
     return successful_creation;
 }
+
+
 
 
 
@@ -1615,7 +1620,7 @@ function mouse_up_listener(event){
         var value = scaling_element.width / rescaling * scaling_element.foreign_id;
         scaling_element.foreign_id = value;
         rescaling = -1;
-        var request = "action=set&id=" + scaling_element.id + "&table=nodes&column=foreign_id&value=" + value;
+        var request = "action=set&id=" + scaling_element.id + "&table=images&column=factor&value=" + value;
         update_entry(request);
     }
     else if (toolbox_button_selected == toolbox_states.DRAW_EDGE){

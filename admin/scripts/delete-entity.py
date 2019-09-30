@@ -114,6 +114,11 @@ if entity_type == "node":
             sql_query = "DELETE FROM labels WHERE id IN (SELECT foreign_id from nodes WHERE id = %s);"
             my_cur.execute(sql_query, (entity_id))
             conn.commit()
+            
+        elif entity_type == "image":
+            sql_query = "DELETE FROM images WHERE node_id = %s;"
+            my_cur.execute(sql_query, (entity_id))
+            conn.commit()
         
         sql_query = "DELETE FROM reactions_direct WHERE node_id_start = %s;"
         my_cur.execute(sql_query, (entity_id))
@@ -233,8 +238,6 @@ elif entity_type == "metabolite":
     my_cur.execute(sql_query, (entity_id))
     conn.commit()
     
-    filepath = os.path.dirname(os.path.abspath(__file__))
-    os.system("rm -f %s/../../images/metabolites/C%s.png" % (filepath, entity_id))
     
     
     
