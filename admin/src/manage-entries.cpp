@@ -59,7 +59,7 @@ static int sqlite_table_meta(void *data, int argc, char **argv, char **azColName
     string* response = (string*)data;
 
     if (response[0].length() > 1) response[0] += ",";
-    response[0] += "\"" + string(argv[0]) + "\"";
+    response[0] += "\"" + string(argv[1]) + "\"";
     
     return SQLITE_OK;
 }
@@ -209,6 +209,7 @@ int main(int argc, char** argv) {
             } 
             
             string sql_query = "UPDATE " + set_table + " SET " + set_col + " = '" + set_value + "' WHERE id = " + set_id + ";";
+            //cout << sql_query << endl;
             rc = sqlite3_exec(db, sql_query.c_str(), NULL, NULL, &zErrMsg);
         
         }
@@ -309,7 +310,7 @@ int main(int argc, char** argv) {
             
         else if (!action_type.compare("pathway_groups_col") || !action_type.compare("proteins_col") || !action_type.compare("metabolites_col") || !action_type.compare("species_col") || !action_type.compare("tissues_col") || !action_type.compare("loci_names_col") || !action_type.compare("pathways_col")){
             replaceAll(action_type, "_col", "");
-            string sql_query = "SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = '" + parameters["mysql_db"] + "' AND `TABLE_NAME` = '" + action_type + "';";
+            string sql_query = "PRAGMA table_info('" + action_type + "');";
             
             string data[] = {"["};
             rc = sqlite3_exec(db, sql_query.c_str(), sqlite_table_meta, (void*)data, &zErrMsg);

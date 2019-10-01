@@ -2904,6 +2904,7 @@ function manage_fill_table(){
         }
     }
     
+    
     var request = "action=get&type=" + manage_current_entry;
     request += "&column=" + encodeURL(manage_sort_columns[manage_current_entry][manage_sort_column]);
     request += "&limit=" + encodeURL((manage_current_page * max_per_page).toString() + ":" + max_per_page.toString());
@@ -4186,7 +4187,7 @@ function add_manage_species_add(){
             }
             document.getElementById('add_manage_species').style.display = 'none';
             manage_fill_table();
-            set_species_menu(true);
+            set_species_menu(true, false);
             add_species_events();
         }
     }
@@ -4385,7 +4386,7 @@ function manage_delete_species(species_id){
             }
             del_species_ncbi = "";
             manage_fill_table();
-            set_species_menu(true);
+            set_species_menu(true, false);
             add_species_events();
         }
     }
