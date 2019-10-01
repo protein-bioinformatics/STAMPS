@@ -97,12 +97,16 @@ int main(int argc, char** argv) {
     }
     
     
+    string host = "";
     vector<string> get_entries = split(get_string, '&');
     map< string, string > form;
     for (uint i = 0; i < get_entries.size(); ++i){
-        vector<string> get_value = split(get_entries.at(i), '=');
-        string value = (get_value.size() > 1) ? get_value.at(1) : "";
-        form.insert(pair< string, string >(get_value.at(0), value));
+        vector<string> get_values = split(get_entries.at(i), '=');
+        string value = (get_values.size() > 1) ? get_values.at(1) : "";
+        form.insert(pair< string, string >(get_values.at(0), value));
+        if (get_values.size() > 1 && get_values.at(0) == "host"){
+            host = get_values.at(1);
+        }
     }
     
     
@@ -124,6 +128,31 @@ int main(int argc, char** argv) {
         }
         myfile.close();
     }
+    
+    
+    
+    
+    // if it is a remote request
+    if (host.length() > 0 && (host != "localhost" || host != "127.0.0.1")){
+        
+        string get_vars = "";
+        for (uint i = 0; i < get_entries.size(); ++i){
+            vector<string> get_values = split(get_entries.at(i), '=');
+            if (get_values.size() && get_values.at(0) != "host"){
+                if (get_vars.length() > 0) get_vars += "&";
+                get_vars += get_entries.at(i);
+            }
+        }
+        string remote_request = host + "/scripts/get-edges.bin?" + get_vars;
+        string response = web_request(remote_request);
+        cout << response << flush;
+        return 0;
+    }
+    
+    
+    
+    
+    
     
     
     // retrieve id and peptide sequence from spectral library

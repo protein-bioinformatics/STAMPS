@@ -24,12 +24,23 @@ if "species" not in form:
     exit()
 
 species = form.getvalue('species')
+hostname = form.getvalue('host') if "host" in form else ""
 
 try:
     a = int(species)
 except:
     print(-2)
     exit()
+    
+    
+    
+    
+if hostname != "":
+    request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
+    print(urlopen("%s/scripts/get-functions.py?%s" % (hostname, request), timeout = 2).read().decode("utf8"))
+    
+    exit()
+    
     
 
 database = "%s/data/database.sqlite" % conf["root_path"]

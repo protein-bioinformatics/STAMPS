@@ -24,6 +24,11 @@ hostname = form.getvalue('host') if "host" in form else ""
 if hostname != "":
     print(urlopen("%s/scripts/get-tissues.py" % hostname, timeout = 2).read().decode("utf8"))
     exit()
+    
+    
+    
+    
+
 
 
 # open database connection

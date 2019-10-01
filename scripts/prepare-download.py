@@ -258,6 +258,23 @@ if "proteins" not in form:
     exit()
 
 proteins = form.getvalue('proteins')
+hostname = form.getvalue('host') if "host" in form else ""
+
+
+
+
+
+if hostname != "":
+    request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
+    reply = urlopen("%s/scripts/prepare-download.py?%s" % (hostname, request), timeout = 2).read().decode("utf8")
+    
+    print("%s/%s" % (hostname, reply))
+    exit()
+
+
+
+
+
 
 spectra = []
 species = form.getvalue('species')

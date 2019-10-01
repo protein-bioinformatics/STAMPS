@@ -30,6 +30,10 @@ if os.environ["REMOTE_ADDR"] not in ["localhost", "127.0.0.1"] and "public" in c
     exit()
     
     
+    
+    
+    
+    
 # open database connection
 database = "%s/data/database.sqlite" % conf["root_path"]
 db = sqlite3.connect(database)

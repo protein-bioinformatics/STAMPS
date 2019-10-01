@@ -29,6 +29,7 @@ my_cur = db.cursor()
 form = cgi.FieldStorage()
 chromosome = form.getvalue('chromosome') if "chromosome" in form else ""
 species = form.getvalue('species') if "species" in form else ""
+hostname = form.getvalue('host') if "host" in form else ""
 
 if len(chromosome) == 0 or len(species) == 0:
     print(-1)
@@ -36,6 +37,14 @@ if len(chromosome) == 0 or len(species) == 0:
 
 if chromosome.find("'") > -1 or chromosome.find("\"") > -1:
     print(-2)
+    exit()
+    
+    
+    
+if hostname != "":
+    request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
+    print(urlopen("%s/scripts/get-chromosome-data.py?%s" % (hostname, request), timeout = 2).read().decode("utf8"))
+    
     exit()
 
 
