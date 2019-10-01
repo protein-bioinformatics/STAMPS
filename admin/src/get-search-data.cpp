@@ -120,15 +120,12 @@ main(int argc, char** argv) {
     
     
     string host = "";
-    
-    
     char* get_string_chr = getenv("QUERY_STRING");
     
     if (!get_string_chr){
         cout << -1;
         return -1;
     }
-    
     string get_string = get_string_chr;
     
     if (!get_string.length()){
@@ -143,6 +140,8 @@ main(int argc, char** argv) {
             host = get_values.at(1);
         }
     }
+    
+    
     
     
     // if it is a remote request
