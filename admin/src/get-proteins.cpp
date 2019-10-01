@@ -423,22 +423,10 @@ main(int argc, char** argv) {
     
     
     if (statistics_pathways){
-        /*
-        string sql_query = "SET SESSION group_concat_max_len=4294967295;";
-        stmt->execute(sql_query);
-        */
         
         string sql_query = "SELECT distinct pw.id pathway_id, pw.name, GROUP_CONCAT(npc.protein_id) prot_id, pw.signaling_pathway FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id group by pw.id order by pw.name;";
         
         
-        /*
-        sql::ResultSet *res = stmt->executeQuery(sql_query);
-        string response = "[";
-        while (res->next()){
-            if (response.length() > 1) response += ",";
-            
-            response += "[" + string(res->getString("pathway_id")) + ",\"" + string(res->getString("name")) + "\",[" + string(res->getString("prot_id")) + "]," + string(res->getString("signaling_pathway")) + "]";
-        }*/
         
         string response = "[";
         rc = sqlite3_exec(db, sql_query.c_str(), sqlite_statistics_pathways, (void*)&response, &zErrMsg);

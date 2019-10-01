@@ -79,6 +79,69 @@ class reaction {
 
 
 
+
+static int sqlite_select_reactions(void *data, int argc, char **argv, char **azColName){
+    map<string, string> row;
+    map<string, reaction* >* all_reactions = (map<string, reaction* >*)data;
+    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    
+   
+    reaction* r = new reaction();
+    r->id = row["id"];
+    r->node_id = row["node_id"];
+    r->anchor_in = row["anchor_in"];
+    r->anchor_out = row["anchor_out"];
+    all_reactions->insert({r->id, r});
+    
+    return SQLITE_OK;
+}
+
+
+
+
+
+static int sqlite_select_reagents(void *data, int argc, char **argv, char **azColName){
+    map<string, string> row;
+    map<string, reaction* >* all_reactions = (map<string, reaction* >*)data;
+    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    
+    reagent* r = new reagent();
+    r->id = row["rg_id"];
+    r->reaction_id = row["reaction_id"];
+    r->node_id = row["rg_node_id"];
+    r->type = row["type"];
+    r->anchor = row["anchor"];
+    r->head = row["head"];
+    all_reactions->at(row["id"])->reagents.push_back(r);
+    
+    return SQLITE_OK;
+}
+
+
+
+
+
+static int sqlite_select_reagents_direct(void *data, int argc, char **argv, char **azColName){
+    map<string, string> row;
+    map<string, direct* >* all_directs = (map<string, direct* >*)data;
+    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    
+    direct* r = new direct();
+    r->id = row["id"];
+    r->node_id_start = row["node_id_start"];
+    r->node_id_end = row["node_id_end"];
+    r->anchor_start = row["anchor_start"];
+    r->anchor_end = row["anchor_end"];
+    r->head = row["head"];
+    all_directs->insert({r->id, r});
+        
+    return SQLITE_OK;
+}
+
+
+
+
+
 main() {
     bool compress = false;
     string response = "";
@@ -138,14 +201,19 @@ main() {
     }
     
     
-    // Create a connection and connect to database
-    sql::Driver *driver;
-    sql::Connection *con;
-    sql::Statement *stmt;
-    sql::ResultSet *res;
-    driver = get_driver_instance();
-    con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
-    con->setSchema(parameters["mysql_db"]);
+    // retrieve id and peptide sequence from spectral library
+    sqlite3 *db;
+    char *zErrMsg = 0;
+    int rc, chr;
+    string database = parameters["root_path"] + "/data/database.sqlite";
+    rc = sqlite3_open((char*)database.c_str(), &db);
+    if( rc ){
+        print_out("[]", compress);
+        exit(-3);
+    }
+    
+    
+    
     
     
     string pathway_id = (form.find("pathway") != form.end()) ? form["pathway"] : "";
@@ -184,11 +252,18 @@ main() {
     sql_query += pathway_id;
     sql_query += " ORDER BY r.id;";
     
+    map<string, reaction* > all_reactions;
+    rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_reactions, (void*)&all_reactions, &zErrMsg);
+    if( rc != SQLITE_OK ){
+        print_out("[]", compress);
+        exit(-4);
+    }
+    
+    /*
     stmt = con->createStatement();
     res = stmt->executeQuery(sql_query);
         
     
-    map<string, reaction* > all_reactions;
     while (res->next()) {
         reaction* r = new reaction();
         r->id = res->getString("id");
@@ -197,6 +272,9 @@ main() {
         r->anchor_out = res->getString("anchor_out");
         all_reactions.insert(pair< string, reaction* >(r->id, r));
     }
+    */
+    
+    
     
     
     
@@ -205,7 +283,7 @@ main() {
     sql_query += pathway_id;
     sql_query += " ORDER BY r.id;";
     
-    
+    /*
     res = stmt->executeQuery(sql_query);
     while (res->next()) {
         reagent* r = new reagent();
@@ -217,21 +295,31 @@ main() {
         r->head = res->getString("head");
         all_reactions[res->getString("id")]->reagents.push_back(r);
     }
+    */
+    
+    
+    rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_reagents, (void*)&all_reactions, &zErrMsg);
+    if( rc != SQLITE_OK ){
+        print_out("[]", compress);
+        exit(-4);
+    }
     
     
     
     
+    map<string, direct* > all_directs;
     sql_query = "SELECT r.* FROM reactions_direct r INNER JOIN nodes n ON r.node_id_start = n.id INNER JOIN nodes nn ON r.node_id_end = nn.id WHERE n.pathway_id = ";
     sql_query += pathway_id;
     sql_query += " AND nn.pathway_id = ";
     sql_query += pathway_id;
     sql_query += " ORDER BY r.id;";
     
+    
+    /*
     stmt = con->createStatement();
     res = stmt->executeQuery(sql_query);
         
     
-    map<string, direct* > all_directs;
     while (res->next()) {
         direct* r = new direct();
         r->id = res->getString("id");
@@ -241,6 +329,13 @@ main() {
         r->anchor_end = res->getString("anchor_end");
         r->head = res->getString("head");
         all_directs.insert(pair< string, direct* >(r->id, r));
+    }
+    */
+    
+    rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_reagents_direct, (void*)&all_directs, &zErrMsg);
+    if( rc != SQLITE_OK ){
+        print_out("[]", compress);
+        exit(-4);
     }
     
     
@@ -264,9 +359,9 @@ main() {
     response += data;    
     print_out(response, compress);
     
-    delete res;
-    delete stmt;
-    delete con;
+    
+    
+    sqlite3_close(db); 
     
     return 0;
 }
