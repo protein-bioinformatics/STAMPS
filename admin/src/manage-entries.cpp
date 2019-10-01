@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
         else {
             if (!set_table.compare("metabolites") && !set_col.compare("smiles")){
                 string filepath = parameters["root_path"] + "/admin/scripts";
-                string command = "java -cp " + filepath + "/cdk-2.0.jar:" + filepath + "/mysql-connector-java-8.0.17.jar:. DrawChem  " + set_id + " '" + set_value + "'";
+                string command = "java -cp " + filepath + "/cdk-2.0.jar:" + filepath + "/sqlite-jdbc-3.27.2.1.jar:. DrawChem  " + set_id + " '" + set_value + "'";
                 int result = system(command.c_str());
                 
                 replaceAll(set_value, "\\", "\\\\");
@@ -505,7 +505,7 @@ int main(int argc, char** argv) {
             
             
             string filepath = parameters["root_path"] + "/admin/scripts";
-            string command = "java -cp " + filepath + "/cdk-2.0.jar:" + filepath + "/mysql-connector-java-8.0.17.jar:. DrawChem  " + metabolite_id + " '" + smiles_data + "'";
+            string command = "java -cp " + filepath + "/cdk-2.0.jar:" + filepath + "/sqlite-jdbc-3.27.2.1.jar:. DrawChem  " + metabolite_id + " '" + smiles_data + "'";
             int result = system(command.c_str());
         }
             

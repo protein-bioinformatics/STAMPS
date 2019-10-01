@@ -9,11 +9,12 @@ import java.util.*;
 import javax.imageio.*;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.Statement; 
 
  
 public class DrawChem {
@@ -51,6 +52,9 @@ public class DrawChem {
         return m;
     }
     
+    
+    
+    
     public static void main(String[] args) {
         if (args.length < 2) System.exit(-1);
         
@@ -76,20 +80,19 @@ public class DrawChem {
             
             
             // Connect with the database
-            //Class.forName("com.mysql.jdbc.Driver");
+            Connection connection = DriverManager.getConnection("jdbc:sqlite:" + parameters.get("root_path") + "/data/database.sqlite");
+            PreparedStatement ps = connection.prepareStatement("UPDATE metabolites SET image = ? WHERE id = ?;");
+
+            ps.setString(1, encoded_img);
+            ps.setString(2, metabolite_id);
+            ps.addBatch();
+
+            connection.setAutoCommit(false);
+            ps.executeBatch();
+            connection.setAutoCommit(true);
             
-            String pattern = "jdbc:mysql://%s:%s/%s?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&user=%s&password=%s";
             
-            String connect_string = String.format(pattern, parameters.get("mysql_host"), parameters.get("mysql_port"), parameters.get("mysql_db"), parameters.get("mysql_user"), parameters.get("mysql_passwd"));
-            
-            Connection connect = DriverManager.getConnection(connect_string);
-            PreparedStatement preparedStatement = connect.prepareStatement("UPDATE metabolites SET image = ? WHERE id = ?;");
-            
-            preparedStatement.setString(1, encoded_img);
-            preparedStatement.setString(2, metabolite_id);
-            preparedStatement.executeUpdate();
-        
-            
+            connection.close();
         }
         catch(Exception e){
             e.printStackTrace(System.out);

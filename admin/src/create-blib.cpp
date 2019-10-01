@@ -62,6 +62,19 @@ bool compare_modifications(pair<int, string>* m1, pair<int, string>* m2){
 
 
 
+static int sqlite_select_spectra_tissues(void *data, int argc, char **argv, char **azColName){
+    map<string, string> row;
+    map<string, int>* spectra_to_tissues = (map<string, int>*)data;
+    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    
+    spectra_to_tissues->insert({row["filename"], atoi(row["tissue"].c_str())});
+        
+    return SQLITE_OK;
+}
+
+
+
+
 int main(int argc, char** argv)
 {
     // load parameters from config file
@@ -73,12 +86,16 @@ int main(int argc, char** argv)
     
     try {
         
-        // Create a connection and connect to database
-        sql::ResultSet *res;
-        sql::Driver *driver = get_driver_instance();
-        sql::Connection *con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
-        con->setSchema(parameters["mysql_db"]);
-        sql::Statement *stmt = con->createStatement();
+        // retrieve id and peptide sequence from spectral library
+        sqlite3 *db_db;
+        char *zErrMsg = 0;
+        int rc, chr;
+        string database = parameters["root_path"] + "/data/database.sqlite";
+        rc = sqlite3_open((char*)database.c_str(), &db_db);
+        if( rc ){
+            cout << "-3" << endl;
+            exit(-3);
+        }
         
         
         // init all necessary tables
@@ -94,10 +111,8 @@ int main(int argc, char** argv)
         
         // load spectra to tissue table
         string sql_query = "SELECT * FROM files WHERE type = 'spectra';";
-        res = stmt->executeQuery(sql_query);
-        while (res->next()){
-            spectra_to_tissues.insert({res->getString("filename"), res->getInt("tissue")});
-        }
+        rc = sqlite3_exec(db_db, sql_query.c_str(), sqlite_select_spectra_tissues, (void*)&spectra_to_tissues, &zErrMsg);
+        sqlite3_close(db_db); 
         
         
         // load data from mzid scan
@@ -287,8 +302,6 @@ int main(int argc, char** argv)
         // create database
         
         sqlite3 *db;
-        char *zErrMsg = 0;
-        int rc;
         rc = sqlite3_open((parameters["root_path"] + "/tmp/upload/spectra.blib").c_str(), &db);
         if( rc ){
             cout << -3 << endl;

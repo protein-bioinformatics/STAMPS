@@ -1,8 +1,10 @@
 BIN_PATH = ../../scripts
 ADMIN_PATH = ../scripts
 
-INC = -I/usr/include/mysql
-LIBS = -lsqlite3 -lmysqlcppconn -lz -lpthread -lcurl
+#INC = -I/usr/include/mysql
+INC = 
+#LIBS = -lsqlite3 -lmysqlcppconn -lz -lpthread -lcurl
+LIBS = -lsqlite3 -lz -lpthread -lcurl
 
 main: nodes proteins search edges pathways manage chromosomes prep_blib create_blib cdk
 	echo "done"

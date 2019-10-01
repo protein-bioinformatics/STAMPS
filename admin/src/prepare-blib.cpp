@@ -44,12 +44,16 @@ int main(int argc, char** argv)
     read_config_file("../qsdb.conf", parameters);
     
     
-    // Create a connection and connect to database
-    sql::ResultSet *res;
-    sql::Driver *driver = get_driver_instance();
-    sql::Connection *con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
-    con->setSchema(parameters["mysql_db"]);
-    sql::Statement *stmt = con->createStatement();
+    // retrieve id and peptide sequence from spectral library
+    sqlite3 *db;
+    char *zErrMsg = 0;
+    int rc, chr;
+    string database = parameters["root_path"] + "/data/database.sqlite";
+    rc = sqlite3_open((char*)database.c_str(), &db);
+    if( rc ){
+        cout << "-3" << endl;
+        exit(-3);
+    }
     
     
     try {
@@ -370,19 +374,20 @@ int main(int argc, char** argv)
         if (input_spectra.size()){
             for (string sp : input_spectra){
                 string sql_query = "INSERT INTO chunks (file_id, checksum, chunk_num, type, filename) values (" + file_id + ", '', 0, 'depend', '" + sp + "');";
-                stmt->execute(sql_query);
+                rc = sqlite3_exec(db, sql_query.c_str(), NULL, NULL, &zErrMsg);
             }
         }
         else {
             string sql_query = "INSERT INTO chunks (file_id, checksum, chunk_num, type, filename) values (" + file_id + ", '', -1, 'depend', '~');";
-            stmt->execute(sql_query);
+            rc = sqlite3_exec(db, sql_query.c_str(), NULL, NULL, &zErrMsg);
         }
     }
     catch (...){
         string sql_query = "INSERT INTO chunks (file_id, checksum, chunk_num, type, filename) values (" + file_id + ", '', -1, 'depend', '~');";
-        stmt->execute(sql_query);
+        rc = sqlite3_exec(db, sql_query.c_str(), NULL, NULL, &zErrMsg);
     }
 
+    sqlite3_close(db); 
     return EXIT_SUCCESS;
 
 }
