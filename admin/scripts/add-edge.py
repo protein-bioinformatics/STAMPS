@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from pymysql import connect, cursors
+import sqlite3
 from cgi import FieldStorage
 
 conf = {}
@@ -21,6 +21,12 @@ anchor_end = form.getvalue('anchor_end') if 'anchor_end' in form else ""
 print("Content-Type: text/html")
 print()
 
+
+
+def dict_rows(cur): return [{k: v for k, v in zip(cur.description, row)} for row in cur]
+
+
+
 if type(start_id) is not str or type(end_id) is not str or type(anchor_start) is not str or type(anchor_end) is not str:
     print([-1, -1, -1])
     exit()
@@ -39,16 +45,17 @@ if anchor_start not in anchors or anchor_end not in anchors:
     
   
   
-conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
-my_cur = conn.cursor(cursors.DictCursor)
+database = "%s/data/database.sqlite" % conf["root_path"]
+conn = sqlite3.connect(database)
+my_cur = conn.cursor()
 
 
 
 my_cur.execute("SELECT type FROM nodes WHERE id = %s;", (start_id))
-start_type = [row for row in my_cur][0]["type"]
+start_type = dict_rows(my_cur)[0]["type"]
 
 my_cur.execute("SELECT type FROM nodes WHERE id = %s;", (end_id))
-end_type = [row for row in my_cur][0]["type"]
+end_type = dict_rows(my_cur)[0]["type"]
 
 result = -1
 
@@ -70,7 +77,7 @@ if count_types["protein"] == 1 and count_types["metabolite"] == 1:
         
     
     my_cur.execute("SELECT id FROM reactions WHERE node_id = %s;", (prot_id))
-    reaction_id = [row for row in my_cur][0]["id"]
+    reaction_id = dict_rows(my_cur)[0]["id"]
     
     my_cur.execute("INSERT INTO reagents (reaction_id, node_id, type, anchor, head) VALUES (%s, %s, %s, %s, 0);", (reaction_id, meta_id, fooduct, meta_a))
     conn.commit()
@@ -81,7 +88,7 @@ if count_types["protein"] == 1 and count_types["metabolite"] == 1:
     
     
     my_cur.execute("SELECT max(id) mid FROM reagents;")
-    result = [row for row in my_cur][0]["mid"]
+    result = dict_rows(my_cur)[0]["mid"]
     
 else:
         
@@ -90,7 +97,7 @@ else:
     conn.commit()
     
     my_cur.execute("SELECT max(id) mid FROM reactions_direct;")
-    result = [row for row in my_cur][0]["mid"]
+    result = dict_rows(my_cur)[0]["mid"]
     
     
 print(result)

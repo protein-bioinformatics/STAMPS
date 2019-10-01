@@ -3,7 +3,6 @@
 
 
 
-from pymysql import connect, cursors
 from cgi import FieldStorage
 from json import dumps
 from base64 import b64decode
@@ -16,6 +15,8 @@ alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789012345
 hash_len = 32
 
 
+def dict_rows(cur): return [{k: v for k, v in zip(cur.description, row)} for row in cur]
+def dict_row(cur): return {k: v for k, v in zip(cur.description, cur)}
 
 form = FieldStorage(environ={'REQUEST_METHOD':'POST'})
 command = form.getvalue('command')
@@ -42,8 +43,9 @@ data_dir = "%s/tmp/upload" % conf["root_path"]
 conn, my_cur = 0, 0
 
 try:
-    conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
-    my_cur = conn.cursor(cursors.DictCursor)
+    database = "%s/data/database.sqlite" % conf["root_path"]
+    conn = sqlite3.connect(database)
+    my_cur = conn.cursor()
 except:
     print(-1)
     exit()
@@ -83,7 +85,7 @@ def register_file():
     sql_query = "select id from files where filename = %s;"
     my_cur.execute(sql_query, (filename))
     if my_cur.rowcount:
-        file_id = my_cur.fetchone()['id']
+        file_id = dict_row(my_cur.fetchone())['id']
     
     else:
         sql_query = "insert into files (type, chunk_num, filename, species, tissue) values (%s, %s, %s, %s, %s);"
@@ -92,7 +94,7 @@ def register_file():
         
         sql_query = "select max(id) max_id from files f;"
         my_cur.execute(sql_query)
-        file_id = my_cur.fetchone()['max_id']
+        file_id = dict_row(my_cur.fetchone())['max_id']
     return file_id
 
 
@@ -114,7 +116,7 @@ def get_check_sum():
     sql_query = "SELECT c.checksum FROM chunks c INNER JOIN files f ON c.file_id = f.id WHERE f.id = %s AND c.chunk_num = %s;"
     my_cur.execute(sql_query, (file_id, chunk_num))
     if my_cur.rowcount:
-        md5 = my_cur.fetchone()['checksum']
+        md5 = dict_row(my_cur.fetchone())['checksum']
     return md5
 
 
@@ -139,7 +141,7 @@ def send_file():
     sql_query = "SELECT * FROM files WHERE id = %s;"
     my_cur.execute(sql_query, (file_id))
     if my_cur.rowcount:
-        row = my_cur.fetchone()
+        row = dict_row(my_cur.fetchone())
         chunk_max = int(row["chunk_num"])
         filename = row["filename"]
         chunk_name = "%s.%s" % (filename, chunk_num)
@@ -167,7 +169,7 @@ def send_file():
             
             with open("%s/run-prepare-blib.sh" % data_dir, mode = "wt") as script_file:
             
-                joined_chunks = " ".join("'%s/%s.%i'" % (data_dir, filename, row["chunk_num"]) for row in my_cur)
+                joined_chunks = " ".join("'%s/%s.%i'" % (data_dir, filename, row["chunk_num"]) for row in dict_rows(my_cur))
                 script_file.write("cat %s > '%s/%s'\n" % (joined_chunks, data_dir, filename))
                 script_file.write("rm -f %s\n" % joined_chunks)
             
@@ -192,7 +194,7 @@ def check_ident():
     sql_query = "SELECT * FROM files WHERE type = 'ident';"
     my_cur.execute(sql_query)
     if my_cur.rowcount:
-        row = my_cur.fetchone()
+        row = dict_row(my_cur.fetchone())
         file_id = row["id"]
         data = {key: row[key] for key in row}
         
@@ -251,7 +253,7 @@ def delete_file():
         sql_query = "SELECT * FROM files WHERE id = %s;"
         my_cur.execute(sql_query, file_id)
         if my_cur.rowcount:
-            row = my_cur.fetchone()
+            row = dict_row(my_cur.fetchone())
             
             
             # no matter which file will be deleted, spectra.blib must be deleted, too
@@ -271,7 +273,7 @@ def delete_file():
                 sql_query = "SELECT f.id, f.filename FROM chunks c INNER JOIN files f ON f.filename = c.filename WHERE c.file_id = %s AND c.type = 'depend';"
                 my_cur.execute(sql_query, file_id)
                 
-                depends = [row for row in my_cur]
+                depends = dict_rows(my_cur)
                 
                 
                 for depend in depends:
@@ -280,7 +282,7 @@ def delete_file():
                     my_cur.execute(sql_query, depend["id"])
                     
             
-                    for row in my_cur:
+                    for row in dict_rows(my_cur):
                         command = "rm -f '%s/%s.%s'" % (data_dir, depend['filename'], row["chunk_num"])
                         os.system(command)
                         
@@ -291,7 +293,7 @@ def delete_file():
                     # delete files from file system
                     sql_query = "select * from files WHERE id = %s;"
                     my_cur.execute(sql_query, depend["id"])
-                    for row in my_cur:
+                    for row in dict_rows(my_cur):
                         os.system("rm -f '%s/%s'" %(data_dir, row["filename"]))
                     
                     # delete files from database
@@ -309,7 +311,7 @@ def delete_file():
             my_cur.execute(sql_query, file_id)
             
         
-            for row in my_cur:
+            for row in dict_rows(my_cur):
                 command = "rm -f '%s/%s.%s'" % (data_dir, filename, row["chunk_num"])
                 os.system(command)
             
@@ -322,7 +324,7 @@ def delete_file():
             # delete files from file system
             sql_query = "SELECT * FROM files WHERE id = %s;"
             my_cur.execute(sql_query, file_id)
-            for row in my_cur:
+            for row in dict_rows(my_cur):
                 os.system("rm -f '%s/%s'" %(data_dir, row["filename"]))
             
             
@@ -348,13 +350,13 @@ def load_dependencies():
     sql_query = "SELECT * FROM files WHERE type = 'ident';"
     my_cur.execute(sql_query)
     if my_cur.rowcount:
-        row = my_cur.fetchone()
+        row = dict_row(my_cur.fetchone())
         file_id = row["id"]
         
         
         sql_query = "SELECT c2.file_id, c.filename, count(c2.id) as uploaded, f.chunk_num, f.tissue FROM chunks c LEFT JOIN files f on c.filename = f.filename LEFT JOIN chunks c2 ON f.id = c2.file_id WHERE c.file_id = %s AND c.type='depend' GROUP BY c2.file_id, c.filename, f.chunk_num, f.tissue;"
         my_cur.execute(sql_query, file_id)
-        data = [{key: row[key] for key in row} for row in my_cur]
+        data = [{key: row[key] for key in row} for row in dict_rows(my_cur)]
         
         return dumps(data)
     
@@ -453,7 +455,7 @@ def merge_blibs():
     sql_query = "SELECT * FROM files WHERE type = 'ident';"
     my_cur.execute(sql_query)
     if my_cur.rowcount:
-        row = my_cur.fetchone()
+        row = dict_row(my_cur.fetchone())
         species_id = row["species"]
         
         spectral_library = "%s/data/spectral_library_%s.blib" % (conf["root_path"], species_id)

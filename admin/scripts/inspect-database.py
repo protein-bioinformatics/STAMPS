@@ -3,7 +3,7 @@
 
 import sys
 from cgi import FieldStorage
-from pymysql import connect, cursors
+import sqlite3
 
 
 conf = {}
@@ -16,8 +16,13 @@ with open("../qsdb.conf", mode="rt") as fl:
         conf[token[0].strip(" ")] = token[1].strip(" ")
 
 
-conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
+
+
+database = "%s/data/database.sqlite" % conf["root_path"]
+conn = sqlite3.connect(database)
 my_cur = conn.cursor()
+
+
 
 form = FieldStorage()
 

@@ -1,27 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstring>
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <math.h>
 #include "bio-classes.h"
 
-#include "mysql_connection.h"
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
-#include <sqlite3.h> 
-
-using namespace std;
-
 char data_sepatator = '~';
-
-
-
 
 void print_out(string response, bool compress){
     replaceAll(response, "\n", "");
@@ -33,6 +12,58 @@ void print_out(string response, bool compress){
         cout << response;
     }
 }
+
+
+
+static int sqlite_select_protein_loci(void *data, int argc, char **argv, char **azColName){
+    string* response = (string*)data;
+    
+    if (response[0].length() > 1) response[0] += ",";
+    response[0] += "\"" + string(argv[0]) + "\":[" + argv[0];
+    for (int i = 1; i < argc; ++i){
+        string content = argv[i];
+        replaceAll(content, "\n", "\\n");
+        replaceAll(content, "\\", "\\\\");
+        response[0] += ",\"" + content + "\"";
+    }
+    response[0] += "]";
+    
+    return SQLITE_OK;
+}
+
+
+
+
+static int sqlite_select_remaining(void *data, int argc, char **argv, char **azColName){
+    string* response = (string*)data;
+    
+    if (response[0].length() > 1) response[0] += ",";
+    response[0] += "[" + string(argv[0]);
+    for (int i = 1; i < argc; ++i){
+        string content = argv[i];
+        replaceAll(content, "\n", "\\n");
+        replaceAll(content, "\\", "\\\\");
+        response[0] += ",\"" + content + "\"";
+    }
+    response[0] += "]";
+    
+    return SQLITE_OK;
+}
+
+
+
+
+
+
+static int sqlite_table_meta(void *data, int argc, char **argv, char **azColName){
+    string* response = (string*)data;
+
+    if (response[0].length() > 1) response[0] += ",";
+    response[0] += "\"" + string(argv[0]) + "\"";
+    
+    return SQLITE_OK;
+}
+
 
 
 int main(int argc, char** argv) {
@@ -84,12 +115,6 @@ int main(int argc, char** argv) {
     read_config_file("../qsdb.conf", parameters);
     
     
-    // Create a connection and connect to database
-    sql::ResultSet *res;
-    sql::Driver *driver = get_driver_instance();
-    sql::Connection *con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
-    con->setSchema(parameters["mysql_db"]);
-    sql::Statement *stmt = con->createStatement();
     
     
     
@@ -105,6 +130,21 @@ int main(int argc, char** argv) {
         print_out(response, compress);
         return -5;
     }
+    
+    
+    
+    // retrieve id and peptide sequence from spectral library
+    sqlite3 *db;
+    char *zErrMsg = 0;
+    int rc, chr;
+    string database = parameters["root_path"] + "/data/database.sqlite";
+    rc = sqlite3_open((char*)database.c_str(), &db);
+    if( rc ){
+        print_out("[]", compress);
+        exit(-3);
+    }
+        
+        
         
     if (!action.compare("set")){
         string set_table = (form.find("table") != form.end()) ? form["table"] : "";
@@ -115,6 +155,7 @@ int main(int argc, char** argv) {
         if (!is_integer_number(set_id) || !set_table.length() || !set_id.length() || !set_col.length()){
             response += "-6";
             print_out(response, compress);
+            sqlite3_close(db); 
             return -6;
         }
         
@@ -128,29 +169,31 @@ int main(int argc, char** argv) {
         
         if (!set_table.compare("nodeproteincorrelations")){
             string sql_query = "DELETE npc FROM " + set_table + " npc INNER JOIN proteins p ON p.id = npc.protein_id WHERE npc.node_id = " + set_id + " AND p.species = " + set_col + ";";
-            stmt->execute(sql_query);
+            rc = sqlite3_exec(db, sql_query.c_str(), NULL, NULL, &zErrMsg);
+            
+            
             
             for(string protein_id : split(set_value, ':')){
                 sql_query = "INSERT INTO " + set_table + "(node_id, protein_id) VALUES(" + set_id + ", " + protein_id + ");";
-                stmt->execute(sql_query);
+                rc = sqlite3_exec(db, sql_query.c_str(), NULL, NULL, &zErrMsg);
             }
         }
         
         
         else if (!set_table.compare("protein_loci")){
             string sql_query = "DELETE FROM " + set_table + " WHERE locus_id = " + set_id + ";";
-            stmt->execute(sql_query);
+            rc = sqlite3_exec(db, sql_query.c_str(), NULL, NULL, &zErrMsg);
             
             for(string protein_id : split(set_value, ':')){
                 sql_query = "INSERT INTO " + set_table + "(locus_id, protein_id) VALUES(" + set_id + ", " + protein_id + ");";
-                stmt->execute(sql_query);
+                rc = sqlite3_exec(db, sql_query.c_str(), NULL, NULL, &zErrMsg);
             }
         }
         
         
         else if (!set_table.compare("images")){
             string sql_query = "UPDATE " + set_table + " SET " + set_col + " = '" + set_value + "' WHERE node_id = " + set_id + ";";
-            stmt->execute(sql_query);
+            rc = sqlite3_exec(db, sql_query.c_str(), NULL, NULL, &zErrMsg);
         }
         
         
@@ -166,9 +209,7 @@ int main(int argc, char** argv) {
             } 
             
             string sql_query = "UPDATE " + set_table + " SET " + set_col + " = '" + set_value + "' WHERE id = " + set_id + ";";
-            
-            
-            stmt->execute(sql_query);
+            rc = sqlite3_exec(db, sql_query.c_str(), NULL, NULL, &zErrMsg);
         
         }
         response += "0";
@@ -183,6 +224,7 @@ int main(int argc, char** argv) {
         if (!action_type.length()){
             response += "-9";
             print_out(response, compress);
+            sqlite3_close(db); 
             return -9;
         }
         
@@ -233,74 +275,48 @@ int main(int argc, char** argv) {
                 replaceAll(limit, ":", ",");
                 sql_query += " LIMIT " + limit;
             }
+            sql_query += ";";
                 
-            res = stmt->executeQuery(sql_query);
-            sql::ResultSetMetaData *res_meta;
-            res_meta = res->getMetaData();
-            int num_cols = res_meta->getColumnCount();
-            
-            string data = "";
+            string data[] = {""};
             
             if (action_type.compare("protein_loci")){
-                data = "{";
-                while (res->next()){
-                    if (data.length() > 1) data += ",";
-                    data += "\"" + res->getString(1) + "\":[" + res->getString(1);
-                    for (int i = 2; i <= num_cols; ++i){
-                        string content = res->getString(i);
-                        replaceAll(content, "\n", "\\n");
-                        replaceAll(content, "\\", "\\\\");
-                        data += ",\"" + content + "\"";
-                    }
-                    data += "]";
-                }
-                data += "}";
+                data[0] = "{";
+                rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_protein_loci, (void*)data, &zErrMsg);
+                data[0] += "}";
             }
             else {
-                data = "[";
-                while (res->next()){
-                    if (data.length() > 1) data += ",";
-                    data += "[" + res->getString(1);
-                    for (int i = 2; i <= num_cols; ++i){
-                        string content = res->getString(i);
-                        replaceAll(content, "\n", "\\n");
-                        replaceAll(content, "\\", "\\\\");
-                        data += ",\"" + content + "\"";
-                    }
-                    data += "]";
-                }
-                data += "]";
+                data[0] = "[";
+                rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_remaining, (void*)data, &zErrMsg);
+                data[0] += "]";
             }
             
             
-            response += data;
+            response += data[0];
             print_out(response, compress);
-            delete res;
         }
             
         else if (!action_type.compare("pathway_groups_num") || !action_type.compare("proteins_num") || !action_type.compare("metabolites_num") || !action_type.compare("species_num") || !action_type.compare("tissues_num") || !action_type.compare("loci_names_num") || !action_type.compare("pathways_num")){
             replaceAll(action_type, "_num", "");
             string sql_query = "SELECT count(*) from " + action_type + ";";
-            res = stmt->executeQuery(sql_query);
-            res->next();
-            response += res->getString(1);
+            
+            sqlite3_stmt *stmt;
+            sqlite3_prepare_v2(db, sql_query.c_str(), -1, &stmt, 0);
+            int rc = sqlite3_step(stmt);
+            response += (char*)sqlite3_column_text(stmt, 0);
+            sqlite3_reset(stmt);
             print_out(response, compress);
-            delete res;
         }
             
         else if (!action_type.compare("pathway_groups_col") || !action_type.compare("proteins_col") || !action_type.compare("metabolites_col") || !action_type.compare("species_col") || !action_type.compare("tissues_col") || !action_type.compare("loci_names_col") || !action_type.compare("pathways_col")){
             replaceAll(action_type, "_col", "");
             string sql_query = "SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = '" + parameters["mysql_db"] + "' AND `TABLE_NAME` = '" + action_type + "';";
-            res = stmt->executeQuery(sql_query);
-            string data = "[";
-            while (res->next()){
-                if (data.length() > 1) data += ",";
-                data += "\"" + res->getString(1) + "\"";
-            }
-            data += "]";
-            response += data;
+            
+            string data[] = {"["};
+            rc = sqlite3_exec(db, sql_query.c_str(), sqlite_table_meta, (void*)data, &zErrMsg);
+            data[0] += "]";
+            
+            response += data[0];
             print_out(response, compress);
-            delete res;
             
         }
     }
@@ -312,12 +328,14 @@ int main(int argc, char** argv) {
         if (!action_type.length()){
             response += "-4";
             print_out(response, compress);
+            sqlite3_close(db); 
             return -4;
         }
         
         if (action_type.compare("pathway_groups") != 0 && action_type.compare("pathways") != 0 && action_type.compare("proteins") != 0 && action_type.compare("metabolites") != 0 && action_type.compare("species") != 0 && action_type.compare("tissues") != 0 && action_type.compare("loci_names") != 0 ){
             response += "-5";
             print_out(response, compress);
+            sqlite3_close(db); 
             return -5;
         }
       
@@ -326,6 +344,7 @@ int main(int argc, char** argv) {
         if (!data.length()){
             response += "-13";
             print_out(response, compress);
+            sqlite3_close(db); 
             return -13;
         }
       
@@ -388,7 +407,7 @@ int main(int argc, char** argv) {
             }
         }
         sql_query += "');";
-        stmt->execute(sql_query);
+        rc = sqlite3_exec(db, sql_query.c_str(), NULL, NULL, &zErrMsg);
         
         
         
@@ -400,10 +419,10 @@ int main(int argc, char** argv) {
             if (!f.good()){
                 f.close();
                 
-                sqlite3 *db;
+                sqlite3 *db_lib;
                 char *zErrMsg = 0;
                 int rc;
-                rc = sqlite3_open(filepath.c_str(), &db);
+                rc = sqlite3_open(filepath.c_str(), &db_lib);
                 if( rc ){
                     print_out("-10", compress);
                     exit(-10);
@@ -411,9 +430,9 @@ int main(int argc, char** argv) {
                 
                 
                 
-                sqlite3_exec(db, "CREATE TABLE SpectrumSourceFiles(id INTEGER primary key autoincrement not null, fileName TEXT);", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "CREATE TABLE ScoreTypes (id INTEGER PRIMARY KEY, scoreType VARCHAR(128), probabilityType VARCHAR(128));", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "INSERT INTO `ScoreTypes` (id,scoreType,probabilityType) VALUES (0,'UNKNOWN','NOT_A_PROBABILITY_VALUE'), \
+                sqlite3_exec(db_lib, "CREATE TABLE SpectrumSourceFiles(id INTEGER primary key autoincrement not null, fileName TEXT);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "CREATE TABLE ScoreTypes (id INTEGER PRIMARY KEY, scoreType VARCHAR(128), probabilityType VARCHAR(128));", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "INSERT INTO `ScoreTypes` (id,scoreType,probabilityType) VALUES (0,'UNKNOWN','NOT_A_PROBABILITY_VALUE'), \
                 (1,'PERCOLATOR QVALUE','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT'), \
                 (2,'PEPTIDE PROPHET SOMETHING','PROBABILITY_THAT_IDENTIFICATION_IS_CORRECT'), \
                 (3,'SPECTRUM MILL','NOT_A_PROBABILITY_VALUE'), \
@@ -434,32 +453,32 @@ int main(int argc, char** argv) {
                 (18,'PEPTIDE SHAKER CONFIDENCE','PROBABILITY_THAT_IDENTIFICATION_IS_CORRECT'), \
                 (19,'GENERIC Q-VALUE','PROBABILITY_THAT_IDENTIFICATION_IS_INCORRECT');", NULL, NULL, &zErrMsg);
                 
-                sqlite3_exec(db, "CREATE TABLE Tissues(RefSpectraID INTEGER, tissue INTEGER, number INTEGER, PRIMARY KEY (RefSpectraID, tissue))", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "CREATE TABLE RetentionTimes(RefSpectraID INTEGER, RedundantRefSpectraID INTEGER, SpectrumSourceID INTEGER, driftTimeMsec REAL, collisionalCrossSectionSqA REAL, driftTimeHighEnergyOffsetMsec REAL, retentionTime REAL, bestSpectrum INTEGER, FOREIGN KEY(RefSpectraID) REFERENCES RefSpectra(id));", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "CREATE TABLE RefSpectraPeaks(RefSpectraID INTEGER, peakMZ BLOB, peakIntensity BLOB);", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "CREATE TABLE RefSpectraPeakAnnotations (id INTEGER primary key autoincrement not null, RefSpectraID INTEGER not null, peakIndex INTEGER not null, name VARCHAR(256), formula VARCHAR(256),inchiKey VARCHAR(256), otherKeys VARCHAR(256), charge INTEGER, adduct VARCHAR(256), comment VARCHAR(256), mzTheoretical REAL not null,mzObserved REAL not null);", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "CREATE TABLE RefSpectra(id INTEGER primary key autoincrement not null, peptideSeq VARCHAR(150), precursorMZ REAL, precursorCharge INTEGER, peptideModSeq VARCHAR(200), prevAA CHAR(1), nextAA CHAR(1), copies INTEGER, numPeaks INTEGER, driftTimeMsec REAL, collisionalCrossSectionSqA REAL, driftTimeHighEnergyOffsetMsec REAL, retentionTime REAL, fileID INTEGER, SpecIDinFile VARCHAR(256), score REAL, scoreType TINYINT, confidence INT);", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "CREATE TABLE Modifications (id INTEGER primary key autoincrement not null, RefSpectraID INTEGER, position INTEGER, mass REAL);", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "CREATE TABLE LibInfo(libLSID TEXT, createTime TEXT, numSpecs INTEGER, majorVersion INTEGER, minorVersion INTEGER);", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "INSERT INTO `LibInfo` (libLSID,createTime,numSpecs,majorVersion,minorVersion) VALUES ('urn:lsid:stamps.isas.de:spectral_library:stamps:nr:spectra','Tue Jul 03 10:43:40 2018',4248,1,7);", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "CREATE TABLE IonMobilityTypes (id INTEGER PRIMARY KEY, ionMobilityType VARCHAR(128) );", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "INSERT INTO `IonMobilityTypes` (id,ionMobilityType) VALUES (0,'none'), \
+                sqlite3_exec(db_lib, "CREATE TABLE Tissues(RefSpectraID INTEGER, tissue INTEGER, number INTEGER, PRIMARY KEY (RefSpectraID, tissue))", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "CREATE TABLE RetentionTimes(RefSpectraID INTEGER, RedundantRefSpectraID INTEGER, SpectrumSourceID INTEGER, driftTimeMsec REAL, collisionalCrossSectionSqA REAL, driftTimeHighEnergyOffsetMsec REAL, retentionTime REAL, bestSpectrum INTEGER, FOREIGN KEY(RefSpectraID) REFERENCES RefSpectra(id));", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "CREATE TABLE RefSpectraPeaks(RefSpectraID INTEGER, peakMZ BLOB, peakIntensity BLOB);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "CREATE TABLE RefSpectraPeakAnnotations (id INTEGER primary key autoincrement not null, RefSpectraID INTEGER not null, peakIndex INTEGER not null, name VARCHAR(256), formula VARCHAR(256),inchiKey VARCHAR(256), otherKeys VARCHAR(256), charge INTEGER, adduct VARCHAR(256), comment VARCHAR(256), mzTheoretical REAL not null,mzObserved REAL not null);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "CREATE TABLE RefSpectra(id INTEGER primary key autoincrement not null, peptideSeq VARCHAR(150), precursorMZ REAL, precursorCharge INTEGER, peptideModSeq VARCHAR(200), prevAA CHAR(1), nextAA CHAR(1), copies INTEGER, numPeaks INTEGER, driftTimeMsec REAL, collisionalCrossSectionSqA REAL, driftTimeHighEnergyOffsetMsec REAL, retentionTime REAL, fileID INTEGER, SpecIDinFile VARCHAR(256), score REAL, scoreType TINYINT, confidence INT);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "CREATE TABLE Modifications (id INTEGER primary key autoincrement not null, RefSpectraID INTEGER, position INTEGER, mass REAL);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "CREATE TABLE LibInfo(libLSID TEXT, createTime TEXT, numSpecs INTEGER, majorVersion INTEGER, minorVersion INTEGER);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "INSERT INTO `LibInfo` (libLSID,createTime,numSpecs,majorVersion,minorVersion) VALUES ('urn:lsid:stamps.isas.de:spectral_library:stamps:nr:spectra','Tue Jul 03 10:43:40 2018',4248,1,7);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "CREATE TABLE IonMobilityTypes (id INTEGER PRIMARY KEY, ionMobilityType VARCHAR(128) );", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "INSERT INTO `IonMobilityTypes` (id,ionMobilityType) VALUES (0,'none'), \
                 (1,'driftTime(msec)'), \
                 (2,'inverseK0(Vsec/cm^2)');", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "CREATE INDEX idxRefIdPeaks ON RefSpectraPeaks (RefSpectraID);", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "CREATE INDEX idxRefIdPeakAnnotations ON RefSpectraPeakAnnotations (RefSpectraID);", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "CREATE INDEX idxPeptideMod ON RefSpectra (peptideModSeq, precursorCharge);", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "CREATE INDEX idxPeptide ON RefSpectra (peptideSeq, precursorCharge);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "CREATE INDEX idxRefIdPeaks ON RefSpectraPeaks (RefSpectraID);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "CREATE INDEX idxRefIdPeakAnnotations ON RefSpectraPeakAnnotations (RefSpectraID);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "CREATE INDEX idxPeptideMod ON RefSpectra (peptideModSeq, precursorCharge);", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "CREATE INDEX idxPeptide ON RefSpectra (peptideSeq, precursorCharge);", NULL, NULL, &zErrMsg);
                 
                 
                 
-                sqlite3_mutex_enter(sqlite3_db_mutex(db));
-                sqlite3_exec(db, "PRAGMA synchronous=OFF", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "PRAGMA count_changes=OFF", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "PRAGMA journal_mode=MEMORY", NULL, NULL, &zErrMsg);
-                sqlite3_exec(db, "PRAGMA temp_store=MEMORY", NULL, NULL, &zErrMsg);
-                sqlite3_mutex_leave(sqlite3_db_mutex(db));
-                sqlite3_close(db);
+                sqlite3_mutex_enter(sqlite3_db_mutex(db_lib));
+                sqlite3_exec(db_lib, "PRAGMA synchronous=OFF", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "PRAGMA count_changes=OFF", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "PRAGMA journal_mode=MEMORY", NULL, NULL, &zErrMsg);
+                sqlite3_exec(db_lib, "PRAGMA temp_store=MEMORY", NULL, NULL, &zErrMsg);
+                sqlite3_mutex_leave(sqlite3_db_mutex(db_lib));
+                sqlite3_close(db_lib);
                 
                 
             }
@@ -474,12 +493,14 @@ int main(int argc, char** argv) {
         
         else if (!action_type.compare("metabolites")){
             sql_query = "SELECT max(id) max_id FROM metabolites;";
-            res = stmt->executeQuery(sql_query);
-            res->next();
             
-            string metabolite_id = res->getString(1);
+            sqlite3_stmt *stmt;
+            sqlite3_prepare_v2(db, sql_query.c_str(), -1, &stmt, 0);
+            int rc = sqlite3_step(stmt);
+            string metabolite_id = (char*)sqlite3_column_text(stmt, 0);
+            sqlite3_reset(stmt);
             
-            delete res;
+            
             
             
             string filepath = parameters["root_path"] + "/admin/scripts";
@@ -489,11 +510,12 @@ int main(int argc, char** argv) {
             
         if (!action_type.compare("pathways")){
             string sql_query = "SELECT max(id) from " + action_type + ";";
-            res = stmt->executeQuery(sql_query);
-            res->next();
-            response += res->getString(1);
+            sqlite3_stmt *stmt;
+            sqlite3_prepare_v2(db, sql_query.c_str(), -1, &stmt, 0);
+            int rc = sqlite3_step(stmt);
+            response += (char*)sqlite3_column_text(stmt, 0);
+            sqlite3_reset(stmt);
             
-            delete res;
         }
         else {
             response += "0";
@@ -502,8 +524,7 @@ int main(int argc, char** argv) {
     }
     
     
+    sqlite3_close(db);
     
-    delete stmt;
-    delete con;
     return 0;
 }

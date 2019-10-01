@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import json
-from pymysql import connect, cursors
 
 print("Content-Type: text/html")
 print()

@@ -7,8 +7,7 @@ from urllib.parse import urlencode
 from urllib.request import urlopen
 import xml.etree.ElementTree as ET
 import re # regular expression module
-from cgi import FieldStorage
-from pymysql import connect, cursors
+import sqlite3
 
 
 
@@ -21,8 +20,15 @@ with open("../qsdb.conf", mode="rt") as fl:
         if len(token) < 2: continue
         conf[token[0].strip(" ")] = token[1].strip(" ")
         
-conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
-my_cur = conn.cursor(cursors.DictCursor)
+        
+def dict_rows(cur): return [{k: v for k, v in zip(cur.description, row)} for row in cur]
+def dict_row(cur): return {k: v for k, v in zip(cur.description, cur)}
+
+        
+        
+database = "%s/data/database.sqlite" % conf["root_path"]
+conn = sqlite3.connect(database)
+my_cur = conn.cursor()
 
         
 print("Content-Type: text/html")
@@ -59,7 +65,7 @@ if entity_type == "protein":
 
 
     my_cur.execute("SELECT * FROM function_names;")
-    ec_to_function_id = {row["ec_prefix"]: row["id"] for row in my_cur if row["parent"] not in [0, 1]}
+    ec_to_function_id = {row["ec_prefix"]: row["id"] for row in dict_rows(my_cur) if row["parent"] not in [0, 1]}
 
 
     # retrieve fasta

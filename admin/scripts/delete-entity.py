@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from pymysql import connect, cursors
+import sqlite3
 from cgi import FieldStorage
 import os
 
@@ -20,6 +20,10 @@ entity_id = form.getvalue('id')
 print("Content-Type: text/html")
 print()
 
+
+def dict_rows(cur): return [{k: v for k, v in zip(cur.description, row)} for row in cur]
+def dict_row(cur): return {k: v for k, v in zip(cur.description, cur)}
+
 if type(entity_type) is not str or type(entity_id) is not str or entity_type not in ["node", "edge", "edge_direct", "protein", "metabolite", "pathway", "pathway_group", "species", "tissues", "loci_names"]:
     print(-1)
     exit()
@@ -31,15 +35,18 @@ except:
     exit()
     
     
-conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
-my_cur = conn.cursor(cursors.DictCursor)
+database = "%s/data/database.sqlite" % conf["root_path"]
+conn = sqlite3.connect(database)
+my_cur = conn.cursor()
+
+
 
 if entity_type == "node":
 
 
     sql_query = "SELECT type FROM nodes WHERE id = %s;"
     my_cur.execute(sql_query, (entity_id))
-    entity_type = [row for row in my_cur][0]["type"]
+    entity_type = dict_row(my_cur.fetchone())["type"]
     
     if entity_type == "pathway":
         sql_query = "DELETE FROM reactions_direct WHERE node_id_start = %s;"
@@ -85,7 +92,7 @@ if entity_type == "node":
     elif entity_type == "metabolite":
         sql_query = "SELECT rc.id FROM reactions rc INNER JOIN reagents r ON rc.id = r.reaction_id INNER JOIN nodes n ON rc.node_id = n.id WHERE r.node_id = %s AND n.type = 'pathway';" # reactions for pathways
         my_cur.execute(sql_query, (entity_id))
-        del_reaction = ", ".join(str(row["id"]) for row in my_cur)
+        del_reaction = ", ".join(str(row["id"]) for row in dict_rows(my_cur))
         
         if len(del_reaction) > 0:
             sql_query = "DELETE FROM reactions WHERE id IN (%s);" % del_reaction # reactions for pathways
@@ -219,7 +226,7 @@ elif entity_type == "metabolite":
     
     sql_query = "SELECT n.id FROM nodes n INNER JOIN metabolites m ON n.foreign_id = m.id WHERE m.id = %s AND n.type = 'metabolite';"
     my_cur.execute(sql_query, (entity_id))
-    del_nodes = ", ".join(str(row["id"]) for row in my_cur)
+    del_nodes = ", ".join(str(row["id"]) for row in dict_rows(my_cur))
     
     if len(del_nodes) > 0:
         sql_query = "DELETE FROM reagents WHERE node_id IN (%s);" % del_nodes
@@ -247,7 +254,7 @@ elif entity_type == "pathway_group":
     
     sql_query = "SELECT id FROM pathways WHERE pathway_group_id = %s;" # reactions for pathways
     my_cur.execute(sql_query, (entity_id))
-    ids_for_delete = [str(row["id"]) for row in my_cur]
+    ids_for_delete = [str(row["id"]) for row in dict_rows(my_cur)]
     for pw_id in ids_for_delete:
     
         sql_query = "DELETE FROM reagents WHERE reaction_id IN (SELECT r.id FROM reactions r INNER JOIN nodes n on r.node_id = n.id WHERE n.type = 'protein' AND pathway_id = %s);"

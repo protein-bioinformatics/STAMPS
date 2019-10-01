@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from pymysql import connect, cursors
+import sqlite3
 from cgi import FieldStorage
 import json
 
@@ -15,6 +15,10 @@ with open("../qsdb.conf", mode="rt") as fl:
 
 print("Content-Type: text/html")
 print()
+
+
+def dict_rows(cur): return [{k: v for k, v in zip(cur.description, row)} for row in cur]
+def dict_row(cur): return {k: v for k, v in zip(cur.description, cur)}
 
 form, node_type, x, y, pathway = None, None, None, None, None
 try:
@@ -42,8 +46,11 @@ except:
     
 x = round(int(x) / 25) * 25
 y = round(int(y) / 25) * 25
-conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
-my_cur = conn.cursor(cursors.DictCursor)
+
+
+database = "%s/data/database.sqlite" % conf["root_path"]
+conn = sqlite3.connect(database)
+my_cur = conn.cursor()
 
 reaction_id = -1
 
@@ -66,14 +73,14 @@ elif node_type == "protein":
     conn.commit()
     
     my_cur.execute("SELECT max(id) mid FROM nodes;")
-    max_node_id = [row for row in my_cur][0]["mid"]
+    max_node_id = dict_row(my_cur.fetchone())["mid"]
     
     
     sql_query = "INSERT INTO reactions (node_id, anchor_in, anchor_out) VALUES (%s, 'left', 'right');"
     my_cur.execute(sql_query, (max_node_id))
     
     my_cur.execute("SELECT max(id) mid FROM reactions;")
-    reaction_id = [row for row in my_cur][0]["mid"]
+    reaction_id = dict_row(my_cur.fetchone())["mid"]
     conn.commit()
     
     
@@ -93,7 +100,7 @@ elif node_type == "label":
     my_cur.execute("INSERT INTO labels (label) VALUES ('undefined');");
     conn.commit()
     my_cur.execute("SELECT max(id) mid FROM labels;")
-    max_label_id = [row for row in my_cur][0]["mid"]
+    max_label_id = dict_row(my_cur.fetchone())["mid"]
     reaction_id = max_label_id;
     
     sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (%s, %s, %s, %s, %s);"
@@ -118,4 +125,4 @@ elif node_type == "invisible":
     
     
 my_cur.execute("SELECT max(id) mid FROM nodes;")
-print( json.dumps( [[row for row in my_cur][0]["mid"], reaction_id] ) )
+print( json.dumps( [dict_row(my_cur.fetchone())["mid"], reaction_id] ) )
