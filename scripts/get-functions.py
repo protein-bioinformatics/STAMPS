@@ -3,6 +3,7 @@
 import json
 import sqlite3
 from cgi import FieldStorage
+from urllib.request import urlopen
 
 print("Content-Type: text/html")
 print()
@@ -36,8 +37,12 @@ except:
     
     
 if hostname != "":
-    request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
-    print(urlopen("%s/scripts/get-functions.py?%s" % (hostname, request), timeout = 2).read().decode("utf8"))
+    try:
+        request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
+        print(urlopen("%s/scripts/get-functions.py?%s" % (hostname, request), timeout = 2).read().decode("utf8"))
+        
+    except Exception as e:
+        print(-1)
     
     exit()
     

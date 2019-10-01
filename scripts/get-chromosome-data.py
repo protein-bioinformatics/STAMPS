@@ -3,6 +3,7 @@
 import json
 import sqlite3
 import cgi, cgitb
+from urllib.request import urlopen
 
 print("Content-Type: text/html")
 print()
@@ -42,8 +43,12 @@ if chromosome.find("'") > -1 or chromosome.find("\"") > -1:
     
     
 if hostname != "":
-    request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
-    print(urlopen("%s/scripts/get-chromosome-data.py?%s" % (hostname, request), timeout = 2).read().decode("utf8"))
+    try:
+        request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
+        print(urlopen("%s/scripts/get-chromosome-data.py?%s" % (hostname, request), timeout = 2).read().decode("utf8"))
+        
+    except Exception as e:
+        print(-1)
     
     exit()
 

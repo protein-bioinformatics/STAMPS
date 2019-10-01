@@ -3,6 +3,7 @@
 import sqlite3
 import json
 from cgi import FieldStorage
+from urllib.request import urlopen
 
 
 conf = {}
@@ -37,8 +38,12 @@ except:
 
 
 if hostname != "":
-    request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
-    print(urlopen("%s/scripts/get-loci.py?%s" % (hostname, request), timeout = 2).read().decode("utf8"))
+    try:
+        request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
+        print(urlopen("%s/scripts/get-loci.py?%s" % (hostname, request), timeout = 2).read().decode("utf8"))
+        
+    except Exception as e:
+        print(-1)
     
     exit()
     

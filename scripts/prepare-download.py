@@ -7,6 +7,7 @@ import os
 import hashlib
 import zlib
 import struct
+from urllib.request import urlopen
 
 
 
@@ -265,10 +266,13 @@ hostname = form.getvalue('host') if "host" in form else ""
 
 
 if hostname != "":
-    request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
-    reply = urlopen("%s/scripts/prepare-download.py?%s" % (hostname, request), timeout = 2).read().decode("utf8")
-    
-    print("%s/%s" % (hostname, reply))
+    try:
+        request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
+        reply = urlopen("%s/scripts/prepare-download.py?%s" % (hostname, request), timeout = 2).read().decode("utf8")
+        
+        print("%s/%s" % (hostname, reply))
+    except Exception as e:
+        print(-1)
     exit()
 
 

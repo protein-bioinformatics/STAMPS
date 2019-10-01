@@ -3,6 +3,7 @@
 import sqlite3
 import cgi, cgitb
 import json
+from urllib.request import urlopen
 
 print("Content-Type: text/html")
 print()
@@ -35,10 +36,16 @@ if "root_path" not in conf:
 
 
 if hostname != "":
-    request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
-    print(urlopen("%s/scripts/get-image.py?%s" % (hostname, request), timeout = 2).read().decode("utf8"))
+    try:
+        request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
+        print(urlopen("%s/scripts/get-image.py?%s" % (hostname, request), timeout = 2).read().decode("utf8"))
+        
+    except Exception as e:
+        print(-1)
     
     exit()
+    
+    
 
 database = "%s/data/database.sqlite" % conf["root_path"]
 db = sqlite3.connect(database)
