@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from pymysql import connect, cursors
+import sqlite3
 import json
 from cgi import FieldStorage
 
@@ -36,9 +36,12 @@ except:
 
 
 
-# open mysql connection
-conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
-my_cur = conn.cursor()
+# open database connection
+database = "%s/data/database.sqlite" % conf["root_path"]
+db = sqlite3.connect(database)
+my_cur = db.cursor()
+
+
 
 # create fasta file
 sql_query = "SELECT ln.id, ln.name locus, count(pl.protein_id) cnt FROM loci_names ln INNER JOIN protein_loci pl ON ln.id = pl.locus_id INNER JOIN proteins p ON pl.protein_id = p.id WHERE p.species = %s GROUP BY ln.id, ln.name order by ln.name;" % species

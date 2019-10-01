@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 
-
-from pymysql import connect, cursors
 import cgi, cgitb
 import sqlite3
 from random import random
@@ -286,9 +284,12 @@ rnd = hashlib.md5(str(int(random() * 1000000000)).encode('utf-8')).hexdigest()
 os.system("mkdir %s/tmp/%s" % (conf["root_path"], rnd))
 
 
-# open mysql connection & create fasta file
-conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
+# open database connection
+database = "%s/data/database.sqlite" % conf["root_path"]
+conn = sqlite3.connect(database)
 my_cur = conn.cursor()
+
+
 
 fasta_file = "%s/tmp/%s/proteins.fasta" % (conf["root_path"], rnd)
 sql_query = "SELECT id, accession, fasta FROM proteins WHERE id IN (%s);" % proteins

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from pymysql import connect, cursors
+import sqlite3
 import cgi, cgitb
 import json
 
@@ -40,8 +40,9 @@ if hostname != "":
     
     exit()
 
-conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
-my_cur = conn.cursor()
+database = "%s/data/database.sqlite" % conf["root_path"]
+db = sqlite3.connect(database)
+my_cur = db.cursor()
    
 my_cur.execute('SELECT * FROM images WHERE node_id = %i;' % node_id)
 

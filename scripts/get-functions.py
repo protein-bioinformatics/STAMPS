@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import json
-from pymysql import connect, cursors
+import sqlite3
 from cgi import FieldStorage
 
 print("Content-Type: text/html")
@@ -30,10 +30,11 @@ try:
 except:
     print(-2)
     exit()
+    
 
-conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
-
-my_cur = conn.cursor()
+database = "%s/data/database.sqlite" % conf["root_path"]
+db = sqlite3.connect(database)
+my_cur = db.cursor()
 
 
 my_cur.execute("SELECT * FROM function_names")

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import json
-from pymysql import connect, cursors
+import sqlite3
 import cgi, cgitb
 from urllib.request import urlopen
 import os
@@ -30,9 +30,13 @@ if os.environ["REMOTE_ADDR"] not in ["localhost", "127.0.0.1"] and "public" in c
     exit()
     
     
+# open database connection
+database = "%s/data/database.sqlite" % conf["root_path"]
+db = sqlite3.connect(database)
+my_cur = db.cursor()
+
+
 species_data = {}
-conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
-my_cur = conn.cursor()
 my_cur.execute('SELECT ncbi, name FROM species;')
 species_data = {row[0]: row[1] for row in my_cur}
 

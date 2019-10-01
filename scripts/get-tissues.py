@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import json
-from pymysql import connect, cursors
+import sqlite3
 from cgi import FieldStorage
 from urllib.request import urlopen
 
@@ -26,9 +26,11 @@ if hostname != "":
     exit()
 
 
+# open database connection
+database = "%s/data/database.sqlite" % conf["root_path"]
+db = sqlite3.connect(database)
+my_cur = db.cursor()
 
-conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
-my_cur = conn.cursor()
 
 my_cur.execute('SELECT brenda, name, icon, color FROM tissues;')
 print(json.dumps([row for row in my_cur]))

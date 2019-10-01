@@ -18,10 +18,13 @@ with open("../admin/qsdb.conf", mode="rt") as fl:
         conf[token[0].strip(" ")] = token[1].strip(" ")
 
 
-database = "%s/data/database.sqlite" % conf["root_path"]
 
+
+database = "%s/data/database.sqlite" % conf["root_path"]
 db = sqlite3.connect(database)
 my_cur = db.cursor()
+
+
 
 form = cgi.FieldStorage()
 chromosome = form.getvalue('chromosome') if "chromosome" in form else ""
@@ -37,6 +40,6 @@ if chromosome.find("'") > -1 or chromosome.find("\"") > -1:
 
 
 
-my_cur.execute("SELECT id, name, definition, kegg_link, accession, ec_number, chr_start, chr_end from proteins where chromosome = '%s' and unreviewed = false and species = '%s' ORDER BY chr_start ASC;" % (chromosome, species))
+my_cur.execute("SELECT id, name, definition, kegg_link, accession, ec_number, chr_start, chr_end from proteins where chromosome = '%s' and unreviewed = 0 and species = '%s' ORDER BY chr_start ASC;" % (chromosome, species))
 data = [row for row in my_cur]
 print(json.dumps(data))
