@@ -37,7 +37,7 @@ void print_out(string response, bool compress){
     }
 }
 
-static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
+static int sqlite_map_peptides(void *data, int argc, char **argv, char **azColName){
     peptide* current_pep = 0;
     string P = argv[1];
     
@@ -73,38 +73,72 @@ static int sqlite_callback(void *data, int argc, char **argv, char **azColName){
         current_pep->spectra.push_back(s1);
         spectrum_dict.insert(pair<int, spectrum* >(s1->id, s1));
     }
-    return 0;
+    return SQLITE_OK;
 }
 
 
 
-string get_protein_data(string sql_query_proteins, string species, sql::Connection *con, bool statistics){
+
+
+
+
+
+static int sqlite_statistics_pathways(void *data, int argc, char **argv, char **azColName){
+    map<string, string> row;
+    string response = *((string*)data);
+    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+
+
+    if (response.length() > 1) response += ",";
     
-    sql::Statement *my_stmt = con->createStatement();
-    sql::ResultSet *res = my_stmt->executeQuery(sql_query_proteins);
+    response += "[" + string(row["pathway_id"]) + ",\"" + string(row["name"]) + "\",[" + string(row["prot_id"]) + "]," + string(row["signaling_pathway"]) + "]";
+    
+    return SQLITE_OK;
+}
+
+
+
+
+
+
+static int sqlite_select_proteins(void *data, int argc, char **argv, char **azColName){
+    map<string, string> row;
+    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    
+    string pid = row["id"];
+    protein* last_protein = new protein(pid);
+    last_protein->name = row["name"];
+    last_protein->definition = row["definition"];
+    last_protein->accession = row["accession"];
+    last_protein->ec_number = row["ec_number"];
+    last_protein->kegg = row["kegg_link"];
+    last_protein->unreviewed = row["unreviewed"];
+    last_protein->fasta = cleanFasta(row["fasta"]);
+    last_protein->pI = predict_isoelectric_point(last_protein->fasta);
+    last_protein->mass = compute_mass(last_protein->fasta);
+    last_protein->proteome_start_pos = len_text;
+    proteins.push_back(last_protein);
+    
+    return SQLITE_OK;
+}
+
+
+string get_protein_data(string sql_query_proteins, string species, sqlite3 *db, bool statistics){
+    
+    char chr;
+    char *zErrMsg = 0;
+    int rc = sqlite3_exec(db, sql_query_proteins.c_str(), sqlite_select_proteins, (void*)&chr, &zErrMsg);
+    if( rc != SQLITE_OK ){
+        print_out("[]", compress);
+        exit(-4);
+    }
+    
     
     len_text = 0;
-    while (res->next()){
-        string pid = res->getString("id");
-        protein* last_protein = new protein(pid);
-        last_protein->name = res->getString("name");
-        last_protein->definition = res->getString("definition");
-        last_protein->accession = res->getString("accession");
-        last_protein->ec_number = res->getString("ec_number");
-        last_protein->kegg = res->getString("kegg_link");
-        last_protein->unreviewed = res->getString("unreviewed");
-        last_protein->fasta = cleanFasta(res->getString("fasta"));
-        last_protein->pI = predict_isoelectric_point(last_protein->fasta);
-        last_protein->mass = compute_mass(last_protein->fasta);
-        last_protein->proteome_start_pos = len_text;
-        len_text += last_protein->fasta.length() + 1;
-        proteins.push_back(last_protein);
+    for (auto protein : proteins){
+        len_text += protein->fasta.length() + 1;
     }
     len_text += 1; // plus sentinal
-    
-    
-    delete res;
-    delete my_stmt;
     
     if (!proteins.size()) return "{}";
     
@@ -146,11 +180,9 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     
     
     // retrieve id and peptide sequence from spectral library
-    sqlite3 *db;
-    char *zErrMsg = 0;
-    int rc;
+    sqlite3 *db_spec;
     string spectral_lib = parameters["root_path"] + "/data/spectral_library_" + species + ".blib";
-    rc = sqlite3_open((char*)spectral_lib.c_str(), &db);
+    rc = sqlite3_open((char*)spectral_lib.c_str(), &db_spec);
     if( rc ){
         print_out("-3", compress);
         exit(-3);
@@ -162,7 +194,7 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     // retrieve all additional information from spectral library
     string sql_query_lite2 = "SELECT id i, peptideSeq p FROM RefSpectra WHERE scoreType <> -1 ORDER BY p;";
     char tmp_data;
-    rc = sqlite3_exec(db, sql_query_lite2.c_str(), sqlite_callback, (void*)&tmp_data, &zErrMsg);
+    rc = sqlite3_exec(db_spec, sql_query_lite2.c_str(), sqlite_map_peptides, (void*)&tmp_data, &zErrMsg);
     if( rc != SQLITE_OK ){
         print_out("-4", compress);
         exit(-4);
@@ -171,10 +203,10 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     
     
     sqlite3_stmt *stmt;
-    sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &zErrMsg);
+    sqlite3_exec(db_spec, "BEGIN TRANSACTION", NULL, NULL, &zErrMsg);
     
     string sql_prepare = "SELECT r.precursorCharge c, r.precursorMZ m, r.peptideModSeq s, group_concat(t.tissue) ts, group_concat(t.number) n, r.confidence q FROM (SELECT id, precursorCharge, precursorMZ, peptideModSeq, confidence FROM RefSpectra WHERE id = ?) r INNER JOIN Tissues t ON r.id = t.RefSpectraId GROUP BY r.id;";
-    sqlite3_prepare_v2(db, sql_prepare.c_str(), -1, &stmt, 0);
+    sqlite3_prepare_v2(db_spec, sql_prepare.c_str(), -1, &stmt, 0);
     
     
     
@@ -214,6 +246,13 @@ string get_protein_data(string sql_query_proteins, string species, sql::Connecti
     replaceAll(response, "\n", "\\n");
     return response;
 }
+
+
+
+
+
+
+
 
 
 
@@ -365,59 +404,73 @@ main(int argc, char** argv) {
     
     
     
-     // Create a connection and connect to database
     
-    sql::Driver *driver = get_driver_instance();
-    sql::Connection *con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
-    con->setSchema(parameters["mysql_db"]);
-    sql::Statement *stmt = con->createStatement();
+    
+    // retrieve id and peptide sequence from spectral library
+    sqlite3 *db;
+    char *zErrMsg = 0;
+    int rc, chr;
+    string database = parameters["root_path"] + "/data/database.sqlite";
+    rc = sqlite3_open((char*)database.c_str(), &db);
+    if( rc ){
+        print_out("[]", compress);
+        exit(-3);
+    }
+    
+    
+    
+    
+    
     
     if (statistics_pathways){
+        /*
         string sql_query = "SET SESSION group_concat_max_len=4294967295;";
         stmt->execute(sql_query);
+        */
+        
+        string sql_query = "SELECT distinct pw.id pathway_id, pw.name, GROUP_CONCAT(npc.protein_id) prot_id, pw.signaling_pathway FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id group by pw.id order by pw.name;";
         
         
-        sql_query = "SELECT distinct pw.id pathway_id, pw.name, GROUP_CONCAT(npc.protein_id) prot_id, pw.signaling_pathway FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id group by pw.id order by pw.name;";
-        
+        /*
         sql::ResultSet *res = stmt->executeQuery(sql_query);
-       
-        
         string response = "[";
         while (res->next()){
             if (response.length() > 1) response += ",";
             
             response += "[" + string(res->getString("pathway_id")) + ",\"" + string(res->getString("name")) + "\",[" + string(res->getString("prot_id")) + "]," + string(res->getString("signaling_pathway")) + "]";
+        }*/
+        
+        string response = "[";
+        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_statistics_pathways, (void*)&response, &zErrMsg);
+        if( rc != SQLITE_OK ){
+            print_out("[]", compress);
+            exit(-4);
         }
         response += "]";
         replaceAll(response, "\n", "\\n");
         
         print_out(response, compress);
-        delete res;
-        delete stmt;
-        delete con;
+        sqlite3_close(db); 
         return 0;
     }
     
     
     if (!species.length()){
         print_out("-7", compress);
-        delete stmt;
-        delete con;
+        sqlite3_close(db); 
         return -7;
     }
     
     if (parameters.find("root_path") == parameters.end()){
         print_out("-8", compress);
-        delete stmt;
-        delete con;
+        sqlite3_close(db); 
         return -8;
     }
     
     if (via_accessions){
         if (accessions == "" || accessions.find("'") != string::npos){
             print_out("-9", compress);
-            delete stmt;
-            delete con;
+            sqlite3_close(db); 
             return -9;
         }    
         replaceAll(accessions, string(":"), string("','"));
@@ -431,8 +484,7 @@ main(int argc, char** argv) {
     
         if (ids == "" || ids.find("'") != string::npos){
             print_out("-10", compress);
-            delete stmt;
-            delete con;
+            sqlite3_close(db); 
             return -10;
         }    
         replaceAll(ids, string(":"), string("','"));
@@ -444,8 +496,7 @@ main(int argc, char** argv) {
     else if (via_loci) {
         if (loci_ids == "" || loci_ids.find("'") != string::npos){
             print_out("-11", compress);
-            delete stmt;
-            delete con;
+            sqlite3_close(db); 
             return -11;
         }    
         replaceAll(loci_ids, string(":"), string("','"));
@@ -457,8 +508,7 @@ main(int argc, char** argv) {
     else if (via_functions) {
         if (function_ids == "" || function_ids.find("'") != string::npos){
             print_out("-12", compress);
-            delete stmt;
-            delete con;
+            sqlite3_close(db); 
             return -12;
         }    
         replaceAll(function_ids, string(":"), string("','"));
@@ -504,8 +554,7 @@ main(int argc, char** argv) {
             t.close();
             
             cout << result;
-            delete stmt;
-            delete con;
+            sqlite3_close(db); 
             return 0;
         }
         // otherwise retrieve the protein data the normal way and store in 'data' folder
@@ -513,7 +562,7 @@ main(int argc, char** argv) {
             
             remove(statistics_json_filename.c_str());
             
-            result = get_protein_data(sql_query_proteins, species, con, statistics);
+            result = get_protein_data(sql_query_proteins, species, db, statistics);
             if (caching){
                 string output = result;
                 if (compress) output = compress_string(output);
@@ -524,15 +573,13 @@ main(int argc, char** argv) {
     }
     else {
     
-        result = get_protein_data(sql_query_proteins, species, con, statistics);
+        result = get_protein_data(sql_query_proteins, species, db, statistics);
     }
     
     print_out(result, compress);
     
     
-    delete stmt;
-    delete con;
-    
+    sqlite3_close(db); 
     
     return 0;
 }

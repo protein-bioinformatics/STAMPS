@@ -101,7 +101,7 @@ static int sqlite_select_nodes(void *data, int argc, char **argv, char **azColNa
     last_node->y = row["y"];
     node_dict->insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
     
-    return 0;
+    return SQLITE_OK;
 }
 
 
@@ -129,7 +129,7 @@ static int sqlite_select_proteins(void *data, int argc, char **argv, char **azCo
     }
     node_dict->at(node_id)->proteins.push_back(last_protein);
     
-    return 0;
+    return SQLITE_OK;
 }
 
 
@@ -163,7 +163,7 @@ static int sqlite_select_remaining(void *data, int argc, char **argv, char **azC
     last_node->image = row["image"];
     node_dict->insert({atoi(last_node->id.c_str()), last_node});
 
-    return 0;
+    return SQLITE_OK;
 }
 
 
@@ -190,7 +190,7 @@ static int sqlite_select_remaining_empty(void *data, int argc, char **argv, char
     last_node->position = row["position"];
     node_dict->insert({atoi(last_node->id.c_str()), last_node});
     
-    return 0;
+    return SQLITE_OK;
 }
 
 
@@ -293,18 +293,6 @@ int main(int argc, char** argv) {
     
     
     
-    
-    
-    /*
-    // Create a connection and connect to database
-    sql::ResultSet *res;
-    sql::Driver *driver = get_driver_instance();
-    sql::Connection *con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
-    con->setSchema(parameters["mysql_db"]);
-    sql::Statement *stmt = con->createStatement();
-    */
-    
-    
     // retrieve id and peptide sequence from spectral library
     sqlite3 *db;
     char *zErrMsg = 0;
@@ -324,22 +312,6 @@ int main(int argc, char** argv) {
     sql_query_nodes += pathway_id;
     sql_query_nodes += " and type = 'protein';";
     
-    
-    
-    /*
-    res = stmt->executeQuery(sql_query_nodes);
-    while (res->next()){
-        node* last_node = new node;
-        last_node->id = res->getString("id");
-        last_node->pathway_id = res->getString("pathway_id");
-        last_node->type = res->getString("type");
-        last_node->x = res->getString("x");
-        last_node->y = res->getString("y");
-        node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
-    }
-    */
-    
-    
     rc = sqlite3_exec(db, sql_query_nodes.c_str(), sqlite_select_nodes, (void*)&chr, &zErrMsg);
     if( rc != SQLITE_OK ){
         print_out("[]", compress);
@@ -357,26 +329,6 @@ int main(int argc, char** argv) {
     sql_query_proteins += species + "'";
     sql_query_proteins += ";";
     
-    /*
-    res = stmt->executeQuery(sql_query_proteins);
-    while (res->next()){
-        int node_id = res->getInt("nid");
-        string str_pid = res->getString("id");
-        int pid = atoi(str_pid.c_str());
-        protein* last_protein = 0;
-        
-        if (all_proteins->find(pid) == all_proteins->end()){
-            last_protein = new protein(str_pid);
-            last_protein->name = res->getString("name");
-            all_proteins->insert(pair<int, protein* >(pid, last_protein));
-            proteins->push_back(last_protein);
-        }
-        else {
-            last_protein = all_proteins->at(pid);
-        }
-        node_dict[node_id]->proteins.push_back(last_protein);
-    }
-    */
     rc = sqlite3_exec(db, sql_query_proteins.c_str(), sqlite_select_proteins, (void*)&chr, &zErrMsg);
     if( rc != SQLITE_OK ){
         print_out("[]", compress);
@@ -404,31 +356,6 @@ int main(int argc, char** argv) {
     sql_query_rest += pathway_id;
     sql_query_rest += ";";
     
-    /*
-    res = stmt->executeQuery(sql_query_rest);
-    while (res->next()){
-        node* last_node = new node();
-        last_node->id = res->getString("id");
-        last_node->pathway_id = res->getString("pathway_id");
-        last_node->name = res->getString("name");
-        last_node->short_name = res->getString("short_name");
-        last_node->type = res->getString("type");
-        last_node->foreign_id = res->getString("foreign_id");
-        last_node->x = res->getString("x");
-        last_node->y = res->getString("y");
-        last_node->c_number = res->getString("c_number");
-        last_node->lm_id = res->getString("lm_id");
-        last_node->smiles = res->getString("smiles");
-        replaceAll(last_node->smiles, "\\", "\\\\");
-        last_node->formula = res->getString("formula");
-        last_node->exact_mass = res->getString("exact_mass");
-        last_node->position = res->getString("position");
-        last_node->highlight = res->getString("highlight");
-        last_node->image = res->getString("image");
-        node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
-    }
-    */
-    
     rc = sqlite3_exec(db, sql_query_rest.c_str(), sqlite_select_remaining, (void*)&chr, &zErrMsg);
     if( rc != SQLITE_OK ){
         print_out("[]", compress);
@@ -454,27 +381,6 @@ int main(int argc, char** argv) {
     sql_query_rest += pathway_id;
     sql_query_rest += ";";
     
-    /*
-    res = stmt->executeQuery(sql_query_rest);
-    while (res->next()){
-        node* last_node = new node();
-        last_node->id = res->getString("id");
-        last_node->pathway_id = res->getString("pathway_id");
-        last_node->name = res->getString("name");
-        last_node->type = res->getString("type");
-        last_node->foreign_id = res->getString("foreign_id");
-        last_node->x = res->getString("x");
-        last_node->y = res->getString("y");
-        last_node->c_number = res->getString("c_number");
-        last_node->lm_id = res->getString("lm_id");
-        last_node->smiles = res->getString("smiles");
-        replaceAll(last_node->smiles, "\\", "\\\\");
-        last_node->formula = res->getString("formula");
-        last_node->exact_mass = res->getString("exact_mass");
-        last_node->position = res->getString("position");
-        node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
-    }
-    */
     rc = sqlite3_exec(db, sql_query_rest.c_str(), sqlite_select_remaining_empty, (void*)&chr, &zErrMsg);
     if( rc != SQLITE_OK ){
         print_out("[]", compress);
@@ -500,10 +406,8 @@ int main(int argc, char** argv) {
     delete all_proteins;
     delete node_dict;
     
-    /*
-    delete res;
-    delete stmt;
-    delete con;
-    */
+    
+    sqlite3_close(db); 
+    
     return 0;
 }
