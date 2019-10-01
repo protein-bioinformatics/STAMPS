@@ -8,6 +8,8 @@ import hashlib
 import zlib
 import struct
 from urllib.request import urlopen
+from urllib.parse import urlencode
+
 
 
 
@@ -255,7 +257,7 @@ if "root_path" not in conf:
 form = cgi.FieldStorage(environ={'REQUEST_METHOD':'POST'})
 
 if "proteins" not in form:
-    print("ready")
+    print("error")
     exit()
 
 proteins = form.getvalue('proteins')
@@ -267,12 +269,13 @@ hostname = form.getvalue('host') if "host" in form else ""
 
 if hostname != "":
     try:
-        request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
-        reply = urlopen("%s/scripts/prepare-download.py?%s" % (hostname, request), timeout = 2).read().decode("utf8")
-        
-        print("%s/%s" % (hostname, reply))
+        params = {key: form.getvalue(key) for key in form if key != "host"} 
+        data = urlencode(params)
+        data = data.encode('ascii')
+        #request = "&".join(["%s=%s" % (key, form.getvalue(key)) for key in form if key != "host"])
+        print(urlopen("%s/scripts/prepare-download.py" % hostname, data, timeout = 2).read().decode("utf8"))
     except Exception as e:
-        print(-1)
+        print(e)
     exit()
 
 

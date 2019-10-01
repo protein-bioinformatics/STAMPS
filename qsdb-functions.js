@@ -395,7 +395,7 @@ function load_tissues(){
             return true;
         }
     }
-    xmlhttp_tissues.open("GET", file_pathname + "scripts/get-tissues.py?host=" + current_host, false);
+    xmlhttp_tissues.open("GET", file_pathname + "scripts/get-tissues.py?host=" + encodeURL(current_host), false);
     xmlhttp_tissues.send();
     
 }
@@ -2069,7 +2069,6 @@ function node(data){
                     
                     var data_type = image_meta["image_type"];
                     
-                    data_type = "jpg";
                     
                     if (data_type == "svg") data_type = "svg+xml";
                     this.node.pos = data_type;
@@ -4173,11 +4172,11 @@ function download_assay(){
     
     var xmlhttp = new XMLHttpRequest();
     var download_link = "";
-    var request = "proteins=" + proteins_list + "&species=" + current_species + "&topnfragments=" + top_n_fragments[filter_parameters['max_topn_fragments']] + "&ions=" + ion_types[filter_parameters['ions']];
+    var request = "proteins=" + proteins_list + "&species=" + current_species + "&topnfragments=" + top_n_fragments[filter_parameters['max_topn_fragments']] + "&ions=" + ion_types[filter_parameters['ions']] + "&host=" + encodeURL(current_host);
 
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            download_link = file_pathname + xmlhttp.responseText;
+            download_link = current_host + "/" + xmlhttp.responseText;
             html = "<table width=100% height=100%><tr><td align=\"center\">";
             html += "<a href=\"" + download_link + "\">download assay</a>";
             html += "<p>&nbsp;<p>";
@@ -4742,7 +4741,7 @@ function get_pathway_groups(){
             set_pathway_menu();
         }
     }
-    xmlhttp_pg.open("GET", file_pathname + "scripts/get-pathway-groups.py", false);
+    xmlhttp_pg.open("GET", file_pathname + "scripts/get-pathway-groups.py?host=" + encodeURL(current_host), false);
     xmlhttp_pg.send();
     
 }
