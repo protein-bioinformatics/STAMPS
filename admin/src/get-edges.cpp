@@ -259,21 +259,6 @@ main() {
         exit(-4);
     }
     
-    /*
-    stmt = con->createStatement();
-    res = stmt->executeQuery(sql_query);
-        
-    
-    while (res->next()) {
-        reaction* r = new reaction();
-        r->id = res->getString("id");
-        r->node_id = res->getString("node_id");
-        r->anchor_in = res->getString("anchor_in");
-        r->anchor_out = res->getString("anchor_out");
-        all_reactions.insert(pair< string, reaction* >(r->id, r));
-    }
-    */
-    
     
     
     
@@ -281,22 +266,7 @@ main() {
     
     sql_query = "SELECT r.id, rg.id rg_id, rg.reaction_id, rg.node_id rg_node_id, rg.type, rg.anchor, rg.head FROM reactions r INNER JOIN nodes n ON r.node_id = n.id INNER JOIN reagents rg on r.id = rg.reaction_id WHERE n.pathway_id = ";
     sql_query += pathway_id;
-    sql_query += " ORDER BY r.id;";
-    
-    /*
-    res = stmt->executeQuery(sql_query);
-    while (res->next()) {
-        reagent* r = new reagent();
-        r->id = res->getString("rg_id");
-        r->reaction_id = res->getString("reaction_id");
-        r->node_id = res->getString("rg_node_id");
-        r->type = res->getString("type");
-        r->anchor = res->getString("anchor");
-        r->head = res->getString("head");
-        all_reactions[res->getString("id")]->reagents.push_back(r);
-    }
-    */
-    
+    sql_query += " ORDER BY r.id;";    
     
     rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_reagents, (void*)&all_reactions, &zErrMsg);
     if( rc != SQLITE_OK ){
@@ -313,24 +283,6 @@ main() {
     sql_query += " AND nn.pathway_id = ";
     sql_query += pathway_id;
     sql_query += " ORDER BY r.id;";
-    
-    
-    /*
-    stmt = con->createStatement();
-    res = stmt->executeQuery(sql_query);
-        
-    
-    while (res->next()) {
-        direct* r = new direct();
-        r->id = res->getString("id");
-        r->node_id_start = res->getString("node_id_start");
-        r->node_id_end = res->getString("node_id_end");
-        r->anchor_start = res->getString("anchor_start");
-        r->anchor_end = res->getString("anchor_end");
-        r->head = res->getString("head");
-        all_directs.insert(pair< string, direct* >(r->id, r));
-    }
-    */
     
     rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_reagents_direct, (void*)&all_directs, &zErrMsg);
     if( rc != SQLITE_OK ){

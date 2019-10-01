@@ -1,24 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstring>
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <math.h>
 #include "bio-classes.h"
-
-#include "mysql_connection.h"
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
-
-using namespace std;
-
-
-
 
 void print_out(string response, bool compress){
     if (compress){
@@ -56,6 +36,31 @@ class chromosome_band {
             return data;
         }
 };
+
+
+
+
+static int sqlite_select_chromosomes(void *data, int argc, char **argv, char **azColName){
+    map<string, string> row;
+    map<string, vector<chromosome_band*>* >* chromosomes = (map<string, vector<chromosome_band*>* >*)data;
+    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    
+    string chromosome = row["chromosome"];
+    if (chromosomes->find(chromosome) == chromosomes->end()) chromosomes->insert({chromosome, new vector<chromosome_band*>()});
+    
+    chromosome_band* cb = new chromosome_band();
+    cb->chromosome;
+    cb->arm = row["arm"];
+    cb->name = row["name"];
+    cb->start = row["start"];
+    cb->end = row["end"];
+    cb->positive = row["positive"];
+    cb->color = row["color"];
+    cb->species = row["species"];
+    chromosomes->at(chromosome)->push_back(cb);
+    
+    return SQLITE_OK;
+}
 
 
 
@@ -121,14 +126,17 @@ int main(int argc, char** argv) {
     }
     
     
-    // Create a connection and connect to database
-    sql::Driver *driver;
-    sql::Connection *con;
-    sql::Statement *stmt;
-    sql::ResultSet *res;
-    driver = get_driver_instance();
-    con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
-    con->setSchema(parameters["mysql_db"]);
+    // retrieve id and peptide sequence from spectral library
+    sqlite3 *db;
+    char *zErrMsg = 0;
+    int rc, chr;
+    string database = parameters["root_path"] + "/data/database.sqlite";
+    rc = sqlite3_open((char*)database.c_str(), &db);
+    if( rc ){
+        print_out("[]", compress);
+        exit(-3);
+    }
+    
     
     
     
@@ -141,13 +149,16 @@ int main(int argc, char** argv) {
     }
     
     
-
-    stmt = con->createStatement();
-    res = stmt->executeQuery("SELECT * FROM chromosome_bands WHERE species = '" + species + "' ORDER BY chromosome;");
-    
-    
     map<string, vector<chromosome_band*>* > chromosomes;
+    string sql_chromosomes = "SELECT * FROM chromosome_bands WHERE species = '" + species + "' ORDER BY chromosome;";
     
+    rc = sqlite3_exec(db, sql_chromosomes.c_str(), sqlite_select_chromosomes, (void*)&chromosomes, &zErrMsg);
+    if( rc != SQLITE_OK ){
+        print_out("[]", compress);
+        exit(-4);
+    }
+    
+    /*
     while (res->next()) {
         string chromosome = res->getString("chromosome");
         if (chromosomes.find(chromosome) == chromosomes.end()) chromosomes.insert(pair< string, vector<chromosome_band*>* >(chromosome, new vector<chromosome_band*>()));
@@ -163,6 +174,10 @@ int main(int argc, char** argv) {
         cb->species = res->getString("species");
         chromosomes[chromosome]->push_back(cb);
     }
+    */
+    
+    
+    
     
     string data = "{";
     for (auto entry : chromosomes){
@@ -180,9 +195,7 @@ int main(int argc, char** argv) {
     response += data;
     print_out(response, compress);
     
-    delete res;
-    delete stmt;
-    delete con;
+    sqlite3_close(db); 
     
     return 0;
 }
