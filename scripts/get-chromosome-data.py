@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import json
-from pymysql import connect, cursors
+import sqlite3
 import cgi, cgitb
 
 print("Content-Type: text/html")
@@ -18,17 +18,24 @@ with open("../admin/qsdb.conf", mode="rt") as fl:
         conf[token[0].strip(" ")] = token[1].strip(" ")
 
 
+database = "%s/data/database.sqlite" % conf["root_path"]
+
+db = sqlite3.connect(database)
+my_cur = db.cursor()
 
 form = cgi.FieldStorage()
-chromosome = form.getvalue('chromosome')
-species = form.getvalue('species')
+chromosome = form.getvalue('chromosome') if "chromosome" in form else ""
+species = form.getvalue('species') if "species" in form else ""
 
-if chromosome.find("'") > -1 or chromosome.find("\"") > -1:
+if len(chromosome) == 0 or len(species) == 0:
     print(-1)
     exit()
 
-conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
-my_cur = conn.cursor()
+if chromosome.find("'") > -1 or chromosome.find("\"") > -1:
+    print(-2)
+    exit()
+
+
 
 my_cur.execute("SELECT id, name, definition, kegg_link, accession, ec_number, chr_start, chr_end from proteins where chromosome = '%s' and unreviewed = false and species = '%s' ORDER BY chr_start ASC;" % (chromosome, species))
 data = [row for row in my_cur]
