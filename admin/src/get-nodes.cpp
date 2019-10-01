@@ -71,7 +71,7 @@ class node {
 
 vector< protein* >* proteins = 0;
 map < int, protein* >* all_proteins = 0;
-
+map< int, node*>* node_dict = 0;
 
 
 
@@ -84,6 +84,113 @@ void print_out(string response, bool compress){
     else {
         cout << response;
     }
+}
+
+
+
+
+static int sqlite_select_nodes(void *data, int argc, char **argv, char **azColName){
+    map<string, string> row;
+    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    
+    node* last_node = new node;
+    last_node->id = row["id"];
+    last_node->pathway_id = row["pathway_id"];
+    last_node->type = row["type"];
+    last_node->x = row["x"];
+    last_node->y = row["y"];
+    node_dict->insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
+    
+    return 0;
+}
+
+
+
+
+
+
+static int sqlite_select_proteins(void *data, int argc, char **argv, char **azColName){
+    map<string, string> row;
+    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    
+    int node_id = atoi(row["nid"].c_str());
+    string str_pid = row["id"];
+    int pid = atoi(str_pid.c_str());
+    protein* last_protein = 0;
+    
+    if (all_proteins->find(pid) == all_proteins->end()){
+        last_protein = new protein(str_pid);
+        last_protein->name = row["name"];
+        all_proteins->insert(pair<int, protein* >(pid, last_protein));
+        proteins->push_back(last_protein);
+    }
+    else {
+        last_protein = all_proteins->at(pid);
+    }
+    node_dict->at(node_id)->proteins.push_back(last_protein);
+    
+    return 0;
+}
+
+
+
+
+
+
+
+
+static int sqlite_select_remaining(void *data, int argc, char **argv, char **azColName){
+    map<string, string> row;
+    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    
+    node* last_node = new node();
+    last_node->id = row["id"];
+    last_node->pathway_id = row["pathway_id"];
+    last_node->name = row["name"];
+    last_node->short_name = row["short_name"];
+    last_node->type = row["type"];
+    last_node->foreign_id = row["foreign_id"];
+    last_node->x = row["x"];
+    last_node->y = row["y"];
+    last_node->c_number = row["c_number"];
+    last_node->lm_id = row["lm_id"];
+    last_node->smiles = row["smiles"];
+    replaceAll(last_node->smiles, "\\", "\\\\");
+    last_node->formula = row["formula"];
+    last_node->exact_mass = row["exact_mass"];
+    last_node->position = row["position"];
+    last_node->highlight = row["highlight"];
+    last_node->image = row["image"];
+    node_dict->insert({atoi(last_node->id.c_str()), last_node});
+
+    return 0;
+}
+
+
+
+
+static int sqlite_select_remaining_empty(void *data, int argc, char **argv, char **azColName){
+    map<string, string> row;
+    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    
+    node* last_node = new node();
+    last_node->id = row["id"];
+    last_node->pathway_id = row["pathway_id"];
+    last_node->name = row["name"];
+    last_node->type = row["type"];
+    last_node->foreign_id = row["foreign_id"];
+    last_node->x = row["x"];
+    last_node->y = row["y"];
+    last_node->c_number = row["c_number"];
+    last_node->lm_id = row["lm_id"];
+    last_node->smiles = row["smiles"];
+    replaceAll(last_node->smiles, "\\", "\\\\");
+    last_node->formula = row["formula"];
+    last_node->exact_mass = row["exact_mass"];
+    last_node->position = row["position"];
+    node_dict->insert({atoi(last_node->id.c_str()), last_node});
+    
+    return 0;
 }
 
 
@@ -161,7 +268,9 @@ int main(int argc, char** argv) {
     
     
     
-    
+    proteins = new vector< protein* >();
+    all_proteins = new map < int, protein* >();
+    node_dict = new map< int, node*>();
     
     
     // if it is a remote request
@@ -186,25 +295,39 @@ int main(int argc, char** argv) {
     
     
     
-    
+    /*
     // Create a connection and connect to database
     sql::ResultSet *res;
     sql::Driver *driver = get_driver_instance();
     sql::Connection *con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
     con->setSchema(parameters["mysql_db"]);
     sql::Statement *stmt = con->createStatement();
+    */
     
     
-    map< int, node*> node_dict;
-    proteins = new vector< protein* >();
-    all_proteins = new map < int, protein* >();
+    // retrieve id and peptide sequence from spectral library
+    sqlite3 *db;
+    char *zErrMsg = 0;
+    int rc, chr;
+    string database = parameters["root_path"] + "/data/database.sqlite";
+    rc = sqlite3_open((char*)database.c_str(), &db);
+    if( rc ){
+        print_out("[]", compress);
+        exit(-3);
+    }
     
     
+    
+    
+    // select nodes
     string sql_query_nodes = "select * from nodes where pathway_id = ";
     sql_query_nodes += pathway_id;
     sql_query_nodes += " and type = 'protein';";
+    
+    
+    
+    /*
     res = stmt->executeQuery(sql_query_nodes);
-       
     while (res->next()){
         node* last_node = new node;
         last_node->id = res->getString("id");
@@ -214,16 +337,28 @@ int main(int argc, char** argv) {
         last_node->y = res->getString("y");
         node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
     }
+    */
     
     
+    rc = sqlite3_exec(db, sql_query_nodes.c_str(), sqlite_select_nodes, (void*)&chr, &zErrMsg);
+    if( rc != SQLITE_OK ){
+        print_out("[]", compress);
+        exit(-4);
+    }
+    
+    
+    
+    
+    
+    // select proteins
     string sql_query_proteins = "select n.id nid, p.id, p.name from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ";
     sql_query_proteins += pathway_id;
     sql_query_proteins += " and n.type = 'protein' and p.species = '";
     sql_query_proteins += species + "'";
     sql_query_proteins += ";";
     
+    /*
     res = stmt->executeQuery(sql_query_proteins);
-       
     while (res->next()){
         int node_id = res->getInt("nid");
         string str_pid = res->getString("id");
@@ -241,27 +376,36 @@ int main(int argc, char** argv) {
         }
         node_dict[node_id]->proteins.push_back(last_protein);
     }
+    */
+    rc = sqlite3_exec(db, sql_query_proteins.c_str(), sqlite_select_proteins, (void*)&chr, &zErrMsg);
+    if( rc != SQLITE_OK ){
+        print_out("[]", compress);
+        exit(-4);
+    }
     
     
     
-    string sql_query_rest = "(select n.id, p.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, '' position, '' short_name, '' highlight, '' image from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ";
+    
+    
+    // select remaining nodes
+    string sql_query_rest = "select n.id, p.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, '' position, '' short_name, '' highlight, '' image from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ";
     sql_query_rest += pathway_id; 
-    sql_query_rest += ") union ";
-    sql_query_rest += "(select n.id, m.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, m.c_number, m.lm_id, m.smiles, m.formula, m.exact_mass, position, short_name, highlight, image from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ";
+    sql_query_rest += " union ";
+    sql_query_rest += "select n.id, m.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, m.c_number, m.lm_id, m.smiles, m.formula, m.exact_mass, position, short_name, highlight, image from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ";
     sql_query_rest += pathway_id;
-    sql_query_rest += ") union ";
-    sql_query_rest += "(select id, '', pathway_id, type, 0, x, y, 0, '', '', '', '', '' position, '' short_name, highlight, '' image from nodes n where n.type = 'membrane' and n.pathway_id = ";
+    sql_query_rest += " union ";
+    sql_query_rest += "select id, '', pathway_id, type, 0, x, y, 0, '', '', '', '', '' position, '' short_name, highlight, '' image from nodes n where n.type = 'membrane' and n.pathway_id = ";
     sql_query_rest += pathway_id;
-    sql_query_rest += ") union ";
-    sql_query_rest += "(select n.id, l.label, n.pathway_id, n.type, n.foreign_id, n.x, n.y, 0, '', '', '', '', '' position, '' short_name, highlight, '' image from nodes n inner join labels l on n.foreign_id = l.id where n.type = 'label' and n.pathway_id = ";
+    sql_query_rest += " union ";
+    sql_query_rest += "select n.id, l.label, n.pathway_id, n.type, n.foreign_id, n.x, n.y, 0, '', '', '', '', '' position, '' short_name, highlight, '' image from nodes n inner join labels l on n.foreign_id = l.id where n.type = 'label' and n.pathway_id = ";
     sql_query_rest += pathway_id;
-    sql_query_rest += ") union ";
-    sql_query_rest += "(select id, '', pathway_id, type, foreign_id, x, y, 0, '', '', '', '', position, '' short_name, '' highlight, '' image from nodes n where type = 'image' and n.pathway_id = ";
+    sql_query_rest += " union ";
+    sql_query_rest += "select id, '', pathway_id, type, foreign_id, x, y, 0, '', '', '', '', position, '' short_name, '' highlight, '' image from nodes n where type = 'image' and n.pathway_id = ";
     sql_query_rest += pathway_id;
-    sql_query_rest += ");";
+    sql_query_rest += ";";
     
+    /*
     res = stmt->executeQuery(sql_query_rest);
-       
     while (res->next()){
         node* last_node = new node();
         last_node->id = res->getString("id");
@@ -283,20 +427,35 @@ int main(int argc, char** argv) {
         last_node->image = res->getString("image");
         node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
     }
+    */
+    
+    rc = sqlite3_exec(db, sql_query_rest.c_str(), sqlite_select_remaining, (void*)&chr, &zErrMsg);
+    if( rc != SQLITE_OK ){
+        print_out("[]", compress);
+        exit(-4);
+    }
     
     
-    sql_query_rest = "(select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, '' position from nodes n where n.type = 'pathway' and n.foreign_id = -1 and n.pathway_id = ";
+    
+    
+    
+    
+    
+    
+    
+    // select remeaing empty / undefined nodes
+    sql_query_rest = "select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, '' position from nodes n where n.type = 'pathway' and n.foreign_id = -1 and n.pathway_id = ";
     sql_query_rest += pathway_id; 
-    sql_query_rest += ") union ";
-    sql_query_rest += "(select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, position from nodes n where n.type = 'metabolite' and n.foreign_id = -1 and n.pathway_id = ";
+    sql_query_rest += " union ";
+    sql_query_rest += "select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, position from nodes n where n.type = 'metabolite' and n.foreign_id = -1 and n.pathway_id = ";
     sql_query_rest += pathway_id;
-    sql_query_rest += ") union ";
-    sql_query_rest += "(select n.id, 'inv' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, position from nodes n where n.type = 'invisible' and n.pathway_id = ";
+    sql_query_rest += " union ";
+    sql_query_rest += "select n.id, 'inv' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, position from nodes n where n.type = 'invisible' and n.pathway_id = ";
     sql_query_rest += pathway_id;
-    sql_query_rest += ");";
+    sql_query_rest += ";";
     
+    /*
     res = stmt->executeQuery(sql_query_rest);
-    
     while (res->next()){
         node* last_node = new node();
         last_node->id = res->getString("id");
@@ -315,13 +474,22 @@ int main(int argc, char** argv) {
         last_node->position = res->getString("position");
         node_dict.insert(pair<int, node*>(atoi(last_node->id.c_str()), last_node));
     }
+    */
+    rc = sqlite3_exec(db, sql_query_rest.c_str(), sqlite_select_remaining_empty, (void*)&chr, &zErrMsg);
+    if( rc != SQLITE_OK ){
+        print_out("[]", compress);
+        exit(-4);
+    }
+    
+    
+    
     
     
 
     response += "[";
-    map<int, node*>::iterator node_it = node_dict.begin();
-    for (map<int, node*>::iterator node_it = node_dict.begin(); node_it != node_dict.end(); ++node_it){
-        if (node_it != node_dict.begin()) response += ",";
+    map<int, node*>::iterator node_it = node_dict->begin();
+    for (map<int, node*>::iterator node_it = node_dict->begin(); node_it != node_dict->end(); ++node_it){
+        if (node_it != node_dict->begin()) response += ",";
         response += (node_it->second)->to_string();
     }
     response += "]";
@@ -330,11 +498,12 @@ int main(int argc, char** argv) {
     
     delete proteins;
     delete all_proteins;
+    delete node_dict;
     
-    
+    /*
     delete res;
     delete stmt;
     delete con;
-    
+    */
     return 0;
 }
