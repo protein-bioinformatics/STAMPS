@@ -201,17 +201,6 @@ main() {
     }
     
     
-    // retrieve id and peptide sequence from spectral library
-    sqlite3 *db;
-    char *zErrMsg = 0;
-    int rc, chr;
-    string database = parameters["root_path"] + "/data/database.sqlite";
-    rc = sqlite3_open((char*)database.c_str(), &db);
-    if( rc ){
-        print_out("[]", compress);
-        exit(-3);
-    }
-    
     
     
     
@@ -248,6 +237,23 @@ main() {
     
     
     
+    
+    // retrieve id and peptide sequence from spectral library
+    sqlite3 *db;
+    char *zErrMsg = 0;
+    int rc, chr;
+    string database = parameters["root_path"] + "/data/database.sqlite";
+    rc = sqlite3_open((char*)database.c_str(), &db);
+    if( rc ){
+        print_out("[]", compress);
+        exit(-3);
+    }
+    
+    
+    
+    
+    
+    
     string sql_query = "SELECT r.* FROM reactions r INNER JOIN nodes n ON r.node_id = n.id WHERE n.pathway_id = ";
     sql_query += pathway_id;
     sql_query += " ORDER BY r.id;";
@@ -256,6 +262,7 @@ main() {
     rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_reactions, (void*)&all_reactions, &zErrMsg);
     if( rc != SQLITE_OK ){
         print_out("[]", compress);
+        sqlite3_close(db); 
         exit(-4);
     }
     
@@ -271,6 +278,7 @@ main() {
     rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_reagents, (void*)&all_reactions, &zErrMsg);
     if( rc != SQLITE_OK ){
         print_out("[]", compress);
+        sqlite3_close(db); 
         exit(-4);
     }
     
@@ -287,6 +295,7 @@ main() {
     rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_reagents_direct, (void*)&all_directs, &zErrMsg);
     if( rc != SQLITE_OK ){
         print_out("[]", compress);
+        sqlite3_close(db); 
         exit(-4);
     }
     

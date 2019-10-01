@@ -1,21 +1,25 @@
-/* Simple C program that connects to MySQL Database server*/
-#include <mysql.h>
-#include <stdio.h>
-#include <iostream>
-#include <vector>
-#include <map>
-#include <string>
-#include <sstream>
-#include <fstream>
 #include "bio-classes.h"
 
-#include "mysql_connection.h"
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
 
-using namespace std;
+
+static int sqlite_select_pathways(void *data, int argc, char **argv, char **azColName){
+    map<string, string> row;
+    string* response = ( string *)data;
+    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+
+
+    
+    if (response[0].length() > 1) response[0] += ",";
+    response[0] += "\"" + row["id"] + "\":";
+    string pw_name = row["name"];
+    string signaling_pw = row["signaling_pathway"];
+    replaceAll(pw_name, "\n", "\\n");
+    response[0] += "[\"" + pw_name + "\"," + signaling_pw + "]";
+    
+    
+    return SQLITE_OK;
+}
+
 
 
 
@@ -61,32 +65,37 @@ main() {
     
     
     
-    // Create a connection and connect to database
-    sql::ResultSet *res;
-    sql::Driver *driver = get_driver_instance();
-    sql::Connection *con = driver->connect(parameters["mysql_host"], parameters["mysql_user"], parameters["mysql_passwd"]);
-    con->setSchema(parameters["mysql_db"]);
-    sql::Statement *stmt = con->createStatement();
+    // retrieve id and peptide sequence from spectral library
+    sqlite3 *db;
+    char *zErrMsg = 0;
+    int rc, chr;
+    string database = parameters["root_path"] + "/data/database.sqlite";
+    rc = sqlite3_open((char*)database.c_str(), &db);
+    if( rc ){
+        cout << "{}" << endl;
+        exit(-3);
+    }
+    
+    
+    
     
     
     /* send SQL query */
     string sql_query = (!print_all) ? "SELECT distinct p.* FROM pathways p inner join nodes n on p.id = n.pathway_id;" : "SELECT * FROM pathways;";
-    res = stmt->executeQuery(sql_query);
     
-    string data = "{";
-    while (res->next()){
-        if (data.length() > 1) data += ",";
-        data += "\"" + res->getString("id") + "\":";
-        string pw_name = res->getString("name");
-        string signaling_pw = res->getString("signaling_pathway");
-        replaceAll(pw_name, "\n", "\\n");
-        data += "[\"" + pw_name + "\"," + signaling_pw + "]";
+    
+    
+    string response[] = {"{"};
+    rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_pathways, (void*)response, &zErrMsg);
+    if( rc != SQLITE_OK ){
+        cout << "{}" << endl;
+        sqlite3_close(db); 
+        exit(-4);
     }
-    data += "}";
+    response[0] += "}";
     
-    cout << data;
+    cout << response[0];
     
-    delete res;
-    delete stmt;
-    delete con;
+    sqlite3_close(db); 
+    return 0;
 }

@@ -85,13 +85,13 @@ static int sqlite_map_peptides(void *data, int argc, char **argv, char **azColNa
 
 static int sqlite_statistics_pathways(void *data, int argc, char **argv, char **azColName){
     map<string, string> row;
-    string response = *((string*)data);
+    string* response = (string*)data;
     for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
 
 
-    if (response.length() > 1) response += ",";
+    if (response[0].length() > 1) response[0] += ",";
     
-    response += "[" + string(row["pathway_id"]) + ",\"" + string(row["name"]) + "\",[" + string(row["prot_id"]) + "]," + string(row["signaling_pathway"]) + "]";
+    response[0] += "[" + string(row["pathway_id"]) + ",\"" + string(row["name"]) + "\",[" + string(row["prot_id"]) + "]," + string(row["signaling_pathway"]) + "]";
     
     return SQLITE_OK;
 }
@@ -428,16 +428,16 @@ main(int argc, char** argv) {
         
         
         
-        string response = "[";
-        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_statistics_pathways, (void*)&response, &zErrMsg);
+        string response[] = {"["};
+        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_statistics_pathways, (void*)response, &zErrMsg);
         if( rc != SQLITE_OK ){
             print_out("[]", compress);
             exit(-4);
         }
-        response += "]";
-        replaceAll(response, "\n", "\\n");
+        response[0] += "]";
+        replaceAll(response[0], "\n", "\\n");
         
-        print_out(response, compress);
+        print_out(response[0], compress);
         sqlite3_close(db); 
         return 0;
     }
