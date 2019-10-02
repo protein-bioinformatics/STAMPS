@@ -62,8 +62,8 @@ elif action == "select":
             print(-4)
             exit()
         
-    sql_query = "SELECT id, peptideModSeq, precursorCharge, scoreType FROM RefSpectra %s ORDER BY id LIMIT %s;" % ("WHERE scoreType = -1" if only_disabled else "", limit)
-    cur.execute(sql_query)
+    sql_query = "SELECT id, peptideModSeq, precursorCharge, scoreType FROM RefSpectra ? ORDER BY id LIMIT ?;"
+    cur.execute(sql_query, ("WHERE scoreType = -1" if only_disabled else "", limit))
     print(json.dumps([row for row in cur]))
     
    
@@ -79,8 +79,8 @@ elif action == "update":
         
     
     try:
-        sql_query = "UPDATE RefSpectra SET scoreType = %s WHERE id = %s;" % (value, e_id)
-        cur.execute(sql_query)
+        sql_query = "UPDATE RefSpectra SET scoreType = ? WHERE id = ?;"
+        cur.execute(sql_query, (value, e_id))
         db.commit()
     except Exception as e:
         print(-6)

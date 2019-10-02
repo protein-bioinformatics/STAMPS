@@ -24,6 +24,7 @@ print()
 
 
 def dict_rows(cur): return [{k: v for k, v in zip(cur.description, row)} for row in cur]
+def dict_row(cur): return {k[0]: v for k, v in zip(cur.description, cur.fetchone())}
 
 
 
@@ -51,10 +52,10 @@ my_cur = conn.cursor()
 
 
 
-my_cur.execute("SELECT type FROM nodes WHERE id = %s;", (start_id))
+my_cur.execute("SELECT type FROM nodes WHERE id = ?;", (start_id))
 start_type = dict_rows(my_cur)[0]["type"]
 
-my_cur.execute("SELECT type FROM nodes WHERE id = %s;", (end_id))
+my_cur.execute("SELECT type FROM nodes WHERE id = ?;", (end_id))
 end_type = dict_rows(my_cur)[0]["type"]
 
 result = -1
@@ -76,14 +77,14 @@ if count_types["protein"] == 1 and count_types["metabolite"] == 1:
         fooduct = "educt"
         
     
-    my_cur.execute("SELECT id FROM reactions WHERE node_id = %s;", (prot_id))
+    my_cur.execute("SELECT id FROM reactions WHERE node_id = ?;", (prot_id))
     reaction_id = dict_rows(my_cur)[0]["id"]
     
-    my_cur.execute("INSERT INTO reagents (reaction_id, node_id, type, anchor, head) VALUES (%s, %s, %s, %s, 0);", (reaction_id, meta_id, fooduct, meta_a))
+    my_cur.execute("INSERT INTO reagents (reaction_id, node_id, type, anchor, head) VALUES (?, ?, ?, ?, 0);", (reaction_id, meta_id, fooduct, meta_a))
     conn.commit()
     
     
-    my_cur.execute("UPDATE reactions SET %s = '%s' where id = %s" % (reac_a, prot_a, reaction_id))
+    my_cur.execute("UPDATE reactions SET ? = '?' where id = ?" % (reac_a, prot_a, reaction_id))
     conn.commit()
     
     
@@ -93,7 +94,7 @@ if count_types["protein"] == 1 and count_types["metabolite"] == 1:
 else:
         
         
-    my_cur.execute("INSERT INTO reactions_direct (node_id_start, node_id_end, anchor_start, anchor_end, head) VALUES (%s, %s, %s, %s, 0);", (start_id, end_id, anchor_start, anchor_end))
+    my_cur.execute("INSERT INTO reactions_direct (node_id_start, node_id_end, anchor_start, anchor_end, head) VALUES (?, ?, ?, ?, 0);", (start_id, end_id, anchor_start, anchor_end))
     conn.commit()
     
     my_cur.execute("SELECT max(id) mid FROM reactions_direct;")

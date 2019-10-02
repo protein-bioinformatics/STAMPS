@@ -18,7 +18,9 @@ print()
 
 
 def dict_rows(cur): return [{k: v for k, v in zip(cur.description, row)} for row in cur]
-def dict_row(cur): return {k: v for k, v in zip(cur.description, cur)}
+def dict_row(cur): return {k[0]: v for k, v in zip(cur.description, cur.fetchone())}
+
+
 
 form, node_type, x, y, pathway = None, None, None, None, None
 try:
@@ -27,6 +29,7 @@ try:
     x = form.getvalue('x')
     y = form.getvalue('y')
     pathway = form.getvalue("pathway")
+
     
 except:
     print(-1)
@@ -62,25 +65,25 @@ if node_type == "pathway":
         print(-3)
         exit()
     
-    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (%s, %s, %s, %s, %s);"
+    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (?, ?, ?, ?, ?);"
     my_cur.execute(sql_query, (pathway, node_type, foreign_id, x, y))
     conn.commit()
     
     
 elif node_type == "protein":
-    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (%s, %s, 0, %s, %s);"
+    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (?, ?, 0, ?, ?);"
     my_cur.execute(sql_query, (pathway, node_type, x, y))
     conn.commit()
     
     my_cur.execute("SELECT max(id) mid FROM nodes;")
-    max_node_id = dict_row(my_cur.fetchone())["mid"]
+    max_node_id = dict_row(my_cur)["mid"]
     
     
-    sql_query = "INSERT INTO reactions (node_id, anchor_in, anchor_out) VALUES (%s, 'left', 'right');"
+    sql_query = "INSERT INTO reactions (node_id, anchor_in, anchor_out) VALUES (?, 'left', 'right');"
     my_cur.execute(sql_query, (max_node_id))
     
     my_cur.execute("SELECT max(id) mid FROM reactions;")
-    reaction_id = dict_row(my_cur.fetchone())["mid"]
+    reaction_id = dict_row(my_cur)["mid"]
     conn.commit()
     
     
@@ -91,7 +94,7 @@ elif node_type == "metabolite":
     except:
         print(-4)
         exit()
-    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (%s, %s, %s, %s, %s);"
+    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (?, ?, ?, ?, ?);"
     my_cur.execute(sql_query, (pathway, node_type, foreign_id, x, y))
     conn.commit()
     
@@ -100,29 +103,29 @@ elif node_type == "label":
     my_cur.execute("INSERT INTO labels (label) VALUES ('undefined');");
     conn.commit()
     my_cur.execute("SELECT max(id) mid FROM labels;")
-    max_label_id = dict_row(my_cur.fetchone())["mid"]
+    max_label_id = dict_row(my_cur)["mid"]
     reaction_id = max_label_id;
     
-    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (%s, %s, %s, %s, %s);"
+    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (?, ?, ?, ?, ?);"
     my_cur.execute(sql_query, (pathway, node_type, max_label_id, x, y))
     conn.commit()
     
     
 elif node_type == "membrane":
-    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (%s, %s, 0, %s, %s);"
+    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (?, ?, 0, ?, ?);"
     my_cur.execute(sql_query, (pathway, node_type, x, y))
     conn.commit()
     
 elif node_type == "image":
-    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (%s, %s, 10000, %s, %s);"
+    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (?, ?, 10000, ?, ?);"
     my_cur.execute(sql_query, (pathway, node_type, x, y))
     conn.commit()
     
 elif node_type == "invisible":
-    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (%s, %s, 0, %s, %s);"
+    sql_query = "INSERT INTO nodes (pathway_id, type, foreign_id, x, y) VALUES (?, ?, 0, ?, ?);"
     my_cur.execute(sql_query, (pathway, node_type, x, y))
     conn.commit()
     
     
 my_cur.execute("SELECT max(id) mid FROM nodes;")
-print( json.dumps( [dict_row(my_cur.fetchone())["mid"], reaction_id] ) )
+print( json.dumps( [dict_row(my_cur)["mid"], reaction_id] ) )

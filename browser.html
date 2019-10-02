@@ -22,21 +22,38 @@
     <table>
     <tr>
     <td width="50%"></td>
-    <td id="select_metabolic_pathway_nav" style="border-left: white; border-left-style: solid; border-left-width: 1px;" class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); select_metabolic_pathway();">
-        Metabolic&nbsp;Pathways
-    </td><td id="select_signaling_pathway_nav" class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); select_signaling_pathway();">
-        Signaling&nbsp;Pathways
-    </td><td id="select_species_nav" class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); select_species();">
+    
+    
+    
+    <td id="select_species_nav" style="border-left: white; border-left-style: solid; border-left-width: 1px;" class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); select_species();">
         Select&nbsp;Species
-    </td><td id="search_field_nav" class="navigation_cell" title="Search for name, definition, UniProt accession number, EC number or peptide amino sequence.">
+    </td>
+    
+    <td id="select_metabolic_pathway_nav" class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); select_metabolic_pathway();">
+        Metabolic&nbsp;Pathways
+    </td>
+    
+    <td id="select_signaling_pathway_nav" class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); select_signaling_pathway();">
+        Signaling&nbsp;Pathways
+    </td>
+    
+    <td id="search_field_nav" class="navigation_cell" title="Search for name, definition, UniProt accession number, EC number or peptide amino sequence.">
         <table><tr><td>Search: </td><td><input type="text" onkeyup="start_search();" onfocus="hide_infobox(); close_navigation(); start_search();" class="search_field" id="search_field" size=24></td></tr></table>
-    </td><td id="filter_panel_nav"  class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); open_filter_panel();" style="min-width: 100px; text-align: center;">
+    </td>
+    
+    <td id="filter_panel_nav"  class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); open_filter_panel();" style="min-width: 100px; text-align: center;">
         Filter
-    </td><td class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); back_function = hide_check_spectra; check_spectra();">
+    </td>
+    
+    <td class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); back_function = hide_check_spectra; check_spectra();">
         Check&nbsp;Spectra
-    </td><td class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); download_assay();">
+    </td>
+    
+    <td class="navigation_cell_click" onclick="hide_infobox(); close_navigation(); download_assay();">
         Download&nbsp;Assay
-    </td><td class="navigation_cell_click" onclick="location.href = '.';" style="min-width: 100px; text-align: center;">
+    </td>
+    
+    <td class="navigation_cell_click" onclick="location.href = '.';" style="min-width: 100px; text-align: center;">
         Back
     </td>
     <td width="50%"></td>
@@ -99,7 +116,7 @@
 <div id="check_spectra" class="check_spectra"></div>
 <div id="waiting_background" class="light_background"></div>
 
-
+<!--
 <div id="cookie_information" class="cookie_information">
     <table width="100%" cellpadding="10" cellspacing="10">
         <tr>
@@ -112,6 +129,33 @@
         </tr>
     </table>    
 </div>
+-->
+
+
+
+
+<div id="analytics_information" class="analytics_information">
+    <table width="100%" cellpadding="10" cellspacing="10">
+        <tr>
+            <td algin="left">
+                <b>Thank you for using STAMPS.</b>
+                STAMPS is funded by the German federal ministry of education and research (BMBF) as part of the de.NBI initiative. The project administration requires us to report ANONYMIZED usage statistics for this tool to evaluate its usefulness for the community.<br>
+                With your permission, we collect the following <b>ANONYMIZED statistics</b>: i) of STAMPS launches ii) of generated transition lists.<br>
+                We do <b>NOT collect</b> any of the following statistics: i) IP address ii) operating system iii) any information that may traced back to the user. "When you click 'Accept': you agree to allow us to collect ANONYMIZED usage statistics. When you click 'Decline': no data will be sent and you can use STAMPS without any restrictions. We would highly appreciate your help to secure further funding for the continued development of STAMPS.
+            </td>
+            <td>
+                <button onclick="document.getElementById('analytics_information').style.display = 'none';">Decline</button>
+            </td>
+            <td>
+                <button onclick="analytics_active = true; document.getElementById('analytics_information').style.display = 'none';">Accept</button>
+            </td>
+        </tr>
+    </table>    
+</div>
+
+
+
+
 
 <div id="pathway_title_field" style="font-family: Arial; font-size: 20px; color: #aaaaaa; margin: 0px; position: absolute; z-index: 10; background-color: #f3f8ff; padding: 10px; border: 1px solid #aaaaaa;">
     <b>Current pathway: <div style="display: inline;" id="pathway_title"></div></b>

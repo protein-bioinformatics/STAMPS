@@ -15,6 +15,7 @@ filter_parameters = {};
 supported_species = {};
 current_species = "";
 current_host = "";
+new_host = "";
 top_n_fragments = [3, 6, 1000];
 ion_types = ["y", "b", "b|y"];
 filter_parameters["min_peptide_length"] = 8;
@@ -63,6 +64,7 @@ back_function = 0;
 num_validation = [0, 0, 0, 0, 0, 0, 0, 0];
 search_data = [];
 read_cookie_information = false;
+analytics_active = false;
 
 windowWidth = 0;
 windowHeight = 0;
@@ -635,7 +637,7 @@ function set_species_menu(reload, request_all){
                 var dom_species_td = document.createElement("td");
                 dom_species_tr.appendChild(dom_species_td);
                 
-                var toks = ncbi[1].split("|")
+                var toks = ncbi[1].split("|");
                 var host = toks.length > 1 ? toks[0] : "";
                 var species_id = toks.length > 1 ? toks[1] : toks[0];
                 
@@ -644,7 +646,7 @@ function set_species_menu(reload, request_all){
                         child.children[0].className = 'select_menu_cell'; \
                     } \
                     this.className = 'selected_menu_cell'; \
-                    last_opened_menu = ''; document.getElementById('select_species').style.display = 'none'; current_host = '" + host + "'; current_species = '" + species_id + "'; load_data();");   
+                    last_opened_menu = ''; document.getElementById('select_species').style.display = 'none'; new_host = '" + host + "'; current_species = '" + species_id + "'; load_data();");   
                 dom_species_td.innerHTML = ncbi[0];
                 dom_species_td.setAttribute("type", "radio");
                 dom_species_td.setAttribute("value", ncbi[1]);
@@ -1220,7 +1222,6 @@ function Protein(data){
             if (this.id in basket) delete basket[this.id];
         }
         compute_statistics();
-        setCookie();
     }
     
     this.mouse_over_name = function(x, y, x_m, y_m, line_number, num){
@@ -4195,6 +4196,8 @@ function download_assay(){
 
 
 function analytics(action){
+    if (!analytics_active) return;
+    
     var xmlhttp_matomo = new XMLHttpRequest();
     xmlhttp_matomo.onreadystatechange = function() {
         if (xmlhttp_matomo.readyState == 4 && xmlhttp_matomo.status == 200) {
@@ -4227,7 +4230,6 @@ function delete_from_protein_table(prot_id){
     delete basket[prot_id];
     draw();
     check_spectra();
-    setCookie();
 }
 
 
@@ -5095,7 +5097,6 @@ function hide_filter_panel(){
             }
             compute_statistics();
             draw();
-            setCookie();
         }
     }
 }
@@ -5368,12 +5369,27 @@ function prepare_infobox(prot){
 
 
 function load_data(reload){
+    
+    if (new_host != current_host){
+        if (confirm("Warning: you are changing the host, all selected proteins will be discarded. Do you want to continue?")){
+            current_host = new_host;
+            basket = {};
+            set_pathway_menu();
+            load_tissues();
+        }
+        else {
+            return;
+        }
+    }
     pathway_is_loaded = false;
+    
+    
+    
+    
     if (!reload){
         reset_view();
     }
     
-    load_tissues();
     
     // reset current information
     if(!reload){
@@ -5719,22 +5735,11 @@ function clean_basket(){
         basket = {};
         filtered_basket = {};
         which_proteins_checked = new Set();
-        setCookie();
         draw();
         check_spectra();
-        setCookie();
     }
 }
 
-
-function setCookie(){
-    if (typeof(qsdb_domain) === 'undefined' || qsdb_domain != true) return;
-    var set_proteins = [];
-    for (prot_id in basket) set_proteins.push(basket[prot_id].accession);
-    
-    var cookie_data = {"proteins_checked": set_proteins.join(":"), "filter_parameters": filter_parameters, "read_cookie_information": read_cookie_information};
-    document.cookie = encodeURI(JSON.stringify(cookie_data));
-}
 
 
 function pathway_to_svg(){

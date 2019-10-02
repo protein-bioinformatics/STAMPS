@@ -1333,6 +1333,7 @@ function create_node(request){
             }
         }
     }
+    console.log(request);
     xmlhttp.open("GET", request, false);
     xmlhttp.send();
     return successful_creation;

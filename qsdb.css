@@ -60,6 +60,17 @@ div.cookie_information {
 }
 
 
+div.analytics_information {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 10px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
 div.toolbox {
     height: 100%;
     position: absolute;

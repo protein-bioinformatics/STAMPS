@@ -93,7 +93,7 @@ try:
 
 
     def compare_spectra(cur_data, row_id1, row_id2, peptide_mod, charge):
-        cur_data.execute('SELECT * FROM RefSpectraPeaks where RefSpectraID = %i;' % row_id1)
+        cur_data.execute('SELECT * FROM RefSpectraPeaks where RefSpectraID = ?;', row_id1)
         row_data1 = cur_data.fetchone()
         mz1, intens1 = row_data1[1], row_data1[2]
         try: mz1 = zlib.decompress(mz1)
@@ -104,7 +104,7 @@ try:
         intens1 = struct.unpack("%if" % (len(intens1) / 4), intens1)
         
         
-        cur_data.execute('SELECT * FROM second.RefSpectraPeaks where RefSpectraID = %i;' % row_id2)
+        cur_data.execute('SELECT * FROM second.RefSpectraPeaks where RefSpectraID = ?;', row_id2)
         row_data2 = cur_data.fetchone()
         mz2, intens2 = row_data2[1], row_data2[2]
         try: mz2 = zlib.decompress(mz2)

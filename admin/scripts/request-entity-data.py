@@ -22,7 +22,7 @@ with open("../qsdb.conf", mode="rt") as fl:
         
         
 def dict_rows(cur): return [{k: v for k, v in zip(cur.description, row)} for row in cur]
-def dict_row(cur): return {k: v for k, v in zip(cur.description, cur)}
+def dict_row(cur): return {k[0]: v for k, v in zip(cur.description, cur.fetchone())}
 
         
         

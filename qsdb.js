@@ -148,24 +148,6 @@ function init(){
     c.addEventListener("mouseout", mouse_up_listener, false);
     
     
-    // cookie treatment
-    var cookie_data = document.cookie;
-    if (typeof cookie_data !== "undefined" && cookie_data != "" && cookie_data.length > 0){
-        try {
-            cookie_data = JSON.parse(decodeURI(cookie_data));
-            filter_parameters = cookie_data["filter_parameters"];
-            read_cookie_information = cookie_data["read_cookie_information"];
-            
-            if (cookie_data["proteins_checked"].length > 0) accession_search_parse_accessions(cookie_data["proteins_checked"]);
-        }
-        catch (e) {
-            document.getElementById('cookie_information').style.display = "none";
-        }
-    }
-    if (!read_cookie_information) document.getElementById('cookie_information').style.display = "inline";
-    
-    
-    
 }
 
 
