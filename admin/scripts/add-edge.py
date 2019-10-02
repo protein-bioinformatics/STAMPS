@@ -52,10 +52,10 @@ my_cur = conn.cursor()
 
 
 
-my_cur.execute("SELECT type FROM nodes WHERE id = ?;", (start_id))
+my_cur.execute("SELECT type FROM nodes WHERE id = ?;", (start_id,))
 start_type = dict_rows(my_cur)[0]["type"]
 
-my_cur.execute("SELECT type FROM nodes WHERE id = ?;", (end_id))
+my_cur.execute("SELECT type FROM nodes WHERE id = ?;", (end_id,))
 end_type = dict_rows(my_cur)[0]["type"]
 
 result = -1

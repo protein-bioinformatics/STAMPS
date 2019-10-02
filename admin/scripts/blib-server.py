@@ -83,7 +83,7 @@ def register_file():
         
     file_id = -1
     sql_query = "select id from files where filename = ?;"
-    my_cur.execute(sql_query, (filename))
+    my_cur.execute(sql_query, (filename,))
     if my_cur.rowcount:
         file_id = dict_row(my_cur)['id']
     
@@ -139,7 +139,7 @@ def send_file():
     
     
     sql_query = "SELECT * FROM files WHERE id = ?;"
-    my_cur.execute(sql_query, (file_id))
+    my_cur.execute(sql_query, (file_id,))
     if my_cur.rowcount:
         row = dict_row(my_cur)
         chunk_max = int(row["chunk_num"])
@@ -163,7 +163,7 @@ def send_file():
             conn.commit()
         
         sql_query = "select * from chunks where file_id = ? ORDER BY chunk_num;"
-        my_cur.execute(sql_query, file_id)
+        my_cur.execute(sql_query, (file_id,))
         if my_cur.rowcount == chunk_max:
             cwd = "%s/admin/scripts" % conf["root_path"]
             
@@ -200,7 +200,7 @@ def check_ident():
         
         
         sql_query = "SELECT * FROM chunks WHERE file_id = ? AND type='chunk';"
-        my_cur.execute(sql_query, file_id)
+        my_cur.execute(sql_query, (file_id,))
         data["uploaded"] = my_cur.rowcount
         
         return dumps(data)
@@ -251,7 +251,7 @@ def delete_file():
     try:
         
         sql_query = "SELECT * FROM files WHERE id = ?;"
-        my_cur.execute(sql_query, file_id)
+        my_cur.execute(sql_query, (file_id,))
         if my_cur.rowcount:
             row = dict_row(my_cur)
             
@@ -271,7 +271,7 @@ def delete_file():
                 
                 
                 sql_query = "SELECT f.id, f.filename FROM chunks c INNER JOIN files f ON f.filename = c.filename WHERE c.file_id = ? AND c.type = 'depend';"
-                my_cur.execute(sql_query, file_id)
+                my_cur.execute(sql_query, (file_id,))
                 
                 depends = dict_rows(my_cur)
                 
@@ -279,7 +279,7 @@ def delete_file():
                 for depend in depends:
                     # delete chunks from file system
                     sql_query = "SELECT * FROM chunks WHERE file_id = ?;"
-                    my_cur.execute(sql_query, depend["id"])
+                    my_cur.execute(sql_query, (depend["id"],))
                     
             
                     for row in dict_rows(my_cur):
@@ -288,17 +288,17 @@ def delete_file():
                         
                     # delete chunks from datebase
                     sql_query = "DELETE FROM chunks WHERE file_id = ?;"
-                    my_cur.execute(sql_query, depend["id"])
+                    my_cur.execute(sql_query, (depend["id"],))
                     
                     # delete files from file system
                     sql_query = "select * from files WHERE id = ?;"
-                    my_cur.execute(sql_query, depend["id"])
+                    my_cur.execute(sql_query, (depend["id"],))
                     for row in dict_rows(my_cur):
                         os.system("rm -f '%s/%s'" %(data_dir, row["filename"]))
                     
                     # delete files from database
                     sql_query = "delete f from files f WHERE f.id = ?;"
-                    my_cur.execute(sql_query, depend["id"])
+                    my_cur.execute(sql_query, (depend["id"],))
                     
                 conn.commit()              
               
@@ -308,7 +308,7 @@ def delete_file():
               
             # delete chunks from file system
             sql_query = "SELECT * FROM chunks WHERE file_id = ?;"
-            my_cur.execute(sql_query, file_id)
+            my_cur.execute(sql_query, (file_id,))
             
         
             for row in dict_rows(my_cur):
@@ -318,19 +318,19 @@ def delete_file():
             
             # delete chunks from datebase
             sql_query = "DELETE FROM chunks WHERE file_id = ?;"
-            my_cur.execute(sql_query, file_id)
+            my_cur.execute(sql_query, (file_id,))
             conn.commit()
             
             # delete files from file system
             sql_query = "SELECT * FROM files WHERE id = ?;"
-            my_cur.execute(sql_query, file_id)
+            my_cur.execute(sql_query, (file_id,))
             for row in dict_rows(my_cur):
                 os.system("rm -f '%s/%s'" %(data_dir, row["filename"]))
             
             
             # delete files from database
             sql_query = "DELETE FROM files WHERE id = ?;"
-            my_cur.execute(sql_query, file_id)
+            my_cur.execute(sql_query, (file_id,))
             conn.commit()
             return 0
               
@@ -355,7 +355,7 @@ def load_dependencies():
         
         
         sql_query = "SELECT c2.file_id, c.filename, count(c2.id) as uploaded, f.chunk_num, f.tissue FROM chunks c LEFT JOIN files f on c.filename = f.filename LEFT JOIN chunks c2 ON f.id = c2.file_id WHERE c.file_id = ? AND c.type='depend' GROUP BY c2.file_id, c.filename, f.chunk_num, f.tissue;"
-        my_cur.execute(sql_query, file_id)
+        my_cur.execute(sql_query, (file_id,))
         data = [{key: row[key] for key in row} for row in dict_rows(my_cur)]
         
         return dumps(data)
@@ -385,7 +385,7 @@ def select_spectra():
             return "#-4"
         
     sql_query = "SELECT id, peptideModSeq, precursorCharge, scoreType FROM RefSpectra ORDER BY id LIMIT ?;"
-    cur.execute(sql_query, limit)
+    cur.execute(sql_query, (limit,))
     return dumps([row for row in cur])
 
 
@@ -415,7 +415,7 @@ def get_spectrum():
     
     db = sqlite3.connect("%s/spectra.blib" % data_dir)
     cur = db.cursor()
-    cur.execute('SELECT * FROM RefSpectra r INNER JOIN RefSpectraPeaks p ON r.id = p.RefSpectraID WHERE r.id = ?;', spectrum_id)
+    cur.execute('SELECT * FROM RefSpectra r INNER JOIN RefSpectraPeaks p ON r.id = p.RefSpectraID WHERE r.id = ?;', (spectrum_id,))
     result = make_dict(cur)
 
     try: result["peakMZ"] = zlib.decompress(result["peakMZ"])

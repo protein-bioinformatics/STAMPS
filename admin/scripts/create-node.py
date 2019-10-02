@@ -80,7 +80,7 @@ elif node_type == "protein":
     
     
     sql_query = "INSERT INTO reactions (node_id, anchor_in, anchor_out) VALUES (?, 'left', 'right');"
-    my_cur.execute(sql_query, (max_node_id))
+    my_cur.execute(sql_query, (max_node_id,))
     
     my_cur.execute("SELECT max(id) mid FROM reactions;")
     reaction_id = dict_row(my_cur)["mid"]

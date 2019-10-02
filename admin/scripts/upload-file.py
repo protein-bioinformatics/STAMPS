@@ -37,14 +37,14 @@ content = content.replace('-', '+').replace('_', '/')
 conn = connect(host = conf["mysql_host"], port = int(conf["mysql_port"]), user = conf["mysql_user"], passwd = conf["mysql_passwd"], db = conf["mysql_db"])
 my_cur = conn.cursor(cursors.DictCursor)
 
-my_cur.execute("SELECT * FROM images WHERE node_id = %s;" % node_id)
+my_cur.execute("SELECT * FROM images WHERE node_id = ?;", (node_id,))
 if my_cur.rowcount > 0:
-    my_cur.execute("UPDATE images SET image = '%s' WHERE node_id = %s;" % (content, node_id))
-    my_cur.execute("UPDATE images SET image_type = '%s' WHERE node_id = %s;" % (extension.lower(), node_id))
-    my_cur.execute("UPDATE images SET factor = 10000 WHERE node_id = %s;" % node_id)
+    my_cur.execute("UPDATE images SET image = ? WHERE node_id = ?;", (content, node_id))
+    my_cur.execute("UPDATE images SET image_type = ? WHERE node_id = ?;", (extension.lower(), node_id))
+    my_cur.execute("UPDATE images SET factor = 10000 WHERE node_id = ?;", (node_id,))
     
 else:
-    my_cur.execute("INSERT INTO images (node_id, image, image_type, factor) VALUES (%s, '%s', '%s', 10000);" % (node_id, content, extension.lower()))
+    my_cur.execute("INSERT INTO images (node_id, image, image_type, factor) VALUES (?, ?, ?, 10000);", (node_id, content, extension.lower()))
 conn.commit()
 
 print(0)
