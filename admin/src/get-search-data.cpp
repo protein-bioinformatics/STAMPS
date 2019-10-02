@@ -147,7 +147,7 @@ main(int argc, char** argv) {
     // if it is a remote request
     if (host.length() > 0 && (host != "localhost" || host != "127.0.0.1")){
         
-        string remote_request = host + "/scripts/get-nodes.bin?";
+        string remote_request = host + "/scripts/get-search-data.bin?";
         string response = web_request(remote_request);
         cout << response << flush;
         return 0;

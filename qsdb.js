@@ -24,83 +24,6 @@ function init(){
     select_field_element = new select_field();
     select_field_element.visible = false;
     
-    var xmlhttp_pw = new XMLHttpRequest();
-    xmlhttp_pw.onreadystatechange = function() {
-        if (xmlhttp_pw.readyState == 4 && xmlhttp_pw.status == 200) {
-            pathways = JSON.parse(xmlhttp_pw.responseText);
-            set_pathway_menu();
-            if ("pathway" in HTTP_GET_VARS) change_pathway(parseInt(HTTP_GET_VARS["pathway"]));
-            else change_pathway();
-            
-            if ("zoom" in HTTP_GET_VARS) {
-                var wait_for_loading_zoom = setInterval(function(){
-                    if (pathway_is_loaded){
-                        pathway_is_loaded = false;
-                        clearInterval(wait_for_loading_zoom);
-                        
-                        var http_zoom = parseInt(HTTP_GET_VARS["zoom"]);
-                        http_zoom = Math.max(min_zoom, http_zoom);
-                        http_zoom = Math.min(max_zoom, http_zoom);
-                        
-                        
-                        
-                        var st_zoom = min_zoom + start_zoom_delta;
-                        if (st_zoom < http_zoom) for (var i = st_zoom; i < http_zoom; ++i) zoom_in_out(0, 0);
-                        else  for (var i = st_zoom; i > http_zoom; --i) zoom_in_out(1, 0);
-                            
-                        if ("position" in HTTP_GET_VARS) {
-                            var position = HTTP_GET_VARS["position"].split(":");
-                            if (position.length == 2){
-                                
-                                var shift_x = parseFloat(position[0]) - null_x;
-                                var shift_y = parseFloat(position[1]) - null_y;
-                                for (var i = 0; i < elements.length; ++i) elements[i].move(shift_x, shift_y);
-                                null_x += shift_x;
-                                null_y += shift_y;
-                                boundaries[0] += shift_x;
-                                boundaries[1] += shift_y;
-                            }
-                        }
-                        
-                        update_browser_link();
-                        draw();
-                        pathway_is_loaded = true;
-                    }
-                }, 20);
-            }
-            
-            else if ("position" in HTTP_GET_VARS) {
-                var position = HTTP_GET_VARS["position"].split(":");
-                if (position.length == 2){
-                    
-                    var shift_x = parseFloat(position[0]) - null_x;
-                    var shift_y = parseFloat(position[1]) - null_y;
-                    
-                    
-                    var wait_for_loading_shift = setInterval(function(){
-                        if (pathway_is_loaded){
-                            pathway_is_loaded = false;
-                            clearInterval(wait_for_loading_shift);
-                    
-                            for (var i = 0; i < elements.length; ++i) elements[i].move(shift_x, shift_y);
-                            null_x += shift_x;
-                            null_y += shift_y;
-                            boundaries[0] += shift_x;
-                            boundaries[1] += shift_y;
-                            update_browser_link();
-                            draw();
-                            pathway_is_loaded = true;
-                        }
-                    }, 20);
-                }
-            }
-            
-            resize_pathway_view();
-        }
-    }
-    xmlhttp_pw.open("GET", file_pathname + "scripts/get-pathways.bin", true);
-    xmlhttp_pw.send();
-    
     
     var xmlhttp_search = new XMLHttpRequest();
     xmlhttp_search.onreadystatechange = function() {
@@ -147,7 +70,7 @@ function init(){
     c.addEventListener('contextmenu', function(event){event.preventDefault(); return false;}, false);
     c.addEventListener("mouseout", mouse_up_listener, false);
     
-    
+    set_frame();
 }
 
 

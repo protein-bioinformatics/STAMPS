@@ -73,7 +73,7 @@ main() {
     // if it is a remote request
     if (host.length() > 0 && (host != "localhost" || host != "127.0.0.1")){
         
-        string remote_request = host + "/scripts/get-nodes.bin?";
+        string remote_request = host + "/scripts/get-pathways.bin?";
         string response = web_request(remote_request);
         cout << response << flush;
         return 0;

@@ -714,7 +714,7 @@ function set_pathway_menu(){
         var sorted_pathways = [];
         for (pathway_id of pathway_groups[pg_id][2]){
             if (pathway_id in pathways && pathways[pathway_id][1] != "1"){
-                var pw_name = replaceAll(replaceAll(pathways[pathway_id][0], "-\n", ""), "\n", " ");
+                var pw_name = replaceAll(replaceAll(pathways[pathway_id][0], "-\\n", ""), "\\n", " ");
                 sorted_pathways.push([pathway_id, pw_name]);
             }
         }
@@ -4733,6 +4733,105 @@ function check_spectra(){
 }
 
 
+
+
+
+
+
+
+function get_pathways(){
+    
+    var xmlhttp_pw = new XMLHttpRequest();
+    xmlhttp_pw.onreadystatechange = function() {
+        if (xmlhttp_pw.readyState == 4 && xmlhttp_pw.status == 200) {
+            pathways = JSON.parse(xmlhttp_pw.responseText);
+            set_pathway_menu();
+            
+        }
+    }
+    xmlhttp_pw.open("GET", file_pathname + "scripts/get-pathways.bin?host=" + encodeURL(current_host), true);
+    xmlhttp_pw.send();
+}
+
+
+
+
+
+
+function set_frame(){
+    if ("pathway" in HTTP_GET_VARS) change_pathway(parseInt(HTTP_GET_VARS["pathway"]));
+    else change_pathway();
+    
+    if ("zoom" in HTTP_GET_VARS) {
+        var wait_for_loading_zoom = setInterval(function(){
+            if (pathway_is_loaded){
+                pathway_is_loaded = false;
+                clearInterval(wait_for_loading_zoom);
+                
+                var http_zoom = parseInt(HTTP_GET_VARS["zoom"]);
+                http_zoom = Math.max(min_zoom, http_zoom);
+                http_zoom = Math.min(max_zoom, http_zoom);
+                
+                
+                
+                var st_zoom = min_zoom + start_zoom_delta;
+                if (st_zoom < http_zoom) for (var i = st_zoom; i < http_zoom; ++i) zoom_in_out(0, 0);
+                else  for (var i = st_zoom; i > http_zoom; --i) zoom_in_out(1, 0);
+                    
+                if ("position" in HTTP_GET_VARS) {
+                    var position = HTTP_GET_VARS["position"].split(":");
+                    if (position.length == 2){
+                        
+                        var shift_x = parseFloat(position[0]) - null_x;
+                        var shift_y = parseFloat(position[1]) - null_y;
+                        for (var i = 0; i < elements.length; ++i) elements[i].move(shift_x, shift_y);
+                        null_x += shift_x;
+                        null_y += shift_y;
+                        boundaries[0] += shift_x;
+                        boundaries[1] += shift_y;
+                    }
+                }
+                
+                update_browser_link();
+                draw();
+                pathway_is_loaded = true;
+            }
+        }, 20);
+    }
+    
+    else if ("position" in HTTP_GET_VARS) {
+        var position = HTTP_GET_VARS["position"].split(":");
+        if (position.length == 2){
+            
+            var shift_x = parseFloat(position[0]) - null_x;
+            var shift_y = parseFloat(position[1]) - null_y;
+            
+            
+            var wait_for_loading_shift = setInterval(function(){
+                if (pathway_is_loaded){
+                    pathway_is_loaded = false;
+                    clearInterval(wait_for_loading_shift);
+            
+                    for (var i = 0; i < elements.length; ++i) elements[i].move(shift_x, shift_y);
+                    null_x += shift_x;
+                    null_y += shift_y;
+                    boundaries[0] += shift_x;
+                    boundaries[1] += shift_y;
+                    update_browser_link();
+                    draw();
+                    pathway_is_loaded = true;
+                }
+            }, 20);
+        }
+    }
+    
+    resize_pathway_view();
+}
+
+
+
+
+
 function get_pathway_groups(){
     // get pathway groups
     var xmlhttp_pg = new XMLHttpRequest();
@@ -4740,7 +4839,7 @@ function get_pathway_groups(){
         if (xmlhttp_pg.readyState == 4 && xmlhttp_pg.status == 200) {
             pathway_groups = JSON.parse(xmlhttp_pg.responseText);
             for (pg_id in pathway_groups) pathway_groups[pg_id][2] = new Set(pathway_groups[pg_id][2].split(","));
-            set_pathway_menu();
+            get_pathways();
         }
     }
     xmlhttp_pg.open("GET", file_pathname + "scripts/get-pathway-groups.py?host=" + encodeURL(current_host), false);
@@ -5374,12 +5473,12 @@ function load_data(reload){
         if (confirm("Warning: you are changing the host, all selected proteins will be discarded. Do you want to continue?")){
             current_host = new_host;
             basket = {};
-            set_pathway_menu();
+            get_pathway_groups();
             load_tissues();
+            change_pathway();
         }
-        else {
-            return;
-        }
+        document.getElementById("menu_background").style.display = "none";
+        return;
     }
     pathway_is_loaded = false;
     

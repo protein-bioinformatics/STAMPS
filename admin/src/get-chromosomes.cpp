@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
                 get_vars += get_entries.at(i);
             }
         }
-        string remote_request = host + "/scripts/get-edges.bin?" + get_vars;
+        string remote_request = host + "/scripts/get-chromosomes.bin?" + get_vars;
         string response = web_request(remote_request);
         cout << response << flush;
         return 0;
