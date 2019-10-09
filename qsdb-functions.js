@@ -17,6 +17,7 @@ current_species = "";
 current_host = "";
 new_host = "";
 new_species = "";
+initial_load = true;
 top_n_fragments = [3, 6, 1000];
 ion_types = ["y", "b", "b|y"];
 filter_parameters["min_peptide_length"] = 8;
@@ -5485,10 +5486,11 @@ function set_selected_species(species_td){
 
 
 function load_data(reload){
-    
+    console.log(new_host + " / " + current_host);
     if (new_host != current_host){
-        if (current_host == "" || confirm("Warning: you are changing the host, all selected proteins will be discarded. Do you want to continue?")){
+        if (initial_load || confirm("Warning: you are changing the host, all selected proteins will be discarded. Do you want to continue?")){
             pathway_is_loaded = false;
+            initial_load = false;
             current_host = new_host;
             current_species = new_species;
             basket = {};
