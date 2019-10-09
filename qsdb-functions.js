@@ -5503,6 +5503,7 @@ function load_data(reload){
         return;
     }
     else {
+        initial_load = false;
         current_species = new_species;
         set_selected_species(selected_menu_dict[current_host + "|" + current_species]);
     }
