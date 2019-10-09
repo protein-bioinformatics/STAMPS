@@ -661,7 +661,7 @@ function set_species_menu(reload, request_all){
                 else {
                     if (species_counter == 0) {
                         current_species = ncbi[1];
-                        current_host = host;
+                        new_host = host;
                         dom_species_td.setAttribute("class", "selected_menu_cell");
                     }
                 }
@@ -4081,7 +4081,6 @@ function change_pathway(p){
     close_navigation();
     if (expand_collapse_obj != 0) expand_collapse_obj.collapse();
     reset_view();
-    pathway_is_loaded = false;
     
     if (p in pathways){
         current_pathway = p;
@@ -5468,9 +5467,10 @@ function prepare_infobox(prot){
 
 
 function load_data(reload){
-    
-    if (new_host != "" && new_host != current_host){
-        if (confirm("Warning: you are changing the host, all selected proteins will be discarded. Do you want to continue?")){
+    if (new_host != current_host){
+        if (current_host == "" || confirm("Warning: you are changing the host, all selected proteins will be discarded. Do you want to continue?")){
+            
+            pathway_is_loaded = false;
             current_host = new_host;
             basket = {};
             get_pathway_groups();
