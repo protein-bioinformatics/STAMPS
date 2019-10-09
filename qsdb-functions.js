@@ -16,6 +16,7 @@ supported_species = {};
 current_species = "";
 current_host = "";
 new_host = "";
+new_species = "";
 top_n_fragments = [3, 6, 1000];
 ion_types = ["y", "b", "b|y"];
 filter_parameters["min_peptide_length"] = 8;
@@ -65,6 +66,7 @@ num_validation = [0, 0, 0, 0, 0, 0, 0, 0];
 search_data = [];
 read_cookie_information = false;
 analytics_active = false;
+selected_menu_dict = {};
 
 windowWidth = 0;
 windowHeight = 0;
@@ -629,6 +631,9 @@ function set_species_menu(reload, request_all){
             sorted_species.sort(function(a, b){
                 return a[0] > b[0];
             });
+
+            selected_menu_dict = {};
+            
             
             for (var ncbi of sorted_species){
                 var dom_species_tr = document.createElement("tr");
@@ -640,19 +645,23 @@ function set_species_menu(reload, request_all){
                 var toks = ncbi[1].split("|");
                 var host = toks.length > 1 ? toks[0] : "";
                 var species_id = toks.length > 1 ? toks[1] : toks[0];
-                
+                selected_menu_dict[host + "|" + species_id] = dom_species_td;
+                /*
                 dom_species_td.setAttribute("onclick", "var species_menu = document.getElementById('select_species_table'); \
                     for (var child of species_menu.children){ \
                         child.children[0].className = 'select_menu_cell'; \
                     } \
                     this.className = 'selected_menu_cell'; \
-                    last_opened_menu = ''; document.getElementById('select_species').style.display = 'none'; new_host = '" + host + "'; current_species = '" + species_id + "'; load_data();");   
+                    last_opened_menu = ''; document.getElementById('select_species').style.display = 'none'; new_host = '" + host + "'; new_species = '" + species_id + "'; load_data();");   
+                */
+                dom_species_td.setAttribute("onclick", "last_opened_menu = ''; document.getElementById('select_species').style.display = 'none'; new_host = '" + host + "'; new_species = '" + species_id + "'; load_data();");
                 dom_species_td.innerHTML = ncbi[0];
                 dom_species_td.setAttribute("type", "radio");
                 dom_species_td.setAttribute("value", ncbi[1]);
                 dom_species_td.setAttribute("name", "species");
                 dom_species_td.setAttribute("id", "species_" + ncbi[1]);
                 dom_species_td.setAttribute("class", "select_menu_cell");
+                
                 if (reload){
                     if (current_species == ncbi[1]){
                         dom_species_td.setAttribute("class", "selected_menu_cell");
@@ -660,7 +669,7 @@ function set_species_menu(reload, request_all){
                 }
                 else {
                     if (species_counter == 0) {
-                        current_species = ncbi[1];
+                        new_species = ncbi[1];
                         new_host = host;
                         dom_species_td.setAttribute("class", "selected_menu_cell");
                     }
@@ -5464,24 +5473,38 @@ function prepare_infobox(prot){
 
 
 
+function set_selected_species(species_td){
+    if (typeof(species_td) === "undefined") return;
+    
+    var species_menu = document.getElementById('select_species_table');
+    for (var child of species_menu.children){
+        child.children[0].className = 'select_menu_cell';
+    }
+    species_td.className = 'selected_menu_cell';
+}
 
 
 function load_data(reload){
+    
     if (new_host != current_host){
         if (current_host == "" || confirm("Warning: you are changing the host, all selected proteins will be discarded. Do you want to continue?")){
-            
             pathway_is_loaded = false;
             current_host = new_host;
+            current_species = new_species;
             basket = {};
             get_pathway_groups();
             load_tissues();
             change_pathway();
+            set_selected_species(selected_menu_dict[current_host + "|" + current_species]);
         }
         document.getElementById("menu_background").style.display = "none";
         return;
     }
+    else {
+        current_species = new_species;
+        set_selected_species(selected_menu_dict[current_host + "|" + current_species]);
+    }
     pathway_is_loaded = false;
-    
     
     
     
