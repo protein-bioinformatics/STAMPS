@@ -71,6 +71,12 @@ function init(){
     c.addEventListener("mouseout", mouse_up_listener, false);
     
     set_frame();
+    
+    
+    // thread to check if current (foreign) host is still alive and switch host if necessary
+    var check_hosts = setInterval(function(){
+        
+    }, 1000);
 }
 
 
