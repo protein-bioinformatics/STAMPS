@@ -74,8 +74,30 @@ function init(){
     
     
     // thread to check if current (foreign) host is still alive and switch host if necessary
+    var xmlhttp_ping = new XMLHttpRequest();
+    xmlhttp_ping.active = false;
     var check_hosts = setInterval(function(){
-        
+        if (current_host != "" && !xmlhttp_ping.active){
+            xmlhttp_ping.active = true;
+            xmlhttp_ping.onreadystatechange = function() {
+                if (xmlhttp_ping.readyState == 4 && xmlhttp_ping.status == 200) {
+                    if (xmlhttp_ping.responseText != 1){
+                        alert("An error occurred when connecting to remote host. Host will be reset.");
+                        pathway_is_loaded = false;
+                        initial_load = false;
+                        current_host = "";
+                        basket = {};
+                        set_species_menu();
+                        get_pathway_groups();
+                        load_tissues();
+                        change_pathway();
+                    }
+                    xmlhttp_ping.active = false;
+                }
+            }
+            xmlhttp_ping.open("GET", file_pathname + "scripts/ping.py?host=" + encodeURL(current_host), true);
+            xmlhttp_ping.send();
+        }
     }, 1000);
 }
 

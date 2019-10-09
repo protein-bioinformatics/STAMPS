@@ -1564,7 +1564,7 @@ function load_statistics(){
         }
     }
     
-    xmlhttp.open("GET", file_pathname + "scripts/get-proteins.bin?statistics&species=" + current_species, true);
+    xmlhttp.open("GET", file_pathname + "scripts/get-proteins.bin?statistics&species=" + current_species + "&host=" + encodeURL(current_host), true);
     xmlhttp.send();
     
     
@@ -1611,7 +1611,7 @@ function load_statistics(){
             update_correlation_tissues_pathway();
         }
     }
-    xmlhttp_search.open("GET", file_pathname + "scripts/get-proteins.bin?statistics_pathways", true);
+    xmlhttp_search.open("GET", file_pathname + "scripts/get-proteins.bin?statistics_pathways" + "?host=" + encodeURL(current_host), true);
     xmlhttp_search.send();
 }
 
@@ -2830,7 +2830,7 @@ function load_all_data(){
             activateTree(document.getElementById("LinkedList1"));
         }
     }
-    xmlhttpfunctions.open("GET", file_pathname + "scripts/get-functions.py?species=" + current_species, true);
+    xmlhttpfunctions.open("GET", file_pathname + "scripts/get-functions.py?species=" + current_species + "&host=" + encodeURL(current_host), true);
     xmlhttpfunctions.send();
     
     
@@ -2849,7 +2849,7 @@ function load_all_data(){
             }
         }
     }
-    xmlhttploci.open("GET", file_pathname + "scripts/get-loci.py?species=" + current_species, true);
+    xmlhttploci.open("GET", file_pathname + "scripts/get-loci.py?species=" + current_species + "&host=" + encodeURL(current_host), true);
     xmlhttploci.send();
     
     
@@ -2860,7 +2860,7 @@ function load_all_data(){
             ideom_data = JSON.parse(xmlhttp_chr.responseText);
         }
     }
-    xmlhttp_chr.open("GET", file_pathname + "scripts/get-chromosomes.bin?species=" + current_species, true);
+    xmlhttp_chr.open("GET", file_pathname + "scripts/get-chromosomes.bin?species=" + current_species + "&host=" + encodeURL(current_host), true);
     xmlhttp_chr.send();
     
     // load tissue images
@@ -2964,7 +2964,7 @@ function draw_chromosome_ideograms(){
                 chromosomes[this.chromosome_key].draw();
             }
         }
-        chromosome_requests[key].open("GET", file_pathname + "scripts/get-chromosome-data.py?chromosome=" + key + "&species=" + current_species, true);
+        chromosome_requests[key].open("GET", file_pathname + "scripts/get-chromosome-data.py?chromosome=" + key + "&species=" + current_species + "&host=" + encodeURL(current_host), true);
         chromosome_requests[key].send();
     }
 }
@@ -3131,7 +3131,17 @@ function change_species(select){
     loaded_chromosomes = 0;
     chromosome_data = {};
     chromosome_data_dict = {};
-    current_species = select[select.selectedIndex].id;
+    
+    sh_id = select[select.selectedIndex].id;
+    if (sh_id.includes("|")){
+        sh_id = sh_id.split("|");
+        current_host = sh_id[0];
+        current_species = sh_id[1];
+    }
+    else {
+        current_host = "";
+        current_species = sh_id;
+    }
     
     load_all_data();
     

@@ -5486,7 +5486,6 @@ function set_selected_species(species_td){
 
 
 function load_data(reload){
-    console.log(new_host + " / " + current_host);
     if (new_host != current_host){
         if (initial_load || confirm("Warning: you are changing the host, all selected proteins will be discarded. Do you want to continue?")){
             pathway_is_loaded = false;
