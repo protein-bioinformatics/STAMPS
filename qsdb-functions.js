@@ -5469,6 +5469,7 @@ function prepare_infobox(prot){
 
 function load_data(reload){
     
+    console.log(new_host + " " + current_host);
     if (new_host != "" && new_host != current_host){
         if (confirm("Warning: you are changing the host, all selected proteins will be discarded. Do you want to continue?")){
             current_host = new_host;
