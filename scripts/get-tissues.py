@@ -26,7 +26,7 @@ if hostname != "":
         print(urlopen("%s/scripts/get-tissues.py" % hostname, timeout = 2).read().decode("utf8"))
         
     except Exception as e:
-        print(-1)
+        print("[]")
     exit()
     
     

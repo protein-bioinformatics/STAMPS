@@ -4069,6 +4069,7 @@ function change_pathway(p){
         }
         
         var sorted_pathways = [];
+        if (highest_group == -1) return;
         for (pathway_id of pathway_groups[highest_group][2]){
             if (pathway_id in pathways) sorted_pathways.push([pathway_id, pathways[pathway_id][0]]);
         }
