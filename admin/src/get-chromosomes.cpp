@@ -145,7 +145,8 @@ int main(int argc, char** argv) {
         }
         string remote_request = host + "/scripts/get-chromosomes.bin?" + get_vars;
         string response = web_request(remote_request);
-        cout << response << flush;
+        if (response.length() == 0) response = "{}";
+        print_out(response, compress);
         return 0;
     }
     
@@ -186,24 +187,6 @@ int main(int argc, char** argv) {
         print_out("[]", compress);
         exit(-4);
     }
-    
-    /*
-    while (res->next()) {
-        string chromosome = res->getString("chromosome");
-        if (chromosomes.find(chromosome) == chromosomes.end()) chromosomes.insert(pair< string, vector<chromosome_band*>* >(chromosome, new vector<chromosome_band*>()));
-        
-        chromosome_band* cb = new chromosome_band();
-        cb->chromosome;
-        cb->arm = res->getString("arm");
-        cb->name = res->getString("name");
-        cb->start = res->getString("start");
-        cb->end = res->getString("end");
-        cb->positive = res->getString("positive");
-        cb->color = res->getString("color");
-        cb->species = res->getString("species");
-        chromosomes[chromosome]->push_back(cb);
-    }
-    */
     
     
     

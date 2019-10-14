@@ -2830,8 +2830,10 @@ function load_all_data(){
             activateTree(document.getElementById("LinkedList1"));
         }
     }
-    xmlhttpfunctions.open("GET", file_pathname + "scripts/get-functions.py?species=" + current_species + "&host=" + encodeURL(current_host), true);
+    xmlhttpfunctions.open("GET", file_pathname + "scripts/get-functions.py?species=" + current_species + "&host=" + encodeURL(current_host), false);
     xmlhttpfunctions.send();
+    
+    
     
     
     // get loci
@@ -2849,10 +2851,10 @@ function load_all_data(){
             }
         }
     }
-    xmlhttploci.open("GET", file_pathname + "scripts/get-loci.py?species=" + current_species + "&host=" + encodeURL(current_host), true);
+    xmlhttploci.open("GET", file_pathname + "scripts/get-loci.py?species=" + current_species + "&host=" + encodeURL(current_host), false);
     xmlhttploci.send();
-    
-    
+  
+  
     // get chromosome bands
     var xmlhttp_chr = new XMLHttpRequest();
     xmlhttp_chr.onreadystatechange = function() {
@@ -2860,17 +2862,20 @@ function load_all_data(){
             ideom_data = JSON.parse(xmlhttp_chr.responseText);
         }
     }
-    xmlhttp_chr.open("GET", file_pathname + "scripts/get-chromosomes.bin?species=" + current_species + "&host=" + encodeURL(current_host), true);
+    xmlhttp_chr.open("GET", file_pathname + "scripts/get-chromosomes.bin?species=" + current_species + "&host=" + encodeURL(current_host), false);
     xmlhttp_chr.send();
+    
     
     // load tissue images
     for (var key in tissues){
         tissue = tissues[key];
         tissue[2] = new Image();
-        tissue[2].src = tissue[0];
+        tissue[2].src = "data:image/png;base64," + tissue[0];
     }
     
     
+    
+
 }
 
 
@@ -2879,6 +2884,8 @@ function load_all_data(){
 
 
 function draw_chromosome_ideograms(){
+
+
     var max_bases = 0;
     chromosome_keys = Object.keys(ideom_data);
     var max_len = 0;

@@ -253,9 +253,15 @@ string web_request(string address){
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); 
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 1L);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, s);
         
         res = curl_easy_perform(curl);
+        /*
+        if (res != CURLE_OK) {
+            s = "-1";
+        }
+        */
         curl_easy_cleanup(curl);
     }
     curl_global_cleanup();

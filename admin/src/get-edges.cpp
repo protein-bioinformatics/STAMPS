@@ -230,7 +230,8 @@ main() {
         }
         string remote_request = host + "/scripts/get-edges.bin?" + get_vars;
         string response = web_request(remote_request);
-        cout << response << flush;
+        if (response.length() == 0) response = "{}";
+        print_out(response, compress);
         return 0;
     }
     
