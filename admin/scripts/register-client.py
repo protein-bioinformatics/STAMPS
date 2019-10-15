@@ -29,8 +29,7 @@ try:
     request += "&action=%ssubscribe" % ("" if public else "un")
     request = stamps_server + "/client-registration.py?" + request
     
-    print(request)
-    #print(urlopen(request, timeout = 2).read().decode("utf8"))
+    print(urlopen(request, timeout = 2).read().decode("utf8"))
     
 except Exception as e:
     print("-1")
