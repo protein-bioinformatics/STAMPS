@@ -73,7 +73,6 @@ function init(){
     set_frame();
     
     
-            console.log(current_host);
     // thread to check if current (foreign) host is still alive and switch host if necessary
     var xmlhttp_ping = new XMLHttpRequest();
     xmlhttp_ping.active = false;

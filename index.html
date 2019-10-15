@@ -3214,6 +3214,20 @@ function mobile_check() {
 
 
 
+function set_species_select(dom_name){
+    var select = document.getElementById(dom_name);
+    select.innerHTML = "";
+    for (var c_species in supported_species){
+        var opt = document.createElement("option");
+        opt.id = c_species;
+        opt.innerHTML = supported_species[c_species];
+        select.add(opt);
+    }
+}
+
+
+
+
 function append_tissues(){
     // create checkboxes for nsaf statistics
     
@@ -3322,6 +3336,10 @@ load_tissues();
 load_species_data();
 append_tissues();
 
+for (var dom_name of ["chromosome_browser_species_select", "accession_browser_species_select", "function_browser_species_select", "locus_browser_species_select"]){
+    set_species_select(dom_name);
+}
+/*
 var select = document.getElementById("chromosome_browser_species_select");
 for (var c_species in supported_species){
     var opt = document.createElement("option");
@@ -3361,9 +3379,19 @@ for (var c_species in supported_species){
     opt.innerHTML = supported_species[c_species];
     select.add(opt);
 }
-
+*/
+console.log(supported_species);
 for (var species_key in supported_species){
-    current_species = species_key;
+    if (species_key.includes("|")){
+        var sh_id = species_key.split("|");
+        current_host = sh_id[0];
+        current_species = sh_id[1];
+    }
+    else {
+        current_host = "";
+        current_species = species_key;
+    }
+    
     break;
 }
 var kr_keys = [];
@@ -3386,6 +3414,52 @@ load_all_data();
 if (mobile_check()){
     alert("We recognized, that you are browsing with a mobile device. We strongly recommend to browse STAMPS from a desktop computer or laptop. Some functionality may not work. Due to high data traffic, some information provision is turned off. We apologize for the inconvenience.");
 }
+
+
+
+// thread to check if current (foreign) host is still alive and switch host if necessary
+var xmlhttp_ping = new XMLHttpRequest();
+xmlhttp_ping.active = false;
+var check_hosts = setInterval(function(){
+    if (current_host != "" && !xmlhttp_ping.active){
+        xmlhttp_ping.active = true;
+        xmlhttp_ping.onreadystatechange = function() {
+            if (xmlhttp_ping.readyState == 4 && xmlhttp_ping.status == 200) {
+                if (xmlhttp_ping.responseText != 1){
+                    alert("An error occurred when connecting to remote host. Host will be reset.");
+                    
+                    pathway_is_loaded = false;
+                    initial_load = false;
+                    current_host = "";
+                    basket = {};
+                    set_species_menu();
+                    get_pathway_groups();
+                    load_tissues();
+                    change_pathway();
+                    
+                    load_species_data();
+                    load_tissues();
+                    append_tissues();
+                    for (var species_key in supported_species){
+                        if (species_key.includes("|")){
+                            var sh_id = species_key.split("|");
+                            current_host = sh_id[0];
+                            current_species = sh_id[1];
+                        }
+                        else {
+                            current_host = "";
+                            current_species = species_key;
+                        }
+                        break;
+                    }
+                }
+                xmlhttp_ping.active = false;
+            }
+        }
+        xmlhttp_ping.open("GET", file_pathname + "scripts/ping.py?host=" + encodeURL(current_host), true);
+        xmlhttp_ping.send();
+    }
+}, 1000);
 
 
 analytics("stamps-request");
