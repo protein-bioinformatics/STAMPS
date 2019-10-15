@@ -76,7 +76,7 @@ main() {
         string remote_request = host + "/scripts/get-pathways.bin?";
         string response = web_request(remote_request);
         if (response.length() == 0) response = "{}";
-        cout << response << endl;
+        cout << response << flush;
         return 0;
     }
     

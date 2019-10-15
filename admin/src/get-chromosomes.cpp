@@ -145,7 +145,9 @@ int main(int argc, char** argv) {
         }
         string remote_request = host + "/scripts/get-chromosomes.bin?" + get_vars;
         string response = web_request(remote_request);
-        if (response.length() == 0) response = "{}";
+        if (response.length() == 0){
+            response = compress ? compress_string("{}") : "{}";
+        }
         print_out(response, compress);
         return 0;
     }

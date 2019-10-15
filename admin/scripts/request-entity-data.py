@@ -3,7 +3,6 @@
 
 from cgi import FieldStorage
 import json
-from urllib.parse import urlencode
 from urllib.request import urlopen
 import xml.etree.ElementTree as ET
 import re # regular expression module

@@ -2844,10 +2844,10 @@ function load_all_data(){
             var locus_data = JSON.parse(xmlhttploci.responseText);
             var locus_select = document.getElementById("loci");
             locus_select.innerHTML = "";
-            for (var i = 0; i < locus_data.length; ++i){
+            for (var row of locus_data){
                 var option = document.createElement("option");
-                option.text = locus_data[i][1];
-                option.id = locus_data[i][0];
+                option.id = row[0];
+                option.text = row[1];
                 locus_select.add(option);
             }
         }
@@ -2862,10 +2862,12 @@ function load_all_data(){
         if (xmlhttp_chr.readyState == 4 && xmlhttp_chr.status == 200) {
             document.getElementById("chromosome_information_table").innerHTML = "";
             chromosome_selected = -1;
+            console.log(xmlhttp_chr.responseText);
             ideom_data = JSON.parse(xmlhttp_chr.responseText);
             draw_chromosome_ideograms();
         }
     }
+    //console.log(file_pathname + "scripts/get-chromosomes.bin?species=" + current_species + "&host=" + encodeURL(current_host));
     xmlhttp_chr.open("GET", file_pathname + "scripts/get-chromosomes.bin?species=" + current_species + "&host=" + encodeURL(current_host), true);
     xmlhttp_chr.send();
     
@@ -3339,48 +3341,8 @@ append_tissues();
 for (var dom_name of ["chromosome_browser_species_select", "accession_browser_species_select", "function_browser_species_select", "locus_browser_species_select"]){
     set_species_select(dom_name);
 }
-/*
-var select = document.getElementById("chromosome_browser_species_select");
-for (var c_species in supported_species){
-    var opt = document.createElement("option");
-    opt.id = c_species;
-    opt.innerHTML = supported_species[c_species];
-    select.add(opt);
-}
 
-select = document.getElementById("accession_browser_species_select");
-for (var c_species in supported_species){
-    var opt = document.createElement("option");
-    opt.id = c_species;
-    opt.innerHTML = supported_species[c_species];
-    select.add(opt);
-}
-
-select = document.getElementById("function_browser_species_select");
-for (var c_species in supported_species){
-    var opt = document.createElement("option");
-    opt.id = c_species;
-    opt.innerHTML = supported_species[c_species];
-    select.add(opt);
-}
-
-select = document.getElementById("locus_browser_species_select");
-for (var c_species in supported_species){
-    var opt = document.createElement("option");
-    opt.id = c_species;
-    opt.innerHTML = supported_species[c_species];
-    select.add(opt);
-}
-
-select = document.getElementById("statistics_species_select");
-for (var c_species in supported_species){
-    var opt = document.createElement("option");
-    opt.id = c_species;
-    opt.innerHTML = supported_species[c_species];
-    select.add(opt);
-}
-*/
-console.log(supported_species);
+// select first host and species
 for (var species_key in supported_species){
     if (species_key.includes("|")){
         var sh_id = species_key.split("|");
@@ -3394,6 +3356,7 @@ for (var species_key in supported_species){
     
     break;
 }
+
 var kr_keys = [];
 var scanner_data = [1, 0, 0]; // scanner_up, scanner_index, scanner_count
 var nav_ids = ["how_to_nav", "pathway_browser_nav", "subcellular_search_nav", "functional_search_nav", "accession_search_nav", "chromosome_search_nav", "statistics_nav", "about_nav"];
@@ -3428,14 +3391,6 @@ var check_hosts = setInterval(function(){
                 if (xmlhttp_ping.responseText != 1){
                     alert("An error occurred when connecting to remote host. Host will be reset.");
                     
-                    pathway_is_loaded = false;
-                    initial_load = false;
-                    current_host = "";
-                    basket = {};
-                    set_species_menu();
-                    get_pathway_groups();
-                    load_tissues();
-                    change_pathway();
                     
                     load_species_data();
                     load_tissues();

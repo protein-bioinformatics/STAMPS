@@ -116,6 +116,21 @@ function init(){
     set_species_menu(false, false);
     add_species_events();
     
+    
+    // register client
+    var xmlhttp_reg_client = new XMLHttpRequest();
+    xmlhttp_reg_client.onreadystatechange = function() {
+        if (xmlhttp_reg_client.readyState == 4 && xmlhttp_reg_client.status == 200) {
+            reg_client = xmlhttp_reg_client.responseText;
+        }
+    }
+    xmlhttp_reg_client.open("GET", file_pathname + "admin/scripts/register-client.py", true);
+    xmlhttp_reg_client.send();
+    
+    
+    
+    
+    
     infobox = new Infobox();
     zoom_sign_in = new zoom_sign(1);
     zoom_sign_out = new zoom_sign(0);

@@ -43,7 +43,7 @@ if hostname != "":
         print(urlopen("%s/scripts/get-loci.py?%s" % (hostname, request), timeout = 2).read().decode("utf8"))
         
     except Exception as e:
-        print(-1)
+        print("[]")
     
     exit()
     
