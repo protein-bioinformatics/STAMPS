@@ -285,7 +285,7 @@ int main(int argc, char** argv) {
             }
         }
         string remote_request = host + "/scripts/get-nodes.bin?" + get_vars;
-        string response = web_request(remote_requst);
+        string response = web_request(remote_request);
         if (response.length() == 0) response = "[]";
         print_out(response, compress);
         return 0;
