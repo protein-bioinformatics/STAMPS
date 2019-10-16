@@ -11,6 +11,16 @@ print()
 form = FieldStorage()
 hostname = form.getvalue('host') if "host" in form else ""
 
+conf = {}
+with open("../admin/qsdb.conf", mode="rt") as fl:
+    for line in fl:
+        line = line.strip().strip(" ")
+        if len(line) < 1 or line[0] == "#": continue
+        token = line.split("=")
+        if len(token) < 2: continue
+        conf[token[0].strip(" ")] = token[1].strip(" ")
+
+
 
 if hostname != "":
     try:
@@ -19,8 +29,8 @@ if hostname != "":
     except Exception as e:
         print(e)
     
-    exit(0)
+    exit()
 
 
-print(1)
+print(1 if conf["public"] == "1" else 0)
 

@@ -122,6 +122,7 @@ function init(){
     xmlhttp_reg_client.onreadystatechange = function() {
         if (xmlhttp_reg_client.readyState == 4 && xmlhttp_reg_client.status == 200) {
             reg_client = xmlhttp_reg_client.responseText;
+            console.log(reg_client);
         }
     }
     xmlhttp_reg_client.open("GET", file_pathname + "admin/scripts/register-client.py", true);
