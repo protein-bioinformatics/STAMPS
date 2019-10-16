@@ -2802,27 +2802,7 @@ function load_all_data(){
     xmlhttpfunctions.onreadystatechange = function() {
         if (xmlhttpfunctions.readyState == 4 && xmlhttpfunctions.status == 200) {
             var function_data = JSON.parse(xmlhttpfunctions.responseText);
-            /*
-            var id_dict = {};
-            var function_tree = [];
             
-            for (var i = 0; i < function_data.length; ++i){
-                var function_row = function_data[i];
-                if (function_row[2] == 0){
-                    function_tree = [function_row[0], function_row[1], function_row[3], []];
-                    id_dict[function_row[0]] = function_tree;
-                    continue;
-                }
-                if (function_row[2] in id_dict){
-                    var node = [function_row[0], function_row[1], function_row[3], []];
-                    id_dict[function_row[2]][3].push(node);
-                    id_dict[function_row[0]] = node;
-                }
-                else {
-                    console.log("Error while loading functions, index " + function_row[2] + " is missing!");
-                    return;
-                }
-            }*/
             
             var functions_tree_content = "<ul id=\"LinkedList1\" class=\"LinkedList\" style=\"padding-left:0;\">";
             if (function_data.length > 0) functions_tree_content += recursive_list_adding(function_data);
@@ -2862,12 +2842,10 @@ function load_all_data(){
         if (xmlhttp_chr.readyState == 4 && xmlhttp_chr.status == 200) {
             document.getElementById("chromosome_information_table").innerHTML = "";
             chromosome_selected = -1;
-            console.log(xmlhttp_chr.responseText);
             ideom_data = JSON.parse(xmlhttp_chr.responseText);
             draw_chromosome_ideograms();
         }
     }
-    //console.log(file_pathname + "scripts/get-chromosomes.bin?species=" + current_species + "&host=" + encodeURL(current_host));
     xmlhttp_chr.open("GET", file_pathname + "scripts/get-chromosomes.bin?species=" + current_species + "&host=" + encodeURL(current_host), true);
     xmlhttp_chr.send();
     
@@ -3389,24 +3367,48 @@ var check_hosts = setInterval(function(){
         xmlhttp_ping.onreadystatechange = function() {
             if (xmlhttp_ping.readyState == 4 && xmlhttp_ping.status == 200) {
                 if (xmlhttp_ping.responseText != 1){
-                    alert("An error occurred when connecting to remote host. Host will be reset.");
-                    
-                    
-                    load_species_data();
-                    load_tissues();
-                    append_tissues();
-                    for (var species_key in supported_species){
-                        if (species_key.includes("|")){
-                            var sh_id = species_key.split("|");
-                            current_host = sh_id[0];
-                            current_species = sh_id[1];
+                
+                
+                
+                
+                    if (document.getElementById("locus_search").style.display == "inline" ||
+                        document.getElementById("accession_search").style.display == "inline" ||
+                        document.getElementById("chromosome_search").style.display == "inline" ||
+                        document.getElementById("function_search").style.display == "inline" ||
+                        document.getElementById("statistics").style.display == "inline"){
+                
+                        alert("An error occurred when connecting to remote host. Host will be reset.");
+                        
+                        
+                        load_species_data();
+                        load_tissues();
+                        append_tissues();
+                        
+                        for (var dom_name of ["chromosome_browser_species_select", "accession_browser_species_select", "function_browser_species_select", "locus_browser_species_select"]){
+                            set_species_select(dom_name);
                         }
-                        else {
-                            current_host = "";
-                            current_species = species_key;
+                        
+                        for (var species_key in supported_species){
+                            if (species_key.includes("|")){
+                                var sh_id = species_key.split("|");
+                                current_host = sh_id[0];
+                                current_species = sh_id[1];
+                            }
+                            else {
+                                current_host = "";
+                                current_species = species_key;
+                            }
+                            break;
                         }
-                        break;
+                        load_all_data();
+                        
+                        if (document.getElementById("locus_search").style.display == "inline") open_locus_search();
+                        if (document.getElementById("accession_search").style.display == "inline") open_accession_search();
+                        if (document.getElementById("chromosome_search").style.display == "inline") open_chromosome_search();
+                        if (document.getElementById("function_search").style.display == "inline") open_function_search();
+                        if (document.getElementById("statistics").style.display == "inline") open_statistics();
                     }
+                    
                 }
                 xmlhttp_ping.active = false;
             }

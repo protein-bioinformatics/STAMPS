@@ -4,6 +4,7 @@ import json
 import sqlite3
 import cgi, cgitb
 from urllib.request import urlopen
+import os
 
 print("Content-Type: text/html")
 print()
@@ -19,6 +20,10 @@ with open("../admin/qsdb.conf", mode="rt") as fl:
         conf[token[0].strip(" ")] = token[1].strip(" ")
 
 
+remote = os.environ["REMOTE_ADDR"] if "REMOTE_ADDR" in os.environ else ""
+if len(remote) == 0 or (remote != "localhost" and remote != "127.0.0.1" and conf["public"] != "1"):
+    print("[]")
+    exit()
 
 
 database = "%s/data/database.sqlite" % conf["root_path"]
@@ -48,7 +53,7 @@ if hostname != "":
         print(urlopen("%s/scripts/get-chromosome-data.py?%s" % (hostname, request), timeout = 2).read().decode("utf8"))
         
     except Exception as e:
-        print(-1)
+        print("[]")
     
     exit()
 
