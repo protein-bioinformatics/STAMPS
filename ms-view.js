@@ -208,6 +208,8 @@ function annotation(ions, ms_panel){
 function resize_ms_view(ms_panel){
     var t_top = 0.02;
     
+    if (document.getElementById(ms_panel) === null) return;
+    
     var filter_height = filter_parameters["filter_panel_visible"] ? 0.3 : 0;
     
     document.getElementById(ms_panel + "_msarea").width = document.getElementById(ms_panel).offsetWidth * 0.695;

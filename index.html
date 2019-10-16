@@ -382,7 +382,7 @@ div<div id="locus_search" class="global_search">
             <tr>
                 <td height="10%" id="chromosome_information" colspan="2" style="border-bottom: 1px solid #000;"><select id="chromosome_browser_species_select" onchange="change_species(this);"></select>, chromosome  <select onchange="change_chromosome_view_combo();" id="chromosome_selection_combo"></select>, bp: <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_start" value="0"></input> - <input type="text" size="7" onkeydown="change_chromosome_view_keydown(event);" onblur="change_chromosome_view();" id="chromosome_selection_end" value="0"></input></td>
             </tr><tr>
-                <td id="function_chromosome_field" style="position: relative; display: block-cell; overflow: hidden;"></td>
+                <td id="function_chromosome_field" style="position: relative; display: table-cell; overflow: hidden;"></td>
                 <td>
                     <table id="chromosome_information_table_headers" width="100%" cellpadding="0" cellspacing="0" style="margin: 0px;"><tr><th width="20%">Accession</th><th width="20%">Gene name</th><th width="20%">Gene start</th><th width="20%">Gene end</th><th align="right"><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(true);">select all</font><font size="-2"> /<br></font><font color="darkblue" size="-2" style="cursor: pointer;" onclick="de_select_all_chromosome_proteins(false);">deselect all</font></th></tr></table>
                     <div style="overflow-y: auto;" id="chromosome_information_table_wrapper"><div id="chromosome_information_table"></div></div>
@@ -1560,7 +1560,7 @@ function load_statistics(){
             update_correlation_tissues_pathway();
             
             document.getElementById("statistics_waiting").style.display = "none";
-            document.getElementById("statistics_content").style.display = "";
+            document.getElementById("statistics_content").style.display = "none";
         }
     }
     
@@ -3165,7 +3165,7 @@ function change_species(select){
     else if (document.getElementById("statistics_species_select") == select){
         statistics_loaded = 1;
         
-        document.getElementById("statistics_waiting").style.display = "";
+        document.getElementById("statistics_waiting").style.display = "none";
         document.getElementById("statistics_content").style.display = "none";
         load_statistics();
         open_statistics();

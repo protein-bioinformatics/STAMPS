@@ -295,7 +295,7 @@ function get_check_spectra_content(){
     var peptides_checked = filter_parameters["peptide_tissues_visible"] ? "checked" : "";
     var validation_visible = filter_parameters["validation_visible"] ? "checked" : "";
     var return_text = "<canvas id=\"check_spectra_msarea\" class=\"msarea\"></canvas> \
-    <fieldset id=\"check_spectra_options\" class=\"spectra_options\" style=\"position: fixed; border: 0px; margin: 0px; top: 0px; padding: px;\"> \
+    <fieldset id=\"check_spectra_options\" class=\"spectra_options\" style=\"position: fixed; border: 0px; margin: 0px; top: 0px; padding: 5px;\"> \
         <input type=\"radio\" onchange=\"change_match_error();\" id=\"check_spectra_radio_ppm\" name=\"select_error\" value=\"ppm\" style=\"border: 0px; margin: 0px; top: 0px; padding: 0px;\" \ checked><label for=\"radio_ppm\">Relative</label> \
         <input type=\"radio\" onchange=\"change_match_error();\" id=\"check_spectra_radio_da\" name=\"select_error\" value=\"Da\" style=\"border: 0px; margin: 0px; top: 0px; padding: 0px;\"><label for=\"radio_da\">Absolute</label> \
         <input type=\"text\" onchange=\"change_match_error_value();\" id=\"check_spectra_error_value\" value=\"-\" size=1 style=\"text-align: right;\"><label id=\"check_spectra_unit\">ppm</label> \
@@ -324,7 +324,7 @@ function get_check_spectra_content(){
 function get_waiting_background_content(){
     return "<div id=\"waiting_black\" style=\"top: 0px; left: 0px; width: 100%; height: 100%; position: fixed; z-index: 10; background-color: black; opacity: 0.4;\"> \
     </div> \
-    <div style=\"top: 40%; left: 40%; width: 20%; height: 20%; position: fixed; z-index: 10; opacity: 40%; background-color: white; border: 1px black solid; border-radius: 15px;\"> \
+    <div style=\"top: 40%; left: 40%; width: 20%; height: 20%; position: fixed; z-index: 10; opacity: 0.4; background-color: white; border: 1px black solid; border-radius: 15px;\"> \
         <table width=\"100%\" height=\"100%\"> \
             <tr> \
                 <td align=\"center\" valign=\"middle\"> \
