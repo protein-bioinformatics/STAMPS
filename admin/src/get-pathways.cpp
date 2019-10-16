@@ -43,6 +43,13 @@ main() {
     }
     
     
+    char* get_remote_addr = getenv("REMOTE_ADDR");
+    if (get_remote_addr == NULL || (string(get_remote_addr) != "localhost" && string(get_remote_addr) != "127.0.0.1" && parameters.at("public") != "1")){
+        cout << "{}" << endl;
+        exit(-3);
+    }
+    
+    
     
     // load get values
     char* get_string_chr = getenv("QUERY_STRING");

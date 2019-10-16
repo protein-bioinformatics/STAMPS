@@ -212,6 +212,10 @@ int main(int argc, char** argv) {
     string host = "";
     
     
+    
+    
+    
+    
     char* get_string_chr = getenv("QUERY_STRING");
     
     if (!get_string_chr){
@@ -264,6 +268,18 @@ int main(int argc, char** argv) {
         }
         myfile.close();
     }
+    
+    
+    
+    char* get_remote_addr = getenv("REMOTE_ADDR");
+    if (get_remote_addr == NULL || (string(get_remote_addr) != "localhost" && string(get_remote_addr) != "127.0.0.1" && parameters.at("public") != "1")){
+        print_out("[]", compress);
+        exit(-3);
+    }
+    
+    
+    
+    
     
     
     
