@@ -26,14 +26,16 @@ try:
 except:
     print(-1)
     exit()
+    
+   
    
 
-if type(action) is not str or action not in ["count", "select", "update"]:
+if type(action) is not str or action not in ["count", "select", "update_enabled", "update_prm", "update_srm"]:
     print(-2)
     exit()
 
     
-spectral_lib = "%s/data/spectral_library_%s.blib" % (conf["root_path"], species)
+spectral_lib = "%s/data/spectral_library_%s.blib" % (conf["root_path"], str(species))
    
 db = sqlite3.connect(spectral_lib)
 cur = db.cursor()
@@ -62,12 +64,12 @@ elif action == "select":
             print(-4)
             exit()
         
-    sql_query = "SELECT id, peptideModSeq, precursorCharge, scoreType FROM RefSpectra ? ORDER BY id LIMIT ?;"
-    cur.execute(sql_query, ("WHERE scoreType = -1" if only_disabled else "", limit))
+    sql_query = "SELECT id, peptideModSeq, precursorCharge, scoreType, confidence FROM RefSpectra %s ORDER BY id LIMIT %s;" % ("WHERE scoreType = -1" if only_disabled else "", limit)
+    cur.execute(sql_query)
     print(json.dumps([row for row in cur]))
     
    
-elif action == "update":
+elif action == "update_enabled":
     e_id = form.getvalue('id').replace(",", "").replace("\"", "")
     value = form.getvalue('value').replace(",", "").replace("\"", "")
     try:
@@ -81,6 +83,33 @@ elif action == "update":
     try:
         sql_query = "UPDATE RefSpectra SET scoreType = ? WHERE id = ?;"
         cur.execute(sql_query, (value, e_id))
+        db.commit()
+    except Exception as e:
+        print(-6)
+        exit()
+    print(0)
+    
+    
+    
+   
+elif action in ["update_prm", "update_srm"]:
+    e_id = form.getvalue('id').replace(",", "").replace("\"", "")
+    value = form.getvalue('value').replace(",", "").replace("\"", "")
+    mask = 2
+    try:
+        e_id = int(e_id)
+        value = int(value)
+        if action == "update_srm":
+            value <<= 1
+            mask >>= 1
+    except Exception as e:
+        print(-5)
+        exit()
+        
+    
+    try:
+        sql_query = "UPDATE RefSpectra SET confidence = ? | ((SELECT confidence from RefSpectra WHERE id = ?) & ?) WHERE id = ?;"
+        cur.execute(sql_query, (value, e_id, mask, e_id))
         db.commit()
     except Exception as e:
         print(-6)
