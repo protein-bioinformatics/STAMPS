@@ -59,6 +59,6 @@ if hostname != "":
 
 
 
-my_cur.execute("SELECT id, name, definition, kegg_link, accession, ec_number, chr_start, chr_end from proteins where chromosome = '%s' and unreviewed = 0 and species = '%s' ORDER BY chr_start ASC;" % (chromosome, species))
+my_cur.execute("SELECT id, name, definition, kegg_link, accession, ec_number, chr_start, chr_end from proteins where chromosome = ? and unreviewed = 0 and species = ? ORDER BY chr_start ASC;", (chromosome, species))
 data = [row for row in my_cur]
 print(json.dumps(data))

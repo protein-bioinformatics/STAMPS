@@ -65,7 +65,7 @@ elif action == "select":
             exit()
         
     sql_query = "SELECT id, peptideModSeq, precursorCharge, scoreType, confidence FROM RefSpectra %s ORDER BY id LIMIT %s;" % ("WHERE scoreType = -1" if only_disabled else "", limit)
-    cur.execute(sql_query)
+    cur.execute(sql_query) # all variables are checked
     print(json.dumps([row for row in cur]))
     
    

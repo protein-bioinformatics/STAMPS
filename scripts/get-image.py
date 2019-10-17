@@ -58,7 +58,7 @@ database = "%s/data/database.sqlite" % conf["root_path"]
 db = sqlite3.connect(database)
 my_cur = db.cursor()
    
-my_cur.execute('SELECT * FROM images WHERE node_id = %i;' % node_id)
+my_cur.execute('SELECT * FROM images WHERE node_id = ?;', (node_id,))
 
 if my_cur.rowcount == 0:
     print("{}")

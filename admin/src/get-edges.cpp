@@ -80,10 +80,12 @@ class reaction {
 
 
 
-static int sqlite_select_reactions(void *data, int argc, char **argv, char **azColName){
+static int sqlite_select_reactions(sqlite3_stmt* select_stmt, void *data){
     map<string, string> row;
     map<string, reaction* >* all_reactions = (map<string, reaction* >*)data;
-    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    for(int col = 0; col < sqlite3_column_count(select_stmt); col++) {
+        row.insert({string(sqlite3_column_name(select_stmt, col)), string((const char*)sqlite3_column_text(select_stmt, col))});
+    }
     
    
     reaction* r = new reaction();
@@ -100,10 +102,12 @@ static int sqlite_select_reactions(void *data, int argc, char **argv, char **azC
 
 
 
-static int sqlite_select_reagents(void *data, int argc, char **argv, char **azColName){
+static int sqlite_select_reagents(sqlite3_stmt* select_stmt, void *data){
     map<string, string> row;
     map<string, reaction* >* all_reactions = (map<string, reaction* >*)data;
-    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    for(int col = 0; col < sqlite3_column_count(select_stmt); col++) {
+        row.insert({string(sqlite3_column_name(select_stmt, col)), string((const char*)sqlite3_column_text(select_stmt, col))});
+    }
     
     reagent* r = new reagent();
     r->id = row["rg_id"];
@@ -121,10 +125,12 @@ static int sqlite_select_reagents(void *data, int argc, char **argv, char **azCo
 
 
 
-static int sqlite_select_reagents_direct(void *data, int argc, char **argv, char **azColName){
+static int sqlite_select_reagents_direct(sqlite3_stmt* select_stmt, void *data){
     map<string, string> row;
     map<string, direct* >* all_directs = (map<string, direct* >*)data;
-    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    for(int col = 0; col < sqlite3_column_count(select_stmt); col++) {
+        row.insert({string(sqlite3_column_name(select_stmt, col)), string((const char*)sqlite3_column_text(select_stmt, col))});
+    }
     
     direct* r = new direct();
     r->id = row["id"];
@@ -217,7 +223,7 @@ main() {
         print_out(response, compress);
         return -3;
     }
-    
+    int pathway_id_int = atoi(pathway_id.c_str());
     
     
     
@@ -259,50 +265,101 @@ main() {
     
     
     
-    string sql_query = "SELECT r.* FROM reactions r INNER JOIN nodes n ON r.node_id = n.id WHERE n.pathway_id = ";
-    sql_query += pathway_id;
-    sql_query += " ORDER BY r.id;";
+    sqlite3_stmt *select_stmt_reactions = NULL;
+    string sql_query = "SELECT r.* FROM reactions r INNER JOIN nodes n ON r.node_id = n.id WHERE n.pathway_id = ? ORDER BY r.id;";
     
     map<string, reaction* > all_reactions;
-    rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_reactions, (void*)&all_reactions, &zErrMsg);
-    if( rc != SQLITE_OK ){
-        print_out("[]", compress);
-        sqlite3_close(db); 
-        exit(-4);
+    rc = sqlite3_prepare_v2(db, sql_query.c_str(), -1, &select_stmt_reactions, NULL);
+    if(SQLITE_OK != rc) {
+        print_out("{}", compress);
+        sqlite3_close(db);
+        exit(-13);
     }
     
+    sqlite3_bind_int(select_stmt_reactions, 1, pathway_id_int);
     
-    
-    
-    
-    
-    sql_query = "SELECT r.id, rg.id rg_id, rg.reaction_id, rg.node_id rg_node_id, rg.type, rg.anchor, rg.head FROM reactions r INNER JOIN nodes n ON r.node_id = n.id INNER JOIN reagents rg on r.id = rg.reaction_id WHERE n.pathway_id = ";
-    sql_query += pathway_id;
-    sql_query += " ORDER BY r.id;";    
-    
-    rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_reagents, (void*)&all_reactions, &zErrMsg);
-    if( rc != SQLITE_OK ){
-        print_out("[]", compress);
-        sqlite3_close(db); 
+    while(SQLITE_ROW == (rc = sqlite3_step(select_stmt_reactions))) {
+        sqlite_select_reactions(select_stmt_reactions, (void*)&all_reactions);
+    }
+    if(SQLITE_DONE != rc) {
+        print_out("{}", compress);
+	sqlite3_finalize(select_stmt_reactions);
         exit(-4);
     }
+    sqlite3_finalize(select_stmt_reactions);
     
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    sqlite3_stmt *select_stmt_reagents = NULL;
+    sql_query = "SELECT r.id, rg.id rg_id, rg.reaction_id, rg.node_id rg_node_id, rg.type, rg.anchor, rg.head FROM reactions r INNER JOIN nodes n ON r.node_id = n.id INNER JOIN reagents rg on r.id = rg.reaction_id WHERE n.pathway_id = ? ORDER BY r.id;";    
+    
+    rc = sqlite3_prepare_v2(db, sql_query.c_str(), -1, &select_stmt_reagents, NULL);
+    if(SQLITE_OK != rc) {
+        print_out("{}", compress);
+        sqlite3_close(db);
+        exit(-13);
+    }
+    
+    sqlite3_bind_int(select_stmt_reagents, 1, pathway_id_int);
+    
+    while(SQLITE_ROW == (rc = sqlite3_step(select_stmt_reagents))) {
+        sqlite_select_reagents(select_stmt_reagents, (void*)&all_reactions);
+    }
+    if(SQLITE_DONE != rc) {
+        print_out("{}", compress);
+	sqlite3_finalize(select_stmt_reagents);
+        exit(-4);
+    }
+    sqlite3_finalize(select_stmt_reagents);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    sqlite3_stmt *select_stmt_reagents_direct = NULL;
     map<string, direct* > all_directs;
-    sql_query = "SELECT r.* FROM reactions_direct r INNER JOIN nodes n ON r.node_id_start = n.id INNER JOIN nodes nn ON r.node_id_end = nn.id WHERE n.pathway_id = ";
-    sql_query += pathway_id;
-    sql_query += " AND nn.pathway_id = ";
-    sql_query += pathway_id;
-    sql_query += " ORDER BY r.id;";
+    sql_query = "SELECT r.* FROM reactions_direct r INNER JOIN nodes n ON r.node_id_start = n.id INNER JOIN nodes nn ON r.node_id_end = nn.id WHERE n.pathway_id = ? AND nn.pathway_id = ? ORDER BY r.id;";
     
-    rc = sqlite3_exec(db, sql_query.c_str(), sqlite_select_reagents_direct, (void*)&all_directs, &zErrMsg);
-    if( rc != SQLITE_OK ){
-        print_out("[]", compress);
-        sqlite3_close(db); 
+    rc = sqlite3_prepare_v2(db, sql_query.c_str(), -1, &select_stmt_reagents_direct, NULL);
+    if(SQLITE_OK != rc) {
+        print_out("{}", compress);
+        sqlite3_close(db);
+        exit(-13);
+    }
+    
+    sqlite3_bind_int(select_stmt_reagents_direct, 1, pathway_id_int);
+    sqlite3_bind_int(select_stmt_reagents_direct, 2, pathway_id_int);
+    
+    while(SQLITE_ROW == (rc = sqlite3_step(select_stmt_reagents_direct))) {
+        sqlite_select_reagents_direct(select_stmt_reagents_direct, (void*)&all_directs);
+    }
+    if(SQLITE_DONE != rc) {
+        print_out("{}", compress);
+	sqlite3_finalize(select_stmt_reagents_direct);
         exit(-4);
     }
+    sqlite3_finalize(select_stmt_reagents_direct);
+    
+    
+    
+    
     
     
     

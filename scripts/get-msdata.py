@@ -58,7 +58,7 @@ spectral_lib =  "%s/data/spectral_library_%s.blib" % (conf["root_path"], species
    
 db = sqlite3.connect(spectral_lib)
 cur = db.cursor()
-cur.execute('SELECT * FROM RefSpectra r INNER JOIN RefSpectraPeaks p ON r.id = p.RefSpectraID WHERE r.id = %i;' % spectrum_id)
+cur.execute('SELECT * FROM RefSpectra r INNER JOIN RefSpectraPeaks p ON r.id = p.RefSpectraID WHERE r.id = ?;', (spectrum_id,))
 result = make_dict(cur)
 
 try: result["peakMZ"] = zlib.decompress(result["peakMZ"])

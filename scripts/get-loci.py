@@ -64,7 +64,7 @@ my_cur = db.cursor()
 
 
 # create fasta file
-sql_query = "SELECT ln.id, ln.name locus, count(pl.protein_id) cnt FROM loci_names ln INNER JOIN protein_loci pl ON ln.id = pl.locus_id INNER JOIN proteins p ON pl.protein_id = p.id WHERE p.species = %s GROUP BY ln.id, ln.name order by ln.name;" % species
-my_cur.execute(sql_query)
+sql_query = "SELECT ln.id, ln.name locus, count(pl.protein_id) cnt FROM loci_names ln INNER JOIN protein_loci pl ON ln.id = pl.locus_id INNER JOIN proteins p ON pl.protein_id = p.id WHERE p.species = ? GROUP BY ln.id, ln.name order by ln.name;"
+my_cur.execute(sql_query, (species,))
 loci = [[row[0], "%s (%s)" % (row[1], row[2])] for row in my_cur]
 print(json.dumps(loci))

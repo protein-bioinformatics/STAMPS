@@ -324,7 +324,7 @@ my_cur = conn.cursor()
 
 
 fasta_file = "%s/tmp/%s/proteins.fasta" % (conf["root_path"], rnd)
-sql_query = "SELECT id, accession, fasta FROM proteins WHERE id IN (%s);" % proteins
+sql_query = "SELECT id, accession, fasta FROM proteins WHERE id IN (%s);" % proteins # proteins is processed priorly
 
 proteome = {}
 proteome_headers = {}

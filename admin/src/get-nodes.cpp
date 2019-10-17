@@ -89,9 +89,11 @@ void print_out(string response, bool compress){
 
 
 
-static int sqlite_select_nodes(void *data, int argc, char **argv, char **azColName){
+static int sqlite_select_nodes(sqlite3_stmt* select_stmt){
     map<string, string> row;
-    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    for(int col = 0; col < sqlite3_column_count(select_stmt); col++) {
+        row.insert({string(sqlite3_column_name(select_stmt, col)), string((const char*)sqlite3_column_text(select_stmt, col))});
+    }
     
     node* last_node = new node;
     last_node->id = row["id"];
@@ -109,9 +111,11 @@ static int sqlite_select_nodes(void *data, int argc, char **argv, char **azColNa
 
 
 
-static int sqlite_select_proteins(void *data, int argc, char **argv, char **azColName){
+static int sqlite_select_proteins(sqlite3_stmt* select_stmt){
     map<string, string> row;
-    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    for(int col = 0; col < sqlite3_column_count(select_stmt); col++) {
+        row.insert({string(sqlite3_column_name(select_stmt, col)), string((const char*)sqlite3_column_text(select_stmt, col))});
+    }
     
     int node_id = atoi(row["nid"].c_str());
     string str_pid = row["id"];
@@ -139,9 +143,11 @@ static int sqlite_select_proteins(void *data, int argc, char **argv, char **azCo
 
 
 
-static int sqlite_select_remaining(void *data, int argc, char **argv, char **azColName){
+static int sqlite_select_remaining(sqlite3_stmt* select_stmt){
     map<string, string> row;
-    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    for(int col = 0; col < sqlite3_column_count(select_stmt); col++) {
+        row.insert({string(sqlite3_column_name(select_stmt, col)), string((const char*)sqlite3_column_text(select_stmt, col))});
+    }
     
     node* last_node = new node();
     last_node->id = row["id"];
@@ -169,9 +175,11 @@ static int sqlite_select_remaining(void *data, int argc, char **argv, char **azC
 
 
 
-static int sqlite_select_remaining_empty(void *data, int argc, char **argv, char **azColName){
+static int sqlite_select_remaining_empty(sqlite3_stmt* select_stmt){
     map<string, string> row;
-    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    for(int col = 0; col < sqlite3_column_count(select_stmt); col++) {
+        row.insert({string(sqlite3_column_name(select_stmt, col)), string((const char*)sqlite3_column_text(select_stmt, col))});
+    }
     
     node* last_node = new node();
     last_node->id = row["id"];
@@ -252,6 +260,7 @@ int main(int argc, char** argv) {
         return -2;
     }
     
+    int pathway_id_int = atoi(pathway_id.c_str());
     
     string line;
     map< string, string > parameters;
@@ -325,59 +334,100 @@ int main(int argc, char** argv) {
     
     
     // select nodes
-    string sql_query_nodes = "select * from nodes where pathway_id = ";
-    sql_query_nodes += pathway_id;
-    sql_query_nodes += " and type = 'protein';";
+    sqlite3_stmt *select_stmt_nodes = NULL;
+    string sql_query_nodes = "select * from nodes where pathway_id = ? and type = 'protein';";
     
-    rc = sqlite3_exec(db, sql_query_nodes.c_str(), sqlite_select_nodes, (void*)&chr, &zErrMsg);
-    if( rc != SQLITE_OK ){
+    rc = sqlite3_prepare_v2(db, sql_query_nodes.c_str(), -1, &select_stmt_nodes, NULL);
+    if(SQLITE_OK != rc) {
         print_out("[]", compress);
+        sqlite3_close(db);
+        exit(-13);
+    }
+    
+    sqlite3_bind_int(select_stmt_nodes, 1, pathway_id_int);
+    
+    while(SQLITE_ROW == (rc = sqlite3_step(select_stmt_nodes))) {
+        sqlite_select_nodes(select_stmt_nodes);
+    }
+    if(SQLITE_DONE != rc) {
+        print_out("[]", compress);
+	sqlite3_finalize(select_stmt_nodes);
         exit(-4);
     }
+    sqlite3_finalize(select_stmt_nodes);
+    
+    
+    
+    
     
     
     
     
     
     // select proteins
-    string sql_query_proteins = "select n.id nid, p.id, p.name from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ";
-    sql_query_proteins += pathway_id;
-    sql_query_proteins += " and n.type = 'protein' and p.species = '";
-    sql_query_proteins += species + "'";
-    sql_query_proteins += ";";
+    sqlite3_stmt *select_stmt_proteins = NULL;
+    string sql_query_proteins = "select n.id nid, p.id, p.name from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ? and n.type = 'protein' and p.species = ?;";
     
-    rc = sqlite3_exec(db, sql_query_proteins.c_str(), sqlite_select_proteins, (void*)&chr, &zErrMsg);
-    if( rc != SQLITE_OK ){
+    rc = sqlite3_prepare_v2(db, sql_query_proteins.c_str(), -1, &select_stmt_proteins, NULL);
+    if(SQLITE_OK != rc) {
         print_out("[]", compress);
+        sqlite3_close(db);
+        exit(-13);
+    }
+    
+    sqlite3_bind_int(select_stmt_proteins, 1, pathway_id_int);
+    sqlite3_bind_text(select_stmt_proteins, 2, species.c_str(), species.length(), SQLITE_STATIC);
+    
+    while(SQLITE_ROW == (rc = sqlite3_step(select_stmt_proteins))) {
+        sqlite_select_proteins(select_stmt_proteins);
+    }
+    if(SQLITE_DONE != rc) {
+        print_out("[]", compress);
+	sqlite3_finalize(select_stmt_proteins);
         exit(-4);
     }
+    sqlite3_finalize(select_stmt_proteins);
+    
+    
+    
     
     
     
     
     
     // select remaining nodes
-    string sql_query_rest = "select n.id, p.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, '' position, '' short_name, '' highlight, '' image from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ";
-    sql_query_rest += pathway_id; 
-    sql_query_rest += " union ";
-    sql_query_rest += "select n.id, m.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, m.c_number, m.lm_id, m.smiles, m.formula, m.exact_mass, position, short_name, highlight, image from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ";
-    sql_query_rest += pathway_id;
-    sql_query_rest += " union ";
-    sql_query_rest += "select id, '', pathway_id, type, 0, x, y, 0, '', '', '', '', '' position, '' short_name, highlight, '' image from nodes n where n.type = 'membrane' and n.pathway_id = ";
-    sql_query_rest += pathway_id;
-    sql_query_rest += " union ";
-    sql_query_rest += "select n.id, l.label, n.pathway_id, n.type, n.foreign_id, n.x, n.y, 0, '', '', '', '', '' position, '' short_name, highlight, '' image from nodes n inner join labels l on n.foreign_id = l.id where n.type = 'label' and n.pathway_id = ";
-    sql_query_rest += pathway_id;
-    sql_query_rest += " union ";
-    sql_query_rest += "select id, '', pathway_id, type, foreign_id, x, y, 0, '', '', '', '', position, '' short_name, '' highlight, '' image from nodes n where type = 'image' and n.pathway_id = ";
-    sql_query_rest += pathway_id;
-    sql_query_rest += ";";
+    sqlite3_stmt *select_stmt_rest = NULL;
+    string sql_query_rest = "select n.id, p.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, '' position, '' short_name, '' highlight, '' image from nodes n inner join pathways p on p.id = n.foreign_id where n.type = 'pathway' and n.pathway_id = ? union ";
+    sql_query_rest += "select n.id, m.name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, m.c_number, m.lm_id, m.smiles, m.formula, m.exact_mass, position, short_name, highlight, image from nodes n inner join metabolites m on m.id = n.foreign_id where n.type = 'metabolite' and n.pathway_id = ? union ";
+    sql_query_rest += "select id, '', pathway_id, type, 0, x, y, 0, '', '', '', '', '' position, '' short_name, highlight, '' image from nodes n where n.type = 'membrane' and n.pathway_id = ? union ";
+    sql_query_rest += "select n.id, l.label, n.pathway_id, n.type, n.foreign_id, n.x, n.y, 0, '', '', '', '', '' position, '' short_name, highlight, '' image from nodes n inner join labels l on n.foreign_id = l.id where n.type = 'label' and n.pathway_id = ? union ";
+    sql_query_rest += "select id, '', pathway_id, type, foreign_id, x, y, 0, '', '', '', '', position, '' short_name, '' highlight, '' image from nodes n where type = 'image' and n.pathway_id = ?;";
     
-    rc = sqlite3_exec(db, sql_query_rest.c_str(), sqlite_select_remaining, (void*)&chr, &zErrMsg);
-    if( rc != SQLITE_OK ){
+    rc = sqlite3_prepare_v2(db, sql_query_rest.c_str(), -1, &select_stmt_rest, NULL);
+    if(SQLITE_OK != rc) {
         print_out("[]", compress);
+        sqlite3_close(db);
+        exit(-13);
+    }
+    
+    sqlite3_bind_int(select_stmt_rest, 1, pathway_id_int);
+    sqlite3_bind_int(select_stmt_rest, 2, pathway_id_int);
+    sqlite3_bind_int(select_stmt_rest, 3, pathway_id_int);
+    sqlite3_bind_int(select_stmt_rest, 4, pathway_id_int);
+    sqlite3_bind_int(select_stmt_rest, 5, pathway_id_int);
+    
+    while(SQLITE_ROW == (rc = sqlite3_step(select_stmt_rest))) {
+        sqlite_select_remaining(select_stmt_rest);
+    }
+    if(SQLITE_DONE != rc) {
+        print_out("[]", compress);
+	sqlite3_finalize(select_stmt_rest);
         exit(-4);
     }
+    sqlite3_finalize(select_stmt_rest);
+    
+    
+    
     
     
     
@@ -388,22 +438,32 @@ int main(int argc, char** argv) {
     
     
     // select remeaing empty / undefined nodes
-    sql_query_rest = "select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, '' position from nodes n where n.type = 'pathway' and n.foreign_id = -1 and n.pathway_id = ";
-    sql_query_rest += pathway_id; 
-    sql_query_rest += " union ";
-    sql_query_rest += "select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, position from nodes n where n.type = 'metabolite' and n.foreign_id = -1 and n.pathway_id = ";
-    sql_query_rest += pathway_id;
-    sql_query_rest += " union ";
-    sql_query_rest += "select n.id, 'inv' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, position from nodes n where n.type = 'invisible' and n.pathway_id = ";
-    sql_query_rest += pathway_id;
-    sql_query_rest += ";";
+    sqlite3_stmt *select_stmt_rest_empty = NULL;
+    sql_query_rest = "select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, '' position from nodes n where n.type = 'pathway' and n.foreign_id = -1 and n.pathway_id = ? union ";
+    sql_query_rest += "select n.id, 'undefined' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, position from nodes n where n.type = 'metabolite' and n.foreign_id = -1 and n.pathway_id = ? union ";
+    sql_query_rest += "select n.id, 'inv' name, n.pathway_id, n.type, n.foreign_id, n.x, n.y, '' c_number, '' lm_id, '' smiles, '' formula, '' exact_mass, position from nodes n where n.type = 'invisible' and n.pathway_id = ?;";
     
-    rc = sqlite3_exec(db, sql_query_rest.c_str(), sqlite_select_remaining_empty, (void*)&chr, &zErrMsg);
-    if( rc != SQLITE_OK ){
+    
+    rc = sqlite3_prepare_v2(db, sql_query_rest.c_str(), -1, &select_stmt_rest_empty, NULL);
+    if(SQLITE_OK != rc) {
         print_out("[]", compress);
-        exit(-4);
+        sqlite3_close(db);
+        exit(-13);
     }
     
+    sqlite3_bind_int(select_stmt_rest_empty, 1, pathway_id_int);
+    sqlite3_bind_int(select_stmt_rest_empty, 2, pathway_id_int);
+    sqlite3_bind_int(select_stmt_rest_empty, 3, pathway_id_int);
+    
+    while(SQLITE_ROW == (rc = sqlite3_step(select_stmt_rest_empty))) {
+        sqlite_select_remaining_empty(select_stmt_rest_empty);
+    }
+    if(SQLITE_DONE != rc) {
+        print_out("[]", compress);
+	sqlite3_finalize(select_stmt_rest_empty);
+        exit(-4);
+    }
+    sqlite3_finalize(select_stmt_rest_empty);
     
     
     

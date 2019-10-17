@@ -40,10 +40,12 @@ class chromosome_band {
 
 
 
-static int sqlite_select_chromosomes(void *data, int argc, char **argv, char **azColName){
+static int sqlite_select_chromosomes(sqlite3_stmt* select_stmt, void *data){
     map<string, string> row;
     map<string, vector<chromosome_band*>* >* chromosomes = (map<string, vector<chromosome_band*>* >*)data;
-    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    for(int col = 0; col < sqlite3_column_count(select_stmt); col++) {
+        row.insert({string(sqlite3_column_name(select_stmt, col)), string((const char*)sqlite3_column_text(select_stmt, col))});
+    }
     
     string chromosome = row["chromosome"];
     if (chromosomes->find(chromosome) == chromosomes->end()) chromosomes->insert({chromosome, new vector<chromosome_band*>()});
@@ -182,13 +184,33 @@ int main(int argc, char** argv) {
     
     
     map<string, vector<chromosome_band*>* > chromosomes;
-    string sql_chromosomes = "SELECT * FROM chromosome_bands WHERE species = '" + species + "' ORDER BY chromosome;";
+    sqlite3_stmt *select_stmt_chromosomes = NULL;
+    string sql_chromosomes = "SELECT * FROM chromosome_bands WHERE species = ? ORDER BY chromosome;";
     
-    rc = sqlite3_exec(db, sql_chromosomes.c_str(), sqlite_select_chromosomes, (void*)&chromosomes, &zErrMsg);
-    if( rc != SQLITE_OK ){
-        print_out("[]", compress);
+    rc = sqlite3_prepare_v2(db, sql_chromosomes.c_str(), -1, &select_stmt_chromosomes, NULL);
+    if(SQLITE_OK != rc) {
+        print_out("{}", compress);
+        sqlite3_close(db);
+        exit(-13);
+    }
+    
+    sqlite3_bind_text(select_stmt_chromosomes, 1, species.c_str(), species.length(), SQLITE_STATIC);
+    
+    while(SQLITE_ROW == (rc = sqlite3_step(select_stmt_chromosomes))) {
+        sqlite_select_chromosomes(select_stmt_chromosomes, (void*)&chromosomes);
+    }
+    if(SQLITE_DONE != rc) {
+        print_out("{}", compress);
+	sqlite3_finalize(select_stmt_chromosomes);
         exit(-4);
     }
+    sqlite3_finalize(select_stmt_chromosomes);
+    
+    
+    
+    
+    
+    
     
     
     

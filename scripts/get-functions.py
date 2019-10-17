@@ -64,7 +64,7 @@ my_cur = db.cursor()
 my_cur.execute("SELECT * FROM function_names")
 functions = {row[0]: list(row) + [0, []] for row in my_cur}
 
-my_cur.execute("SELECT function_id, count(function_id) cnt FROM `proteins` WHERE species = %s GROUP BY function_id HAVING function_id <> 0;" % species)
+my_cur.execute("SELECT function_id, count(function_id) cnt FROM `proteins` WHERE species = ? GROUP BY function_id HAVING function_id <> 0;", (species,))
 function_counts = {row[0]: row[1] for row in my_cur}
 
 
