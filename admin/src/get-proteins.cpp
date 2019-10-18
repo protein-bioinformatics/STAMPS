@@ -101,9 +101,11 @@ static int sqlite_statistics_pathways(void *data, int argc, char **argv, char **
 
 
 
-static int sqlite_select_proteins(void *data, int argc, char **argv, char **azColName){
+static int sqlite_select_proteins(sqlite3_stmt* select_stmt){
     map<string, string> row;
-    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
+    for(int col = 0; col < sqlite3_column_count(select_stmt); col++) {
+        row.insert({string(sqlite3_column_name(select_stmt, col)), string((const char*)sqlite3_column_text(select_stmt, col))});
+    }
     
     string pid = row["id"];
     protein* last_protein = new protein(pid);
@@ -123,15 +125,21 @@ static int sqlite_select_proteins(void *data, int argc, char **argv, char **azCo
 }
 
 
-string get_protein_data(string sql_query_proteins, string species, sqlite3 *db, bool statistics){
+string get_protein_data(sqlite3_stmt* select_stmt_proteins, string species){
     
-    char chr;
     char *zErrMsg = 0;
-    int rc = sqlite3_exec(db, sql_query_proteins.c_str(), sqlite_select_proteins, (void*)&chr, &zErrMsg);
-    if( rc != SQLITE_OK ){
-        print_out("[]", compress);
-        exit(-4);
+    int rc = 0;
+    
+
+    
+    while(SQLITE_ROW == (rc = sqlite3_step(select_stmt_proteins))) {
+        sqlite_select_proteins(select_stmt_proteins);
     }
+    if(SQLITE_DONE != rc) {
+        return "[]";
+    }
+    
+    
     
     
     len_text = 0;
@@ -225,11 +233,11 @@ string get_protein_data(string sql_query_proteins, string species, sqlite3 *db, 
         
         
     }
-    sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, &zErrMsg);
+    sqlite3_exec(db_spec, "COMMIT TRANSACTION", NULL, NULL, &zErrMsg);
     sqlite3_finalize(stmt);
     
     
-    sqlite3_close(db);
+    sqlite3_close(db_spec);
     delete occ;
     delete index_rank;
     delete SA;
@@ -363,7 +371,7 @@ main(int argc, char** argv) {
     }
     
     
-    string sql_query_proteins = "";
+    sqlite3_stmt *select_stmt_proteins = NULL;
     string line = "";
     ifstream myfile ("../admin/qsdb.conf");
     if (myfile.is_open()){
@@ -431,8 +439,6 @@ main(int argc, char** argv) {
         
         string sql_query = "SELECT distinct pw.id pathway_id, pw.name, GROUP_CONCAT(npc.protein_id) prot_id, pw.signaling_pathway FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id group by pw.id order by pw.name;";
         
-        
-        
         string response[] = {"["};
         rc = sqlite3_exec(db, sql_query.c_str(), sqlite_statistics_pathways, (void*)response, &zErrMsg);
         if( rc != SQLITE_OK ){
@@ -465,12 +471,32 @@ main(int argc, char** argv) {
             print_out("-9", compress);
             sqlite3_close(db); 
             return -9;
-        }    
-        replaceAll(accessions, string(":"), string("','"));
+        }
+        vector<string> accession_list = split(accessions, ':');
         
-        sql_query_proteins = "select distinct * from proteins where accession in ('";
-        sql_query_proteins += accessions;
-        sql_query_proteins += "') and species = '" + species + "';";
+        std::stringstream ss;
+        ss << "SELECT * FROM proteins WHERE accession IN (";
+        for (int i = 0; i < accession_list.size(); ++i){
+            ss << "?";
+            if (i < accession_list.size() - 1) ss << ", ";
+        }
+        ss << ") AND species = ?";
+        
+        rc = sqlite3_prepare_v2(db, ss.str().c_str(), -1, &select_stmt_proteins, NULL);
+        if(SQLITE_OK != rc) {
+            print_out("[]", compress);
+            sqlite3_close(db);
+            exit(-13);
+        }
+        
+        int binder = 1;
+        
+        for (; binder <= accession_list.size(); ++binder){
+            string accession = accession_list.at(binder - 1);
+            sqlite3_bind_text(select_stmt_proteins, binder, accession.c_str(), accession.length(), SQLITE_TRANSIENT);
+            
+        }
+        sqlite3_bind_text(select_stmt_proteins, binder, species.c_str(), species.length(), SQLITE_TRANSIENT);        
     }
     
     else if (via_ids){
@@ -479,24 +505,64 @@ main(int argc, char** argv) {
             print_out("-10", compress);
             sqlite3_close(db); 
             return -10;
-        }    
-        replaceAll(ids, string(":"), string("','"));
+        }
+        vector<string> ids_list = split(ids, ':');
         
-        sql_query_proteins = "select distinct * from proteins where id in ('";
-        sql_query_proteins += ids;
-        sql_query_proteins += "');";
+        
+        std::stringstream ss;
+        ss << "SELECT DISTINCT * FROM proteins WHERE id IN (";
+        for (int i = 0; i < ids_list.size(); ++i){
+            ss << "?";
+            if (i < ids_list.size() - 1) ss << ", ";
+        }
+        ss << ");";
+        
+        
+        rc = sqlite3_prepare_v2(db, ss.str().c_str(), -1, &select_stmt_proteins, NULL);
+        if(SQLITE_OK != rc) {
+            print_out("[]", compress);
+            sqlite3_close(db);
+            exit(-13);
+        }
+        
+        for (int binder = 0; binder < ids_list.size(); ++binder){
+            sqlite3_bind_int(select_stmt_proteins, binder + 1, atoi(ids_list.at(binder).c_str()));
+        }
     }
     else if (via_loci) {
         if (loci_ids == "" || loci_ids.find("'") != string::npos){
             print_out("-11", compress);
             sqlite3_close(db); 
             return -11;
-        }    
-        replaceAll(loci_ids, string(":"), string("','"));
+        }
+        vector<string> loci_list = split(loci_ids, ':');
         
-        sql_query_proteins = "select distinct p.* from proteins p inner join protein_loci pl on p.id = pl.protein_id where pl.locus_id in ('";
-        sql_query_proteins += loci_ids;
-        sql_query_proteins += "') and p.species = '" + species + "';";
+        
+        std::stringstream ss;
+        ss << "SELECT DISTINCT p.* FROM proteins p INNER JOIN protein_loci pl ON p.id = pl.protein_id WHERE pl.locus_id IN (";
+        for (int i = 0; i < loci_list.size(); ++i){
+            ss << "?";
+            if (i < loci_list.size() - 1) ss << ", ";
+        }
+        ss << ") AND p.species = ?;";
+        
+        
+        rc = sqlite3_prepare_v2(db, ss.str().c_str(), -1, &select_stmt_proteins, NULL);
+        if(SQLITE_OK != rc) {
+            print_out("[]", compress);
+            sqlite3_close(db);
+            exit(-13);
+        }
+        
+        int binder = 1;
+        for (; binder <= loci_list.size(); ++binder){
+            sqlite3_bind_int(select_stmt_proteins, binder, atoi(loci_list.at(binder - 1).c_str()));
+        }
+        sqlite3_bind_text(select_stmt_proteins, binder, species.c_str(), species.length(), SQLITE_TRANSIENT);
+        
+        
+        
+        
     }
     else if (via_functions) {
         if (function_ids == "" || function_ids.find("'") != string::npos){
@@ -504,21 +570,58 @@ main(int argc, char** argv) {
             sqlite3_close(db); 
             return -12;
         }    
-        replaceAll(function_ids, string(":"), string("','"));
+        vector<string> functions_list = split(function_ids, ':');
         
-        sql_query_proteins = "select distinct p.* from proteins p inner join protein_functions pf on p.id = pf.protein_id where pf.function_id in ('";
-        sql_query_proteins += function_ids;
-        sql_query_proteins += "') and p.species = '" + species + "';";
+        
+        std::stringstream ss;
+        ss << "SELECT DISTINCT p.* FROM proteins p INNER JOIN protein_functions pf ON p.id = pf.protein_id WHERE pf.function_id IN (";
+        for (int i = 0; i < functions_list.size(); ++i){
+            ss << "?";
+            if (i < functions_list.size() - 1) ss << ", ";
+        }
+        ss << ") AND p.species = ?;";
+        
+        
+        rc = sqlite3_prepare_v2(db, ss.str().c_str(), -1, &select_stmt_proteins, NULL);
+        if(SQLITE_OK != rc) {
+            print_out("[]", compress);
+            sqlite3_close(db);
+            exit(-13);
+        }
+        
+        int binder = 1;
+        for (; binder <= functions_list.size(); ++binder){
+            sqlite3_bind_int(select_stmt_proteins, binder, atoi(functions_list.at(binder - 1).c_str()));
+        }
+        sqlite3_bind_text(select_stmt_proteins, binder, species.c_str(), species.length(), SQLITE_TRANSIENT);
+        
+        
+        
     }
     else if (statistics) {
-        sql_query_proteins = "select * from proteins where species = '" + species + "';";
+        string sql_query_proteins = "select * from proteins where species = ?;";
+        
+        rc = sqlite3_prepare_v2(db, sql_query_proteins.c_str(), -1, &select_stmt_proteins, NULL);
+        if(SQLITE_OK != rc) {
+            print_out("[]", compress);
+            sqlite3_close(db);
+            exit(-13);
+        }
+        sqlite3_bind_text(select_stmt_proteins, 1, species.c_str(), species.length(), SQLITE_TRANSIENT);
+        
     }
     else if (via_pathway){
-        sql_query_proteins = "select distinct p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ";
-        sql_query_proteins += pathway_id;
-        sql_query_proteins += " and n.type = 'protein' and p.species = '";
-        sql_query_proteins += species;
-        sql_query_proteins += "';";
+        string sql_query_proteins = "select distinct p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ? and n.type = 'protein' and p.species = ?;";
+        
+        rc = sqlite3_prepare_v2(db, sql_query_proteins.c_str(), -1, &select_stmt_proteins, NULL);
+        if(SQLITE_OK != rc) {
+            print_out("[]", compress);
+            sqlite3_close(db);
+            exit(-13);
+        }
+        
+        sqlite3_bind_int(select_stmt_proteins, 1, atoi(pathway_id.c_str()));
+        sqlite3_bind_text(select_stmt_proteins, 2, species.c_str(), species.length(), SQLITE_TRANSIENT);
     }
     
     
@@ -555,7 +658,7 @@ main(int argc, char** argv) {
             
             remove(statistics_json_filename.c_str());
             
-            result = get_protein_data(sql_query_proteins, species, db, statistics);
+            result = get_protein_data(select_stmt_proteins, species);
             if (caching){
                 string output = result;
                 if (compress) output = compress_string(output);
@@ -566,12 +669,12 @@ main(int argc, char** argv) {
     }
     else {
     
-        result = get_protein_data(sql_query_proteins, species, db, statistics);
+        result = get_protein_data(select_stmt_proteins, species);
     }
     
     print_out(result, compress);
     
-    
+    sqlite3_finalize(select_stmt_proteins);
     sqlite3_close(db); 
     
     return 0;
