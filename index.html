@@ -1564,6 +1564,7 @@ function load_statistics(){
         }
     }
     
+    console.log(file_pathname + "scripts/get-proteins.bin?statistics&species=" + current_species + "&host=" + encodeURL(current_host));
     xmlhttp.open("GET", file_pathname + "scripts/get-proteins.bin?statistics&species=" + current_species + "&host=" + encodeURL(current_host), true);
     xmlhttp.send();
     

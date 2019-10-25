@@ -83,11 +83,12 @@ static int sqlite_map_peptides(void *data, int argc, char **argv, char **azColNa
 
 
 
-static int sqlite_statistics_pathways(void *data, int argc, char **argv, char **azColName){
+static int sqlite_statistics_pathways(sqlite3_stmt *select_stmt, void *data){
     map<string, string> row;
     string* response = (string*)data;
-    for (int i = 0; i < argc; ++i) row.insert({azColName[i], argv[i]});
-
+    for(int col = 0; col < sqlite3_column_count(select_stmt); col++) {
+        row.insert({string(sqlite3_column_name(select_stmt, col)), string((const char*)sqlite3_column_text(select_stmt, col))});
+    }
 
     if (response[0].length() > 1) response[0] += ",";
     
@@ -370,7 +371,6 @@ main(int argc, char** argv) {
         cout << "Content-Type: text/html" << endl << endl;
     }
     
-    
     sqlite3_stmt *select_stmt_proteins = NULL;
     string line = "";
     ifstream myfile ("../admin/qsdb.conf");
@@ -389,7 +389,7 @@ main(int argc, char** argv) {
     
     
     char* get_remote_addr = getenv("REMOTE_ADDR");
-    if (get_remote_addr == NULL || (string(get_remote_addr) != "localhost" && string(get_remote_addr) != "127.0.0.1" && parameters.at("public") != "1")){
+    if (get_remote_addr != NULL && string(get_remote_addr) != "localhost" && string(get_remote_addr) != "127.0.0.1" && parameters.at("public") != "1"){
         print_out("[]", compress);
         exit(-3);
     }
@@ -419,6 +419,7 @@ main(int argc, char** argv) {
     
     
     
+    
     // retrieve id and peptide sequence from spectral library
     sqlite3 *db;
     char *zErrMsg = 0;
@@ -437,15 +438,32 @@ main(int argc, char** argv) {
     
     if (statistics_pathways){
         
-        string sql_query = "SELECT distinct pw.id pathway_id, pw.name, GROUP_CONCAT(npc.protein_id) prot_id, pw.signaling_pathway FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id group by pw.id order by pw.name;";
+        sqlite3_stmt *select_stmt_stat = NULL;
+        string sql_query_proteins = "SELECT distinct pw.id pathway_id, pw.name, GROUP_CONCAT(npc.protein_id) prot_id, pw.signaling_pathway FROM pathways pw inner join nodes n on pw.id = n.pathway_id inner join nodeproteincorrelations npc on n.id = npc.node_id inner join proteins p on npc.protein_id = p.id where p.species = ? group by pw.id order by pw.name;";
+        
+        rc = sqlite3_prepare_v2(db, sql_query_proteins.c_str(), -1, &select_stmt_stat, NULL);
+        if(SQLITE_OK != rc) {
+            print_out("[]", compress);
+            sqlite3_close(db);
+            exit(-13);
+        }
         
         string response[] = {"["};
-        rc = sqlite3_exec(db, sql_query.c_str(), sqlite_statistics_pathways, (void*)response, &zErrMsg);
-        if( rc != SQLITE_OK ){
-            print_out("[]", compress);
-            exit(-4);
+        sqlite3_bind_text(select_stmt_stat, 1, species.c_str(), species.length(), SQLITE_TRANSIENT);
+        while(SQLITE_ROW == (rc = sqlite3_step(select_stmt_stat))) {
+            sqlite_statistics_pathways(select_stmt_stat, response);
         }
         response[0] += "]";
+        replaceAll(response[0], "\n", "\\n");
+        
+        if(SQLITE_DONE != rc) {
+            print_out("[]", compress);
+            sqlite3_finalize(select_stmt_stat);
+            exit(-4);
+        }
+        sqlite3_finalize(select_stmt_stat);
+        
+        
         replaceAll(response[0], "\n", "\\n");
         
         print_out(response[0], compress);
@@ -608,7 +626,6 @@ main(int argc, char** argv) {
             exit(-13);
         }
         sqlite3_bind_text(select_stmt_proteins, 1, species.c_str(), species.length(), SQLITE_TRANSIENT);
-        
     }
     else if (via_pathway){
         string sql_query_proteins = "select distinct p.* from nodes n inner join nodeproteincorrelations np on n.id = np.node_id inner join proteins p on np.protein_id = p.id where n.pathway_id = ? and n.type = 'protein' and p.species = ?;";
