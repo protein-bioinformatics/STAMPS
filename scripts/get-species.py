@@ -25,7 +25,7 @@ with open("../admin/qsdb.conf", mode="rt") as fl:
 form = cgi.FieldStorage()
 request_all = "request_all" in form
 
-if os.environ["REMOTE_ADDR"] not in ["localhost", "127.0.0.1"] and "public" in conf and conf["public"] != "1":
+if "public" not in conf or conf["public"] != "1":
     print("{}")
     exit()
     
