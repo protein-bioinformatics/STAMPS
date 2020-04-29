@@ -161,7 +161,7 @@ preview_element = 0;
 select_field_element = 0;
 background_hiding = 0;
 
-pathways = {15: "Alanine, aspartate and glutamate metabolism"};
+pathways = {};
 
 var filter_panel_meta_data = [0, 0, 0];
 
@@ -4092,6 +4092,7 @@ function change_pathway(p){
     close_navigation();
     if (expand_collapse_obj != 0) expand_collapse_obj.collapse();
     reset_view();
+
     
     if (p in pathways){
         current_pathway = p;

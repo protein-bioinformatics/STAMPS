@@ -24,11 +24,7 @@ with open("../admin/qsdb.conf", mode="rt") as fl:
 
 form = cgi.FieldStorage()
 request_all = "request_all" in form
-
-if "public" not in conf or conf["public"] != "1":
-    print("{}")
-    exit()
-    
+  
     
     
     

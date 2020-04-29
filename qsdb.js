@@ -72,7 +72,6 @@ function init(){
     
     set_frame();
     
-    
     // thread to check if current (foreign) host is still alive and switch host if necessary
     var xmlhttp_ping = new XMLHttpRequest();
     xmlhttp_ping.active = false;
@@ -99,6 +98,15 @@ function init(){
             xmlhttp_ping.send();
         }
     }, 1000);
+    
+    
+    var init_pathway = setInterval(function(){
+        if(Object.keys(pathways).length > 0){
+            change_pathway();
+            clearInterval(init_pathway);
+        }
+    }, 100);
+    
 }
 
 
