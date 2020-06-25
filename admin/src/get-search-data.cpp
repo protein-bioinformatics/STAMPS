@@ -88,7 +88,7 @@ static int sqlite_select_proteins(void *data, int argc, char **argv, char **azCo
 
 
 
-main(int argc, char** argv) {
+main(int argc, char** argv, char** envp) {
     bool compress = true;
     string response = "";
     
@@ -125,33 +125,34 @@ main(int argc, char** argv) {
     }
     */
     
+
+    
     
     string host = "";
     char* get_string_chr = getenv("QUERY_STRING");
     
     if (!get_string_chr){
-        cout << -1;
-        return -1;
+        response += "-2";
+        print_out(response, compress);
+        return -2;
     }
     string get_string = get_string_chr;
     
-    if (!get_string.length()){
-        response += "-1";
-        print_out(response, compress);
-        return -1;
-    }
-    vector<string> get_entries = split(get_string, '&');  
-    for (uint i = 0; i < get_entries.size(); ++i){
-        vector<string> get_values = split(get_entries.at(i), '=');
-        if (get_values.size() > 1 && get_values.at(0) == "host"){
-            host = get_values.at(1);
+    if (get_string.length()){
+        vector<string> get_entries = split(get_string, '&');  
+        for (uint i = 0; i < get_entries.size(); ++i){
+            vector<string> get_values = split(get_entries.at(i), '=');
+            if (get_values.size() > 1 && get_values.at(0) == "host"){
+                host = get_values.at(1);
+            }
         }
     }
     
     
     
-    
     // if it is a remote request
+    
+    /*
     if (host.length() > 0 && (host != "localhost" || host != "127.0.0.1")){
         
         string remote_request = host + "/scripts/get-search-data.bin?";
@@ -160,7 +161,7 @@ main(int argc, char** argv) {
         print_out(response, compress);
         return 0;
     }
-    
+    */
     
     
     
