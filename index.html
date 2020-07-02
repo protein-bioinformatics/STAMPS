@@ -647,7 +647,9 @@ function change_chromosome_view_keydown(e){
     }
 }
 
-var statistics_loaded = 0;
+var tissues_loaded = false;
+var proteins_loaded = false;
+var pathways_loaded = false;
 var max_NSAF = -1000000;
 var min_NSAF = 0;
 
@@ -687,7 +689,6 @@ function update_ppm_pw_select(){
 
 function update_nsaf_pathway_select(){
     var signaling = document.getElementById("nsaf_pathway_radio_signaling").checked;
-    
     var target_select = document.getElementById("nsaf_pathway_figure_select");
     for(var i = target_select.options.length - 1 ; i >= 0 ; i--)
     {
@@ -807,9 +808,10 @@ function update_correlation_pathway_select(){
 
 
 
+
 var selected_pathways = new Set();
 function update_tissue(ctx){
-    if (statistics_loaded < 3) return;
+    if (!tissues_loaded || !proteins_loaded || !pathways_loaded) return;
     
     
     if (typeof(ctx) === 'undefined'){
@@ -972,7 +974,7 @@ function update_tissue(ctx){
 
 
 function update_nsaf(ctx){
-    if (statistics_loaded < 3) return;
+    if (!tissues_loaded || !proteins_loaded || !pathways_loaded) return;
     
     if (typeof(ctx) === 'undefined'){
         var nsaf_figure = document.getElementById("nsaf_figure");
@@ -1061,7 +1063,7 @@ function update_nsaf(ctx){
 
 
 function update_correlation_tissues(ctx){
-    if (statistics_loaded < 3) return;
+    if (!tissues_loaded || !proteins_loaded || !pathways_loaded) return;
     
     if (typeof(ctx) === 'undefined'){
         var correlation_tissue_tissue = document.getElementById("correlation_tissue_tissue");
@@ -1208,7 +1210,7 @@ function update_correlation_tissues(ctx){
 
 
 function update_correlation_tissues_pathway(ctx){
-    if (statistics_loaded < 3) return;
+    if (!tissues_loaded || !proteins_loaded || !pathways_loaded) return;
     
     if (typeof(ctx) === 'undefined'){
         var correlation_tissue_tissue_pathway = document.getElementById("correlation_tissue_tissue_pathway");
@@ -1410,7 +1412,6 @@ function resize_views(){
 
 
 function add_nsaf(t, curr, total, ctx){
-    
     var w_box = 600;
     var w_offset = 70;
     var h_box = 250;
@@ -1479,7 +1480,7 @@ function open_statistics (){
 
 
 function load_statistics(){
-    if (statistics_loaded >= 3) return;
+    if (!tissues_loaded) return;
 
     var tissue_tissue_select = document.getElementById("tissue_tissue_select");
     for (t in tissues){
@@ -1546,7 +1547,7 @@ function load_statistics(){
             
             max_NSAF = Math.ceil(max_NSAF);
             
-            statistics_loaded++;
+            proteins_loaded = true;
             update_nsaf_pathway_select();
             update_absolute_pathway_select();
             update_nsaf();
@@ -1560,11 +1561,10 @@ function load_statistics(){
             update_correlation_tissues_pathway();
             
             document.getElementById("statistics_waiting").style.display = "none";
-            document.getElementById("statistics_content").style.display = "none";
+            document.getElementById("statistics_content").style.display = "inline";
         }
     }
     
-    console.log(file_pathname + "scripts/get-proteins.bin?statistics&species=" + current_species + "&host=" + encodeURL(current_host));
     xmlhttp.open("GET", file_pathname + "scripts/get-proteins.bin?statistics&species=" + current_species + "&host=" + encodeURL(current_host), true);
     xmlhttp.send();
     
@@ -1573,7 +1573,7 @@ function load_statistics(){
     xmlhttp_search.onreadystatechange = function() {
         if (xmlhttp_search.readyState == 4 && xmlhttp_search.status == 200) {
             var tmp_pw = JSON.parse(xmlhttp_search.responseText);
-            statistics_loaded++;
+            pathways_loaded = true;
             
             var pw_select_metabolic = document.getElementById("nsaf_pathway_figure_select_metabolic");
             var pw_select_signaling = document.getElementById("nsaf_pathway_figure_select_signaling");
@@ -1599,6 +1599,7 @@ function load_statistics(){
                 
                 pathways_to_proteins[tmp_pw[i][0]] = [tmp_pw[i][1], protein_ids, tmp_pw[i][3] == "1"];
             }
+            
             update_nsaf_pathway_select();
             update_absolute_pathway_select();
             update_nsaf();
@@ -1612,7 +1613,7 @@ function load_statistics(){
             update_correlation_tissues_pathway();
         }
     }
-    xmlhttp_search.open("GET", file_pathname + "scripts/get-proteins.bin?statistics_pathways" + "?host=" + encodeURL(current_host), true);
+    xmlhttp_search.open("GET", file_pathname + "scripts/get-proteins.bin?statistics_pathways" + "&species=" + current_species + "&host=" + encodeURL(current_host), true);
     xmlhttp_search.send();
 }
 
@@ -1623,7 +1624,7 @@ function load_statistics(){
 
 
 function update_ppm(ppm_ctx){
-    if (statistics_loaded < 3) return;
+    if (!tissues_loaded || !proteins_loaded || !pathways_loaded) return;
     
     if (typeof(ppm_ctx) === 'undefined'){
         var ppm_histogram_canvas = document.getElementById("ppm_histogram");
@@ -1771,7 +1772,7 @@ function update_ppm(ppm_ctx){
 
 
 function update_pI(pI_ctx){
-    if (statistics_loaded < 3) return;
+    if (!tissues_loaded || !proteins_loaded || !pathways_loaded) return;
     
     if (typeof(pI_ctx) === 'undefined'){
         var pI_figure = document.getElementById("pI_figure");
@@ -1885,7 +1886,7 @@ function update_pI(pI_ctx){
 
 
 function update_absolute_pathway_figure(ctx){
-    if (statistics_loaded < 3) return;
+    if (!tissues_loaded || !proteins_loaded || !pathways_loaded) return;
     
     var pw_option = document.getElementById("absolute_pathway_figure_select").options[document.getElementById("absolute_pathway_figure_select").selectedIndex];
     if (typeof(ctx) === "undefined"){
@@ -2006,7 +2007,7 @@ function update_absolute_pathway_figure(ctx){
 
 
 function update_nsaf_pathway_figure(ctx){
-    if (statistics_loaded < 3) return;
+    if (!tissues_loaded || !proteins_loaded || !pathways_loaded) return;
     
     var pw_option = document.getElementById("nsaf_pathway_figure_select").options[document.getElementById("nsaf_pathway_figure_select").selectedIndex];
     if (typeof(ctx) === "undefined"){
@@ -2853,16 +2854,11 @@ function load_all_data(){
     
     // load tissue images
     load_tissues();
-    tissues = {};
     for (var key in tissues){
         tissue = tissues[key];
         tissue[2] = new Image();
         tissue[2].src = "data:image/png;base64," + tissue[0];
     }
-    
-    
-    
-
 }
 
 
@@ -2966,7 +2962,7 @@ function draw_chromosome_ideograms(){
 
 
 function to_svg(figure){
-    if (statistics_loaded < 3) return;
+    if (!tissues_loaded || !proteins_loaded || !pathways_loaded) return;
     
     
     var svg_ctx = 0;
@@ -3164,7 +3160,7 @@ function change_species(select){
     }
     
     else if (document.getElementById("statistics_species_select") == select){
-        statistics_loaded = 1;
+        proteins_loaded = false;
         
         document.getElementById("statistics_waiting").style.display = "none";
         document.getElementById("statistics_content").style.display = "none";
@@ -3307,8 +3303,7 @@ function append_tissues(){
         ++i;
     }
     
-    
-    ++statistics_loaded;
+    tissues_loaded = true;
 }
 
 
@@ -3317,7 +3312,7 @@ load_tissues();
 load_species_data();
 append_tissues();
 
-for (var dom_name of ["chromosome_browser_species_select", "accession_browser_species_select", "function_browser_species_select", "locus_browser_species_select"]){
+for (var dom_name of ["chromosome_browser_species_select", "accession_browser_species_select", "function_browser_species_select", "locus_browser_species_select", "statistics_species_select"]){
     set_species_select(dom_name);
 }
 
