@@ -334,7 +334,7 @@ with open(fasta_file, mode="wt") as fl:
         proteins_to_spectra[row[1]] = proteins_to_spectra[row[0]]
         del proteins_to_spectra[row[0]]
         
-        prot_seq = row[2]
+        prot_seq = row[2].replace("\\n", "\n")
         fl.write(prot_seq + "\n")
         
         attributes = get_attributes(prot_seq[:prot_seq.find("\n")])

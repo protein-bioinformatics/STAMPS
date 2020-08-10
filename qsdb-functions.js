@@ -4190,7 +4190,7 @@ function download_assay(){
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             download_link = current_host + "/" + xmlhttp.responseText;
             html = "<table width=100% height=100%><tr><td align=\"center\">";
-            html += "<a href=\"" + download_link + "\">download assay</a>";
+            html += "<a href=\"/stamps/" + download_link + "\">download assay</a>";
             html += "<p>&nbsp;<p>";
             html += "Extracted .fasta and .blib file can be easily imported in <a href=\"https://skyline.gs.washington.edu/labkey/project/home/software/Skyline/begin.view\" target=\"_blank\">Skyline</a>.";
             html += "<p>&nbsp;<p>";
