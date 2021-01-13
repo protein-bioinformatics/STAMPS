@@ -13,7 +13,7 @@ mouse_y = 0;
 zoom_options = [0, 0, 0];
 filter_parameters = {};
 supported_species = {};
-current_species = "";
+current_species = -1;
 current_host = "";
 new_host = "";
 new_species = "";
@@ -632,6 +632,7 @@ function set_species_menu(reload, request_all){
             sorted_species.sort(function(a, b){
                 return a[0] > b[0];
             });
+            if (current_species == -1 && sorted_species.length > 0) current_species = sorted_species[0][1]; 
 
             selected_menu_dict = {};
             
@@ -4097,9 +4098,6 @@ function change_pathway(p){
     if (p in pathways){
         current_pathway = p;
         update_browser_link();
-        var pw_name = replaceAll(replaceAll(pathways[p][0], "-\n", ""), "\n", " ");
-        document.title = "STAMPS Home - " + pw_name;
-        document.getElementById('pathway_title').innerHTML = pw_name;
         
         var metabolic_pw_menu = document.getElementById('metabolic_pathway_menu');
         var pw_group = 0;
@@ -5543,6 +5541,10 @@ function load_data(reload){
     var ctx = c.getContext("2d");
     
     
+    var pw_name = replaceAll(replaceAll(pathways[current_pathway][0], "-\n", ""), "\n", " ");
+    document.title = "STAMPS Home - " + supported_species[current_species] + ": " + pw_name;
+    document.getElementById('pathway_title').innerHTML = pw_name;
+    document.getElementById('species_title').innerHTML = supported_species[current_species];
     
     protein_dictionary = {};
     for (prot_id in basket) protein_dictionary[prot_id] = basket[prot_id];
