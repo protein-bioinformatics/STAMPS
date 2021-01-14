@@ -265,7 +265,7 @@ string get_protein_data(sqlite3_stmt* select_stmt_proteins, string species){
 
 
 
-main(int argc, char** argv) {
+int main(int argc, char** argv) {
     bool compress = true;
     bool caching = true;
     bool rewrite_cache = false;

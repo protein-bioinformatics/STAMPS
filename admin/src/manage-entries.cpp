@@ -168,7 +168,8 @@ int main(int argc, char** argv) {
         
         
         if (!set_table.compare("nodeproteincorrelations")){
-            string sql_query = "DELETE npc FROM " + set_table + " npc INNER JOIN proteins p ON p.id = npc.protein_id WHERE npc.node_id = " + set_id + " AND p.species = " + set_col + ";";
+            string sql_query = "DELETE FROM " + set_table + " WHERE ROWID IN (SELECT npc.ROWID FROM " + set_table + " npc INNER JOIN proteins p ON p.id = npc.protein_id WHERE npc.node_id = " + set_id + " AND p.species = " + set_col + ");";
+            
             rc = sqlite3_exec(db, sql_query.c_str(), NULL, NULL, &zErrMsg);
             
             

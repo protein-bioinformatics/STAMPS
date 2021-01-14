@@ -630,7 +630,7 @@ function set_species_menu(reload, request_all){
             var sorted_species = [];
             for (var ncbi in supported_species) sorted_species.push([supported_species[ncbi], ncbi]);
             sorted_species.sort(function(a, b){
-                return a[0] > b[0];
+                return a[0] < b[0];
             });
             if (current_species == -1 && sorted_species.length > 0) current_species = sorted_species[0][1]; 
 
@@ -1060,10 +1060,10 @@ function Protein(data){
     
     
     this.update = function(data){
-        this.name = ('n' in data) ? data['n'] : "";
+        this.accession = ('a' in data) ? data['a'] : "";
+        this.name = ('n' in data) ? data['n'] : this.accession;
         this.definition = ('d' in data) ? data['d'] : "";
         this.kegg_link = ('k' in data) ? data['k'] : "";
-        this.accession = ('a' in data) ? data['a'] : "";
         this.ec_number = ('e' in data) ? data['e'] : "";
         this.mass = ('m' in data) ? data['m'] : "";
         this.unreviewed = ('u' in data) ? data['u'] : 0;

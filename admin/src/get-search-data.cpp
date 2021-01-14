@@ -88,7 +88,7 @@ static int sqlite_select_proteins(void *data, int argc, char **argv, char **azCo
 
 
 
-main(int argc, char** argv, char** envp) {
+int main(int argc, char** argv, char** envp) {
     bool compress = true;
     string response = "";
     

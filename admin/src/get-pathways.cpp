@@ -23,7 +23,7 @@ static int sqlite_select_pathways(void *data, int argc, char **argv, char **azCo
 
 
 
-main() {
+int main(int argc, char** argv) {
     cout << "Content-Type: text/html" << endl << endl;
     
     string line;

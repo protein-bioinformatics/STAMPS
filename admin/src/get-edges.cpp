@@ -148,7 +148,7 @@ static int sqlite_select_reagents_direct(sqlite3_stmt* select_stmt, void *data){
 
 
 
-main() {
+int main(int argc, char** argv) {
     bool compress = false;
     string response = "";
     
